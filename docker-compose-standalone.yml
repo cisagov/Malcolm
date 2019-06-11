@@ -27,6 +27,16 @@ x-logstash-variables: &logstash-variables
 x-kibana-variables: &kibana-variables
   KIBANA_OFFLINE_REGION_MAPS : 'true'
 
+x-curator-variables: &curator-variables
+  # for managing automatic closing of older Elasticsearch indices (to conserve memory)
+  CURATOR_CLOSE_UNITS : years
+  CURATOR_CLOSE_COUNT : 1
+  # for managing automatic deleting of older Elasticsearch indices (to reduce disk consumtion)
+  CURATOR_DELETE_UNITS : years
+  CURATOR_DELETE_COUNT : 99
+  # for managing automatic deleting of Elasticsearch indices based on cumulative size (to reduce disk consumtion)
+  CURATOR_DELETE_GIGS : 1000000
+
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
 
@@ -125,6 +135,15 @@ services:
       - ./elastalert/config/elastalert.yaml:/opt/elastalert/config.yaml
       - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
       - ./elastalert/rules/:/opt/elastalert/rules/
+  curator:
+    image: malcolmnetsec/curator:1.2.0
+    hostname: curator
+    environment:
+      << : *curator-variables
+      ES_HOST : 'elasticsearch'
+      ES_PORT : 9200
+    depends_on:
+      - elasticsearch
   logstash:
     image: malcolmnetsec/logstash-oss:1.2.0
     hostname: logstash
