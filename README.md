@@ -65,11 +65,14 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
         + [Applying mapping changes](#ApplyMapping)
 * [Known issues](#Issues)
+* [Installation example using Ubuntu 18.04 LTS](#InstallationExample)
 * [Copyright](#Footer)
 
 ## <a name="QuickStart"></a>Quick start
 
 ### Getting Malcolm
+
+For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 18.04 LTS](#InstallationExample).
 
 #### Source code
 
@@ -81,7 +84,38 @@ The `build.sh` script can Malcolm's Docker from scratch. See [Building from sour
 
 #### Pull Malcolm's Docker images
 
-**Coming soon**: Malcolm's Docker images will (hopefully) soon be available to pull from [Docker Hub](https://hub.docker.com/).
+Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
+```
+$ docker-compose pull
+Pulling elasticsearch ... done
+Pulling kibana        ... done
+Pulling elastalert    ... done
+Pulling logstash      ... done
+Pulling filebeat      ... done
+Pulling moloch        ... done
+Pulling file-monitor  ... done
+Pulling pcap-capture  ... done
+Pulling upload        ... done
+Pulling nginx-proxy   ... done
+```
+
+You can then observe that the images have been retrieved by running `docker images`:
+```
+$ docker images
+REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
+malcolmnetsec/nginx-proxy                           1.2.0               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.2.0               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.2.0               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.2.0               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/moloch                                1.2.0               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.2.0               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/logstash-oss                          1.2.0               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.2.0               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.2.0               xxxxxxxxxxxx        17 hours ago        850MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
+```
+
+You will still probably want to make sure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Import from pre-packaged tarballs
 
@@ -92,9 +126,9 @@ Once built, the `malcolm_appliance_packager.sh` script can be used to create pre
 Use the scripts in the `scripts/` directory to start and stop Malcolm, view debug logs of a currently running
 instance, wipe the database and restore Malcolm to a fresh state, etc.
 
-### User interface
+### <a name="UserInterfaceURLs"></a>User interface
 
-A few minutes after starting Malcolm (probably 5-10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
+A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
 * Moloch: [https://localhost](https://localhost)
 * Kibana: [https://localhost:5601](https://localhost:5601)
@@ -262,7 +296,7 @@ Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. 
 ### <a name="SystemRequirements"></a>Recommended system requirements
 Malcolm needs a reasonably up-to-date version of [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In theory this should be possible on Linux, macOS, and recent Windows 10 releases, although so far it's only been tested on Linux and macOS hosts.
 
-For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm will run on less, but of course more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
+To quote the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/guide/current/hardware.html), "If there is one resource that you will run out of first, it will likely be memory." The same is true for Malcolm: you will want at least 16 gigabytes of RAM to run Malcolm comfortably. For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm can run on less, but more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
 
 Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#hardware-requirements) and [here](https://github.com/aol/moloch/wiki/FAQ#what-kind-of-capture-machines-should-we-buy) and [here](https://github.com/aol/moloch/wiki/FAQ#how-many-elasticsearch-nodes-or-machines-do-i-need) and a [calculator here](https://molo.ch/#estimators)) which may be helpful, although not everything in those documents will apply to a Docker-based setup like Malcolm.
 
@@ -895,6 +929,220 @@ Because some fields are created in Elasticsearch dynamically when Zeek logs are 
 After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh Kibana’s field list by clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
 
 ![Refreshing Kibana's cached index pattern](./docs/images/screenshots/kibana_refresh_index.png)
+
+## <a name="InstallationExample"></a>Installation example using Ubuntu 18.04 LTS
+
+Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
+
+You can use `git` to clone Malcolm, or you can download and extract the artifacts from the latest [release](https://github.com/idaholab/Malcolm/releases). In this example we'll use git:
+```
+user@host:~$ git clone https://github.com/idaholab/Malcolm
+Cloning into 'Malcolm'...
+remote: Enumerating objects: 443, done.
+remote: Counting objects: 100% (443/443), done.
+remote: Compressing objects: 100% (310/310), done.
+remote: Total 443 (delta 81), reused 441 (delta 79), pack-reused 0
+Receiving objects: 100% (443/443), 6.87 MiB | 18.86 MiB/s, done.
+Resolving deltas: 100% (81/81), done.
+
+user@host:~$ cd Malcolm/
+```
+
+Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key.
+```
+user@host:~/Malcolm$ sudo python3 scripts/install.py
+Installing required packages: ['apache2-utils', 'make', 'openssl']
+
+"docker info" failed, attempt to install Docker? (Y/n): y
+
+Attempt to install Docker using official repositories? (Y/n): y
+Installing required packages: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
+Installing docker packages: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+Installation of docker packages apparently succeeded
+
+Add a non-root user to the "docker" group? (y/n): y
+
+Enter user account: user
+
+Add another non-root user to the "docker" group? (y/n): n
+
+"docker-compose version" failed, attempt to install docker-compose? (Y/n): y
+
+Install docker-compose directly from docker github? (Y/n): y
+Download and installation of docker-compose apparently succeeded
+
+
+fs.file-max increases allowed maximum for file handles
+fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+fs.inotify.max_user_watches increases allowed maximum for monitored files
+fs.inotify.max_user_watches= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+
+vm.max_map_count increases allowed maximum for memory segments
+vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+
+net.core.somaxconn increases allowed maximum for socket connections
+net.core.somaxconn= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+
+vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages
+vm.swappiness= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+
+vm.dirty_background_ratio defines the percentage of system memory fillable with "dirty" pages before flushing
+vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+
+vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything
+vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+
+/etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
+/etc/security/limits.d/limits.conf does not exist, create it? (Y/n): y
+
+The "haveged" utility may help improve Malcolm startup times by providing entropy for the Linux kernel.
+Install haveged? (y/N): y
+Installing haveged packages: ['haveged']
+Installation of haveged packages apparently succeeded
+```
+
+At this point you should **reboot** your computer so that the new system settings can be applied. After doing so, log back in and return to the Malcolm directory. This time we will run `install.py` in "configuration only" mode since we've already installed Docker and changed the system configuration. The values you see here may not exactly match what you see depending on your system's resources and desired configuration (see [System configuration and tuning](#ConfigAndTuning)).
+```
+user@host:~/Malcolm$ python3 scripts/install.py --configure
+
+Setting 10g for ElasticSearch and 3g for Logstash. Is this OK? (Y/n): y
+
+Automatically analyze all PCAP files with Zeek? (y/N): y
+
+Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs? (y/N): n
+
+Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
+
+Expose Logstash port to external hosts? (y/N): n
+
+Forward Logstash logs to external Elasticstack instance? (y/N): n
+
+Enable file extraction with Zeek? (y/N): y
+
+Select file extraction behavior ('none', 'known', 'mapped', 'all', 'interesting'): interesting
+
+Select file preservation behavior ('quarantined', 'all', 'none'): quarantined
+
+Scan extracted files with ClamAV? (y/N): y
+
+Download updated ClamAV virus signatures periodically? (Y/n): y
+
+Should Malcolm capture network traffic to PCAP files? (y/N): y
+
+Specify capture interface(s) (comma-separated): eth0
+
+Capture packets using netsniff-ng? (Y/n): y
+
+Capture packets using tcpdump? (y/N): n
+
+Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
+Scripts for starting and stopping Malcolm and changing authentication-related settings can be found
+in /home/user/Malcolm/scripts.
+```
+
+Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
+```
+user@host:~/Malcolm$ ./scripts/auth_setup.sh
+Username: analyst
+analyst password:
+analyst password (again):
+
+(Re)generate self-signed certificates for HTTPS access [Y/n]? y
+
+(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
+```
+
+For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
+```
+user@host:~/Malcolm$ docker-compose pull
+Pulling elasticsearch ... done
+Pulling kibana        ... done
+Pulling elastalert    ... done
+Pulling logstash      ... done
+Pulling filebeat      ... done
+Pulling moloch        ... done
+Pulling file-monitor  ... done
+Pulling pcap-capture  ... done
+Pulling upload        ... done
+Pulling nginx-proxy   ... done
+
+
+user@host:~/Malcolm$ docker images
+REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
+malcolmnetsec/nginx-proxy                           1.2.0               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.2.0               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.2.0               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.2.0               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/moloch                                1.2.0               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.2.0               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/logstash-oss                          1.2.0               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.2.0               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.2.0               xxxxxxxxxxxx        17 hours ago        850MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
+```
+
+Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
+```
+user@host:~/Malcolm$ ./scripts/start.sh
+Creating network "malcolm_default" with the default driver
+Creating malcolm_file-monitor_1  ... done
+Creating malcolm_pcap-capture_1  ... done
+Creating malcolm_elasticsearch_1 ... done
+Creating malcolm_moloch_1        ... done
+Creating malcolm_elastalert_1    ... done
+Creating malcolm_logstash_1      ... done
+Creating malcolm_kibana_1        ... done
+Creating malcolm_upload_1        ... done
+Creating malcolm_filebeat_1      ... done
+Creating malcolm_nginx-proxy_1   ... done
+
+Malcolm started, setting "INITIALIZEDB=false" in "docker-compose.yml" for subsequent runs.
+
+In a few minutes, Malcolm services will be accessible via the following URLs:
+------------------------------------------------------------------------------
+  - Moloch: https://localhost/
+  - Kibana: https://localhost:5601/
+  - PCAP Upload (web): https://localhost:8443/
+  - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+
+         Name                        Command                       State                                                                   Ports
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------$
+malcolm_elastalert_1      /usr/local/bin/elastalert- ...   Up (health: starting)   3030/tcp
+malcolm_elasticsearch_1   /usr/local/bin/docker-entr ...   Up (health: starting)   9200/tcp, 9300/tcp
+malcolm_file-monitor_1    /usr/local/bin/supervisord ...   Up                      3310/tcp
+malcolm_filebeat_1        /usr/local/bin/docker-entr ...   Up
+malcolm_kibana_1          /usr/bin/supervisord -c /e ...   Up (health: starting)   28991/tcp, 5601/tcp
+malcolm_logstash_1        /usr/local/bin/logstash-st ...   Up (health: starting)   5000/tcp, 5044/tcp, 9600/tcp
+malcolm_moloch_1          /usr/bin/supervisord -c /e ...   Up                      8000/tcp, 8005/tcp, 8081/tcp
+malcolm_nginx-proxy_1     /app/docker-entrypoint.sh  ...   Up                      0.0.0.0:28991->28991/tcp, 0.0.0.0:3030->3030/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:5601->5601/tcp, 80/tcp,
+                                                                                   0.0.0.0:8443->8443/tcp, 0.0.0.0:9200->9200/tcp, 0.0.0.0:9600->9600/tcp
+malcolm_pcap-capture_1    /usr/local/bin/supervisor.sh     Up
+malcolm_upload_1          /docker-entrypoint.sh /usr ...   Up                      127.0.0.1:8022->22/tcp, 80/tcp
+
+Attaching to malcolm_nginx-proxy_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_elastalert_1, malcolm_moloch_1, malcolm_elasticsearch_1, malcolm_file-monitor_1$
+ malcolm_pcap-capture_1
+...
+```
+
+It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 5 to 10 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
+```
+...
+logstash_1  | [2019-06-11T15:45:41,938][INFO ][logstash.pipeline ] Pipeline started successfully {:pipeline_id=>"main", :thread=>"#<Thread:0x7a5910 sleep>"}
+logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>3, :running_pipelines=>[:input, :main, :output], :non_running_pipelines=>[]}
+logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
+...
+```
+
+You can now open a web browser and navigate to one of the [Malcolm user interfaces](#UserInterfaceURLs).
 
 ## <a name="Footer"></a>Copyright
 
