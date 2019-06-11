@@ -934,7 +934,16 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
-You can use `git` to clone Malcolm, or you can download and extract the artifacts from the latest [release](https://github.com/idaholab/Malcolm/releases). In this example we'll use git:
+You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/idaholab/Malcolm/releases).
+
+To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/idaholab/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
+```
+user@host:~$ cd Downloads/
+user@host:~/Downloads$ ls
+install.py  malcolm_20190611_095410_ce2d8de.tar.gz
+```
+
+If you are obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:
 ```
 user@host:~$ git clone https://github.com/idaholab/Malcolm
 Cloning into 'Malcolm'...
@@ -948,9 +957,9 @@ Resolving deltas: 100% (81/81), done.
 user@host:~$ cd Malcolm/
 ```
 
-Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key.
+Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
-user@host:~/Malcolm$ sudo python3 scripts/install.py
+user@host:~/Downloads$ sudo python3 install.py
 Installing required packages: ['apache2-utils', 'make', 'openssl']
 
 "docker info" failed, attempt to install Docker? (Y/n): y
@@ -1008,10 +1017,21 @@ Installing haveged packages: ['haveged']
 Installation of haveged packages apparently succeeded
 ```
 
-At this point you should **reboot** your computer so that the new system settings can be applied. After doing so, log back in and return to the Malcolm directory. This time we will run `install.py` in "configuration only" mode since we've already installed Docker and changed the system configuration. The values you see here may not exactly match what you see depending on your system's resources and desired configuration (see [System configuration and tuning](#ConfigAndTuning)).
+At this point, **if you are installing from the a release tarball** you will be asked if you would like to extract the contents of the tarball and to specify the installation directory:
+```
+Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y/n): y
+
+Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/Malcolm
+Malcolm runtime files extracted to /home/user/Malcolm
+```
+
+Alternately, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
 user@host:~/Malcolm$ python3 scripts/install.py --configure
+```
 
+Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
+```
 Setting 10g for ElasticSearch and 3g for Logstash. Is this OK? (Y/n): y
 
 Automatically analyze all PCAP files with Zeek? (y/N): y
@@ -1046,6 +1066,8 @@ Malcolm has been installed to /home/user/Malcolm. See README.md for more informa
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found
 in /home/user/Malcolm/scripts.
 ```
+
+At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
 
 Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
