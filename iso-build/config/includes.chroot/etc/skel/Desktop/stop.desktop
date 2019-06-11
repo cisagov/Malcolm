@@ -1,0 +1,8 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=Stop Malcolm
+Exec=lxterminal --command=/bin/bash\ -l\ /home/analyst/Malcolm/scripts/stop.sh
+Comment=Stop Malcolm
+Terminal=false
+Type=Application
+Icon=exit.png

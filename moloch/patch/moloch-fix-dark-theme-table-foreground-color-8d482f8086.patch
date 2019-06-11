@@ -1,0 +1,26 @@
+From 8d482f8086ea73459acde1752e714026c35f5f06 Mon Sep 17 00:00:00 2001
+From: 31453 <elyse.rinne@verizonmedia.com>
+Date: Wed, 1 May 2019 14:22:25 -0400
+Subject: [PATCH] fix dark theme table foreground color
+
+---
+ viewer/vueapp/src/App.vue | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/viewer/vueapp/src/App.vue b/viewer/vueapp/src/App.vue
+index 35c08d12..ea8470e9 100644
+--- a/viewer/vueapp/src/App.vue
++++ b/viewer/vueapp/src/App.vue
+@@ -618,4 +618,9 @@ dl.dl-horizontal.dl-horizontal-wide dd {
+   margin-top: 0;
+   color: var(--color-primary);
+ }
++
++/* apply theme foreground to tables */
++table.table {
++  color: var(--color-foreground, #555);
++}
+ </style>
+-- 
+2.11.0
+

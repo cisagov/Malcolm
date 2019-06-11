@@ -1,0 +1,25 @@
+---
+# Default Kibana configuration from kibana-docker.
+
+server.name: kibana
+server.host: "0"
+elasticsearch.url: ${ELASTICSEARCH_URL}
+elasticsearch.requestTimeout: 180000
+kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
+elastalert-kibana-plugin.serverHost: elastalert
+elastalert-kibana-plugin.serverPort: 3030
+
+# offline region map
+regionmap:
+  includeElasticMapsService: false
+  layers:
+     - name: "World (offline)"
+       url: "http://localhost:${KIBANA_OFFLINE_REGION_MAPS_PORT}/world.geojson"
+       attribution: "https://exploratory.io/maps"
+       fields:
+          - name: "ISO_A2"
+            description: "Country Code"
+          - name: "WB_A2"
+            description: "Country Code2"
+          - name: "NAME"
+            description: "Country Name"

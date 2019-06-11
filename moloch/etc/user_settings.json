@@ -1,0 +1,69 @@
+{
+  "doc": {
+    "enabled": true,
+    "createEnabled": true,
+    "webEnabled": true,
+    "headerAuthEnabled": true,
+    "emailSearch": true,
+    "removeEnabled": true,
+    "packetSearch": true,
+    "hideStats": false,
+    "hideFiles": false,
+    "hidePcap": false,
+    "disablePcapDownload": false,
+    "settings": {
+      "timezone": "local",
+      "detailFormat": "last",
+      "showTimestamps": "last",
+      "sortColumn": "start",
+      "sortDirection": "asc",
+      "spiGraph": "protocol",
+      "connSrcField": "srcIp",
+      "connDstField": "dstIp",
+      "numPackets": "last",
+      "theme" : "custom1: #222222,#E2E2E2,#FFFFFF,#00789E,#004A79,#017D73,#092B40,#42b7c5,#2A7580,#ecb30a,#333333,#89ADCC,#6D6D6D,#FFE7E7,#ECFEFF",
+      "manualQuery": false
+    },
+    "views": {
+      "Public IP Addresses": {
+        "expression": "(country.dst == EXISTS!) || (country.src == EXISTS!) || (ip.dst == EXISTS! && ip.dst != 0.0.0.0 && ip.dst != 127.0.0.1 && ip.dst != 224.0.0.0/4 && ip.dst != 255.255.255.255 && ip.dst != 10.0.0.0/8 && ip.dst != 172.16.0.0/12 && ip.dst != 192.168.0.0/16 && ip.dst != :: && ip.dst != ::1 && ip.dst != ff00::/8 && ip.dst != fe80::/10 && ip.dst != fc00::/7 && ip.dst != fd00::/8) || (ip.src == EXISTS! && ip.src != 0.0.0.0 && ip.src != 127.0.0.1 && ip.src != 224.0.0.0/4 && ip.src != 255.255.255.255 && ip.src != 10.0.0.0/8 && ip.src != 172.16.0.0/12 && ip.src != 192.168.0.0/16 && ip.src != :: && ip.src != ::1 && ip.src != ff00::/8 && ip.src != fe80::/10 && ip.src != fc00::/7 && ip.src != fd00::/8)"
+      },
+      "PCAP Files": {
+        "expression": "zeek.logType != EXISTS!"
+      },
+      "Zeek Logs": {
+        "expression": "zeek.logType == EXISTS!"
+      },
+      "Zeek conn.log": {
+        "expression": "zeek.logType == conn"
+      },
+      "Zeek Exclude conn.log": {
+        "expression": "zeek.logType == EXISTS! && zeek.logType != conn"
+      }
+    },
+    "tableStates": {
+      "sessionsNew": {
+        "order": [
+          [
+            "firstPacket",
+            "asc"
+          ]
+        ],
+        "visibleHeaders": [
+          "protocol",
+          "zeek.logType",
+          "firstPacket",
+          "lastPacket",
+          "src",
+          "srcPort",
+          "dst",
+          "dstPort",
+          "totPackets",
+          "dbby",
+          "tags",
+          "info"
+        ]
+      }
+    }
+  }
+}

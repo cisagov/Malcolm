@@ -1,0 +1,23 @@
+{
+  "appName": "elastalert-server",
+  "port": 3030,
+  "elastalertPath": "/opt/elastalert",
+  "verbose": false,
+  "es_debug": false,
+  "debug": false,
+  "rulesPath": {
+    "relative": true,
+    "path": "/rules"
+  },
+  "templatesPath": {
+    "relative": true,
+    "path": "/rule_templates"
+  },
+  "es_host": "elasticsearch",
+  "es_port": 9200,
+  "writeback_index": "elastalert_status",
+  "index_settings": {
+    "shards": 2,
+    "replicas": 0
+  }
+}

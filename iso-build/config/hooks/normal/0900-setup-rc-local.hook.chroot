@@ -1,0 +1,20 @@
+#!/bin/bash
+
+sed -i 's/^exit 0//' /etc/rc.local 2>/dev/null
+
+cat << 'EOF' >> /etc/rc.local
+
+# other agg-specific initialization prior to starting up
+/usr/local/bin/agg-init.sh
+
+# hddtemp daemon for querying HDD temperatures
+/usr/sbin/hddtemp --daemon --numeric --quiet --unit=C -4 --listen=127.0.0.1 --port=7634 /dev/sd?
+
+systemctl mask ctrl-alt-del.target
+
+exit 0
+EOF
+
+sed -i "1i #!/bin/sh" /etc/rc.local
+
+chmod +x /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/configure-*.py

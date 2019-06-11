@@ -1,0 +1,185 @@
+{
+  "version": "6.8.0",
+  "objects": [
+    {
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 54,
+      "attributes": {
+        "title": "Zeek Logs",
+        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"[Overview](/app/kibana#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)   \\n[Notices](/app/kibana#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)   \\n[Connections](/app/kibana#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)   \\n[DCE/RPC](/app/kibana#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   \\n[DHCP](/app/kibana#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)  \\n[DNP3](/app/kibana#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)  \\n[DNS](/app/kibana#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)  \\n[Files](/app/kibana#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[FTP](/app/kibana#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b)  \\n[HTTP](/app/kibana#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)  \\n[Intel](/app/kibana#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[IRC](/app/kibana#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)  \\n[Kerberos](/app/kibana#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)  \\n[Modbus](/app/kibana#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)  \\n[MySQL](/app/kibana#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)  \\n[NTLM](/app/kibana#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)  \\n[PE](/app/kibana#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[RADIUS](/app/kibana#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)  \\n[RDP](/app/kibana#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)  \\n[RFB](/app/kibana#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)  \\n[Signatures](/app/kibana#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[SIP](/app/kibana#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)  \\n[SMB](/app/kibana#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)  \\n[SMTP](/app/kibana#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)  \\n[SNMP](/app/kibana#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)  \\n[Software](/app/kibana#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[SSH](/app/kibana#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)  \\n[SSL](/app/kibana#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb)  \\n[Syslog](/app/kibana#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   \\n[Tunnels](/app/kibana#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)  \\n[Weird](/app/kibana#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[X.509](/app/kibana#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "cf553dfa-f641-47cf-916d-041cf46a80c4",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "visState": "{\"title\":\"Syslog - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 30 seconds\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"line\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
+        "description": "",
+        "title": "Syslog - Log Count Over Time",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "version": 1,
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+      "type": "search",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "sort": [
+          "firstPacket",
+          "desc"
+        ],
+        "hits": 0,
+        "description": "",
+        "title": "Syslog (Zeek) - Logs",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"index\":\"sessions2-*\",\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"zeek.logType:syslog\",\"analyze_wildcard\":true}}}"
+        },
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "dstPort",
+          "zeek.uid",
+          "_id"
+        ]
+      }
+    },
+    {
+      "id": "46cba2ad-03cd-4eef-8e3a-c35ac3ac1b76",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "visState": "{\"title\":\"Syslog - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcIp\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
+        "description": "",
+        "title": "Syslog - Source IP Address",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "f54d6418-1499-4a14-9a8e-f706249b9962",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "visState": "{\"title\":\"Syslog - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
+        "description": "",
+        "title": "Syslog - Destination IP Address",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "6a006054-309e-447f-9371-99f119d18291",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "visState": "{\"title\":\"Syslog - Destination Port\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstPort\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Port\"}}],\"listeners\":{}}",
+        "description": "",
+        "title": "Syslog - Destination Port",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "ab31bef3-9eaf-458b-8ff8-6fba232a6a06",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "visState": "{\"title\":\"Syslog - Protocol\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.proto\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Protocol\"}}],\"listeners\":{}}",
+        "description": "",
+        "title": "Syslog - Protocol",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "version": 1,
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "1c50098c-be32-4f8e-bdf3-d78c0bfa2c0c",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "visState": "{\"title\":\"Syslog - Severity\",\"type\":\"histogram\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":false,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{\"text\":\"Severity\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":false,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_syslog.severity\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Severity\"}}],\"listeners\":{}}",
+        "description": "",
+        "title": "Syslog - Severity",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false},\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "version": 1,
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "AWDHE-_wxQT5EBNmq4n3",
+      "type": "visualization",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "title": "Syslog - Log Count",
+        "visState": "{\"title\":\"Syslog - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
+        "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
+        "description": "",
+        "savedSearchId": "7d7fd24e-51be-4040-83b3-a6630e989e2d",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[]}"
+        }
+      }
+    },
+    {
+      "id": "92985909-dc29-4533-9e80-d3182a0ecf1d",
+      "type": "dashboard",
+      "updated_at": "2018-10-01T14:38:42.261Z",
+      "version": 1,
+      "attributes": {
+        "title": "Syslog",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":2,\"h\":14,\"i\":\"1\"},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":4,\"y\":0,\"w\":8,\"h\":2,\"i\":\"3\"},\"id\":\"cf553dfa-f641-47cf-916d-041cf46a80c4\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":14,\"w\":12,\"h\":6,\"i\":\"4\"},\"columns\":[\"srcIp\",\"dstIp\",\"dstPort\",\"zeek.uid\",\"_id\"],\"id\":\"7d7fd24e-51be-4040-83b3-a6630e989e2d\",\"sort\":[\"firstPacket\",\"desc\"],\"type\":\"search\",\"version\":\"6.1.1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":2,\"y\":8,\"w\":3,\"h\":6,\"i\":\"5\"},\"id\":\"46cba2ad-03cd-4eef-8e3a-c35ac3ac1b76\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":5,\"y\":8,\"w\":3,\"h\":6,\"i\":\"6\"},\"id\":\"f54d6418-1499-4a14-9a8e-f706249b9962\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":8,\"y\":8,\"w\":4,\"h\":6,\"i\":\"7\"},\"id\":\"6a006054-309e-447f-9371-99f119d18291\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"8\",\"gridData\":{\"x\":9,\"y\":2,\"w\":3,\"h\":6,\"i\":\"8\"},\"id\":\"ab31bef3-9eaf-458b-8ff8-6fba232a6a06\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"9\",\"gridData\":{\"x\":2,\"y\":2,\"w\":7,\"h\":6,\"i\":\"9\"},\"id\":\"1c50098c-be32-4f8e-bdf3-d78c0bfa2c0c\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":2,\"y\":0,\"w\":2,\"h\":2,\"i\":\"10\"},\"id\":\"AWDHE-_wxQT5EBNmq4n3\",\"type\":\"visualization\",\"version\":\"6.1.1\"}]",
+        "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
+        "uiStateJSON": "{\"P-2\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-5\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-6\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-7\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-8\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-10\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\",\"default_field\":\"*\"}},\"language\":\"lucene\"}}"
+        }
+      }
+    }
+  ]
+}

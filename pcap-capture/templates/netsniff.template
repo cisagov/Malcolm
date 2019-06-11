@@ -1,0 +1,9 @@
+[program:netsniff-$IFACE]
+command=/usr/sbin/netsniff-ng -i "$IFACE" -T "%(ENV_PCAP_NETSNIFF_MAGIC)s" -o "%(ENV_PCAP_PATH)s" -P "netsniff-$IFACE_" -F "%(ENV_PCAP_ROTATE_MEGABYTES)sMiB" --silent "%(ENV_PCAP_FILTER)s"
+startsecs=5
+startretries=3
+stopasgroup=true
+killasgroup=true
+autostart=%(ENV_PCAP_ENABLE_NETSNIFF)s
+directory=%(ENV_PCAP_PATH)s
+user=%(ENV_PCAP_USER)s

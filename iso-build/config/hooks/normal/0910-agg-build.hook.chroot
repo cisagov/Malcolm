@@ -1,0 +1,64 @@
+#!/bin/bash
+
+BEATS_VER="6.8.0"
+FILEBEAT_URL="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-$BEATS_VER-amd64.deb"
+METRICBEAT_URL="https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-$BEATS_VER-amd64.deb"
+AUDITBEAT_URL="https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-$BEATS_VER-amd64.deb"
+
+# Install filebeat/metricbeat/auditbeat
+cd /tmp
+curl -L -o filebeat-$BEATS_VER-amd64.deb "$FILEBEAT_URL"
+curl -L -o metricbeat-$BEATS_VER-amd64.deb "$METRICBEAT_URL"
+curl -L -o auditbeat-$BEATS_VER-amd64.deb "$AUDITBEAT_URL"
+dpkg -i filebeat-$BEATS_VER-amd64.deb
+dpkg -i metricbeat-$BEATS_VER-amd64.deb
+dpkg -i auditbeat-$BEATS_VER-amd64.deb
+rm -f filebeat-$BEATS_VER-amd64.deb metricbeat-$BEATS_VER-amd64.deb auditbeat-$BEATS_VER-amd64.deb
+
+# remove some dashboards we don't care about (for clutter)
+rm -f /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-apache-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-containers-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-docker-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-golang-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-haproxy-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-kafka-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-kubernetes-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-mongodb-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-mysql-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-nginx-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-rabbitmq-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-redis-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-uwsgi-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-windows-*json \
+      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-executions.json \
+      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-overview.json \
+      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-sockets.json \
+      /usr/share/filebeat/kibana/6/dashboard/*json
+
+# tweak some dashboards
+sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" /usr/share/metricbeat/kibana/6/dashboard/*
+
+# add custom dashboards
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/filebeat/kibana/6/dashboard-custom/* /usr/share/filebeat/kibana/6/dashboard/
+fi
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/metricbeat/kibana/6/dashboard-custom/* /usr/share/metricbeat/kibana/6/dashboard/
+fi
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/auditbeat/kibana/6/dashboard-custom/* /usr/share/auditbeat/kibana/6/dashboard/
+fi
+
+# dark themes 4 lyfe
+sed -i 's@darkTheme\\": false@darkTheme\\": true@g' /usr/share/{auditbeat,filebeat,metricbeat}/kibana/{5,6}/dashboard/*.json
+
+###
+
+# set up capabilities for network-related tools
+chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
+  setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
+
+###

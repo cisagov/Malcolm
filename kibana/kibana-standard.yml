@@ -1,0 +1,11 @@
+---
+# Default Kibana configuration from kibana-docker.
+
+server.name: kibana
+server.host: "0"
+elasticsearch.url: ${ELASTICSEARCH_URL}
+elasticsearch.requestTimeout: 180000
+kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
+elastalert-kibana-plugin.serverHost: elastalert
+elastalert-kibana-plugin.serverPort: 3030
+

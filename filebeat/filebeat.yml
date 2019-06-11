@@ -1,0 +1,60 @@
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
+logging.metrics.enabled: false
+
+filebeat.inputs:
+- type: log
+  paths:
+    - ${FILEBEAT_LOG_PATH:/data/zeek/current}/*.log
+  # see comment below for signatures(_carved).log
+  exclude_files: ['signatures\(_carved.*\)\.log$']
+  symlinks: true
+  fields_under_root: true
+  # tags: ["foo"]
+  fields:
+    type: "session"
+  compression_level: 0
+  exclude_lines: ['^\s*#']
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:45m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:30m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:30s}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
+# signatures(_carved).log is different, as it comes from file carving and is
+# "live" regardless of whether the other *.log files that may be processed
+# after the fact. The most important difference is close_eof, as
+# we don't want to close signatures(_carved).log when we get to the end of the
+# file as it will likely be written to again shortly. For these reasons we
+# exclude it in the main filebeat log input (see above) and handle it with
+# custom settings here.
+- type: log
+  paths:
+    - ${FILEBEAT_LOG_PATH:/data/zeek/current}/signatures(_carved*).log
+  symlinks: true
+  fields_under_root: true
+  # tags: ["foo"]
+  fields:
+    type: "session"
+  compression_level: 0
+  exclude_lines: ['^\s*#']
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: 200m
+  ignore_older: 180m
+  close_inactive: 120m
+  close_renamed: false
+  close_removed: true
+  close_eof: false
+  clean_removed: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
+  ssl.enabled: ${BEATS_SSL:false}
+  ssl.certificate_authorities: ["/certs/ca.crt"]
+  ssl.certificate: "/certs/client.crt"
+  ssl.key: "/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"

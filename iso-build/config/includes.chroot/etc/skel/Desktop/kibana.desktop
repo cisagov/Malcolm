@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - Kibana
+Exec=/usr/bin/chromium https://localhost:5601/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=/usr/share/icons/hicolor/48x48/kibana.png
+Categories=Network;
+StartupWMClass=chromium
+StartupNotify=true

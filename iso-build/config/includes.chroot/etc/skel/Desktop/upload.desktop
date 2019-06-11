@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - Upload
+Exec=/usr/bin/chromium https://localhost:8443/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=up.png
+Categories=Network;
+StartupWMClass=chromium
+StartupNotify=true

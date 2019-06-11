@@ -2,4 +2,917 @@
 
 ![](./docs/images/logo/Malcolm_banner.png)
 
-Stay tuned!
+[Malcolm](https://github.com/idaholab/malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
+
+* **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
+* **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Moloch, a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
+* **Streamlined deployment** – Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. This Docker-based deployment model, combined with a few simple scripts for setup and run-time management, makes Malcolm suitable to be deployed quickly across a variety of platforms and use cases, whether it be for long-term deployment on a Linux server in a security operations center (SOC) or for incident response on a Macbook for an individual engagement.
+* **Secure communications** – All communications with Malcolm, both from the user interface and from remote log forwarders, are secured with industry standard encryption protocols.
+* **Permissive license** – Malcolm is comprised of several widely used open source tools, making it an attractive alternative to security solutions requiring paid licenses.
+* **Expanding control systems visibility** – While Malcolm is great for general-purpose network traffic analysis, its creators see a particular need in the community for tools providing insight into protocols used in industrial control systems (ICS) environments. Ongoing Malcolm development will aim to provide additional parsers for common ICS protocols.
+
+Although all of the open source tools which make up Malcolm are already available and in general use, Malcolm provides a framework of interconnectivity which makes it greater than the sum of its parts. And while there are many other network traffic analysis solutions out there, ranging from complete Linux distributions like Security Onion to licensed products like Splunk Enterprise Security, the creators of Malcolm feel its easy deployment and robust combination of tools fill a void in the network security space that will make network traffic analysis accessible to many in both the public and private sectors as well as individual enthusiasts.
+
+In short, Malcolm provides an easily deployable network analysis tool suite for full packet capture artifacts (PCAP files) and Zeek logs. While Internet access is required to build it, it is not required at runtime.
+
+## <a name="TableOfContents"></a>Table of Contents
+
+* [Quick start](#QuickStart)
+* [Overview](#Overview)
+* [Components](#Components)
+* [Development](#Development)
+    * [Building from source](#Build)
+* [Pre-Packaged installation files](#Packager)
+* [Preparing your system](#Preparing)
+    * [Recommended system requirements](#SystemRequirements)
+    * [System configuration and tuning](#ConfigAndTuning)
+        * [`docker-compose.yml` parameters](#DockerComposeYml)
+        * [Linux host system configuration](#HostSystemConfigLinux)
+        * [macOS host system configuration](#HostSystemConfigMac)
+        * [Windows host system configuration](#HostSystemConfigWindows)
+* [Running Malcolm](#Running)
+    * [Configure authentication](#AuthSetup)
+    * [Starting Malcolm](#Starting)
+    * [Monitoring a live Zeek instance](#LiveZeek)
+    * [Stopping and restarting Malcolm](#StopAndRestart)
+    * [Clearing Malcolm's data](#Wipe)
+* [Capture file and log archive upload](#Upload)
+    - [Tagging](#Tagging)
+    - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek) 
+* [Moloch](#Moloch)
+    * [Zeek log integration](#MolochZeek)
+    * [Help](#MolochHelp)
+    * [Sessions](#MolochSessions)
+        * [PCAP Export](#MolochPCAPExport)
+    * [SPIView](#MolochSPIView)
+    * [SPIGraph](#MolochSPIGraph)
+    * [Connections](#MolochConnections)
+    * [Hunt](#MolochHunt)
+    * [Statistics](#MolochStats)
+    * [Settings](#MolochSettings)
+* [Kibana](#Kibana)
+    * [Discover](#Discover)
+        - [Screenshots](#DiscoverGallery)
+    * [Visualizations and dashboards](#KibanaVisualizations)
+        - [Prebuilt visualizations and dashboards](#PrebuiltVisualizations)
+            - [Screenshots](#PrebuiltVisualizationsGallery)
+        - [Building your own visualizations and dashboards](#BuildDashboard)
+            + [Screenshots](#NewVisualizationsGallery)
+* [Other Malcolm features](#MalcolmFeatures)
+    - [Automatic file extraction and scanning](#ZeekFileExtraction)
+    - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
+        + [IP/MAC address to hostname mapping via `host-map.txt`](#HostNaming)
+        + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
+        + [Applying mapping changes](#ApplyMapping)
+* [Known issues](#Issues)
+* [Copyright](#Footer)
+
+## <a name="QuickStart"></a>Quick start
+
+### Getting Malcolm
+
+#### Source code
+
+The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/malcolm). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+
+#### Building Malcolm from scratch
+
+The `build.sh` script can Malcolm's Docker from scratch. See [Building from source](#Build) for more information.
+
+#### Pull Malcolm's Docker images
+
+**Coming soon**: Malcolm's Docker images will (hopefully) soon be available to pull from [Docker Hub](https://hub.docker.com/).
+
+#### Import from pre-packaged tarballs
+
+Once built, the `malcolm_appliance_packager.sh` script can be used to create pre-packaged Malcolm tarballs for import on another machine. See [Pre-Packaged Installation Files](#Packager) for more information.
+
+### Starting and stopping Malcolm
+
+Use the scripts in the `scripts/` directory to start and stop Malcolm, view debug logs of a currently running
+instance, wipe the database and restore Malcolm to a fresh state, etc.
+
+### User interface
+
+A few minutes after starting Malcolm (probably 5-10 minutes for Logstash to be completely up, depenging on the system), the following services will be accessible:
+
+* Moloch: [https://localhost](https://localhost)
+* Kibana: [https://localhost:5601](https://localhost:5601)
+* Capture File and Log Archive Upload (Web): [https://localhost:8443](https://localhost:8443)
+* Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
+
+## <a name="Overview"></a>Overview
+
+![Malcolm Network Diagram](./docs/images/malcolm_network_diagram.png)
+
+Malcolm processes network traffic data in the form of packet capture (PCAP) files or Zeek logs. A packet capture appliance ("sensor") monitors network traffic mirrored to it over a SPAN port on a network switch or router, or using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for examination later.
+
+Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments](#SegmentNaming) and [hosts](#HostNaming) based on user-defined IP address and MAC mappings, performing [TLS fingerprinting](#https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
+
+The enriched data is stored in an [Elasticsearch](https://www.elastic.co/products/elasticsearch) document store in a format suitable for analysis through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Moloch, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
+
+For smaller networks, use at home by network security enthusiasts, or in the field for incident response engagements, Malcolm can also easily be deployed locally on an ordinary consumer workstation or laptop. Malcolm can process local artifacts such as locally-generated Zeek logs, locally-captured PCAP files, and PCAP files collected offline without the use of a dedicated sensor appliance.
+
+## <a name="Components"></a>Components
+
+Malcolm leverages the following excellent open source tools, among others.
+
+* [Moloch](https://molo.ch/) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Moloch itself consists of two parts:
+    * [moloch-capture](https://github.com/aol/moloch/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
+    * [viewer](https://github.com/aol/moloch/tree/master/viewer) - a browser-based interface for data visualization
+* [Elasticsearch](https://www.elastic.co/products/elasticsearch) - a search and analytics engine for indexing and querying network traffic session metadata 
+* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Moloch understands and is able to understand in the same way it natively understands PCAP data
+* [Kibana](https://www.elastic.co/products/kibana) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
+* [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
+* [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
+* [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
+* [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
+* [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
+* [nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
+* [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
+
+## <a name="Development"></a>Development
+
+Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) results in the following subdirectories in your `malcolm/` working copy:
+
+* `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
+* `docs` - a directory containing instructions and documentation
+* `elastalert` - code and configuration for the `elastalert` container which provides an alerting framework for Elasticsearch
+* `elasticsearch` - an initially empty directory where the Elasticsearch database instance will reside
+* `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
+* `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
+* `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
+* `iso-build` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
+* `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
+* `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
+* `moloch` - code and configuration for the `moloch` container which handles PCAP processing and which serves the Viewer application
+* `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
+* `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
+* `nginx` - configuration for the `nginx` reverse proxy container
+* `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
+* `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
+* `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
+* `shared` - miscellaneous code used by various Malcolm components 
+* `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
+
+and the following files of special note:
+
+* `auth.env` - the script `./scripts/auth_setup.sh` prompts the user for the username and password to be used when configuring the HTTPS and SFTP servers served by an instance of the Malcolm appliance, and `auth.env` is the environment file where those values are stored
+* `cidr-map.txt` - specify custom IP address to network segment mapping
+* `host-map.txt` - specify custom IP and/or MAC address to host mapping
+* `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
+* `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
+* `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor live Zeek logs (ie., being actively written to)
+
+### <a name="Build"></a>Building from source
+
+Building the Malcolm docker images from scratch requires internet access to pull source files for its components. Once internet access is available, execute the following command to build all of the Docker images used by the Malcolm appliance:
+
+```
+$ ./scripts/build.sh
+```
+
+Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
+
+* `malcolmnetsec/elastalert` (based on `bitsensor/elastalert`)
+* `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
+* `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
+* `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
+* `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
+* `malcolmnetsec/logstash-oss` (based on `centos:7`)
+* `malcolmnetsec/moloch` (based on `debian:stretch-slim`)
+* `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
+* `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
+
+Additionally, the command will pull from Docker Hub:
+
+* `docker.elastic.co/elasticsearch/elasticsearch-oss`
+
+## <a name="Packager"></a>Pre-Packaged installation files
+
+### Creating pre-packaged installation files
+
+`scripts/malcolm_appliance_packager.sh` can be run to package up the configuration files (and, if necessary, the Docker images) which can be copied to a network share or USB drive for distribution to non-networked machines. For example:
+
+```
+$ ./scripts/malcolm_appliance_packager.sh 
+You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
+Username: analyst
+analyst password: 
+analyst password (again): 
+
+(Re)generate self-signed certificates for HTTPS access [Y/n]? 
+
+(Re)generate self-signed certificates for a remote log forwarder [Y/n]? 
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? 
+Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
+
+
+Do you need to package docker images also [y/N]? y
+This might take a few minutes...
+
+Packaged Malcolm docker images to "/home/user/tmp/malcolm_20190513_101117_f0d052c_images.tar.gz"
+
+
+To install Malcolm:
+  1. Run install.py
+  2. Follow the prompts
+
+To start, stop, restart, etc. Malcolm:
+  Use the control scripts in the "scripts/" directory:
+   - start.sh      (start Malcolm)
+   - stop.sh       (stop Malcolm)
+   - restart.sh    (restart Malcolm)
+   - logs.sh       (monitor Malcolm logs)
+   - wipe.sh       (stop Malcolm and clear its database)
+   - auth_setup.sh (change authentication-related settings)
+
+A minute or so after starting Malcolm, the following services will be accessible:
+  - Moloch: https://localhost/
+  - Kibana: https://localhost:5601/
+  - PCAP Upload (web): https://localhost:8443/
+  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+```
+
+The above example will result in the following artifacts for distribution as explained in the script's output:
+
+```
+$ ls -lh
+total 2.0G
+-rwxr-xr-x 1 user user  61k May 13 11:32 install.py
+-rw-r--r-- 1 user user 2.0G May 13 11:37 malcolm_20190513_101117_f0d052c_images.tar.gz
+-rw-r--r-- 1 user user  683 May 13 11:37 malcolm_20190513_101117_f0d052c.README.txt
+-rw-r--r-- 1 user user 183k May 13 11:32 malcolm_20190513_101117_f0d052c.tar.gz
+```
+
+### Installing from pre-packaged installation files
+
+If you have obtained pre-packaged installation files to install Malcolm on a non-networked machine via an internal network share or on a USB key, you likely have the following files:
+
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains a minimal set up instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternately, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` - This tarball contains the Docker images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz`
+* `install.py` - This install script can load the Docker images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
+
+Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. If you do not already have Docker and Docker Compose installed, the `install.py` script will help you install them.
+
+## <a name="Preparing"></a>Preparing your system
+
+### <a name="SystemRequirements"></a>Recommended system requirements
+Malcolm needs a reasonably up-to-date version of [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In theory this should be possible on Linux, macOS, and recent Windows 10 releases, although so far it's only been tested on Linux and macOS hosts.
+
+For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm will run on less, but of course more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
+
+Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#hardware-requirements) and [here](https://github.com/aol/moloch/wiki/FAQ#what-kind-of-capture-machines-should-we-buy) and [here](https://github.com/aol/moloch/wiki/FAQ#how-many-elasticsearch-nodes-or-machines-do-i-need) and a [calculator here](https://molo.ch/#estimators)) which may be helpful, although not everything in those documents will apply to a Docker-based setup like Malcolm.
+
+### <a name="ConfigAndTuning"></a>System configuration and tuning
+
+If you already have Docker and Docker Compose installed, the `install.py` script can still help you tune system configuration and `docker-compose.yml` parameters for Malcolm. To run it in "configuration only" mode, bypassing the steps to install Docker and Docker Compose, run it like this:
+```
+sudo ./scripts/install.py --configure
+```
+
+Although `install.py` will attempt to automate many of the following configuration and tuning parameters, they are nonetheless listed in the following sections for reference:
+
+#### <a name="DockerComposeYml"></a>`docker-compose.yml` parameters
+
+Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4g -Xmx4g` values, replacing `4g` with a number that is half of your total system memory, or just under 32 gigabytes, whichever is less. So, for example, if I had 64 gigabytes of memory I would edit those values to be `-Xms31g -Xmx31g`. This indicates how much memory can be allocated to the Elasticsearch heaps. For a pleasant experience, I would suggest not using a value under 10 gigabytes. Similar values can be modified for Logstash with `LS_JAVA_OPTS`, where using 3 or 4 gigabytes is recommended.
+
+Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
+
+* `INITIALIZEDB` – indicates to Malcolm to create (or recreate) Moloch’s internal settings database on startup; this setting is managed by the `wipe.sh` and `start.sh` scripts and does not generally need to be changed manually
+
+* `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
+
+* `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
+
+* `MOLOCH_ANALYZE_PCAP_THREADS` – the number of threads available to Moloch for analyzing PCAP files (default `1`)
+
+* `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
+
+* `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
+
+* `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
+
+* `ES_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external Elasticsearch instance in addition to the one maintained locally by Malcolm
+
+* `ES_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external Elasticsearch instances specified in `ES_EXTERNAL_HOSTS`
+
+* `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full SSL certificate validation; this may fail if using self-signed certificates (default `false`)
+
+* `KIBANA_OFFLINE_REGION_MAPS` – if set to `true`, a small internal server will be surfaced to Kibana to provide the ability to view region map visualizations even when an Internet connection is not available (default `true`)
+
+* `AUTO_TAG` – if set to `true`, Malcolm will automatically create Moloch sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
+
+* `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external Beats-based forwarders from which it will accept logs; if Malcolm is being used as a standalone tool then this can safely be set to `false`, but if external log feeds are to be accepted then setting it to true is recommended (default `false`)
+
+* `ZEEK_EXTRACTOR_MODE` – determines the file extraction behavior for file transfers detected by Zeek; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details
+
+* `EXTRACTED_FILE_IGNORE_EXISTING` – if set to `true`, files extant in `./zeek-logs/extract_files/`  directory will be ignored on startup rather than scanned
+
+* `EXTRACTED_FILE_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](#ZeekFileExtraction)
+
+* `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
+
+* `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true` (and `VTOT_API2_KEY` is unspecified), [Zeek-extracted files](#ZeekFileExtraction) will be scanned with ClamAV
+
+* `EXTRACTED_FILE_ENABLE_FRESHCLAM` – if set to `true`, ClamAV will periodically update virus databases
+
+#### <a name="HostSystemConfigLinux"></a>Linux host system configuration
+
+##### Installing Docker
+
+Docker installation instructions vary slightly by distribution. Please follow the links below to docker.com to find the instructions specific to your distribution:
+
+* [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+* [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
+* [Fedora](https://docs.docker.com/install/linux/docker-ce/fedora/)
+* [CentOS](https://docs.docker.com/install/linux/docker-ce/centos/)
+* [Binaries](https://docs.docker.com/install/linux/docker-ce/binaries/)
+
+After installing Docker, because Malcolm should be run as a non-root user, add your user to the `docker` group with something like:
+```
+$ sudo usermod -aG docker yourusername
+```
+
+Following this, either reboot or log out then log back in.
+
+Docker starts automatically on DEB-based distributions. On RPM-based distributions, you need to start it manually or enable it using the appropriate `systemctl` or `service` command(s).
+
+You can test docker by running `docker info`, or (assuming you have internet access), `docker run --rm hello-world`.
+
+##### Installing docker-compose
+
+Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing docker-compose.
+
+##### Operating system configuration
+
+The host system (ie., the one running Docker) will need to be configured for the [best possible Elasticsearch performance](https://www.elastic.co/guide/en/elasticsearch/reference/master/system-config.html). Here are a few suggestions for Linux hosts (these may vary from distribution to distribution):
+
+* Append the following lines to `/etc/sysctl.conf`:
+
+```
+# the maximum number of open file handles
+fs.file-max=65536
+
+# the maximum number of user inotify watches
+fs.inotify.max_user_watches=131072
+
+# the maximum number of memory map areas a process may have
+vm.max_map_count=262144
+
+# decrease "swappiness" (swapping out runtime memory vs. dropping pages)
+vm.swappiness=1
+
+# the maximum number of incoming connections
+net.core.somaxconn=65535
+
+# the % of system memory fillable with "dirty" pages before flushing
+vm.dirty_background_ratio=40
+
+# maximum % of dirty system memory before committing everything
+vm.dirty_ratio=80
+```
+
+* Depending on your distribution, create **either** the file `/etc/security/limits.d/limits.conf` containing:
+
+```
+# the maximum number of open file handles
+* soft nofile 65535
+* hard nofile 65535
+# do not limit the size of memory that can be locked
+* soft memlock unlimited
+* hard memlock unlimited
+```
+
+**OR** the file `/etc/systemd/system.conf.d/limits.conf` containing: 
+
+```
+[Manager]
+# the maximum number of open file handles
+DefaultLimitNOFILE=65535:65535
+# do not limit the size of memory that can be locked
+DefaultLimitMEMLOCK=infinity
+```
+
+* Change the readahead value for the disk where the Elasticsearch data will be stored. There are a few ways to do this. For example, you could add this line to `/etc/rc.local` (replacing `/dev/sda` with your disk block descriptor):
+
+```
+# change disk read-adhead value (# of blocks)
+blockdev --setra 512 /dev/sda
+```
+
+* Change the I/O scheduler to `deadline` or `noop`. Again, this can be done in a variety of ways. The simplest is to add `elevator=deadline` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub2`
+
+* If you are planning on using very large data sets, consider formatting the drive containing `elasticsearch` volume as XFS.
+
+After making all of these changes, do a reboot for good measure!
+
+#### <a name="HostSystemConfigMac"></a>macOS host system configuration
+
+##### Automatic installation using `install.py`
+
+The `install.py` script will attempt to guide you through the installation of Docker and Docker Compose if they are not present. If that works for you, you can skip ahead to **Configure docker daemon option** in this section.
+
+##### Install Homebrew
+
+The easiest way to install and maintain docker on Mac is using the [Homebrew cask](https://brew.sh). Execute the following in a terminal.
+
+```
+$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+$ brew install cask
+$ brew tap caskroom/versions
+```
+
+##### Install docker-edge
+
+```
+$ brew cask install docker-edge
+```
+This will install the latest version of docker and docker-compose. It can be upgraded later using `brew` as well:
+```
+$ brew cask upgrade --no-quarantine docker-edge
+```
+You can now run docker from the Applications folder.
+
+##### Configure docker daemon option
+
+Some changes should be made for performance ([this link](http://markshust.com/2018/01/30/performance-tuning-docker-mac) gives a good succinct overview).
+
+* **Resource allocation** - For a good experience, you likely need at least a quad-core MacBook Pro with 16GB RAM and an SSD. I have run Malcolm on an older 2013 MacBook Pro with 8GB of RAM, but the more the better. Go in your system tray and select **Docker** → **Preferences** → **Advanced**. Set the resources available to docker to at least 4 CPUs and 8GB of RAM (>= 16GB is preferable).
+
+* **Volume mount performance** - You can speed up performance of volume mounts by removing unused paths from **Docker** → **Preferences** → **File Sharing**. For example, if you’re only going to be mounting volumes under your home directory, you could share `/Users` but remove other paths.
+
+After making these changes, right click on the Docker 🐋 icon in the system tray and select **Restart**.
+
+#### <a name="HostSystemConfigWindows"></a>Windows host system configuration
+
+There are several ways of installing and running docker with Windows, and they vary depending on the version of Windows you are running, whether or not Hyper-V must be enabled (which is a requirement for VMWare, but is precluded by the recent non-virtual machine release of Docker).
+
+As the author supposes that the target audience of this document are more likely to be running macOS or Linux, detailed instructions for Docker setup under Windows are not included here. Instead, refer to the following links:
+
+* Announcing WSL 2 - [https://devblogs.microsoft.com/commandline/announcing-wsl-2/](https://devblogs.microsoft.com/commandline/announcing-wsl-2/)
+* Install and run docker-toolbox easily with Chocolatey while still allowing Hyper-V to be enabled so that VMWare can run - [https://stefanscherer.github.io/yes-you-can-docker-on-windows-7](https://stefanscherer.github.io/yes-you-can-docker-on-windows-7)
+* Getting started with Docker for Windows - [https://docs.docker.com/docker-for-windows](https://docs.docker.com/docker-for-windows)
+* Docker CE for Windows - [https://store.docker.com/editions/community/docker-ce-desktop-windows](https://store.docker.com/editions/community/docker-ce-desktop-windows)
+
+## <a name="Running"></a>Running Malcolm
+
+### <a name="AuthSetup"></a>Configure authentication
+
+Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+
+* define the username and password to be used when accessing the HTTPS and SFTP interfaces provided by the local instance of the Malcolm appliance
+* specify whether or not to (re)generate the self-signed certificates used for HTTPS access
+    * key and certificate files are located in the `nginx/certs/` directory
+* specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
+    * certificate authority, certificate, and key files for Malcolm’s Logstash instance are located in the `logstash/certs/` directory
+    * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory
+* specify whether or not to store the username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (see the `ES_EXTERNAL_HOSTS`, `ES_EXTERNAL_SSL`, and `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
+    * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
+
+### <a name="Starting"></a>Starting Malcolm
+
+[Docker compose](https://docs.docker.com/compose/) is used to coordinate running the Docker containers. To start Malcolm, navigate to the directory containing `docker-compose.yml` and run:
+```
+$ ./scripts/start.sh
+```
+This will create the containers' virtual network and instantiate them, then leave them running in the background. The Malcolm containers may take a several minutes to start up completely. To follow the debug output for an already-running Malcolm instance, run:
+```
+$ ./scripts/logs.sh
+```
+You can also use `docker stats` to monitor the resource utilization of running containers.
+
+#### <a name="LiveZeek"></a>Monitoring a live Zeek instance
+
+If you are using Malcolm to analyze *live* Zeek logs (ie., when `bro` is listening on a network interface and actively writing to log files), replace `docker-compose.yml` with `docker-compose-zeek-live.yml` before starting:
+
+```
+$ mv -f ./docker-compose-zeek-live.yml ./docker-compose.yml
+```
+
+Then, run `bro` from inside of `./zeek-logs/current/` after starting Malcolm as described above.
+
+Alternately, you can run the `start.sh` script like this:
+```
+$ ./scripts/start.sh ./docker-compose-zeek-live.yml
+```
+
+### <a name="StopAndRestart"></a>Stopping and restarting Malcolm
+
+You can run `./scripts/stop.sh` to stop the docker containers and remove their virtual network. Alternately, `./scripts/restart.sh` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
+
+### <a name="Wipe"></a>Clearing Malcolm’s data
+
+Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch database.
+
+## <a name="Upload"></a>Capture file and log archive upload
+
+Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs over HTTPS on port 8443 (eg., [https://localhost:8443](https://localhost:8443) if you are connecting locally).
+
+![Capture File and Log Archive Upload](./docs/images/screenshots/malcolm_upload.png)
+
+Additionally, there is a writable `files` directory on an SFTP server served on port 8022 (eg., `sftp://USERNAME@localhost:8022/files/` if you are connecting locally).
+
+The types of files supported are:
+
+* PCAP files (of mime type `application/vnd.tcpdump.pcap` or `application/x-pcapng`)
+    - PCAPNG files are *partially* supported: Zeek is able to process PCAPNG files, but not all of Moloch's packet examination features work correctly
+* Zeek logs in archive files (`application/gzip`, `application/x-gzip`, `application/x-7z-compressed`, `application/x-bzip2`, `application/x-cpio`, `application/x-lzip`, `application/x-lzma`, `application/x-rar-compressed`, `application/x-tar`, `application/x-xz`, or `application/zip`)
+    - where the Zeek logs are found in the internal directory structure in the archive file does not matter
+
+Files uploaded via these methods are monitored and moved automatically to other directories for processing to begin, generally within one minute of completion of the upload.
+
+### <a name="Tagging"></a>Tagging
+
+In addition to be processed for uploading, Malcolm events will be tagged according to the components of the filenames of the PCAP files or Zeek log archives files from which the events were parsed. For example, records created from a PCAP file named `ACME_Scada_VLAN10.pcap` would be tagged with `ACME`, `Scada`, and `VLAN10`. Tags are extracted from filenames by splitting on the characters "," (comma), "-" (dash), and "_" (underscore). These tags are viewable and searchable (via the `tags` field) in Moloch and Kibana. This behavior can be changed by modifying the `AUTO_TAG` [environment variable in `docker-compose.yml`](#DockerComposeYml).
+
+Tags may also be specified manually with the [browser-based upload form](#Upload).
+
+### <a name="UploadPCAPZeek"></a>Processing uploaded PCAPs with Zeek
+
+The browser-based upload interface also provides the ability to specify tags for events extracted from the files uploaded. Additionally, an **Analyze with Zeek** checkbox may be used when uploading PCAP files to cause them to be analyzed by Zeek, similarly to the `ZEEK_AUTO_ANALYZE_PCAP_FILES` environment variable [described above](#DockerComposeYml), only on a per-upload basis. Zeek can also automatically carve out files from file transfers; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details.
+
+## <a name="Moloch"></a>Moloch
+
+The Moloch interface will be accessible over HTTPS on port 443 at the docker hosts IP address (eg., [https://localhost](https://localhost) if you are connecting locally).
+
+### <a name="MolochZeek"></a>Zeek log integration
+
+A stock installation of Moloch extracts all of its network connection ("session") metadata ("SPI" or "Session Profile Information") from full packet capture artifacts (PCAP files). Zeek (formerly Bro) generates similar session metadata, linking network events to sessions via a connection UID. Malcolm aims to facilitate analysis of Zeek logs by mapping values from Zeek logs to the Moloch session database schema for equivalent fields, and by creating new "native" Moloch database fields for all the other Zeek log values for which there is not currently an equivalent in Moloch:
+
+![Zeek log session record](./docs/images/screenshots/moloch_session_zeek.png)
+
+In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
+
+One value of particular mention is **Zeek Log Type** (`zeek.logType` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `zeek.logType == conn`, or restricted to records from `weird.log` by searching `zeek.logType == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Moloch `EXISTS` filter, as in `zeek.logType == EXISTS!`. On the other hand, to exclude Zeek logs and only view records from PCAP files, use `zeek.logType != EXISTS!`. 
+
+Click the icon of the owl **🦉** in the upper-left hand corner of to access the Moloch usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
+
+![Zeek fields](./docs/images/screenshots/moloch_help_fields.png)
+
+The values of records created from Zeek logs can be expanded and viewed like any native moloch session by clicking the plus **➕** icon to the left of the record in the Sessions view. However, note that when dealing with these Zeek records the full packet contents are not available, so buttons dealing with viewing and exporting PCAP information will not behave as they would for records from PCAP files. However, clicking the `Source Raw` or `Destination Raw` buttons will allow you to view the original Zeek log (formatted as JSON) from which the record was created. Other than that, Zeek records and their values are usable in Malcolm just like native PCAP session records.
+
+![Source Raw button opens Zeek log JSON](./docs/images/screenshots/moloch_session_source_raw.png)
+
+### <a name="MolochHelp"></a>Help
+
+Click the icon of the owl 🦉 in the upper-left hand corner of to access the Moloch usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), which includes such topics as [search syntax](https://localhost/help#search), the [Sessions view](https://localhost/help#sessions), [SPIView](https://localhost/help#spiview), [SPIGraph](https://localhost/help#spigraph), and the [Connections](https://localhost/help#connections) graph.
+
+### <a name="MolochSessions"></a>Sessions
+
+The **Sessions** view provides low-level details of the sessions being investigated, whether they be Moloch sessions created from PCAP files or [Zeek logs mapped](#MolochZeek) to the Moloch session database schema.
+
+![Moloch's Sessions view](./docs/images/screenshots/moloch_sessions.png)
+
+The **Sessions** view contains many controls for filtering the sessions displayed from all sessions down to sessions of interest:
+
+* [search bar](https://localhost/help#search): Indicated by the magnifying glass **🔍** icon, the search bar allows defining filters on session/log metadata
+* [time bounding](https://localhost/help#timebounding) controls: The **🕘**, **Start**, **End**, **Bounding**, and **Interval** fields, and the **date histogram** can be used to visually zoom and pan the time range being examined.
+* search button: The **Search** button re-runs the sessions query with the filters currently specified.
+* views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Moloch preconfigured views including several on the `zeek.logType` field. 
+
+![Malcolm views](./docs/images/screenshots/moloch_log_filter.png)
+
+* map: A global map can be expanded by clicking the globe **🌎** icon. This allows filtering sessions by IP-based geolocation when possible.
+
+Some of these filter controls are also available on other Moloch pages (such as SPIView, SPIGraph, Connections, and Hunt).
+
+The number of sessions displayed per page, as well as the page currently displayed, can be specified using the paging controls underneath the time bounding controls.
+
+The sessions table is displayed below the filter controls. This table contains the sessions/logs matching the specified filters.
+
+To the left of the column headers are two buttons. The **Toggle visible columns** button, indicated by a grid **⊞** icon, allows toggling which columns are displayed in the sessions table. The **Save or load custom column configuration** button, indicated by a columns **◫** icon, allows saving the current displayed columns or loading previously-saved configurations. This is useful for customizing which columns are displayed when investigating different types of traffic. Column headers can also be clicked to sort the results in the table, and column widths may be adjusted by dragging the separators between column headers.
+
+Details for individual sessions/logs can be expanded by clicking the plus **➕** icon on the left of each row. Each row may contain multiple sections and controls, depending on whether the row represents a Moloch session or a [Zeek log](#MolochZeek). Clicking the field names and values in the details sections allows additional filters to be specified or summary lists of unique values to be exported.
+
+When viewing Moloch session details (ie., a session generated from a PCAP file), an additional packets section will be visible underneath the metadata sections. When the details of a session of this type are expanded, Moloch will read the packet(s) comprising the session for display here. Various controls can be used to adjust how the packet is displayed (enabling **natural** decoding and enabling **Show Images & Files** may produce visually pleasing results), and other options (including PCAP download, carving images and files, applying decoding filters, and examining payloads in [CyberChef](https://github.com/gchq/CyberChef)) are available.
+
+See also Moloch's usage documentation for more information on the [Sessions view](https://localhost/help#sessions).
+
+#### <a name="MolochPCAPExport"></a>PCAP Export
+
+Clicking the down arrow **▼** icon to the far right of the search bar presents a list of actions including **PCAP Export** (see Moloch's [sessions help](https://localhost/help#sessions) for information on the other actions).  When full PCAP sessions are displayed, the **PCAP Export** feature allows you to create a new PCAP file from the matching Moloch sessions, including controls for which sessions are included (open items, visible items, or all matching items) and whether or not to include linked segments. Click **Export PCAP** button to generate the PCAP, after which you'll be presented with a browser download dialog to save or open the file. Note that depending on the scope of the filters specified this might take a long time (or, possibly even time out).
+
+![Export PCAP](./docs/images/screenshots/moloch_export_pcap.png)
+
+See the [issues](#Issues) section of this document for an error that can occur using this feature when Zeek log sessions are displayed.View
+
+### <a name="MolochSPIView"></a>SPIView
+
+Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (eg., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Moloch and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
+
+![Moloch's SPIView](./docs/images/screenshots/moloch_spiview.png)
+
+Click the the plus **➕** icon to the right of a category to expand it. The values for specific fields are displayed by clicking the field description in the field list underneatn the category name. The list of field names can be filtered by typing part of the field name in the *Search for fields to display in this category* text input. The **Load All** and **Unload All** buttons can be used to toggle display of all of the fields belonging to that category. Once displayed, a field's name or one of its values may be clicked to provide further actions for filtering or displaying that field or its values. Of particular interest may be the **Open [fieldname] SPI Graph** option when clicking on a field's name. This will open a new tab with the SPI Graph ([see below](#MolochSPIGraph)) populated with the field's top values.
+
+Note that because the SPIView page can potentially run many queries, SPIView limits the search domain to seven days (in other words, seven indices, as each index represents one day's worth of data). When using SPIView, you will have best results if you limit your search time frame to less than or equal to seven days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini](./etc/moloch/config.ini) and rebuilding the `malcolmnetsec/moloch` docker container.
+
+See also Moloch's usage documentation for more information on [SPIView](https://localhost/help#spiview).
+
+### <a name="MolochSPIGraph"></a>SPIGraph
+
+Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **Graph** visualizes the occurence of some field's top *n* values over time, and (optionally) geographically. This is particularly useful for identifying trends in a particular type of communication over time: traffic using a particular protocol when seen sparsely at regular intervals on that protocol's date histogram in the SPIGraph may indicate a connection check, polling, or beaconing (for example, see the `llmnr` protocol in the screenshot below).
+
+![Moloch's SPIGraph](./docs/images/screenshots/moloch_spigraph.png)
+
+Controls can be found underneath the time bounding controls for selecting the field of interest, the number of elements to be displayed, the sort order, and a periodic refresh of the data.
+
+See also Moloch's usage documentation for more information on [SPIGraph](https://localhost/help#spigraph).
+
+### <a name="MolochConnections"></a>Connections
+
+The **Connections** page presents network communications via a force-directed graph, making it easy to visualize logical relationships between network hosts.
+
+![Moloch's Connections graph](./docs/images/screenshots/moloch_connections.png)
+
+Controls are available for specifying the query size (where smaller values will execute more quickly but may only contain an incomplete representation of the top *n* sessions, and larger values may take longer to execute but will be more complete), which fields to use as the source and destionation for node values, a minimum connections threshold, and the method for determining the "weight" of the link between two nodes. As is the case with most other visualizations in Moloch, the graph is interactive: clicking on a node or the link between two nodes can be used to modify query filters, and the nodes themselves may be repositioned by dragging and dropping them. A node's color indicates whether it communicated as a source/originator, a destination/responder, or both.
+
+While the default source and destination fields are *Src IP* and *Dst IP:Dst Port*, the Connections view is able to use any combination of any of the fields populated by Moloch and Zeek. For example:
+
+* *Src OUI* and *Dst OUI* (hardware manufacturers)
+* *Src IP* and *Protocols*
+* *Originating Network Segment* and *Responding Network Segment* (see [CIDR subnet to network segment name mapping](#SegmentNaming))
+* *Originating GeoIP City* and *Responding GeoIP City*
+
+or any other combination of these or other fields.
+
+See also Moloch's usage documentation for more information on the [Connections graph](https://localhost/help#connections).
+
+### <a name="MolochHunt"></a>Hunt
+
+Moloch's **Hunt** feature allows an analyst to search within the packets themselves (including payload data) rather than simply searching the session metadata. The search string may be specified using ASCII (with or without case sensitivity), hex codes, or regular expressions. Once a hunt job is complete, matching sessions can be viewed in the [Sessions](#MolochSessions)  view.
+
+Clicking the **Create a packet search job** on the Hunt page will allow you to specify the following parameters for a new hunt job:
+
+* a packet search job **name**
+* a **maximum number of packets** to examine per session
+* the **search string** and its format (*ascii*, *ascii (case sensitive)*, *hex*, *regex*, or *hex regex*)
+* whether to search **source packets**, **destination packets**, or both
+* whether to search **raw** or **reassembled** packets
+
+Click the **➕ Create** button to begin the search. Moloch will scan the source PCAP files from which the sessions were created according to the search criteria. Note that whatever filters were specified when the hunt job is executed will apply to the hunt job as well; the number of sessions matching the current filters will be displayed above the hunt job parameters with text like "ⓘ Creating a new packet search job will search the packets of # sessions."
+
+![Hunt creation](./docs/images/screenshots/moloch_hunt_creation.png)
+
+Once a hunt job is submitted, it will be assigned a unique hunt ID (a long unique string of characters like `yuBHAGsBdljYmwGkbEMm`) and its progress will be updated periodically in the **Hunt Job Queue** with the execution percent complete, the number of matches found so far, and the other parameters with which the job was submitted. More details for the hunt job can be viewed by expanding its row with the plus **➕** icon on the left.
+
+![Hunt completed](./docs/images/screenshots/moloch_hunt_finished.png)
+
+Once the hunt job is complete (and a minute or so has passed, as the `huntId` must be added to the matching session records in the database), click the folder **📂** icon on the right side of the hunt job row to open a new [Sessions](#MolochSessions) tab with the search bar prepopulated to filter to sessions with packets matching the search criteria.
+
+![Hunt result sessions](./docs/images/screenshots/moloch_hunt_sessions.png)
+
+From this list of filtered sessions you can expand session details and explore packet payloads which matched the hunt search criteria.
+
+The hunt feature is available only for sessions created from full packet capture data, not Zeek logs. This being the case, it is a good idea to click the eyeball **👁** icon and select the **PCAP Files** view to exclude Zeek logs from candidate sessions prior to using the hunt feature.
+
+See also Moloch's usage documentation for more information on the [hunt feature](https://localhost/help#hunt).
+
+### <a name="MolochStats"></a>Statistics
+
+Moloch provides several other reports which show information about the state of Moloch and the underlying Elasticsearch database.
+
+The **Files** list displays a list of PCAP files processed by Moloch, the date and time of the earliest packet in each file, and the file size:
+
+![Moloch's Files list](./docs/images/screenshots/moloch_files.png)
+
+The **ES Indices** list (available under the **Stats** page) lists the Elasticsearch indices within which log data is contained:
+
+![Moloch's ES indices list](./docs/images/screenshots/moloch_es_stats.png)
+
+The **History** view provides a historical list of queries issues to Moloch and the details of those queries:
+
+![Moloch's History view](./docs/images/screenshots/moloch_history.png)
+
+See also Moloch's usage documentation for more information on the [Files list](https://localhost/help#files), [statistics](https://localhost/help#files), and [history](https://localhost/help#history).
+
+### <a name="MolochSettings"></a>Settings
+
+#### General settings
+
+The **Settings** page can be used to tweak Moloch preferences, defined additional custom views and column configurations, tweak the color theme, and more.
+
+See Moloch's usage documentation for more information on [settings](https://localhost/help#settings).
+
+![Moloch general settings](./docs/images/screenshots/moloch_general_settings.png)
+
+![Moloch custom view management](./docs/images/screenshots/moloch_view_settings.png)
+
+#### User management
+
+Currently, when [`auth_setup.sh`](#AuthSetup) is run Malcolm creates a single username/password used by all of its [components](#Components), and those credentials are used to authenticate across all of those components. This being the case, it is currently *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as these settings will not be consistently used across Malcolm.
+
+Multi-user management -- most likely with integration to an authentication server such as Active Directory -- is on Malcolm's roadmap for development in the (hopefully) not-too-distant future.
+
+## <a name="Kibana"></a>Kibana
+
+While Moloch provides very nice visualizations, especially for network traffic, [Kibana](https://www.elastic.co/guide/en/kibana/current/getting-started.html) (an open source general-purpose data visualization tool for Elasticsearch) can be used to create custom visualizations (tables, charts, graphs, dashboards, etc.) using the same data.
+
+The Kibana container can be accessed over HTTPS on port 5601 (eg., [https://localhost:5601](https://localhost:5601) if you are connecting locally). Several preconfigured dashboards for Zeek logs are included in Malcolm's Kibana configuration.
+
+The official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) has excellent tutorials for a variety of topics.
+
+Kibana has several components for data searching and visualization:
+
+### <a name="Discover"></a>Discover
+
+The **Discover** view enables you to view events on a record-by-record basis (similar to a *session* record in Moloch or an individual line from a Zeek log). See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) for information on using the Discover view:
+
+* [Getting Started: Discovering Your Data](https://www.elastic.co/guide/en/kibana/current/tutorial-discovering.html)
+* [Discover](https://www.elastic.co/guide/en/kibana/current/discover.html)
+* [Searching Your Data](https://www.elastic.co/guide/en/kibana/current/search.html)
+
+#### <a name="DiscoverGallery"></a>Screenshots
+
+![Kibana's Discover view](./docs/images/screenshots/kibana_discover.png)
+
+![Viewing the details of a session in Discover](./docs/images/screenshots/kibana_discover_table.png)
+
+![Filtering by tags to display only sessions with public IP addresses](./docs/images/screenshots/kibana_add_filter.png)
+
+![Changing the fields displayed in Discover](./docs/images/screenshots/kibana_fields_list.png)
+
+![Opening a previously-saved search](./docs/images/screenshots/kibana_open_search.png)
+
+### <a name="KibanaVisualizations"></a>Visualizations and dashboards
+
+#### <a name="PrebuiltVisualizations"></a>Prebuilt visualizations and dashboards
+
+Malcolm comes with dozens of prebuilt visualizations and dashboards for the network traffic represented by each of the Zeek log types. Click **Dashboard** to see a list of these dashboards. As is the case with all Kibana's visualizations, all of the charts, graphs, maps, and tables are interactive and can be clicked on to narrow or expand the scope of the data you are investigating. Similarly, click **Visualize** to explore the prebuilt visualizations used to build the dashboards.
+
+##### <a name="PrebuiltVisualizationsGallery"></a>Screenshots
+
+![The Connections dashboard displays information about the "top talkers" across all types of sessions](./docs/images/screenshots/kibana_connections.png)
+
+![The HTTP dashboard displays important details about HTTP traffic](./docs/images/screenshots/kibana_http.png)
+
+![There are several Connections visualizations using locations from GeoIP lookups](./docs/images/screenshots/kibana_latlon_map.png)
+
+![Kibana includes both coordinate and region map types](./docs/images/screenshots/kibana_region_map.png)
+
+![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/kibana_notices.png)
+
+![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/kibana_signatures.png)
+
+![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/kibana_software.png)
+
+![The PE (portable executables) dashboard displays information about executable files transferred over the network](./docs/images/screenshots/kibana_portable_executables.png)
+
+![The SMTP dashboard highlights details about SMTP traffic](./docs/images/screenshots/kibana_smtp.png)
+
+![The SSL dashboard displays information about SSL versions, certificates, and TLS JA3 fingerprints](./docs/images/screenshots/kibana_ssl.png)
+
+![The files dashboard displays metrics about the files transferred over the network](./docs/images/screenshots/kibana_files_source.png)
+
+![This dashboard provides insight into DNP3 (Distributed Network Protocol), a protocol used commonly in electric and water utilities](./docs/images/screenshots/kibana_dnp3.png)
+
+![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/kibana_modbus.png)
+
+#### <a name="BuildDashboard"></a>Building your own visualizations and dashboards
+
+See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) for information on creating your own visualizations and dashboards:
+
+* [Getting Started: Visualizing Your Data](https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html)
+* [Visualize](https://www.elastic.co/guide/en/kibana/current/visualize.html)
+* [Dashboard](https://www.elastic.co/guide/en/kibana/current/dashboard.html)
+* [Timelion](https://www.elastic.co/guide/en/kibana/current/timelion.html) (more advanced time series data visualizer)
+
+##### <a name="NewVisualizationsGallery"></a>Screenshots
+
+![Kibana boasts many types of visualizations for displaying your data](./docs/images/screenshots/kibana_new_visualization.png)
+
+![Timelion is a powerful tool for visualizing time series data](./docs/images/screenshots/kibana_timelion.png)
+
+![Visual Builder is another time series data visualizer](./docs/images/screenshots/kibana_time_series.png)
+
+## <a name="MalcolmFeatures"></a>Other Malcolm features
+
+### <a name="ZeekFileExtraction"></a>Automatic file extraction and scanning
+
+Malcolm can leverage Zeek's knowledge of network protocols to automatically detect file transfers and extract those files from PCAPs as Zeek processes them. This behavior can be enabled globally by modifying the `ZEEK_EXTRACTOR_MODE` [environment variable in `docker-compose.yml`](#DockerComposeYml), or on a per-upload basis for PCAP files uploaded via the [browser-based upload form](#Upload) when **Analyze with Zeek** is selected.
+
+To specify which files should be extracted, the following values are acceptable in `ZEEK_EXTRACTOR_MODE`:
+
+* `none`: no file extraction
+* `interesting`: extraction of files with mime types of common attack vectors
+* `mapped`: extraction of files with recognized mime types
+* `known`: extraction of files for which any mime type can be determined
+* `all`: extract all files
+
+Extracted files can be examined through either (but not both) of two methods:
+
+* submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, specify the `VTOT_API2_KEY` [environment variable in `docker-compose.yml`](#DockerComposeYml)
+* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, set the `EXTRACTED_FILE_ENABLE_CLAMAV` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true` and leave `VTOT_API2_KEY` blank
+
+Files which are flagged as potentially malicious via either of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in Kibana.
+
+The `EXTRACTED_FILE_PRESERVATION` [environment variable in `docker-compose.yml`](#DockerComposeYml) determines the behavior for preservation of Zeek-extracted files:
+
+* `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
+* `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
+* `none`: preserve no extracted files
+
+### <a name="HostAndSubnetNaming"></a>Automatic host and subnet name assignment
+
+#### <a name="HostNaming"></a>IP/MAC address to hostname mapping via `host-map.txt`
+
+The `host-map.txt` file in the Malcolm installation directory can be used to define names for network hosts based on IP and/or MAC addresses in Zeek logs. The default empty configuration looks like this:
+```
+# IP or MAC address to host name map:
+#   address|host name|required tag
+#
+# where:
+#   address: comma-separated list of IPv4, IPv6, or MAC addresses
+#          eg., 172.16.10.41, 02:42:45:dc:a2:96, 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+#
+#   host name: host name to be assigned when event address(es) match
+#
+#   required tag (optional): only check match and apply host name if the event
+#                            contains this tag
+#
+```
+Each non-comment line (not beginning with a `#`), defines an address-to-name mapping for a network host. For example:
+```
+127.0.0.1,127.0.1.1,::1|localhost|
+192.168.10.10|office-laptop.intranet.lan|
+06:46:0b:a6:16:bf|serial-host.intranet.lan|testbed
+```
+Each line consists of three `|`-separated fields: address(es), hostname, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
+
+As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP and MAC address fields (`zeek.orig_h`, `zeek.resp_h`, `zeek.orig_l2_addr`, and `zeek.resp_l2_addr`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `zeek.orig_hostname` or `zeek.resp_hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
+
+`zeek.orig_hostname` and `zeek.resp_hostname` may each contain multiple values. For example, if both a host's source IP address and source MAC address were matched by two different lines, `zeek.orig_hostname` would contain the hostname values from both matching lines.
+
+#### <a name="SegmentNaming"></a>CIDR subnet to network segment name mapping via `cidr-map.txt`
+
+The `cidr-map.txt` file in the Malcolm installation directory can be used to define names for network segments based on IP addresses in Zeek logs. The default empty configuration looks like this:
+```
+# CIDR to network segment format:
+#   IP(s)|segment name|required tag
+#
+# where:
+#   IP(s): comma-separated list of CIDR-formatted network IP addresses
+#          eg., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
+#
+#   segment name: segment name to be assigned when event IP address(es) match
+#
+#   required tag (optional): only check match and apply segment name if the event
+#                            contains this tag
+#
+```
+Each non-comment line (not beginning with a `#`), defines an subnet-to-name mapping for a network host. For example:
+```
+192.168.50.0/24,192.168.40.0/24,10.0.0.0/8|corporate|
+192.168.100.0/24|control|
+192.168.200.0/24|dmz|
+172.16.0.0/12|virtualized|testbed
+```
+Each line consists of three `|`-separated fields: CIDR-formated subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
+
+As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`zeek.orig_h` and `zeek.resp_h`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `zeek.orig_segment` or `zeek.resp_segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
+
+`zeek.orig_segment` and `zeek.resp_segment` may each contain multiple values. For example, if `cidr-map.txt` specifies multiple overlapping subnets on different lines, `zeek.orig_segment` would contain the hostname values from both matching lines if `zeek.orig_h` belonged to both subnets.
+
+If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if they contain different values, the tag `cross_segment` will be added to the log's `tags` field for convenient identification of cross-segment traffic. This traffic could be easily visualized using Moloch's **Connections** graph, by setting the **Src:** value to **Originating Network Segment** and the **Dst:** value to **Responding Network Segment**:
+
+![Cross-segment traffic in Connections](./docs/images/screenshots/moloch_connections_segments.png)
+
+#### <a name="ApplyMapping"></a>Applying mapping changes
+When changes are made to either `cidr-map.txt` or `host-map.txt`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart.sh` (see [Stopping and restarting Malcolm](#StopAndRestart)).
+
+## <a name="Issues"></a>Known Issues
+
+### PCAP file export error when Zeek logs are in Moloch search results
+
+Moloch has a nice feature that allows you to export PCAP files matching the filters currently populating the search field. However, Moloch viewer will raise an exception if records created from Zeek logs are found among the search results to be exported. For this reason, if you are using the export PCAP feature it is recommended that you apply the **PCAP Files** view to filter your search results prior to doing the export.
+
+### Manual Kibana index pattern refresh
+
+Because some fields are created in Elasticsearch dynamically when Zeek logs are ingested by Logstash, they may not have been present when Kibana configures its index pattern field mapping during initialization. As such, those fields will not show up in Kibana visualizations until Kibana’s copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
+
+After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh Kibana’s field list by clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
+
+![Refreshing Kibana's cached index pattern](./docs/images/screenshots/kibana_refresh_index.png)
+
+## <a name="Footer"></a>Copyright
+
+[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+
+See `License.txt` for the terms of its release.
+
+### Contact information of author(s):
+
+[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Malcolm)
+
+## Other Software
+Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
+
+[Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
+
+[Supported Open Source Software](https://github.com/idaholab)
+
+[Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
+
+[Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)

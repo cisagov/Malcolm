@@ -1,0 +1,8 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=Start Malcolm
+Exec=lxterminal --command=/bin/bash\ -l\ /home/analyst/Malcolm/scripts/start.sh
+Comment=Start Malcolm
+Terminal=false
+Type=Application
+Icon=/usr/share/icons/hicolor/64x64/malcolm.png

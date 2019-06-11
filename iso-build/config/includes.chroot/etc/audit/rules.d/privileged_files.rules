@@ -1,0 +1,11 @@
+-w /etc/group -p wa -k usergroup_modification
+-w /etc/gshadow -p wa -k usergroup_modification
+-w /etc/opasswd -p wa -k usergroup_modification
+-w /etc/passwd -p wa -k usergroup_modification
+-w /etc/security/opasswd -p wa -k usergroup_modification
+-w /etc/shadow -p wa -k usergroup_modification
+-w /etc/sudoers.d -p wa -k privileged
+-w /etc/sudoers -p wa -k privileged
+-w /var/log/lastlog -p wa -k logins
+-w /var/log/tallylog -p wa -k logins
+-w /var/run/faillock -p wa -k logins

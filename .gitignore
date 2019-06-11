@@ -1,0 +1,19 @@
+# moloch
+/moloch/etc/GeoLite2-*
+/moloch/etc/oui.txt
+/moloch/etc/ipv4-address-space.csv
+/README.css
+
+# auth-related
+/auth.env
+/logstash/certs
+/filebeat/certs
+/nginx/certs
+/nginx/htpasswd
+
+# development
+docker-compose-seth*
+.vagrant
+malcolm_*images.tar.gz
+*.iso
+*-build.log

@@ -1,0 +1,108 @@
+From a16498e7812c719e4c3b0129ef14a0ccf080f864 Mon Sep 17 00:00:00 2001
+From: 31453 <elyse.rinne@verizonmedia.com>
+Date: Wed, 29 May 2019 16:06:40 -0400
+Subject: [PATCH] fix 0 start time messing up custom time ranges
+
+fixes #1071
+---
+ viewer/viewer.js                                            | 2 +-
+ viewer/vueapp/src/components/search/ExpressionTypeahead.vue | 3 ++-
+ viewer/vueapp/src/components/search/Time.vue                | 6 +++---
+ viewer/vueapp/src/components/sessions/SessionsService.js    | 8 ++------
+ viewer/vueapp/src/store.js                                  | 4 ++--
+ 5 files changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/viewer/viewer.js b/viewer/viewer.js
+index a1b8b120..7ac1530e 100644
+--- a/viewer/viewer.js
++++ b/viewer/viewer.js
+@@ -2649,7 +2649,7 @@ function buildSessionQuery (req, buildCb) {
+   if ((req.query.date && req.query.date === '-1') ||
+       (req.query.segments && req.query.segments === "all")) {
+     interval = 60*60; // Hour to be safe
+-  } else if (req.query.startTime && req.query.stopTime) {
++  } else if (req.query.startTime !== undefined && req.query.stopTime) {
+     switch (req.query.bounding) {
+     case "first":
+       query.query.bool.filter.push({range: {firstPacket: {gte: req.query.startTime*1000, lte: req.query.stopTime*1000}}});
+diff --git a/viewer/vueapp/src/components/search/ExpressionTypeahead.vue b/viewer/vueapp/src/components/search/ExpressionTypeahead.vue
+index e67ccdd7..65886937 100644
+--- a/viewer/vueapp/src/components/search/ExpressionTypeahead.vue
++++ b/viewer/vueapp/src/components/search/ExpressionTypeahead.vue
+@@ -581,7 +581,8 @@ export default {
+ 
+         if (this.$route.query.date) {
+           params.date = this.$route.query.date;
+-        } else if (this.$route.query.startTime && this.$route.query.stopTime) {
++        } else if (this.$route.query.startTime !== undefined &&
++          this.$route.query.stopTime !== undefined) {
+           params.startTime = this.$route.query.startTime;
+           params.stopTime = this.$route.query.stopTime;
+         }
+diff --git a/viewer/vueapp/src/components/search/Time.vue b/viewer/vueapp/src/components/search/Time.vue
+index 772eb28f..47304b8f 100644
+--- a/viewer/vueapp/src/components/search/Time.vue
++++ b/viewer/vueapp/src/components/search/Time.vue
+@@ -636,12 +636,12 @@ export default {
+           this.localStartTime = moment((currentTimeSec - (hourSec * this.timeRange)) * 1000);
+           this.time.startTime = (currentTimeSec - (hourSec * this.timeRange)).toString();
+         }
+-      } else if (startTime && stopTime) {
++      } else if (startTime !== undefined && stopTime !== undefined) {
+         // start and stop times available
+         let stop = stopTime;
+         let start = startTime;
+ 
+-        if (stop && start && !isNaN(stop) && !isNaN(start)) {
++        if (stop !== undefined && start !== undefined && !isNaN(stop) && !isNaN(start)) {
+           stop = parseInt(stop, 10);
+           start = parseInt(start, 10);
+ 
+@@ -672,7 +672,7 @@ export default {
+         } else { // if we can't parse stop or start time, set default
+           this.timeRange = '1'; // default to 1 hour
+         }
+-      } else if (!date && !startTime && !stopTime) {
++      } else if (!date) {
+         // there are no time query parameters, so set defaults
+         this.timeRange = '1'; // default to 1 hour
+       }
+diff --git a/viewer/vueapp/src/components/sessions/SessionsService.js b/viewer/vueapp/src/components/sessions/SessionsService.js
+index 46748b34..a828202c 100644
+--- a/viewer/vueapp/src/components/sessions/SessionsService.js
++++ b/viewer/vueapp/src/components/sessions/SessionsService.js
+@@ -30,12 +30,8 @@ export default {
+         if (parseInt(query.date, 10) === -1) {
+           params.date = query.date;
+         } else {
+-          if (query.startTime) {
+-            params.startTime = query.startTime;
+-          }
+-          if (query.stopTime) {
+-            params.stopTime = query.stopTime;
+-          }
++          params.startTime = query.startTime;
++          params.stopTime = query.stopTime;
+         }
+ 
+         let i, len, item;
+diff --git a/viewer/vueapp/src/store.js b/viewer/vueapp/src/store.js
+index 6ba12621..cbb7901d 100644
+--- a/viewer/vueapp/src/store.js
++++ b/viewer/vueapp/src/store.js
+@@ -33,10 +33,10 @@ const store = new Vuex.Store({
+       state.timeRange = value.toString();
+     },
+     setTime (state, value) {
+-      if (value.startTime) {
++      if (value.startTime !== undefined) {
+         state.time.startTime = value.startTime.toString();
+       }
+-      if (value.stopTime) {
++      if (value.stopTime !== undefined) {
+         state.time.stopTime = value.stopTime.toString();
+       }
+     },
+-- 
+2.11.0
+

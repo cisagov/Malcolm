@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# configure firewall
+/usr/sbin/ufw --force enable
+/usr/sbin/ufw default deny incoming
+/usr/sbin/ufw default allow outgoing
+/usr/sbin/ufw allow ssh
+/usr/sbin/ufw allow ntp
+/usr/sbin/ufw allow 443/tcp
+/usr/sbin/ufw allow 5044
+/usr/sbin/ufw allow 5601/tcp
+/usr/sbin/ufw allow 8443/tcp
+/usr/sbin/ufw allow 9200/tcp
+
+# performance parameters for networking, disk, etc.
+cat << 'EOF' >> /etc/sysctl.conf
+kernel.dmesg_restrict=0
+
+# the maximum number of open file handles
+fs.file-max=65536
+
+# the maximum number of user inotify watches
+fs.inotify.max_user_watches=131072
+
+# the maximum number of memory map areas a process may have
+vm.max_map_count=262144
+
+# the maximum number of incoming connections
+net.core.somaxconn=65535
+
+# decrease "swappiness" (swapping out runtime memory vs. dropping pages)
+vm.swappiness=1
+
+# the % of system memory fillable with "dirty" pages before flushing
+vm.dirty_background_ratio=40
+
+# maximum % of dirty system memory before committing everything
+vm.dirty_ratio=80
+EOF
+
+# password requirement hardening
+sed -i -e 's/[[:space:]]*nullok[[:alnum:]_]*//g' /etc/pam.d/common-auth
+sed -i -r "s/(pam_faildelay.so.*delay)[[:space:]]*=[[:space:]]*[[:digit:]]+/\1=4000000/g" /etc/pam.d/login
+sed -i -r "s/([[:space:]]*session[[:space:]]*)[[:alnum:]_]*([[:space:]]*pam_lastlog.so[[:space:]]*)/\1required\2\tshowfailed/g" /etc/pam.d/login
+sed -i "s/^[[:space:]]*password[[:space:]]*requisite[[:space:]]*pam_pwquality\.so.*/password requisite pam_pwquality.so retry=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 difok=8 minclass=4 maxrepeat=2 maxclassrepeat=4 minlen=15/g" /etc/pam.d/common-password
+
+# enable cryptsetup support on boot
+sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
+
+# some permissions
+find /etc/audit -type d -exec chmod 750 "{}" \;
+find /etc/audit -type f -exec chmod 640 "{}" \;
+
+# set DIR_MODE to 750 for new users
+sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
+
+# new directories default to 750, new files to 640
+echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
+echo "umask 0077" >> /etc/profile
+echo "export UMASK=077" >> /etc/profile
+
+# enable cron logging
+sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
+
+# enable rsyslog forwarding to localhost:9514 over UDP (for filebeat syslog input)
+echo >> /etc/rsyslog.conf
+echo '*.* @127.0.0.1:9514' >> /etc/rsyslog.conf
+echo >> /etc/rsyslog.conf
+
+# tweak some auditd settings
+sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
+sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audisp/audisp-remote.conf
+
+# disable ntp for now, and disable servers, but it could be turned back on later
+systemctl disable ntp || true
+sed -i "s/^\(pool \)/# \1/" /etc/ntp.conf
+sed -i "s/^\(restrict -6\)/# \1/" /etc/ntp.conf
+sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
+sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
+
+# disable htpdate service, we're going to use cron instead
+systemctl disable htpdate || true

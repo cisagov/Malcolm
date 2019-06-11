@@ -1,0 +1,43 @@
+unless Vagrant.has_plugin?("vagrant-reload")
+  raise 'vagrant-reload plugin is not installed!'
+end
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "bento/debian-9"
+
+  config.vm.network "private_network", type: "dhcp"
+
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.vm.synced_folder "../..", "/malcolm-build"
+
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = true
+  end
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = 4
+  end
+
+  config.vm.provision "shell", inline: <<-STEP1
+    apt-get update
+    apt-get dist-upgrade -y
+    sed -i "s/main/main contrib non-free/g" /etc/apt/sources.list
+    echo "deb http://httpredir.debian.org/debian/ stretch-backports main contrib non-free" >> /etc/apt/sources.list
+    echo "deb-src http://httpredir.debian.org/debian/ stretch-backports main contrib non-free" >> /etc/apt/sources.list
+    apt-get update
+    export KERNEL_VERSION=$(apt-cache search linux-image-4 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
+    apt-get install -y -t stretch-backports \
+      linux-image-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-common \
+      dkms build-essential linux-kbuild-4.19 linux-compiler-gcc-6-x86 \
+      firmware-linux firmware-linux-nonfree firmware-misc-nonfree firmware-amd-graphics
+  STEP1
+  config.vm.provision :reload
+
+  config.vm.provision "shell", inline: <<-STEP2
+    apt-get update
+    apt-get install -y -t stretch-backports \
+      rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick
+  STEP2
+end

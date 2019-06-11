@@ -1,0 +1,13 @@
+{
+  "index_patterns" : ["sessions2-*"],
+  "order" : 0,
+  "mappings": {
+    "_default_": {
+      "properties": {
+        "zeek.destination_geo.location": { "type": "geo_point" },
+        "zeek.source_geo.location": { "type": "geo_point" },
+        "zeek_conn.duration": { "type": "float" }
+      }
+    }
+  }
+}

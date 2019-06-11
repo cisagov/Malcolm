@@ -1,0 +1,24 @@
+#!/bin/sh
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
+# python 3
+pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
+  bat \
+  docker-compose \
+  namedlist \
+  numpy \
+  scapy \
+  requests
+
+# python 3.7
+pip3.7 install --no-compile --no-cache-dir --force-reinstall --upgrade \
+  beautifulsoup4 \
+  cachetools \
+  debinterface \
+  namedlist \
+  netifaces \
+  pythondialog \
+  pyinotify \
+  requests

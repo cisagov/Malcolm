@@ -1,0 +1,8 @@
+- pipeline.id: input
+  path.config: "/usr/share/logstash/pipeline-input"
+
+- pipeline.id: main
+  path.config: "/usr/share/logstash/pipeline-main"
+
+- pipeline.id: output
+  path.config: "/usr/share/logstash/pipeline-output"

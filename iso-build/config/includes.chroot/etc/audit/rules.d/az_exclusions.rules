@@ -1,0 +1,6 @@
+-a always,exclude -F msgtype=AVC
+-a always,exclude -F msgtype=CWD
+-a always,exclude -F msgtype=EOE
+-a always,exclude -F msgtype=CRYPTO_KEY_USER
+
+

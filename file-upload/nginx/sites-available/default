@@ -1,0 +1,29 @@
+server {
+    listen 80 default_server;
+
+    sendfile on;
+    client_max_body_size 20G;
+
+    proxy_buffer_size 128k;
+    proxy_buffers 4 256k;
+    proxy_busy_buffers_size 256k;
+
+    root /var/www/upload;
+    index index.php index.html index.htm;
+
+    server_name upload.malcolm.local;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_read_timeout 300;
+        fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
