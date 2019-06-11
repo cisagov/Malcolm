@@ -94,7 +94,7 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 
 ### User interface
 
-A few minutes after starting Malcolm (probably 5-10 minutes for Logstash to be completely up, depenging on the system), the following services will be accessible:
+A few minutes after starting Malcolm (probably 5-10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
 * Moloch: [https://localhost](https://localhost)
 * Kibana: [https://localhost:5601](https://localhost:5601)
