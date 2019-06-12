@@ -125,6 +125,7 @@ services:
       - elasticsearch
     expose:
       - 3030
+      - 3333
     healthcheck:
         test: ["CMD", "curl", "-f", "http://localhost:3030"]
         interval: 30s

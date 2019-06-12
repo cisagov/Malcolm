@@ -1,4 +1,4 @@
-FROM bitsensor/elastalert:1.0.0
+FROM bitsensor/elastalert:2.0.0
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
