@@ -3,6 +3,7 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
+from __future__ import print_function
 import os
 from os.path import splitext
 import errno
@@ -94,14 +95,14 @@ def pruneFiles():
 
       if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
         # this is a closed file that is old, so delete it
-        print "removing old file \"{}\" ({}, used {} seconds ago)".format(file, fileType, lastUseTime)
+        print("removing old file \"{}\" ({}, used {} seconds ago)".format(file, fileType, lastUseTime))
         silentRemove(file)
 
   # clean up any broken symlinks in the current/ directory
   for current in os.listdir(currentDir):
     currentFileSpec = os.path.join(currentDir, current)
     if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
-      print "removing dead symlink \"{}\"".format(currentFileSpec)
+      print("removing dead symlink \"{}\"".format(currentFileSpec))
       silentRemove(currentFileSpec)
 
   # clean up any old and empty directories in processed/ directory
@@ -119,7 +120,7 @@ def pruneFiles():
     if (dirAge >= cleanDirSeconds):
       try:
         os.rmdir(dirToRm)
-        print "removed empty directory \"{}\" (used {} seconds ago)".format(dirToRm, dirAge)
+        print("removed empty directory \"{}\" (used {} seconds ago)".format(dirToRm, dirAge))
       except OSError:
         pass
 
