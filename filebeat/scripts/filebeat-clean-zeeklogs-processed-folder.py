@@ -6,6 +6,7 @@
 from __future__ import print_function
 import os
 from os.path import splitext
+from tempfile import gettempdir
 import errno
 import time
 import fcntl
@@ -16,7 +17,7 @@ import pprint
 import re
 from subprocess import Popen, PIPE
 
-lockFilename = '{}.lock'.format(splitext(__file__)[0])
+lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
 broDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/data/zeek/"), '')
 cleanLogSeconds = int(os.getenv('FILEBEAT_LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('FILEBEAT_ZIP_CLEANUP_MINUTES', "120")) * 60
@@ -95,14 +96,14 @@ def pruneFiles():
 
       if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
         # this is a closed file that is old, so delete it
-        print("removing old file \"{}\" ({}, used {} seconds ago)".format(file, fileType, lastUseTime))
+        print('removing old file "{}" ({}, used {} seconds ago)'.format(file, fileType, lastUseTime))
         silentRemove(file)
 
   # clean up any broken symlinks in the current/ directory
   for current in os.listdir(currentDir):
     currentFileSpec = os.path.join(currentDir, current)
     if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
-      print("removing dead symlink \"{}\"".format(currentFileSpec))
+      print('removing dead symlink "{}"'.format(currentFileSpec))
       silentRemove(currentFileSpec)
 
   # clean up any old and empty directories in processed/ directory
@@ -120,7 +121,7 @@ def pruneFiles():
     if (dirAge >= cleanDirSeconds):
       try:
         os.rmdir(dirToRm)
-        print("removed empty directory \"{}\" (used {} seconds ago)".format(dirToRm, dirAge))
+        print('removed empty directory "{}" (used {} seconds ago)'.format(dirToRm, dirAge))
       except OSError:
         pass
 
