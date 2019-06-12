@@ -49,6 +49,11 @@ import json
 from collections import defaultdict
 from ordered_set import OrderedSet
 
+try:
+  basestring
+except NameError:  # Python 3
+  basestring = str
+
 # lists of all known fields for each type of zeek log we're concerned with mapping (ordered as in the .log file header)
 # are stored in zeek-log-fields.json
 FIELDS_JSON_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "zeek-log-fields.json")
@@ -87,9 +92,9 @@ def main():
   # load from json canonical list of known zeek log fields we're concerned with mapping
   try:
     zeekLogFieldsTmp = json.load(open(FIELDS_JSON_FILE, 'r'))
-    if type(zeekLogFieldsTmp) is dict:
+    if isinstance(zeekLogFieldsTmp, dict):
       for logType, listOfFieldLists in zeekLogFieldsTmp.items():
-        if ((type(logType) is str) or (type(logType) is unicode)) and type(listOfFieldLists) is list:
+        if isinstance(logType, basestring) and isinstance(listOfFieldLists, list):
           zeekLogFields[str(logType)] = [OrderedSet(fieldList) for fieldList in listOfFieldLists]
         else:
           dataError = True
