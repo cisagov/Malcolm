@@ -25,8 +25,9 @@ doc_type: session
 timestamp_field: "@timestamp"
 timestamp_type: iso
 filter:
-  - term:
-      zeek.logType: "weird"
+ - query:
+      query_string:
+        query: "zeek.logType: weird"
 
 ######################################
 # Alert parameters
@@ -36,7 +37,7 @@ alert_subject: "weird-{}"
 alert_subject_args: ["zeek_weird.name"]
 
 alert_text_type: alert_text_only
-alert_text: "{0} [{1}]: {2}, {4}:{5} -> {6}:{7}"
+alert_text: "{0} [{1}]: {2}, {3}:{4} -> {5}:{6}"
 alert_text_args: ["@timestamp", "zeek.uid", "zeek_weird.name", "srcIp", "srcPort", "dstIp", "dstPort"]
 
 pipe_alert_text: true
