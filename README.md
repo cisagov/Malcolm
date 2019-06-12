@@ -776,6 +776,8 @@ The **Discover** view enables you to view events on a record-by-record basis (si
 
 Malcolm comes with dozens of prebuilt visualizations and dashboards for the network traffic represented by each of the Zeek log types. Click **Dashboard** to see a list of these dashboards. As is the case with all Kibana's visualizations, all of the charts, graphs, maps, and tables are interactive and can be clicked on to narrow or expand the scope of the data you are investigating. Similarly, click **Visualize** to explore the prebuilt visualizations used to build the dashboards.
 
+Many of Malcolm's prebuilt visualizations for Zeek logs are heavily inspired by the excellent [Kibana Dashboards](https://github.com/Security-Onion-Solutions/securityonion-elastic/tree/master/kibana/dashboards) that are part of [Security Onion](https://securityonion.net/).
+
 ##### <a name="PrebuiltVisualizationsGallery"></a>Screenshots
 
 ![The Connections dashboard displays information about the "top talkers" across all types of sessions](./docs/images/screenshots/kibana_connections.png)
