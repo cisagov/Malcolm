@@ -12,6 +12,7 @@ RUN apk update && \
 ADD elastalert/elastalert-start.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/elastalert-start.sh && \
+    mkdir -p /opt/elastalert/server_data/tests && \
     chown -R node:node /opt
 
 VOLUME ["/opt/elastalert/server_data"]
