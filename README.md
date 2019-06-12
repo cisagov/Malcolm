@@ -33,12 +33,15 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Running Malcolm](#Running)
     * [Configure authentication](#AuthSetup)
     * [Starting Malcolm](#Starting)
-    * [Monitoring a live Zeek instance](#LiveZeek)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
 * [Capture file and log archive upload](#Upload)
     - [Tagging](#Tagging)
-    - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek) 
+    - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek)
+* [Live analysis](#LiveAnalysis)
+    * [Capturing traffic on local network interfaces](#LocalPCAP)
+    * [Zeek logs from an external source](#ZeekForward)
+    * [Monitoring a local Zeek instance](#LiveZeek) 
 * [Moloch](#Moloch)
     * [Zeek log integration](#MolochZeek)
     * [Help](#MolochHelp)
@@ -353,6 +356,18 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `EXTRACTED_FILE_ENABLE_FRESHCLAM` – if set to `true`, ClamAV will periodically update virus databases
 
+* `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
+
+* `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
+
+* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (eg., `'enp0s25'` or `'enp10s0,enp11s0'`)
+
+* `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it closed for processing and a new PCAP file created 
+
+* `PCAP_ROTATE_MINUTES` – used to specify an time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
+
+* `PCAP_FILTER` – specifies a tcpdump-style filter expression for local packet capture; leave blank to capture all traffic
+
 #### <a name="HostSystemConfigLinux"></a>Linux host system configuration
 
 ##### Installing Docker
@@ -518,21 +533,6 @@ $ ./scripts/logs.sh
 ```
 You can also use `docker stats` to monitor the resource utilization of running containers.
 
-#### <a name="LiveZeek"></a>Monitoring a live Zeek instance
-
-If you are using Malcolm to analyze *live* Zeek logs (ie., when `bro` is listening on a network interface and actively writing to log files), replace `docker-compose.yml` with `docker-compose-zeek-live.yml` before starting:
-
-```
-$ mv -f ./docker-compose-zeek-live.yml ./docker-compose.yml
-```
-
-Then, run `bro` from inside of `./zeek-logs/current/` after starting Malcolm as described above.
-
-Alternately, you can run the `start.sh` script like this:
-```
-$ ./scripts/start.sh ./docker-compose-zeek-live.yml
-```
-
 ### <a name="StopAndRestart"></a>Stopping and restarting Malcolm
 
 You can run `./scripts/stop.sh` to stop the docker containers and remove their virtual network. Alternately, `./scripts/restart.sh` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
@@ -567,6 +567,70 @@ Tags may also be specified manually with the [browser-based upload form](#Upload
 ### <a name="UploadPCAPZeek"></a>Processing uploaded PCAPs with Zeek
 
 The browser-based upload interface also provides the ability to specify tags for events extracted from the files uploaded. Additionally, an **Analyze with Zeek** checkbox may be used when uploading PCAP files to cause them to be analyzed by Zeek, similarly to the `ZEEK_AUTO_ANALYZE_PCAP_FILES` environment variable [described above](#DockerComposeYml), only on a per-upload basis. Zeek can also automatically carve out files from file transfers; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details.
+
+## <a name="LiveAnalysis"></a>Live analysis
+
+### <a name="LocalPCAP"></a>Capturing traffic on local network interfaces
+
+Malcolm's `pcap-capture` container can capture traffic on one or more local network interfaces and periodically rotate these files for processing with Moloch and Zeek. The `pcap-capture` Docker container is started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) in order for it to be able to open network interfaces in promiscuous mode for capture.
+
+The environment variables prefixed with `PCAP_` in the [`docker-compose.yml`](#DockerComposeYml) file determine local packet capture behavior. Local capture can also be configured by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Should Malcolm capture network traffic to PCAP files?`."
+
+Note that currently Microsoft Windows and Apple macOS platforms run Docker inside of a virtualized environment. This would require additional configuration of virtual interfaces and port forwarding in Docker, the process for which is outside of the scope of this document.
+
+### <a name="ZeekForward"></a>Zeek logs from an external source
+
+Malcolm’s Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
+
+Configuring Filebeat to forward Zeek logs to Malcolm might look something like this example [`filebeat.yml`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html):
+```
+filebeat.inputs:
+- type: log
+  paths:
+    - /var/zeek/*.log
+  fields_under_root: true
+  fields:
+    type: "session"
+  compression_level: 0
+  exclude_lines: ['^\s*#']
+  scan_frequency: 10s
+  clean_inactive: 180m
+  ignore_older: 120m
+  close_inactive: 90m
+  close_renamed: true
+  close_removed: true
+  close_eof: false
+  clean_renamed: true
+  clean_removed: true
+
+output.logstash:
+  hosts: ["192.0.2.123:5044"]
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/foo/bar/ca.crt"]
+  ssl.certificate: "/foo/bar/client.crt"
+  ssl.key: "/foo/bar/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"
+```
+
+A future release of Malcolm is planned which will include a customized Linux-based network sensor appliance OS installation image to help automate this setup.
+
+### <a name="LiveZeek"></a>Monitoring a local Zeek instance
+
+Another option for analyzing live network data is to run an external copy of Zeek (ie., not within Malcolm) so that the log files it creates are seen by Malcolm and automatically processed as they are written.
+
+To do this, you'll need to configure Malcolm's local Filebeat log forwarder so that it will continue to look for changes to Zeek logs that are actively being written to even once it reaches the end of the file. You can do this by replacing `docker-compose.yml` with `docker-compose-zeek-live.yml` before starting Malcolm:
+
+```
+$ mv -f ./docker-compose-zeek-live.yml ./docker-compose.yml
+```
+
+Alternately, you can run the `start.sh` script (and the other control scripts) like this, without modifying your original `docker-compose.yml` file:
+```
+$ ./scripts/start.sh ./docker-compose-zeek-live.yml
+```
+
+Once Malcolm has been [started](#Starting), `cd` into `./zeek-logs/current/` and run `bro` from inside that directory.
 
 ## <a name="Moloch"></a>Moloch
 
