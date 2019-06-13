@@ -711,7 +711,7 @@ See also Moloch's usage documentation for more information on [SPIView](https://
 
 ### <a name="MolochSPIGraph"></a>SPIGraph
 
-Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **Graph** visualizes the occurence of some field's top *n* values over time, and (optionally) geographically. This is particularly useful for identifying trends in a particular type of communication over time: traffic using a particular protocol when seen sparsely at regular intervals on that protocol's date histogram in the SPIGraph may indicate a connection check, polling, or beaconing (for example, see the `llmnr` protocol in the screenshot below).
+Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **Graph** visualizes the occurrence of some field's top *n* values over time, and (optionally) geographically. This is particularly useful for identifying trends in a particular type of communication over time: traffic using a particular protocol when seen sparsely at regular intervals on that protocol's date histogram in the SPIGraph may indicate a connection check, polling, or beaconing (for example, see the `llmnr` protocol in the screenshot below).
 
 ![Moloch's SPIGraph](./docs/images/screenshots/moloch_spigraph.png)
 
@@ -969,7 +969,7 @@ Each non-comment line (not beginning with a `#`), defines an subnet-to-name mapp
 192.168.200.0/24|dmz|
 172.16.0.0/12|virtualized|testbed
 ```
-Each line consists of three `|`-separated fields: CIDR-formated subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
+Each line consists of three `|`-separated fields: CIDR-formatted subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
 As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`zeek.orig_h` and `zeek.resp_h`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `zeek.orig_segment` or `zeek.resp_segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
 
