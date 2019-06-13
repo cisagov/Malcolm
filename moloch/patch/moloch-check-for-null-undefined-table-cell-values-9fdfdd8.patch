@@ -1,0 +1,35 @@
+From 9fdfdd8bb8420c8faf64d8ec44eb05c97099ab3b Mon Sep 17 00:00:00 2001
+From: 31453 <elyse.rinne@verizonmedia.com>
+Date: Wed, 12 Jun 2019 16:39:06 -0400
+Subject: [PATCH] check for null/undefined table cell values
+
+fixes #1075
+---
+ viewer/vueapp/src/components/utils/Table.vue | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/viewer/vueapp/src/components/utils/Table.vue b/viewer/vueapp/src/components/utils/Table.vue
+index 38a55bab..cff86720 100644
+--- a/viewer/vueapp/src/components/utils/Table.vue
++++ b/viewer/vueapp/src/components/utils/Table.vue
+@@ -319,6 +319,7 @@ export default {
+           if (column.doStats) {
+             let totalValue = 0;
+             for (let item of this.data) {
++              if (!item[column.id || column.sort]) { continue; }
+               totalValue += parseInt(item[column.id || column.sort]);
+             }
+             this.totalValues[column.id] = totalValue;
+@@ -450,6 +451,9 @@ export default {
+ 
+       let itemClone = JSON.parse(JSON.stringify(item));
+       let value = itemClone[column.id];
++
++      if (!value) { return; }
++
+       if (this.zeroMap[column.id]) {
+         value = value - this.zeroMap[column.id][index];
+       }
+-- 
+2.20.1
+
