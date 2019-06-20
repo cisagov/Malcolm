@@ -457,9 +457,56 @@ class Installer(object):
       esMemory = '8g'
       lsMemory = '3g'
 
-    while not YesOrNo('Setting {} for ElasticSearch and {} for Logstash. Is this OK?'.format(esMemory, lsMemory), default=True):
-      esMemory = AskForString('Enter memory for ElasticSearch (eg., 16g, 9500m, etc.)')
+    while not YesOrNo('Setting {} for Elasticsearch and {} for Logstash. Is this OK?'.format(esMemory, lsMemory), default=True):
+      esMemory = AskForString('Enter memory for Elasticsearch (eg., 16g, 9500m, etc.)')
       lsMemory = AskForString('Enter memory for LogStash (eg., 4g, 2500m, etc.)')
+
+    curatorCloseUnits = 'years'
+    curatorCloseCount = '5'
+    if YesOrNo('Periodically close old Elasticsearch indices?', default=True):
+      while not YesOrNo('Indices older than {} {} will be periodically closed. Is this OK?'.format(curatorCloseCount, curatorCloseUnits), default=True):
+        while True:
+          curatorPeriod = AskForString('Enter index close threshold (eg., 90 days, 2 years, etc.)').lower().split()
+          if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
+            curatorPeriod[1] += 's'
+          if ((len(curatorPeriod) == 2) and
+              curatorPeriod[0].isnumeric() and
+              (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
+            curatorCloseUnits = curatorPeriod[1]
+            curatorCloseCount = curatorPeriod[0]
+            break
+    else:
+      curatorCloseUnits = 'years'
+      curatorCloseCount = '99'
+
+    curatorDeleteUnits = 'years'
+    curatorDeleteCount = '10'
+    if YesOrNo('Periodically delete old Elasticsearch indices?', default=True):
+      while not YesOrNo('Indices older than {} {} will be periodically deleted. Is this OK?'.format(curatorDeleteCount, curatorDeleteUnits), default=True):
+        while True:
+          curatorPeriod = AskForString('Enter index delete threshold (eg., 90 days, 2 years, etc.)').lower().split()
+          if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
+            curatorPeriod[1] += 's'
+          if ((len(curatorPeriod) == 2) and
+              curatorPeriod[0].isnumeric() and
+              (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
+            curatorDeleteUnits = curatorPeriod[1]
+            curatorDeleteCount = curatorPeriod[0]
+            break
+    else:
+      curatorDeleteUnits = 'years'
+      curatorDeleteCount = '99'
+
+    curatorDeleteOverGigs = '10000'
+    if YesOrNo('Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size?', default=True):
+      while not YesOrNo('Indices will be deleted when the database exceeds {} gigabytes. Is this OK?'.format(curatorDeleteOverGigs), default=True):
+        while True:
+          curatorSize = AskForString('Enter index threshold in gigabytes')
+          if (len(curatorSize) > 0) and curatorSize.isnumeric():
+            curatorDeleteOverGigs = curatorSize
+            break
+    else:
+      curatorDeleteOverGigs = '9000000'
 
     autoZeek = YesOrNo('Automatically analyze all PCAP files with Zeek?', default=False)
     reverseDns = YesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
@@ -571,6 +618,21 @@ class Installer(object):
           elif 'BEATS_SSL' in line:
             # enable/disable beats SSL
             line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if logstashOpen and logstashSsl else "'false'"), line)
+          elif 'CURATOR_CLOSE_COUNT' in line:
+            # set count for index curation close age
+            line = re.sub(r'(CURATOR_CLOSE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseCount), line)
+          elif 'CURATOR_CLOSE_UNITS' in line:
+            # set units for index curation close age
+            line = re.sub(r'(CURATOR_CLOSE_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseUnits), line)
+          elif 'CURATOR_DELETE_COUNT' in line:
+            # set count for index curation delete age
+            line = re.sub(r'(CURATOR_DELETE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorDeleteCount), line)
+          elif 'CURATOR_DELETE_UNITS' in line:
+            # set units for index curation delete age
+            line = re.sub(r'(CURATOR_DELETE_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorDeleteUnits), line)
+          elif 'CURATOR_DELETE_GIGS' in line:
+            # set size for index deletion threshold
+            line = re.sub(r'(CURATOR_DELETE_GIGS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorDeleteOverGigs), line)
           elif 'ES_EXTERNAL_HOSTS' in line:
             # enable/disable forwarding Logstash to external Elasticsearch instance
             line = re.sub(r'(#\s*)?(ES_EXTERNAL_HOSTS\s*:\s*)(\S+)', r"\g<2>'{}'".format(externalEsHost), line)

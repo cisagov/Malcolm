@@ -93,6 +93,7 @@ $ docker-compose pull
 Pulling elasticsearch ... done
 Pulling kibana        ... done
 Pulling elastalert    ... done
+Pulling curator       ... done
 Pulling logstash      ... done
 Pulling filebeat      ... done
 Pulling moloch        ... done
@@ -112,6 +113,7 @@ malcolmnetsec/pcap-capture                          1.2.1               xxxxxxxx
 malcolmnetsec/file-monitor                          1.2.1               xxxxxxxxxxxx        17 hours ago        353MB
 malcolmnetsec/moloch                                1.2.1               xxxxxxxxxxxx        17 hours ago        1.04GB
 malcolmnetsec/filebeat-oss                          1.2.1               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/curator                               1.2.1               xxxxxxxxxxxx        17 hours ago        303MB
 malcolmnetsec/logstash-oss                          1.2.1               xxxxxxxxxxxx        17 hours ago        1.14GB
 malcolmnetsec/elastalert                            1.2.1               xxxxxxxxxxxx        17 hours ago        268MB
 malcolmnetsec/kibana-oss                            1.2.1               xxxxxxxxxxxx        17 hours ago        850MB
@@ -172,6 +174,7 @@ Malcolm leverages the following excellent open source tools, among others.
 
 Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) results in the following subdirectories in your `malcolm/` working copy:
 
+* `curator` - code and configuration for the `curator` container which define rules for closing and/or deleting old Elasticsearch indices
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
 * `elastalert` - code and configuration for the `elastalert` container which provides an alerting framework for Elasticsearch
@@ -211,6 +214,7 @@ $ ./scripts/build.sh
 
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
+* `malcolmnetsec/curator` (based on `debian:buster-slim`)
 * `malcolmnetsec/elastalert` (based on `bitsensor/elastalert`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
@@ -1098,7 +1102,7 @@ user@host:~/Malcolm$ python3 scripts/install.py --configure
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
-Setting 10g for ElasticSearch and 3g for Logstash. Is this OK? (Y/n): y
+Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
 
 Automatically analyze all PCAP files with Zeek? (y/N): y
 
@@ -1162,7 +1166,6 @@ Pulling file-monitor  ... done
 Pulling pcap-capture  ... done
 Pulling upload        ... done
 Pulling nginx-proxy   ... done
-
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
