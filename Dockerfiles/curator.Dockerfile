@@ -31,7 +31,7 @@ ENV CURATOR_DELETE_GIGS $CURATOR_DELETE_GIGS
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV CURATOR_VERSION "5.7.6"
-ENV CRON "0 0 * * *"
+ENV CRON "15 */6 * * *"
 ENV CONFIG_FILE "/config/config_file.yml"
 ENV ACTION_FILE "/config/action_file.yml"
 ENV CURATOR_USER "curator"
