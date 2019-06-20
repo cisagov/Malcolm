@@ -67,6 +67,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [IP/MAC address to hostname mapping via `host-map.txt`](#HostNaming)
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
         + [Applying mapping changes](#ApplyMapping)
+    - [Elasticsearch index curation](#Curator)
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 18.04 LTS](#InstallationExample)
 * [Copyright](#Footer)
@@ -343,6 +344,12 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full SSL certificate validation; this may fail if using self-signed certificates (default `false`)
 
 * `KIBANA_OFFLINE_REGION_MAPS` – if set to `true`, a small internal server will be surfaced to Kibana to provide the ability to view region map visualizations even when an Internet connection is not available (default `true`)
+
+* `CURATOR_CLOSE_COUNT` and `CURATOR_CLOSE_UNITS` - determine behavior for automatically closing older Elasticsearch indices to conserve memory; see [Elasticsearch index curation](#Curator)
+
+* `CURATOR_DELETE_COUNT` and `CURATOR_DELETE_UNITS` - determine behavior for automatically deleting older Elasticsearch indices to reduce disk usage; see [Elasticsearch index curation](#Curator)
+
+* `CURATOR_DELETE_GIGS` - if the Elasticsearch indices representing the log data exceed this size, in gigabytes, older indices will be deleted to bring the total size back under this threshold; see [Elasticsearch index curation](#Curator)
 
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Moloch sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
 
@@ -986,7 +993,33 @@ If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if t
 #### <a name="ApplyMapping"></a>Applying mapping changes
 When changes are made to either `cidr-map.txt` or `host-map.txt`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart.sh` (see [Stopping and restarting Malcolm](#StopAndRestart)).
 
-## <a name="Issues"></a>Known Issues
+## <a name="Curator"></a>Elasticsearch index curation
+
+Malcolm uses [Elasticsearch Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/about.html) to periodically examine indices representing the log data and perform actions on indices meeting criteria for age or disk usage. The environment variables prefixed with `CURATOR_` in the [`docker-compose.yml`](#DockerComposeYml) file determine the criteria for the following actions:
+
+* [close](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/close.html) indices [older than a specificed age](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_age.html) in order to reduce RAM utilization
+* [delete](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/delete_indices.html) indices [older than a specificed age](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_age.html) in order to reduce disk usage
+* [delete](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/delete_indices.html) the oldest indices in order to keep the total [database size under a specified threshold](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_space.html)
+
+This behavior can also be modified by running [`./scripts/install.py --configure`](#ConfigAndTuning).
+
+Future development of Malcolm may include additional actions, such as creating index [snapshots](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/snapshot.html).
+
+Other custom [filters](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filters.html) and [actions](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html) may be defined by the user by manually modifying the `action_file.yml` file used by the `curator` container and ensuring that it is mounted into the container as a volume in the `curator:` section of your `docker-compose.yml` file:
+
+```
+  curator:
+…
+    volumes:
+      - ./curator/config/action_file.yml:/config/action_file.yml
+…
+```
+
+The settings governing index curation can affect Malcolm's performance in both log ingestion and queries, and there are caveats that should be taken into consideration when configuring this feature. Please read the Elasticsearch documentation linked in this section with regards to index curation.
+
+Index curation only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Moloch to prune old PCAP files based on available disk space.
+
+## <a name="Issues"></a>Known issues
 
 ### PCAP file export error when Zeek logs are in Moloch search results
 
@@ -1103,6 +1136,30 @@ user@host:~/Malcolm$ python3 scripts/install.py --configure
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
 Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
+
+Periodically close old Elasticsearch indices? (Y/n): y
+
+Indices older than 5 years will be periodically closed. Is this OK? (Y/n): n
+
+Enter index close threshold (eg., 90 days, 2 years, etc.): 1 years
+
+Indices older than 1 years will be periodically closed. Is this OK? (Y/n): y
+
+Periodically delete old Elasticsearch indices? (Y/n): y
+
+Indices older than 10 years will be periodically deleted. Is this OK? (Y/n): n
+
+Enter index delete threshold (eg., 90 days, 2 years, etc.): 5 years
+
+Indices older than 5 years will be periodically deleted. Is this OK? (Y/n): y
+
+Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size? (Y/n): y
+
+Indices will be deleted when the database exceeds 10000 gigabytes. Is this OK? (Y/n): n
+
+Enter index threshold in gigabytes: 100
+
+Indices will be deleted when the database exceeds 100 gigabytes. Is this OK? (Y/n): y
 
 Automatically analyze all PCAP files with Zeek? (y/N): y
 
@@ -1221,16 +1278,16 @@ malcolm_upload_1          /docker-entrypoint.sh /usr ...   Up                   
 
 Attaching to malcolm_nginx-proxy_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_elastalert_1, malcolm_moloch_1, malcolm_elasticsearch_1, malcolm_file-monitor_1$
  malcolm_pcap-capture_1
-...
+…
 ```
 
 It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 5 to 10 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
 ```
-...
+…
 logstash_1  | [2019-06-11T15:45:41,938][INFO ][logstash.pipeline ] Pipeline started successfully {:pipeline_id=>"main", :thread=>"#<Thread:0x7a5910 sleep>"}
 logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>3, :running_pipelines=>[:input, :main, :output], :non_running_pipelines=>[]}
 logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
-...
+…
 ```
 
 You can now open a web browser and navigate to one of the [Malcolm user interfaces](#UserInterfaceURLs).
