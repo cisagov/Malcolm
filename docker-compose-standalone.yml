@@ -137,7 +137,7 @@ services:
       - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
       - ./elastalert/rules/:/opt/elastalert/rules/
   curator:
-    image: malcolmnetsec/curator:1.2.0
+    image: malcolmnetsec/curator:1.2.1
     hostname: curator
     environment:
       << : *curator-variables

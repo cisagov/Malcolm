@@ -19,7 +19,7 @@ actions:
     - filtertype: age
       source: name
       direction: older
-      timestring: '%Y%m%d'
+      timestring: '%y%m%d'
       unit: ${CURATOR_CLOSE_UNITS:years}
       unit_count: ${CURATOR_CLOSE_COUNT:1}
       exclude:
@@ -43,7 +43,7 @@ actions:
     - filtertype: age
       source: name
       direction: older
-      timestring: '%Y%m%d'
+      timestring: '%y%m%d'
       unit: ${CURATOR_DELETE_UNITS:years}
       unit_count: ${CURATOR_DELETE_COUNT:99}
       exclude:
@@ -68,5 +68,5 @@ actions:
       disk_space: ${CURATOR_DELETE_GIGS:1000000}
       use_age: True
       source: name
-      timestring: '%Y%m%d'
+      timestring: '%y%m%d'
       exclude:

@@ -146,7 +146,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.2.0
+    image: malcolmnetsec/curator:1.2.1
     hostname: curator
     environment:
       << : *curator-variables
