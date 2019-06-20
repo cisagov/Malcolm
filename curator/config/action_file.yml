@@ -2,7 +2,7 @@ actions:
   1:
     action: close
     description: >-
-       Close indices older than ${CURATOR_CLOSE_COUNT:1} ${CURATOR_CLOSE_UNITS:years}
+       Close indices older than ${CURATOR_CLOSE_COUNT:5} ${CURATOR_CLOSE_UNITS:years}
        (based on index name), for sessions2-prefixed indices, to conserve memory.
        Ignore the error if the filter does not result in an actionable list of indices
        (ignore_empty_list) and exit cleanly.
@@ -21,7 +21,7 @@ actions:
       direction: older
       timestring: '%y%m%d'
       unit: ${CURATOR_CLOSE_UNITS:years}
-      unit_count: ${CURATOR_CLOSE_COUNT:1}
+      unit_count: ${CURATOR_CLOSE_COUNT:5}
       exclude:
   2:
     action: delete_indices
