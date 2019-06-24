@@ -108,16 +108,16 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.2.1               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.2.1               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.2.1               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.2.1               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/moloch                                1.2.1               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.2.1               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/curator                               1.2.1               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/logstash-oss                          1.2.1               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.2.1               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.2.1               xxxxxxxxxxxx        17 hours ago        850MB
+malcolmnetsec/nginx-proxy                           1.2.2               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.2.2               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.2.2               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.2.2               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/moloch                                1.2.2               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/curator                               1.2.2               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/logstash-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.2.2               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.2.2               xxxxxxxxxxxx        17 hours ago        850MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
@@ -1216,6 +1216,7 @@ user@host:~/Malcolm$ docker-compose pull
 Pulling elasticsearch ... done
 Pulling kibana        ... done
 Pulling elastalert    ... done
+Pulling curator       ... done
 Pulling logstash      ... done
 Pulling filebeat      ... done
 Pulling moloch        ... done
@@ -1226,15 +1227,16 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.2.1               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.2.1               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.2.1               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.2.1               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/moloch                                1.2.1               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.2.1               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/logstash-oss                          1.2.1               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.2.1               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.2.1               xxxxxxxxxxxx        17 hours ago        850MB
+malcolmnetsec/nginx-proxy                           1.2.2               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.2.2               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.2.2               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.2.2               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/curator                               1.2.2               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/moloch                                1.2.2               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/logstash-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.2.2               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.2.2               xxxxxxxxxxxx        17 hours ago        850MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
