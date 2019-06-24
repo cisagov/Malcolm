@@ -30,7 +30,7 @@ x-kibana-variables: &kibana-variables
 x-curator-variables: &curator-variables
   # for managing automatic closing of older Elasticsearch indices (to conserve memory)
   CURATOR_CLOSE_UNITS : years
-  CURATOR_CLOSE_COUNT : 5
+  CURATOR_CLOSE_COUNT : 10
   # for managing automatic deleting of older Elasticsearch indices (to reduce disk consumption)
   CURATOR_DELETE_UNITS : years
   CURATOR_DELETE_COUNT : 99
