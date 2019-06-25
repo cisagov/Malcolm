@@ -138,6 +138,8 @@ def str2bool(v):
 ###################################################################################################
 # determine if a program/script exists and is executable in the system path
 def Which(cmd):
+  global args
+
   result = any(os.access(os.path.join(path, cmd), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
   if args.debug:
     eprint("Which {} returned {}".format(cmd, result))
@@ -155,6 +157,8 @@ def SizeHumanFormat(num, suffix='B'):
 ###################################################################################################
 # download to file
 def DownloadToFile(url, local_filename):
+  global args
+
   r = requests.get(url, stream=True, allow_redirects=True)
   with open(local_filename, 'wb') as f:
     for chunk in r.iter_content(chunk_size=1024):
@@ -425,9 +429,17 @@ class Installer(object):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def tweak_malcolm_runtime(self, malcolm_install_path, expose_logstash_default=False):
+    global args
 
-    # get a list of all of the docker-compose files
-    composeFiles = glob.glob(os.path.join(malcolm_install_path, 'docker-compose*.yml'))
+    if not args.configFile:
+      # get a list of all of the docker-compose files
+      composeFiles = glob.glob(os.path.join(malcolm_install_path, 'docker-compose*.yml'))
+
+    elif os.path.isfile(args.configFile):
+      # single docker-compose file explicitly specified
+      composeFiles = [os.path.realpath(args.configFile)]
+      malcolm_install_path = os.path.dirname(composeFiles[0])
+
     if self.debug:
       eprint("{} contains {}, system memory is {} GiB".format(malcolm_install_path, composeFiles, self.totalMemoryGigs))
 
@@ -1306,6 +1318,7 @@ def main():
   parser.add_argument('-m', '--malcolm-file', required=False, dest='mfile', metavar='<STR>', type=str, default='', help='Malcolm .tar.gz file for installation')
   parser.add_argument('-i', '--image-file', required=False, dest='ifile', metavar='<STR>', type=str, default='', help='Malcolm docker images .tar.gz file for installation')
   parser.add_argument('-c', '--configure', dest='configOnly', type=str2bool, nargs='?', const=True, default=False, help="Only do configuration (not installation)")
+  parser.add_argument('-f', '--configure-file', required=False, dest='configFile', metavar='<STR>', type=str, default='', help='Single docker-compose YML file to configure')
   parser.add_argument('-d', '--defaults', dest='acceptDefaults', type=str2bool, nargs='?', const=True, default=False, help="Accept defaults to prompts without user interaction")
   parser.add_argument('-l', '--logstash-expose', dest='exposeLogstash', type=str2bool, nargs='?', const=True, default=False, help="Configure to expose Logstash port to external hosts")
   try:
@@ -1373,10 +1386,13 @@ def main():
   if (not args.configOnly) and hasattr(installer, 'install_docker_compose'): success = installer.install_docker_compose()
   if hasattr(installer, 'tweak_system_files'): success = installer.tweak_system_files()
   if (not args.configOnly) and hasattr(installer, 'install_docker_images'): success = installer.install_docker_images(imageFile)
-  if args.configOnly:
-    for testPath in [origPath, scriptPath, os.path.realpath(os.path.join(scriptPath, ".."))]:
-      if os.path.isfile(os.path.join(testPath, "docker-compose.yml")):
-        installPath = testPath
+  if args.configOnly or (args.configFile and os.path.isfile(args.configFile)):
+    if not args.configFile:
+      for testPath in [origPath, scriptPath, os.path.realpath(os.path.join(scriptPath, ".."))]:
+        if os.path.isfile(os.path.join(testPath, "docker-compose.yml")):
+          installPath = testPath
+    else:
+      installPath = os.path.dirname(os.path.realpath(args.configFile))
     success = (installPath is not None) and os.path.isdir(installPath)
     if args.debug:
       eprint("Malcolm installation detected at {}".format(installPath))
