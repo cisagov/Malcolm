@@ -27,7 +27,7 @@ from subprocess import (PIPE, STDOUT, Popen, CalledProcessError)
 from collections import defaultdict, namedtuple
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION="1.23.2"
+DOCKER_COMPOSE_INSTALL_VERSION="1.24.0"
 
 PLATFORM_WINDOWS = "Windows"
 PLATFORM_MAC = "Darwin"
@@ -585,8 +585,32 @@ class Installer(object):
       origUid, origGuid = composeFileStat[4], composeFileStat[5]
       composeFileHandle = fileinput.FileInput(composeFile, inplace=True, backup=None)
       try:
+        servicesSectionFound = False
+        serviceIndent = None
+        currentService = None
+
         for line in composeFileHandle:
           line = line.rstrip("\n")
+          skipLine = False
+
+          # it would be cleaner to use something like PyYAML to do this, but I want to have as few dependencies
+          # as possible so we're going to do it janky instead
+
+          # determine indentation for each service section (assumes YML file is consistently indented)
+          if (not servicesSectionFound) and line.lower().startswith('services:'):
+            servicesSectionFound = True
+          elif servicesSectionFound and (serviceIndent is None):
+            indentMatch = re.search(r'^(\s+)\S+\s*:\s*$', line)
+            if indentMatch is not None:
+              serviceIndent = indentMatch.group(1)
+
+          # determine which service we're currently processing in the YML file
+          serviceStartLine = False
+          if servicesSectionFound and (serviceIndent is not None):
+            serviceMatch = re.search(r'^{}(\S+)\s*:\s*$'.format(serviceIndent), line)
+            if serviceMatch is not None:
+              currentService = serviceMatch.group(1).lower()
+              serviceStartLine = True
 
           if 'ZEEK_EXTRACTOR_MODE' in line:
             # zeek file extraction mode
@@ -659,16 +683,18 @@ class Installer(object):
             leadingSpaces = len(line) - len(line.lstrip())
             if leadingSpaces <= 0: leadingSpaces = 2
             line = "{}{}".format(' ' * leadingSpaces, line.lstrip().lstrip('#').lstrip())
-          elif logstashOpen and re.match(r'^\s+logstash\s*:\s*$', line):
+          elif logstashOpen and serviceStartLine and (currentService == 'logstash'):
             # exposing logstash port 5044 to the world
             print(line)
-            leadingSpaces = len(line) - len(line.lstrip())
-            if leadingSpaces <= 0: leadingSpaces = 2
-            line = "{}ports:".format(' ' * (leadingSpaces*2))
+            line = "{}ports:".format(serviceIndent * 2)
             print(line)
-            line = "{}- 0.0.0.0:5044:5044".format(' ' * (leadingSpaces*3))
+            line = "{}- 0.0.0.0:5044:5044".format(serviceIndent * 3)
+          elif (not serviceStartLine) and (currentService == 'logstash') and re.match(r'^({}ports:|{}-.*5044:5044)\s*$'.format(serviceIndent * 2, serviceIndent * 3), line):
+            # remove previous/leftover/duplicate exposing logstash port 5044 to the world
+            skipLine = True
 
-          print(line)
+          if not skipLine: print(line)
+
       finally:
         composeFileHandle.close()
         # restore ownership
