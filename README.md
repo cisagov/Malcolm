@@ -108,17 +108,17 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.2.2               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.2.2               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.2.2               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.2.2               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/moloch                                1.2.2               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/curator                               1.2.2               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/logstash-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.2.2               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.2.2               xxxxxxxxxxxx        17 hours ago        850MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
+malcolmnetsec/nginx-proxy                           1.2.3               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.2.3               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.2.3               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.2.3               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/moloch                                1.2.3               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.2.3               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/curator                               1.2.3               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/logstash-oss                          1.2.3               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.2.3               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.2.3               xxxxxxxxxxxx        17 hours ago        850MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -1227,17 +1227,17 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.2.2               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.2.2               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.2.2               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.2.2               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/curator                               1.2.2               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/moloch                                1.2.2               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/logstash-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.2.2               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.2.2               xxxxxxxxxxxx        17 hours ago        850MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
+malcolmnetsec/nginx-proxy                           1.2.3               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.2.3               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.2.3               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.2.3               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/curator                               1.2.3               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/moloch                                1.2.3               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.2.3               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/logstash-oss                          1.2.3               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.2.3               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.2.3               xxxxxxxxxxxx        17 hours ago        850MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

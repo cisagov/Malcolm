@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BEATS_VER="6.8.0"
+BEATS_VER="6.8.1"
 FILEBEAT_URL="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-$BEATS_VER-amd64.deb"
 METRICBEAT_URL="https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-$BEATS_VER-amd64.deb"
 AUDITBEAT_URL="https://artifacts.elastic.co/downloads/beats/auditbeat/auditbeat-$BEATS_VER-amd64.deb"

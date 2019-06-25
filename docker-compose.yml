@@ -66,7 +66,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.0
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.1
     hostname: elasticsearch
     environment:
       bootstrap.memory_lock : 'true'
@@ -95,7 +95,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.2.2
+    image: malcolmnetsec/kibana-oss:1.2.3
     hostname: kibana
     environment:
       << : *kibana-variables
@@ -120,7 +120,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.2.2
+    image: malcolmnetsec/elastalert:1.2.3
     hostname: elastalert
     environment:
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
@@ -146,7 +146,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.2.2
+    image: malcolmnetsec/curator:1.2.3
     hostname: curator
     environment:
       << : *curator-variables
@@ -160,7 +160,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.2.2
+    image: malcolmnetsec/logstash-oss:1.2.3
     hostname: logstash
     environment:
       << : *logstash-variables
@@ -197,7 +197,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.2.2
+    image: malcolmnetsec/filebeat-oss:1.2.3
     hostname: filebeat
     environment:
       << : *common-upload-variables
@@ -225,7 +225,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.2.2
+    image: malcolmnetsec/moloch:1.2.3
     hostname: moloch
     env_file:
       - ./auth.env
@@ -263,7 +263,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.2.2
+    image: malcolmnetsec/file-monitor:1.2.3
     hostname: filemon
     environment:
       << : *zeek-file-extraction-variables
@@ -276,7 +276,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.2.2
+    image: malcolmnetsec/pcap-capture:1.2.3
     network_mode: host
     ulimits:
       memlock:
@@ -295,7 +295,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.2.2
+    image: malcolmnetsec/file-upload:1.2.3
     hostname: upload
     env_file:
       - ./auth.env
@@ -314,7 +314,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.2.2
+    image: malcolmnetsec/nginx-proxy:1.2.3
     hostname: nginx-proxy
     depends_on:
       - moloch

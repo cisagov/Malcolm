@@ -1,5 +1,5 @@
 {
-  "version": "6.8.0",
+  "version": "6.8.1",
   "objects": [
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
@@ -118,7 +118,7 @@
         "title": "Signatures",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"gridData\":{\"h\":56,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":8,\"i\":\"9\",\"w\":32,\"x\":16,\"y\":0},\"id\":\"0927a2fa-f94e-4f68-a23b-5054ed2e171a\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"10\",\"w\":8,\"x\":8,\"y\":0},\"id\":\"8356c570-523f-11e9-a30e-e3576242f3ed\",\"panelIndex\":\"10\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":48,\"i\":\"11\",\"w\":40,\"x\":8,\"y\":32},\"id\":\"34dd33c0-523f-11e9-a30e-e3576242f3ed\",\"panelIndex\":\"11\",\"type\":\"search\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"12\",\"w\":20,\"x\":8,\"y\":8},\"id\":\"0e9b1a00-525e-11e9-9bd7-13d6d1bafa75\",\"panelIndex\":\"12\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"13\",\"w\":20,\"x\":28,\"y\":8},\"id\":\"39073d50-525e-11e9-9bd7-13d6d1bafa75\",\"panelIndex\":\"13\",\"type\":\"visualization\",\"version\":\"6.8.0\"}]",
+        "panelsJSON": "[{\"gridData\":{\"h\":56,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.8.1\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":8,\"i\":\"9\",\"w\":32,\"x\":16,\"y\":0},\"id\":\"0927a2fa-f94e-4f68-a23b-5054ed2e171a\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"6.8.1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"10\",\"w\":8,\"x\":8,\"y\":0},\"id\":\"8356c570-523f-11e9-a30e-e3576242f3ed\",\"panelIndex\":\"10\",\"type\":\"visualization\",\"version\":\"6.8.1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":48,\"i\":\"11\",\"w\":40,\"x\":8,\"y\":32},\"id\":\"34dd33c0-523f-11e9-a30e-e3576242f3ed\",\"panelIndex\":\"11\",\"type\":\"search\",\"version\":\"6.8.1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"12\",\"w\":20,\"x\":8,\"y\":8},\"id\":\"0e9b1a00-525e-11e9-9bd7-13d6d1bafa75\",\"panelIndex\":\"12\",\"type\":\"visualization\",\"version\":\"6.8.1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"13\",\"w\":20,\"x\":28,\"y\":8},\"id\":\"39073d50-525e-11e9-9bd7-13d6d1bafa75\",\"panelIndex\":\"13\",\"type\":\"visualization\",\"version\":\"6.8.1\"}]",
         "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

@@ -1,5 +1,5 @@
 {
-  "version": "6.8.0",
+  "version": "6.8.1",
   "objects": [
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
@@ -70,7 +70,7 @@
         "title": "Connections - Source - Responder Bytes (region map)",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":44,\"i\":\"2\"},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":40,\"i\":\"3\"},\"version\":\"6.8.0\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"id\":\"18420e50-3f95-11e9-a58e-8bdedb0915e8\",\"embeddableConfig\":{\"mapCenter\":[0,0],\"mapZoom\":3}}]",
+        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":44,\"i\":\"2\"},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.8.1\"},{\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":40,\"i\":\"3\"},\"version\":\"6.8.1\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"id\":\"18420e50-3f95-11e9-a58e-8bdedb0915e8\",\"embeddableConfig\":{\"mapCenter\":[0,0],\"mapZoom\":3}}]",
         "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
