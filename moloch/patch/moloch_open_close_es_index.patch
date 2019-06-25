@@ -1,0 +1,126 @@
+diff --git a/viewer/db.js b/viewer/db.js
+index 459220a8..155be6af 100644
+--- a/viewer/db.js
++++ b/viewer/db.js
+@@ -300,6 +300,28 @@ exports.optimizeIndex = function (index, options, cb) {
+   return internals.elasticSearchClient.indices.forcemerge(params, cb);
+ };
+ 
++// This API does not call fixIndex
++exports.closeIndex = function (index, options, cb) {
++  if (!cb) {
++    cb = options;
++    options = undefined;
++  }
++  var params = {index: index};
++  exports.merge(params, options);
++  return internals.elasticSearchClient.indices.close(params, cb);
++};
++
++// This API does not call fixIndex
++exports.openIndex = function (index, options, cb) {
++  if (!cb) {
++    cb = options;
++    options = undefined;
++  }
++  var params = {index: index};
++  exports.merge(params, options);
++  return internals.elasticSearchClient.indices.open(params, cb);
++};
++
+ exports.indexStats = function(index, cb) {
+   return internals.elasticSearchClient.indices.stats({index: fixIndex(index)}, cb);
+ };
+diff --git a/viewer/viewer.js b/viewer/viewer.js
+index 7ac1530e..2aebf7b1 100644
+--- a/viewer/viewer.js
++++ b/viewer/viewer.js
+@@ -3279,7 +3279,7 @@ app.post('/esindices/:index/optimize', logAction(), checkCookieToken, function(r
+   if (!req.user.createEnabled) { return res.molochError(403, 'Need admin privileges'); }
+ 
+   if (!req.params.index) {
+-    return res.molochError(403, 'Missing index to delete');
++    return res.molochError(403, 'Missing index to optimize');
+   }
+ 
+   Db.optimizeIndex([req.params.index], {}, (err, result) => {
+@@ -3292,6 +3292,39 @@ app.post('/esindices/:index/optimize', logAction(), checkCookieToken, function(r
+   return res.send(JSON.stringify({ success: true, text: {} }));
+ });
+ 
++app.post('/esindices/:index/close', logAction(), checkCookieToken, function(req, res) {
++  if (!req.user.createEnabled) { return res.molochError(403, 'Need admin privileges'); }
++
++  if (!req.params.index) {
++    return res.molochError(403, 'Missing index to close');
++  }
++
++  Db.closeIndex([req.params.index], {}, (err, result) => {
++    if (err) {
++      res.status(404);
++      return res.send(JSON.stringify({ success:false, text:'Error closing index' }));
++    }
++    return res.send(JSON.stringify({ success: true, text: result }));
++  });
++});
++
++app.post('/esindices/:index/open', logAction(), checkCookieToken, function(req, res) {
++  if (!req.user.createEnabled) { return res.molochError(403, 'Need admin privileges'); }
++
++  if (!req.params.index) {
++    return res.molochError(403, 'Missing index to open');
++  }
++
++  Db.openIndex([req.params.index], {}, (err, result) => {
++    if (err) {
++      console.log ("ERROR -", req.params.index, "open failed", err);
++    }
++  });
++
++  // Always return right away, openIndex might block
++  return res.send(JSON.stringify({ success: true, text: {} }));
++});
++
+ app.get('/estask/list', recordResponseTime, function(req, res) {
+   if (req.user.hideStats) { return res.molochError(403, 'Need permission to view stats'); }
+ 
+diff --git a/viewer/vueapp/src/components/stats/EsIndices.vue b/viewer/vueapp/src/components/stats/EsIndices.vue
+index 038968d1..0c473589 100644
+--- a/viewer/vueapp/src/components/stats/EsIndices.vue
++++ b/viewer/vueapp/src/components/stats/EsIndices.vue
+@@ -45,6 +45,14 @@
+               @click="optimizeIndex(item.index)">
+               Optimize Index {{ item.index }}
+             </b-dropdown-item>
++            <b-dropdown-item
++              @click="closeIndex(item.index)">
++              Close Index {{ item.index }}
++            </b-dropdown-item>
++            <b-dropdown-item
++              @click="openIndex(item.index)">
++              Open Index {{ item.index }}
++            </b-dropdown-item>
+           </b-dropdown>
+         </template>
+       </moloch-table>
+@@ -182,6 +190,20 @@ export default {
+           this.$emit('errored', error.text || error);
+         });
+     },
++    closeIndex (indexName) {
++      this.$http.post(`esindices/${indexName}/close`)
++        .then((response) => {
++        }, (error) => {
++          this.$emit('errored', error.text || error);
++        });
++    },
++    openIndex (indexName) {
++      this.$http.post(`esindices/${indexName}/open`)
++        .then((response) => {
++        }, (error) => {
++          this.$emit('errored', error.text || error);
++        });
++    },
+     /* helper functions ------------------------------------------ */
+     setRequestInterval: function () {
+       reqPromise = setInterval(() => {

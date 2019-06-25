@@ -1,9 +1,11 @@
 #!/bin/bash
 
+unset FORCE_PROVISION
 DOCKER_IMAGES_TGZ=""
-while getopts s:d: opts; do
+while getopts fd: opts; do
    case ${opts} in
       d) DOCKER_IMAGES_TGZ=${OPTARG} ;;
+      f) FORCE_PROVISION=0 ;;
    esac
 done
 
@@ -30,6 +32,12 @@ function vm_execute() {
 pushd "$SCRIPT_PATH"/vagrant
 
 VM_NAME="$(grep "config.vm.box" Vagrantfile | tr -d "[:space:]" | sed "s/.*=//")"
+
+if [[ -n $FORCE_PROVISION ]]; then
+  echo "Destroying build machine to force provisioning..." >&2
+  vagrant destroy -f
+  sleep 1
+fi
 
 # make sure the VM is up and running, or start it otherwise
 if ! vm_is_running; then
