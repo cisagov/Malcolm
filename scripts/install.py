@@ -500,7 +500,7 @@ class Installer(object):
 
     curatorCloseUnits = 'years'
     curatorCloseCount = '5'
-    if YesOrNo('Periodically close old Elasticsearch indices?', default=True):
+    if YesOrNo('Periodically close old Elasticsearch indices?', default=False):
       while not YesOrNo('Indices older than {} {} will be periodically closed. Is this OK?'.format(curatorCloseCount, curatorCloseUnits), default=True):
         while True:
           curatorPeriod = AskForString('Enter index close threshold (eg., 90 days, 2 years, etc.)').lower().split()
@@ -518,7 +518,7 @@ class Installer(object):
 
     curatorDeleteUnits = 'years'
     curatorDeleteCount = '10'
-    if YesOrNo('Periodically delete old Elasticsearch indices?', default=True):
+    if YesOrNo('Periodically delete old Elasticsearch indices?', default=False):
       while not YesOrNo('Indices older than {} {} will be periodically deleted. Is this OK?'.format(curatorDeleteCount, curatorDeleteUnits), default=True):
         while True:
           curatorPeriod = AskForString('Enter index delete threshold (eg., 90 days, 2 years, etc.)').lower().split()
@@ -535,7 +535,7 @@ class Installer(object):
       curatorDeleteCount = '99'
 
     curatorDeleteOverGigs = '10000'
-    if YesOrNo('Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size?', default=True):
+    if YesOrNo('Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size?', default=False):
       while not YesOrNo('Indices will be deleted when the database exceeds {} gigabytes. Is this OK?'.format(curatorDeleteOverGigs), default=True):
         while True:
           curatorSize = AskForString('Enter index threshold in gigabytes')
@@ -545,7 +545,7 @@ class Installer(object):
     else:
       curatorDeleteOverGigs = '9000000'
 
-    autoZeek = YesOrNo('Automatically analyze all PCAP files with Zeek?', default=False)
+    autoZeek = YesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
     reverseDns = YesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
     autoOui = YesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
     logstashOpen = YesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
@@ -564,6 +564,7 @@ class Installer(object):
     allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
     allowedFilePreserveModes = ('quarantined', 'all', 'none')
 
+    fileCarveModeUser = None
     fileCarveMode = None
     filePreserveMode = None
     vtotApiKey = '0'
@@ -575,20 +576,18 @@ class Installer(object):
         fileCarveMode = AskForString('Select file extraction behavior {}'.format(allowedFileCarveModes), default=allowedFileCarveModes[0])
       while filePreserveMode not in allowedFilePreserveModes:
         filePreserveMode = AskForString('Select file preservation behavior {}'.format(allowedFilePreserveModes), default=allowedFilePreserveModes[0])
+      if fileCarveMode is not None:
+        if YesOrNo('Scan extracted files with ClamAV?', default=False):
+          clamAvScan = True
+          clamAvUpdate = YesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
+        elif YesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
+          while (len(vtotApiKey) <= 1):
+            vtotApiKey = AskForString('Enter VirusTotal API key')
 
     if fileCarveMode not in allowedFileCarveModes:
       fileCarveMode = allowedFileCarveModes[0]
     if filePreserveMode not in allowedFileCarveModes:
       filePreserveMode = allowedFilePreserveModes[0]
-
-    if fileCarveMode is not None:
-      if YesOrNo('Scan extracted files with ClamAV?', default=False):
-        clamAvScan = True
-        clamAvUpdate = YesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
-      elif YesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
-        while (len(vtotApiKey) <= 1):
-          vtotApiKey = AskForString('Enter VirusTotal API key')
-
     if (vtotApiKey is None) or (len(vtotApiKey) <= 1):
       vtotApiKey = '0'
 
@@ -685,9 +684,11 @@ class Installer(object):
           elif 'CURATOR_SNAPSHOT_UNITS' in line:
             # set units for index curation snapshot age
             line = re.sub(r'(CURATOR_SNAPSHOT_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorSnapshotUnits), line)
-          elif os.path.isdir(curatorSnapshotDir) and (currentService == 'elasticsearch') and 'path.repo' in line:
+          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and os.path.isdir(curatorSnapshotDir):
             # elasticsearch backup directory
-            line = re.sub(r'(path.repo\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorSnapshotDir), line)
+            volumeParts = line.strip().lstrip('-').lstrip().split(':')
+            volumeParts[0] = curatorSnapshotDir
+            line = "{}- {}".format(serviceIndent * 3, ':'.join(volumeParts))
           elif 'CURATOR_CLOSE_COUNT' in line:
             # set count for index curation close age
             line = re.sub(r'(CURATOR_CLOSE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseCount), line)
@@ -715,7 +716,7 @@ class Installer(object):
           elif (len(externalEsHost) > 0) and re.match(r'^\s*#.+:/usr/share/logstash/config/logstash.keystore(:r[ow])?\s*$', line):
             # make sure logstash.keystore is shared (volume mapping is not commented out)
             leadingSpaces = len(line) - len(line.lstrip())
-            if leadingSpaces <= 0: leadingSpaces = 2
+            if leadingSpaces <= 0: leadingSpaces = 6
             line = "{}{}".format(' ' * leadingSpaces, line.lstrip().lstrip('#').lstrip())
           elif logstashOpen and serviceStartLine and (currentService == 'logstash'):
             # exposing logstash port 5044 to the world
