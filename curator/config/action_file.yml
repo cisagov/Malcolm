@@ -1,5 +1,36 @@
 actions:
   1:
+    action: snapshot
+    description: >-
+       Store a snapshot in ${CURATOR_SNAPSHOT_REPO:logs} of indices older than
+       ${CURATOR_SNAPSHOT_COUNT:5} ${CURATOR_SNAPSHOT_UNITS:years} (based on index name),
+       for sessions2-prefixed indices.
+       Ignore the error if the filter does not result in an actionable list of indices
+       (ignore_empty_list) and exit cleanly.
+    options:
+      repository: ${CURATOR_SNAPSHOT_REPO:logs}
+      name: sessions2-%Y%m%d%H%M%S
+      ignore_unavailable: False
+      include_global_state: True
+      partial: False
+      wait_for_completion: True
+      skip_repo_fs_check: False
+      timeout_override:
+      continue_if_exception: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: sessions2-
+      exclude:
+    - filtertype: age
+      source: name
+      direction: older
+      timestring: '%y%m%d'
+      unit: ${CURATOR_SNAPSHOT_UNITS:years}
+      unit_count: ${CURATOR_SNAPSHOT_COUNT:5}
+      exclude:
+  2:
     action: delete_indices
     description: >-
        Delete the oldest indices with sessions2- prefixes when their cumulative
@@ -22,7 +53,7 @@ actions:
       source: name
       timestring: '%y%m%d'
       exclude:
-  2:
+  3:
     action: delete_indices
     description: >-
        Delete indices older than ${CURATOR_DELETE_COUNT:99} ${CURATOR_DELETE_UNITS:years}
@@ -46,7 +77,7 @@ actions:
       unit: ${CURATOR_DELETE_UNITS:years}
       unit_count: ${CURATOR_DELETE_COUNT:99}
       exclude:
-  3:
+  4:
     action: close
     description: >-
        Close indices older than ${CURATOR_CLOSE_COUNT:10} ${CURATOR_CLOSE_UNITS:years}

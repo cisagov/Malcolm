@@ -36,6 +36,11 @@ x-curator-variables: &curator-variables
   CURATOR_DELETE_COUNT : 99
   # for managing automatic deleting of Elasticsearch indices based on cumulative size (to reduce disk consumption)
   CURATOR_DELETE_GIGS : 1000000
+  # for managing automatic snapshots of Elasticsearch indices
+  CURATOR_SNAPSHOT_UNITS : years
+  CURATOR_SNAPSHOT_COUNT : 5
+  # name of Elasticsearch snapshot repository under path.repo
+  CURATOR_SNAPSHOT_REPO : 'logs'
   # controls compression of Elasticsearch snapshots managed by the curator
   CURATOR_SNAPSHOTS_COMPRESSED : 'false'
 
@@ -147,7 +152,6 @@ services:
       << : *curator-variables
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
-      ES_SNAPSHOT_REPO : '/opt/elasticsearch/backup'
     depends_on:
       - elasticsearch
   logstash:

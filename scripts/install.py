@@ -473,6 +473,24 @@ class Installer(object):
       esMemory = AskForString('Enter memory for Elasticsearch (eg., 16g, 9500m, etc.)')
       lsMemory = AskForString('Enter memory for LogStash (eg., 4g, 2500m, etc.)')
 
+    curatorSnapshotUnits = 'weeks'
+    curatorSnapshotCount = '1'
+    if YesOrNo('Periodically back up (snapshot) Elasticsearch indices?', default=True):
+      while not YesOrNo('Indices older than {} {} will be periodically backed up. Is this OK?'.format(curatorSnapshotCount, curatorSnapshotUnits), default=True):
+        while True:
+          curatorPeriod = AskForString('Enter index snapshot threshold (eg., 90 days, 2 years, etc.)').lower().split()
+          if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
+            curatorPeriod[1] += 's'
+          if ((len(curatorPeriod) == 2) and
+              curatorPeriod[0].isnumeric() and
+              (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
+            curatorSnapshotUnits = curatorPeriod[1]
+            curatorSnapshotCount = curatorPeriod[0]
+            break
+    else:
+      curatorSnapshotUnits = 'years'
+      curatorSnapshotCount = '99'
+
     curatorCloseUnits = 'years'
     curatorCloseCount = '5'
     if YesOrNo('Periodically close old Elasticsearch indices?', default=True):
@@ -654,6 +672,12 @@ class Installer(object):
           elif 'BEATS_SSL' in line:
             # enable/disable beats SSL
             line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if logstashOpen and logstashSsl else "'false'"), line)
+          elif 'CURATOR_SNAPSHOT_COUNT' in line:
+            # set count for index curation snapshot age
+            line = re.sub(r'(CURATOR_SNAPSHOT_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorSnapshotCount), line)
+          elif 'CURATOR_SNAPSHOT_UNITS' in line:
+            # set units for index curation snapshot age
+            line = re.sub(r'(CURATOR_SNAPSHOT_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorSnapshotUnits), line)
           elif 'CURATOR_CLOSE_COUNT' in line:
             # set count for index curation close age
             line = re.sub(r'(CURATOR_CLOSE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseCount), line)
