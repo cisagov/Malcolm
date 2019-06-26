@@ -32,6 +32,8 @@ RUN yum install -y epel-release && \
     npm install -g http-server
 
 ADD kibana/scripts /data/
+ADD shared/bin/elastic_search_status.sh /data/
+ADD shared/bin/cron_env_centos.sh /data/
 ADD kibana/kibana-standard.yml /opt/kibana/config/kibana-standard.yml
 ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
 ADD kibana/supervisord.conf /etc/supervisord.conf

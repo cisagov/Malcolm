@@ -87,6 +87,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/elasticsearch/nodes/"
+  mkdir -p "$MALCOLM_DEST_DIR/elasticsearch-backup/"
   mkdir -p "$MALCOLM_DEST_DIR/elastalert/config/"
   mkdir -p "$MALCOLM_DEST_DIR/elastalert/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/elastalert/sample-rules/"

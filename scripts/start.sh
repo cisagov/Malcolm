@@ -45,6 +45,8 @@ fi
 chmod 644 ./nginx/htpasswd >/dev/null 2>&1
 
 # make sure some directories exist before we start
+mkdir -p ./elasticsearch/
+mkdir -p ./elasticsearch-backup/
 mkdir -p ./pcap/upload/
 mkdir -p ./pcap/processed/
 mkdir -p ./pcap/autozeek/

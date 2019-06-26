@@ -10,6 +10,7 @@ RUN apk update && \
     rm -rf /var/cache/apk/*
 
 ADD elastalert/elastalert-start.sh /usr/local/bin/
+ADD shared/bin/elastic_search_status.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/elastalert-start.sh && \
     mkdir -p /opt/elastalert/server_data/tests && \

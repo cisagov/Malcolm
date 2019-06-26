@@ -36,6 +36,8 @@ x-curator-variables: &curator-variables
   CURATOR_DELETE_COUNT : 99
   # for managing automatic deleting of Elasticsearch indices based on cumulative size (to reduce disk consumption)
   CURATOR_DELETE_GIGS : 1000000
+  # controls compression of Elasticsearch snapshots managed by the curator
+  CURATOR_SNAPSHOTS_COMPRESSED : 'false'
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
@@ -75,6 +77,7 @@ services:
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       cluster.max_shards_per_node : 2500
+      path.repo : '/opt/elasticsearch/backup'
     expose:
       - 9200
     ulimits:
@@ -91,6 +94,7 @@ services:
         start_period: 180s
     volumes:
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
+      - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
   kibana:
     build:
       context: .
@@ -152,6 +156,7 @@ services:
       << : *curator-variables
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
+      ES_SNAPSHOT_REPO : '/opt/elasticsearch/backup'
     depends_on:
       - elasticsearch
     volumes:
