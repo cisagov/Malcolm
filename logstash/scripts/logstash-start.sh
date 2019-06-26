@@ -50,5 +50,12 @@ else
   sed -i "s/,[[:blank:]]*['\"]$EXTERNAL_ES_PIPELINE_ADDRESS['\"]//" "$MAIN_OUTPUT_FILTER"
 fi
 
+# experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
+if [[ "$LOGSTASH_JAVA_EXECUTION_ENGINE" == 'true' ]]; then
+  LOGSTASH_JAVA_FLAG="--java-execution"
+else
+  LOGSTASH_JAVA_FLAG=""
+fi
+
 # start logstash
-/usr/local/bin/docker-entrypoint
+/usr/local/bin/docker-entrypoint $LOGSTASH_JAVA_FLAG

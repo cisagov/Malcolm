@@ -14,6 +14,8 @@ x-moloch-variables: &moloch-variables
   ZEEK_AUTO_ANALYZE_PCAP_THREADS : 1
 
 x-logstash-variables: &logstash-variables
+  # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
+  LOGSTASH_JAVA_EXECUTION_ENGINE : 'false'
   LOGSTASH_OUI_LOOKUP  : 'true'
   LOGSTASH_REVERSE_DNS : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'

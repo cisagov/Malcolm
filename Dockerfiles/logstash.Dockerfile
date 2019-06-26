@@ -3,6 +3,10 @@ FROM centos:7 AS build
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
 
+ARG LOGSTASH_JAVA_EXECUTION_ENGINE=false
+
+ENV LOGSTASH_JAVA_EXECUTION_ENGINE $LOGSTASH_JAVA_EXECUTION_ENGINE
+
 RUN yum install -y epel-release && \
     yum update -y && \
     yum install -y java-1.8.0-openjdk-devel git curl wget tar which \
