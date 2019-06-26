@@ -475,6 +475,7 @@ class Installer(object):
 
     curatorSnapshotUnits = 'weeks'
     curatorSnapshotCount = '1'
+    curatorSnapshotDir = None
     if YesOrNo('Periodically back up (snapshot) Elasticsearch indices?', default=True):
       while not YesOrNo('Indices older than {} {} will be periodically backed up. Is this OK?'.format(curatorSnapshotCount, curatorSnapshotUnits), default=True):
         while True:
@@ -482,10 +483,16 @@ class Installer(object):
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isnumeric() and
+              curatorPeriod[0].isdigit() and
               (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
             curatorSnapshotUnits = curatorPeriod[1]
             curatorSnapshotCount = curatorPeriod[0]
+            break
+      if not YesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'elasticsearch-backup')), default=True):
+        while True:
+          curatorSnapshotDir = AskForString('Enter Elasticsearch index snapshot directory')
+          if (len(curatorSnapshotDir) > 1) and os.path.isdir(curatorSnapshotDir):
+            curatorSnapshotDir = os.path.realpath(curatorSnapshotDir)
             break
     else:
       curatorSnapshotUnits = 'years'
@@ -500,7 +507,7 @@ class Installer(object):
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isnumeric() and
+              curatorPeriod[0].isdigit() and
               (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
             curatorCloseUnits = curatorPeriod[1]
             curatorCloseCount = curatorPeriod[0]
@@ -518,7 +525,7 @@ class Installer(object):
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isnumeric() and
+              curatorPeriod[0].isdigit() and
               (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
             curatorDeleteUnits = curatorPeriod[1]
             curatorDeleteCount = curatorPeriod[0]
@@ -532,7 +539,7 @@ class Installer(object):
       while not YesOrNo('Indices will be deleted when the database exceeds {} gigabytes. Is this OK?'.format(curatorDeleteOverGigs), default=True):
         while True:
           curatorSize = AskForString('Enter index threshold in gigabytes')
-          if (len(curatorSize) > 0) and curatorSize.isnumeric():
+          if (len(curatorSize) > 0) and curatorSize.isdigit():
             curatorDeleteOverGigs = curatorSize
             break
     else:
@@ -678,6 +685,9 @@ class Installer(object):
           elif 'CURATOR_SNAPSHOT_UNITS' in line:
             # set units for index curation snapshot age
             line = re.sub(r'(CURATOR_SNAPSHOT_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorSnapshotUnits), line)
+          elif os.path.isdir(curatorSnapshotDir) and (currentService == 'elasticsearch') and 'path.repo' in line:
+            # elasticsearch backup directory
+            line = re.sub(r'(path.repo\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorSnapshotDir), line)
           elif 'CURATOR_CLOSE_COUNT' in line:
             # set count for index curation close age
             line = re.sub(r'(CURATOR_CLOSE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseCount), line)
