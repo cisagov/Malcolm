@@ -15,6 +15,7 @@ actions:
       partial: False
       wait_for_completion: True
       skip_repo_fs_check: False
+      ignore_empty_list: True
       timeout_override:
       continue_if_exception: True
       disable_action: False
