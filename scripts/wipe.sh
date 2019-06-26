@@ -32,8 +32,8 @@ $SCRIPT_PATH/stop.sh "$CONFIG_FILE"
 
 # completely clean out elasticsearch database and local files
 rm -rf ./elasticsearch/nodes 2>/dev/null
-find ./zeek-logs/ ./moloch-logs/ ./pcap/ ./moloch-raw/ \( \( -type f -o -type l \) -a ! -name ".gitignore" \) -delete 2>/dev/null
-find ./zeek-logs/processed/ ./zeek-logs/current/ -mindepth 1 -type d -delete 2>/dev/null
+find ./elasticsearch-backup/ ./zeek-logs/ ./moloch-logs/ ./pcap/ ./moloch-raw/ \( \( -type f -o -type l \) -a ! -name ".gitignore" \) -delete 2>/dev/null
+find ./elasticsearch-backup/logs/ ./zeek-logs/processed/ ./zeek-logs/current/ -mindepth 1 -type d -delete 2>/dev/null
 
 echo "Malcolm has been stopped and its data cleared."
 echo ""
