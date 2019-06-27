@@ -666,7 +666,7 @@ class Installer(object):
           elif 'CURATOR_SNAPSHOT_DISABLED' in line:
             # set count for index curation snapshot enable/disable
             line = re.sub(r'(CURATOR_SNAPSHOT_DISABLED\s*:\s*)(\S+)', r'\g<1>{}'.format("'False'" if curatorSnapshots else "'True'"), line)
-          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and os.path.isdir(curatorSnapshotDir):
+          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and (curatorSnapshotDir is not None) and os.path.isdir(curatorSnapshotDir):
             # elasticsearch backup directory
             volumeParts = line.strip().lstrip('-').lstrip().split(':')
             volumeParts[0] = curatorSnapshotDir
