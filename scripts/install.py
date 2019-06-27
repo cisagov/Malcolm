@@ -474,7 +474,7 @@ class Installer(object):
       lsMemory = AskForString('Enter memory for LogStash (eg., 4g, 2500m, etc.)')
 
     curatorSnapshots = YesOrNo('Create daily snapshots (backups) of Elasticsearch indices?', default=False)
-    curatorSnapshotDir = None
+    curatorSnapshotDir = './elasticsearch-backup'
     if curatorSnapshots:
       if not YesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'elasticsearch-backup')), default=True):
         while True:
