@@ -14,6 +14,8 @@ x-moloch-variables: &moloch-variables
   ZEEK_AUTO_ANALYZE_PCAP_THREADS : 1
 
 x-logstash-variables: &logstash-variables
+  # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
+  LOGSTASH_JAVA_EXECUTION_ENGINE : 'false'
   LOGSTASH_OUI_LOOKUP  : 'true'
   LOGSTASH_REVERSE_DNS : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
@@ -28,6 +30,8 @@ x-kibana-variables: &kibana-variables
   KIBANA_OFFLINE_REGION_MAPS : 'true'
 
 x-curator-variables: &curator-variables
+  # get index dates from actual date index was created (creation_date) vs. extracted from index name (name)
+  CURATOR_TIME_SOURCE : 'name'
   # for managing automatic closing of older Elasticsearch indices (to conserve memory)
   CURATOR_CLOSE_UNITS : years
   CURATOR_CLOSE_COUNT : 10
@@ -36,6 +40,12 @@ x-curator-variables: &curator-variables
   CURATOR_DELETE_COUNT : 99
   # for managing automatic deleting of Elasticsearch indices based on cumulative size (to reduce disk consumption)
   CURATOR_DELETE_GIGS : 1000000
+  # for managing automatic snapshots of Elasticsearch indices
+  CURATOR_SNAPSHOT_DISABLED : 'True'
+  # name of Elasticsearch snapshot repository under path.repo
+  CURATOR_SNAPSHOT_REPO : 'logs'
+  # controls compression of Elasticsearch snapshots managed by the curator
+  CURATOR_SNAPSHOT_COMPRESSED : 'false'
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
@@ -66,7 +76,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.0
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.1
     hostname: elasticsearch
     environment:
       bootstrap.memory_lock : 'true'
@@ -75,6 +85,7 @@ services:
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       cluster.max_shards_per_node : 2500
+      path.repo : '/opt/elasticsearch/backup'
     expose:
       - 9200
     ulimits:
@@ -91,11 +102,12 @@ services:
         start_period: 180s
     volumes:
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
+      - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
   kibana:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.2.2
+    image: malcolmnetsec/kibana-oss:1.3.0
     hostname: kibana
     environment:
       << : *kibana-variables
@@ -120,7 +132,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.2.2
+    image: malcolmnetsec/elastalert:1.3.0
     hostname: elastalert
     environment:
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
@@ -146,7 +158,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.2.2
+    image: malcolmnetsec/curator:1.3.0
     hostname: curator
     environment:
       << : *curator-variables
@@ -160,7 +172,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.2.2
+    image: malcolmnetsec/logstash-oss:1.3.0
     hostname: logstash
     environment:
       << : *logstash-variables
@@ -197,7 +209,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.2.2
+    image: malcolmnetsec/filebeat-oss:1.3.0
     hostname: filebeat
     environment:
       << : *common-upload-variables
@@ -225,7 +237,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.2.2
+    image: malcolmnetsec/moloch:1.3.0
     hostname: moloch
     env_file:
       - ./auth.env
@@ -263,7 +275,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.2.2
+    image: malcolmnetsec/file-monitor:1.3.0
     hostname: filemon
     environment:
       << : *zeek-file-extraction-variables
@@ -276,7 +288,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.2.2
+    image: malcolmnetsec/pcap-capture:1.3.0
     network_mode: host
     ulimits:
       memlock:
@@ -295,7 +307,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.2.2
+    image: malcolmnetsec/file-upload:1.3.0
     hostname: upload
     env_file:
       - ./auth.env
@@ -314,7 +326,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.2.2
+    image: malcolmnetsec/nginx-proxy:1.3.0
     hostname: nginx-proxy
     depends_on:
       - moloch

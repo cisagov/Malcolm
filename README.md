@@ -108,17 +108,17 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.2.2               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.2.2               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.2.2               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.2.2               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/moloch                                1.2.2               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/curator                               1.2.2               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/logstash-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.2.2               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.2.2               xxxxxxxxxxxx        17 hours ago        850MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
+malcolmnetsec/nginx-proxy                           1.3.0               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.3.0               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.3.0               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.3.0               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/moloch                                1.3.0               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.3.0               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/curator                               1.3.0               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/logstash-oss                          1.3.0               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.3.0               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.3.0               xxxxxxxxxxxx        17 hours ago        850MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -180,6 +180,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 * `docs` - a directory containing instructions and documentation
 * `elastalert` - code and configuration for the `elastalert` container which provides an alerting framework for Elasticsearch
 * `elasticsearch` - an initially empty directory where the Elasticsearch database instance will reside
+* `elasticsearch-backup` - an initially empty directory for storing Elasticsearch [index snapshots](#Curator) 
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
@@ -333,6 +334,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
 
+* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing (default `false`, as it is currently considered experimental)
+
 * `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
 
 * `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
@@ -350,6 +353,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `CURATOR_DELETE_COUNT` and `CURATOR_DELETE_UNITS` - determine behavior for automatically deleting older Elasticsearch indices to reduce disk usage; see [Elasticsearch index curation](#Curator)
 
 * `CURATOR_DELETE_GIGS` - if the Elasticsearch indices representing the log data exceed this size, in gigabytes, older indices will be deleted to bring the total size back under this threshold; see [Elasticsearch index curation](#Curator)
+
+* `CURATOR_SNAPSHOT_DISABLED` - if set to `False`, daily snapshots (backups) will be made of the previous day's Elasticsearch log index; see [Elasticsearch index curation](#Curator)
 
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Moloch sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
 
@@ -550,7 +555,7 @@ You can run `./scripts/stop.sh` to stop the docker containers and remove their v
 
 ### <a name="Wipe"></a>Clearing Malcolm’s data
 
-Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch database.
+Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch database (including [index snapshots](#Curator)).
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
@@ -997,13 +1002,12 @@ When changes are made to either `cidr-map.txt` or `host-map.txt`, Malcolm's Logs
 
 Malcolm uses [Elasticsearch Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/about.html) to periodically examine indices representing the log data and perform actions on indices meeting criteria for age or disk usage. The environment variables prefixed with `CURATOR_` in the [`docker-compose.yml`](#DockerComposeYml) file determine the criteria for the following actions:
 
+* [snapshot](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/snapshot.html) (back up) the previous day's Elasticsearch index once daily; by default snapshots are stored locally under the `./elasticsearch-backup/` directory mounted as a volume into the `elasticsearch` container
 * [close](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/close.html) indices [older than a specificed age](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_age.html) in order to reduce RAM utilization
 * [delete](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/delete_indices.html) indices [older than a specificed age](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_age.html) in order to reduce disk usage
 * [delete](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/delete_indices.html) the oldest indices in order to keep the total [database size under a specified threshold](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_space.html)
 
 This behavior can also be modified by running [`./scripts/install.py --configure`](#ConfigAndTuning).
-
-Future development of Malcolm may include additional actions, such as creating index [snapshots](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/snapshot.html).
 
 Other custom [filters](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filters.html) and [actions](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html) may be defined by the user by manually modifying the `action_file.yml` file used by the `curator` container and ensuring that it is mounted into the container as a volume in the `curator:` section of your `docker-compose.yml` file:
 
@@ -1227,17 +1231,17 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.2.2               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.2.2               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.2.2               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.2.2               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/curator                               1.2.2               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/moloch                                1.2.2               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/logstash-oss                          1.2.2               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.2.2               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.2.2               xxxxxxxxxxxx        17 hours ago        850MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.0               xxxxxxxxxxxx        3 weeks ago         765MB
+malcolmnetsec/nginx-proxy                           1.3.0               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.3.0               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.3.0               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.3.0               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/curator                               1.3.0               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/moloch                                1.3.0               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.3.0               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/logstash-oss                          1.3.0               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.3.0               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.3.0               xxxxxxxxxxxx        17 hours ago        850MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

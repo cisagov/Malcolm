@@ -1,5 +1,35 @@
 actions:
   1:
+    action: snapshot
+    description: >-
+       Store a snapshot in ${CURATOR_SNAPSHOT_REPO:logs} of the previous day's indices.
+       Ignore the error if the filter does not result in an actionable list of indices
+       (ignore_empty_list) and exit cleanly.
+    options:
+      repository: ${CURATOR_SNAPSHOT_REPO:logs}
+      name: sessions2-%Y%m%d%H%M%S
+      ignore_unavailable: False
+      include_global_state: True
+      partial: False
+      wait_for_completion: True
+      skip_repo_fs_check: False
+      ignore_empty_list: True
+      timeout_override:
+      continue_if_exception: True
+      disable_action: ${CURATOR_SNAPSHOT_DISABLED:True}
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: sessions2-
+      exclude:
+    - filtertype: period
+      period_type: relative
+      source: ${CURATOR_TIME_SOURCE:creation_date}
+      timestring: '%y%m%d'
+      range_from: -1
+      range_to: -1
+      unit: days
+  2:
     action: delete_indices
     description: >-
        Delete the oldest indices with sessions2- prefixes when their cumulative
@@ -19,10 +49,10 @@ actions:
     - filtertype: space
       disk_space: ${CURATOR_DELETE_GIGS:1000000}
       use_age: True
-      source: name
+      source: ${CURATOR_TIME_SOURCE:name}
       timestring: '%y%m%d'
       exclude:
-  2:
+  3:
     action: delete_indices
     description: >-
        Delete indices older than ${CURATOR_DELETE_COUNT:99} ${CURATOR_DELETE_UNITS:years}
@@ -40,13 +70,13 @@ actions:
       value: sessions2-
       exclude:
     - filtertype: age
-      source: name
+      source: ${CURATOR_TIME_SOURCE:name}
       direction: older
       timestring: '%y%m%d'
       unit: ${CURATOR_DELETE_UNITS:years}
       unit_count: ${CURATOR_DELETE_COUNT:99}
       exclude:
-  3:
+  4:
     action: close
     description: >-
        Close indices older than ${CURATOR_CLOSE_COUNT:10} ${CURATOR_CLOSE_UNITS:years}
@@ -64,7 +94,7 @@ actions:
       value: sessions2-
       exclude:
     - filtertype: age
-      source: name
+      source: ${CURATOR_TIME_SOURCE:name}
       direction: older
       timestring: '%y%m%d'
       unit: ${CURATOR_CLOSE_UNITS:years}

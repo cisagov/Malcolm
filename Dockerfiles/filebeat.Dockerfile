@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:6.8.0
+FROM docker.elastic.co/beats/filebeat-oss:6.8.1
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
@@ -25,6 +25,7 @@ RUN yum install -y epel-release && \
     easy_install supervisor && \
     pip install patool entrypoint2 pyunpack python-magic ordered-set
 
+ADD shared/bin/cron_env_centos.sh /data/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/scripts /data/
 ADD filebeat/supervisord.conf /etc/supervisord.conf

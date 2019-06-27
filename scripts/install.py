@@ -27,7 +27,7 @@ from subprocess import (PIPE, STDOUT, Popen, CalledProcessError)
 from collections import defaultdict, namedtuple
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION="1.23.2"
+DOCKER_COMPOSE_INSTALL_VERSION="1.24.0"
 
 PLATFORM_WINDOWS = "Windows"
 PLATFORM_MAC = "Darwin"
@@ -138,6 +138,8 @@ def str2bool(v):
 ###################################################################################################
 # determine if a program/script exists and is executable in the system path
 def Which(cmd):
+  global args
+
   result = any(os.access(os.path.join(path, cmd), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
   if args.debug:
     eprint("Which {} returned {}".format(cmd, result))
@@ -155,6 +157,8 @@ def SizeHumanFormat(num, suffix='B'):
 ###################################################################################################
 # download to file
 def DownloadToFile(url, local_filename):
+  global args
+
   r = requests.get(url, stream=True, allow_redirects=True)
   with open(local_filename, 'wb') as f:
     for chunk in r.iter_content(chunk_size=1024):
@@ -425,9 +429,17 @@ class Installer(object):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def tweak_malcolm_runtime(self, malcolm_install_path, expose_logstash_default=False):
+    global args
 
-    # get a list of all of the docker-compose files
-    composeFiles = glob.glob(os.path.join(malcolm_install_path, 'docker-compose*.yml'))
+    if not args.configFile:
+      # get a list of all of the docker-compose files
+      composeFiles = glob.glob(os.path.join(malcolm_install_path, 'docker-compose*.yml'))
+
+    elif os.path.isfile(args.configFile):
+      # single docker-compose file explicitly specified
+      composeFiles = [os.path.realpath(args.configFile)]
+      malcolm_install_path = os.path.dirname(composeFiles[0])
+
     if self.debug:
       eprint("{} contains {}, system memory is {} GiB".format(malcolm_install_path, composeFiles, self.totalMemoryGigs))
 
@@ -461,16 +473,26 @@ class Installer(object):
       esMemory = AskForString('Enter memory for Elasticsearch (eg., 16g, 9500m, etc.)')
       lsMemory = AskForString('Enter memory for LogStash (eg., 4g, 2500m, etc.)')
 
+    curatorSnapshots = YesOrNo('Create daily snapshots (backups) of Elasticsearch indices?', default=False)
+    curatorSnapshotDir = './elasticsearch-backup'
+    if curatorSnapshots:
+      if not YesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'elasticsearch-backup')), default=True):
+        while True:
+          curatorSnapshotDir = AskForString('Enter Elasticsearch index snapshot directory')
+          if (len(curatorSnapshotDir) > 1) and os.path.isdir(curatorSnapshotDir):
+            curatorSnapshotDir = os.path.realpath(curatorSnapshotDir)
+            break
+
     curatorCloseUnits = 'years'
     curatorCloseCount = '5'
-    if YesOrNo('Periodically close old Elasticsearch indices?', default=True):
+    if YesOrNo('Periodically close old Elasticsearch indices?', default=False):
       while not YesOrNo('Indices older than {} {} will be periodically closed. Is this OK?'.format(curatorCloseCount, curatorCloseUnits), default=True):
         while True:
           curatorPeriod = AskForString('Enter index close threshold (eg., 90 days, 2 years, etc.)').lower().split()
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isnumeric() and
+              curatorPeriod[0].isdigit() and
               (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
             curatorCloseUnits = curatorPeriod[1]
             curatorCloseCount = curatorPeriod[0]
@@ -481,14 +503,14 @@ class Installer(object):
 
     curatorDeleteUnits = 'years'
     curatorDeleteCount = '10'
-    if YesOrNo('Periodically delete old Elasticsearch indices?', default=True):
+    if YesOrNo('Periodically delete old Elasticsearch indices?', default=False):
       while not YesOrNo('Indices older than {} {} will be periodically deleted. Is this OK?'.format(curatorDeleteCount, curatorDeleteUnits), default=True):
         while True:
           curatorPeriod = AskForString('Enter index delete threshold (eg., 90 days, 2 years, etc.)').lower().split()
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isnumeric() and
+              curatorPeriod[0].isdigit() and
               (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
             curatorDeleteUnits = curatorPeriod[1]
             curatorDeleteCount = curatorPeriod[0]
@@ -498,17 +520,17 @@ class Installer(object):
       curatorDeleteCount = '99'
 
     curatorDeleteOverGigs = '10000'
-    if YesOrNo('Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size?', default=True):
+    if YesOrNo('Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size?', default=False):
       while not YesOrNo('Indices will be deleted when the database exceeds {} gigabytes. Is this OK?'.format(curatorDeleteOverGigs), default=True):
         while True:
           curatorSize = AskForString('Enter index threshold in gigabytes')
-          if (len(curatorSize) > 0) and curatorSize.isnumeric():
+          if (len(curatorSize) > 0) and curatorSize.isdigit():
             curatorDeleteOverGigs = curatorSize
             break
     else:
       curatorDeleteOverGigs = '9000000'
 
-    autoZeek = YesOrNo('Automatically analyze all PCAP files with Zeek?', default=False)
+    autoZeek = YesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
     reverseDns = YesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
     autoOui = YesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
     logstashOpen = YesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
@@ -527,6 +549,7 @@ class Installer(object):
     allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
     allowedFilePreserveModes = ('quarantined', 'all', 'none')
 
+    fileCarveModeUser = None
     fileCarveMode = None
     filePreserveMode = None
     vtotApiKey = '0'
@@ -538,20 +561,18 @@ class Installer(object):
         fileCarveMode = AskForString('Select file extraction behavior {}'.format(allowedFileCarveModes), default=allowedFileCarveModes[0])
       while filePreserveMode not in allowedFilePreserveModes:
         filePreserveMode = AskForString('Select file preservation behavior {}'.format(allowedFilePreserveModes), default=allowedFilePreserveModes[0])
+      if fileCarveMode is not None:
+        if YesOrNo('Scan extracted files with ClamAV?', default=False):
+          clamAvScan = True
+          clamAvUpdate = YesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
+        elif YesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
+          while (len(vtotApiKey) <= 1):
+            vtotApiKey = AskForString('Enter VirusTotal API key')
 
     if fileCarveMode not in allowedFileCarveModes:
       fileCarveMode = allowedFileCarveModes[0]
     if filePreserveMode not in allowedFileCarveModes:
       filePreserveMode = allowedFilePreserveModes[0]
-
-    if fileCarveMode is not None:
-      if YesOrNo('Scan extracted files with ClamAV?', default=False):
-        clamAvScan = True
-        clamAvUpdate = YesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
-      elif YesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
-        while (len(vtotApiKey) <= 1):
-          vtotApiKey = AskForString('Enter VirusTotal API key')
-
     if (vtotApiKey is None) or (len(vtotApiKey) <= 1):
       vtotApiKey = '0'
 
@@ -573,8 +594,32 @@ class Installer(object):
       origUid, origGuid = composeFileStat[4], composeFileStat[5]
       composeFileHandle = fileinput.FileInput(composeFile, inplace=True, backup=None)
       try:
+        servicesSectionFound = False
+        serviceIndent = None
+        currentService = None
+
         for line in composeFileHandle:
           line = line.rstrip("\n")
+          skipLine = False
+
+          # it would be cleaner to use something like PyYAML to do this, but I want to have as few dependencies
+          # as possible so we're going to do it janky instead
+
+          # determine indentation for each service section (assumes YML file is consistently indented)
+          if (not servicesSectionFound) and line.lower().startswith('services:'):
+            servicesSectionFound = True
+          elif servicesSectionFound and (serviceIndent is None):
+            indentMatch = re.search(r'^(\s+)\S+\s*:\s*$', line)
+            if indentMatch is not None:
+              serviceIndent = indentMatch.group(1)
+
+          # determine which service we're currently processing in the YML file
+          serviceStartLine = False
+          if servicesSectionFound and (serviceIndent is not None):
+            serviceMatch = re.search(r'^{}(\S+)\s*:\s*$'.format(serviceIndent), line)
+            if serviceMatch is not None:
+              currentService = serviceMatch.group(1).lower()
+              serviceStartLine = True
 
           if 'ZEEK_EXTRACTOR_MODE' in line:
             # zeek file extraction mode
@@ -618,6 +663,14 @@ class Installer(object):
           elif 'BEATS_SSL' in line:
             # enable/disable beats SSL
             line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if logstashOpen and logstashSsl else "'false'"), line)
+          elif 'CURATOR_SNAPSHOT_DISABLED' in line:
+            # set count for index curation snapshot enable/disable
+            line = re.sub(r'(CURATOR_SNAPSHOT_DISABLED\s*:\s*)(\S+)', r'\g<1>{}'.format("'False'" if curatorSnapshots else "'True'"), line)
+          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and (curatorSnapshotDir is not None) and os.path.isdir(curatorSnapshotDir):
+            # elasticsearch backup directory
+            volumeParts = line.strip().lstrip('-').lstrip().split(':')
+            volumeParts[0] = curatorSnapshotDir
+            line = "{}- {}".format(serviceIndent * 3, ':'.join(volumeParts))
           elif 'CURATOR_CLOSE_COUNT' in line:
             # set count for index curation close age
             line = re.sub(r'(CURATOR_CLOSE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseCount), line)
@@ -645,18 +698,20 @@ class Installer(object):
           elif (len(externalEsHost) > 0) and re.match(r'^\s*#.+:/usr/share/logstash/config/logstash.keystore(:r[ow])?\s*$', line):
             # make sure logstash.keystore is shared (volume mapping is not commented out)
             leadingSpaces = len(line) - len(line.lstrip())
-            if leadingSpaces <= 0: leadingSpaces = 2
+            if leadingSpaces <= 0: leadingSpaces = 6
             line = "{}{}".format(' ' * leadingSpaces, line.lstrip().lstrip('#').lstrip())
-          elif logstashOpen and re.match(r'^\s+logstash\s*:\s*$', line):
+          elif logstashOpen and serviceStartLine and (currentService == 'logstash'):
             # exposing logstash port 5044 to the world
             print(line)
-            leadingSpaces = len(line) - len(line.lstrip())
-            if leadingSpaces <= 0: leadingSpaces = 2
-            line = "{}ports:".format(' ' * (leadingSpaces*2))
+            line = "{}ports:".format(serviceIndent * 2)
             print(line)
-            line = "{}- 0.0.0.0:5044:5044".format(' ' * (leadingSpaces*3))
+            line = "{}- 0.0.0.0:5044:5044".format(serviceIndent * 3)
+          elif (not serviceStartLine) and (currentService == 'logstash') and re.match(r'^({}ports:|{}-.*5044:5044)\s*$'.format(serviceIndent * 2, serviceIndent * 3), line):
+            # remove previous/leftover/duplicate exposing logstash port 5044 to the world
+            skipLine = True
 
-          print(line)
+          if not skipLine: print(line)
+
       finally:
         composeFileHandle.close()
         # restore ownership
@@ -1306,6 +1361,7 @@ def main():
   parser.add_argument('-m', '--malcolm-file', required=False, dest='mfile', metavar='<STR>', type=str, default='', help='Malcolm .tar.gz file for installation')
   parser.add_argument('-i', '--image-file', required=False, dest='ifile', metavar='<STR>', type=str, default='', help='Malcolm docker images .tar.gz file for installation')
   parser.add_argument('-c', '--configure', dest='configOnly', type=str2bool, nargs='?', const=True, default=False, help="Only do configuration (not installation)")
+  parser.add_argument('-f', '--configure-file', required=False, dest='configFile', metavar='<STR>', type=str, default='', help='Single docker-compose YML file to configure')
   parser.add_argument('-d', '--defaults', dest='acceptDefaults', type=str2bool, nargs='?', const=True, default=False, help="Accept defaults to prompts without user interaction")
   parser.add_argument('-l', '--logstash-expose', dest='exposeLogstash', type=str2bool, nargs='?', const=True, default=False, help="Configure to expose Logstash port to external hosts")
   try:
@@ -1373,10 +1429,13 @@ def main():
   if (not args.configOnly) and hasattr(installer, 'install_docker_compose'): success = installer.install_docker_compose()
   if hasattr(installer, 'tweak_system_files'): success = installer.tweak_system_files()
   if (not args.configOnly) and hasattr(installer, 'install_docker_images'): success = installer.install_docker_images(imageFile)
-  if args.configOnly:
-    for testPath in [origPath, scriptPath, os.path.realpath(os.path.join(scriptPath, ".."))]:
-      if os.path.isfile(os.path.join(testPath, "docker-compose.yml")):
-        installPath = testPath
+  if args.configOnly or (args.configFile and os.path.isfile(args.configFile)):
+    if not args.configFile:
+      for testPath in [origPath, scriptPath, os.path.realpath(os.path.join(scriptPath, ".."))]:
+        if os.path.isfile(os.path.join(testPath, "docker-compose.yml")):
+          installPath = testPath
+    else:
+      installPath = os.path.dirname(os.path.realpath(args.configFile))
     success = (installPath is not None) and os.path.isdir(installPath)
     if args.debug:
       eprint("Malcolm installation detected at {}".format(installPath))

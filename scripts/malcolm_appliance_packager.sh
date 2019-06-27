@@ -65,6 +65,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch/nodes/"
+  mkdir $VERBOSE -p "$DESTDIR/elasticsearch-backup/"
   mkdir $VERBOSE -p "$DESTDIR/elastalert/config/"
   mkdir $VERBOSE -p "$DESTDIR/elastalert/rules/"
   mkdir $VERBOSE -p "$DESTDIR/elastalert/sample-rules/"

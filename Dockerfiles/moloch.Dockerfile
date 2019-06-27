@@ -233,6 +233,8 @@ RUN apt-get -q update && \
 
 # add configuration and scripts
 ADD moloch/scripts /data/
+ADD shared/bin/elastic_search_status.sh /data/
+ADD shared/bin/cron_env_deb.sh /data/
 ADD moloch/etc /data/moloch/etc/
 ADD https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv /data/moloch/etc/ipv4-address-space.csv
 ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf /data/moloch/etc/oui.txt
