@@ -103,8 +103,6 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
-    strip --strip-unneeded \
-      $ZEEK_DIR/bin/bro && \
   apt-get clean && \
   rm -rf $MOLOCHDIR"-"$MOLOCH_VERSION "/data/bro-"$ZEEK_VERSION /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
