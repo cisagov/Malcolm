@@ -1,4 +1,4 @@
-FROM debian:buster-slim AS build
+FROM debian:buster-slim
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
