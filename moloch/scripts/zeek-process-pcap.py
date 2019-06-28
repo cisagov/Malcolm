@@ -22,6 +22,7 @@ ZEEK_LOCAL_SCRIPT = 'local'
 ZEEK_STATE_DIR = '.state'
 ZEEK_UPLOAD_DIR_DEFAULT = '/data/zeek/upload'
 ZEEK_UPLOAD_DIR_ENV_VAR = 'ZEEK_UPLOAD_DIR'
+ZEEK_INSTALL_DIR_ENV_VAR = 'ZEEK_DIR'
 ZEEK_AUTOZEEK_TAG = 'AUTOZEEK'
 ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
 
@@ -61,7 +62,7 @@ def main():
         os.chdir(tmpLogDir)
 
         # use Zeek to process the pcap
-        broCmd = ["bro", "-r", pcapFile, ZEEK_LOCAL_SCRIPT]
+        broCmd = [os.path.join(os.getenv(ZEEK_INSTALL_DIR_ENV_VAR, "/opt/bro"), "bin/bro"), "-r", pcapFile, ZEEK_LOCAL_SCRIPT]
 
         # set file extraction parameters if required
         if (extractFileMode != ZEEK_EXTRACTOR_MODE_NONE):
