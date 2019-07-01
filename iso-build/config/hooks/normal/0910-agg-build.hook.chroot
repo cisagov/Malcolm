@@ -17,6 +17,7 @@ for BEAT in filebeat metricbeat auditbeat packetbeat; do
     dpkg-deb -e "$BEATS_DEB" "$BEATS_TMP_DIR/DEBIAN" && \
     sed -i 's@\(\\"darkTheme\\" *: *\)false@\1true@g' "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/*.json && \
     ( [[ "$BEAT" == "metricbeat" ]] && sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/* || true ) && \
+    pushd "$BEATS_TMP_DIR" && ( rm -f DEBIAN/md5sums && find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -l -0 md5sum >> DEBIAN/md5sums ) && popd && \
     dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
     rm -rf "$BEATS_TMP_DIR" && \
     dpkg -i "$BEATS_NEW_DEB" && \
