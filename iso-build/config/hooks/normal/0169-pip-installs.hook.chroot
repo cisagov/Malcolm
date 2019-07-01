@@ -9,13 +9,14 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   docker-compose \
   namedlist \
   numpy \
-  scapy \
-  requests
+  requests \
+  scapy
 
 # python 3.7
 pip3.7 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   beautifulsoup4 \
   cachetools \
+  clamd \
   debinterface \
   namedlist \
   netifaces \
