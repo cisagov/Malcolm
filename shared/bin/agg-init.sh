@@ -26,6 +26,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
       fi
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/auth_setup.sh ]]; then
         ln -r -s "$MAIN_USER_HOME"/Malcolm/scripts/auth_setup.sh "$MAIN_USER_HOME/Desktop/Malcolm Authentication Setup.sh"
+        chown -h "$MAIN_USER:$MAIN_USER" "$MAIN_USER_HOME/Desktop/Malcolm Authentication Setup.sh"
       fi
       rm -f "$MAIN_USER_HOME"/Malcolm/firstrun
     fi
