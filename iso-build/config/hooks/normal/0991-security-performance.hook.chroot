@@ -77,6 +77,7 @@ sed -i "s/^\(pool \)/# \1/" /etc/ntp.conf
 sed -i "s/^\(restrict -6\)/# \1/" /etc/ntp.conf
 sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
 sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
+usermod -d /var/lib/ntp ntp
 
 # disable htpdate service, we're going to use cron instead
 systemctl disable htpdate || true
