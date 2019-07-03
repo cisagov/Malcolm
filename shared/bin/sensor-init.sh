@@ -6,6 +6,8 @@ SCRIPT_PATH="$(dirname $(realpath -e "${BASH_SOURCE[0]}"))"
 
 echo "sensor" > /etc/installer
 
+MAIN_USER="$(id -nu 1000)"
+
 if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   . "$SCRIPT_PATH"/common-init.sh
 
@@ -47,11 +49,33 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     [[ -f /opt/bro/bin/bro ]] && setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/bro/bin/bro
   fi
 
+  # if the sensor needs to do clamav scanning, configure it to run as the sensor user
+  if dpkg -s clamav >/dev/null 2>&1 ; then
+    mkdir -p /var/run/clamav /var/log/clamav /var/lib/clamav
+    chown -R 1000:1000 /var/run/clamav /var/log/clamav  /var/lib/clamav
+    chmod -R 750 /var/run/clamav /var/log/clamav  /var/lib/clamav
+    sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf
+    sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf
+    if [[ -d /opt/sensor/sensor_ctl ]]; then
+      sed -i 's@^UpdateLogFile .*$@UpdateLogFile /opt/sensor/sensor_ctl/log/freshclam.log@g' /etc/clamav/freshclam.conf
+      sed -i 's@^LogFile .*$@LogFile /opt/sensor/sensor_ctl/log/clamd.log@g' /etc/clamav/clamd.conf
+    fi
+    if [[ -n $MAIN_USER ]]; then
+      sed -i "s/^User .*$/User $MAIN_USER/g" /etc/clamav/clamd.conf
+      sed -i "s/^LocalSocketGroup .*$/LocalSocketGroup $MAIN_USER/g" /etc/clamav/clamd.conf
+      sed -i "s/^DatabaseOwner .*$/DatabaseOwner $MAIN_USER/g" /etc/clamav/freshclam.conf
+    fi
+    [[ -r /opt/sensor/sensor_ctl/control_vars.conf ]] && source /opt/sensor/sensor_ctl/control_vars.conf
+    [[ -z $EXTRACTED_FILE_MAX_BYTES ]] && EXTRACTED_FILE_MAX_BYTES=134217728
+    sed -i "s/^MaxFileSize .*$/MaxFileSize $EXTRACTED_FILE_MAX_BYTES/g" /etc/clamav/clamd.conf
+    sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf
+    echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
+  fi
+
   # if the network configuration files for the interfaces haven't been set to come up on boot, configure that now.
   InitializeNetworking
 
   # fix some permisions to make sure things belong to the right person
-  MAIN_USER="$(id -nu 1000)"
   [[ -n $MAIN_USER ]] && FixPermissions "$MAIN_USER"
 
   # chromium tries to call home despite my best efforts

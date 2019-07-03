@@ -39,6 +39,7 @@ function CleanDefaultAccounts() {
   [ ! -d /var/lib/_apt ] && ((mkdir -p /var/lib/_apt && chown _apt:nogroup /var/lib/_apt && chmod 700 /var/lib/_apt && usermod -m -d /var/lib/_apt _apt) || true)
   [ ! -d /run/systemd/resolve ] && ((mkdir -p /run/systemd/resolve && chown systemd-resolve:systemd-resolve /run/systemd/resolve && chmod 700 /run/systemd/resolve) || true)
   [ ! -d /var/lib/usbmux ] && ((mkdir -p /var/lib/usbmux && chown usbmux:plugdev /var/lib/usbmux && chmod 700 /var/lib/usbmux) || true)
+  [ ! -d /var/lib/ntp ] && ((mkdir -p /var/lib/ntp && chown ntp:ntp /var/lib/ntp && chmod 700 /var/lib/ntp) || true)
 }
 
 # if the network configuration files for the interfaces haven't been set to come up on boot, configure that
