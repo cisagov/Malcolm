@@ -57,8 +57,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf
     if [[ -d /opt/sensor/sensor_ctl ]]; then
-      sed -i 's@^UpdateLogFile .*$@UpdateLogFile /opt/sensor/sensor_ctl/log/freshclam.log@g' /etc/clamav/freshclam.conf
-      sed -i 's@^LogFile .*$@LogFile /opt/sensor/sensor_ctl/log/clamd.log@g' /etc/clamav/clamd.conf
+      # disable clamd/freshclam logfiles as supervisord will handle the logging from STDOUT instead
+      sed -i 's@^UpdateLogFile .*$@#UpdateLogFile /var/log/clamav/freshclam.log@g' /etc/clamav/freshclam.conf
+      sed -i 's@^LogFile .*$@#LogFile /var/log/clamav/clamd.log@g' /etc/clamav/clamd.conf
     fi
     if [[ -n $MAIN_USER ]]; then
       sed -i "s/^User .*$/User $MAIN_USER/g" /etc/clamav/clamd.conf
