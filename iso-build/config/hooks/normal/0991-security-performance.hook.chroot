@@ -14,19 +14,17 @@
 
 # performance parameters for networking, disk, etc.
 cat << 'EOF' >> /etc/sysctl.conf
+# don't restrict dmesg to root
 kernel.dmesg_restrict=0
 
 # the maximum number of open file handles
-fs.file-max=65536
+fs.file-max=518144
 
 # the maximum number of user inotify watches
 fs.inotify.max_user_watches=131072
 
 # the maximum number of memory map areas a process may have
 vm.max_map_count=262144
-
-# the maximum number of incoming connections
-net.core.somaxconn=65535
 
 # decrease "swappiness" (swapping out runtime memory vs. dropping pages)
 vm.swappiness=1
@@ -36,6 +34,27 @@ vm.dirty_background_ratio=40
 
 # maximum % of dirty system memory before committing everything
 vm.dirty_ratio=80
+
+net.core.netdev_max_backlog=250000
+net.core.optmem_max=33554432
+net.core.rmem_default=425984
+net.core.rmem_max=33554432
+net.core.somaxconn=65535
+net.core.wmem_default=425984
+net.core.wmem_max=33554432
+net.ipv4.tcp_rmem=10240 425984 33554432
+net.ipv4.tcp_wmem=10240 425984 33554432
+net.ipv4.udp_mem=10240 425984 33554432
+
+net.ipv4.conf.all.accept_redirects=0
+net.ipv4.conf.all.accept_source_route=0
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.default.accept_source_route=0
+net.ipv4.conf.default.send_redirects=0
+net.ipv4.icmp_echo_ignore_broadcasts=1
+net.ipv4.ip_forward=0
+net.ipv6.conf.all.accept_source_route=0
 EOF
 
 # password requirement hardening
