@@ -67,11 +67,17 @@ db_go
 # get answer to $RET
 db_get hedgehog/xscreensaver_lock
 
-# store answer in .Xresources/.xscreensaver for xscreensaver.lock:
+# store places defaults can exist for xscreensaver lock
 if [ -n $RET ]; then
-  [ -f /etc/skel/.Xresources ] && sed -i "s/^\(xscreensaver.lock:\).*$/\1 $RET/" /etc/skel/.Xresources
   URET="$(echo "$RET" | sed -r 's/\<./\U&/')"
-  [ -f /etc/skel/.xscreensaver ] && sed -i "s/^\(lock:\).*$/\1		$URET/" /etc/skel/.xscreensaver
+  sed -i "s/^\(xscreensaver.lock:\).*$/\1 $RET/g" /etc/skel/.Xresources || true
+  sed -i "s/^\(lock:\).*$/\1		$URET/g" /etc/skel/.xscreensaver || true
+  sed -i "s/^\(\*lock:\).*$/\1			$URET/g" /etc/X11/app-defaults/XScreenSaver* || true
+  # at this point users have already been created, so we need to re-apply our changes there
+  for HOMEDIR in $(getent passwd | cut -d: -f6); do
+    [ -f /etc/skel/.Xresources ] && [ -f "$HOMEDIR"/.Xresources ] && cp -f /etc/skel/.Xresources "$HOMEDIR"/.Xresources
+    [ -f /etc/skel/.xscreensaver ] && [ -f "$HOMEDIR"/.xscreensaver ] && cp -f /etc/skel/.xscreensaver "$HOMEDIR"/.xscreensaver
+  done
 fi
 
 echo "hedgehog/xscreensaver_lock=$RET" >> /tmp/hedgehog.answer
