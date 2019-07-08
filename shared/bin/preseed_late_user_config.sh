@@ -117,6 +117,15 @@ By using this IS (which includes any device attached to this IS), you consent to
 EOF
   /bin/echo -E "$OLD_ISSUE \n \l" >> /etc/issue
   echo >> /etc/issue
+  if [ -f /usr/local/bin/dod-login-banner.sh ]; then
+    [ -f /etc/xdg/lxsession/LXDE/autostart ] && echo "@/usr/local/bin/dod-login-banner.sh" >> /etc/xdg/lxsession/LXDE/autostart
+    for HOMEDIR in $(getent passwd | cut -d: -f6); do
+      [ -f "$HOMEDIR"/.config/lxsession/LXDE/autostart ] && echo "@/usr/local/bin/dod-login-banner.sh" >> "$HOMEDIR"/.config/lxsession/LXDE/autostart
+    done
+  fi
+
+else
+  rm -f /usr/local/bin/dod-login-banner.sh
 fi
 
 echo "malcolm/dod_banner=$RET" >> /tmp/malcolm.answer
