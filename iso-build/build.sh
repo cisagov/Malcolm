@@ -64,9 +64,10 @@ if [ -d "$WORKDIR" ]; then
 
   chown -R root:root *
 
-  # put the date in the grub.cfg entries and configure an encryption option
+  # put the date in the grub.cfg entries and configure installation options
   sed -i "s/\(Install Malcolm Base\)/\1 $(date +'%Y-%m-%d %H:%M:%S')/g" ./config/includes.binary/boot/grub/grub.cfg
   cp ./config/includes.binary/install/preseed.cfg ./config/includes.binary/install/preseed_crypto.cfg
+  cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_crypto.cfg
 
   # make sure we install the newer kernel, firmwares, and kernel headers
@@ -162,7 +163,7 @@ if [ -d "$WORKDIR" ]; then
     --parent-mirror-binary http://httpredir.debian.org/debian/ \
     --mirror-bootstrap http://ftp.us.debian.org/debian/ \
     --mirror-binary http://httpredir.debian.org/debian/ \
-    --debootstrap-options "--include=apt-transport-https,gnupg2,ca-certificates,openssl" \
+    --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
     --apt-options "--force-yes --yes"
 
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
