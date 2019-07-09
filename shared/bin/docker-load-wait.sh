@@ -3,7 +3,7 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 function finish {
-  killall zenity
+  pkill -f "zenity.*Preparing Malcolm"
 }
 
 if [[ -f /malcolm_images.tar.gz ]] || pgrep -f "docker load" >/dev/null 2>&1 || pgrep -f "docker-untar" >/dev/null 2>&1; then
