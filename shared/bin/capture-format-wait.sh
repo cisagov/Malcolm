@@ -3,7 +3,7 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 function finish {
-  killall zenity
+  pkill -f "zenity.*Preparing Storage"
 }
 
 if [ -f /etc/capture_storage_format.crypt ]; then

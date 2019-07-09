@@ -2,7 +2,7 @@
 
 ##################################################################################
 # prompt whether to autologin or not
-# prompt whether or not to lock xscreensaver for the sensor GUI session
+# prompt whether or not to lock xscreensaver for the GUI session
 # prompt whether to use U.S. DoD login banner (https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585)
 
 # this is a debconf-compatible script
@@ -14,7 +14,7 @@ Template: malcolm/autologin
 Type: boolean
 Default: true
 Description:
- Should the sensor user open a GUI session automatically?
+ Automatically login to the GUI session?
 
 Template: malcolm/autologin_title
 Type: text
@@ -56,8 +56,9 @@ db_get malcolm/autologin
 
 # store answer in /etc/lightdm/lightdm.conf for autologin
 if [ -n $RET ] && [ -f /etc/lightdm/lightdm.conf ]; then
-  if [ "$RET" = true ]; then
-    sed -i 's/^#\(autologin-user=\)/\1/' /etc/lightdm/lightdm.conf
+  MAIN_USER="$(id -nu 1000)"
+  if [ -n $MAIN_USER ] && [ "$RET" = true ]; then
+    sed -i "s/^#\(autologin-user=\).*/\1$MAIN_USER/" /etc/lightdm/lightdm.conf
     sed -i 's/^#\(autologin-user-timeout=\)/\1/' /etc/lightdm/lightdm.conf
   else
   	sed -i 's/^\(autologin-user=\)/#\1/' /etc/lightdm/lightdm.conf
