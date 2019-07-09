@@ -2,7 +2,7 @@
 
 ##################################################################################
 # prompt whether to autologin or not
-# prompt whether or not to lock xscreensaver for the sensor GUI session
+# prompt whether or not to lock xscreensaver for the GUI session
 # prompt whether to use U.S. DoD login banner (https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585)
 
 # this is a debconf-compatible script
@@ -14,7 +14,7 @@ Template: malcolm/autologin
 Type: boolean
 Default: true
 Description:
- Should the sensor user open a GUI session automatically?
+ Automatically login to the GUI session?
 
 Template: malcolm/autologin_title
 Type: text
