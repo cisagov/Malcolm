@@ -82,7 +82,6 @@ function calc () { python -c "from math import *; n = $1; print n; print '$'+hex
 
 function add () {
   awk '{s+=$1} END {print s}'
-  # alternately: paste -sd+ - | bc
 }
 
 ########################################################################
@@ -94,14 +93,6 @@ function fcd() { [ -f $1  ] && { cd $(dirname $1);  } || { cd $1 ; } }
 
 function up { cd $(eval printf '../'%.0s {1..$1}) && pwd; }
 
-function realpath {
-  if [ $MACOS ]; then
-    /usr/local/bin/realpath "$@"
-  else
-    readlink -f "$@"
-  fi
-}
-
 function realgo() { fcd $(realpath $(which $1)) && pwd ; }
 
 function realwhich() { realpath $(which $1) ; }
@@ -110,30 +101,6 @@ function renmod() {
   FILENAME="$@";
   TIMESTAMP=$(date -d @$(stat -c%Y "$FILENAME") +"%Y%m%d%H%M%S")
   mv -iv "$FILENAME" "$FILENAME.$TIMESTAMP"
-}
-
-function unp() {
-  for ARCHIVE_FILENAME in "$@"
-  do
-    TIMESTAMP=$(date -d @$(stat -c%Y "$ARCHIVE_FILENAME") +"%Y%m%d%H%M%S")
-    DEST_DIR="$(basename "$ARCHIVE_FILENAME")_$TIMESTAMP"
-    mkdir "$DEST_DIR" 2>/dev/null || {
-      DEST_DIR="$(mktemp -d -p . -t $(basename "$ARCHIVE_FILENAME")_XXXXXX)"
-    }
-    python -m pyunpack.cli -a "$ARCHIVE_FILENAME" "$DEST_DIR/"
-    DEST_DIR_CONTENTS=()
-    while IFS=  read -r -d $'\0'; do
-        DEST_DIR_CONTENTS+=("$REPLY")
-    done < <(find "$DEST_DIR" -mindepth 1 -maxdepth 1 -print0)
-    if [[ ${#DEST_DIR_CONTENTS[@]} -eq 1 ]]; then
-      (mv -n "$DEST_DIR"/* "$DEST_DIR"/.. >/dev/null 2>&1 && \
-         rmdir "$DEST_DIR" >/dev/null 2>&1 && \
-         echo "\"$ARCHIVE_FILENAME\" -> \"$(basename "${DEST_DIR_CONTENTS[0]}")\"" ) || \
-      echo "\"$ARCHIVE_FILENAME\" -> \"$DEST_DIR/\""
-    else
-      echo "\"$ARCHIVE_FILENAME\" -> \"$DEST_DIR/\""
-    fi
-  done
 }
 
 function upto() {
@@ -271,27 +238,8 @@ function sec2dhms() {
 }
 
 ########################################################################
-# development
+# system
 ########################################################################
-function urlencode() {
-    # urlencode <string>
-    local length="${#1}"
-    for (( i = 0; i < length; i++ )); do
-        local c="${1:i:1}"
-        case $c in
-            [a-zA-Z0-9.~_-]) printf "$c" ;;
-            *) printf '%%%02X' "'$c"
-        esac
-    done
-}
-
-function urldecode() {
-    # urldecode <string>
-
-    local url_encoded="${1//+/ }"
-    printf '%b' "${url_encoded//%/\\x}"
-}
-
 function ddisousb() {
   if [ "$1" ] && [[ -r "$1" ]] ; then
     if [ "$2" ] && [[ -r "$2" ]] ; then
@@ -305,9 +253,6 @@ function ddisousb() {
   fi
 }
 
-########################################################################
-# system
-########################################################################
 function find_linux_root_device() {
   local PDEVICE=`stat -c %04D /`
   for file in $(find /dev -type b 2>/dev/null) ; do
@@ -357,8 +302,7 @@ function dirtydev() {
 }
 
 function cpuuse() {
-  if [ "$1" ]
-  then
+  if [ "$1" ]; then
     SLEEPSEC="$1"
   else
     SLEEPSEC=1
@@ -401,7 +345,6 @@ function screen() {
 ########################################################################
 # helper functions for docker
 ########################################################################
-
 # run a new container and remove it when done
 function drun() {
   docker run -t -i -P --rm \
@@ -455,4 +398,3 @@ function dstop() { docker stop $(docker ps -a -q); }
 function dregls () {
   curl -k -X GET "https://"$1"/v2/_catalog"
 }
-
