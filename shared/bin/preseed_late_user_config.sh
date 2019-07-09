@@ -56,8 +56,9 @@ db_get malcolm/autologin
 
 # store answer in /etc/lightdm/lightdm.conf for autologin
 if [ -n $RET ] && [ -f /etc/lightdm/lightdm.conf ]; then
-  if [ "$RET" = true ]; then
-    sed -i 's/^#\(autologin-user=\)/\1/' /etc/lightdm/lightdm.conf
+  MAIN_USER="$(id -nu 1000)"
+  if [ -n $MAIN_USER ] && [ "$RET" = true ]; then
+    sed -i "s/^#\(autologin-user=\).*/\1$MAIN_USER/" /etc/lightdm/lightdm.conf
     sed -i 's/^#\(autologin-user-timeout=\)/\1/' /etc/lightdm/lightdm.conf
   else
   	sed -i 's/^\(autologin-user=\)/#\1/' /etc/lightdm/lightdm.conf
