@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # remove development packages
-apt-get -y --purge remove $(dpkg --get-selections | grep -v deinstall$ | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+apt-get -y --purge remove checkinstall $(dpkg --get-selections | grep -v deinstall$ | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \
@@ -24,6 +24,9 @@ apt-get -y --purge remove bluez-firmware \
 
 apt-get -y autoremove
 apt-get clean
+
+# remove any residual configs
+dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 
 # disable automatic/initial running of some services (but don't abort if we fail)
 systemctl disable systemd-timesyncd || true

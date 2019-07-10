@@ -14,6 +14,7 @@ btrfs-progs
 busybox
 bzip2
 ccache
+checkinstall
 cifs-utils
 coreutils
 cpio
@@ -22,6 +23,7 @@ cracklib-runtime
 cryptsetup
 cryptsetup-bin
 curl
+debsums
 dialog
 dosfstools
 ebtables
@@ -66,12 +68,15 @@ htop
 hwdata
 javascript-common
 less
+libffi6
+libffi-dev
 libgoogle-perftools4
 libgtk2.0-bin
 libnl-3-200
 libnl-genl-3-200
 libnl-route-3-200
 libpam-pwquality
+libssl1.0-dev
 libykpers-1-1
 libyubikey0
 lm-sensors
@@ -144,3 +149,5 @@ xz-utils
 zenity
 zenity-common
 zip
+zlib1g-dev
+
