@@ -6,7 +6,7 @@ iproute2
 iputils-arping
 iputils-ping
 iputils-tracepath
-libcurl3
+libcurl4
 libssh2-1
 macchanger
 netcat-openbsd

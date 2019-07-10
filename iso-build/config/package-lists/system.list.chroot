@@ -14,7 +14,6 @@ btrfs-progs
 busybox
 bzip2
 ccache
-checkinstall
 cifs-utils
 coreutils
 cpio
@@ -34,7 +33,6 @@ exfat-utils
 fatresize
 fonts-dejavu
 fuse
-fusedav
 fuseext2
 fusefat
 fuseiso
@@ -76,7 +74,7 @@ libnl-3-200
 libnl-genl-3-200
 libnl-route-3-200
 libpam-pwquality
-libssl1.0-dev
+libssl-dev
 libykpers-1-1
 libyubikey0
 lm-sensors
@@ -100,8 +98,8 @@ p7zip
 p7zip-full
 p7zip-rar
 parprouted
+partclone
 parted
-partimage
 pciutils
 pcregrep
 pigz
