@@ -14,7 +14,6 @@ btrfs-progs
 busybox
 bzip2
 ccache
-checkinstall
 cifs-utils
 coreutils
 cpio

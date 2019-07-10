@@ -3,19 +3,16 @@
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
-PYTHON_3_VERSION=3.7.3
+PYTHON_3_VERSION=3.7.4
 PYTHON_3_URL="https://www.python.org/ftp/python/$PYTHON_3_VERSION/Python-$PYTHON_3_VERSION.tgz"
-
-apt-get update
-apt-get -y install build-essential
-apt-get -y install libssl-dev zlib1g-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev
-apt-get -y install libgdbm-dev libdb5.3-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev
 
 cd /tmp
 curl -o "Python-$PYTHON_3_VERSION.tgz" "$PYTHON_3_URL"
 tar -xvf "Python-$PYTHON_3_VERSION.tgz"
 cd "Python-$PYTHON_3_VERSION"
 ./configure --enable-optimizations --prefix=/usr --enable-shared --with-system-expat --with-system-ffi
-make altinstall
+# make altinstall
+checkinstall -y -D --install=yes --fstrans=no --pkgname="python3.7" --pkgversion="$PYTHON_3_VERSION" --pkgarch="amd64" --pkgsource="$PYTHON_3_URL" make altinstall
+
 cd ..
 rm -rf "Python-$PYTHON_3_VERSION.tgz" "Python-$PYTHON_3_VERSION"
