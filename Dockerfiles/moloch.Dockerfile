@@ -199,6 +199,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
       ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
       ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
+    apt-get -q -y --purge remove gcc gcc-6 cpp cpp-6 libssl1.0-dev && \
     apt-get -q -y autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
