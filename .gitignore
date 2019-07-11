@@ -12,7 +12,6 @@
 /nginx/htpasswd
 
 # development
-docker-compose-seth*
 .vagrant
 malcolm_*images.tar.gz
 *.iso

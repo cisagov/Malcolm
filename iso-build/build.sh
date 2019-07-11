@@ -2,7 +2,7 @@
 
 IMAGE_NAME=malcolm
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=stretch
+IMAGE_DISTRIBUTION=buster
 
 BUILD_ERROR_CODE=1
 
@@ -73,7 +73,7 @@ if [ -d "$WORKDIR" ]; then
   # make sure we install the newer kernel, firmwares, and kernel headers
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-compiler-gcc-6-x86=$(dpkg -s linux-compiler-gcc-6-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "linux-kbuild-4.19=$(dpkg -s linux-kbuild-4.19 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
@@ -152,7 +152,7 @@ if [ -d "$WORKDIR" ]; then
     --binary-images iso-hybrid \
     --bootloaders "syslinux,grub-efi" \
     --chroot-filesystem squashfs \
-    --backports true \
+    --backports false \
     --security true \
     --updates true \
     --source false \

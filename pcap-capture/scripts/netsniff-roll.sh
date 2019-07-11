@@ -17,13 +17,19 @@ PCAP_ROTATE_SECONDS=$(echo "$PCAP_ROTATE_MINUTES*60" | bc)
 # with that because we'll be looking at the actual file time itself
 
 while true; do
-  sleep 5
+  sleep 10
 
   NETSNIFF_PIDS=$(pidof netsniff-ng)
   for NETSNIFF_PID in $NETSNIFF_PIDS; do
 
     unset OUTPUT_DIR
     unset PCAP_PREFIX
+
+    # when was this netsniff-ng started (we don't want to roll based on leftover pcap files from a previous instance)
+    NOW_DATE_UNIX="$(date +%s)"
+    PROC_START_DATE_STR="$(ps -q $NETSNIFF_PID -o lstart=)"
+    PROC_START_DATE_UNIX="$(date +%s -d "$PROC_START_DATE_STR")"
+    PROC_START_SECONDS_AGO=$((NOW_DATE_UNIX-PROC_START_DATE_UNIX))
 
     # see what arguments this netsniff-ng was started with
     NETSNIFF_ARGS=($(cat /proc/$NETSNIFF_PID/cmdline | tr '\000' ' ' | python -c 'import shlex; print shlex.split(None)' | tr -d '[],'))
@@ -51,7 +57,8 @@ while true; do
       MAX_SEC_SINCE_MOD=0
       for PCAP_FILE in "$OUTPUT_DIR/$PCAP_PREFIX"*; do
         SEC_SINCE_MOD=$(lastmod "$PCAP_FILE")
-        if (( $SEC_SINCE_MOD >= $PCAP_ROTATE_SECONDS )); then
+        # if this file is younger than the netsniff-ng process AND older than the rotate threshold
+        if (( $SEC_SINCE_MOD <= $PROC_START_SECONDS_AGO )) && (( $SEC_SINCE_MOD >= $PCAP_ROTATE_SECONDS )); then
           NEEDS_HUP=$((NEEDS_HUP+1))
           (( $SEC_SINCE_MOD > $MAX_SEC_SINCE_MOD )) && MAX_SEC_SINCE_MOD=$SEC_SINCE_MOD
         fi

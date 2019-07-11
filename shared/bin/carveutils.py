@@ -370,51 +370,62 @@ class MalassScan(FileScanProvider):
 
     filename = self.transactionIdToFilenameDict[transactionId]
 
-    success, errMsg, avSummaryStr = malass_client.query_av_summary_rpt(transactionId, filename, self.host, self.port)
-    if success:
+    try:
+      success, errMsg, avSummaryStr = malass_client.query_av_summary_rpt(transactionId, filename, self.host, self.port)
+      if success:
 
-      # get body text
-      body = BeautifulSoup(avSummaryStr, "html.parser").find("body")
-      if body is not None:
-        result.success = True
+        # get body text
+        body = BeautifulSoup(avSummaryStr, "html.parser").find("body")
+        if body is not None:
+          result.success = True
 
-        lines = body.text.split('\n')
+          lines = body.text.split('\n')
 
-        # see if analysis is complete (look for termination string)
-        summaryDict['complete'] = any(MAL_END_OF_TRANSACTION in x for x in lines)
+          # see if analysis is complete (look for termination string, then truncate the list starting at MAL_END_OF_TRANSACTION, inclusive)
+          eotIndices = [i for i, s in enumerate(lines) if MAL_END_OF_TRANSACTION in s]
+          summaryDict['complete'] = (len(eotIndices) > 0)
+          if summaryDict['complete']:
+            del lines[eotIndices[0]:]
 
-        # take report name/value pairs (minus AV results) and insert them into summaryDict
-        summaryDict.update(dict(map(str, x[1:].split('=')) for x in lines if x.startswith('#') and not x.startswith(f"#{MAL_END_OF_TRANSACTION}")))
+          # take report name/value pairs (minus AV results) and insert them into summaryDict
+          try:
+            summaryDict.update(dict(map(str, x[1:].split('=')) for x in lines if x.startswith('#')))
+          except (ValueError, TypeError) as e:
+            summaryDict['error'] = f"Report parse error: {str(e)}"
+            summaryDict['complete'] = True # avoid future lookups, abandon submission
 
-        # take AV results in this report and merge them into summaryDict
-        summaryDict['av'] = {}
-        for vmLine in [x for x in lines if x.startswith('av_vm_')]:
-          avDict = dict(map(str, x.split('=')) for x in vmLine.split(","))
-          if ('av_vm_name' in avDict) and (len(avDict['av_vm_name']) > 0):
-            summaryDict['av'][avDict['av_vm_name']] = avDict
+          # take AV results in this report and merge them into summaryDict
+          summaryDict['av'] = {}
+          for vmLine in [x for x in lines if x.startswith('av_vm_')]:
+            avDict = dict(map(str, x.split('=')) for x in vmLine.split(","))
+            if ('av_vm_name' in avDict) and (len(avDict['av_vm_name']) > 0):
+              summaryDict['av'][avDict['av_vm_name']] = avDict
 
-        # merge any new av results in this response into the final finishedAvsDict
-        for avName, avEntry in summaryDict['av'].items():
-          if ('av_vm_num' in avEntry) and (avEntry['av_vm_num'].isnumeric()) and (not (int(avEntry['av_vm_num']) in finishedAvsDict)):
-            finishedAvsDict[int(avEntry['av_vm_num'])] = avName
+          # merge any new av results in this response into the final finishedAvsDict
+          for avName, avEntry in summaryDict['av'].items():
+            if ('av_vm_num' in avEntry) and (avEntry['av_vm_num'].isnumeric()) and (not (int(avEntry['av_vm_num']) in finishedAvsDict)):
+              finishedAvsDict[int(avEntry['av_vm_num'])] = avName
 
-        # are we done?
-        if (summaryDict['complete'] == True):
-          # yes, we are done! decrement scanning counter and remove trans->filename mapping
-          self.scanningFilesCount.decrement()
-          self.transactionIdToFilenameDict.pop(transactionId, None)
+          # are we done?
+          if summaryDict['complete']:
 
-          # let's make sure at least one AV scanned, and report an error if not
-          if (len(finishedAvsDict) == 0):
-            summaryDict['error'] = f"No AVs scanned file sample ({transactionId}/{filename})"
+            # yes, we are done! let's make sure at least one AV scanned, and report an error if not
+            if (len(finishedAvsDict) == 0) and (len(summaryDict['error']) == 0):
+              summaryDict['error'] = f"No AVs scanned file sample ({transactionId}/{filename})"
+
+        else:
+          summaryDict['error'] = f"Summary report contained no body ({transactionId}/{filename})"
+          summaryDict['complete'] = True # avoid future lookups, abandon submission
 
       else:
-        summaryDict['error'] = f"Summary report contained no body ({transactionId}/{filename})"
+        summaryDict['error'] = f"Summary report was not generated: {errMsg} ({transactionId}/{filename})"
         summaryDict['complete'] = True # avoid future lookups, abandon submission
 
-    else:
-      summaryDict['error'] = f"Summary report was not generated: {errMsg} ({transactionId}/{filename})"
-      summaryDict['complete'] = True # avoid future lookups, abandon submission
+    finally:
+      if (transactionId is not None) and summaryDict['complete']:
+        # decrement scanning counter and remove trans->filename mapping if this scan is complete
+        self.scanningFilesCount.decrement()
+        self.transactionIdToFilenameDict.pop(transactionId, None)        
 
     result.finished = summaryDict['complete']
     result.result = summaryDict
