@@ -1104,7 +1104,7 @@ class LinuxInstaller(Installer):
                                     ['[Manager]',
                                      'DefaultLimitNOFILE=65535:65535',
                                      'DefaultLimitMEMLOCK=infinity']),
-                        ConfigLines(['bionic', 'cosmic', 'stretch', 'buster', 'sid', 'fedora'],
+                        ConfigLines(['bionic', 'cosmic', 'disco', 'stretch', 'buster', 'sid', 'fedora'],
                                     '/etc/security/limits.d/limits.conf',
                                     '',
                                     '/etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments',
