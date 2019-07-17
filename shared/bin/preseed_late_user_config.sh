@@ -4,6 +4,7 @@
 # prompt whether to autologin or not
 # prompt whether or not to lock xscreensaver for the GUI session
 # prompt whether to use U.S. DoD login banner (https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585)
+# prompt for disabling IPV6 or not
 
 # this is a debconf-compatible script
 . /usr/share/debconf/confmodule
@@ -39,10 +40,42 @@ Description:
 Template: malcolm/dod_banner_title
 Type: text
 Description: Use U.S. DoD login banner?
+
+Template: malcolm/disable_ipv6
+Type: boolean
+Default: true
+Description:
+ Disable IPv6?
+
+Template: malcolm/disable_ipv6_title
+Type: text
+Description: IPv6
 !EOF!
 
 # load template
 db_x_loadtemplatefile /tmp/malcolm.template malcolm
+
+# set title
+db_settitle malcolm/disable_ipv6_title
+
+# prompt
+db_input critical malcolm/disable_ipv6
+db_go
+
+# get answer to $RET
+db_get malcolm/disable_ipv6
+
+# store answer in /etc/sysctl.conf and /etc/default/grub
+if [ "$RET" = false ]; then
+  DISABLE_IPV6_VAL=0
+else
+  DISABLE_IPV6_VAL=1
+fi
+
+sed -i "s/\(disable_ipv6=\)[[:digit:]]\+/\1$DISABLE_IPV6_VAL/g" /etc/sysctl.conf 2>/dev/null || true
+sed -i "s/\(ipv6\.disable=\)[[:digit:]]\+/\1$DISABLE_IPV6_VAL/g" /etc/default/grub 2>/dev/null || true
+
+echo "malcolm/disable_ipv6=$RET" > /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/autologin_title
