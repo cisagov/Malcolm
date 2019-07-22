@@ -10,6 +10,8 @@
 /filebeat/certs
 /nginx/certs
 /nginx/htpasswd
+/htadmin/config.ini
+/htadmin/metadata
 
 # development
 .vagrant

@@ -49,7 +49,36 @@ EOF
 chmod 600 ./auth.env
 
 pushd ./nginx/ >/dev/null 2>&1
-htpasswd -bc ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
+htpasswd -b -c -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
+PASSWORD_HTPASSWD_HASHED="$(cat ./htpasswd | cut -d: -f2)"
+popd >/dev/null 2>&1
+
+pushd ./htadmin/ >/dev/null 2>&1
+cat <<EOF > config.ini
+; HTAdmin config file.
+
+[application]
+; Change this to customize your title:
+app_title = Malcolm User Management
+
+; htpasswd file
+secure_path  = ./config/htpasswd
+; metadata file
+metadata_path  = ./config/metadata
+
+; admin user/password (htpasswd -b -c -B ...)
+admin_user = $USERNAME
+admin_pwd_hash = $PASSWORD_HTPASSWD_HASHED
+
+; SMTP server information for password reset:
+mail_from = admin@example.com
+mail_from_name = Administrator
+mail_user = admin@example.com
+mail_pwd  = xxxx
+mail_server = mail.example.com
+
+EOF
+touch metadata
 popd >/dev/null 2>&1
 
 unset CONFIRMATION

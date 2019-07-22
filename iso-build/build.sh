@@ -164,7 +164,7 @@ if [ -d "$WORKDIR" ]; then
     --mirror-bootstrap http://ftp.us.debian.org/debian/ \
     --mirror-binary http://httpredir.debian.org/debian/ \
     --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
-    --apt-options "--force-yes --yes"
+    --apt-options "--allow-downgrades --allow-remove-essential --allow-change-held-packages --yes"
 
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
   if [ -f "$IMAGE_NAME-amd64.hybrid.iso" ]; then

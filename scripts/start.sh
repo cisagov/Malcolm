@@ -30,19 +30,21 @@ pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 # if we are in an interactive shell and we're missing any of the auth files, prompt to create them now
 # ( another way to check this: [[ "${-}" =~ 'i' ]] )
 if [[ -t 1 ]] && \
-   ( [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]] )
+   ( [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]] )
 then
   echo "Malcolm authentication files are missing, running ./scripts/auth_setup.sh..."
   ./scripts/auth_setup.sh
 fi
 # still missing? sorry charlie
-if [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]]; then
+if [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]]; then
   echo "Malcolm authentication files are missing, please run ./scripts/auth_setup.sh to generate them"
   exit 1
 fi
 
-# make sure a read permission is set correctly for the nginx worker process
-chmod 644 ./nginx/htpasswd >/dev/null 2>&1
+[[ -f ./htadmin/metadata ]] || touch ./htadmin/metadata
+
+# make sure a read permission is set correctly for the nginx worker processes
+chmod 644 ./nginx/htpasswd ./htadmin/config.ini ./htadmin/metadata >/dev/null 2>&1
 
 # make sure some directories exist before we start
 mkdir -p ./elasticsearch/

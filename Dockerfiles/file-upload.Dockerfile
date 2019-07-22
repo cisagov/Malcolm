@@ -10,7 +10,7 @@ ENV JQUERY_FILE_UPLOAD_VERSION v9.19.1
 ADD https://github.com/blueimp/jQuery-File-Upload/archive/${JQUERY_FILE_UPLOAD_VERSION}.tar.gz /jQuery-File-Upload.tar.gz
 
 RUN apt-get update && \
-    apt-get -y -q --force-yes install --no-install-recommends npm node-encoding git ca-certificates wget && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends npm node-encoding git ca-certificates wget && \
     npm install -g bower && \
     mkdir /jQuery-File-Upload && \
   	tar --strip-components=1 -C /jQuery-File-Upload -xzf /jQuery-File-Upload.tar.gz && \
@@ -30,9 +30,8 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 RUN apt-get update && \
-    apt-get -y -q --force-yes install --no-install-recommends \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       wget \
-      apt-transport-https \
       ca-certificates \
       openssh-server \
       supervisor \
@@ -42,7 +41,8 @@ RUN apt-get update && \
       php7.3-fpm \
       php7.3-apcu \
       nginx-light && \
-    apt-get clean -y -q
+    apt-get clean -y -q && \
+    rm -rf /var/lib/apt/lists/*
 
 ADD file-upload/supervisord.conf /supervisord.conf
 ADD file-upload/jquery-file-upload/index.html /var/www/upload/index.html
