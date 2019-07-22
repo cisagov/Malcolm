@@ -35,7 +35,7 @@ RUN apt-get update && \
     yes '' | pecl install mcrypt-$MCRYPT_VERSION && \
     ln -s -r /usr/lib/php/20??????/*.so /usr/lib/php/$PHP_VERSION/ && \
     mkdir -p /run/php && \
-    git clone --depth 1 https://github.com/lbrayner/htadmin /tmp/htadmin && \
+    git clone --depth 1 https://github.com/mmguero/htadmin /tmp/htadmin && \
     mv /tmp/htadmin/sites/html/htadmin /var/www/htadmin && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
       git make libmcrypt-dev php-pear php-dev && \

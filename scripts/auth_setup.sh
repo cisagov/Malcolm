@@ -29,7 +29,7 @@ USERNAME=""
 PASSWORD=""
 PASSWORD_CONFIRM=""
 
-read -p "Username: " USERNAME
+read -p "Administrator username: " USERNAME
 while true; do
     read -s -p "${USERNAME} password: " PASSWORD
     echo
@@ -66,7 +66,7 @@ secure_path  = ./config/htpasswd
 ; metadata file
 metadata_path  = ./config/metadata
 
-; admin user/password (htpasswd -b -c -B ...)
+; administrator user/password (htpasswd -b -c -B ...)
 admin_user = $USERNAME
 admin_pwd_hash = $PASSWORD_HTPASSWD_HASHED
 

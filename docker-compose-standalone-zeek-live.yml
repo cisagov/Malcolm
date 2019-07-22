@@ -292,6 +292,18 @@ services:
       - 127.0.0.1:8022:22
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
+  htadmin:
+    image: malcolmnetsec/htadmin:1.3.2
+    restart: "no"
+    hostname: htadmin
+    environment:
+      VIRTUAL_HOST : 'htadmin.malcolm.local'
+    expose:
+      - 80
+    volumes:
+      - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
+      - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
+      - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
   nginx-proxy:
     image: malcolmnetsec/nginx-proxy:1.3.2
     restart: "no"
@@ -300,8 +312,10 @@ services:
       - moloch
       - kibana
       - upload
+      - htadmin
     ports:
       - "443:443"
+      - "488:488"
       - "3030:3030"
       - "5601:5601"
       - "8443:8443"

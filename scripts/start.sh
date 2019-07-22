@@ -32,12 +32,12 @@ pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 if [[ -t 1 ]] && \
    ( [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]] )
 then
-  echo "Malcolm authentication files are missing, running ./scripts/auth_setup.sh..."
+  echo "Malcolm administrator account authentication files are missing, running ./scripts/auth_setup.sh..."
   ./scripts/auth_setup.sh
 fi
 # still missing? sorry charlie
 if [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]]; then
-  echo "Malcolm authentication files are missing, please run ./scripts/auth_setup.sh to generate them"
+  echo "Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup.sh to generate them"
   exit 1
 fi
 

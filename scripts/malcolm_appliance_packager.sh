@@ -99,7 +99,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./elastalert/rules/* "$DESTDIR/elastalert/rules/" 2>/dev/null || true
   cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
   pushd "$DESTDIR" >/dev/null 2>&1
-  echo "You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated"
+  echo "You must set an administrator username and password for Malcolm, and self-signed X.509 certificates will be generated"
   ./scripts/auth_setup.sh
   rm -rf logstash/certs/ca.key
   pushd .. >/dev/null 2>&1

@@ -101,6 +101,7 @@ Pulling moloch        ... done
 Pulling file-monitor  ... done
 Pulling pcap-capture  ... done
 Pulling upload        ... done
+Pulling htadmin       ... done
 Pulling nginx-proxy   ... done
 ```
 
@@ -109,6 +110,7 @@ You can then observe that the images have been retrieved by running `docker imag
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/nginx-proxy                           1.3.2               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/htadmin                               1.3.2               xxxxxxxxxxxx        16 hours ago        180MB
 malcolmnetsec/file-upload                           1.3.2               xxxxxxxxxxxx        16 hours ago        214MB
 malcolmnetsec/pcap-capture                          1.3.2               xxxxxxxxxxxx        17 hours ago        111MB
 malcolmnetsec/file-monitor                          1.3.2               xxxxxxxxxxxx        17 hours ago        353MB
@@ -185,6 +187,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
+* `htadmin` - configuration for the `htadmin` user account management container
 * `iso-build` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
@@ -219,9 +222,10 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 
 * `malcolmnetsec/curator` (based on `debian:buster-slim`)
 * `malcolmnetsec/elastalert` (based on `bitsensor/elastalert`)
-* `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
+* `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
+* `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `centos:7`)
 * `malcolmnetsec/moloch` (based on `debian:stretch-slim`)
@@ -241,7 +245,7 @@ Additionally, the command will pull from Docker Hub:
 ```
 $ ./scripts/malcolm_appliance_packager.sh 
 You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
-Username: analyst
+Administrator username: analyst
 analyst password: 
 analyst password (again): 
 
@@ -1235,11 +1239,13 @@ Pulling moloch        ... done
 Pulling file-monitor  ... done
 Pulling pcap-capture  ... done
 Pulling upload        ... done
+Pulling htadmin       ... done
 Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/nginx-proxy                           1.3.2               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/htadmin                               1.3.2               xxxxxxxxxxxx        16 hours ago        180MB
 malcolmnetsec/file-upload                           1.3.2               xxxxxxxxxxxx        16 hours ago        214MB
 malcolmnetsec/pcap-capture                          1.3.2               xxxxxxxxxxxx        17 hours ago        111MB
 malcolmnetsec/file-monitor                          1.3.2               xxxxxxxxxxxx        17 hours ago        353MB
@@ -1258,6 +1264,7 @@ user@host:~/Malcolm$ ./scripts/start.sh
 Creating network "malcolm_default" with the default driver
 Creating malcolm_file-monitor_1  ... done
 Creating malcolm_pcap-capture_1  ... done
+Creating malcolm_htadmin_1       ... done
 Creating malcolm_elasticsearch_1 ... done
 Creating malcolm_moloch_1        ... done
 Creating malcolm_elastalert_1    ... done
