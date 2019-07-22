@@ -7,7 +7,7 @@ version: '3.7'
 #-------------------------------------------------------------------------------
 x-moloch-variables: &moloch-variables
   # INITIALIZEDB should be 'true' on Moloch's first execution, and 'false' every other time
-  INITIALIZEDB : 'false'
+  INITIALIZEDB : 'true'
   MANAGE_PCAP_FILES : 'false'
   ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
