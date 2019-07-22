@@ -428,7 +428,7 @@ class Installer(object):
     return result, installPath
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  def tweak_malcolm_runtime(self, malcolm_install_path, expose_logstash_default=False):
+  def tweak_malcolm_runtime(self, malcolm_install_path, expose_logstash_default=False, restart_mode_default=False):
     global args
 
     if not args.configFile:
@@ -472,6 +472,15 @@ class Installer(object):
     while not YesOrNo('Setting {} for Elasticsearch and {} for Logstash. Is this OK?'.format(esMemory, lsMemory), default=True):
       esMemory = AskForString('Enter memory for Elasticsearch (eg., 16g, 9500m, etc.)')
       lsMemory = AskForString('Enter memory for LogStash (eg., 4g, 2500m, etc.)')
+
+    restartMode = None
+    allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
+    if YesOrNo('Restart Malcolm upon system or Docker daemon restart?', default=restart_mode_default):
+      while restartMode not in allowedRestartModes:
+        restartMode = AskForString('Select Malcolm restart behavior {}'.format(allowedRestartModes), default='unless-stopped')
+    else:
+      restartMode = 'no'
+    if (restartMode == 'no'): restartMode = '"no"'
 
     curatorSnapshots = YesOrNo('Create daily snapshots (backups) of Elasticsearch indices?', default=False)
     curatorSnapshotDir = './elasticsearch-backup'
@@ -621,7 +630,10 @@ class Installer(object):
               currentService = serviceMatch.group(1).lower()
               serviceStartLine = True
 
-          if 'ZEEK_EXTRACTOR_MODE' in line:
+          if (currentService is not None) and (restartMode is not None) and re.match(r'^\s*restart\s*:.*$', line):
+            # elasticsearch backup directory
+            line = "{}restart: {}".format(serviceIndent * 2, restartMode)
+          elif 'ZEEK_EXTRACTOR_MODE' in line:
             # zeek file extraction mode
             line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', r"\g<1>'{}'".format(fileCarveMode), line)
           elif 'EXTRACTED_FILE_PRESERVATION' in line:
@@ -1363,7 +1375,9 @@ def main():
   parser.add_argument('-c', '--configure', dest='configOnly', type=str2bool, nargs='?', const=True, default=False, help="Only do configuration (not installation)")
   parser.add_argument('-f', '--configure-file', required=False, dest='configFile', metavar='<STR>', type=str, default='', help='Single docker-compose YML file to configure')
   parser.add_argument('-d', '--defaults', dest='acceptDefaults', type=str2bool, nargs='?', const=True, default=False, help="Accept defaults to prompts without user interaction")
-  parser.add_argument('-l', '--logstash-expose', dest='exposeLogstash', type=str2bool, nargs='?', const=True, default=False, help="Configure to expose Logstash port to external hosts")
+  parser.add_argument('-l', '--logstash-expose', dest='exposeLogstash', type=str2bool, nargs='?', const=True, default=False, help="Expose Logstash port to external hosts")
+  parser.add_argument('-r', '--restart-malcolm', dest='malcolmAutoRestart', type=str2bool, nargs='?', const=True, default=False, help="Restart Malcolm on system restart (unless-stopped)")
+
   try:
     parser.error = parser.exit
     args = parser.parse_args()
@@ -1442,7 +1456,7 @@ def main():
   elif hasattr(installer, 'install_malcolm_files'):
     success, installPath = installer.install_malcolm_files(malcolmFile)
   if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
-    installer.tweak_malcolm_runtime(installPath, expose_logstash_default=args.exposeLogstash)
+    installer.tweak_malcolm_runtime(installPath, expose_logstash_default=args.exposeLogstash, restart_mode_default=args.malcolmAutoRestart)
     eprint("\nMalcolm has been installed to {}. See README.md for more information.".format(installPath))
     eprint("Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {}.".format(os.path.join(installPath, "scripts")))
 

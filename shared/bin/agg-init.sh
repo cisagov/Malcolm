@@ -22,7 +22,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     MAIN_USER_HOME="$(getent passwd "$MAIN_USER" | cut -d: -f6)"
     if [[ -f "$MAIN_USER_HOME"/Malcolm/firstrun ]]; then
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
-        /usr/bin/env python3.7 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --logstash-expose
+        /usr/bin/env python3.7 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --logstash-expose --restart-malcolm
       fi
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/auth_setup.sh ]]; then
         ln -r -s "$MAIN_USER_HOME"/Malcolm/scripts/auth_setup.sh "$MAIN_USER_HOME/Desktop/Malcolm Authentication Setup.sh"

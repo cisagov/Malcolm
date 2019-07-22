@@ -553,6 +553,8 @@ You can also use `docker stats` to monitor the resource utilization of running c
 
 You can run `./scripts/stop.sh` to stop the docker containers and remove their virtual network. Alternately, `./scripts/restart.sh` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
 
+Malcolm can be configured to be automatically restarted when the Docker system daemon restart (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
+
 ### <a name="Wipe"></a>Clearing Malcolm’s data
 
 Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch database (including [index snapshots](#Curator)).
@@ -1140,6 +1142,10 @@ user@host:~/Malcolm$ python3 scripts/install.py --configure
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
 Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
+
+Restart Malcolm upon system or Docker daemon restart? (y/N): y
+
+Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
 
 Periodically close old Elasticsearch indices? (Y/n): y
 
