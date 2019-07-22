@@ -72,6 +72,7 @@ if $DOCKER_COMPOSE_COMMAND up --detach ; then
   echo "  - Kibana: https://localhost:5601/"
   echo "  - PCAP Upload (web): https://localhost:8443/"
   echo "  - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/"
+  echo "  - Account management: https://localhost:488/"
   echo ""
 
   $SCRIPT_PATH/logs.sh "$CONFIG_FILE"

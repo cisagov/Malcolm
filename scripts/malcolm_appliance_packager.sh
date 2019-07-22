@@ -143,6 +143,7 @@ if mkdir "$DESTDIR"; then
   echo "  - Kibana: https://localhost:5601/" | tee -a "$README"
   echo "  - PCAP Upload (web): https://localhost:8443/" | tee -a "$README"
   echo "  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
+  echo "  - Account management: https://localhost:488/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1

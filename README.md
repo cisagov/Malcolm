@@ -140,6 +140,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * Kibana: [https://localhost:5601](https://localhost:5601)
 * Capture File and Log Archive Upload (Web): [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
+* Account Management: [https://localhost:488](https://localhost:488)
 
 ## <a name="Overview"></a>Overview
 
@@ -276,6 +277,7 @@ A minute or so after starting Malcolm, the following services will be accessible
   - Kibana: https://localhost:5601/
   - PCAP Upload (web): https://localhost:8443/
   - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - Account management: https://localhost:488/
 ```
 
 The above example will result in the following artifacts for distribution as explained in the script's output:
@@ -1273,6 +1275,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - Kibana: https://localhost:5601/
   - PCAP Upload (web): https://localhost:8443/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+  - Account management: https://localhost:488/
 
          Name                        Command                       State                                                                   Ports
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------$
