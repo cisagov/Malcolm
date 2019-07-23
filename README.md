@@ -32,6 +32,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         * [Windows host system configuration](#HostSystemConfigWindows)
 * [Running Malcolm](#Running)
     * [Configure authentication](#AuthSetup)
+        * [Account management](#AccountManagement)
     * [Starting Malcolm](#Starting)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
@@ -109,18 +110,18 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.3.2               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/htadmin                               1.3.2               xxxxxxxxxxxx        16 hours ago        180MB
-malcolmnetsec/file-upload                           1.3.2               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.3.2               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.3.2               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/moloch                                1.3.2               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/curator                               1.3.2               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/logstash-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.3.2               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.3.2               xxxxxxxxxxxx        17 hours ago        850MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
+malcolmnetsec/moloch                                1.4.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.4.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.4.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.4.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.4.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.4.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.4.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.4.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.4.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.4.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.4.0               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -203,7 +204,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 
 and the following files of special note:
 
-* `auth.env` - the script `./scripts/auth_setup.sh` prompts the user for the username and password to be used when configuring the HTTPS and SFTP servers served by an instance of the Malcolm appliance, and `auth.env` is the environment file where those values are stored
+* `auth.env` - the script `./scripts/auth_setup.sh` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
 * `cidr-map.txt` - specify custom IP address to network segment mapping
 * `host-map.txt` - specify custom IP and/or MAC address to host mapping
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
@@ -534,7 +535,7 @@ As the author supposes that the target audience of this document are more likely
 
 Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
 
-* define the username and password to be used when accessing the HTTPS and SFTP interfaces provided by the local instance of the Malcolm appliance
+* define the administrator account username and password
 * specify whether or not to (re)generate the self-signed certificates used for HTTPS access
     * key and certificate files are located in the `nginx/certs/` directory
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
@@ -542,6 +543,14 @@ Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in orde
     * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory
 * specify whether or not to store the username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (see the `ES_EXTERNAL_HOSTS`, `ES_EXTERNAL_SSL`, and `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
     * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
+
+#### <a name="AccountManagement"></a>Account management
+
+[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (eg., [https://localhost:488](https://localhost:488) if you are connecting locally).
+
+Malcolm user accounts can be used to access the [interfaces](#UserInterfaceURLs) of all of its [components](#Components), including Moloch. Moloch uses its own internal database of user accounts, so when a Malcolm user account logs in to Moloch for the first time Malcolm creates a corresponding Moloch user account automatically. This being the case, it is *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as those settings would not be consistently used across Malcolm.
+
+Users may change their passwords via the **Malcolm User Management** page by clicking **User Self Service**. A forgotten password can also be reset via an emailed link, though this requires SMTP server settings to be specified in `htadmin/config.ini` in the Malcolm installation directory.
 
 ### <a name="Starting"></a>Starting Malcolm
 
@@ -821,12 +830,6 @@ See Moloch's usage documentation for more information on [settings](https://loca
 ![Moloch general settings](./docs/images/screenshots/moloch_general_settings.png)
 
 ![Moloch custom view management](./docs/images/screenshots/moloch_view_settings.png)
-
-#### User management
-
-Currently, when [`auth_setup.sh`](#AuthSetup) is run Malcolm creates a single username/password used by all of its [components](#Components), and those credentials are used to authenticate across all of those components. This being the case, it is currently *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as these settings will not be consistently used across Malcolm.
-
-Multi-user management -- most likely with integration to an authentication server such as Active Directory -- is on Malcolm's roadmap for development in the (hopefully) not-too-distant future.
 
 ## <a name="Kibana"></a>Kibana
 
@@ -1244,18 +1247,18 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.3.2               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/htadmin                               1.3.2               xxxxxxxxxxxx        16 hours ago        180MB
-malcolmnetsec/file-upload                           1.3.2               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.3.2               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.3.2               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/curator                               1.3.2               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/moloch                                1.3.2               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/logstash-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.3.2               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.3.2               xxxxxxxxxxxx        17 hours ago        850MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
+malcolmnetsec/moloch                                1.4.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.4.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.4.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.4.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.4.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.4.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.4.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.4.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.4.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.4.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.4.0               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1263,43 +1266,45 @@ Finally, we can start Malcolm. When Malcolm starts it will stream informational 
 user@host:~/Malcolm$ ./scripts/start.sh
 Creating network "malcolm_default" with the default driver
 Creating malcolm_file-monitor_1  ... done
-Creating malcolm_pcap-capture_1  ... done
 Creating malcolm_htadmin_1       ... done
 Creating malcolm_elasticsearch_1 ... done
-Creating malcolm_moloch_1        ... done
-Creating malcolm_elastalert_1    ... done
+Creating malcolm_pcap-capture_1  ... done
+Creating malcolm_curator_1       ... done
 Creating malcolm_logstash_1      ... done
+Creating malcolm_elastalert_1    ... done
 Creating malcolm_kibana_1        ... done
-Creating malcolm_upload_1        ... done
+Creating malcolm_moloch_1        ... done
 Creating malcolm_filebeat_1      ... done
+Creating malcolm_upload_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
 
 Malcolm started, setting "INITIALIZEDB=false" in "docker-compose.yml" for subsequent runs.
 
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
-  - Moloch: https://localhost/
+  - Moloch: https://localhost:443/
   - Kibana: https://localhost:5601/
   - PCAP Upload (web): https://localhost:8443/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Account management: https://localhost:488/
 
-         Name                        Command                       State                                                                   Ports
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------$
-malcolm_elastalert_1      /usr/local/bin/elastalert- ...   Up (health: starting)   3030/tcp
-malcolm_elasticsearch_1   /usr/local/bin/docker-entr ...   Up (health: starting)   9200/tcp, 9300/tcp
-malcolm_file-monitor_1    /usr/local/bin/supervisord ...   Up                      3310/tcp
-malcolm_filebeat_1        /usr/local/bin/docker-entr ...   Up
-malcolm_kibana_1          /usr/bin/supervisord -c /e ...   Up (health: starting)   28991/tcp, 5601/tcp
-malcolm_logstash_1        /usr/local/bin/logstash-st ...   Up (health: starting)   5000/tcp, 5044/tcp, 9600/tcp
-malcolm_moloch_1          /usr/bin/supervisord -c /e ...   Up                      8000/tcp, 8005/tcp, 8081/tcp
-malcolm_nginx-proxy_1     /app/docker-entrypoint.sh  ...   Up                      0.0.0.0:28991->28991/tcp, 0.0.0.0:3030->3030/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:5601->5601/tcp, 80/tcp,
-                                                                                   0.0.0.0:8443->8443/tcp, 0.0.0.0:9200->9200/tcp, 0.0.0.0:9600->9600/tcp
-malcolm_pcap-capture_1    /usr/local/bin/supervisor.sh     Up
-malcolm_upload_1          /docker-entrypoint.sh /usr ...   Up                      127.0.0.1:8022->22/tcp, 80/tcp
+         Name                        Command                       State                                                                          Ports                                                               
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+malcolm_curator_1         /usr/local/bin/cron_env_deb.sh   Up                                                                                                                                                         
+malcolm_elastalert_1      /usr/local/bin/elastalert- ...   Up (health: starting)   3030/tcp, 3333/tcp                                                                                                                 
+malcolm_elasticsearch_1   /usr/local/bin/docker-entr ...   Up (health: starting)   9200/tcp, 9300/tcp                                                                                                                 
+malcolm_file-monitor_1    /usr/local/bin/supervisord ...   Up                      3310/tcp                                                                                                                           
+malcolm_filebeat_1        /usr/local/bin/docker-entr ...   Up                                                                                                                                                         
+malcolm_htadmin_1         /usr/bin/supervisord -c /s ...   Up                      80/tcp                                                                                                                             
+malcolm_kibana_1          /usr/bin/supervisord -c /e ...   Up (health: starting)   28991/tcp, 5601/tcp                                                                                                                
+malcolm_logstash_1        /usr/local/bin/logstash-st ...   Up (health: starting)   5000/tcp, 5044/tcp, 9600/tcp                                                                                                       
+malcolm_moloch_1          /usr/bin/supervisord -c /e ...   Up                      8000/tcp, 8005/tcp, 8081/tcp                                                                                                       
+malcolm_nginx-proxy_1     /app/docker-entrypoint.sh  ...   Up                      0.0.0.0:28991->28991/tcp, 0.0.0.0:3030->3030/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:488->488/tcp, 0.0.0.0:5601->5601/tcp, 80/tcp,      
+                                                                                   0.0.0.0:8443->8443/tcp, 0.0.0.0:9200->9200/tcp, 0.0.0.0:9600->9600/tcp                                                             
+malcolm_pcap-capture_1    /usr/local/bin/supervisor.sh     Up                                                                                                                                                         
+malcolm_upload_1          /docker-entrypoint.sh /usr ...   Up                      127.0.0.1:8022->22/tcp, 80/tcp                                                                                                     
 
-Attaching to malcolm_nginx-proxy_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_elastalert_1, malcolm_moloch_1, malcolm_elasticsearch_1, malcolm_file-monitor_1$
- malcolm_pcap-capture_1
+Attaching to malcolm_nginx-proxy_1, malcolm_upload_1, malcolm_filebeat_1, malcolm_kibana_1, malcolm_moloch_1, malcolm_elastalert_1, malcolm_logstash_1, malcolm_curator_1, malcolm_elasticsearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1
 …
 ```
 
