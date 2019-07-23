@@ -68,7 +68,7 @@ if $DOCKER_COMPOSE_COMMAND up --detach ; then
 
   echo "In a few minutes, Malcolm services will be accessible via the following URLs:"
   echo "------------------------------------------------------------------------------"
-  echo "  - Moloch: https://localhost/"
+  echo "  - Moloch: https://localhost:443/"
   echo "  - Kibana: https://localhost:5601/"
   echo "  - PCAP Upload (web): https://localhost:8443/"
   echo "  - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/"

@@ -139,7 +139,7 @@ if mkdir "$DESTDIR"; then
   echo "   - auth_setup.sh (change authentication-related settings)" | tee -a "$README"
   echo "" | tee -a "$README"
   echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
-  echo "  - Moloch: https://localhost/" | tee -a "$README"
+  echo "  - Moloch: https://localhost:443/" | tee -a "$README"
   echo "  - Kibana: https://localhost:5601/" | tee -a "$README"
   echo "  - PCAP Upload (web): https://localhost:8443/" | tee -a "$README"
   echo "  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"

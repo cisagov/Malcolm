@@ -138,7 +138,7 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 
 A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
-* Moloch: [https://localhost](https://localhost)
+* Moloch: [https://localhost:443](https://localhost:443)
 * Kibana: [https://localhost:5601](https://localhost:5601)
 * Capture File and Log Archive Upload (Web): [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
