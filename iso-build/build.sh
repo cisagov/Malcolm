@@ -85,6 +85,7 @@ if [ -d "$WORKDIR" ]; then
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
   mkdir -p "$MALCOLM_DEST_DIR"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"
+  mkdir -p "$MALCOLM_DEST_DIR/htadmin/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/elasticsearch/nodes/"
