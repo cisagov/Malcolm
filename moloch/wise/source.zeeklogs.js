@@ -3,9 +3,15 @@ var wiseSource     = require('./wiseSource.js')
   ;
 
 //////////////////////////////////////////////////////////////////////////////////
-// see 11_zeek_logs.conf for the logstash rules populating this data
+// Moloch WISE Data Source definition for Zeek logs.
+//
+// Part of Malcolm (https://github.com/idaholab/malcolm)
+//
+// Data may be populated with Malcolm's Zeek Logstash filters:
+//   (particularly https://raw.githubusercontent.com/idaholab/Malcolm/master/logstash/pipeline-main/11_zeek_logs.conf)
 //
 // Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+// see https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 function ZeekLogs (api, section) {
   ZeekLogs.super_.call(this, api, section);
@@ -1185,7 +1191,6 @@ function ZeekLogs (api, section) {
 
     // ####################################################################
     "  br\n");
-
 
   // Add the source as available
   this.api.addSource("zeek", this);
