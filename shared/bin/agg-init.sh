@@ -22,16 +22,20 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     MAIN_USER_HOME="$(getent passwd "$MAIN_USER" | cut -d: -f6)"
     if [[ -f "$MAIN_USER_HOME"/Malcolm/firstrun ]]; then
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
-        /usr/bin/env python3.7 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --logstash-expose
-      fi
-      if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/auth_setup.sh ]]; then
-        ln -r -s "$MAIN_USER_HOME"/Malcolm/scripts/auth_setup.sh "$MAIN_USER_HOME/Desktop/Malcolm Authentication Setup.sh"
-        chown -h "$MAIN_USER:$MAIN_USER" "$MAIN_USER_HOME/Desktop/Malcolm Authentication Setup.sh"
+        /usr/bin/env python3.7 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --logstash-expose --restart-malcolm
       fi
       rm -f "$MAIN_USER_HOME"/Malcolm/firstrun
     fi
 
+    # make sure read permission is set correctly for the nginx worker processes
+    chmod 644 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/config.ini "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
   fi
+
+  # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
+  InitializeAggregatorNetworking
+
+  # chromium tries to call home despite my best efforts
+  BadGoogle
 
   # if we need to import prebuilt Malcolm docker images, do so now (but not if we're in a live-usb boot)
   DOCKER_DRIVER="$(docker info 2>/dev/null | grep 'Storage Driver' | cut -d' ' -f3)"

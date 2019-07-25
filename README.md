@@ -108,16 +108,16 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.3.1               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.3.1               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.3.1               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.3.1               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/moloch                                1.3.1               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.3.1               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/curator                               1.3.1               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/logstash-oss                          1.3.1               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.3.1               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.3.1               xxxxxxxxxxxx        17 hours ago        850MB
+malcolmnetsec/nginx-proxy                           1.3.2               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.3.2               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.3.2               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.3.2               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/moloch                                1.3.2               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/curator                               1.3.2               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/logstash-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.3.2               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.3.2               xxxxxxxxxxxx        17 hours ago        850MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 
@@ -552,6 +552,8 @@ You can also use `docker stats` to monitor the resource utilization of running c
 ### <a name="StopAndRestart"></a>Stopping and restarting Malcolm
 
 You can run `./scripts/stop.sh` to stop the docker containers and remove their virtual network. Alternately, `./scripts/restart.sh` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
+
+Malcolm can be configured to be automatically restarted when the Docker system daemon restart (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
 
 ### <a name="Wipe"></a>Clearing Malcolm’s data
 
@@ -1141,6 +1143,10 @@ Now that any necessary system configuration changes have been made, the local Ma
 ```
 Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
 
+Restart Malcolm upon system or Docker daemon restart? (y/N): y
+
+Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
+
 Periodically close old Elasticsearch indices? (Y/n): y
 
 Indices older than 5 years will be periodically closed. Is this OK? (Y/n): n
@@ -1231,16 +1237,16 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/nginx-proxy                           1.3.1               xxxxxxxxxxxx        16 hours ago        53MB
-malcolmnetsec/file-upload                           1.3.1               xxxxxxxxxxxx        16 hours ago        214MB
-malcolmnetsec/pcap-capture                          1.3.1               xxxxxxxxxxxx        17 hours ago        111MB
-malcolmnetsec/file-monitor                          1.3.1               xxxxxxxxxxxx        17 hours ago        353MB
-malcolmnetsec/curator                               1.3.1               xxxxxxxxxxxx        17 hours ago        303MB
-malcolmnetsec/moloch                                1.3.1               xxxxxxxxxxxx        17 hours ago        1.04GB
-malcolmnetsec/filebeat-oss                          1.3.1               xxxxxxxxxxxx        17 hours ago        454MB
-malcolmnetsec/logstash-oss                          1.3.1               xxxxxxxxxxxx        17 hours ago        1.14GB
-malcolmnetsec/elastalert                            1.3.1               xxxxxxxxxxxx        17 hours ago        268MB
-malcolmnetsec/kibana-oss                            1.3.1               xxxxxxxxxxxx        17 hours ago        850MB
+malcolmnetsec/nginx-proxy                           1.3.2               xxxxxxxxxxxx        16 hours ago        53MB
+malcolmnetsec/file-upload                           1.3.2               xxxxxxxxxxxx        16 hours ago        214MB
+malcolmnetsec/pcap-capture                          1.3.2               xxxxxxxxxxxx        17 hours ago        111MB
+malcolmnetsec/file-monitor                          1.3.2               xxxxxxxxxxxx        17 hours ago        353MB
+malcolmnetsec/curator                               1.3.2               xxxxxxxxxxxx        17 hours ago        303MB
+malcolmnetsec/moloch                                1.3.2               xxxxxxxxxxxx        17 hours ago        1.04GB
+malcolmnetsec/filebeat-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        454MB
+malcolmnetsec/logstash-oss                          1.3.2               xxxxxxxxxxxx        17 hours ago        1.14GB
+malcolmnetsec/elastalert                            1.3.2               xxxxxxxxxxxx        17 hours ago        268MB
+malcolmnetsec/kibana-oss                            1.3.2               xxxxxxxxxxxx        17 hours ago        850MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        3 weeks ago         765MB
 ```
 

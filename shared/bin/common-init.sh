@@ -43,7 +43,9 @@ function CleanDefaultAccounts() {
 }
 
 # if the network configuration files for the interfaces haven't been set to come up on boot, configure that
-function InitializeNetworking() {
+function InitializeSensorNetworking() {
+  unset NEED_NETWORKING_RESTART
+
   if [[ ! -f /etc/network/interfaces.d/sensor ]]; then
     # /etc/network/interfaces.d/sensor can be further configured by the system admin via configure-interfaces.py.
     echo "" >> /etc/network/interfaces
@@ -56,12 +58,36 @@ function InitializeNetworking() {
       echo "  post-down ip link set dev \$IFACE down" >> /etc/network/interfaces.d/sensor
       echo "" >> /etc/network/interfaces.d/sensor
     done
+    NEED_NETWORKING_RESTART=0
+  fi
 
+
+  if ! grep --quiet ^TimeoutStartSec=1min /etc/systemd/system/network-online.target.wants/networking.service; then
     # only wait 1 minute during boot for network interfaces to come up
     sed -i 's/^\(TimeoutStartSec\)=.*/\1=1min/' /etc/systemd/system/network-online.target.wants/networking.service
-
-    systemctl restart networking
+    NEED_NETWORKING_RESTART=0
   fi
+
+  [[ -n $NEED_NETWORKING_RESTART ]] && systemctl restart networking
+}
+
+function InitializeAggregatorNetworking() {
+  unset NEED_NETWORKING_RESTART
+
+  # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
+  NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
+  if [ $NET_IFACES_LINES -gt 4 ] ; then
+    echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces
+    NEED_NETWORKING_RESTART=0
+  fi
+
+  if ! grep --quiet ^TimeoutStartSec=1min /etc/systemd/system/network-online.target.wants/networking.service; then
+    # only wait 1 minute during boot for network interfaces to come up
+    sed -i 's/^\(TimeoutStartSec\)=.*/\1=1min/' /etc/systemd/system/network-online.target.wants/networking.service
+    NEED_NETWORKING_RESTART=0
+  fi
+
+  [[ -n $NEED_NETWORKING_RESTART ]] && systemctl restart networking
 }
 
 # fix some permisions to make sure things belong to the right person

@@ -74,7 +74,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   fi
 
   # if the network configuration files for the interfaces haven't been set to come up on boot, configure that now.
-  InitializeNetworking
+  InitializeSensorNetworking
 
   # fix some permisions to make sure things belong to the right person
   [[ -n $MAIN_USER ]] && FixPermissions "$MAIN_USER"
