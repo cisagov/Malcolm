@@ -31,6 +31,12 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chmod 644 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/config.ini "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
   fi
 
+  # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
+  InitializeAggregatorNetworking
+
+  # chromium tries to call home despite my best efforts
+  BadGoogle
+
   # if we need to import prebuilt Malcolm docker images, do so now (but not if we're in a live-usb boot)
   DOCKER_DRIVER="$(docker info 2>/dev/null | grep 'Storage Driver' | cut -d' ' -f3)"
   if [[ -n $DOCKER_DRIVER ]] && [[ "$DOCKER_DRIVER" != "vfs" ]] && [[ -r /malcolm_images.tar.gz ]]; then
