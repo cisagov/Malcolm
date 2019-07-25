@@ -11,6 +11,7 @@ ENV ZEEK_VERSION "2.6.2"
 ENV ZEEK_DIR "/opt/bro"
 ENV CYBERCHEF_VERSION "8.30.1"
 
+ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
 ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
@@ -49,11 +50,13 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
         patch \
         python-dev \
         python3-dev \
+        python3-pip \
         rename \
         sudo \
         swig \
         wget \
         zlib1g-dev && \
+  pip3 install --no-cache-dir beautifulsoup4 && \
   cd /data && \
   tar -xvf "bro.tar.gz" && \
     rm -f "bro.tar.gz" && \
@@ -101,6 +104,8 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
     ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
     ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
+    python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
+    mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
   apt-get clean && \
@@ -195,7 +200,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
       vim-tiny \
       wget \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
-    pip3 install --no-cache-dir elasticsearch manuf geoip2 patool entrypoint2 pyunpack && \
+    pip3 install --no-cache-dir beautifulsoup4 elasticsearch manuf geoip2 patool entrypoint2 pyunpack && \
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
       ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
       ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \

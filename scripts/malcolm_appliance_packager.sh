@@ -62,6 +62,7 @@ if mkdir "$DESTDIR"; then
   trap "cleanup" EXIT
 
   mkdir $VERBOSE -p "$DESTDIR/nginx/certs/"
+  mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch/nodes/"
@@ -98,7 +99,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./elastalert/rules/* "$DESTDIR/elastalert/rules/" 2>/dev/null || true
   cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
   pushd "$DESTDIR" >/dev/null 2>&1
-  echo "You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated"
+  echo "You must set an administrator username and password for Malcolm, and self-signed X.509 certificates will be generated"
   ./scripts/auth_setup.sh
   rm -rf logstash/certs/ca.key
   pushd .. >/dev/null 2>&1
@@ -138,10 +139,11 @@ if mkdir "$DESTDIR"; then
   echo "   - auth_setup.sh (change authentication-related settings)" | tee -a "$README"
   echo "" | tee -a "$README"
   echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
-  echo "  - Moloch: https://localhost/" | tee -a "$README"
+  echo "  - Moloch: https://localhost:443/" | tee -a "$README"
   echo "  - Kibana: https://localhost:5601/" | tee -a "$README"
   echo "  - PCAP Upload (web): https://localhost:8443/" | tee -a "$README"
   echo "  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
+  echo "  - Account management: https://localhost:488/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1

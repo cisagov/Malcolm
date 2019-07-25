@@ -58,8 +58,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-requests && \
     pip3 install clamd namedlist supervisor && \
     mkdir -p /var/log/supervisor && \
-    apt-get -y -q --force-yes --purge remove python3-dev build-essential && \
-      apt-get -y -q --force-yes autoremove && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove python3-dev build-essential && \
+      apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && \
     wget -O /var/lib/clamav/main.cvd http://database.clamav.net/main.cvd && \

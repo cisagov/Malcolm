@@ -1,0 +1,25 @@
+server {
+    listen 80 default_server;
+
+    sendfile on;
+
+    root /var/www/htadmin;
+    index index.php index.html index.htm;
+
+    server_name htaccess.malcolm.local;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_read_timeout 300;
+        fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    }
+
+    location /config {
+        deny all;
+        return 404;
+    }
+}

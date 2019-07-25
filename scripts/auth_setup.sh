@@ -29,7 +29,7 @@ USERNAME=""
 PASSWORD=""
 PASSWORD_CONFIRM=""
 
-read -p "Username: " USERNAME
+read -p "Administrator username: " USERNAME
 while true; do
     read -s -p "${USERNAME} password: " PASSWORD
     echo
@@ -40,16 +40,54 @@ while true; do
 done
 PASSWORD_ENCRYPTED="$(echo $PASSWORD | openssl passwd -1 -stdin)"
 
+# get previous admin username to remove from htpasswd file if it's changed
+unset USERNAME_PREVIOUS
+[[ -r auth.env ]] && source auth.env && USERNAME_PREVIOUS="$MALCOLM_USERNAME"
+
 cat <<EOF > auth.env
-# username and encrypted password for nginx reverse proxy (and upload server's SFTP access)
+# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)
 MALCOLM_USERNAME=$USERNAME
 MALCOLM_PASSWORD=$PASSWORD_ENCRYPTED
 EOF
-
 chmod 600 ./auth.env
 
 pushd ./nginx/ >/dev/null 2>&1
-htpasswd -bc ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
+# create or update the htpasswd file
+[[ ! -f ./htpasswd ]] && HTPASSWD_CREATE_FLAG="-c" || HTPASSWD_CREATE_FLAG=""
+htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
+# grab the hashed version of the password to also store in the htadmin/config.ini file
+PASSWORD_HTPASSWD_HASHED="$(grep "^$USERNAME:" ./htpasswd | head -n 1 | cut -d: -f2)"
+# if the admininstrator username has changed, remove the previous administrator username from htpasswd
+[[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
+
+popd >/dev/null 2>&1
+
+pushd ./htadmin/ >/dev/null 2>&1
+cat <<EOF > config.ini
+; HTAdmin config file.
+
+[application]
+; Change this to customize your title:
+app_title = Malcolm User Management
+
+; htpasswd file
+secure_path  = ./config/htpasswd
+; metadata file
+metadata_path  = ./config/metadata
+
+; administrator user/password (htpasswd -b -c -B ...)
+admin_user = $USERNAME
+admin_pwd_hash = $PASSWORD_HTPASSWD_HASHED
+
+; SMTP server information for password reset:
+mail_from = admin@example.com
+mail_from_name = Administrator
+mail_user = admin@example.com
+mail_pwd  = xxxx
+mail_server = mail.example.com
+
+EOF
+touch metadata
 popd >/dev/null 2>&1
 
 unset CONFIRMATION

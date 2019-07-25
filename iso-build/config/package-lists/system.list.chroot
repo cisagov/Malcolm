@@ -9,6 +9,7 @@ audispd-plugins
 auditd
 bash-completion
 bc
+bcrypt
 bridge-utils
 btrfs-progs
 busybox
