@@ -40,17 +40,26 @@ while true; do
 done
 PASSWORD_ENCRYPTED="$(echo $PASSWORD | openssl passwd -1 -stdin)"
 
+# get previous admin username to remove from htpasswd file if it's changed
+unset USERNAME_PREVIOUS
+[[ -r auth.env ]] && source auth.env && USERNAME_PREVIOUS="$MALCOLM_USERNAME"
+
 cat <<EOF > auth.env
-# username and encrypted password for nginx reverse proxy (and upload server's SFTP access)
+# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)
 MALCOLM_USERNAME=$USERNAME
 MALCOLM_PASSWORD=$PASSWORD_ENCRYPTED
 EOF
-
 chmod 600 ./auth.env
 
 pushd ./nginx/ >/dev/null 2>&1
-htpasswd -b -c -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
-PASSWORD_HTPASSWD_HASHED="$(cat ./htpasswd | cut -d: -f2)"
+# create or update the htpasswd file
+[[ ! -f ./htpasswd ]] && HTPASSWD_CREATE_FLAG="-c" || HTPASSWD_CREATE_FLAG=""
+htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
+# grab the hashed version of the password to also store in the htadmin/config.ini file
+PASSWORD_HTPASSWD_HASHED="$(grep "^$USERNAME:" ./htpasswd | head -n 1 | cut -d: -f2)"
+# if the admininstrator username has changed, remove the previous administrator username from htpasswd
+[[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
+
 popd >/dev/null 2>&1
 
 pushd ./htadmin/ >/dev/null 2>&1
