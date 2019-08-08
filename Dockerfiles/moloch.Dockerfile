@@ -20,7 +20,7 @@ ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.t
 ADD https://github.com/gchq/CyberChef/releases/download/v$CYBERCHEF_VERSION/cyberchef.htm $MOLOCHDIR/doc/cyberchef.htm
 ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
 
-RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list && \
+RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
         bison \

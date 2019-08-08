@@ -31,7 +31,7 @@ BASE_PATH=`pwd`;
 # tail logs
 $DOCKER_COMPOSE_COMMAND ps
 echo ""
-IGNORE_LOG_TEXT="(deprecated|eshealth|update_mapping|throttling index|but no there are no living connections|saved_objects|\b(d|es)?stats\.json|esindices\/list|_cat\/indices|use_field_mapping|reaped unknown pid|Successfully handled GET request for '/'|GET /api/status 200|POST /_bulk HTTP/[\d\.].+\b200\b.+(Go-http-client|Manticore)|POST\s+/server/php/\s+HTTP/\d+\.\d+\"\s+\d+\s+\d+.*:8443/)"
+IGNORE_LOG_TEXT="(deprecated|eshealth|update_mapping|throttling index|but no there are no living connections|saved_objects|\b(d|es)?stats\.json|esindices\/list|_cat\/indices|use_field_mapping|reaped unknown pid|Successfully handled GET request for '/'|GET /api/status 200|POST /d?stats/d?stat/.+HTTP/[\d\.].+\b200\b|POST /_bulk HTTP/[\d\.].+\b200\b|POST\s+/server/php/\s+HTTP/\d+\.\d+\"\s+\d+\s+\d+.*:8443/)"
 
 $DOCKER_COMPOSE_COMMAND logs -f | grep --line-buffered -Piv "$IGNORE_LOG_TEXT"
 
