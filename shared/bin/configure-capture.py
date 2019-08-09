@@ -29,6 +29,8 @@ class Constants:
 
   SENSOR_CAPTURE_CONFIG = '/opt/sensor/sensor_ctl/control_vars.conf'
 
+  PCAP_CAPTURE_AUTOSTART_ENTRIES={'AUTOSTART_MOLOCH', 'AUTOSTART_NETSNIFF', 'AUTOSTART_TCPDUMP'}
+
   ZEEK_FILE_CARVING_NONE = 'none'
   ZEEK_FILE_CARVING_ALL = 'all'
   ZEEK_FILE_CARVING_KNOWN = 'known'
@@ -47,6 +49,7 @@ class Constants:
   AUDITBEAT='auditbeat'
   HEATBEAT='heatbeat' # protologbeat to log temperature and other misc. stuff
   SYSLOGBEAT='filebeat-syslog' # another filebeat instance for syslog
+  MOLOCHCAP='moloch-capture'
 
   BEAT_DIR = {
     FILEBEAT : f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -81,7 +84,7 @@ class Constants:
   BEAT_LS_SSL_CLIENT_KEY = 'BEAT_LS_SSL_CLIENT_KEY'
   BEAT_LS_SSL_VERIFY = 'BEAT_LS_SSL_VERIFY'
 
-  # specific to beats forwarded to elastic search (eg., metricbeat, auditbeat, filebeat-syslog)
+  # specific to beats forwarded to elasticsearch (eg., metricbeat, auditbeat, filebeat-syslog)
   BEAT_ES_HOST = "BEAT_ES_HOST"
   BEAT_ES_PORT = "BEAT_ES_PORT"
   BEAT_ES_PROTOCOL = "BEAT_ES_PROTOCOL"
@@ -108,6 +111,7 @@ class Constants:
   MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
   MSG_CONFIG_MODE_AUTOSTART = 'Configure Autostart Services'
   MSG_CONFIG_GENERIC = 'Configure {}'
+  MSG_CONFIG_MOLOCH = (f'{MOLOCHCAP}', f'Configure Moloch session forwarding via {MOLOCHCAP}')
   MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
   MSG_CONFIG_METRICBEAT = (f'{METRICBEAT}', f'Configure resource metrics forwarding via {METRICBEAT}')
   MSG_CONFIG_AUDITBEAT = (f'{AUDITBEAT}', f'Configure audit log forwarding via {AUDITBEAT}')
@@ -146,6 +150,7 @@ class Constants:
   MSG_TESTING_CONNECTION_SUCCESS = '{} connection succeeded! ({} {})'
   MSG_TESTING_CONNECTION_FAILURE = "{} connection error: {} {}:\n\n {}"
   MSG_TESTING_CONNECTION_FAILURE_LOGSTASH = "{} connection error: could not connect to {}:{}"
+  MSG_WARNING_MULTIPLE_PCAP = "Warning: multiple PCAP processes are enabled ({}). Using a single PCAP process is recommended."
 
 # the main dialog window used for the duration of this tool
 d = Dialog(dialog='dialog', autowidgetsize=True)
@@ -167,6 +172,161 @@ def mime_to_extension_mappings(mapfile):
         mime_maps[match.group(1)] = match.group(2)
 
   return mime_maps
+
+###################################################################################################
+def input_elasticsearch_connection_info(forwarder,
+                                        default_es_host=None,
+                                        default_es_port=None,
+                                        default_kibana_host=None,
+                                        default_kibana_port=None,
+                                        default_username=None,
+                                        default_password=None):
+
+  return_dict = defaultdict(str)
+
+  # Elasticsearch configuration
+  # elasticsearch protocol and SSL verification mode
+  elastic_protocol = "http"
+  elastic_ssl_verify = "none"
+  if (d.yesno("Elasticsearch connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
+    elastic_protocol = "https"
+    if (d.yesno("Elasticsearch SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
+      elastic_ssl_verify = "full"
+  return_dict[Constants.BEAT_ES_PROTOCOL] = elastic_protocol
+  return_dict[Constants.BEAT_ES_SSL_VERIFY] = elastic_ssl_verify
+
+  while True:
+    # host/port for Elasticsearch
+    code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(forwarder), [
+                          ('Elasticsearch Host', 1, 1, default_es_host or "", 1,  25, 30, 255),
+                          ('Elasticsearch Port', 2, 1, default_es_port or "9200", 2, 25, 6, 5)
+                          ])
+    values = [x.strip() for x in values]
+
+    if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+      raise CancelledError
+
+    elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
+      code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
+
+    else:
+      return_dict[Constants.BEAT_ES_HOST] = values[0]
+      return_dict[Constants.BEAT_ES_PORT] = values[1]
+      break
+
+  # Kibana configuration (if supported by forwarder)
+  if (forwarder in Constants.BEAT_KIBANA_DIR.keys()) and (d.yesno(f"Configure {forwarder} Kibana connectivity?") == Dialog.OK):
+    # elasticsearch protocol and SSL verification mode
+    kibana_protocol = "http"
+    kibana_ssl_verify = "none"
+    if (d.yesno("Kibana connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
+      kibana_protocol = "https"
+      if (d.yesno("Kibana SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
+        kibana_ssl_verify = "full"
+    return_dict[Constants.BEAT_KIBANA_PROTOCOL] = kibana_protocol
+    return_dict[Constants.BEAT_KIBANA_SSL_VERIFY] = kibana_ssl_verify
+
+    while True:
+      # host/port for Kibana
+      code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(forwarder), [
+                            ('Kibana Host', 1, 1, default_kibana_host or "", 1,  20, 30, 255),
+                            ('Kibana Port', 2, 1, default_kibana_port or "5601", 2, 20, 6, 5)
+                            ])
+      values = [x.strip() for x in values]
+
+      if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+        raise CancelledError
+
+      elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
+        code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
+
+      else:
+        return_dict[Constants.BEAT_KIBANA_HOST] = values[0]
+        return_dict[Constants.BEAT_KIBANA_PORT] = values[1]
+        break
+
+    if (d.yesno(f"Configure {forwarder} Kibana dashboards?") == Dialog.OK):
+      kibana_dashboards = "true"
+    else:
+      kibana_dashboards = "false"
+    return_dict[Constants.BEAT_KIBANA_DASHBOARDS_ENABLED] = kibana_dashboards
+
+    if kibana_dashboards == "true":
+      while True:
+        code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(forwarder), [
+                              ('Kibana Dashboards Path', 1, 1, Constants.BEAT_KIBANA_DIR[forwarder], 1, 30, 30, 255)
+                              ])
+        values = [x.strip() for x in values]
+
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+          raise CancelledError
+
+        elif (len(values[0]) <= 0) or (not os.path.isdir(values[0])):
+          code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
+
+        else:
+          return_dict[Constants.BEAT_KIBANA_DASHBOARDS_PATH] = values[0]
+          break
+
+  server_display_name = "Elasticsearch/Kibana" if Constants.BEAT_KIBANA_HOST in return_dict.keys() else "Elasticsearch"
+
+  # HTTP/HTTPS authentication
+  code, http_username = d.inputbox(f"{server_display_name} HTTP/HTTPS server username", init=default_username)
+  if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+    raise CancelledError
+  return_dict[Constants.BEAT_HTTP_USERNAME] = http_username.strip()
+
+  # make them enter the password twice
+  while True:
+    code, http_password = d.passwordbox(f"{server_display_name} HTTP/HTTPS server password", insecure=True, init=default_password)
+    if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+      raise CancelledError
+
+    code, http_password2 = d.passwordbox(f"{server_display_name} HTTP/HTTPS server password (again)", insecure=True, init=default_password if (http_password == default_password) else "")
+    if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+      raise CancelledError
+
+    if (http_password == http_password2):
+      return_dict[Constants.BEAT_HTTP_PASSWORD] = http_password.strip()
+      break
+    else:
+      code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format("Passwords did not match"))
+
+  # test Elasticsearch connection
+  code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Elasticsearch"))
+  retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_ES_PROTOCOL],
+                                             host=return_dict[Constants.BEAT_ES_HOST],
+                                             port=return_dict[Constants.BEAT_ES_PORT],
+                                             username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
+                                             password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
+                                             ssl_verify=return_dict[Constants.BEAT_ES_SSL_VERIFY])
+  if (retcode == 200):
+    code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Elasticsearch", retcode, message))
+  else:
+    code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Elasticsearch", retcode, message, "\n".join(output)),
+                   yes_label="Ignore Error", no_label="Start Over")
+    if code != Dialog.OK:
+      raise CancelledError
+
+  # test Kibana connection
+  if Constants.BEAT_KIBANA_HOST in return_dict.keys():
+    code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Kibana"))
+    retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_KIBANA_PROTOCOL],
+                                               host=return_dict[Constants.BEAT_KIBANA_HOST],
+                                               port=return_dict[Constants.BEAT_KIBANA_PORT],
+                                               uri="status",
+                                               username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
+                                               password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
+                                               ssl_verify=return_dict[Constants.BEAT_KIBANA_SSL_VERIFY])
+    if (retcode == 200):
+      code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Kibana", retcode, message))
+    else:
+      code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Kibana", retcode, message, "\n".join(output)),
+                     yes_label="Ignore Error", no_label="Start Over")
+      if code != Dialog.OK:
+        raise CancelledError
+
+  return return_dict
 
 ###################################################################################################
 ###################################################################################################
@@ -218,6 +378,13 @@ def main():
           if len(line.strip()) > 0:
             name, var = remove_prefix(line, "export").partition("=")[::2]
             capture_config_dict[name.strip()] = var.strip().strip("'").strip('"')
+      if (Constants.BEAT_ES_HOST not in previous_config_values.keys()) and ("ES_HOST" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_ES_HOST] = capture_config_dict["ES_HOST"]
+        previous_config_values[Constants.BEAT_KIBANA_HOST] = capture_config_dict["ES_HOST"]
+      if (Constants.BEAT_ES_PORT not in previous_config_values.keys()) and ("ES_PORT" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_ES_PORT] = capture_config_dict["ES_PORT"]
+      if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("ES_USERNAME" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["ES_USERNAME"]
 
       code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
       if (code == Dialog.CANCEL or code == Dialog.ESC):
@@ -232,21 +399,27 @@ def main():
       if mode == Constants.MSG_CONFIG_MODE_AUTOSTART:
         ##### sensor autostart services configuration #######################################################################################
 
-        # select processes for autostart
-        autostart_choices = []
-        for k, v in sorted(capture_config_dict.items()):
-          if k.startswith("AUTOSTART_"):
-            autostart_choices.append((k, '', v.lower() == "true"))
-        code, autostart_tags = d.checklist(Constants.MSG_CONFIG_AUTOSTARTS, choices=autostart_choices)
-        if (code == Dialog.CANCEL or code == Dialog.ESC):
-          raise CancelledError
+        while True:
+          # select processes for autostart
+          autostart_choices = []
+          for k, v in sorted(capture_config_dict.items()):
+            if k.startswith("AUTOSTART_"):
+              autostart_choices.append((k, '', v.lower() == "true"))
+          code, autostart_tags = d.checklist(Constants.MSG_CONFIG_AUTOSTARTS, choices=autostart_choices)
+          if (code == Dialog.CANCEL or code == Dialog.ESC):
+            raise CancelledError
 
-        for tag in [x[0] for x in autostart_choices]:
-          capture_config_dict[tag] = "false"
-        for tag in autostart_tags:
-          capture_config_dict[tag] = "true"
+          for tag in [x[0] for x in autostart_choices]:
+            capture_config_dict[tag] = "false"
+          for tag in autostart_tags:
+            capture_config_dict[tag] = "true"
 
-        autostart_re = re.compile(r"(\bAUTOSTART_\w+)\s*=\s*.+?$")
+          # warn them if we're doing mulitple PCAP capture processes
+          pcap_procs_enabled = [x for x in autostart_tags if x in Constants.PCAP_CAPTURE_AUTOSTART_ENTRIES]
+          if ((len(pcap_procs_enabled) <= 1) or
+              (d.yesno(text=Constants.MSG_WARNING_MULTIPLE_PCAP.format(", ".join(pcap_procs_enabled)),
+                       yes_label="Continue Anyway", no_label="Adjust Selections") == Dialog.OK)):
+            break
 
         # get confirmation from user that we really want to do this
         code = d.yesno(Constants.MSG_CONFIG_AUTOSTART_CONFIRM.format("\n".join(sorted([f"{k}={v}" for k, v in capture_config_dict.items() if "AUTOSTART" in k]))),
@@ -254,6 +427,7 @@ def main():
         if code == Dialog.OK:
 
           # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
+          autostart_re = re.compile(r"(\bAUTOSTART_\w+)\s*=\s*.+?$")
           with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
             for line in file:
               line = line.rstrip("\n")
@@ -464,11 +638,52 @@ def main():
       elif mode == Constants.MSG_CONFIG_MODE_FORWARD:
         ##### sensor forwarding (beats) configuration #########################################################################
 
-        code, fwd_mode = d.menu(Constants.MSG_CONFIG_MODE, choices=[Constants.MSG_CONFIG_FILEBEAT, Constants.MSG_CONFIG_METRICBEAT, Constants.MSG_CONFIG_AUDITBEAT, Constants.MSG_CONFIG_SYSLOGBEAT, Constants.MSG_CONFIG_HEATBEAT])
+        code, fwd_mode = d.menu(Constants.MSG_CONFIG_MODE, choices=[Constants.MSG_CONFIG_FILEBEAT, Constants.MSG_CONFIG_MOLOCH, Constants.MSG_CONFIG_METRICBEAT, Constants.MSG_CONFIG_AUDITBEAT, Constants.MSG_CONFIG_SYSLOGBEAT, Constants.MSG_CONFIG_HEATBEAT])
         if code != Dialog.OK:
           raise CancelledError
 
-        if (fwd_mode == Constants.FILEBEAT) or (fwd_mode == Constants.METRICBEAT) or (fwd_mode == Constants.AUDITBEAT) or (fwd_mode == Constants.SYSLOGBEAT) or (fwd_mode == Constants.HEATBEAT):
+        if (fwd_mode == Constants.MOLOCHCAP):
+          # forwarding configuration for moloch-capture
+
+          # get elasticsearch/kibana connection information from user
+          elastic_config_dict = input_elasticsearch_connection_info(forwarder=fwd_mode,
+                                                                    default_es_host=previous_config_values[Constants.BEAT_ES_HOST],
+                                                                    default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
+                                                                    default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
+                                                                    default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD])
+          moloch_elastic_config_dict = elastic_config_dict.copy()
+          # massage the data a bit for how moloch's going to want it in the control_vars.conf file
+          if Constants.BEAT_HTTP_USERNAME in moloch_elastic_config_dict.keys():
+            moloch_elastic_config_dict["ES_USERNAME"] = moloch_elastic_config_dict.pop(Constants.BEAT_HTTP_USERNAME)
+          if Constants.BEAT_HTTP_PASSWORD in moloch_elastic_config_dict.keys():
+            moloch_elastic_config_dict["ES_PASSWORD"] = aggressive_url_encode(moloch_elastic_config_dict.pop(Constants.BEAT_HTTP_PASSWORD))
+          moloch_elastic_config_dict = { k.replace('BEAT_', ''): v for k, v in moloch_elastic_config_dict.items() }
+
+          list_results = sorted([f"{k}={v}" for k, v in moloch_elastic_config_dict.items() if "PASSWORD" not in k])
+
+          code = d.yesno(Constants.MSG_CONFIG_FORWARDING_CONFIRM.format(fwd_mode, "\n".join(list_results)),
+                         yes_label="OK", no_label="Cancel")
+          if code != Dialog.OK:
+            raise CancelledError
+
+          previous_config_values = elastic_config_dict.copy()
+
+          # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
+          elastic_values_re = re.compile(r"\b(" + '|'.join(list(moloch_elastic_config_dict.keys())) + r")\s*=\s*.*?$")
+          with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
+            for line in file:
+              line = line.rstrip("\n")
+              elastic_key_match = elastic_values_re.search(line)
+              if elastic_key_match is not None:
+                print(elastic_values_re.sub(r"\1=%s" % moloch_elastic_config_dict[elastic_key_match.group(1)], line))
+              else:
+                print(line)
+
+          # hooray
+          code = d.msgbox(text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(fwd_mode, "\n".join(list_results)))
+
+        elif (fwd_mode == Constants.FILEBEAT) or (fwd_mode == Constants.METRICBEAT) or (fwd_mode == Constants.AUDITBEAT) or (fwd_mode == Constants.SYSLOGBEAT) or (fwd_mode == Constants.HEATBEAT):
+          # forwarder configuration for beats
 
           if not os.path.isdir(Constants.BEAT_DIR[fwd_mode]):
             # beat dir not found, give up
@@ -503,147 +718,17 @@ def main():
                 raise CancelledError
               forwarder_dict[Constants.BEAT_INTERVAL] = f"{beat_interval}s"
 
-            # Elastic Search configuration
-            # elastic search protocol and SSL verification mode
-            elastic_protocol = "http"
-            elastic_ssl_verify = "none"
-            if (d.yesno("Elastic Search connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
-              elastic_protocol = "https"
-              if (d.yesno("Elastic Search SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
-                elastic_ssl_verify = "full"
-            forwarder_dict[Constants.BEAT_ES_PROTOCOL] = elastic_protocol
-            forwarder_dict[Constants.BEAT_ES_SSL_VERIFY] = elastic_ssl_verify
+            # get elasticsearch/kibana connection information from user
+            forwarder_dict.update(input_elasticsearch_connection_info(forwarder=fwd_mode,
+                                                                      default_es_host=previous_config_values[Constants.BEAT_ES_HOST],
+                                                                      default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
+                                                                      default_kibana_host=previous_config_values[Constants.BEAT_KIBANA_HOST],
+                                                                      default_kibana_port=previous_config_values[Constants.BEAT_KIBANA_PORT],
+                                                                      default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
+                                                                      default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD]))
 
-            while True:
-              # host/port for Elastic Search
-              code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(fwd_mode), [
-                                    ('Elastic Search Host', 1, 1, previous_config_values[Constants.BEAT_ES_HOST], 1,  25, 30, 255),
-                                    ('Elastic Search Port', 2, 1, previous_config_values[Constants.BEAT_ES_PORT] if (Constants.BEAT_ES_PORT in previous_config_values) else "9200", 2, 25, 6, 5)
-                                    ])
-              values = [x.strip() for x in values]
 
-              if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                raise CancelledError
-
-              elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
-                code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
-
-              else:
-                forwarder_dict[Constants.BEAT_ES_HOST] = values[0]
-                forwarder_dict[Constants.BEAT_ES_PORT] = values[1]
-                break
-
-            # Kibana configuration
-            if (d.yesno(f"Configure {fwd_mode} Kibana connectivity?") == Dialog.OK):
-              # elastic search protocol and SSL verification mode
-              kibana_protocol = "http"
-              kibana_ssl_verify = "none"
-              if (d.yesno("Kibana connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
-                kibana_protocol = "https"
-                if (d.yesno("Kibana SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
-                  kibana_ssl_verify = "full"
-              forwarder_dict[Constants.BEAT_KIBANA_PROTOCOL] = kibana_protocol
-              forwarder_dict[Constants.BEAT_KIBANA_SSL_VERIFY] = kibana_ssl_verify
-
-              while True:
-                # host/port for Kibana
-                code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(fwd_mode), [
-                                      ('Kibana Host', 1, 1, previous_config_values[Constants.BEAT_KIBANA_HOST], 1,  20, 30, 255),
-                                      ('Kibana Port', 2, 1, previous_config_values[Constants.BEAT_KIBANA_PORT] if Constants.BEAT_KIBANA_PORT in previous_config_values else "5601", 2, 20, 6, 5)
-                                      ])
-                values = [x.strip() for x in values]
-
-                if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                  raise CancelledError
-
-                elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
-                  code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
-
-                else:
-                  forwarder_dict[Constants.BEAT_KIBANA_HOST] = values[0]
-                  forwarder_dict[Constants.BEAT_KIBANA_PORT] = values[1]
-                  break
-
-              if (d.yesno(f"Configure {fwd_mode} Kibana dashboards?") == Dialog.OK):
-                kibana_dashboards = "true"
-              else:
-                kibana_dashboards = "false"
-              forwarder_dict[Constants.BEAT_KIBANA_DASHBOARDS_ENABLED] = kibana_dashboards
-
-              if kibana_dashboards == "true":
-                while True:
-                  code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(fwd_mode), [
-                                        ('Kibana Dashboards Path', 1, 1, Constants.BEAT_KIBANA_DIR[fwd_mode], 1, 30, 30, 255)
-                                        ])
-                  values = [x.strip() for x in values]
-
-                  if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                    raise CancelledError
-
-                  elif (len(values[0]) <= 0) or (not os.path.isdir(values[0])):
-                    code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
-
-                  else:
-                    forwarder_dict[Constants.BEAT_KIBANA_DASHBOARDS_PATH] = values[0]
-                    break
-
-            # HTTP/HTTPS authentication
-            code, http_username = d.inputbox("Elastic Search/Kibana HTTP/HTTPS server username", init=previous_config_values[Constants.BEAT_HTTP_USERNAME])
-            if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-              raise CancelledError
-            forwarder_dict[Constants.BEAT_HTTP_USERNAME] = http_username.strip()
-
-            # make them enter the password twice
-            while True:
-              code, http_password = d.passwordbox("Elastic Search/Kibana HTTP/HTTPS server password", insecure=True, init=previous_config_values[Constants.BEAT_HTTP_PASSWORD])
-              if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                raise CancelledError
-
-              code, http_password2 = d.passwordbox("Elastic Search/Kibana HTTP/HTTPS server password (again)", insecure=True, init=previous_config_values[Constants.BEAT_HTTP_PASSWORD] if (http_password == previous_config_values[Constants.BEAT_HTTP_PASSWORD]) else "")
-              if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                raise CancelledError
-
-              if (http_password == http_password2):
-                forwarder_dict[Constants.BEAT_HTTP_PASSWORD] = http_password.strip()
-                break
-              else:
-                code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format("Passwords did not match"))
-
-            # test Elasticsearch connection
-            code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Elasticsearch"))
-            retcode, message, output = test_connection(protocol=forwarder_dict[Constants.BEAT_ES_PROTOCOL],
-                                                       host=forwarder_dict[Constants.BEAT_ES_HOST],
-                                                       port=forwarder_dict[Constants.BEAT_ES_PORT],
-                                                       username=forwarder_dict[Constants.BEAT_HTTP_USERNAME] if (len(forwarder_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
-                                                       password=forwarder_dict[Constants.BEAT_HTTP_PASSWORD] if (len(forwarder_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
-                                                       ssl_verify=forwarder_dict[Constants.BEAT_ES_SSL_VERIFY])
-            if (retcode == 200):
-              code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Elasticsearch", retcode, message))
-            else:
-              code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Elasticsearch", retcode, message, "\n".join(output)),
-                             yes_label="Ignore Error", no_label="Start Over")
-              if code != Dialog.OK:
-                raise CancelledError
-
-            # test Kibana connection
-            if Constants.BEAT_KIBANA_HOST in forwarder_dict.keys():
-              code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Kibana"))
-              retcode, message, output = test_connection(protocol=forwarder_dict[Constants.BEAT_KIBANA_PROTOCOL],
-                                                         host=forwarder_dict[Constants.BEAT_KIBANA_HOST],
-                                                         port=forwarder_dict[Constants.BEAT_KIBANA_PORT],
-                                                         uri="status",
-                                                         username=forwarder_dict[Constants.BEAT_HTTP_USERNAME] if (len(forwarder_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
-                                                         password=forwarder_dict[Constants.BEAT_HTTP_PASSWORD] if (len(forwarder_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
-                                                         ssl_verify=forwarder_dict[Constants.BEAT_KIBANA_SSL_VERIFY])
-              if (retcode == 200):
-                code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Kibana", retcode, message))
-              else:
-                code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Kibana", retcode, message, "\n".join(output)),
-                               yes_label="Ignore Error", no_label="Start Over")
-                if code != Dialog.OK:
-                  raise CancelledError
-
-          else:
+          elif (fwd_mode == Constants.FILEBEAT):
             #### filebeat #############################################################################################
             while True:
               forwarder_dict = defaultdict(str)

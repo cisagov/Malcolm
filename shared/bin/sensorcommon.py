@@ -45,6 +45,11 @@ def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
 ###################################################################################################
+# urlencode each character of a string
+def aggressive_url_encode(string):
+  return "".join("%{0:0>2}".format(format(ord(char), "x")) for char in string)
+
+###################################################################################################
 # strip a prefix from the beginning of a string if needed
 def remove_prefix(text, prefix):
   if (len(prefix) > 0) and text.startswith(prefix):
