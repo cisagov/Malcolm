@@ -151,7 +151,7 @@ if [ -d "$WORKDIR" ]; then
     --linux-packages "linux-image-$(uname -r | sed 's/-amd64$//')" \
     --architectures amd64 \
     --binary-images iso-hybrid \
-    --bootloaders "grub-efi" \
+    --bootloaders "syslinux,grub-efi" \
     --chroot-filesystem squashfs \
     --backports false \
     --security true \
