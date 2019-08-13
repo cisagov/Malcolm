@@ -102,10 +102,8 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/current/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/upload/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/processed/"
-  set -x
   YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" ./docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
-  set +x
   cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
   cp ./docker-compose-standalone-zeek-live.yml "$MALCOLM_DEST_DIR/docker-compose-zeek-live.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
@@ -164,10 +162,6 @@ if [ -d "$WORKDIR" ]; then
     --apt-indices none \
     --apt-source-archives false \
     --archive-areas 'main contrib non-free' \
-    --parent-mirror-bootstrap http://ftp.us.debian.org/debian/ \
-    --parent-mirror-binary http://httpredir.debian.org/debian/ \
-    --mirror-bootstrap http://ftp.us.debian.org/debian/ \
-    --mirror-binary http://httpredir.debian.org/debian/ \
     --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
     --apt-options "--allow-downgrades --allow-remove-essential --allow-change-held-packages --yes"
 
