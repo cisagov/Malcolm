@@ -62,6 +62,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
             - [Screenshots](#PrebuiltVisualizationsGallery)
         - [Building your own visualizations and dashboards](#BuildDashboard)
             + [Screenshots](#NewVisualizationsGallery)
+* [Search Queries in Moloch and Kibana](#SearchCheatSheet)
 * [Other Malcolm features](#MalcolmFeatures)
     - [Automatic file extraction and scanning](#ZeekFileExtraction)
     - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
@@ -913,6 +914,78 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/curr
 ![Timelion is a powerful tool for visualizing time series data](./docs/images/screenshots/kibana_timelion.png)
 
 ![Visual Builder is another time series data visualizer](./docs/images/screenshots/kibana_time_series.png)
+
+## <a name="SearchCheatSheet"></a>Search Queries in Moloch and Kibana
+
+[Kibana's query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) is somewhat different than Moloch's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Moloch interface is for searching and visualizing both Moloch sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Moloch sessions. Here are some common patterns used in building search query strings for Moloch and Kibana, respectively. See the links provided for further documentation.
+
+| | [Moloch Search String](https://localhost/help#search) | [Kibana Search String](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) |
+|---|:---:|:---:|
+| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|
+| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|
+| Field matches a value |`port.dst == 22`|`dstPort:22`|
+| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|
+| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|
+| Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|
+| Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|
+| Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|
+| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|
+| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) ||` (zeek_http.password == EXISTS!)`|`|``(zeek.user == "anonymous")``|``_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"``|
+| Global string search (anywhere in the document) |`all Moloch search expressions are field-based`|`microsoft`|
+| Wildcards (`?` for single character, `*` for any characters) |`host.dns == "*micro?oft*"`|`dns.host:*micro?oft*`|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|
+| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
+| IPv6 values |``(ip.src == EXISTS! |`|` ip.dst == EXISTS!) && (ip != 0.0.0.0/0)``|``(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")``|
+| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|
+| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|
+| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|
+| Search time frame |`Use Moloch time bounding controls under the search bar`|`Use Kibana time range controls in the upper right-hand corner`|
+
+When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
+
+As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Moloch's underlying Elasticsearch schema. A complete list of these fields can be found in the Moloch help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
+
+Whenever possible, Zeek fields are mapped to existing corresponding Moloch fields: for example, the `orig_h` field in Zeek is mapped to Moloch's `srcIp` field. The original Zeek fields are also left intact. To complicate the issue, the Moloch interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Moloch's alias) in Moloch and `srcIp` or `zeek.orig_h` in Kibana.
+
+The table below shows the mapping of some of these fields.
+
+| Field Description |Moloch Field Alias(es)|Moloch-mapped Zeek Field(s)|Zeek Field(s)|
+|---|:---:|:---:|:---:|
+| Destination IP |`ip.dst`|`dstIp`|`zeek.resp_h`|
+| Destination MAC |`mac.dst`|`dstMac`|`zeek.resp_l2_addr`|
+| Destination Port |`port.dst`|`dstPort`|`zeek.resp_p`|
+| Duration |`session.length`|`length`|`zeek_conn.duration`|
+| First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
+| IP Protocol |`ip.protocol`|`ipProtocol`|`zeek.proto`|
+| Last Packet Time |`stoptime`|`lastPacket`|``|
+| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`zeek.filetype`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
+| Protocol/Service |`protocols`|`protocol`|`zeek.proto`, `zeek.service`|
+| Request Bytes |`databytes.src`, `bytes.src`|`srcBytes`, `srcDataBytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
+| Request Packets |`packets.src`|`srcPackets`|`zeek_conn.orig_pkts`|
+| Response Bytes |`databytes.dst`, `bytes.dst`|`dstBytes`, `dstDataBytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
+| Response Packets |`packets.dst`|`dstPackets`|`zeek_con.resp_pkts`|
+| Source IP |`ip.src`|`srcIp`|`zeek.orig_h`|
+| Source MAC |`mac.src`|`srcMac`|`zeek.orig_l2_addr`|
+| Source Port |`port.src`|`srcPort`|`zeek.orig_p`|
+| Total Bytes |`databytes`, `bytes`|`totDataBytes`, `totBytes`||
+| Total Packets |`packets`|`totPackets`||
+| Username |`user`|`user`|`zeek.user`|
+| Zeek Connection UID|||`zeek.uid`|
+| Zeek File UID |||`zeek.fuid`|
+| Zeek Log Type |||`zeek.logType`|
+
+In addition to the fields listed above, Moloch provides several special field aliases for matching any field of a particular type. While these aliases do not exist in Kibana *per se*, they can be approximated as illustrated below.
+
+| Matches Any | Moloch Special Field Example | Kibana/Zeek Equivalent Example |
+|---|:---:|:---:|
+| IP Address | `ip == 192.168.0.1` | `srcIp:192.168.0.1 OR dstIp:192.168.0.1` |
+| Port | `port == [80, 443, 8080, 8443]` | `srcPort:(80 OR 443 OR 8080 OR 8443) OR dstPort:(80 OR 443 OR 8080 OR 8443)` |
+| Country (code) | `country == [RU,CN]` | `zeek.destination_geo.country_code2:(RU OR CN) OR zeek.source_geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
+| Country (name) | | `zeek.destination_geo.country_name:(Russia OR China) OR zeek.source_geo.country_name:(Russia OR China)` |
+| ASN | `asn == "*Mozilla*"` | `srcASN:*Mozilla* OR dstASN:*Mozilla* OR dns.ASN:*Mozilla*` |
+| Host | `host == www.microsoft.com` | `zeek_http.host:www.microsoft.com (or zeek_dhcp.host_name, zeek_dns.host, zeek_ntlm.host, smb.host, etc.)` |
+| Protocol (layers >= 4) | `protocols == tls` | `protocol:tls` |
+| User | `user == EXISTS! && user != anonymous` | `_exists_:user AND (NOT user:anonymous)` |
 
 ## <a name="MalcolmFeatures"></a>Other Malcolm features
 
