@@ -18,6 +18,7 @@ function ZeekLogs (api, section) {
 
   // id information
   this.uidField = this.api.addField("field:zeek.uid;db:zeek.uid;kind:termfield;friendly:Zeek Connection ID;help:Zeek Connection ID");
+  this.communityIdField = this.api.addField("field:zeek.community_id;db:zeek.community_id;kind:termfield;friendly:Zeek Connection Community ID;help:Zeek Connection Community ID");
   this.logTypeField = this.api.addField("field:zeek.logType;db:zeek.logType;kind:termfield;friendly:Zeek Log Type;help:Zeek Log Type");
   this.tsField = this.api.addField("field:zeek.ts;db:zeek.ts;kind:termfield;friendly:Timestamp;help:Zeek Timestamp");
   this.hostField = this.api.addField("field:host.name;db:host.name;kind:termfield;friendly:Zeek Node;help:Zeek Node");
@@ -576,6 +577,7 @@ function ZeekLogs (api, section) {
     "  div.sessionDetailMeta.bold zeek\n" +
     "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
     "    +arrayList(session.zeek, 'uid', 'Zeek Connection ID', 'zeek.uid')\n" +
+    "    +arrayList(session.zeek, 'community_id', 'Zeek Connection Community ID', 'zeek.community_id')\n" +
     "    +arrayList(session.zeek, 'logType', 'Zeek Log Type', 'zeek.logType')\n" +
     "    +arrayList(session.host, 'name', 'Zeek Node', 'host.name')\n" +
 

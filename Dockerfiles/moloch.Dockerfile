@@ -10,6 +10,7 @@ ENV MOLOCHDIR "/data/moloch"
 ENV ZEEK_VERSION "2.6.3"
 ENV ZEEK_DIR "/opt/bro"
 ENV CYBERCHEF_VERSION "8.30.1"
+ENV ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER "1.2"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
@@ -19,6 +20,7 @@ ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
 ADD https://github.com/gchq/CyberChef/releases/download/v$CYBERCHEF_VERSION/cyberchef.htm $MOLOCHDIR/doc/cyberchef.htm
 ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
+ADD https://github.com/corelight/bro-community-id/archive/$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER.tar.gz /data/bro-community-id.tar.gz
 
 RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -77,6 +79,12 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
     mkdir -p $ZEEK_DIR/share/bro/site/ja3 && \
     cp -v /tmp/ja3/bro/* $ZEEK_DIR/share/bro/site/ja3 && \
     rm -rf /tmp/ja3 && \
+  cd /data && \
+    tar -xvf "bro-community-id.tar.gz" && \
+    cd "bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER && \
+    ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
+    make && \
+    make install && \
   cd $MOLOCHDIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
     cd $MOLOCHDIR/doc && \
@@ -109,7 +117,14 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
   apt-get clean && \
-  rm -rf $MOLOCHDIR"-"$MOLOCH_VERSION "/data/bro-"$ZEEK_VERSION /var/lib/apt/lists/* /tmp/* /var/tmp/*
+  rm -rf $MOLOCHDIR"-"$MOLOCH_VERSION \
+         /data/bro.tar.gz \
+         "/data/bro-"$ZEEK_VERSION \
+         /data/bro-community-id.tar.gz \
+         "/data/bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER \
+         /var/lib/apt/lists/* \
+         /tmp/* \
+         /var/tmp/*
 
 FROM debian:stretch-slim AS runtime
 

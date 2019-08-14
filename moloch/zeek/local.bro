@@ -33,4 +33,5 @@ redef ignore_checksums = T;
 @load frameworks/files/detect-MHR
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
+@load Corelight/CommunityID
 @load ./ja3

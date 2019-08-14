@@ -25,7 +25,8 @@
             "vlan",
             "inner_vlan",
             "orig_l2_addr",
-            "resp_l2_addr"
+            "resp_l2_addr",
+            "community_id"
         ]
     ],
     "dhcp": [
