@@ -928,12 +928,12 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/curr
 | Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|
 | Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|
 | Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|
-| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) ||` (zeek_http.password == EXISTS!)`|`|``(zeek.user == "anonymous")``|``_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"``|
+| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|
 | Global string search (anywhere in the document) |`all Moloch search expressions are field-based`|`microsoft`|
 | Wildcards (`?` for single character, `*` for any characters) |`host.dns == "*micro?oft*"`|`dns.host:*micro?oft*`|
 | Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|
 | IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
-| IPv6 values |``(ip.src == EXISTS! |`|` ip.dst == EXISTS!) && (ip != 0.0.0.0/0)``|``(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")``|
+| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|
 | Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|
@@ -955,7 +955,7 @@ The table below shows the mapping of some of these fields.
 | Duration |`session.length`|`length`|`zeek_conn.duration`|
 | First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
 | IP Protocol |`ip.protocol`|`ipProtocol`|`zeek.proto`|
-| Last Packet Time |`stoptime`|`lastPacket`|``|
+| Last Packet Time |`stoptime`|`lastPacket`||
 | MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`zeek.filetype`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
 | Protocol/Service |`protocols`|`protocol`|`zeek.proto`, `zeek.service`|
 | Request Bytes |`databytes.src`, `bytes.src`|`srcBytes`, `srcDataBytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
