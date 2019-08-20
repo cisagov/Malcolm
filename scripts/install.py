@@ -1329,8 +1329,8 @@ class MacInstaller(Installer):
       if newCpus or newMemoryMiB:
         with open(settingsFile, 'r+') as f:
           data = json.load(f)
-          if newCpus: data['cpus'] = newCpus
-          if newMemoryGiB: data['memoryMiB'] = newMemoryGiB*1024
+          if newCpus: data['cpus'] = int(newCpus)
+          if newMemoryGiB: data['memoryMiB'] = int(newMemoryGiB)*1024
           f.seek(0)
           json.dump(data, f, indent=2)
           f.truncate()
