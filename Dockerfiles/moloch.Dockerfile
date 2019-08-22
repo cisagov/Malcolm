@@ -5,7 +5,7 @@ LABEL maintainer="Seth.Grover@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "1.8.0"
+ENV MOLOCH_VERSION "2.0.0"
 ENV MOLOCHDIR "/data/moloch"
 ENV ZEEK_VERSION "2.6.3"
 ENV ZEEK_DIR "/opt/bro"

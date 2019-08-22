@@ -42,7 +42,7 @@ if [ "$INITIALIZEDB" = "true" ] ; then
   rm -f /tmp/not_a_packet.pcap
 
   #set some default settings I want for moloch
-  curl -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v6/user/$MALCOLM_USERNAME/_update -d "@$MOLOCHDIR/etc/user_settings.json"
+  curl -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$MOLOCHDIR/etc/user_settings.json"
   curl -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/_template/zeek_template -d "@$MOLOCHDIR/etc/zeek_template.json"
 fi
 

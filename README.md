@@ -86,7 +86,7 @@ The files required to build and run Malcolm are available on the [Idaho National
 
 #### Building Malcolm from scratch
 
-The `build.sh` script can Malcolm's Docker from scratch. See [Building from source](#Build) for more information.
+The `build.sh` script can build Malcolm's Docker images from scratch. See [Building from source](#Build) for more information.
 
 #### Pull Malcolm's Docker images
 
@@ -1403,7 +1403,7 @@ See `License.txt` for the terms of its release.
 [Seth Grover](mailto:Seth.Grover@inl.gov?subject=Malcolm)
 
 ## Other Software
-Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
+Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
 
 [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
 
