@@ -33,7 +33,7 @@ fi
 if ! curl -fs --output /dev/null -H'Content-Type: application/json' -XGET http://$ES_HOST:$ES_PORT/_template/zeek_template ; then
   echo "Initializing Elasticsearch database..."
 
-	echo INIT | $MOLOCHDIR/db/db.pl http://$ES_HOST:$ES_PORT init
+	$MOLOCHDIR/db/db.pl http://$ES_HOST:$ES_PORT initnoprompt
 
 	# this password isn't going to be used by Moloch, nginx will do the auth instead
 	$MOLOCHDIR/bin/moloch_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
@@ -44,16 +44,29 @@ if ! curl -fs --output /dev/null -H'Content-Type: application/json' -XGET http:/
   rm -f /tmp/not_a_packet.pcap
 
   #set some default settings I want for moloch
-  curl -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$MOLOCHDIR/etc/user_settings.json"
+  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$MOLOCHDIR/etc/user_settings.json"
 
   # load zeek_template containing a few special-typed fields (the rest are done by Moloch WISE for now)
-  curl -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/_template/zeek_template -d "@$MOLOCHDIR/etc/zeek_template.json"
+  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/_template/zeek_template -d "@$MOLOCHDIR/etc/zeek_template.json"
 
-  echo -e "Elasticsearch database initialized!\n"
+  echo -e "\nElasticsearch database initialized!\n"
 
 else
-  echo -e "Elasticsearch database previously initialized!\n"
-fi
+  echo "Elasticsearch database previously initialized!"
+  echo
+
+  if /data/moloch-needs-upgrade.sh 2>&1; then
+    echo "Elasticsearch database needs to be upgraded for $MOLOCH_VERSION!"
+    $MOLOCHDIR/db/db.pl http://$ES_HOST:$ES_PORT upgradenoprompt
+    echo "Elasticsearch database upgrade complete!"
+    echo
+
+  else
+    echo "Elasticsearch database is up-to-date for Moloch version $MOLOCH_VERSION!"
+    echo
+
+  fi # if /data/moloch-needs-upgrade.sh
+fi # if/else Elasticsearch database initialized
 
 touch $MOLOCHDIR/initialized
 
