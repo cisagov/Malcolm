@@ -30,7 +30,7 @@ redef ignore_checksums = T;
 @load protocols/ssh/interesting-hostnames
 @load protocols/http/detect-sqli
 @load frameworks/files/hash-all-files
-@load frameworks/files/detect-MHR
+# @load frameworks/files/detect-MHR
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
 @load Corelight/CommunityID
