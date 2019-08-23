@@ -3,8 +3,8 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
-echo "Checking ElasticSearch..."
-/data/elastic_search_status.sh 2>&1 && echo "ElasticSearch is running!"
+echo "Checking Elasticsearch..."
+/data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
 #Wipe is the same initalize except it keeps users intact
 echo WIPE | /data/moloch/db/db.pl http://$ES_HOST:$ES_PORT wipe

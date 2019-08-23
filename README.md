@@ -332,8 +332,6 @@ Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
-* `INITIALIZEDB` – indicates to Malcolm to create (or recreate) Moloch’s internal settings database on startup; this setting is managed by the `wipe.sh` and `start.sh` scripts and does not generally need to be changed manually
-
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
@@ -1350,8 +1348,6 @@ Creating malcolm_moloch_1        ... done
 Creating malcolm_filebeat_1      ... done
 Creating malcolm_upload_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
-
-Malcolm started, setting "INITIALIZEDB=false" in "docker-compose.yml" for subsequent runs.
 
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------

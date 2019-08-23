@@ -60,12 +60,6 @@ mkdir -p ./zeek-logs/extract_files/
 # start docker
 if $DOCKER_COMPOSE_COMMAND up --detach ; then
   echo ""
-
-  # set INITIALIZEDB=false to prevent wipe of database on subsequent startup
-  echo "Malcolm started, setting \"INITIALIZEDB=false\" in \"$CONFIG_FILE\" for subsequent runs."
-  sed -i "s/\(INITIALIZEDB[[:space:]]*:[[:space:]]\)'true'/\1'false'/" "$CONFIG_FILE"
-  echo ""
-
   echo "In a few minutes, Malcolm services will be accessible via the following URLs:"
   echo "------------------------------------------------------------------------------"
   echo "  - Moloch: https://localhost:443/"

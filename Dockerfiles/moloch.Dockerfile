@@ -141,10 +141,6 @@ ARG MOLOCH_ANALYZE_PCAP_THREADS=1
 ARG CAPTURE=off
 ARG WISE=off
 ARG VIEWER=on
-#Initalize is used to reset the environment from scratch and rebuild a new ES Stack
-ARG INITIALIZEDB=false
-#Wipe is the same as initalize except it keeps users intact
-ARG WIPEDB=false
 #Whether or not Moloch is in charge of deleting old PCAP files to reclaim space
 ARG MANAGE_PCAP_FILES=false
 #Whether or not to auto-tag logs based on filename
@@ -171,8 +167,6 @@ ENV MOLOCH_ANALYZE_PCAP_THREADS $MOLOCH_ANALYZE_PCAP_THREADS
 ENV CAPTURE $CAPTURE
 ENV WISE $WISE
 ENV VIEWER $VIEWER
-ENV INITIALIZEDB $INITIALIZEDB
-ENV WIPEDB $WIPEDB
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
 ENV ZEEK_DIR "/opt/bro"
@@ -253,8 +247,6 @@ RUN groupadd --gid 1000 $MOLOCHUSER && \
 
 #Update Path
 ENV PATH="/data:$MOLOCHDIR/bin:$ZEEK_DIR/bin:${PATH}"
-
-VOLUME ["/data/configured"]
 
 EXPOSE 8000 8005 8081
 WORKDIR $MOLOCHDIR

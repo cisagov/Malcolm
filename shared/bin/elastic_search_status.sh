@@ -32,4 +32,4 @@ until [[ "$(curl -fsSL "$ES_URL/_cat/health?h=status" | sed -r 's/^[[:space:]]+|
   sleep 1
 done
 
-echo "ElasticSearch is up and healthy at "$ES_URL"" >&2
+echo "Elasticsearch is up and healthy at "$ES_URL"" >&2
