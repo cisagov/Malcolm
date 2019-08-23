@@ -14,8 +14,8 @@ INDEX_TIME_FIELD=${MOLOCH_INDEX_TIME_FIELD:-"firstPacket"}
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_ES_MOLOCH_SESSION_INDEX" = "true" ]] ; then
 
-  echo "Giving ElasticSearch time to start before configuring Kibana..."
-  /data/elastic_search_status.sh 2>&1 && echo "ElasticSearch is running!"
+  echo "Giving Elasticsearch time to start before configuring Kibana..."
+  /data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
   # is the kibana process server up and responding to requests?
   if curl -f -XGET "http://localhost:5601/api/saved_objects/index-pattern/" ; then

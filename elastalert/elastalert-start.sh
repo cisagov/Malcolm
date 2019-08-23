@@ -4,7 +4,7 @@
 
 set -e
 
-echo "Giving ElasticSearch at $ELASTICSEARCH_URL time to start..."
+echo "Giving Elasticsearch at $ELASTICSEARCH_URL time to start..."
 
 elastic_search_status.sh
 
