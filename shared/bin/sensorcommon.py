@@ -4,6 +4,7 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
+import ipaddress
 import json
 import os
 import socket
@@ -84,6 +85,20 @@ def isfloat(value):
     return True
   except ValueError:
     return False
+
+###################################################################################################
+# check a string or list to see if something is a valid IP address
+def isipaddress(value):
+  result = True
+  try:
+    if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
+      for v in value:
+        ip = ipaddress.ip_address(v)
+    else:
+      ip = ipaddress.ip_address(value)
+  except:
+      result = False
+  return result
 
 ###################################################################################################
 # execute a shell process returning its exit code and output
