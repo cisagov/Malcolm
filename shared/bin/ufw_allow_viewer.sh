@@ -51,11 +51,11 @@ done <<< "$(/usr/sbin/ufw status numbered | tac | grep "${MOLOCH_VIEWER_PORT}/tc
 if [[ -n $MOLOCH_PACKET_ACL ]]; then
   IFS=","
   for IP in $MOLOCH_PACKET_ACL; do
-    /usr/sbin/ufw allow proto tcp from $IP/32 to any port $MOLOCH_VIEWER_PORT
+    /usr/sbin/ufw allow proto tcp from $IP to any port $MOLOCH_VIEWER_PORT
   done
   unset IFS
 elif [[ -n $ES_HOST ]]; then
-  /usr/sbin/ufw allow proto tcp from $ES_HOST/32 to any port $MOLOCH_VIEWER_PORT
+  /usr/sbin/ufw allow proto tcp from $ES_HOST to any port $MOLOCH_VIEWER_PORT
 fi
 
 # output status of rule
