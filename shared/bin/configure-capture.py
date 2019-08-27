@@ -106,6 +106,9 @@ class Constants:
   # specific to metricbeat
   BEAT_INTERVAL = "BEAT_INTERVAL"
 
+  # specific to moloch
+  MOLOCH_PACKET_ACL = "MOLOCH_PACKET_ACL"
+
   MSG_CONFIG_MODE = 'Configuration Mode'
   MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
   MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
@@ -131,6 +134,7 @@ class Constants:
   MSG_CONFIG_CAPTURE_SUCCESS = 'Capture interface set to {} in {}.\n\nReboot to apply changes.'
   MSG_CONFIG_AUTOSTART_SUCCESS = 'Autostart services configured.\n\nReboot to apply changes.'
   MSG_CONFIG_FORWARDING_SUCCESS = '{} forwarding configured:\n\n{}\n\nRestart forwarding services or reboot to apply changes.'
+  MSG_CONFIG_MOLOCH_PCAP_ACL = 'Specify IP addresses for PCAP retrieval ACL (one per line)'
   MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
   MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
   MSG_ERROR_FILE_NOT_FOUND = 'One or more of the files specified does not exist'
@@ -385,6 +389,8 @@ def main():
         previous_config_values[Constants.BEAT_ES_PORT] = capture_config_dict["ES_PORT"]
       if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("ES_USERNAME" in capture_config_dict.keys()):
         previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["ES_USERNAME"]
+      if (Constants.MOLOCH_PACKET_ACL not in previous_config_values.keys()) and ("MOLOCH_PACKET_ACL" in capture_config_dict.keys()):
+        previous_config_values[Constants.MOLOCH_PACKET_ACL] = capture_config_dict[Constants.MOLOCH_PACKET_ACL]
 
       code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
       if (code == Dialog.CANCEL or code == Dialog.ESC):
@@ -658,6 +664,14 @@ def main():
           if Constants.BEAT_HTTP_PASSWORD in moloch_elastic_config_dict.keys():
             moloch_elastic_config_dict["ES_PASSWORD"] = aggressive_url_encode(moloch_elastic_config_dict.pop(Constants.BEAT_HTTP_PASSWORD))
           moloch_elastic_config_dict = { k.replace('BEAT_', ''): v for k, v in moloch_elastic_config_dict.items() }
+
+          # get list of IP addresses allowed for packet payload retrieval
+          lines = previous_config_values[Constants.MOLOCH_PACKET_ACL].split(",")
+          lines.append(elastic_config_dict[Constants.BEAT_ES_HOST])
+          code, lines = d.editbox_str("\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_MOLOCH_PCAP_ACL)
+          if code != Dialog.OK:
+            raise CancelledError
+          moloch_elastic_config_dict[Constants.MOLOCH_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
 
           list_results = sorted([f"{k}={v}" for k, v in moloch_elastic_config_dict.items() if "PASSWORD" not in k])
 
