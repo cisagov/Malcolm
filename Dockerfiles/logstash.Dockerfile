@@ -3,7 +3,7 @@ FROM centos:7 AS build
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
 
-ARG LOGSTASH_JAVA_EXECUTION_ENGINE=false
+ARG LOGSTASH_JAVA_EXECUTION_ENGINE=true
 
 ENV LOGSTASH_JAVA_EXECUTION_ENGINE $LOGSTASH_JAVA_EXECUTION_ENGINE
 

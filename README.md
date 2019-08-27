@@ -340,7 +340,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
 
-* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing (default `false`, as it is currently considered experimental)
+* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing
 
 * `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
 
