@@ -6,6 +6,9 @@
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
+redef HTTP::default_capture_password = T;
+redef FTP::default_capture_password = T;
+redef SOCKS::default_capture_password = T;
 
 @load tuning/defaults
 @load misc/scan
