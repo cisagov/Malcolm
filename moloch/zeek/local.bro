@@ -38,3 +38,4 @@ redef SOCKS::default_capture_password = T;
 @load policy/protocols/conn/mac-logging
 @load Corelight/CommunityID
 @load ./ja3
+@load ./hassh

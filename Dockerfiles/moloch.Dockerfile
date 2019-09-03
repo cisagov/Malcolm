@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV MOLOCH_VERSION "2.0.0"
 ENV MOLOCHDIR "/data/moloch"
-ENV ZEEK_VERSION "2.6.3"
+ENV ZEEK_VERSION "2.6.4"
 ENV ZEEK_DIR "/opt/bro"
 ENV CYBERCHEF_VERSION "8.30.1"
 ENV ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER "1.2"
@@ -79,6 +79,10 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
     mkdir -p $ZEEK_DIR/share/bro/site/ja3 && \
     cp -v /tmp/ja3/bro/* $ZEEK_DIR/share/bro/site/ja3 && \
     rm -rf /tmp/ja3 && \
+  git clone --depth 1 https://github.com/salesforce/hassh /tmp/hassh && \
+    mkdir -p $ZEEK_DIR/share/bro/site/hassh && \
+    cp -v /tmp/hassh/bro/* $ZEEK_DIR/share/bro/site/hassh && \
+    rm -rf /tmp/hassh && \
   cd /data && \
     tar -xvf "bro-community-id.tar.gz" && \
     cd "bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER && \

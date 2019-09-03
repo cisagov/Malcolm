@@ -428,6 +428,13 @@ function ZeekLogs (api, section) {
   this.ssh_remote_location_cityField = this.api.addField("field:zeek_ssh.remote_location_city;db:zeek_ssh.remote_location_city;kind:termfield;friendly:ssh remote_location_city;help:ssh remote_location_city");
   this.ssh_remote_location_latitudeField = this.api.addField("field:zeek_ssh.remote_location_latitude;db:zeek_ssh.remote_location_latitude;kind:termfield;friendly:ssh remote_location_latitude;help:ssh remote_location_latitude");
   this.ssh_remote_location_longitudeField = this.api.addField("field:zeek_ssh.remote_location_longitude;db:zeek_ssh.remote_location_longitude;kind:termfield;friendly:ssh remote_location_longitude;help:ssh remote_location_longitude");
+  this.ssh_hasshVersionField = this.api.addField("field:zeek_ssh.hasshVersion;db:zeek_ssh.hasshVersion;kind:termfield;friendly:HASSH Version;help:HASSH Version");
+  this.ssh_hasshField = this.api.addField("field:zeek_ssh.hassh;db:zeek_ssh.hassh;kind:termfield;friendly:HASSH Client Fingerprint;help:HASSH Client Fingerprint");
+  this.ssh_hasshServerField = this.api.addField("field:zeek_ssh.hasshServer;db:zeek_ssh.hasshServer;kind:termfield;friendly:HASSH Server Fingerprint;help:HASSH Server Fingerprint");
+  this.ssh_hasshAlgorithmsField = this.api.addField("field:zeek_ssh.hasshAlgorithms;db:zeek_ssh.hasshAlgorithms;kind:termfield;friendly:HASSH Client Algorithms;help:HASSH Client Algorithms");
+  this.ssh_hasshServerAlgorithmsField = this.api.addField("field:zeek_ssh.hasshServerAlgorithms;db:zeek_ssh.hasshServerAlgorithms;kind:termfield;friendly:HASSH Server Algorithms;help:HASSH Server Algorithms");
+  this.ssh_cshkaField = this.api.addField("field:zeek_ssh.cshka;db:zeek_ssh.cshka;kind:termfield;friendly:HASSH Client Host Key Algorithms;help:HASSH Client Host Key Algorithms");
+  this.ssh_sshkaField = this.api.addField("field:zeek_ssh.sshka;db:zeek_ssh.sshka;kind:termfield;friendly:HASSH Server Host Key Algorithms;help:HASSH Server Host Key Algorithms");
 
   // ssl.log
   this.ssl_ssl_versionField = this.api.addField("field:zeek_ssl.ssl_version;db:zeek_ssl.ssl_version;kind:termfield;friendly:ssl ssl_version;help:ssl ssl_version");
@@ -1048,6 +1055,12 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek_ssh, 'remote_location_city', 'ssh remote_location_city', 'zeek_ssh.remote_location_city')\n" +
     "      +arrayList(session.zeek_ssh, 'remote_location_latitude', 'ssh remote_location_latitude', 'zeek_ssh.remote_location_latitude')\n" +
     "      +arrayList(session.zeek_ssh, 'remote_location_longitude', 'ssh remote_location_longitude', 'zeek_ssh.remote_location_longitude')\n" +
+    "      +arrayList(session.zeek_ssh, 'hassh', 'HASSH Client Fingerprint', 'zeek_ssh.hassh')\n" +
+    "      +arrayList(session.zeek_ssh, 'hasshServer', 'HASSH Server Fingerprint', 'zeek_ssh.hasshServer')\n" +
+    "      +arrayList(session.zeek_ssh, 'hasshAlgorithms', 'HASSH Client Algorithms', 'zeek_ssh.hasshAlgorithms')\n" +
+    "      +arrayList(session.zeek_ssh, 'hasshServerAlgorithms', 'HASSH Server Algorithms', 'zeek_ssh.hasshServerAlgorithms')\n" +
+    "      +arrayList(session.zeek_ssh, 'cshka', 'HASSH Client Host Key Algorithms', 'zeek_ssh.cshka')\n" +
+    "      +arrayList(session.zeek_ssh, 'sshka', 'HASSH Server Host Key Algorithms', 'zeek_ssh.sshka')\n" +
 
     // ssl.log
     "  if (session.zeek_ssl)\n" +
