@@ -73,6 +73,15 @@ def main():
 
   ja3Map = defaultdict(list)
 
+  urls = ['https://ja3er.com/getAllUasJson']
+  for url in urls:
+    try:
+      for fingerprint in requests.get(url).json():
+        if ('md5' in fingerprint) and fingerprint['md5'] and ('User-Agent' in fingerprint) and fingerprint['User-Agent']:
+          ja3Map[fingerprint['md5']].append(fingerprint['User-Agent'])
+    except Exception as e:
+      eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
+
   try:
     url = 'https://raw.githubusercontent.com/LeeBrotherston/tls-fingerprinting/master/fingerprints/fingerprints.json'
     keys = ['record_tls_version', 'ciphersuite', 'extensions', 'e_curves', 'ec_point_fmt']
