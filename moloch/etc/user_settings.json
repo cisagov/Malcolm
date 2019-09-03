@@ -16,7 +16,7 @@
       "detailFormat": "last",
       "showTimestamps": "last",
       "sortColumn": "start",
-      "sortDirection": "asc",
+      "sortDirection": "desc",
       "spiGraph": "protocol",
       "connSrcField": "srcIp",
       "connDstField": "dstIp",
