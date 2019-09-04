@@ -25,7 +25,8 @@
             "vlan",
             "inner_vlan",
             "orig_l2_addr",
-            "resp_l2_addr"
+            "resp_l2_addr",
+            "community_id"
         ]
     ],
     "dhcp": [
@@ -116,6 +117,40 @@
             "server_dns_computer_name",
             "server_tree_name",
             "success"
+        ]
+    ],
+    "ssh": [
+        [
+            "ts",
+            "uid",
+            "id.orig_h",
+            "id.orig_p",
+            "id.resp_h",
+            "id.resp_p",
+            "version",
+            "auth_success",
+            "auth_attempts",
+            "direction",
+            "client",
+            "server",
+            "cipher_alg",
+            "mac_alg",
+            "compression_alg",
+            "kex_alg",
+            "host_key_alg",
+            "host_key",
+            "remote_location.country_code",
+            "remote_location.region",
+            "remote_location.city",
+            "remote_location.latitude",
+            "remote_location.longitude",
+            "hasshVersion",
+            "hassh",
+            "hasshServer",
+            "cshka",
+            "hasshAlgorithms",
+            "sshka",
+            "hasshServerAlgorithms"
         ]
     ],
     "ssl": [

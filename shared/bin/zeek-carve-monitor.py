@@ -44,6 +44,7 @@ MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 134217728
 
 ###################################################################################################
 debug = False
+debugToggled = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
@@ -61,6 +62,14 @@ def shutdown_handler(signum, frame):
 def pdb_handler(sig, frame):
   import pdb
   pdb.Pdb().set_trace(frame)
+
+###################################################################################################
+# handle sigusr2 for toggling debug
+def debug_toggle_handler(signum, frame):
+  global debug
+  global debugToggled
+  debug = not debug
+  debugToggled = True
 
 ###################################################################################################
 # worker thread for processing events from the inotify event queue and calculating the sha256 hash,
@@ -191,6 +200,7 @@ def resultCheckWorker(args):
 def main():
   global args
   global debug
+  global debugToggled
   global shuttingDown
 
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
@@ -237,6 +247,7 @@ def main():
   signal.signal(signal.SIGINT, shutdown_handler)
   signal.signal(signal.SIGTERM, shutdown_handler)
   signal.signal(signal.SIGUSR1, pdb_handler)
+  signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
   # sleep for a bit if requested
   sleepCount = 0
@@ -490,8 +501,9 @@ def main():
                       len(toCheckFileQueue),
                       len(hashedFileQueue),
                       len(newFileQueue)]
-        if any(x > 0 for x in debugStats) or any(x > 0 for x in prevDebugStats):
+        if any(x > 0 for x in debugStats) or any(x > 0 for x in prevDebugStats) or debugToggled:
           eprint(f"\t{debugStats[0]} finished, {debugStats[1]} checking, {debugStats[2]} to check, {debugStats[3]} hashed, {debugStats[4]} new")
+          debugToggled = False
         prevDebugStats = debugStats
 
       # if we didn't do anything, sleep for a bit before checking again

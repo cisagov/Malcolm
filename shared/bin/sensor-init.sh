@@ -19,6 +19,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
   # set up some sensor-specific stuff
   if [[ -d /opt/sensor ]]; then
+
     # set ownership for /opt/sensor files for sensor UID:GID
     chown -R 1000:1000 /opt/sensor
     find /opt/sensor/ -type d -exec chmod 750 "{}" \;
@@ -34,7 +35,11 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
           sed -i "s/CAPTURE_INTERFACE=xxxx/CAPTURE_INTERFACE=${CAP_IFACE}/g" /opt/sensor/sensor_ctl/control_vars.conf
         fi
       fi
+      chmod 600 /opt/sensor/sensor_ctl/control_vars.conf*
     fi
+
+    [[ -d /opt/sensor/sensor_ctl/moloch/config.ini ]] && chmod 600 /opt/sensor/sensor_ctl/moloch/config.ini
+
   fi
 
   # broctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user

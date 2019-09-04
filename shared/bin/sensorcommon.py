@@ -4,6 +4,7 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
+import ipaddress
 import json
 import os
 import socket
@@ -45,6 +46,11 @@ def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
 ###################################################################################################
+# urlencode each character of a string
+def aggressive_url_encode(string):
+  return "".join("%{0:0>2}".format(format(ord(char), "x")) for char in string)
+
+###################################################################################################
 # strip a prefix from the beginning of a string if needed
 def remove_prefix(text, prefix):
   if (len(prefix) > 0) and text.startswith(prefix):
@@ -79,6 +85,20 @@ def isfloat(value):
     return True
   except ValueError:
     return False
+
+###################################################################################################
+# check a string or list to see if something is a valid IP address
+def isipaddress(value):
+  result = True
+  try:
+    if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
+      for v in value:
+        ip = ipaddress.ip_address(v)
+    else:
+      ip = ipaddress.ip_address(value)
+  except:
+      result = False
+  return result
 
 ###################################################################################################
 # execute a shell process returning its exit code and output

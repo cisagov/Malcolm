@@ -2,6 +2,14 @@
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
+
+function filesize_in_image() {
+  FILESPEC="$2"
+  IMAGE="$(grep -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  docker run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\""
+}
+
+
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
   exit 1
@@ -48,3 +56,25 @@ if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 else
   $DOCKER_COMPOSE_COMMAND build "$@"
 fi
+
+# we're going to do some validation that some things got pulled/built correctly
+FILES_IN_IMAGES=(
+  "/var/lib/clamav/main.cvd;file-monitor"
+  "/var/lib/clamav/daily.cvd;file-monitor"
+  "/var/lib/clamav/bytecode.cvd;file-monitor"
+  "/usr/share/logstash/config/oui-logstash.txt;logstash"
+  "/etc/ip_protocol_numbers.yaml;logstash"
+  "/etc/ja3.yaml;logstash"
+  "/data/moloch/etc/GeoLite2-ASN.mmdb;moloch"
+  "/data/moloch/etc/GeoLite2-Country.mmdb;moloch"
+  "/data/moloch/etc/ipv4-address-space.csv;moloch"
+  "/data/moloch/etc/oui.txt;moloch"
+  "/opt/bro/bin/bro;moloch"
+  "/opt/bro/share/bro/site/ja3/ja3.bro;moloch"
+  "/data/moloch/bin/moloch-capture;moloch"
+)
+for i in ${FILES_IN_IMAGES[@]}; do
+  FILE="$(echo "$i" | cut -d';' -f1)"
+  IMAGE="$(echo "$i" | cut -d';' -f2)"
+  (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
+done

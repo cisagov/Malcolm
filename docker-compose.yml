@@ -6,8 +6,6 @@ version: '3.7'
 # Commonly tweaked configuration options
 #-------------------------------------------------------------------------------
 x-moloch-variables: &moloch-variables
-  # INITIALIZEDB should be 'true' on Moloch's first execution, and 'false' every other time
-  INITIALIZEDB : 'true'
   MANAGE_PCAP_FILES : 'false'
   ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
@@ -15,7 +13,7 @@ x-moloch-variables: &moloch-variables
 
 x-logstash-variables: &logstash-variables
   # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
-  LOGSTASH_JAVA_EXECUTION_ENGINE : 'false'
+  LOGSTASH_JAVA_EXECUTION_ENGINE : 'true'
   LOGSTASH_OUI_LOOKUP  : 'true'
   LOGSTASH_REVERSE_DNS : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
@@ -76,7 +74,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.2
     restart: "no"
     hostname: elasticsearch
     environment:
@@ -108,7 +106,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.4.0
+    image: malcolmnetsec/kibana-oss:1.5.0
     restart: "no"
     hostname: kibana
     environment:
@@ -134,7 +132,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.4.0
+    image: malcolmnetsec/elastalert:1.5.0
     restart: "no"
     hostname: elastalert
     environment:
@@ -161,7 +159,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.4.0
+    image: malcolmnetsec/curator:1.5.0
     restart: "no"
     hostname: curator
     environment:
@@ -176,7 +174,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.4.0
+    image: malcolmnetsec/logstash-oss:1.5.0
     restart: "no"
     hostname: logstash
     environment:
@@ -214,7 +212,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.4.0
+    image: malcolmnetsec/filebeat-oss:1.5.0
     restart: "no"
     hostname: filebeat
     environment:
@@ -243,7 +241,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.4.0
+    image: malcolmnetsec/moloch:1.5.0
     restart: "no"
     hostname: moloch
     env_file:
@@ -258,7 +256,6 @@ services:
       ES_PORT : 9200
       VIEWER : 'on'
       WISE : 'on'
-      WIPEDB : 'false'
     ulimits:
       memlock:
         soft: -1
@@ -282,7 +279,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.4.0
+    image: malcolmnetsec/file-monitor:1.5.0
     restart: "no"
     hostname: filemon
     environment:
@@ -296,7 +293,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.4.0
+    image: malcolmnetsec/pcap-capture:1.5.0
     restart: "no"
     network_mode: host
     ulimits:
@@ -316,7 +313,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.4.0
+    image: malcolmnetsec/file-upload:1.5.0
     restart: "no"
     hostname: upload
     env_file:
@@ -333,7 +330,7 @@ services:
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
-    image: malcolmnetsec/htadmin:1.4.0
+    image: malcolmnetsec/htadmin:1.5.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -351,7 +348,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.4.0
+    image: malcolmnetsec/nginx-proxy:1.5.0
     restart: "no"
     hostname: nginx-proxy
     depends_on:

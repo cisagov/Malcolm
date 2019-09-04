@@ -6,6 +6,9 @@
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
+redef HTTP::default_capture_password = T;
+redef FTP::default_capture_password = T;
+redef SOCKS::default_capture_password = T;
 
 @load tuning/defaults
 @load misc/scan
@@ -30,7 +33,9 @@ redef ignore_checksums = T;
 @load protocols/ssh/interesting-hostnames
 @load protocols/http/detect-sqli
 @load frameworks/files/hash-all-files
-@load frameworks/files/detect-MHR
+# @load frameworks/files/detect-MHR
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
+@load Corelight/CommunityID
 @load ./ja3
+@load ./hassh

@@ -1,4 +1,4 @@
-FROM docker.elastic.co/kibana/kibana-oss:6.8.1
+FROM docker.elastic.co/kibana/kibana-oss:6.8.2
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
@@ -40,9 +40,9 @@ ADD kibana/supervisord.conf /etc/supervisord.conf
 ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/maps /opt/maps
 ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.0.3/elastalert-kibana-plugin-1.0.3-6.8.0.zip /tmp/elastalert-kibana-plugin.zip
-ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v6.7.1/prelert_swimlane_vis-6.7.1.zip /tmp/kibana-swimlane.zip
+ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v6.8.1/prelert_swimlane_vis-6.8.1.zip /tmp/kibana-swimlane.zip
 ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/6.7.1/kibana-comments-app-plugin-6.7.1-1.zip /tmp/kibana-comments.zip
-ADD https://github.com/walterra/kibana-milestones-vis/releases/download/v6.8.0/kibana-milestones-vis-6.8.0.zip /tmp/kibana-milestones.zip
+ADD https://github.com/walterra/kibana-milestones-vis/releases/download/v6.8.1/kibana-milestones-vis-6.8.1.zip /tmp/kibana-milestones.zip
 
 # TODO: commented out because it's not optimizing in 6.6+ correctly
 # put these back in here and below in the build section:
@@ -63,25 +63,25 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
       unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
-      sed -i "s/6\.8\.0/6\.8\.1/g" kibana/elastalert-kibana-plugin/package.json && \
+      sed -i "s/6\.8\.0/6\.8\.2/g" kibana/elastalert-kibana-plugin/package.json && \
       zip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip && \
       rm -f /tmp/elastalert-kibana-plugin.zip && \
     echo "Installing Swimlanes visualization..." && \
-      unzip kibana-swimlane.zip kibana/prelert_swimlane_vis-6.7.1/package.json && \
-      sed -i "s/6\.7\.1/6\.8\.1/g" kibana/prelert_swimlane_vis-6.7.1/package.json && \
-      zip kibana-swimlane.zip kibana/prelert_swimlane_vis-6.7.1/package.json && \
+      unzip kibana-swimlane.zip kibana/prelert_swimlane_vis-6.8.1/package.json && \
+      sed -i "s/6\.8\.1/6\.8\.2/g" kibana/prelert_swimlane_vis-6.8.1/package.json && \
+      zip kibana-swimlane.zip kibana/prelert_swimlane_vis-6.8.1/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip && \
       rm -f /tmp/elastalert-kibana-plugin.zip && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
-      sed -i "s/6\.7\.1/6\.8\.1/g" kibana/kibana-comments-app-plugin/package.json && \
+      sed -i "s/6\.7\.1/6\.8\.2/g" kibana/kibana-comments-app-plugin/package.json && \
       zip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-comments.zip && \
       rm -rf /tmp/kibana-comments.zip /tmp/kibana && \
     echo "Installing Milestones visualization..." && \
       unzip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
-      sed -i "s/6\.8\.0/6\.8\.1/g" kibana/kibana-milestones-vis/package.json && \
+      sed -i "s/6\.8\.1/6\.8\.2/g" kibana/kibana-milestones-vis/package.json && \
       zip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-milestones.zip && \
       rm -rf /tmp/kibana-milestones.zip /tmp/kibana

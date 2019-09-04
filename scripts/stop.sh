@@ -17,6 +17,14 @@ else
   DOCKER_COMPOSE_COMMAND="docker-compose"
 fi
 
+# if stop.sh is being called with wipe.sh (after the docker-compose file)
+# then also remove named and anonymous volumes (not external volumes, of course)
+if [ "$2" == "wipe" ]; then
+  VOLUMES_FLAG="--volumes"
+else
+  VOLUMES_FLAG=""
+fi
+
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
 [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
 [[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
@@ -28,7 +36,7 @@ SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 
 # stop docker
-if $DOCKER_COMPOSE_COMMAND down ; then
+if $DOCKER_COMPOSE_COMMAND down $VOLUMES_FLAG ; then
   echo "Stopped Malcolm"
   echo ""
 else

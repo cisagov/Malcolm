@@ -3,7 +3,7 @@ FROM centos:7 AS build
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
 
-ARG LOGSTASH_JAVA_EXECUTION_ENGINE=false
+ARG LOGSTASH_JAVA_EXECUTION_ENGINE=true
 
 ENV LOGSTASH_JAVA_EXECUTION_ENGINE $LOGSTASH_JAVA_EXECUTION_ENGINE
 
@@ -24,7 +24,7 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     git clone --depth 1 https://github.com/mmguero/logstash-filter-ieee_oui.git /opt/logstash-filter-ieee_oui && \
     /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
-FROM docker.elastic.co/logstash/logstash-oss:6.8.1 AS runtime
+FROM docker.elastic.co/logstash/logstash-oss:6.8.2 AS runtime
 
 USER root
 

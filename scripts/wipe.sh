@@ -27,8 +27,11 @@ fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 
-# stop Malcolm if needed
-$SCRIPT_PATH/stop.sh "$CONFIG_FILE"
+# attempt to DELETE _template/zeek_template in Elasticsearch
+$DOCKER_COMPOSE_COMMAND exec moloch bash -c 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$ES_PORT/_template/zeek_template"' >/dev/null 2>&1
+
+# stop Malcolm and remove volumes if needed
+$SCRIPT_PATH/stop.sh "$CONFIG_FILE" wipe
 
 # completely clean out elasticsearch database and local files
 rm -rf ./elasticsearch/nodes 2>/dev/null
@@ -36,11 +39,6 @@ find ./elasticsearch-backup/ ./zeek-logs/ ./moloch-logs/ ./pcap/ ./moloch-raw/ \
 find ./elasticsearch-backup/logs/ ./zeek-logs/processed/ ./zeek-logs/current/ -mindepth 1 -type d -delete 2>/dev/null
 
 echo "Malcolm has been stopped and its data cleared."
-echo ""
-
-# set INITIALIZEDB=true to reinitialize database on subsequent startup
-echo "setting \"INITIALIZEDB=true\" in \"$CONFIG_FILE\" for subsequent Malcolm runs."
-sed -i "s/\(INITIALIZEDB[[:space:]]*:[[:space:]]\)'false'/\1'true'/" "$CONFIG_FILE"
 echo ""
 
 popd >/dev/null 2>&1

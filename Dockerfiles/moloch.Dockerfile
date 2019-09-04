@@ -5,11 +5,12 @@ LABEL maintainer="Seth.Grover@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "1.8.0"
+ENV MOLOCH_VERSION "2.0.0"
 ENV MOLOCHDIR "/data/moloch"
-ENV ZEEK_VERSION "2.6.2"
+ENV ZEEK_VERSION "2.6.4"
 ENV ZEEK_DIR "/opt/bro"
 ENV CYBERCHEF_VERSION "8.30.1"
+ENV ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER "1.2"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
@@ -19,8 +20,9 @@ ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
 ADD https://github.com/gchq/CyberChef/releases/download/v$CYBERCHEF_VERSION/cyberchef.htm $MOLOCHDIR/doc/cyberchef.htm
 ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
+ADD https://github.com/corelight/bro-community-id/archive/$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER.tar.gz /data/bro-community-id.tar.gz
 
-RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list && \
+RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
         bison \
@@ -77,6 +79,16 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     mkdir -p $ZEEK_DIR/share/bro/site/ja3 && \
     cp -v /tmp/ja3/bro/* $ZEEK_DIR/share/bro/site/ja3 && \
     rm -rf /tmp/ja3 && \
+  git clone --depth 1 https://github.com/salesforce/hassh /tmp/hassh && \
+    mkdir -p $ZEEK_DIR/share/bro/site/hassh && \
+    cp -v /tmp/hassh/bro/* $ZEEK_DIR/share/bro/site/hassh && \
+    rm -rf /tmp/hassh && \
+  cd /data && \
+    tar -xvf "bro-community-id.tar.gz" && \
+    cd "bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER && \
+    ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
+    make && \
+    make install && \
   cd $MOLOCHDIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
     cd $MOLOCHDIR/doc && \
@@ -109,7 +121,14 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
   apt-get clean && \
-  rm -rf $MOLOCHDIR"-"$MOLOCH_VERSION "/data/bro-"$ZEEK_VERSION /var/lib/apt/lists/* /tmp/* /var/tmp/*
+  rm -rf $MOLOCHDIR"-"$MOLOCH_VERSION \
+         /data/bro.tar.gz \
+         "/data/bro-"$ZEEK_VERSION \
+         /data/bro-community-id.tar.gz \
+         "/data/bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER \
+         /var/lib/apt/lists/* \
+         /tmp/* \
+         /var/tmp/*
 
 FROM debian:stretch-slim AS runtime
 
@@ -126,10 +145,6 @@ ARG MOLOCH_ANALYZE_PCAP_THREADS=1
 ARG CAPTURE=off
 ARG WISE=off
 ARG VIEWER=on
-#Initalize is used to reset the environment from scratch and rebuild a new ES Stack
-ARG INITIALIZEDB=false
-#Wipe is the same as initalize except it keeps users intact
-ARG WIPEDB=false
 #Whether or not Moloch is in charge of deleting old PCAP files to reclaim space
 ARG MANAGE_PCAP_FILES=false
 #Whether or not to auto-tag logs based on filename
@@ -156,8 +171,6 @@ ENV MOLOCH_ANALYZE_PCAP_THREADS $MOLOCH_ANALYZE_PCAP_THREADS
 ENV CAPTURE $CAPTURE
 ENV WISE $WISE
 ENV VIEWER $VIEWER
-ENV INITIALIZEDB $INITIALIZEDB
-ENV WIPEDB $WIPEDB
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
 ENV ZEEK_DIR "/opt/bro"
@@ -238,8 +251,6 @@ RUN groupadd --gid 1000 $MOLOCHUSER && \
 
 #Update Path
 ENV PATH="/data:$MOLOCHDIR/bin:$ZEEK_DIR/bin:${PATH}"
-
-VOLUME ["/data/configured"]
 
 EXPOSE 8000 8005 8081
 WORKDIR $MOLOCHDIR

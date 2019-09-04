@@ -45,6 +45,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     * [Monitoring a local Zeek instance](#LiveZeek) 
 * [Moloch](#Moloch)
     * [Zeek log integration](#MolochZeek)
+        - [Correlating Zeek logs and Moloch sessions](#ZeekMolochFlowCorrelation)
     * [Help](#MolochHelp)
     * [Sessions](#MolochSessions)
         * [PCAP Export](#MolochPCAPExport)
@@ -62,6 +63,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
             - [Screenshots](#PrebuiltVisualizationsGallery)
         - [Building your own visualizations and dashboards](#BuildDashboard)
             + [Screenshots](#NewVisualizationsGallery)
+* [Search Queries in Moloch and Kibana](#SearchCheatSheet)
 * [Other Malcolm features](#MalcolmFeatures)
     - [Automatic file extraction and scanning](#ZeekFileExtraction)
     - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
@@ -85,7 +87,7 @@ The files required to build and run Malcolm are available on the [Idaho National
 
 #### Building Malcolm from scratch
 
-The `build.sh` script can Malcolm's Docker from scratch. See [Building from source](#Build) for more information.
+The `build.sh` script can build Malcolm's Docker images from scratch. See [Building from source](#Build) for more information.
 
 #### Pull Malcolm's Docker images
 
@@ -110,18 +112,18 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.4.0               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.4.0               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.4.0               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.4.0               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.4.0               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.4.0               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.4.0               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.4.0               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.4.0               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.4.0               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.4.0               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                1.5.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.5.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.5.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.5.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.5.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.5.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.5.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.5.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.5.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.5.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.5.0               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.2               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -331,8 +333,6 @@ Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
-* `INITIALIZEDB` – indicates to Malcolm to create (or recreate) Moloch’s internal settings database on startup; this setting is managed by the `wipe.sh` and `start.sh` scripts and does not generally need to be changed manually
-
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
@@ -341,7 +341,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
 
-* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing (default `false`, as it is currently considered experimental)
+* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing
 
 * `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
 
@@ -687,6 +687,20 @@ The values of records created from Zeek logs can be expanded and viewed like any
 
 ![Source Raw button opens Zeek log JSON](./docs/images/screenshots/moloch_session_source_raw.png)
 
+#### <a name="ZeekMolochFlowCorrelation"></a>Correlating Zeek logs and Moloch sessions
+
+The Moloch interface displays both Zeek logs and Moloch sessions alongside each other. Using fields common to both data sources, one can [craft queries](#SearchCheatSheet) to filter results matching desired criteria.
+
+A few fields of particular mention that help limit returned results to those Zeek logs and Moloch session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`communityId` and `zeek.community_id` in Moloch and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Moloch's `rootId` field.
+
+Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (eg., Moloch sessions) to another (eg., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
+
+The `rootId` field is used by Moloch to link session records together when a particular session has too many packets to be represented by a single session. When normalizing Zeek logs to Moloch's schema, Malcolm piggybacks on `rootId` to store Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) to crossreference entries across Zeek log types. The connection UID is also stored in `zeek.uid`.
+
+Filtering on community ID OR'ed with zeek UID (eg., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Moloch sessions and Zeek logs generated by a particular network connection.
+
+![Correlating Moloch sessions and Zeek logs](./docs/images/screenshots/moloch_correlate_communityid_uid.png)
+
 ### <a name="MolochHelp"></a>Help
 
 Click the icon of the owl 🦉 in the upper-left hand corner of to access the Moloch usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), which includes such topics as [search syntax](https://localhost/help#search), the [Sessions view](https://localhost/help#sessions), [SPIView](https://localhost/help#spiview), [SPIGraph](https://localhost/help#spigraph), and the [Connections](https://localhost/help#connections) graph.
@@ -913,6 +927,81 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/curr
 ![Timelion is a powerful tool for visualizing time series data](./docs/images/screenshots/kibana_timelion.png)
 
 ![Visual Builder is another time series data visualizer](./docs/images/screenshots/kibana_time_series.png)
+
+## <a name="SearchCheatSheet"></a>Search Queries in Moloch and Kibana
+
+[Kibana's query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) is somewhat different than Moloch's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Moloch interface is for searching and visualizing both Moloch sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Moloch sessions. Here are some common patterns used in building search query strings for Moloch and Kibana, respectively. See the links provided for further documentation.
+
+| | [Moloch Search String](https://localhost/help#search) | [Kibana Search String](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) |
+|---|:---:|:---:|
+| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|
+| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|
+| Field matches a value |`port.dst == 22`|`dstPort:22`|
+| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|
+| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|
+| Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|
+| Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|
+| Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|
+| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|
+| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|
+| Global string search (anywhere in the document) |`all Moloch search expressions are field-based`|`microsoft`|
+| Wildcards (`?` for single character, `*` for any characters) |`host.dns == "*micro?oft*"`|`dns.host:*micro?oft*`|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|
+| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
+| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|
+| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|
+| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|
+| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|
+| Search time frame |`Use Moloch time bounding controls under the search bar`|`Use Kibana time range controls in the upper right-hand corner`|
+
+When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
+
+As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Moloch's underlying Elasticsearch schema. A complete list of these fields can be found in the Moloch help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
+
+Whenever possible, Zeek fields are mapped to existing corresponding Moloch fields: for example, the `orig_h` field in Zeek is mapped to Moloch's `srcIp` field. The original Zeek fields are also left intact. To complicate the issue, the Moloch interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Moloch's alias) in Moloch and `srcIp` or `zeek.orig_h` in Kibana.
+
+The table below shows the mapping of some of these fields.
+
+| Field Description |Moloch Field Alias(es)|Moloch-mapped Zeek Field(s)|Zeek Field(s)|
+|---|:---:|:---:|:---:|
+| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`communityId`|`zeek.community_id`|
+| Destination IP |`ip.dst`|`dstIp`|`zeek.resp_h`|
+| Destination MAC |`mac.dst`|`dstMac`|`zeek.resp_l2_addr`|
+| Destination Port |`port.dst`|`dstPort`|`zeek.resp_p`|
+| Duration |`session.length`|`length`|`zeek_conn.duration`|
+| First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
+| IP Protocol |`ip.protocol`|`ipProtocol`|`zeek.proto`|
+| Last Packet Time |`stoptime`|`lastPacket`||
+| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`zeek.filetype`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
+| Protocol/Service |`protocols`|`protocol`|`zeek.proto`, `zeek.service`|
+| Request Bytes |`databytes.src`, `bytes.src`|`srcBytes`, `srcDataBytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
+| Request Packets |`packets.src`|`srcPackets`|`zeek_conn.orig_pkts`|
+| Response Bytes |`databytes.dst`, `bytes.dst`|`dstBytes`, `dstDataBytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
+| Response Packets |`packets.dst`|`dstPackets`|`zeek_con.resp_pkts`|
+| Source IP |`ip.src`|`srcIp`|`zeek.orig_h`|
+| Source MAC |`mac.src`|`srcMac`|`zeek.orig_l2_addr`|
+| Source Port |`port.src`|`srcPort`|`zeek.orig_p`|
+| Total Bytes |`databytes`, `bytes`|`totDataBytes`, `totBytes`||
+| Total Packets |`packets`|`totPackets`||
+| Username |`user`|`user`|`zeek.user`|
+| Zeek Connection UID|||`zeek.uid`|
+| Zeek File UID |||`zeek.fuid`|
+| Zeek Log Type |||`zeek.logType`|
+
+In addition to the fields listed above, Moloch provides several special field aliases for matching any field of a particular type. While these aliases do not exist in Kibana *per se*, they can be approximated as illustrated below.
+
+| Matches Any | Moloch Special Field Example | Kibana/Zeek Equivalent Example |
+|---|:---:|:---:|
+| IP Address | `ip == 192.168.0.1` | `srcIp:192.168.0.1 OR dstIp:192.168.0.1` |
+| Port | `port == [80, 443, 8080, 8443]` | `srcPort:(80 OR 443 OR 8080 OR 8443) OR dstPort:(80 OR 443 OR 8080 OR 8443)` |
+| Country (code) | `country == [RU,CN]` | `zeek.destination_geo.country_code2:(RU OR CN) OR zeek.source_geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
+| Country (name) | | `zeek.destination_geo.country_name:(Russia OR China) OR zeek.source_geo.country_name:(Russia OR China)` |
+| ASN | `asn == "*Mozilla*"` | `srcASN:*Mozilla* OR dstASN:*Mozilla* OR dns.ASN:*Mozilla*` |
+| Host | `host == www.microsoft.com` | `zeek_http.host:www.microsoft.com (or zeek_dhcp.host_name, zeek_dns.host, zeek_ntlm.host, smb.host, etc.)` |
+| Protocol (layers >= 4) | `protocols == tls` | `protocol:tls` |
+| User | `user == EXISTS! && user != anonymous` | `_exists_:user AND (NOT user:anonymous)` |
+
+For details on how to filter both Zeek logs and Moloch session records for a particular connection, see [Correlating Zeek logs and Moloch sessions](#ZeekMolochFlowCorrelation).
 
 ## <a name="MalcolmFeatures"></a>Other Malcolm features
 
@@ -1247,18 +1336,18 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.4.0               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.4.0               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.4.0               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.4.0               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.4.0               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.4.0               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.4.0               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.4.0               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.4.0               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.4.0               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.4.0               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.1               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                1.5.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.5.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.5.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.5.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.5.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.5.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.5.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.5.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.5.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.5.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.5.0               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.2               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1277,8 +1366,6 @@ Creating malcolm_moloch_1        ... done
 Creating malcolm_filebeat_1      ... done
 Creating malcolm_upload_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
-
-Malcolm started, setting "INITIALIZEDB=false" in "docker-compose.yml" for subsequent runs.
 
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
@@ -1330,7 +1417,7 @@ See `License.txt` for the terms of its release.
 [Seth Grover](mailto:Seth.Grover@inl.gov?subject=Malcolm)
 
 ## Other Software
-Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
+Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
 
 [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
 
