@@ -683,9 +683,7 @@ Click the icon of the owl **🦉** in the upper-left hand corner of to access th
 
 ![Zeek fields](./docs/images/screenshots/moloch_help_fields.png)
 
-The values of records created from Zeek logs can be expanded and viewed like any native moloch session by clicking the plus **➕** icon to the left of the record in the Sessions view. However, note that when dealing with these Zeek records the full packet contents are not available, so buttons dealing with viewing and exporting PCAP information will not behave as they would for records from PCAP files. However, clicking the `Source Raw` or `Destination Raw` buttons will allow you to view the original Zeek log (formatted as JSON) from which the record was created. Other than that, Zeek records and their values are usable in Malcolm just like native PCAP session records.
-
-![Source Raw button opens Zeek log JSON](./docs/images/screenshots/moloch_session_source_raw.png)
+The values of records created from Zeek logs can be expanded and viewed like any native moloch session by clicking the plus **➕** icon to the left of the record in the Sessions view. However, note that when dealing with these Zeek records the full packet contents are not available, so buttons dealing with viewing and exporting PCAP information will not behave as they would for records from PCAP files. Other than that, Zeek records and their values are usable in Malcolm just like native PCAP session records.
 
 #### <a name="ZeekMolochFlowCorrelation"></a>Correlating Zeek logs and Moloch sessions
 
