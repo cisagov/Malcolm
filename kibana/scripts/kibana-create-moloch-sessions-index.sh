@@ -6,7 +6,7 @@
 set -euo pipefail
 shopt -s nocasematch
 
-KIBANA_URL="http://localhost:5601"
+KIBANA_URL="http://localhost:5601/kibana"
 INDEX_PATTERN=${MOLOCH_INDEX_PATTERN:-"sessions2-*"}
 INDEX_PATTERN_ID=${MOLOCH_INDEX_PATTERN_ID:-"sessions2-*"}
 INDEX_TIME_FIELD=${MOLOCH_INDEX_TIME_FIELD:-"firstPacket"}
@@ -18,10 +18,10 @@ if [[ "$CREATE_ES_MOLOCH_SESSION_INDEX" = "true" ]] ; then
   /data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
   # is the kibana process server up and responding to requests?
-  if curl -f -XGET "http://localhost:5601/api/saved_objects/index-pattern/" ; then
+  if curl -f -XGET "$KIBANA_URL/api/saved_objects/index-pattern/" ; then
 
     # have we not not already created the index pattern?
-    if ! curl -f -XGET "http://localhost:5601/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
+    if ! curl -f -XGET "$KIBANA_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
 
       # From https://github.com/elastic/kibana/issues/3709
       # Create index pattern
