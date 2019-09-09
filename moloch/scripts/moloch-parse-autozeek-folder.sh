@@ -4,6 +4,7 @@
 
 
 MOLOCH_ZEEK_PROCESS_COUNT=${ZEEK_AUTO_ANALYZE_PCAP_THREADS:-1}
+AUTOZEEK_TXT_DIR="${AUTOZEEK_DIR:-/autozeek}"
 
 # ensure only one instance of this script can run at a time
 LOCKDIR="/tmp/moloch-parse-autozeek-folder"
@@ -20,7 +21,7 @@ if mkdir $LOCKDIR; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
 
-  cd /data/pcap/autozeek && (ls | grep "^autozeek_" | xargs -n 1 -P $MOLOCH_ZEEK_PROCESS_COUNT -I '{}' bash -c '
+  cd "$AUTOZEEK_TXT_DIR" && (ls | grep "^autozeek_" | xargs -n 1 -P $MOLOCH_ZEEK_PROCESS_COUNT -I '{}' bash -c '
     fuser -s "{}" 2>/dev/null
     if [[ $? -ne 0 ]]
     then

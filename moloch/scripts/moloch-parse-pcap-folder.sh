@@ -18,6 +18,7 @@ MOLOCH_CAPTURE_PROCESS_COUNT=${MOLOCH_ANALYZE_PCAP_THREADS:-1}
 LOCKDIR="/tmp/moloch-parse-pcap-folder"
 
 export PCAP_AUTO_TAG=${AUTO_TAG:-"true"}
+export AUTOZEEK_TXT_DIR="${AUTOZEEK_DIR:-/autozeek}"
 
 # remove the lock directory on exit
 function cleanup {
@@ -47,7 +48,6 @@ if mkdir $LOCKDIR; then
       SOURCEDIR="$(dirname "{}")"
       DESTDIR="./processed/$SOURCEDIR"
       DESTNAME="$DESTDIR/$(basename "{}")"
-      AUTOZEEK_DIR="./autozeek"
 
       AUTO_ZEEK_BY_TAG=0
       AUTOZEEK_ARGS=( "$(realpath "$DESTNAME")" )
@@ -74,7 +74,7 @@ if mkdir $LOCKDIR; then
       mv -v "{}" "$DESTNAME"
       /data/moloch/bin/moloch-capture $EXTRA_MOLOCH_CAPTURE_ARGS -r "$DESTNAME" "${TAGS_ARGS[@]}"
       if [[ "$ZEEK_AUTO_ANALYZE_PCAP_FILES" = "true" ]] || [[ $AUTO_ZEEK_BY_TAG -ne 0 ]]; then
-        printf "%s\0" "${AUTOZEEK_ARGS[@]}" > "$AUTOZEEK_DIR/autozeek_$(date +%s%N).txt"
+        printf "%s\0" "${AUTOZEEK_ARGS[@]}" > "$AUTOZEEK_TXT_DIR/autozeek_$(date +%s%N).txt"
       fi
     fi
   '

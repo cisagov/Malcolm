@@ -173,6 +173,7 @@ ENV WISE $WISE
 ENV VIEWER $VIEWER
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
+ENV AUTOZEEK_DIR "/autozeek"
 ENV ZEEK_DIR "/opt/bro"
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
@@ -245,12 +246,15 @@ RUN groupadd --gid 1000 $MOLOCHUSER && \
     rm -f /tmp/GeoLite2-ASN.mmdb.gz && \
     sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" $MOLOCHDIR/bin/Configure && \
     sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" $MOLOCHDIR/bin/Configure && \
-    chown -R 1000:1000 $MOLOCHDIR/logs && \
     chmod u+s $MOLOCHDIR/bin/moloch-capture && \
+    mkdir $AUTOZEEK_DIR && \
+    chown -R 1000:1000 $MOLOCHDIR/logs $AUTOZEEK_DIR && \
     bash -c 'echo -e "* * * * * su -c /data/moloch-parse-pcap-folder.sh $MOLOCHUSER >/dev/null 2>&1\n* * * * * su -c $MOLOCHDIR-parse-autozeek-folder.sh $MOLOCHUSER >/dev/null 2>&1" | crontab -'
 
 #Update Path
 ENV PATH="/data:$MOLOCHDIR/bin:$ZEEK_DIR/bin:${PATH}"
+
+VOLUME $AUTOZEEK_DIR
 
 EXPOSE 8000 8005 8081
 WORKDIR $MOLOCHDIR

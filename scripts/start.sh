@@ -51,7 +51,6 @@ mkdir -p ./elasticsearch/
 mkdir -p ./elasticsearch-backup/
 mkdir -p ./pcap/upload/
 mkdir -p ./pcap/processed/
-mkdir -p ./pcap/autozeek/
 mkdir -p ./zeek-logs/current/
 mkdir -p ./zeek-logs/upload/
 mkdir -p ./zeek-logs/processed/

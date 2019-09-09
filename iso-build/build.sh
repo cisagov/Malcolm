@@ -97,7 +97,6 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/moloch-logs/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/processed/"
-  mkdir -p "$MALCOLM_DEST_DIR/pcap/autozeek/"
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/current/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/upload/"
