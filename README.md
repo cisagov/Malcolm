@@ -312,7 +312,8 @@ Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. 
 ## <a name="Preparing"></a>Preparing your system
 
 ### <a name="SystemRequirements"></a>Recommended system requirements
-Malcolm needs a reasonably up-to-date version of [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In theory this should be possible on Linux, macOS, and recent Windows 10 releases, although so far it's only been tested on Linux and macOS hosts.
+
+Malcolm runs on top of [Docker](https://www.docker.com/) which runs on recent releases of Linux, Apple macOS and Microsoft Windows 10.
 
 To quote the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/guide/current/hardware.html), "If there is one resource that you will run out of first, it will likely be memory." The same is true for Malcolm: you will want at least 16 gigabytes of RAM to run Malcolm comfortably. For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm can run on less, but more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
 
