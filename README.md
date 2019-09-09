@@ -520,14 +520,39 @@ After making these changes, right click on the Docker 🐋 icon in the system tr
 
 #### <a name="HostSystemConfigWindows"></a>Windows host system configuration
 
-There are several ways of installing and running docker with Windows, and they vary depending on the version of Windows you are running, whether or not Hyper-V must be enabled (which is a requirement for VMWare, but is precluded by the recent non-virtual machine release of Docker).
+#### <a name="HostSystemConfigWindowsDocker"></a>Installing and configuring Docker Desktop for Windows
 
-As the author supposes that the target audience of this document are more likely to be running macOS or Linux, detailed instructions for Docker setup under Windows are not included here. Instead, refer to the following links:
+Installing and configuring Docker to run under Windows must be done manually, rather than through the `install.py` script as is done for Linux and macOS.
 
-* Announcing WSL 2 - [https://devblogs.microsoft.com/commandline/announcing-wsl-2/](https://devblogs.microsoft.com/commandline/announcing-wsl-2/)
-* Install and run docker-toolbox easily with Chocolatey while still allowing Hyper-V to be enabled so that VMWare can run - [https://stefanscherer.github.io/yes-you-can-docker-on-windows-7](https://stefanscherer.github.io/yes-you-can-docker-on-windows-7)
-* Getting started with Docker for Windows - [https://docs.docker.com/docker-for-windows](https://docs.docker.com/docker-for-windows)
-* Docker CE for Windows - [https://store.docker.com/editions/community/docker-ce-desktop-windows](https://store.docker.com/editions/community/docker-ce-desktop-windows)
+1. In order to be able to configure Docker volume mounts correctly, you should be running [Windows 10, version 1803](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-1803) or higher.
+1. The control scripts in the `scripts/` directory are written in the Bash command language. The easiest way to run Bash in Windows is using the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL). To install WSL, run the following command in PowerShell as Administrator:
+    + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
+1. Install the [Linux distribution of your choice](https://docs.microsoft.com/en-us/windows/wsl/install-win10#install-your-linux-distribution-of-choice) in WSL. These instructions have been tested using Debian, but will probably work with other distributions as well.
+1. Run the following commands in PowerShell as Administrator to enable required Windows features:
+    + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All`
+    + `Enable-WindowsOptionalFeature -Online -FeatureName Containers –All`
+1. If you have not yet done so after enabling the Windows features, reboot.
+1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows) either by downloading the installer from the official Docker site or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop/2.1.0.2).
+1. Run **Docker Desktop**, click the **Settings** option in the Docker system tray menu and make the following adjustments:
+    + **General**
+        * Ensure *Start Docker Desktop when you log in* is checked.
+    + **Shared Drives**
+        * Mark the drive onto which Malcolm is installed as *Shared* (eg., check *Shared* for drive *C*).
+    + **Advanced**
+        + Increase *CPUs* to as many as you're comfortable with (at least *4* is best).
+        + Increase *Memory* to as much as you're comfortable with (at least *16* is recommended, no fewer than *10*).
+        + Increase *Disk image max size* to however much space you want Malcolm to have available to it (ideally at least several hundred gigabytes), and change the *Disk image location* if needed to accommodate it.
+1. Make sure Docker applies/restarts (or just reboot), then go back in and check the **Advanced** settings to make sure things stick.
+1. To ensure Docker volume mounts work correctly when using WSL, WSL needs to be configured to mount at `/` instead of at `/mnt`. Inside your WSL Bash shell, run the following command to write `/etc/wsl.conf` to specify the WSL mount point:
+    + `echo -e '[automount]\nroot = /\noptions = "metadata"' | sudo tee /etc/wsl.conf`
+1. Reboot.
+1. Run `docker info` in PowerShell to make sure Docker is running.
+1. Open a shell in your WSL distribution and run `docker.exe info` to make sure Docker is accessible from within WSL.
+    + Previous versions of WSL required the native Linux `docker` command-line client to interact with the Windows Desktop Docker server. Recent improvements to WSL allow the Windows executables `docker-compose.exe` and `docker.exe` to be run seamlessly in WSL. Malcolm's control scripts detect this scenario.
+
+#### <a name="HostSystemConfigWindowsMalcolm"></a>Finish Malcolm's configuration
+
+Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo python3 ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
 
 ## <a name="Running"></a>Running Malcolm
 

@@ -9,6 +9,12 @@ fi
 
 set -e
 
+if docker version >/dev/null 2>&1; then
+  DOCKER_BIN=docker
+elif grep -q Microsoft /proc/version && docker.exe version >/dev/null 2>&1; then
+  DOCKER_BIN=docker.exe
+fi
+
 if [ "$1" ]; then
   CONFIG_FILE="$1"
 else
@@ -139,7 +145,7 @@ if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
 
   pushd ./logstash/certs/ >/dev/null 2>&1
   rm -f ./logstash.keystore
-  docker run --rm --entrypoint /bin/bash \
+  $DOCKER_BIN run --rm --entrypoint /bin/bash \
     -v "$(pwd)":/usr/share/logstash/config:rw \
     -w /usr/share/logstash/config \
     -u logstash \

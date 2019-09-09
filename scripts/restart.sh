@@ -7,14 +7,20 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
+if docker-compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=docker-compose
+elif grep -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=docker-compose.exe
+fi
+
 # if the docker-compose config file was specified, use it, otherwise
 # let docker-compose figure it out
 if [ "$1" ]; then
   CONFIG_FILE="$1"
-  DOCKER_COMPOSE_COMMAND="docker-compose -f "$CONFIG_FILE""
+  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN -f "$CONFIG_FILE""
 else
   CONFIG_FILE="docker-compose.yml"
-  DOCKER_COMPOSE_COMMAND="docker-compose"
+  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN"
 fi
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
