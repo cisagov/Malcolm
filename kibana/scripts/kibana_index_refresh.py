@@ -53,7 +53,7 @@ def main():
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
-  parser.add_argument('-k', '--kibana', dest='url', metavar='<protocol://host:port>', type=str, default='http://localhost:5601', help='Kibana URL')
+  parser.add_argument('-k', '--kibana', dest='url', metavar='<protocol://host:port>', type=str, default='http://localhost:5601/kibana', help='Kibana URL')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
   try:
     parser.error = parser.exit

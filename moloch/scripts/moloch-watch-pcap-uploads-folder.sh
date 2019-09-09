@@ -4,10 +4,9 @@
 
 
 PROCESS_DIR="/data/pcap"
-AUTOZEEK_DIR="${PROCESS_DIR}/autozeek"
 UPLOAD_DIR="${PROCESS_DIR}/upload"
 ZEEK_UPLOAD_DIR="/data/zeek/upload"
-mkdir -p "$UPLOAD_DIR" "$AUTOZEEK_DIR"
+mkdir -p "$UPLOAD_DIR"
 
 # as new pcaps are closed for writing in /data/pcap/upload, move them to /data/pcap for processing
 inotifywait -m -e close_write --format '%w%f' "${UPLOAD_DIR}" | while read NEWFILE

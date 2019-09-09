@@ -2,27 +2,33 @@
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
-
-function filesize_in_image() {
-  FILESPEC="$2"
-  IMAGE="$(grep -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
-  docker run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\""
-}
-
-
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
   exit 1
 fi
 
+if docker-compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=docker-compose
+  DOCKER_BIN=docker
+elif grep -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=docker-compose.exe
+  DOCKER_BIN=docker.exe
+fi
+
 if [ "$1" ]; then
   CONFIG_FILE="$1"
-  DOCKER_COMPOSE_COMMAND="docker-compose -f "$CONFIG_FILE""
+  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN -f "$CONFIG_FILE""
   shift # use remainder of arguments for services
 else
   CONFIG_FILE="docker-compose.yml"
-  DOCKER_COMPOSE_COMMAND="docker-compose"
+  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN"
 fi
+
+function filesize_in_image() {
+  FILESPEC="$2"
+  IMAGE="$(grep -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\""
+}
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
 [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
@@ -35,14 +41,14 @@ SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 
 # make sure docker is installed, at this point it's required
-if ! docker info >/dev/null 2>&1 ; then
+if ! $DOCKER_BIN info >/dev/null 2>&1 ; then
   echo "Docker is not installed, or not runable as this user."
   echo "Install docker (install.py may help with that) and try again later."
   exit 1
 fi
 
 # make sure docker-compose is installed, at this point it's required
-if ! docker-compose version >/dev/null 2>&1 ; then
+if ! $DOCKER_COMPOSE_BIN version >/dev/null 2>&1 ; then
   echo "Docker Compose is not installed, or not runable as this user."
   echo "Install docker-compose (install.py may help with that) and try again later."
   exit 1

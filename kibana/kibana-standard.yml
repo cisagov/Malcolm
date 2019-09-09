@@ -3,6 +3,8 @@
 
 server.name: kibana
 server.host: "0"
+server.basePath: "/kibana"
+server.rewriteBasePath: true
 elasticsearch.url: ${ELASTICSEARCH_URL}
 elasticsearch.requestTimeout: 180000
 kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
