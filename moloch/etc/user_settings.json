@@ -46,7 +46,7 @@
         "order": [
           [
             "firstPacket",
-            "asc"
+            "desc"
           ]
         ],
         "visibleHeaders": [
