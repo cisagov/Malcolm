@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "shell", inline: <<-STEP1
+    export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get dist-upgrade -y
     sed -i "s/main/main contrib non-free/g" /etc/apt/sources.list
@@ -34,6 +35,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :reload
 
   config.vm.provision "shell", inline: <<-STEP2
+    export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get install -y \
       rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick
