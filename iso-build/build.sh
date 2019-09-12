@@ -153,6 +153,7 @@ if [ -d "$WORKDIR" ]; then
     --architectures amd64 \
     --binary-images iso-hybrid \
     --bootloaders "syslinux,grub-efi" \
+    --memtest none \
     --chroot-filesystem squashfs \
     --backports false \
     --security true \

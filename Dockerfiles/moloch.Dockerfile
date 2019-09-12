@@ -5,11 +5,10 @@ LABEL maintainer="Seth.Grover@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.0.0"
+ENV MOLOCH_VERSION "2.0.1"
 ENV MOLOCHDIR "/data/moloch"
 ENV ZEEK_VERSION "2.6.4"
 ENV ZEEK_DIR "/opt/bro"
-ENV CYBERCHEF_VERSION "8.30.1"
 ENV ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER "1.2"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -18,7 +17,6 @@ ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
-ADD https://github.com/gchq/CyberChef/releases/download/v$CYBERCHEF_VERSION/cyberchef.htm $MOLOCHDIR/doc/cyberchef.htm
 ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
 ADD https://github.com/corelight/bro-community-id/archive/$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER.tar.gz /data/bro-community-id.tar.gz
 
@@ -108,10 +106,6 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/public/header_logo.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/vueapp/src/assets/logo.png && \
     find $MOLOCHDIR/doc/images/screenshots -name "*.png" -delete && \
-    cp -v $MOLOCHDIR/doc/cyberchef.htm ./viewer/public/cyberchef.htm && \
-    rm -f ./viewer/public/cyberchef.htm.gz && \
-    gzip ./viewer/public/cyberchef.htm && \
-    chmod 664 ./viewer/public/cyberchef.htm.gz $MOLOCHDIR/doc/cyberchef.htm && \
     export PATH="$MOLOCHDIR/bin:${PATH}" && \
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
     ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
