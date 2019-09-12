@@ -147,6 +147,7 @@ services:
         start_period: 200s
     volumes:
       - ./elastalert/config/elastalert.yaml:/opt/elastalert/config.yaml
+      - ./elastalert/config/smtp-auth.yaml:/opt/elastalert/smtp-auth.yaml:ro
       - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
       - ./elastalert/rules/:/opt/elastalert/rules/
   curator:

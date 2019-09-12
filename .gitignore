@@ -12,6 +12,7 @@
 /nginx/htpasswd
 /htadmin/config.ini
 /htadmin/metadata
+/elastalert/config/smtp-auth.yaml
 
 # development
 .vagrant
