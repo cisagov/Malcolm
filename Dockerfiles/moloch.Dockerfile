@@ -1,4 +1,4 @@
-FROM debian:stretch-slim AS build
+FROM debian:buster-slim AS build
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
@@ -20,7 +20,7 @@ ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.t
 ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
 ADD https://github.com/corelight/bro-community-id/archive/$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER.tar.gz /data/bro-community-id.tar.gz
 
-RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.list && \
+RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
         bison \
@@ -40,7 +40,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
         libkrb5-dev \
         libmaxminddb-dev \
         libpcap0.8-dev \
-        libssl1.0-dev \
+        libssl-dev \
         libtool \
         libwww-perl \
         libyaml-dev \
@@ -124,7 +124,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
          /tmp/* \
          /var/tmp/*
 
-FROM debian:stretch-slim AS runtime
+FROM debian:buster-slim AS runtime
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
@@ -177,7 +177,7 @@ ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 COPY --from=build $MOLOCHDIR $MOLOCHDIR
 COPY --from=build $ZEEK_DIR $ZEEK_DIR
 
-RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list && \
+RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       cron \
@@ -212,7 +212,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
       ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
       ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
-    apt-get -q -y --purge remove gcc gcc-6 cpp cpp-6 libssl1.0-dev && \
+    apt-get -q -y --purge remove gcc gcc-8 cpp cpp-8 libssl-dev && \
     apt-get -q -y autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

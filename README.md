@@ -231,7 +231,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `centos:7`)
-* `malcolmnetsec/moloch` (based on `debian:stretch-slim`)
+* `malcolmnetsec/moloch` (based on `debian:buster-slim`)
 * `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 
