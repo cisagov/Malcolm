@@ -326,7 +326,7 @@ def input_elasticsearch_connection_info(forwarder,
     retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_KIBANA_PROTOCOL],
                                                host=return_dict[Constants.BEAT_KIBANA_HOST],
                                                port=return_dict[Constants.BEAT_KIBANA_PORT],
-                                               uri="status",
+                                               uri="api/status",
                                                username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
                                                password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
                                                ssl_verify=return_dict[Constants.BEAT_KIBANA_SSL_VERIFY])
