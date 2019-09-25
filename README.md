@@ -112,17 +112,17 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.5.1               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.5.1               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.5.1               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.5.1               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.5.1               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.5.1               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.5.1               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.5.1               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.5.1               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.5.1               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.5.1               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/moloch                                1.5.2               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.5.2               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.5.2               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.5.2               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.5.2               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.5.2               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.5.2               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.5.2               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.5.2               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.5.2               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.5.2               xxxxxxxxxxxx        11 days ago         276MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.3               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
@@ -231,7 +231,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `centos:7`)
-* `malcolmnetsec/moloch` (based on `debian:stretch-slim`)
+* `malcolmnetsec/moloch` (based on `debian:buster-slim`)
 * `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 
@@ -312,7 +312,8 @@ Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. 
 ## <a name="Preparing"></a>Preparing your system
 
 ### <a name="SystemRequirements"></a>Recommended system requirements
-Malcolm needs a reasonably up-to-date version of [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/). In theory this should be possible on Linux, macOS, and recent Windows 10 releases, although so far it's only been tested on Linux and macOS hosts.
+
+Malcolm runs on top of [Docker](https://www.docker.com/) which runs on recent releases of Linux, Apple macOS and Microsoft Windows 10.
 
 To quote the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/guide/current/hardware.html), "If there is one resource that you will run out of first, it will likely be memory." The same is true for Malcolm: you will want at least 16 gigabytes of RAM to run Malcolm comfortably. For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm can run on less, but more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
 
@@ -1359,17 +1360,17 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.5.1               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.5.1               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.5.1               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.5.1               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.5.1               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.5.1               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.5.1               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.5.1               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.5.1               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.5.1               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.5.1               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/moloch                                1.5.2               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.5.2               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.5.2               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.5.2               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.5.2               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.5.2               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.5.2               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.5.2               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.5.2               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.5.2               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.5.2               xxxxxxxxxxxx        11 days ago         276MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.3               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 

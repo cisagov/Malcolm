@@ -49,6 +49,17 @@ fi
 
 [[ -f ./htadmin/metadata ]] || touch ./htadmin/metadata
 
+if [[ ! -f ./elastalert/config/smtp-auth.yaml ]]; then
+  # create a sample smtp-auth.yaml for if/when we want to do elastalert email
+  pushd ./elastalert/config/ >/dev/null 2>&1
+  cat <<EOF > smtp-auth.yaml
+user: "user@gmail.com"
+password: "abcdefg1234567"
+EOF
+  chmod 600 ./smtp-auth.yaml
+  popd >/dev/null 2>&1
+fi
+
 # make sure a read permission is set correctly for the nginx worker processes
 chmod 644 ./nginx/htpasswd ./htadmin/config.ini ./htadmin/metadata >/dev/null 2>&1
 

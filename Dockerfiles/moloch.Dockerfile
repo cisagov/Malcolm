@@ -1,15 +1,14 @@
-FROM debian:stretch-slim AS build
+FROM debian:buster-slim AS build
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.0.0"
+ENV MOLOCH_VERSION "2.0.1"
 ENV MOLOCHDIR "/data/moloch"
 ENV ZEEK_VERSION "2.6.4"
 ENV ZEEK_DIR "/opt/bro"
-ENV CYBERCHEF_VERSION "8.30.1"
 ENV ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER "1.2"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -18,11 +17,10 @@ ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
-ADD https://github.com/gchq/CyberChef/releases/download/v$CYBERCHEF_VERSION/cyberchef.htm $MOLOCHDIR/doc/cyberchef.htm
 ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
 ADD https://github.com/corelight/bro-community-id/archive/$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER.tar.gz /data/bro-community-id.tar.gz
 
-RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.list && \
+RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
         bison \
@@ -42,7 +40,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
         libkrb5-dev \
         libmaxminddb-dev \
         libpcap0.8-dev \
-        libssl1.0-dev \
+        libssl-dev \
         libtool \
         libwww-perl \
         libyaml-dev \
@@ -108,10 +106,6 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/public/header_logo.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/vueapp/src/assets/logo.png && \
     find $MOLOCHDIR/doc/images/screenshots -name "*.png" -delete && \
-    cp -v $MOLOCHDIR/doc/cyberchef.htm ./viewer/public/cyberchef.htm && \
-    rm -f ./viewer/public/cyberchef.htm.gz && \
-    gzip ./viewer/public/cyberchef.htm && \
-    chmod 664 ./viewer/public/cyberchef.htm.gz $MOLOCHDIR/doc/cyberchef.htm && \
     export PATH="$MOLOCHDIR/bin:${PATH}" && \
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
     ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
@@ -130,7 +124,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/g" /etc/apt/sources.lis
          /tmp/* \
          /var/tmp/*
 
-FROM debian:stretch-slim AS runtime
+FROM debian:buster-slim AS runtime
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
@@ -183,7 +177,7 @@ ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 COPY --from=build $MOLOCHDIR $MOLOCHDIR
 COPY --from=build $ZEEK_DIR $ZEEK_DIR
 
-RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list && \
+RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       cron \
@@ -218,7 +212,7 @@ RUN sed -i "s/stretch main/stretch main contrib non-free/" /etc/apt/sources.list
     ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
       ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
       ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
-    apt-get -q -y --purge remove gcc gcc-6 cpp cpp-6 libssl1.0-dev && \
+    apt-get -q -y --purge remove gcc gcc-8 cpp cpp-8 libssl-dev && \
     apt-get -q -y autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

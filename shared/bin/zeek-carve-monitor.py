@@ -45,6 +45,7 @@ MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 134217728
 ###################################################################################################
 debug = False
 debugToggled = False
+pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
@@ -60,8 +61,8 @@ def shutdown_handler(signum, frame):
 ###################################################################################################
 # handle sigusr1 for a pdb breakpoint
 def pdb_handler(sig, frame):
-  import pdb
-  pdb.Pdb().set_trace(frame)
+  global pdbFlagged
+  pdbFlagged = True
 
 ###################################################################################################
 # handle sigusr2 for toggling debug
@@ -201,6 +202,7 @@ def main():
   global args
   global debug
   global debugToggled
+  global pdbFlagged
   global shuttingDown
 
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
@@ -354,10 +356,19 @@ def main():
 
     while (not shuttingDown):
 
+      if pdbFlagged:
+        pdbFlagged = False
+        breakpoint()
+
       processedEvents = 0
 
       # processed files for which checking is finished
       while (not shuttingDown) and (processedEvents < (MAX_PROCESSED_BATCH_SIZE // 2)):
+
+        if pdbFlagged:
+          pdbFlagged = False
+          breakpoint()
+
         try:
           fileEvent = finishedFileQueue.popleft()
         except IndexError:
@@ -420,6 +431,11 @@ def main():
       # process new hashed files to be checked
       queuedDupes = deque()
       while (not shuttingDown) and (processedEvents < MAX_PROCESSED_BATCH_SIZE):
+
+        if pdbFlagged:
+          pdbFlagged = False
+          breakpoint()
+
         try:
           fileEvent = hashedFileQueue.popleft()
         except IndexError:
@@ -491,6 +507,11 @@ def main():
       # put duplicated processing events back into the hashedFileQueue to check again in a bit
       dupeEvents = 0
       while (len(queuedDupes) > 0):
+
+        if pdbFlagged:
+          pdbFlagged = False
+          breakpoint()
+
         dupeEvents += 1
         hashedFileQueue.append(queuedDupes.popleft())
 

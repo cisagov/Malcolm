@@ -7,7 +7,7 @@ index ba43003a..89b292f0 100644
            <div class="row">
              <div class="col-sm-12">
 +              <a class="btn btn-link" href="/readme">Malcolm README</a> |
-+              <a class="btn btn-link" href="/chef">CyberChef</a> |
++              <a class="btn btn-link" href="/cyberchef/">CyberChef</a> |
                <a class="btn btn-link" href="https://molo.ch">Home Page</a> |
                <a class="btn btn-link" href="https://molo.ch/faq">FAQ</a> |
                <a class="btn btn-link" href="https://github.com/aol/moloch/wiki">Wiki</a> |
