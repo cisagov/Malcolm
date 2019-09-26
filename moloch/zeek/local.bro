@@ -37,5 +37,6 @@ redef SOCKS::default_capture_password = T;
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
 @load Corelight/CommunityID
+@load Salesforce/GQUIC
 @load ./ja3
 @load ./hassh

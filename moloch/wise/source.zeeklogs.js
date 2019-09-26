@@ -149,6 +149,14 @@ function ZeekLogs (api, section) {
   this.ftp_data_channel_resp_pField = this.api.addField("field:zeek_ftp.data_channel_resp_p;db:zeek_ftp.data_channel_resp_p;kind:integer;friendly:ftp data_channel_resp_p;help:ftp data_channel_resp_p");
   this.ftp_fuidField = this.api.addField("field:zeek_ftp.fuid;db:zeek_ftp.fuid;kind:termfield;friendly:ftp fuid;help:ftp fuid");
 
+  // gquic.log
+  this.gquic_versionField = this.api.addField("field:zeek_gquic.version;db:zeek_gquic.version;kind:termfield;friendly:gquic version;help:gquic version");
+  this.gquic_server_nameField = this.api.addField("field:zeek_gquic.server_name;db:zeek_gquic.server_name;kind:termfield;friendly:gquic server_name;help:gquic server_name");
+  this.gquic_user_agentField = this.api.addField("field:zeek_gquic.user_agent;db:zeek_gquic.user_agent;kind:termfield;friendly:gquic user_agent;help:gquic user_agent");
+  this.gquic_tag_countField = this.api.addField("field:zeek_gquic.tag_count;db:zeek_gquic.tag_count;kind:integer;friendly:gquic tag_count;help:gquic tag_count");
+  this.gquic_cyuField = this.api.addField("field:zeek_gquic.cyu;db:zeek_gquic.cyu;kind:termfield;friendly:gquic cyu;help:gquic cyu");
+  this.gquic_cyutagsField = this.api.addField("field:zeek_gquic.cyutags;db:zeek_gquic.cyutags;kind:termfield;friendly:gquic cyutags;help:gquic cyutags");
+
   // http.log
   this.http_trans_depthField = this.api.addField("field:zeek_http.trans_depth;db:zeek_http.trans_depth;kind:integer;friendly:http trans_depth;help:http trans_depth");
   this.http_methodField = this.api.addField("field:zeek_http.method;db:zeek_http.method;kind:termfield;friendly:http method;help:http method");
@@ -749,6 +757,16 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek_ftp, 'data_channel_resp_h', 'ftp data_channel_resp_h', 'zeek_ftp.data_channel_resp_h')\n" +
     "      +arrayList(session.zeek_ftp, 'data_channel_resp_p', 'ftp data_channel_resp_p', 'zeek_ftp.data_channel_resp_p')\n" +
     "      +arrayList(session.zeek_ftp, 'fuid', 'ftp fuid', 'zeek_ftp.fuid')\n" +
+
+    // gquic.log
+    "  if (session.zeek_gquic)\n" +
+    "    dl.sessionDetailMeta(suffix=\"gquic.log\")\n" +
+    "      +arrayList(session.zeek_gquic, 'version', 'gquic version', 'zeek_gquic.version')\n" +
+    "      +arrayList(session.zeek_gquic, 'server_name', 'gquic server_name', 'zeek_gquic.server_name')\n" +
+    "      +arrayList(session.zeek_gquic, 'user_agent', 'gquic user_agent', 'zeek_gquic.user_agent')\n" +
+    "      +arrayList(session.zeek_gquic, 'tag_count', 'gquic tag_count', 'zeek_gquic.tag_count')\n" +
+    "      +arrayList(session.zeek_gquic, 'cyu', 'gquic cyu', 'zeek_gquic.cyu')\n" +
+    "      +arrayList(session.zeek_gquic, 'cyutags', 'gquic cyutags', 'zeek_gquic.cyutags')\n" +
 
     // http.log
     "  if (session.zeek_http)\n" +
