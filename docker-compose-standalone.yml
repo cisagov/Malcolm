@@ -103,7 +103,7 @@ services:
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
       - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
   kibana:
-    image: malcolmnetsec/kibana-oss:1.5.2
+    image: malcolmnetsec/kibana-oss:1.6.0
     restart: "no"
     hostname: kibana
     environment:
@@ -126,7 +126,7 @@ services:
         retries: 3
         start_period: 200s
   elastalert:
-    image: malcolmnetsec/elastalert:1.5.2
+    image: malcolmnetsec/elastalert:1.6.0
     restart: "no"
     hostname: elastalert
     environment:
@@ -151,7 +151,7 @@ services:
       - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
       - ./elastalert/rules/:/opt/elastalert/rules/
   curator:
-    image: malcolmnetsec/curator:1.5.2
+    image: malcolmnetsec/curator:1.6.0
     restart: "no"
     hostname: curator
     environment:
@@ -161,7 +161,7 @@ services:
     depends_on:
       - elasticsearch
   logstash:
-    image: malcolmnetsec/logstash-oss:1.5.2
+    image: malcolmnetsec/logstash-oss:1.6.0
     restart: "no"
     hostname: logstash
     environment:
@@ -189,7 +189,7 @@ services:
       - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
       - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
   filebeat:
-    image: malcolmnetsec/filebeat-oss:1.5.2
+    image: malcolmnetsec/filebeat-oss:1.6.0
     restart: "no"
     hostname: filebeat
     environment:
@@ -214,7 +214,7 @@ services:
       - ./filebeat/certs/client.crt:/certs/client.crt:ro
       - ./filebeat/certs/client.key:/certs/client.key:ro
   moloch:
-    image: malcolmnetsec/moloch:1.5.2
+    image: malcolmnetsec/moloch:1.6.0
     restart: "no"
     hostname: moloch
     env_file:
@@ -246,7 +246,7 @@ services:
       - ./moloch-logs:/data/moloch/logs
       - ./moloch-raw:/data/moloch/raw
   file-monitor:
-    image: malcolmnetsec/file-monitor:1.5.2
+    image: malcolmnetsec/file-monitor:1.6.0
     restart: "no"
     hostname: filemon
     environment:
@@ -257,7 +257,7 @@ services:
       - ./zeek-logs/extract_files:/data/zeek/extract_files
       - ./zeek-logs/current:/data/zeek/logs
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:1.5.2
+    image: malcolmnetsec/pcap-capture:1.6.0
     restart: "no"
     network_mode: host
     ulimits:
@@ -274,7 +274,7 @@ services:
     volumes:
       - ./pcap/upload:/pcap
   upload:
-    image: malcolmnetsec/file-upload:1.5.2
+    image: malcolmnetsec/file-upload:1.6.0
     restart: "no"
     hostname: upload
     env_file:
@@ -291,7 +291,7 @@ services:
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
-    image: malcolmnetsec/htadmin:1.5.2
+    image: malcolmnetsec/htadmin:1.6.0
     restart: "no"
     hostname: htadmin
     environment:
@@ -303,7 +303,7 @@ services:
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:1.5.2
+    image: malcolmnetsec/nginx-proxy:1.6.0
     restart: "no"
     hostname: nginx-proxy
     depends_on:

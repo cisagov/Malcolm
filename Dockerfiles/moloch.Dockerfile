@@ -87,6 +87,15 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
     make && \
     make install && \
+  git clone --depth 1 https://github.com/salesforce/GQUIC_Protocol_Analyzer /tmp/gquic && \
+    cd /data/bro-$ZEEK_VERSION/aux/bro-aux/plugin-support/ && \
+    ./init-plugin ./bro-quic Salesforce GQUIC && \
+    cd ./bro-quic && \
+    rm -rf CMakeLists.txt ./scripts ./src && \
+    cp -vr /tmp/gquic/CMakeLists.txt /tmp/gquic/scripts /tmp/gquic/src ./ && \
+    ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
+    make && \
+    make install && \
   cd $MOLOCHDIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
     cd $MOLOCHDIR/doc && \
