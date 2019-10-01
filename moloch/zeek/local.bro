@@ -40,3 +40,4 @@ redef SOCKS::default_capture_password = T;
 @load Salesforce/GQUIC
 @load ./ja3
 @load ./hassh
+@load ./bzar
