@@ -87,6 +87,7 @@ Plugin {
     DisableUpscale=0
     UseSmallerIcons=-1
     spacing=1
+    ShowAllDesks=0
   }
 }
 Plugin {
