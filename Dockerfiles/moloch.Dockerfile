@@ -96,6 +96,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
     make && \
     make install && \
+  git clone --depth 1 https://github.com/mitre-attack/car.git /tmp/car && \
+    mkdir -p $ZEEK_DIR/share/bro/site/bzar && \
+    cp -v /tmp/car/implementations/bzar/scripts/* $ZEEK_DIR/share/bro/site/bzar && \
+    rm -rf /tmp/car && \
   cd $MOLOCHDIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
     cd $MOLOCHDIR/doc && \
