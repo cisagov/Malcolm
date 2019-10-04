@@ -68,15 +68,13 @@ sed -i -r "s/(pam_faildelay.so.*delay)[[:space:]]*=[[:space:]]*[[:digit:]]+/\1=4
 sed -i -r "s/([[:space:]]*session[[:space:]]*)[[:alnum:]_]*([[:space:]]*pam_lastlog.so[[:space:]]*)/\1required\2\tshowfailed/g" /etc/pam.d/login
 sed -i "s/^[[:space:]]*password[[:space:]]*requisite[[:space:]]*pam_pwquality\.so.*/password requisite pam_pwquality.so retry=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 difok=8 minclass=4 maxrepeat=2 maxclassrepeat=4 minlen=15/g" /etc/pam.d/common-password
 
-# move /etc/security/limits.d/limits.conf into /etc/security/limits.conf so the harbian audit script sees it
-sed '$e cat /etc/security/limits.d/limits.conf' /etc/security/limits.conf && rm -f /etc/security/limits.d/limits.conf
-
 # enable cryptsetup support on boot
 sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
 
 # some permissions
 find /etc/audit -type d -exec chmod 750 "{}" \;
 find /etc/audit -type f -exec chmod 640 "{}" \;
+chmod 600 /etc/ssh/sshd_config
 
 # set DIR_MODE to 750 for new users
 sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
