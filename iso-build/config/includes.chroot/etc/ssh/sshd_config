@@ -21,8 +21,9 @@ AddressFamily inet
 #HostKey /etc/ssh/ssh_host_ed25519_key
 
 # Ciphers and keying
-Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
 MACs hmac-sha2-256,hmac-sha2-512
+KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256
 #RekeyLimit default none
 
 # Logging
@@ -31,10 +32,10 @@ MACs hmac-sha2-256,hmac-sha2-512
 
 # Authentication:
 
-#LoginGraceTime 2m
+LoginGraceTime 60
 PermitRootLogin no
 StrictModes yes
-#MaxAuthTries 6
+MaxAuthTries 4
 #MaxSessions 10
 
 PubkeyAuthentication yes
@@ -90,7 +91,7 @@ RhostsRSAAuthentication no
 #AllowAgentForwarding yes
 #AllowTcpForwarding yes
 #GatewayPorts no
-X11Forwarding yes
+X11Forwarding no
 #X11DisplayOffset 10
 #X11UseLocalhost yes
 #PermitTTY yes
@@ -100,8 +101,8 @@ PrintLastLog yes
 #UseLogin no
 UsePrivilegeSeparation sandbox
 PermitUserEnvironment no
-Compression delayed
-ClientAliveInterval 600
+Compression no
+ClientAliveInterval 300
 ClientAliveCountMax 0
 #UseDNS no
 #PidFile /var/run/sshd.pid
@@ -110,7 +111,7 @@ ClientAliveCountMax 0
 #ChrootDirectory none
 #VersionAddendum none
 
-banner=/etc/issue
+Banner=/etc/issue
 
 # Allow client to pass locale environment variables
 AcceptEnv LANG LC_*

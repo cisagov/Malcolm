@@ -1,6 +1,7 @@
 accountsservice
 apache2-utils
 apparmor
+apparmor-profiles
 apparmor-utils
 apt
 arj
@@ -149,4 +150,3 @@ zenity
 zenity-common
 zip
 zlib1g-dev
-

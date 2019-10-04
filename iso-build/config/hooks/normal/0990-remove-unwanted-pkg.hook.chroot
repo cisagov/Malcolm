@@ -13,13 +13,16 @@ apt-get -y --purge remove bluez-firmware \
                           gnome-user-guide \
                           gucharmap \
                           libasound2-plugins \
+                          libcupsfilters1 \
+                          libcupsimage2 \
                           lxmusic \
                           mpv \
                           pavucontrol \
+                          prelink \
                           pulseaudio \
                           smplayer \
-                          yelp \
                           xdg-user-dirs \
+                          yelp \
                           youtube-dl || true
 
 apt-get -y autoremove

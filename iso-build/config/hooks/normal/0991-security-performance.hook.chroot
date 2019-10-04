@@ -55,6 +55,8 @@ net.ipv4.conf.default.send_redirects=0
 net.ipv4.icmp_echo_ignore_broadcasts=1
 net.ipv4.ip_forward=1
 net.ipv6.conf.all.accept_source_route=0
+net.ipv6.conf.all.accept_ra=0
+net.ipv6.conf.default.accept_ra=0
 net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
 net.ipv6.conf.lo.disable_ipv6=1
@@ -65,6 +67,9 @@ sed -i -e 's/[[:space:]]*nullok[[:alnum:]_]*//g' /etc/pam.d/common-auth
 sed -i -r "s/(pam_faildelay.so.*delay)[[:space:]]*=[[:space:]]*[[:digit:]]+/\1=4000000/g" /etc/pam.d/login
 sed -i -r "s/([[:space:]]*session[[:space:]]*)[[:alnum:]_]*([[:space:]]*pam_lastlog.so[[:space:]]*)/\1required\2\tshowfailed/g" /etc/pam.d/login
 sed -i "s/^[[:space:]]*password[[:space:]]*requisite[[:space:]]*pam_pwquality\.so.*/password requisite pam_pwquality.so retry=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 difok=8 minclass=4 maxrepeat=2 maxclassrepeat=4 minlen=15/g" /etc/pam.d/common-password
+
+# move /etc/security/limits.d/limits.conf into /etc/security/limits.conf so the harbian audit script sees it
+sed '$e cat /etc/security/limits.d/limits.conf' /etc/security/limits.conf && rm -f /etc/security/limits.d/limits.conf
 
 # enable cryptsetup support on boot
 sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
@@ -78,7 +83,7 @@ sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
 
 # new directories default to 750, new files to 640
 echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
-echo "umask 0077" >> /etc/profile
+echo "umask 077" >> /etc/profile
 echo "export UMASK=077" >> /etc/profile
 
 # enable cron logging
@@ -88,6 +93,22 @@ sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
 echo >> /etc/rsyslog.conf
 echo '*.* @127.0.0.1:9514' >> /etc/rsyslog.conf
 echo >> /etc/rsyslog.conf
+
+# put sudoers log into its own logfile
+awk 'FNR==NR{ if (/^Defaults/) p=NR; next} 1; FNR==p{ print "Defaults\t!syslog\nDefaults\tlogfile = /var/log/sudo.log" }' /etc/sudoers /etc/sudoers > /tmp/newsudoers
+mv /tmp/newsudoers /etc/sudoers && chmod 440 /etc/sudoers
+cat << 'EOF' > /etc/logrotate.d/sudoers
+/var/log/sudo.log
+{
+  weekly
+  missingok
+  rotate 4
+  compress
+  delaycompress
+  copytruncate
+  minsize 100k
+}
+EOF
 
 # tweak some auditd settings
 sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
@@ -103,3 +124,8 @@ usermod -d /var/lib/ntp ntp
 
 # disable htpdate service, we're going to use cron instead
 systemctl disable htpdate || true
+
+# remove identifying operating system information
+truncate -s 0 /etc/motd
+sed -i "s/Debian/Hedgehog/g" /etc/issue
+sed -i "s/Debian/Hedgehog/g" /etc/issue.net

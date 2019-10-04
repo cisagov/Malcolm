@@ -3,7 +3,7 @@
 # for examples
 
 # new directories default to 700, new files to 600
-umask 0077
+umask 077
 export UMASK=077
 
 # If not running interactively, don't do anything
