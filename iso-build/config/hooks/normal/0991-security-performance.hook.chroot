@@ -122,6 +122,8 @@ usermod -d /var/lib/ntp ntp
 
 # disable htpdate service, we're going to use cron instead
 systemctl disable htpdate || true
+sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
+sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 
 # remove identifying operating system information
 truncate -s 0 /etc/motd
