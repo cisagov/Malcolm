@@ -90,7 +90,7 @@ def hashFileWorker(queues):
       if (not fileEvent.dir) and os.path.isfile(fileEvent.pathname):
         if (args.minBytes <= os.path.getsize(fileEvent.pathname) <= args.maxBytes):
           # the entity is a file, and it exists, so hash it and put it into the hashed file queue
-          hashedQueue.append(HashedFileEvent(event=fileEvent, hash=sha256sum(fileEvent.pathname), request=None, result=None))
+          hashedQueue.append(HashedFileEvent(event=fileEvent, hash=sha256sum(fileEvent.pathname), request=None, result=None, created=int(datetime.utcnow().timestamp() * 1000000)))
         else:
           # too small/big to care about, delete it
           os.remove(fileEvent.pathname)
@@ -299,14 +299,20 @@ def main():
   toCheckFileQueue = deque()
   checkingFileQueue = deque()
   finishedFileQueue = deque()
-  hashCache = TTLCache(maxsize=MAX_HASH_CACHE_SIZE, ttl=MAX_HASH_CACHE_TTL) # only used in the main thread
+
+  # scanCache is a cache (dict) of dicts of file events that have results
+  # eg. scanCache['e1105070ba828...'][1570579838699465]         = fileEvent1
+  #     scanCache['e1105070ba828...'][1570579839234213]         = fileEvent2
+  #     scanCache['2546dcffc5ad8...'][1570579826443478]         = fileEvent3
+  #     ^ cache   ^ file sha256sum    ^ event seen microseconds   ^ file event object
+  scanCache = TTLCache(maxsize=MAX_HASH_CACHE_SIZE, ttl=MAX_HASH_CACHE_TTL) # only used in the main thread
 
   if (isinstance(args.malassHost, str) and (len(args.malassHost) > 1)):
     checkConnInfo = MalassScan(args.malassHost, args.malassPort, reqLimit=args.malassLimit)
   elif (isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.vtotReqLimit > 0)):
     checkConnInfo = VirusTotalSearch(args.vtotApi, reqLimit=args.vtotReqLimit)
   elif args.enableClamAv:
-    checkConnInfo = ClamAVScan(debug=debug, socketFileName=args.clamAvSocket)
+    checkConnInfo = ClamAVScan(debug=debug, verboseDebug=False, socketFileName=args.clamAvSocket)
   else:
     checkConnInfo = None
 
@@ -426,11 +432,11 @@ def main():
 
           if debug: eprint(debugStr)
 
-          # this file has been checked, update the hash cache with the final result
-          hashCache[fileEvent.hash] = fileEvent
+          # update the hash cache with the final result to avoid repeat scans in the immediate future
+          if not fileEvent.hash in scanCache: scanCache[fileEvent.hash] = dict()
+          scanCache[fileEvent.hash][fileEvent.created] = fileEvent
 
       # process new hashed files to be checked
-      queuedDupes = deque()
       while (not shuttingDown) and (processedEvents < MAX_PROCESSED_BATCH_SIZE):
 
         if pdbFlagged:
@@ -445,76 +451,61 @@ def main():
           processedEvents += 1
           debugStr = f"POP: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
 
-          if fileEvent.hash in hashCache:
-            triggered = False
+          # see if we have seen this file hash before
+          previouslySeen = (fileEvent.hash in scanCache)
 
-            if hashCache[fileEvent.hash].result is not None:
-              # the file has already been checked all the way through the pipeline and has a result
-              debugStr = f"OLD: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
+          # and get the first instance of it with a non-None scan result (if any)
+          firstMatchingEventWithResult = next(iter(sorted([event for (created, event) in scanCache[fileEvent.hash].items() if event.result is not None], key=lambda x: x.created)), None) if previouslySeen else None
+          if firstMatchingEventWithResult is not None:
 
-              triggered = isinstance(hashCache[fileEvent.hash].result, BroSignatureLine)
-              if triggered:
+            # the file has already been checked all the way through the pipeline and has a result
+            debugStr = f"OLD: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
 
-                # this file triggered a previous signature match, so we don't need to bother processing it again
+            triggered = isinstance(firstMatchingEventWithResult.result, BroSignatureLine)
+            if triggered:
 
-                # just update the new fields for the copy of the log
-                fileSpecFields = extracted_filespec_to_fields(fileEvent.event.pathname)
-                dupResultBroLine = copy.deepcopy(hashCache[fileEvent.hash].result)
-                dupResultBroLine.ts=f"{fileSpecFields.time}"
-                dupResultBroLine.uid = fileSpecFields.uid if fileSpecFields.uid is not None else '-'
-                dupResultBroLine.sub_message = f"{fileSpecFields.fid if fileSpecFields.fid is not None else os.path.basename(fileEvent.event.pathname)},{hashCache[fileEvent.hash].result.sub_message}"
+              # this file triggered a previous signature match, so we don't need to bother processing it again
 
-                broLineStr = BroStringFormat.format(**dupResultBroLine._asdict())
-                debugStr = f"{broLineStr}"
+              # just update the new fields for the copy of the log
+              fileSpecFields = extracted_filespec_to_fields(fileEvent.event.pathname)
+              dupResultBroLine = copy.deepcopy(firstMatchingEventWithResult.result)
+              dupResultBroLine.ts=f"{fileSpecFields.time}"
+              dupResultBroLine.uid = fileSpecFields.uid if fileSpecFields.uid is not None else '-'
+              dupResultBroLine.sub_message = f"{fileSpecFields.fid if fileSpecFields.fid is not None else os.path.basename(fileEvent.event.pathname)},{firstMatchingEventWithResult.result.sub_message}"
 
-                # write broLineStr event line out to zeek signature.log
-                print(broLineStr, file=broSigFile, end='\n')
+              broLineStr = BroStringFormat.format(**dupResultBroLine._asdict())
+              debugStr = f"{broLineStr}"
 
-                # don't save the duplicate, since we've already saved the original and reference it in the log
-                os.remove(fileEvent.event.pathname)
+              # write broLineStr event line out to zeek signature.log
+              print(broLineStr, file=broSigFile, end='\n')
 
-              else:
-                # the file is in the pipeline to be checked, so we don't know the result, but we don't want to check it mulitple times...
-                # debugStr = f"AOK: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
-                debugStr = "" # too verbose, even for debug
-
-                # seen before, but not triggered, so just delete this harmless file
-                os.remove(fileEvent.event.pathname)
+              # don't save the duplicate, since we've already saved the original and reference it in the log
+              os.remove(fileEvent.event.pathname)
 
             else:
-              # todo: BUG: if submission failed for everyone, then they're all just sitting in the queue but nobody ever retries
-
-              # the file is in the pipeline to be checked, so we don't know the result, but we don't want to check it mulitple times...
-              # debugStr = f"DUP: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
+              # debugStr = f"AOK: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
               debugStr = "" # too verbose, even for debug
 
-              if checkConnInfo is not None:
-                # as long as we have some kind of file checker registered (any(checkConnInfo)),
-                # after the loop we will reinsert this into the back end of the queue for checking later
-                queuedDupes.append(fileEvent)
-
-              else:
-                # no file checker created. don't save the duplicate, since we'd have already saved the original
-                os.remove(fileEvent.event.pathname)
-
-            if debug and (len(debugStr) > 0): eprint(debugStr)
+              # seen before, but not triggered, so just delete this harmless file
+              os.remove(fileEvent.event.pathname)
 
           else:
-            # this is a file we have not seen before
-            if debug: eprint(f"NEW: {fileEvent.event.pathname} is {fileEvent.hash[:8]}")
-            hashCache[fileEvent.hash] = fileEvent
+            # insert file into queue to be checked
             toCheckFileQueue.append(fileEvent)
 
-      # put duplicated processing events back into the hashedFileQueue to check again in a bit
-      dupeEvents = 0
-      while (len(queuedDupes) > 0):
+            # even though we don't have a result (yet), insert this event into the scan cache so we could track duplicates if we want
+            # the assignment of firstMatchingEventWithResult above will only get non-None results, so this is okay
+            if not previouslySeen: scanCache[fileEvent.hash] = dict()
+            scanCache[fileEvent.hash][fileEvent.created] = fileEvent
 
-        if pdbFlagged:
-          pdbFlagged = False
-          breakpoint()
+            if previouslySeen:
+              # debugStr = f"DUP: {fileEvent.event.pathname} is {fileEvent.hash[:8]} ({fileEvent.result})" if debug else ""
+              debugStr = "" # too verbose, even for debug
+            else:
+              debugStr = f"NEW: {fileEvent.event.pathname} is {fileEvent.hash[:8]}" if debug else ""
 
-        dupeEvents += 1
-        hashedFileQueue.append(queuedDupes.popleft())
+
+          if debug and (len(debugStr) > 0): eprint(debugStr)
 
       # if we didn't do anything, sleep for a bit before checking again
       if debug:
@@ -529,7 +520,7 @@ def main():
         prevDebugStats = debugStats
 
       # if we didn't do anything, sleep for a bit before checking again
-      if ((processedEvents - dupeEvents) < MAX_PROCESSED_BATCH_SIZE):
+      if (processedEvents < MAX_PROCESSED_BATCH_SIZE):
         sleepCount = 0
         while (not shuttingDown) and (sleepCount < 5):
           time.sleep(1)

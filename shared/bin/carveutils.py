@@ -84,7 +84,8 @@ AnalyzerResult = namedlist('AnalyzerResult', [('finished', False), ('success', F
 # .hash - string containing file hash
 # .request - an AnalyzerScan representing the request to scan/lookup
 # .result - an AnalyzerResult representing the result of the scan/lookup
-HashedFileEvent = namedlist('HashedFileEvent', [('event'), ('hash', None), ('request', None), ('result', None)])
+# .created - UTC UNIX microseconds event was seen
+HashedFileEvent = namedlist('HashedFileEvent', [('event'), ('hash', None), ('request', None), ('result', None), ('created', 0)])
 
 # a structure representing the fields of a line of Zeek's signatures.log, and the corresponding string formatting and type definitions
 BroSignatureLine = namedlist('BroSignatureLine', 'ts uid orig_h orig_p resp_h resp_p note signature_id event_message sub_message signature_count host_count', default='-')
@@ -474,9 +475,10 @@ class ClamAVScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False, socketFileName=None):
+  def __init__(self, debug=False, verboseDebug=False, socketFileName=None):
     self.scanningFilesCount = AtomicInt(value=0)
     self.debug = debug
+    self.verboseDebug = verboseDebug
     self.socketFileName = socketFileName
 
   # ---------------------------------------------------------------------------------
@@ -493,12 +495,12 @@ class ClamAVScan(FileScanProvider):
     while (not allowed) and (not clamavResult.finished):
 
       if not connected:
-        if self.debug: eprint(f"{get_ident()}: ClamAV attempting connection")
-        clamAv = clamd.ClamdUnixSocket(path=self.socketFileName)
+        if self.verboseDebug: eprint(f"{get_ident()}: ClamAV attempting connection")
+        clamAv = clamd.ClamdUnixSocket(path=self.socketFileName) if self.socketFileName is not None else clamd.ClamdUnixSocket()
       try:
         clamAv.ping()
         connected = True
-        if self.debug: eprint(f"{get_ident()}: ClamAV connected!")
+        if self.verboseDebug: eprint(f"{get_ident()}: ClamAV connected!")
       except Exception as e:
         connected = False
         if self.debug: eprint(f"{get_ident()}: ClamAV connection failed: {str(e)}")
@@ -513,9 +515,9 @@ class ClamAVScan(FileScanProvider):
 
       if connected and allowed:
         try:
-          if self.debug: eprint(f'{get_ident()} ClamAV scanning: {fileName}')
+          if self.verboseDebug: eprint(f'{get_ident()} ClamAV scanning: {fileName}')
           clamavResult.result = clamAv.scan(fileName)
-          if self.debug: eprint(f'{get_ident()} ClamAV scan result: {clamavResult.result}')
+          if self.verboseDebug: eprint(f'{get_ident()} ClamAV scan result: {clamavResult.result}')
           clamavResult.success = (clamavResult.result is not None)
           clamavResult.finished = True
         except Exception as e:
