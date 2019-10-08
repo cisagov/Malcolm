@@ -20,6 +20,7 @@ ARG MALASS_MAX_REQUESTS=20
 ARG EXTRACTED_FILE_ENABLE_CLAMAV=false
 ARG EXTRACTED_FILE_ENABLE_FRESHCLAM=false
 ARG EXTRACTED_FILE_VERBOSE=false
+ARG CLAMD_SOCKET_FILE=/tmp/clamd.ctl
 
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
@@ -36,6 +37,7 @@ ENV MALASS_MAX_REQUESTS $MALASS_MAX_REQUESTS
 ENV EXTRACTED_FILE_ENABLE_CLAMAV $EXTRACTED_FILE_ENABLE_CLAMAV
 ENV EXTRACTED_FILE_ENABLE_FRESHCLAM $EXTRACTED_FILE_ENABLE_FRESHCLAM
 ENV EXTRACTED_FILE_VERBOSE $EXTRACTED_FILE_VERBOSE
+ENV CLAMD_SOCKET_FILE $CLAMD_SOCKET_FILE
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
@@ -67,11 +69,12 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       wget -O /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid 1000 monitor && \
       useradd -M --uid 1000 --gid 1000 monitor && \
-    mkdir -p /var/run/clamav /var/log/clamav /var/lib/clamav && \
-      chown -R monitor:monitor /var/run/clamav /var/log/clamav  /var/lib/clamav && \
-      chmod -R 750 /var/run/clamav /var/log/clamav  /var/lib/clamav && \
+    mkdir -p /var/log/clamav /var/lib/clamav && \
+      chown -R monitor:monitor /var/log/clamav  /var/lib/clamav && \
+      chmod -R 750 /var/log/clamav  /var/lib/clamav && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i 's/^User .*$/User monitor/g' /etc/clamav/clamd.conf && \
+      sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
       sed -i 's/^LocalSocketGroup .*$/LocalSocketGroup monitor/g' /etc/clamav/clamd.conf && \
       sed -i "s/^MaxFileSize .*$/MaxFileSize $EXTRACTED_FILE_MAX_BYTES/g" /etc/clamav/clamd.conf && \
       sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf && \

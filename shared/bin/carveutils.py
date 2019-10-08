@@ -425,7 +425,7 @@ class MalassScan(FileScanProvider):
       if (transactionId is not None) and summaryDict['complete']:
         # decrement scanning counter and remove trans->filename mapping if this scan is complete
         self.scanningFilesCount.decrement()
-        self.transactionIdToFilenameDict.pop(transactionId, None)        
+        self.transactionIdToFilenameDict.pop(transactionId, None)
 
     result.finished = summaryDict['complete']
     result.result = summaryDict
@@ -474,9 +474,10 @@ class ClamAVScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False):
+  def __init__(self, debug=False, socketFileName=None):
     self.scanningFilesCount = AtomicInt(value=0)
     self.debug = debug
+    self.socketFileName = socketFileName
 
   # ---------------------------------------------------------------------------------
   # upload a file to scan with ClamAV, respecting rate limiting. return submitted transaction ID
@@ -493,7 +494,7 @@ class ClamAVScan(FileScanProvider):
 
       if not connected:
         if self.debug: eprint(f"{get_ident()}: ClamAV attempting connection")
-        clamAv = clamd.ClamdUnixSocket()
+        clamAv = clamd.ClamdUnixSocket(path=self.socketFileName)
       try:
         clamAv.ping()
         connected = True

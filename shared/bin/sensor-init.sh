@@ -56,15 +56,20 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
   if dpkg -s clamav >/dev/null 2>&1 ; then
-    mkdir -p /var/run/clamav /var/log/clamav /var/lib/clamav
-    chown -R 1000:1000 /var/run/clamav /var/log/clamav  /var/lib/clamav
-    chmod -R 750 /var/run/clamav /var/log/clamav  /var/lib/clamav
+    mkdir -p /var/log/clamav /var/lib/clamav
+    chown -R 1000:1000 /var/log/clamav  /var/lib/clamav
+    chmod -R 750 /var/log/clamav  /var/lib/clamav
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf
     if [[ -d /opt/sensor/sensor_ctl ]]; then
       # disable clamd/freshclam logfiles as supervisord will handle the logging from STDOUT instead
       sed -i 's@^UpdateLogFile .*$@#UpdateLogFile /var/log/clamav/freshclam.log@g' /etc/clamav/freshclam.conf
       sed -i 's@^LogFile .*$@#LogFile /var/log/clamav/clamd.log@g' /etc/clamav/clamd.conf
+      # use local directory for socket file
+      mkdir -p /opt/sensor/sensor_ctl/clamav
+      chown -R 1000:1000 /opt/sensor/sensor_ctl/clamav
+      chmod -R 750 /opt/sensor/sensor_ctl/clamav
+      sed -i 's@^LocalSocket .*$@LocalSocket /opt/sensor/sensor_ctl/clamav/clamd.ctl@g' /etc/clamav/clamd.conf
     fi
     if [[ -n $MAIN_USER ]]; then
       sed -i "s/^User .*$/User $MAIN_USER/g" /etc/clamav/clamd.conf
@@ -75,7 +80,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     [[ -z $EXTRACTED_FILE_MAX_BYTES ]] && EXTRACTED_FILE_MAX_BYTES=134217728
     sed -i "s/^MaxFileSize .*$/MaxFileSize $EXTRACTED_FILE_MAX_BYTES/g" /etc/clamav/clamd.conf
     sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf
-    echo "TCPSocket 3310" >> /etc/clamav/clamd.conf
+    grep -q "^TCPSocket" /etc/clamav/clamd.conf && (sed -i 's/^TCPSocket .*$/TCPSocket 3310/g' /etc/clamav/clamd.conf) || (echo "TCPSocket 3310" >> /etc/clamav/clamd.conf)
   fi
 
   # if the network configuration files for the interfaces haven't been set to come up on boot, configure that now.
