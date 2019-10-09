@@ -99,5 +99,11 @@ export {
     ["text/jscript"]= "jsx",
     ["text/rtf"]= "rtf",
     ["text/vbscript"]= "vbs"
-  } &default="dat";
+  };
+
+  # TODO: this was:
+  # } &default="dat";
+  # not allowed in 3.0.0, need to research why
+  # see https://github.com/zeek/zeek/commit/db79041b1924e95d0bbde81acfbfb8d8ba1814b5
+
 }
