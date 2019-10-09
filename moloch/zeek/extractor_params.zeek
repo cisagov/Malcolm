@@ -1,4 +1,4 @@
-#!/usr/bin/env bro
+#!/usr/bin/env zeek
 
 export {
   const extractor_extract_none      = "none" &redef;

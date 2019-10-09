@@ -1,4 +1,4 @@
-#!/usr/bin/env bro
+#!/usr/bin/env zeek
 
 @load ./extractor_params
 

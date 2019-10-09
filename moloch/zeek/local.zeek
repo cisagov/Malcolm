@@ -25,7 +25,7 @@ redef SOCKS::default_capture_password = T;
 @load protocols/conn/known-hosts
 @load protocols/conn/known-services
 @load protocols/ssl/known-certs
-@load tuning/track-all-assets.bro
+@load tuning/track-all-assets.zeek
 @load protocols/ssl/validate-certs
 @load protocols/ssl/log-hostcerts-only
 @load protocols/ssh/geo-data
@@ -33,11 +33,12 @@ redef SOCKS::default_capture_password = T;
 @load protocols/ssh/interesting-hostnames
 @load protocols/http/detect-sqli
 @load frameworks/files/hash-all-files
-# @load frameworks/files/detect-MHR
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
-@load Corelight/CommunityID
+# @load frameworks/files/detect-MHR
+
+# custom packages installed manually
 @load Salesforce/GQUIC
-@load ./ja3
-@load ./hassh
 @load ./bzar
+# custom packages managed by zkg via packages/packages.zeek
+@load ./packages/packages.zeek

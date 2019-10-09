@@ -1,4 +1,4 @@
-#!/usr/bin/env bro
+#!/usr/bin/env zeek
 
 export {
   redef extractor_always_extract_unknown = F;
