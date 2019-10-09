@@ -89,6 +89,40 @@
             "extracted_size"
         ]
     ],
+    "http": [
+        [
+            "ts",
+            "uid",
+            "id.orig_h",
+            "id.orig_p",
+            "id.resp_h",
+            "id.resp_p",
+            "trans_depth",
+            "method",
+            "host",
+            "uri",
+            "referrer",
+            "version",
+            "user_agent",
+            "origin",
+            "request_body_len",
+            "response_body_len",
+            "status_code",
+            "status_msg",
+            "info_code",
+            "info_msg",
+            "tags",
+            "username",
+            "password",
+            "proxied",
+            "orig_fuids",
+            "orig_filenames",
+            "orig_mime_types",
+            "resp_fuids",
+            "resp_filenames",
+            "resp_mime_types"
+        ]
+    ],
     "ntlm": [
         [
             "ts",
@@ -117,6 +151,32 @@
             "server_dns_computer_name",
             "server_tree_name",
             "success"
+        ]
+    ],
+    "rdp": [
+        [
+            "ts",
+            "uid",
+            "id.orig_h",
+            "id.orig_p",
+            "id.resp_h",
+            "id.resp_p",
+            "cookie",
+            "result",
+            "security_protocol",
+            "client_channels",
+            "keyboard_layout",
+            "client_build",
+            "client_name",
+            "client_dig_product_id",
+            "desktop_width",
+            "desktop_height",
+            "requested_color_depth",
+            "cert_type",
+            "cert_count",
+            "cert_permanent",
+            "encryption_level",
+            "encryption_method"
         ]
     ],
     "ssh": [
