@@ -69,6 +69,18 @@ function ZeekLogs (api, section) {
   this.conn_vlanField = this.api.addField("field:zeek_conn.vlan;db:zeek_conn.vlan;kind:integer;friendly:conn vlan;help:conn outer VLAN");
   this.conn_inner_vlanField = this.api.addField("field:zeek_conn.inner_vlan;db:zeek_conn.inner_vlan;kind:integer;friendly:conn inner_vlan;help:conn inner VLAN");
 
+  // bacnet.log - https://github.com/amzn/zeek-plugin-bacnet
+  this.bacnet_bvlc_functionField = this.api.addField("field:zeek_bacnet.bvlc_function;db:zeek_bacnet.bvlc_function;kind:termfield;friendly:bacnet bvlc_function;help:bacnet bvlc_function");
+  this.bacnet_bvlc_lenField = this.api.addField("field:zeek_bacnet.bvlc_len;db:zeek_bacnet.bvlc_len;kind:integer;friendly:bacnet bvlc_len;help:bacnet bvlc_len");
+  this.bacnet_apdu_typeField = this.api.addField("field:zeek_bacnet.apdu_type;db:zeek_bacnet.apdu_type;kind:termfield;friendly:bacnet apdu_type;help:bacnet apdu_type");
+  this.bacnet_service_choiceField = this.api.addField("field:zeek_bacnet.service_choice;db:zeek_bacnet.service_choice;kind:termfield;friendly:bacnet service_choice;help:bacnet service_choice");
+  this.bacnet_dataField = this.api.addField("field:zeek_bacnet.data;db:zeek_bacnet.data;kind:termfield;friendly:bacnet data;help:bacnet data");
+
+  // cip.log - https://github.com/amzn/zeek-plugin-enip
+  this.cip_serviceField = this.api.addField("field:zeek_cip.cip_service;db:zeek_cip.cip_service;kind:termfield;friendly:cip service;help:cip service");
+  this.cip_statusField = this.api.addField("field:zeek_cip.status;db:zeek_cip.status;kind:termfield;friendly:cip status;help:cip status");
+  this.cip_tagsField = this.api.addField("field:zeek_cip.cip_tags;db:zeek_cip.cip_tags;kind:termfield;friendly:cip tags;help:cip tags");
+
   // dce_rpc.log
   this.dce_rpc_rttField = this.api.addField("field:zeek_dce_rpc.rtt;db:zeek_dce_rpc.rtt;kind:termfield;friendly:dce_rpc rtt;help:dce_rpc rtt");
   this.dce_rpc_named_pipeField = this.api.addField("field:zeek_dce_rpc.named_pipe;db:zeek_dce_rpc.named_pipe;kind:termfield;friendly:dce_rpc named_pipe;help:dce_rpc named_pipe");
@@ -108,6 +120,25 @@ function ZeekLogs (api, section) {
   // dpd.log
   this.dpd_serviceField = this.api.addField("field:zeek_dpd.service;db:zeek_dpd.service;kind:termfield;friendly:dpd service;help:dpd service");
   this.dpd_failure_reasonField = this.api.addField("field:zeek_dpd.failure_reason;db:zeek_dpd.failure_reason;kind:termfield;friendly:dpd failure_reason;help:dpd failure_reason");
+
+  // enip.log - https://github.com/amzn/zeek-plugin-enip
+  this.enip_commandField = this.api.addField("field:zeek_enip.command;db:zeek_enip.command;kind:termfield;friendly:enip command;help:enip command");
+  this.enip_lengthField = this.api.addField("field:zeek_enip.length;db:zeek_enip.length;kind:integer;friendly:enip length;help:enip length");
+  this.enip_session_handleField = this.api.addField("field:zeek_enip.session_handle;db:zeek_enip.session_handle;kind:termfield;friendly:enip session_handle;help:enip session_handle");
+  this.enip_statusField = this.api.addField("field:zeek_enip.status;db:zeek_enip.status;kind:termfield;friendly:enip status;help:enip status");
+  this.enip_sender_contextField = this.api.addField("field:zeek_enip.sender_context;db:zeek_enip.sender_context;kind:termfield;friendly:enip sender_context;help:enip sender_context");
+  this.enip_optionsField = this.api.addField("field:zeek_enip.options;db:zeek_enip.options;kind:termfield;friendly:enip options;help:enip options");
+
+  // enip_list_identity.log - https://github.com/amzn/zeek-plugin-enip
+  this.enip_list_identity_device_typeField = this.api.addField("field:zeek_enip_list_identity.device_type;db:zeek_enip_list_identity.device_type;kind:termfield;friendly:enip_list_identity device_type;help:enip_list_identity device_type");
+  this.enip_list_identity_vendorField = this.api.addField("field:zeek_enip_list_identity.vendor;db:zeek_enip_list_identity.vendor;kind:termfield;friendly:enip_list_identity vendor;help:enip_list_identity vendor");
+  this.enip_list_identity_product_nameField = this.api.addField("field:zeek_enip_list_identity.product_name;db:zeek_enip_list_identity.product_name;kind:termfield;friendly:enip_list_identity product_name;help:enip_list_identity product_name");
+  this.enip_list_identity_serial_numberField = this.api.addField("field:zeek_enip_list_identity.serial_number;db:zeek_enip_list_identity.serial_number;kind:termfield;friendly:enip_list_identity serial_number;help:enip_list_identity serial_number");
+  this.enip_list_identity_product_codeField = this.api.addField("field:zeek_enip_list_identity.product_code;db:zeek_enip_list_identity.product_code;kind:integer;friendly:enip_list_identity product_code;help:enip_list_identity product_code");
+  this.enip_list_identity_revisionField = this.api.addField("field:zeek_enip_list_identity.revision;db:zeek_enip_list_identity.revision;kind:termfield;friendly:enip_list_identity revision;help:enip_list_identity revision");
+  this.enip_list_identity_statusField = this.api.addField("field:zeek_enip_list_identity.status;db:zeek_enip_list_identity.status;kind:termfield;friendly:enip_list_identity status;help:enip_list_identity status");
+  this.enip_list_identity_stateField = this.api.addField("field:zeek_enip_list_identity.state;db:zeek_enip_list_identity.state;kind:termfield;friendly:enip_list_identity state;help:enip_list_identity state");
+  this.enip_list_identity_device_ipField = this.api.addField("field:zeek_enip_list_identity.device_ip;db:zeek_enip_list_identity.device_ip;kind:termfield;friendly:enip_list_identity device_ip;help:enip_list_identity device_ip");
 
   // files.log
   this.files_fuidField = this.api.addField("field:zeek_files.fuid;db:zeek_files.fuid;kind:termfield;friendly:files fuid;help:files fuid");
@@ -204,6 +235,9 @@ function ZeekLogs (api, section) {
   this.irc_dcc_mime_typeField = this.api.addField("field:zeek_irc.dcc_mime_type;db:zeek_irc.dcc_mime_type;kind:termfield;friendly:irc dcc_mime_type;help:irc dcc_mime_type");
   this.irc_fuidField = this.api.addField("field:zeek_irc.fuid;db:zeek_irc.fuid;kind:termfield;friendly:irc fuid;help:irc fuid");
 
+  // iso_cotp.log - https://github.com/amzn/zeek-plugin-s7comm
+  this.iso_cotp_pdu_typeField = this.api.addField("field:zeek_iso_cotp.pdu_type;db:zeek_iso_cotp.pdu_type;kind:termfield;friendly:iso_cotp pdu_type;help:iso_cotp pdu_type");
+
   // kerberos.log
   this.kerberos_cnameField = this.api.addField("field:zeek_kerberos.cname;db:zeek_kerberos.cname;kind:termfield;friendly:kerberos cname;help:kerberos cname");
   this.kerberos_snameField = this.api.addField("field:zeek_kerberos.sname;db:zeek_kerberos.sname;kind:termfield;friendly:kerberos sname;help:kerberos sname");
@@ -219,9 +253,22 @@ function ZeekLogs (api, section) {
   this.kerberos_server_cert_subjectField = this.api.addField("field:zeek_kerberos.server_cert_subject;db:zeek_kerberos.server_cert_subject;kind:termfield;friendly:kerberos server_cert_subject;help:kerberos server_cert_subject");
   this.kerberos_server_cert_fuidField = this.api.addField("field:zeek_kerberos.server_cert_fuid;db:zeek_kerberos.server_cert_fuid;kind:termfield;friendly:kerberos server_cert_fuid;help:kerberos server_cert_fuid");
 
+  // known_certs.log
+  this.known_certs_subjectField = this.api.addField("field:zeek_known_certs.subject;db:zeek_known_certs.subject;kind:termfield;friendly:known_certs subject;help:known_certs subject");
+  this.known_certs_issuer_subjectField = this.api.addField("field:zeek_known_certs.issuer_subject;db:zeek_known_certs.issuer_subject;kind:termfield;friendly:known_certs issuer_subject;help:known_certs issuer_subject");
+  this.known_certs_serialField = this.api.addField("field:zeek_known_certs.serial;db:zeek_known_certs.serial;kind:termfield;friendly:known_certs serial;help:known_certs serial");
+
   // modbus.log
   this.modbus_funcField = this.api.addField("field:zeek_modbus.func;db:zeek_modbus.func;kind:termfield;friendly:modbus func;help:modbus func");
   this.modbus_exceptionField = this.api.addField("field:zeek_modbus.exception;db:zeek_modbus.exception;kind:termfield;friendly:modbus exception;help:modbus exception");
+
+  // mqtt_connect.log
+  this.mqtt_connect_proto_nameField = this.api.addField("field:zeek_mqtt_connect.proto_name;db:zeek_mqtt_connect.proto_name;kind:termfield;friendly:mqtt_connect proto_name;help:mqtt_connect proto_name");
+  this.mqtt_connect_proto_versionField = this.api.addField("field:zeek_mqtt_connect.proto_version;db:zeek_mqtt_connect.proto_version;kind:termfield;friendly:mqtt_connect proto_version;help:mqtt_connect proto_version");
+  this.mqtt_connect_client_idField = this.api.addField("field:zeek_mqtt_connect.client_id;db:zeek_mqtt_connect.client_id;kind:termfield;friendly:mqtt_connect client_id;help:mqtt_connect client_id");
+  this.mqtt_connect_connect_statusField = this.api.addField("field:zeek_mqtt_connect.connect_status;db:zeek_mqtt_connect.connect_status;kind:termfield;friendly:mqtt_connect connect_status;help:mqtt_connect connect_status");
+  this.mqtt_connect_will_topicField = this.api.addField("field:zeek_mqtt_connect.will_topic;db:zeek_mqtt_connect.will_topic;kind:termfield;friendly:mqtt_connect will_topic;help:mqtt_connect will_topic");
+  this.mqtt_connect_will_payloadField = this.api.addField("field:zeek_mqtt_connect.will_payload;db:zeek_mqtt_connect.will_payload;kind:termfield;friendly:mqtt_connect will_payload;help:mqtt_connect will_payload");
 
   // mysql.log
   this.mysql_cmdField = this.api.addField("field:zeek_mysql.cmd;db:zeek_mysql.cmd;kind:termfield;friendly:mysql cmd;help:mysql cmd");
@@ -257,6 +304,21 @@ function ZeekLogs (api, section) {
   this.ntlm_successField = this.api.addField("field:zeek_ntlm.success;db:zeek_ntlm.success;kind:termfield;friendly:ntlm success;help:ntlm success");
   this.ntlm_statusField = this.api.addField("field:zeek_ntlm.status;db:zeek_ntlm.status;kind:termfield;friendly:ntlm status;help:ntlm status");
 
+  // ntp.log
+  this.ntp_versionField = this.api.addField("field:zeek_ntp.version;db:zeek_ntp.version;kind:integer;friendly:ntp version;help:ntp version");
+  this.ntp_modeField = this.api.addField("field:zeek_ntp.mode;db:zeek_ntp.mode;kind:integer;friendly:ntp mode;help:ntp mode");
+  this.ntp_stratumField = this.api.addField("field:zeek_ntp.stratum;db:zeek_ntp.stratum;kind:integer;friendly:ntp stratum;help:ntp stratum");
+  this.ntp_pollField = this.api.addField("field:zeek_ntp.poll;db:zeek_ntp.poll;kind:termfield;friendly:ntp poll;help:ntp poll");
+  this.ntp_precisionField = this.api.addField("field:zeek_ntp.precision;db:zeek_ntp.precision;kind:termfield;friendly:ntp precision;help:ntp precision");
+  this.ntp_root_delayField = this.api.addField("field:zeek_ntp.root_delay;db:zeek_ntp.root_delay;kind:termfield;friendly:ntp root_delay;help:ntp root_delay");
+  this.ntp_root_dispField = this.api.addField("field:zeek_ntp.root_disp;db:zeek_ntp.root_disp;kind:termfield;friendly:ntp root_disp;help:ntp root_disp");
+  this.ntp_ref_idField = this.api.addField("field:zeek_ntp.ref_id;db:zeek_ntp.ref_id;kind:termfield;friendly:ntp ref_id;help:ntp ref_id");
+  this.ntp_ref_timeField = this.api.addField("field:zeek_ntp.ref_time;db:zeek_ntp.ref_time;kind:termfield;friendly:ntp ref_time;help:ntp ref_time");
+  this.ntp_org_timeField = this.api.addField("field:zeek_ntp.org_time;db:zeek_ntp.org_time;kind:termfield;friendly:ntp org_time;help:ntp org_time");
+  this.ntp_rec_timeField = this.api.addField("field:zeek_ntp.rec_time;db:zeek_ntp.rec_time;kind:termfield;friendly:ntp rec_time;help:ntp rec_time");
+  this.ntp_xmt_timeField = this.api.addField("field:zeek_ntp.xmt_time;db:zeek_ntp.xmt_time;kind:termfield;friendly:ntp xmt_time;help:ntp xmt_time");
+  this.ntp_num_extsField = this.api.addField("field:zeek_ntp.num_exts;db:zeek_ntp.num_exts;kind:integer;friendly:ntp num_exts;help:ntp num_exts");
+
   // pe.log
   this.pe_fuidField = this.api.addField("field:zeek_pe.fuid;db:zeek_pe.fuid;kind:termfield;friendly:pe fuid;help:pe fuid");
   this.pe_machineField = this.api.addField("field:zeek_pe.machine;db:zeek_pe.machine;kind:termfield;friendly:pe machine;help:pe machine");
@@ -274,6 +336,22 @@ function ZeekLogs (api, section) {
   this.pe_has_cert_tableField = this.api.addField("field:zeek_pe.has_cert_table;db:zeek_pe.has_cert_table;kind:termfield;friendly:pe has_cert_table;help:pe has_cert_table");
   this.pe_has_debug_dataField = this.api.addField("field:zeek_pe.has_debug_data;db:zeek_pe.has_debug_data;kind:termfield;friendly:pe has_debug_data;help:pe has_debug_data");
   this.pe_section_namesField = this.api.addField("field:zeek_pe.section_names;db:zeek_pe.section_names;kind:termfield;friendly:pe section_names;help:pe section_names");
+
+  // profinet.log - https://github.com/amzn/zeek-plugin-profinet
+  this.profinet_operation_typeField = this.api.addField("field:zeek_profinet.operation_type;db:zeek_profinet.operation_type;kind:termfield;friendly:profinet operation_type;help:profinet operation_type");
+  this.profinet_block_versionField = this.api.addField("field:zeek_profinet.block_version;db:zeek_profinet.block_version;kind:termfield;friendly:profinet block_version;help:profinet block_version");
+  this.profinet_slot_numberField = this.api.addField("field:zeek_profinet.slot_number;db:zeek_profinet.slot_number;kind:integer;friendly:profinet slot_number;help:profinet slot_number");
+  this.profinet_subslot_numberField = this.api.addField("field:zeek_profinet.subslot_number;db:zeek_profinet.subslot_number;kind:integer;friendly:profinet subslot_number;help:profinet subslot_number");
+  this.profinet_indexField = this.api.addField("field:zeek_profinet.index;db:zeek_profinet.index;kind:termfield;friendly:profinet index;help:profinet index");
+
+  // profinet_dce_rpc.log - https://github.com/amzn/zeek-plugin-profinet
+  this.profinet_dce_rpc_versionField = this.api.addField("field:zeek_profinet_dce_rpc.version;db:zeek_profinet_dce_rpc.version;kind:integer;friendly:profinet_dce_rpc version;help:profinet_dce_rpc version");
+  this.profinet_dce_rpc_packet_typeField = this.api.addField("field:zeek_profinet_dce_rpc.packet_type;db:zeek_profinet_dce_rpc.packet_type;kind:integer;friendly:profinet_dce_rpc packet_type;help:profinet_dce_rpc packet_type");
+  this.profinet_dce_rpc_object_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.object_uuid;db:zeek_profinet_dce_rpc.object_uuid;kind:termfield;friendly:profinet_dce_rpc object_uuid;help:profinet_dce_rpc object_uuid");
+  this.profinet_dce_rpc_interface_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.interface_uuid;db:zeek_profinet_dce_rpc.interface_uuid;kind:termfield;friendly:profinet_dce_rpc interface_uuid;help:profinet_dce_rpc interface_uuid");
+  this.profinet_dce_rpc_activity_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.activity_uuid;db:zeek_profinet_dce_rpc.activity_uuid;kind:termfield;friendly:profinet_dce_rpc activity_uuid;help:profinet_dce_rpc activity_uuid");
+  this.profinet_dce_rpc_server_boot_timeField = this.api.addField("field:zeek_profinet_dce_rpc.server_boot_time;db:zeek_profinet_dce_rpc.server_boot_time;kind:integer;friendly:profinet_dce_rpc server_boot_time;help:profinet_dce_rpc server_boot_time");
+  this.profinet_dce_rpc_operationField = this.api.addField("field:zeek_profinet_dce_rpc.operation;db:zeek_profinet_dce_rpc.operation;kind:termfield;friendly:profinet_dce_rpc operation;help:profinet_dce_rpc operation");
 
   // radius.log
   this.radius_macField = this.api.addField("field:zeek_radius.mac;db:zeek_radius.mac;kind:termfield;friendly:radius mac;help:radius mac");
@@ -313,6 +391,12 @@ function ZeekLogs (api, section) {
   this.rfb_desktop_nameField = this.api.addField("field:zeek_rfb.desktop_name;db:zeek_rfb.desktop_name;kind:termfield;friendly:rfb desktop_name;help:rfb desktop_name");
   this.rfb_widthField = this.api.addField("field:zeek_rfb.width;db:zeek_rfb.width;kind:integer;friendly:rfb width;help:rfb width");
   this.rfb_heightField = this.api.addField("field:zeek_rfb.height;db:zeek_rfb.height;kind:integer;friendly:rfb height;help:rfb height");
+
+  // s7comm.log - https://github.com/amzn/zeek-plugin-s7comm
+  this.s7comm_rosctrField = this.api.addField("field:zeek_s7comm.rosctr;db:zeek_s7comm.rosctr;kind:termfield;friendly:s7comm rosctr;help:s7comm rosctr");
+  this.s7comm_parameterField = this.api.addField("field:zeek_s7comm.parameter;db:zeek_s7comm.parameter;kind:termfield;friendly:s7comm parameter;help:s7comm parameter");
+  this.s7comm_item_countField = this.api.addField("field:zeek_s7comm.item_count;db:zeek_s7comm.item_count;kind:integer;friendly:s7comm item_count;help:s7comm item_count");
+  this.s7comm_data_infoField = this.api.addField("field:zeek_s7comm.data_info;db:zeek_s7comm.data_info;kind:termfield;friendly:s7comm data_info;help:s7comm data_info");
 
   // signatures.log
   this.signatures_noteField = this.api.addField("field:zeek_signatures.note;db:zeek_signatures.note;kind:termfield;friendly:signatures note;help:signatures note");
@@ -526,6 +610,17 @@ function ZeekLogs (api, section) {
   this.syslog_severityField = this.api.addField("field:zeek_syslog.severity;db:zeek_syslog.severity;kind:termfield;friendly:syslog severity;help:syslog severity");
   this.syslog_messageField = this.api.addField("field:zeek_syslog.message;db:zeek_syslog.message;kind:termfield;friendly:syslog message;help:syslog message");
 
+  // tds.log - https://github.com/amzn/zeek-plugin-tds
+  this.tds_commandField = this.api.addField("field:zeek_tds.command;db:zeek_tds.command;kind:termfield;friendly:tds command;help:tds command");
+
+  // tds_rpc.log - https://github.com/amzn/zeek-plugin-tds
+  this.tds_rpc_procedure_nameField = this.api.addField("field:zeek_tds_rpc.procedure_name;db:zeek_tds_rpc.procedure_name;kind:termfield;friendly:tds_rpc procedure_name;help:tds_rpc procedure_name");
+  this.tds_rpc_parametersField = this.api.addField("field:zeek_tds_rpc.parameters;db:zeek_tds_rpc.parameters;kind:termfield;friendly:tds_rpc parameters;help:tds_rpc parameters");
+
+  // tds_sql_batch.log - https://github.com/amzn/zeek-plugin-tds
+  this.tds_sql_batch_header_typeField = this.api.addField("field:zeek_tds_sql_batch.header_type;db:zeek_tds_sql_batch.header_type;kind:termfield;friendly:tds_sql_batch header_type;help:tds_sql_batch header_type");
+  this.tds_sql_batch_queryField = this.api.addField("field:zeek_tds_sql_batch.query;db:zeek_tds_sql_batch.query;kind:termfield;friendly:tds_sql_batch query;help:tds_sql_batch query");
+
   // tunnel.log
   this.tunnel_tunnel_typeField = this.api.addField("field:zeek_tunnel.tunnel_type;db:zeek_tunnel.tunnel_type;kind:termfield;friendly:tunnel tunnel_type;help:tunnel tunnel_type");
   this.tunnel_actionField = this.api.addField("field:zeek_tunnel.action;db:zeek_tunnel.action;kind:termfield;friendly:tunnel action;help:tunnel action");
@@ -590,7 +685,7 @@ function ZeekLogs (api, section) {
   // add right-clicks for pivoting into Kibana from Moloch (see nginx.conf)
   var filterLabel = "Filter %DBFIELD% in Kibana";
   var filterUrl = "idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
-  var allFieldsStr = "communityId,host.name,ip.protocol,mac.dst,mac.src,node,oui.dst,oui.src,protocols,rootId,tags,zeek.community_id,zeek.destination_geo.city_name,zeek.destination_geo.country_name,zeek.destination_ip_reverse_dns,zeek.filename,zeek.filetype,zeek.fuid,zeek.logType,zeek.orig_h,zeek.orig_hostname,zeek.orig_l2_addr,zeek.orig_l2_oui,zeek.orig_p,zeek.orig_segment,zeek.proto,zeek.resp_h,zeek.resp_hostname,zeek.resp_l2_addr,zeek.resp_l2_oui,zeek.resp_p,zeek.resp_segment,zeek.service,zeek.source_geo.city_name,zeek.source_geo.country_name,zeek.source_ip_reverse_dns,zeek.ts,zeek.uid,zeek.user,zeek_conn.conn_state,zeek_conn.conn_state_description,zeek_conn.duration,zeek_conn.history,zeek_conn.inner_vlan,zeek_conn.local_orig,zeek_conn.local_resp,zeek_conn.missed_bytes,zeek_conn.orig_bytes,zeek_conn.orig_ip_bytes,zeek_conn.orig_pkts,zeek_conn.resp_bytes,zeek_conn.resp_ip_bytes,zeek_conn.resp_pkts,zeek_conn.tunnel_parents,zeek_conn.vlan,zeek_dce_rpc.endpoint,zeek_dce_rpc.named_pipe,zeek_dce_rpc.operation,zeek_dce_rpc.rtt,zeek_dhcp.assigned_ip,zeek_dhcp.lease_time,zeek_dhcp.mac,zeek_dhcp.trans_id,zeek_dnp3.fc_reply,zeek_dnp3.fc_request,zeek_dnp3.iin,zeek_dns.AA,zeek_dns.answers,zeek_dns.qclass,zeek_dns.qclass_name,zeek_dns.qtype,zeek_dns.qtype_name,zeek_dns.query,zeek_dns.RA,zeek_dns.rcode,zeek_dns.rcode_name,zeek_dns.RD,zeek_dns.rejected,zeek_dns.rtt,zeek_dns.TC,zeek_dns.trans_id,zeek_dns.TTLs,zeek_dns.Z,zeek_dpd.failure_reason,zeek_dpd.service,zeek_files.analyzers,zeek_files.conn_uids,zeek_files.depth,zeek_files.duration,zeek_files.extracted,zeek_files.extracted_cutoff,zeek_files.extracted_size,zeek_files.filename,zeek_files.fuid,zeek_files.is_orig,zeek_files.local_orig,zeek_files.md5,zeek_files.mime_type,zeek_files.missing_bytes,zeek_files.overflow_bytes,zeek_files.parent_fuid,zeek_files.rx_hosts,zeek_files.seen_bytes,zeek_files.sha1,zeek_files.sha256,zeek_files.source,zeek_files.timedout,zeek_files.total_bytes,zeek_files.tx_hosts,zeek_ftp.arg,zeek_ftp.command,zeek_ftp.data_channel_orig_h,zeek_ftp.data_channel_passive,zeek_ftp.data_channel_resp_h,zeek_ftp.data_channel_resp_p,zeek_ftp.file_size,zeek_ftp.fuid,zeek_ftp.mime_type,zeek_ftp.password,zeek_ftp.reply_code,zeek_ftp.reply_msg,zeek_http.host,zeek_http.info_code,zeek_http.info_msg,zeek_http.method,zeek_http.orig_filenames,zeek_http.orig_fuids,zeek_http.orig_mime_types,zeek_http.origin,zeek_http.password,zeek_http.proxied,zeek_http.referrer,zeek_http.request_body_len,zeek_http.resp_filenames,zeek_http.resp_fuids,zeek_http.resp_mime_types,zeek_http.response_body_len,zeek_http.status_code,zeek_http.status_msg,zeek_http.tags,zeek_http.trans_depth,zeek_http.uri,zeek_http.user,zeek_http.user_agent,zeek_http.version,zeek_intel.file_description,zeek_intel.fuid,zeek_intel.indicator,zeek_intel.indicator_type,zeek_intel.matched,zeek_intel.mimetype,zeek_intel.seen_node,zeek_intel.seen_where,zeek_intel.sources,zeek_irc.addl,zeek_irc.command,zeek_irc.dcc_file_name,zeek_irc.dcc_file_size,zeek_irc.dcc_mime_type,zeek_irc.fuid,zeek_irc.nick,zeek_irc.value,zeek_kerberos.cipher,zeek_kerberos.client_cert_fuid,zeek_kerberos.client_cert_subject,zeek_kerberos.cname,zeek_kerberos.error_msg,zeek_kerberos.forwardable,zeek_kerberos.from,zeek_kerberos.renewable,zeek_kerberos.server_cert_fuid,zeek_kerberos.server_cert_subject,zeek_kerberos.sname,zeek_kerberos.success,zeek_kerberos.till,zeek_modbus.exception,zeek_modbus.func,zeek_mysql.arg,zeek_mysql.cmd,zeek_mysql.response,zeek_mysql.rows,zeek_mysql.success,zeek_notice.actions,zeek_notice.dropped,zeek_notice.dst,zeek_notice.file_desc,zeek_notice.file_mime_type,zeek_notice.fuid,zeek_notice.msg,zeek_notice.n,zeek_notice.note,zeek_notice.p,zeek_notice.peer_descr,zeek_notice.remote_location_city,zeek_notice.remote_location_cityremote_location_latitude,zeek_notice.remote_location_country_code,zeek_notice.remote_location_latitude,zeek_notice.remote_location_longitude,zeek_notice.remote_location_region,zeek_notice.src,zeek_notice.sub,zeek_notice.suppress_for,zeek_ntlm.domain,zeek_ntlm.host,zeek_ntlm.status,zeek_ntlm.success,zeek_pe.compile_ts,zeek_pe.fuid,zeek_pe.has_cert_table,zeek_pe.has_debug_data,zeek_pe.has_export_table,zeek_pe.has_import_table,zeek_pe.is_64bit,zeek_pe.is_exe,zeek_pe.machine,zeek_pe.os,zeek_pe.section_names,zeek_pe.subsystem,zeek_pe.uses_aslr,zeek_pe.uses_code_integrity,zeek_pe.uses_dep,zeek_pe.uses_seh,zeek_radius.connect_info,zeek_radius.framed_addr,zeek_radius.mac,zeek_radius.remote_ip,zeek_radius.reply_msg,zeek_radius.result,zeek_radius.ttl,zeek_rdp.cert_count,zeek_rdp.cert_permanent,zeek_rdp.cert_type,zeek_rdp.client_build,zeek_rdp.client_channels,zeek_rdp.client_dig_product_id,zeek_rdp.client_name,zeek_rdp.cookie,zeek_rdp.desktop_height,zeek_rdp.desktop_width,zeek_rdp.encryption_level,zeek_rdp.encryption_method,zeek_rdp.keyboard_layout,zeek_rdp.requested_color_depth,zeek_rdp.result,zeek_rdp.security_protocol,zeek_rfb.auth,zeek_rfb.authentication_method,zeek_rfb.client_major_version,zeek_rfb.client_minor_version,zeek_rfb.desktop_name,zeek_rfb.height,zeek_rfb.server_major_version,zeek_rfb.server_minor_version,zeek_rfb.share_flag,zeek_rfb.width,zeek_signatures.engine,zeek_signatures.event_message,zeek_signatures.hits,zeek_signatures.host_count,zeek_signatures.note,zeek_signatures.signature_count,zeek_signatures.signature_id,zeek_signatures.sub_message,zeek_sip.call_id,zeek_sip.content_type,zeek_sip.date,zeek_sip.method,zeek_sip.reply_to,zeek_sip.request_body_len,zeek_sip.request_from,zeek_sip.request_path,zeek_sip.request_to,zeek_sip.response_body_len,zeek_sip.response_from,zeek_sip.response_path,zeek_sip.response_to,zeek_sip.seq,zeek_sip.status_code,zeek_sip.status_msg,zeek_sip.subject,zeek_sip.trans_depth,zeek_sip.uri,zeek_sip.user_agent,zeek_sip.warning,zeek_smb_files.action,zeek_smb_files.fuid,zeek_smb_files.name,zeek_smb_files.path,zeek_smb_files.prev_name,zeek_smb_files.size,zeek_smb_files.times_accessed,zeek_smb_files.times_changed,zeek_smb_files.times_created,zeek_smb_files.times_modified,zeek_smb_mapping.native_file_system,zeek_smb_mapping.path,zeek_smb_mapping.resource_type,zeek_smb_mapping.share_type,zeek_smtp.cc,zeek_smtp.date,zeek_smtp.first_received,zeek_smtp.from,zeek_smtp.fuids,zeek_smtp.helo,zeek_smtp.in_reply_to,zeek_smtp.is_webmail,zeek_smtp.last_reply,zeek_smtp.mailfrom,zeek_smtp.msg_id,zeek_smtp.path,zeek_smtp.rcptto,zeek_smtp.reply_to,zeek_smtp.second_received,zeek_smtp.subject,zeek_smtp.tls,zeek_smtp.to,zeek_smtp.trans_depth,zeek_smtp.user_agent,zeek_smtp.x_originating_ip,zeek_snmp.community,zeek_snmp.display_string,zeek_snmp.duration,zeek_snmp.get_bulk_requests,zeek_snmp.get_requests,zeek_snmp.get_responses,zeek_snmp.set_requests,zeek_snmp.up_since,zeek_snmp.version,zeek_socks.bound_host,zeek_socks.bound_name,zeek_socks.bound_port,zeek_socks.password,zeek_socks.request_host,zeek_socks.request_name,zeek_socks.request_port,zeek_socks.server_status,zeek_socks.version,zeek_software.name,zeek_software.software_type,zeek_software.unparsed_version,zeek_software.version_addl,zeek_software.version_major,zeek_software.version_minor,zeek_software.version_minor2,zeek_software.version_minor3,zeek_ssh.auth_attempts,zeek_ssh.auth_success,zeek_ssh.cipher_alg,zeek_ssh.client,zeek_ssh.compression_alg,zeek_ssh.cshka,zeek_ssh.direction,zeek_ssh.hassh,zeek_ssh.hasshAlgorithms,zeek_ssh.hasshServer,zeek_ssh.hasshServerAlgorithms,zeek_ssh.hasshVersion,zeek_ssh.host_key,zeek_ssh.host_key_alg,zeek_ssh.kex_alg,zeek_ssh.mac_alg,zeek_ssh.remote_location_city,zeek_ssh.remote_location_country_code,zeek_ssh.remote_location_latitude,zeek_ssh.remote_location_longitude,zeek_ssh.remote_location_region,zeek_ssh.server,zeek_ssh.sshka,zeek_ssh.version,zeek_ssl.cert_chain_fuids,zeek_ssl.cipher,zeek_ssl.client_cert_chain_fuids,zeek_ssl.client_issuer.C,zeek_ssl.client_issuer.CN,zeek_ssl.client_issuer.DC,zeek_ssl.client_issuer.emailAddress,zeek_ssl.client_issuer.GN,zeek_ssl.client_issuer.initials,zeek_ssl.client_issuer.L,zeek_ssl.client_issuer.O,zeek_ssl.client_issuer.OU,zeek_ssl.client_issuer.pseudonym,zeek_ssl.client_issuer.serialNumber,zeek_ssl.client_issuer.SN,zeek_ssl.client_issuer.ST,zeek_ssl.client_issuer.title,zeek_ssl.client_issuer_full,zeek_ssl.client_subject.C,zeek_ssl.client_subject.CN,zeek_ssl.client_subject.emailAddress,zeek_ssl.client_subject.GN,zeek_ssl.client_subject.initials,zeek_ssl.client_subject.L,zeek_ssl.client_subject.O,zeek_ssl.client_subject.OU,zeek_ssl.client_subject.pseudonym,zeek_ssl.client_subject.serialNumber,zeek_ssl.client_subject.SN,zeek_ssl.client_subject.ST,zeek_ssl.client_subject.title,zeek_ssl.client_subject_full,zeek_ssl.curve,zeek_ssl.established,zeek_ssl.issuer.C,zeek_ssl.issuer.CN,zeek_ssl.issuer.DC,zeek_ssl.issuer.emailAddress,zeek_ssl.issuer.GN,zeek_ssl.issuer.initials,zeek_ssl.issuer.L,zeek_ssl.issuer.O,zeek_ssl.issuer.OU,zeek_ssl.issuer.pseudonym,zeek_ssl.issuer.serialNumber,zeek_ssl.issuer.SN,zeek_ssl.issuer.ST,zeek_ssl.issuer.title,zeek_ssl.issuer_full,zeek_ssl.ja3,zeek_ssl.ja3_desc,zeek_ssl.ja3s,zeek_ssl.ja3s_desc,zeek_ssl.last_alert,zeek_ssl.next_protocol,zeek_ssl.resumed,zeek_ssl.server_name,zeek_ssl.ssl_version,zeek_ssl.subject.C,zeek_ssl.subject.CN,zeek_ssl.subject.emailAddress,zeek_ssl.subject.GN,zeek_ssl.subject.initials,zeek_ssl.subject.L,zeek_ssl.subject.O,zeek_ssl.subject.OU,zeek_ssl.subject.pseudonym,zeek_ssl.subject.serialNumber,zeek_ssl.subject.SN,zeek_ssl.subject.ST,zeek_ssl.subject.title,zeek_ssl.subject_full,zeek_ssl.validation_status,zeek_syslog.facility,zeek_syslog.message,zeek_syslog.severity,zeek_tunnel.action,zeek_tunnel.tunnel_type,zeek_weird.addl,zeek_weird.name,zeek_weird.notice,zeek_weird.peer,zeek_x509.basic_constraints_ca,zeek_x509.basic_constraints_path_len,zeek_x509.certificate_curve,zeek_x509.certificate_exponent,zeek_x509.certificate_issuer.C,zeek_x509.certificate_issuer.CN,zeek_x509.certificate_issuer.emailAddress,zeek_x509.certificate_issuer.GN,zeek_x509.certificate_issuer.initials,zeek_x509.certificate_issuer.L,zeek_x509.certificate_issuer.O,zeek_x509.certificate_issuer.OU,zeek_x509.certificate_issuer.pseudonym,zeek_x509.certificate_issuer.serialNumber,zeek_x509.certificate_issuer.SN,zeek_x509.certificate_issuer.ST,zeek_x509.certificate_issuer.title,zeek_x509.certificate_issuer_full,zeek_x509.certificate_key_alg,zeek_x509.certificate_key_length,zeek_x509.certificate_key_type,zeek_x509.certificate_not_valid_after,zeek_x509.certificate_not_valid_before,zeek_x509.certificate_serial,zeek_x509.certificate_sig_alg,zeek_x509.certificate_subject.C,zeek_x509.certificate_subject.CN,zeek_x509.certificate_subject.DC,zeek_x509.certificate_subject.emailAddress,zeek_x509.certificate_subject.GN,zeek_x509.certificate_subject.initials,zeek_x509.certificate_subject.L,zeek_x509.certificate_subject.O,zeek_x509.certificate_subject.OU,zeek_x509.certificate_subject.pseudonym,zeek_x509.certificate_subject.serialNumber,zeek_x509.certificate_subject.SN,zeek_x509.certificate_subject.ST,zeek_x509.certificate_subject.title,zeek_x509.certificate_subject_full,zeek_x509.certificate_version,zeek_x509.fuid,zeek_x509.san_dns,zeek_x509.san_email,zeek_x509.san_ip,zeek_x509.san_uri";
+  var allFieldsStr = "communityId,host.name,ip.protocol,mac.dst,mac.src,node,oui.dst,oui.src,protocols,rootId,tags,zeek.community_id,zeek.destination_geo.city_name,zeek.destination_geo.country_name,zeek.destination_ip_reverse_dns,zeek.filename,zeek.filetype,zeek.fuid,zeek.logType,zeek.orig_h,zeek.orig_hostname,zeek.orig_l2_addr,zeek.orig_l2_oui,zeek.orig_p,zeek.orig_segment,zeek.proto,zeek.resp_h,zeek.resp_hostname,zeek.resp_l2_addr,zeek.resp_l2_oui,zeek.resp_p,zeek.resp_segment,zeek.service,zeek.source_geo.city_name,zeek.source_geo.country_name,zeek.source_ip_reverse_dns,zeek.ts,zeek.uid,zeek.user,zeek_bacnet.apdu_type,zeek_bacnet.bvlc_function,zeek_bacnet.bvlc_len,zeek_bacnet.data,zeek_bacnet.service_choice,zeek_cip.cip_service,zeek_cip.cip_tags,zeek_cip.status,zeek_conn.conn_state,zeek_conn.conn_state_description,zeek_conn.duration,zeek_conn.history,zeek_conn.inner_vlan,zeek_conn.local_orig,zeek_conn.local_resp,zeek_conn.missed_bytes,zeek_conn.orig_bytes,zeek_conn.orig_ip_bytes,zeek_conn.orig_pkts,zeek_conn.resp_bytes,zeek_conn.resp_ip_bytes,zeek_conn.resp_pkts,zeek_conn.tunnel_parents,zeek_conn.vlan,zeek_dce_rpc.endpoint,zeek_dce_rpc.named_pipe,zeek_dce_rpc.operation,zeek_dce_rpc.rtt,zeek_dhcp.assigned_ip,zeek_dhcp.lease_time,zeek_dhcp.mac,zeek_dhcp.trans_id,zeek_dnp3.fc_reply,zeek_dnp3.fc_request,zeek_dnp3.iin,zeek_dns.AA,zeek_dns.answers,zeek_dns.qclass,zeek_dns.qclass_name,zeek_dns.qtype,zeek_dns.qtype_name,zeek_dns.query,zeek_dns.RA,zeek_dns.rcode,zeek_dns.rcode_name,zeek_dns.RD,zeek_dns.rejected,zeek_dns.rtt,zeek_dns.TC,zeek_dns.trans_id,zeek_dns.TTLs,zeek_dns.Z,zeek_dpd.failure_reason,zeek_dpd.service,zeek_enip.command,zeek_enip.length,zeek_enip.options,zeek_enip.sender_context,zeek_enip.session_handle,zeek_enip.status,zeek_enip_list_identity.device_ip,zeek_enip_list_identity.device_type,zeek_enip_list_identity.product_code,zeek_enip_list_identity.product_name,zeek_enip_list_identity.revision,zeek_enip_list_identity.serial_number,zeek_enip_list_identity.state,zeek_enip_list_identity.status,zeek_enip_list_identity.vendor,zeek_files.analyzers,zeek_files.conn_uids,zeek_files.depth,zeek_files.duration,zeek_files.extracted,zeek_files.extracted_cutoff,zeek_files.extracted_size,zeek_files.filename,zeek_files.fuid,zeek_files.is_orig,zeek_files.local_orig,zeek_files.md5,zeek_files.mime_type,zeek_files.missing_bytes,zeek_files.overflow_bytes,zeek_files.parent_fuid,zeek_files.rx_hosts,zeek_files.seen_bytes,zeek_files.sha1,zeek_files.sha256,zeek_files.source,zeek_files.timedout,zeek_files.total_bytes,zeek_files.tx_hosts,zeek_ftp.arg,zeek_ftp.command,zeek_ftp.data_channel_orig_h,zeek_ftp.data_channel_passive,zeek_ftp.data_channel_resp_h,zeek_ftp.data_channel_resp_p,zeek_ftp.file_size,zeek_ftp.fuid,zeek_ftp.mime_type,zeek_ftp.password,zeek_ftp.reply_code,zeek_ftp.reply_msg,zeek_gquic.cyu,zeek_gquic.cyutags,zeek_gquic.server_name,zeek_gquic.tag_count,zeek_gquic.user_agent,zeek_gquic.version,zeek_http.host,zeek_http.info_code,zeek_http.info_msg,zeek_http.method,zeek_http.orig_filenames,zeek_http.orig_fuids,zeek_http.orig_mime_types,zeek_http.origin,zeek_http.password,zeek_http.proxied,zeek_http.referrer,zeek_http.request_body_len,zeek_http.resp_filenames,zeek_http.resp_fuids,zeek_http.resp_mime_types,zeek_http.response_body_len,zeek_http.status_code,zeek_http.status_msg,zeek_http.tags,zeek_http.trans_depth,zeek_http.uri,zeek_http.user,zeek_http.user_agent,zeek_http.version,zeek_intel.file_description,zeek_intel.fuid,zeek_intel.indicator,zeek_intel.indicator_type,zeek_intel.matched,zeek_intel.mimetype,zeek_intel.seen_node,zeek_intel.seen_where,zeek_intel.sources,zeek_irc.addl,zeek_irc.command,zeek_irc.dcc_file_name,zeek_irc.dcc_file_size,zeek_irc.dcc_mime_type,zeek_irc.fuid,zeek_irc.nick,zeek_irc.value,zeek_iso_cotp.pdu_type,zeek_kerberos.cipher,zeek_kerberos.client_cert_fuid,zeek_kerberos.client_cert_subject,zeek_kerberos.cname,zeek_kerberos.error_msg,zeek_kerberos.forwardable,zeek_kerberos.from,zeek_kerberos.renewable,zeek_kerberos.server_cert_fuid,zeek_kerberos.server_cert_subject,zeek_kerberos.sname,zeek_kerberos.success,zeek_kerberos.till,zeek_known_certs.issuer_subject,zeek_known_certs.serial,zeek_known_certs.subject,zeek_modbus.exception,zeek_modbus.func,zeek_mqtt_connect.client_id,zeek_mqtt_connect.connect_status,zeek_mqtt_connect.proto_name,zeek_mqtt_connect.proto_version,zeek_mqtt_connect.will_payload,zeek_mqtt_connect.will_topic,zeek_mysql.arg,zeek_mysql.cmd,zeek_mysql.response,zeek_mysql.rows,zeek_mysql.success,zeek_notice.actions,zeek_notice.dropped,zeek_notice.dst,zeek_notice.file_desc,zeek_notice.file_mime_type,zeek_notice.fuid,zeek_notice.msg,zeek_notice.n,zeek_notice.note,zeek_notice.p,zeek_notice.peer_descr,zeek_notice.remote_location_city,zeek_notice.remote_location_cityremote_location_latitude,zeek_notice.remote_location_country_code,zeek_notice.remote_location_latitude,zeek_notice.remote_location_longitude,zeek_notice.remote_location_region,zeek_notice.src,zeek_notice.sub,zeek_notice.suppress_for,zeek_ntlm.domain,zeek_ntlm.host,zeek_ntlm.status,zeek_ntlm.success,zeek_ntp.mode,zeek_ntp.num_exts,zeek_ntp.org_time,zeek_ntp.poll,zeek_ntp.precision,zeek_ntp.rec_time,zeek_ntp.ref_id,zeek_ntp.ref_time,zeek_ntp.root_delay,zeek_ntp.root_disp,zeek_ntp.stratum,zeek_ntp.version,zeek_ntp.xmt_time,zeek_pe.compile_ts,zeek_pe.fuid,zeek_pe.has_cert_table,zeek_pe.has_debug_data,zeek_pe.has_export_table,zeek_pe.has_import_table,zeek_pe.is_64bit,zeek_pe.is_exe,zeek_pe.machine,zeek_pe.os,zeek_pe.section_names,zeek_pe.subsystem,zeek_pe.uses_aslr,zeek_pe.uses_code_integrity,zeek_pe.uses_dep,zeek_pe.uses_seh,zeek_profinet.block_version,zeek_profinet.index,zeek_profinet.operation_type,zeek_profinet.slot_number,zeek_profinet.subslot_number,zeek_profinet_dce_rpc.activity_uuid,zeek_profinet_dce_rpc.interface_uuid,zeek_profinet_dce_rpc.object_uuid,zeek_profinet_dce_rpc.operation,zeek_profinet_dce_rpc.packet_type,zeek_profinet_dce_rpc.server_boot_time,zeek_profinet_dce_rpc.version,zeek_radius.connect_info,zeek_radius.framed_addr,zeek_radius.mac,zeek_radius.remote_ip,zeek_radius.reply_msg,zeek_radius.result,zeek_radius.ttl,zeek_rdp.cert_count,zeek_rdp.cert_permanent,zeek_rdp.cert_type,zeek_rdp.client_build,zeek_rdp.client_channels,zeek_rdp.client_dig_product_id,zeek_rdp.client_name,zeek_rdp.cookie,zeek_rdp.desktop_height,zeek_rdp.desktop_width,zeek_rdp.encryption_level,zeek_rdp.encryption_method,zeek_rdp.keyboard_layout,zeek_rdp.requested_color_depth,zeek_rdp.result,zeek_rdp.security_protocol,zeek_rfb.auth,zeek_rfb.authentication_method,zeek_rfb.client_major_version,zeek_rfb.client_minor_version,zeek_rfb.desktop_name,zeek_rfb.height,zeek_rfb.server_major_version,zeek_rfb.server_minor_version,zeek_rfb.share_flag,zeek_rfb.width,zeek_s7comm.data_info,zeek_s7comm.item_count,zeek_s7comm.parameter,zeek_s7comm.rosctr,zeek_signatures.engine,zeek_signatures.event_message,zeek_signatures.hits,zeek_signatures.host_count,zeek_signatures.note,zeek_signatures.signature_count,zeek_signatures.signature_id,zeek_signatures.sub_message,zeek_sip.call_id,zeek_sip.content_type,zeek_sip.date,zeek_sip.method,zeek_sip.reply_to,zeek_sip.request_body_len,zeek_sip.request_from,zeek_sip.request_path,zeek_sip.request_to,zeek_sip.response_body_len,zeek_sip.response_from,zeek_sip.response_path,zeek_sip.response_to,zeek_sip.seq,zeek_sip.status_code,zeek_sip.status_msg,zeek_sip.subject,zeek_sip.trans_depth,zeek_sip.uri,zeek_sip.user_agent,zeek_sip.warning,zeek_smb_files.action,zeek_smb_files.fuid,zeek_smb_files.name,zeek_smb_files.path,zeek_smb_files.prev_name,zeek_smb_files.size,zeek_smb_files.times_accessed,zeek_smb_files.times_changed,zeek_smb_files.times_created,zeek_smb_files.times_modified,zeek_smb_mapping.native_file_system,zeek_smb_mapping.path,zeek_smb_mapping.resource_type,zeek_smb_mapping.share_type,zeek_smtp.cc,zeek_smtp.date,zeek_smtp.first_received,zeek_smtp.from,zeek_smtp.fuids,zeek_smtp.helo,zeek_smtp.in_reply_to,zeek_smtp.is_webmail,zeek_smtp.last_reply,zeek_smtp.mailfrom,zeek_smtp.msg_id,zeek_smtp.path,zeek_smtp.rcptto,zeek_smtp.reply_to,zeek_smtp.second_received,zeek_smtp.subject,zeek_smtp.tls,zeek_smtp.to,zeek_smtp.trans_depth,zeek_smtp.user_agent,zeek_smtp.x_originating_ip,zeek_snmp.community,zeek_snmp.display_string,zeek_snmp.duration,zeek_snmp.get_bulk_requests,zeek_snmp.get_requests,zeek_snmp.get_responses,zeek_snmp.set_requests,zeek_snmp.up_since,zeek_snmp.version,zeek_socks.bound_host,zeek_socks.bound_name,zeek_socks.bound_port,zeek_socks.password,zeek_socks.request_host,zeek_socks.request_name,zeek_socks.request_port,zeek_socks.server_status,zeek_socks.version,zeek_software.name,zeek_software.software_type,zeek_software.unparsed_version,zeek_software.version_addl,zeek_software.version_major,zeek_software.version_minor,zeek_software.version_minor2,zeek_software.version_minor3,zeek_ssh.auth_attempts,zeek_ssh.auth_success,zeek_ssh.cipher_alg,zeek_ssh.client,zeek_ssh.compression_alg,zeek_ssh.cshka,zeek_ssh.direction,zeek_ssh.hassh,zeek_ssh.hasshAlgorithms,zeek_ssh.hasshServer,zeek_ssh.hasshServerAlgorithms,zeek_ssh.hasshVersion,zeek_ssh.host_key,zeek_ssh.host_key_alg,zeek_ssh.kex_alg,zeek_ssh.mac_alg,zeek_ssh.remote_location_city,zeek_ssh.remote_location_country_code,zeek_ssh.remote_location_latitude,zeek_ssh.remote_location_longitude,zeek_ssh.remote_location_region,zeek_ssh.server,zeek_ssh.sshka,zeek_ssh.version,zeek_ssl.cert_chain_fuids,zeek_ssl.cipher,zeek_ssl.client_cert_chain_fuids,zeek_ssl.client_issuer.C,zeek_ssl.client_issuer.CN,zeek_ssl.client_issuer.DC,zeek_ssl.client_issuer.emailAddress,zeek_ssl.client_issuer.GN,zeek_ssl.client_issuer.initials,zeek_ssl.client_issuer.L,zeek_ssl.client_issuer.O,zeek_ssl.client_issuer.OU,zeek_ssl.client_issuer.pseudonym,zeek_ssl.client_issuer.serialNumber,zeek_ssl.client_issuer.SN,zeek_ssl.client_issuer.ST,zeek_ssl.client_issuer.title,zeek_ssl.client_issuer_full,zeek_ssl.client_subject.C,zeek_ssl.client_subject.CN,zeek_ssl.client_subject.emailAddress,zeek_ssl.client_subject.GN,zeek_ssl.client_subject.initials,zeek_ssl.client_subject.L,zeek_ssl.client_subject.O,zeek_ssl.client_subject.OU,zeek_ssl.client_subject.pseudonym,zeek_ssl.client_subject.serialNumber,zeek_ssl.client_subject.SN,zeek_ssl.client_subject.ST,zeek_ssl.client_subject.title,zeek_ssl.client_subject_full,zeek_ssl.curve,zeek_ssl.established,zeek_ssl.issuer.C,zeek_ssl.issuer.CN,zeek_ssl.issuer.DC,zeek_ssl.issuer.emailAddress,zeek_ssl.issuer.GN,zeek_ssl.issuer.initials,zeek_ssl.issuer.L,zeek_ssl.issuer.O,zeek_ssl.issuer.OU,zeek_ssl.issuer.pseudonym,zeek_ssl.issuer.serialNumber,zeek_ssl.issuer.SN,zeek_ssl.issuer.ST,zeek_ssl.issuer.title,zeek_ssl.issuer_full,zeek_ssl.ja3,zeek_ssl.ja3_desc,zeek_ssl.ja3s,zeek_ssl.ja3s_desc,zeek_ssl.last_alert,zeek_ssl.next_protocol,zeek_ssl.resumed,zeek_ssl.server_name,zeek_ssl.ssl_version,zeek_ssl.subject.C,zeek_ssl.subject.CN,zeek_ssl.subject.emailAddress,zeek_ssl.subject.GN,zeek_ssl.subject.initials,zeek_ssl.subject.L,zeek_ssl.subject.O,zeek_ssl.subject.OU,zeek_ssl.subject.pseudonym,zeek_ssl.subject.serialNumber,zeek_ssl.subject.SN,zeek_ssl.subject.ST,zeek_ssl.subject.title,zeek_ssl.subject_full,zeek_ssl.validation_status,zeek_syslog.facility,zeek_syslog.message,zeek_syslog.severity,zeek_tds.command,zeek_tds_rpc.parameters,zeek_tds_rpc.procedure_name,zeek_tds_sql_batch.header_type,zeek_tds_sql_batch.query,zeek_tunnel.action,zeek_tunnel.tunnel_type,zeek_weird.addl,zeek_weird.name,zeek_weird.notice,zeek_weird.peer,zeek_x509.basic_constraints_ca,zeek_x509.basic_constraints_path_len,zeek_x509.certificate_curve,zeek_x509.certificate_exponent,zeek_x509.certificate_issuer.C,zeek_x509.certificate_issuer.CN,zeek_x509.certificate_issuer.emailAddress,zeek_x509.certificate_issuer.GN,zeek_x509.certificate_issuer.initials,zeek_x509.certificate_issuer.L,zeek_x509.certificate_issuer.O,zeek_x509.certificate_issuer.OU,zeek_x509.certificate_issuer.pseudonym,zeek_x509.certificate_issuer.serialNumber,zeek_x509.certificate_issuer.SN,zeek_x509.certificate_issuer.ST,zeek_x509.certificate_issuer.title,zeek_x509.certificate_issuer_full,zeek_x509.certificate_key_alg,zeek_x509.certificate_key_length,zeek_x509.certificate_key_type,zeek_x509.certificate_not_valid_after,zeek_x509.certificate_not_valid_before,zeek_x509.certificate_serial,zeek_x509.certificate_sig_alg,zeek_x509.certificate_subject.C,zeek_x509.certificate_subject.CN,zeek_x509.certificate_subject.DC,zeek_x509.certificate_subject.emailAddress,zeek_x509.certificate_subject.GN,zeek_x509.certificate_subject.initials,zeek_x509.certificate_subject.L,zeek_x509.certificate_subject.O,zeek_x509.certificate_subject.OU,zeek_x509.certificate_subject.pseudonym,zeek_x509.certificate_subject.serialNumber,zeek_x509.certificate_subject.SN,zeek_x509.certificate_subject.ST,zeek_x509.certificate_subject.title,zeek_x509.certificate_subject_full,zeek_x509.certificate_version,zeek_x509.fuid,zeek_x509.san_dns,zeek_x509.san_email,zeek_x509.san_ip,zeek_x509.san_uri";
   this.api.addRightClick("malcolm_kibana_cat_ip",       {name:filterLabel, url:"idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
   this.api.addRightClick("malcolm_kibana_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
   this.api.addRightClick("malcolm_kibana_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
@@ -601,11 +696,11 @@ function ZeekLogs (api, section) {
   // add right-click for viewing original JSON document
   this.api.addRightClick("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});
 
-  this.api.addView("zeek",
+  this.api.addView("zeek_common",
     "if (session.zeek)\n" +
 
     // id information
-    "  div.sessionDetailMeta.bold zeek\n" +
+    "  div.sessionDetailMeta.bold Zeek Common Fields\n" +
     "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
     "    +arrayList(session.zeek, 'uid', 'Zeek Connection ID', 'zeek.uid')\n" +
     "    +arrayList(session.zeek, 'community_id', 'Zeek Connection Community ID', 'zeek.community_id')\n" +
@@ -646,602 +741,58 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek, 'filename', 'File Name', 'zeek.filename')\n" +
     "      +arrayList(session.zeek, 'filetype', 'File Magic', 'zeek.filetype')\n" +
 
-    // conn.log
-    "  if (session.zeek_conn)\n" +
-    "    dl.sessionDetailMeta(suffix=\"conn.log\")\n" +
-    "      +arrayList(session.zeek_conn, 'duration', 'conn duration', 'zeek_conn.duration')\n" +
-    "      +arrayList(session.zeek_conn, 'orig_bytes', 'conn orig_bytes', 'zeek_conn.orig_bytes')\n" +
-    "      +arrayList(session.zeek_conn, 'resp_bytes', 'conn resp_bytes', 'zeek_conn.resp_bytes')\n" +
-    "      +arrayList(session.zeek_conn, 'conn_state', 'conn conn_state', 'zeek_conn.conn_state')\n" +
-    "      +arrayList(session.zeek_conn, 'conn_state_description', 'conn conn_state_description', 'zeek_conn.conn_state_description')\n" +
-    "      +arrayList(session.zeek_conn, 'local_orig', 'conn local_orig', 'zeek_conn.local_orig')\n" +
-    "      +arrayList(session.zeek_conn, 'local_resp', 'conn local_resp', 'zeek_conn.local_resp')\n" +
-    "      +arrayList(session.zeek_conn, 'missed_bytes', 'conn missed_bytes', 'zeek_conn.missed_bytes')\n" +
-    "      +arrayList(session.zeek_conn, 'history', 'conn history', 'zeek_conn.history')\n" +
-    "      +arrayList(session.zeek_conn, 'orig_pkts', 'conn orig_pkts', 'zeek_conn.orig_pkts')\n" +
-    "      +arrayList(session.zeek_conn, 'orig_ip_bytes', 'conn orig_ip_bytes', 'zeek_conn.orig_ip_bytes')\n" +
-    "      +arrayList(session.zeek_conn, 'resp_pkts', 'conn resp_pkts', 'zeek_conn.resp_pkts')\n" +
-    "      +arrayList(session.zeek_conn, 'resp_ip_bytes', 'conn resp_ip_bytes', 'zeek_conn.resp_ip_bytes')\n" +
-    "      +arrayList(session.zeek_conn, 'tunnel_parents', 'conn tunnel_parents', 'zeek_conn.tunnel_parents')\n" +
-    "      +arrayList(session.zeek_conn, 'vlan', 'conn vlan', 'zeek_conn.vlan')\n" +
-    "      +arrayList(session.zeek_conn, 'inner_vlan', 'conn inner_vlan', 'zeek_conn.inner_vlan')\n" +
-
-    // dce_rpc.log
-    "  if (session.zeek_dce_rpc)\n" +
-    "    dl.sessionDetailMeta(suffix=\"dce_rpc.log\")\n" +
-    "      +arrayList(session.zeek_dce_rpc, 'rtt', 'dce_rpc rtt', 'zeek_dce_rpc.rtt')\n" +
-    "      +arrayList(session.zeek_dce_rpc, 'named_pipe', 'dce_rpc named_pipe', 'zeek_dce_rpc.named_pipe')\n" +
-    "      +arrayList(session.zeek_dce_rpc, 'endpoint', 'dce_rpc endpoint', 'zeek_dce_rpc.endpoint')\n" +
-    "      +arrayList(session.zeek_dce_rpc, 'operation', 'dce_rpc operation', 'zeek_dce_rpc.operation')\n" +
-
-    // dhcp.log
-    "  if (session.zeek_dhcp)\n" +
-    "    dl.sessionDetailMeta(suffix=\"dhcp.log\")\n" +
-    "      +arrayList(session.zeek_dhcp, 'mac', 'dhcp mac', 'zeek_dhcp.mac')\n" +
-    "      +arrayList(session.zeek_dhcp, 'assigned_ip', 'dhcp assigned_ip', 'zeek_dhcp.assigned_ip')\n" +
-    "      +arrayList(session.zeek_dhcp, 'lease_time', 'dhcp lease_time', 'zeek_dhcp.lease_time')\n" +
-    "      +arrayList(session.zeek_dhcp, 'trans_id', 'dhcp trans_id', 'zeek_dhcp.trans_id')\n" +
-
-    // dnp3.log
-    "  if (session.zeek_dnp3)\n" +
-    "    dl.sessionDetailMeta(suffix=\"dnp3.log\")\n" +
-    "      +arrayList(session.zeek_dnp3, 'fc_request', 'dnp3 fc_request', 'zeek_dnp3.fc_request')\n" +
-    "      +arrayList(session.zeek_dnp3, 'fc_reply', 'dnp3 fc_reply', 'zeek_dnp3.fc_reply')\n" +
-    "      +arrayList(session.zeek_dnp3, 'iin', 'dnp3 iin', 'zeek_dnp3.iin')\n" +
-
-    // dns.log
-    "  if (session.zeek_dns)\n" +
-    "    dl.sessionDetailMeta(suffix=\"dns.log\")\n" +
-    "      +arrayList(session.zeek_dns, 'trans_id', 'dns trans_id', 'zeek_dns.trans_id')\n" +
-    "      +arrayList(session.zeek_dns, 'rtt', 'dns rtt', 'zeek_dns.rtt')\n" +
-    "      +arrayList(session.zeek_dns, 'query', 'dns query', 'zeek_dns.query')\n" +
-    "      +arrayList(session.zeek_dns, 'qclass', 'dns qclass', 'zeek_dns.qclass')\n" +
-    "      +arrayList(session.zeek_dns, 'qclass_name', 'dns qclass_name', 'zeek_dns.qclass_name')\n" +
-    "      +arrayList(session.zeek_dns, 'qtype', 'dns qtype', 'zeek_dns.qtype')\n" +
-    "      +arrayList(session.zeek_dns, 'qtype_name', 'dns qtype_name', 'zeek_dns.qtype_name')\n" +
-    "      +arrayList(session.zeek_dns, 'rcode', 'dns rcode', 'zeek_dns.rcode')\n" +
-    "      +arrayList(session.zeek_dns, 'rcode_name', 'dns rcode_name', 'zeek_dns.rcode_name')\n" +
-    "      +arrayList(session.zeek_dns, 'AA', 'dns AA', 'zeek_dns.AA')\n" +
-    "      +arrayList(session.zeek_dns, 'TC', 'dns TC', 'zeek_dns.TC')\n" +
-    "      +arrayList(session.zeek_dns, 'RD', 'dns RD', 'zeek_dns.RD')\n" +
-    "      +arrayList(session.zeek_dns, 'RA', 'dns RA', 'zeek_dns.RA')\n" +
-    "      +arrayList(session.zeek_dns, 'Z', 'dns Z', 'zeek_dns.Z')\n" +
-    "      +arrayList(session.zeek_dns, 'answers', 'dns answers', 'zeek_dns.answers')\n" +
-    "      +arrayList(session.zeek_dns, 'TTLs', 'dns TTLs', 'zeek_dns.TTLs')\n" +
-    "      +arrayList(session.zeek_dns, 'rejected', 'dns rejected', 'zeek_dns.rejected')\n" +
-
-    // dpd.log
-    "  if (session.zeek_dpd)\n" +
-    "    dl.sessionDetailMeta(suffix=\"dpd.log\")\n" +
-    "      +arrayList(session.zeek_dpd, 'service', 'dpd service', 'zeek_dpd.service')\n" +
-    "      +arrayList(session.zeek_dpd, 'failure_reason', 'dpd failure_reason', 'zeek_dpd.failure_reason')\n" +
-
-    // files.log
-    "  if (session.zeek_files)\n" +
-    "    dl.sessionDetailMeta(suffix=\"files.log\")\n" +
-    "      +arrayList(session.zeek_files, 'fuid', 'files fuid', 'zeek_files.fuid')\n" +
-    "      +arrayList(session.zeek_files, 'tx_hosts', 'files tx_hosts', 'zeek_files.tx_hosts')\n" +
-    "      +arrayList(session.zeek_files, 'rx_hosts', 'files rx_hosts', 'zeek_files.rx_hosts')\n" +
-    "      +arrayList(session.zeek_files, 'conn_uids', 'files conn_uids', 'zeek_files.conn_uids')\n" +
-    "      +arrayList(session.zeek_files, 'source', 'files source', 'zeek_files.source')\n" +
-    "      +arrayList(session.zeek_files, 'depth', 'files depth', 'zeek_files.depth')\n" +
-    "      +arrayList(session.zeek_files, 'analyzers', 'files analyzers', 'zeek_files.analyzers')\n" +
-    "      +arrayList(session.zeek_files, 'mime_type', 'files mime_type', 'zeek_files.mime_type')\n" +
-    "      +arrayList(session.zeek_files, 'filename', 'files filename', 'zeek_files.filename')\n" +
-    "      +arrayList(session.zeek_files, 'duration', 'files duration', 'zeek_files.duration')\n" +
-    "      +arrayList(session.zeek_files, 'local_orig', 'files local_orig', 'zeek_files.local_orig')\n" +
-    "      +arrayList(session.zeek_files, 'is_orig', 'files is_orig', 'zeek_files.is_orig')\n" +
-    "      +arrayList(session.zeek_files, 'seen_bytes', 'files seen_bytes', 'zeek_files.seen_bytes')\n" +
-    "      +arrayList(session.zeek_files, 'total_bytes', 'files total_bytes', 'zeek_files.total_bytes')\n" +
-    "      +arrayList(session.zeek_files, 'missing_bytes', 'files missing_bytes', 'zeek_files.missing_bytes')\n" +
-    "      +arrayList(session.zeek_files, 'overflow_bytes', 'files overflow_bytes', 'zeek_files.overflow_bytes')\n" +
-    "      +arrayList(session.zeek_files, 'timedout', 'files timedout', 'zeek_files.timedout')\n" +
-    "      +arrayList(session.zeek_files, 'parent_fuid', 'files parent_fuid', 'zeek_files.parent_fuid')\n" +
-    "      +arrayList(session.zeek_files, 'md5', 'files md5', 'zeek_files.md5')\n" +
-    "      +arrayList(session.zeek_files, 'sha1', 'files sha1', 'zeek_files.sha1')\n" +
-    "      +arrayList(session.zeek_files, 'sha256', 'files sha256', 'zeek_files.sha256')\n" +
-    "      +arrayList(session.zeek_files, 'extracted', 'files extracted', 'zeek_files.extracted')\n" +
-    "      +arrayList(session.zeek_files, 'extracted_cutoff', 'files extracted_cutoff', 'zeek_files.extracted_cutoff')\n" +
-    "      +arrayList(session.zeek_files, 'extracted_size', 'files extracted_size', 'zeek_files.extracted_size')\n" +
-
-    // ftp.log
-    "  if (session.zeek_ftp)\n" +
-    "    dl.sessionDetailMeta(suffix=\"ftp.log\")\n" +
-    "      +arrayList(session.zeek_ftp, 'password', 'ftp password', 'zeek_ftp.password')\n" +
-    "      +arrayList(session.zeek_ftp, 'command', 'ftp command', 'zeek_ftp.command')\n" +
-    "      +arrayList(session.zeek_ftp, 'arg', 'ftp arg', 'zeek_ftp.arg')\n" +
-    "      +arrayList(session.zeek_ftp, 'mime_type', 'ftp mime_type', 'zeek_ftp.mime_type')\n" +
-    "      +arrayList(session.zeek_ftp, 'file_size', 'ftp file_size', 'zeek_ftp.file_size')\n" +
-    "      +arrayList(session.zeek_ftp, 'reply_code', 'ftp reply_code', 'zeek_ftp.reply_code')\n" +
-    "      +arrayList(session.zeek_ftp, 'reply_msg', 'ftp reply_msg', 'zeek_ftp.reply_msg')\n" +
-    "      +arrayList(session.zeek_ftp, 'data_channel_passive', 'ftp data_channel_passive', 'zeek_ftp.data_channel_passive')\n" +
-    "      +arrayList(session.zeek_ftp, 'data_channel_orig_h', 'ftp data_channel_orig_h', 'zeek_ftp.data_channel_orig_h')\n" +
-    "      +arrayList(session.zeek_ftp, 'data_channel_resp_h', 'ftp data_channel_resp_h', 'zeek_ftp.data_channel_resp_h')\n" +
-    "      +arrayList(session.zeek_ftp, 'data_channel_resp_p', 'ftp data_channel_resp_p', 'zeek_ftp.data_channel_resp_p')\n" +
-    "      +arrayList(session.zeek_ftp, 'fuid', 'ftp fuid', 'zeek_ftp.fuid')\n" +
-
-    // gquic.log
-    "  if (session.zeek_gquic)\n" +
-    "    dl.sessionDetailMeta(suffix=\"gquic.log\")\n" +
-    "      +arrayList(session.zeek_gquic, 'version', 'gquic version', 'zeek_gquic.version')\n" +
-    "      +arrayList(session.zeek_gquic, 'server_name', 'gquic server_name', 'zeek_gquic.server_name')\n" +
-    "      +arrayList(session.zeek_gquic, 'user_agent', 'gquic user_agent', 'zeek_gquic.user_agent')\n" +
-    "      +arrayList(session.zeek_gquic, 'tag_count', 'gquic tag_count', 'zeek_gquic.tag_count')\n" +
-    "      +arrayList(session.zeek_gquic, 'cyu', 'gquic cyu', 'zeek_gquic.cyu')\n" +
-    "      +arrayList(session.zeek_gquic, 'cyutags', 'gquic cyutags', 'zeek_gquic.cyutags')\n" +
-
-    // http.log
-    "  if (session.zeek_http)\n" +
-    "    dl.sessionDetailMeta(suffix=\"http.log\")\n" +
-    "      +arrayList(session.zeek_http, 'trans_depth', 'http trans_depth', 'zeek_http.trans_depth')\n" +
-    "      +arrayList(session.zeek_http, 'method', 'http method', 'zeek_http.method')\n" +
-    "      +arrayList(session.zeek_http, 'host', 'http host', 'zeek_http.host')\n" +
-    "      +arrayList(session.zeek_http, 'uri', 'http uri', 'zeek_http.uri')\n" +
-    "      +arrayList(session.zeek_http, 'origin', 'http origin', 'zeek_http.origin')\n" +
-    "      +arrayList(session.zeek_http, 'referrer', 'http referrer', 'zeek_http.referrer')\n" +
-    "      +arrayList(session.zeek_http, 'version', 'http version', 'zeek_http.version')\n" +
-    "      +arrayList(session.zeek_http, 'user_agent', 'http user_agent', 'zeek_http.user_agent')\n" +
-    "      +arrayList(session.zeek_http, 'request_body_len', 'http request_body_len', 'zeek_http.request_body_len')\n" +
-    "      +arrayList(session.zeek_http, 'response_body_len', 'http response_body_len', 'zeek_http.response_body_len')\n" +
-    "      +arrayList(session.zeek_http, 'status_code', 'http status_code', 'zeek_http.status_code')\n" +
-    "      +arrayList(session.zeek_http, 'status_msg', 'http status_msg', 'zeek_http.status_msg')\n" +
-    "      +arrayList(session.zeek_http, 'info_code', 'http info_code', 'zeek_http.info_code')\n" +
-    "      +arrayList(session.zeek_http, 'info_msg', 'http info_msg', 'zeek_http.info_msg')\n" +
-    "      +arrayList(session.zeek_http, 'tags', 'http tags', 'zeek_http.tags')\n" +
-    "      +arrayList(session.zeek_http, 'user', 'http user', 'zeek_http.user')\n" +
-    "      +arrayList(session.zeek_http, 'password', 'http password', 'zeek_http.password')\n" +
-    "      +arrayList(session.zeek_http, 'proxied', 'http proxied', 'zeek_http.proxied')\n" +
-    "      +arrayList(session.zeek_http, 'orig_fuids', 'http orig_fuids', 'zeek_http.orig_fuids')\n" +
-    "      +arrayList(session.zeek_http, 'orig_filenames', 'http orig_filenames', 'zeek_http.orig_filenames')\n" +
-    "      +arrayList(session.zeek_http, 'orig_mime_types', 'http orig_mime_types', 'zeek_http.orig_mime_types')\n" +
-    "      +arrayList(session.zeek_http, 'resp_fuids', 'http resp_fuids', 'zeek_http.resp_fuids')\n" +
-    "      +arrayList(session.zeek_http, 'resp_filenames', 'http resp_filenames', 'zeek_http.resp_filenames')\n" +
-    "      +arrayList(session.zeek_http, 'resp_mime_types', 'http resp_mime_types', 'zeek_http.resp_mime_types')\n" +
-
-    // intel.log
-    "  if (session.zeek_intel)\n" +
-    "    dl.sessionDetailMeta(suffix=\"intel.log\")\n" +
-    "      +arrayList(session.zeek_intel, 'indicator', 'intel indicator', 'zeek_intel.indicator')\n" +
-    "      +arrayList(session.zeek_intel, 'indicator_type', 'intel indicator_type', 'zeek_intel.indicator_type')\n" +
-    "      +arrayList(session.zeek_intel, 'seen_where', 'intel seen_where', 'zeek_intel.seen_where')\n" +
-    "      +arrayList(session.zeek_intel, 'seen_node', 'intel seen_node', 'zeek_intel.seen_node')\n" +
-    "      +arrayList(session.zeek_intel, 'matched', 'intel matched', 'zeek_intel.matched')\n" +
-    "      +arrayList(session.zeek_intel, 'sources', 'intel sources', 'zeek_intel.sources')\n" +
-    "      +arrayList(session.zeek_intel, 'fuid', 'intel fuid', 'zeek_intel.fuid')\n" +
-    "      +arrayList(session.zeek_intel, 'mimetype', 'intel mimetype', 'zeek_intel.mimetype')\n" +
-    "      +arrayList(session.zeek_intel, 'file_description', 'intel file_description', 'zeek_intel.file_description')\n" +
-
-    // irc.log
-    "  if (session.zeek_irc)\n" +
-    "    dl.sessionDetailMeta(suffix=\"irc.log\")\n" +
-    "      +arrayList(session.zeek_irc, 'nick', 'irc nick', 'zeek_irc.nick')\n" +
-    "      +arrayList(session.zeek_irc, 'command', 'irc command', 'zeek_irc.command')\n" +
-    "      +arrayList(session.zeek_irc, 'value', 'irc value', 'zeek_irc.value')\n" +
-    "      +arrayList(session.zeek_irc, 'addl', 'irc addl', 'zeek_irc.addl')\n" +
-    "      +arrayList(session.zeek_irc, 'dcc_file_name', 'irc dcc_file_name', 'zeek_irc.dcc_file_name')\n" +
-    "      +arrayList(session.zeek_irc, 'dcc_file_size', 'irc dcc_file_size', 'zeek_irc.dcc_file_size')\n" +
-    "      +arrayList(session.zeek_irc, 'dcc_mime_type', 'irc dcc_mime_type', 'zeek_irc.dcc_mime_type')\n" +
-    "      +arrayList(session.zeek_irc, 'fuid', 'irc fuid', 'zeek_irc.fuid')\n" +
-
-    // kerberos.log
-    "  if (session.zeek_kerberos)\n" +
-    "    dl.sessionDetailMeta(suffix=\"kerberos.log\")\n" +
-    "      +arrayList(session.zeek_kerberos, 'cname', 'kerberos cname', 'zeek_kerberos.cname')\n" +
-    "      +arrayList(session.zeek_kerberos, 'sname', 'kerberos sname', 'zeek_kerberos.sname')\n" +
-    "      +arrayList(session.zeek_kerberos, 'success', 'kerberos success', 'zeek_kerberos.success')\n" +
-    "      +arrayList(session.zeek_kerberos, 'error_msg', 'kerberos error_msg', 'zeek_kerberos.error_msg')\n" +
-    "      +arrayList(session.zeek_kerberos, 'from', 'kerberos from', 'zeek_kerberos.from')\n" +
-    "      +arrayList(session.zeek_kerberos, 'till', 'kerberos till', 'zeek_kerberos.till')\n" +
-    "      +arrayList(session.zeek_kerberos, 'cipher', 'kerberos cipher', 'zeek_kerberos.cipher')\n" +
-    "      +arrayList(session.zeek_kerberos, 'forwardable', 'kerberos forwardable', 'zeek_kerberos.forwardable')\n" +
-    "      +arrayList(session.zeek_kerberos, 'renewable', 'kerberos renewable', 'zeek_kerberos.renewable')\n" +
-    "      +arrayList(session.zeek_kerberos, 'client_cert_subject', 'kerberos client_cert_subject', 'zeek_kerberos.client_cert_subject')\n" +
-    "      +arrayList(session.zeek_kerberos, 'client_cert_fuid', 'kerberos client_cert_fuid', 'zeek_kerberos.client_cert_fuid')\n" +
-    "      +arrayList(session.zeek_kerberos, 'server_cert_subject', 'kerberos server_cert_subject', 'zeek_kerberos.server_cert_subject')\n" +
-    "      +arrayList(session.zeek_kerberos, 'server_cert_fuid', 'kerberos server_cert_fuid', 'zeek_kerberos.server_cert_fuid')\n" +
-
-    // modbus.log
-    "  if (session.zeek_modbus)\n" +
-    "    dl.sessionDetailMeta(suffix=\"modbus.log\")\n" +
-    "      +arrayList(session.zeek_modbus, 'func', 'modbus func', 'zeek_modbus.func')\n" +
-    "      +arrayList(session.zeek_modbus, 'exception', 'modbus exception', 'zeek_modbus.exception')\n" +
-
-    // mysql.log
-    "  if (session.zeek_mysql)\n" +
-    "    dl.sessionDetailMeta(suffix=\"mysql.log\")\n" +
-    "      +arrayList(session.zeek_mysql, 'cmd', 'mysql cmd', 'zeek_mysql.cmd')\n" +
-    "      +arrayList(session.zeek_mysql, 'arg', 'mysql arg', 'zeek_mysql.arg')\n" +
-    "      +arrayList(session.zeek_mysql, 'success', 'mysql success', 'zeek_mysql.success')\n" +
-    "      +arrayList(session.zeek_mysql, 'rows', 'mysql rows', 'zeek_mysql.rows')\n" +
-    "      +arrayList(session.zeek_mysql, 'response', 'mysql response', 'zeek_mysql.response')\n" +
-
-    // notice.log
-    "  if (session.zeek_notice)\n" +
-    "    dl.sessionDetailMeta(suffix=\"notice.log\")\n" +
-    "      +arrayList(session.zeek_notice, 'fuid', 'notice fuid', 'zeek_notice.fuid')\n" +
-    "      +arrayList(session.zeek_notice, 'file_mime_type', 'notice file_mime_type', 'zeek_notice.file_mime_type')\n" +
-    "      +arrayList(session.zeek_notice, 'file_desc', 'notice file_desc', 'zeek_notice.file_desc')\n" +
-    "      +arrayList(session.zeek_notice, 'note', 'notice note', 'zeek_notice.note')\n" +
-    "      +arrayList(session.zeek_notice, 'msg', 'notice msg', 'zeek_notice.msg')\n" +
-    "      +arrayList(session.zeek_notice, 'sub', 'notice sub', 'zeek_notice.sub')\n" +
-    "      +arrayList(session.zeek_notice, 'src', 'notice src', 'zeek_notice.src')\n" +
-    "      +arrayList(session.zeek_notice, 'dst', 'notice dst', 'zeek_notice.dst')\n" +
-    "      +arrayList(session.zeek_notice, 'p', 'notice p', 'zeek_notice.p')\n" +
-    "      +arrayList(session.zeek_notice, 'n', 'notice n', 'zeek_notice.n')\n" +
-    "      +arrayList(session.zeek_notice, 'peer_descr', 'notice peer_descr', 'zeek_notice.peer_descr')\n" +
-    "      +arrayList(session.zeek_notice, 'actions', 'notice actions', 'zeek_notice.actions')\n" +
-    "      +arrayList(session.zeek_notice, 'suppress_for', 'notice suppress_for', 'zeek_notice.suppress_for')\n" +
-    "      +arrayList(session.zeek_notice, 'dropped', 'notice dropped', 'zeek_notice.dropped')\n" +
-    "      +arrayList(session.zeek_notice, 'remote_location_country_code', 'notice remote_location_country_code', 'zeek_notice.remote_location_country_code')\n" +
-    "      +arrayList(session.zeek_notice, 'remote_location_region', 'notice remote_location_region', 'zeek_notice.remote_location_region')\n" +
-    "      +arrayList(session.zeek_notice, 'remote_location_cityremote_location_latitude', 'notice remote_location_cityremote_location_latitude', 'zeek_notice.remote_location_cityremote_location_latitude')\n" +
-    "      +arrayList(session.zeek_notice, 'remote_location_longitude', 'notice remote_location_longitude', 'zeek_notice.remote_location_longitude')\n" +
-
-    // ntlm.log
-    "  if (session.zeek_ntlm)\n" +
-    "    dl.sessionDetailMeta(suffix=\"ntlm.log\")\n" +
-    "      +arrayList(session.zeek_ntlm, 'host', 'ntlm host', 'zeek_ntlm.host')\n" +
-    "      +arrayList(session.zeek_ntlm, 'domain', 'ntlm domain', 'zeek_ntlm.domain')\n" +
-    "      +arrayList(session.zeek_ntlm, 'success', 'ntlm success', 'zeek_ntlm.success')\n" +
-    "      +arrayList(session.zeek_ntlm, 'status', 'ntlm status', 'zeek_ntlm.status')\n" +
-
-    // pe.log
-    "  if (session.zeek_pe)\n" +
-    "    dl.sessionDetailMeta(suffix=\"pe.log\")\n" +
-    "      +arrayList(session.zeek_pe, 'fuid', 'pe fuid', 'zeek_pe.fuid')\n" +
-    "      +arrayList(session.zeek_pe, 'machine', 'pe machine', 'zeek_pe.machine')\n" +
-    "      +arrayList(session.zeek_pe, 'compile_ts', 'pe compile_ts', 'zeek_pe.compile_ts')\n" +
-    "      +arrayList(session.zeek_pe, 'os', 'pe os', 'zeek_pe.os')\n" +
-    "      +arrayList(session.zeek_pe, 'subsystem', 'pe subsystem', 'zeek_pe.subsystem')\n" +
-    "      +arrayList(session.zeek_pe, 'is_exe', 'pe is_exe', 'zeek_pe.is_exe')\n" +
-    "      +arrayList(session.zeek_pe, 'is_64bit', 'pe is_64bit', 'zeek_pe.is_64bit')\n" +
-    "      +arrayList(session.zeek_pe, 'uses_aslr', 'pe uses_aslr', 'zeek_pe.uses_aslr')\n" +
-    "      +arrayList(session.zeek_pe, 'uses_dep', 'pe uses_dep', 'zeek_pe.uses_dep')\n" +
-    "      +arrayList(session.zeek_pe, 'uses_code_integrity', 'pe uses_code_integrity', 'zeek_pe.uses_code_integrity')\n" +
-    "      +arrayList(session.zeek_pe, 'uses_seh', 'pe uses_seh', 'zeek_pe.uses_seh')\n" +
-    "      +arrayList(session.zeek_pe, 'has_import_table', 'pe has_import_table', 'zeek_pe.has_import_table')\n" +
-    "      +arrayList(session.zeek_pe, 'has_export_table', 'pe has_export_table', 'zeek_pe.has_export_table')\n" +
-    "      +arrayList(session.zeek_pe, 'has_cert_table', 'pe has_cert_table', 'zeek_pe.has_cert_table')\n" +
-    "      +arrayList(session.zeek_pe, 'has_debug_data', 'pe has_debug_data', 'zeek_pe.has_debug_data')\n" +
-    "      +arrayList(session.zeek_pe, 'section_names', 'pe section_names', 'zeek_pe.section_names')\n" +
-
-    // radius.log
-    "  if (session.zeek_radius)\n" +
-    "    dl.sessionDetailMeta(suffix=\"radius.log\")\n" +
-    "      +arrayList(session.zeek_radius, 'mac', 'radius mac', 'zeek_radius.mac')\n" +
-    "      +arrayList(session.zeek_radius, 'framed_addr', 'radius framed_addr', 'zeek_radius.framed_addr')\n" +
-    "      +arrayList(session.zeek_radius, 'remote_ip', 'radius remote_ip', 'zeek_radius.remote_ip')\n" +
-    "      +arrayList(session.zeek_radius, 'connect_info', 'radius connect_info', 'zeek_radius.connect_info')\n" +
-    "      +arrayList(session.zeek_radius, 'reply_msg', 'radius reply_msg', 'zeek_radius.reply_msg')\n" +
-    "      +arrayList(session.zeek_radius, 'result', 'radius result', 'zeek_radius.result')\n" +
-    "      +arrayList(session.zeek_radius, 'ttl', 'radius ttl', 'zeek_radius.ttl')\n" +
-
-    // rdp.log
-    "  if (session.zeek_rdp)\n" +
-    "    dl.sessionDetailMeta(suffix=\"rdp.log\")\n" +
-    "      +arrayList(session.zeek_rdp, 'cookie', 'rdp cookie', 'zeek_rdp.cookie')\n" +
-    "      +arrayList(session.zeek_rdp, 'result', 'rdp result', 'zeek_rdp.result')\n" +
-    "      +arrayList(session.zeek_rdp, 'security_protocol', 'rdp security_protocol', 'zeek_rdp.security_protocol')\n" +
-    "      +arrayList(session.zeek_rdp, 'client_channels', 'rdp client_channels', 'zeek_rdp.client_channels')\n" +
-    "      +arrayList(session.zeek_rdp, 'keyboard_layout', 'rdp keyboard_layout', 'zeek_rdp.keyboard_layout')\n" +
-    "      +arrayList(session.zeek_rdp, 'client_build', 'rdp client_build', 'zeek_rdp.client_build')\n" +
-    "      +arrayList(session.zeek_rdp, 'client_name', 'rdp client_build', 'zeek_rdp.client_name')\n" +
-    "      +arrayList(session.zeek_rdp, 'client_dig_product_id', 'rdp client_dig_product_id', 'zeek_rdp.client_dig_product_id')\n" +
-    "      +arrayList(session.zeek_rdp, 'desktop_width', 'rdp desktop_width', 'zeek_rdp.desktop_width')\n" +
-    "      +arrayList(session.zeek_rdp, 'desktop_height', 'rdp desktop_height', 'zeek_rdp.desktop_height')\n" +
-    "      +arrayList(session.zeek_rdp, 'requested_color_depth', 'rdp requested_color_depth', 'zeek_rdp.requested_color_depth')\n" +
-    "      +arrayList(session.zeek_rdp, 'cert_type', 'rdp cert_type', 'zeek_rdp.cert_type')\n" +
-    "      +arrayList(session.zeek_rdp, 'cert_count', 'rdp cert_count', 'zeek_rdp.cert_count')\n" +
-    "      +arrayList(session.zeek_rdp, 'cert_permanent', 'rdp cert_permanent', 'zeek_rdp.cert_permanent')\n" +
-    "      +arrayList(session.zeek_rdp, 'encryption_level', 'rdp encryption_level', 'zeek_rdp.encryption_level')\n" +
-    "      +arrayList(session.zeek_rdp, 'encryption_method', 'rdp encryption_method', 'zeek_rdp.encryption_method')\n" +
-
-    // rfb.log
-    "  if (session.zeek_rfb)\n" +
-    "    dl.sessionDetailMeta(suffix=\"rfb.log\")\n" +
-    "      +arrayList(session.zeek_rfb, 'client_major_version', 'rfb client_major_version', 'zeek_rfb.client_major_version')\n" +
-    "      +arrayList(session.zeek_rfb, 'client_minor_version', 'rfb client_minor_version', 'zeek_rfb.client_minor_version')\n" +
-    "      +arrayList(session.zeek_rfb, 'server_major_version', 'rfb server_major_version', 'zeek_rfb.server_major_version')\n" +
-    "      +arrayList(session.zeek_rfb, 'server_minor_version', 'rfb server_minor_version', 'zeek_rfb.server_minor_version')\n" +
-    "      +arrayList(session.zeek_rfb, 'authentication_method', 'rfb authentication_method', 'zeek_rfb.authentication_method')\n" +
-    "      +arrayList(session.zeek_rfb, 'auth', 'rfb auth', 'zeek_rfb.auth')\n" +
-    "      +arrayList(session.zeek_rfb, 'share_flag', 'rfb share_flag', 'zeek_rfb.share_flag')\n" +
-    "      +arrayList(session.zeek_rfb, 'desktop_name', 'rfb desktop_name', 'zeek_rfb.desktop_name')\n" +
-    "      +arrayList(session.zeek_rfb, 'width', 'rfb width', 'zeek_rfb.width')\n" +
-    "      +arrayList(session.zeek_rfb, 'height', 'rfb height', 'zeek_rfb.height')\n" +
-
-    // signatures.log
-    "  if (session.zeek_signatures)\n" +
-    "    dl.sessionDetailMeta(suffix=\"signatures.log\")\n" +
-    "      +arrayList(session.zeek_signatures, 'note', 'signatures note', 'zeek_signatures.note')\n" +
-    "      +arrayList(session.zeek_signatures, 'signature_id', 'signatures signature_id', 'zeek_signatures.signature_id')\n" +
-    "      +arrayList(session.zeek_signatures, 'engine', 'signatures engine', 'zeek_signatures.engine')\n" +
-    "      +arrayList(session.zeek_signatures, 'event_message', 'signatures event_message', 'zeek_signatures.event_message')\n" +
-    "      +arrayList(session.zeek_signatures, 'sub_message', 'signatures sub_message', 'zeek_signatures.sub_message')\n" +
-    "      +arrayList(session.zeek_signatures, 'signature_count', 'signatures signature_count', 'zeek_signatures.signature_count')\n" +
-    "      +arrayList(session.zeek_signatures, 'host_count', 'signatures host_count', 'zeek_signatures.host_count')\n" +
-
-    // sip.log
-    "  if (session.zeek_sip)\n" +
-    "    dl.sessionDetailMeta(suffix=\"sip.log\")\n" +
-    "      +arrayList(session.zeek_sip, 'trans_depth', 'sip trans_depth', 'zeek_sip.trans_depth')\n" +
-    "      +arrayList(session.zeek_sip, 'method', 'sip method', 'zeek_sip.method')\n" +
-    "      +arrayList(session.zeek_sip, 'uri', 'sip uri', 'zeek_sip.uri')\n" +
-    "      +arrayList(session.zeek_sip, 'date', 'sip date', 'zeek_sip.date')\n" +
-    "      +arrayList(session.zeek_sip, 'request_from', 'sip request_from', 'zeek_sip.request_from')\n" +
-    "      +arrayList(session.zeek_sip, 'request_to', 'sip request_to', 'zeek_sip.request_to')\n" +
-    "      +arrayList(session.zeek_sip, 'response_from', 'sip response_from', 'zeek_sip.response_from')\n" +
-    "      +arrayList(session.zeek_sip, 'response_to', 'sip response_to', 'zeek_sip.response_to')\n" +
-    "      +arrayList(session.zeek_sip, 'reply_to', 'sip reply_to', 'zeek_sip.reply_to')\n" +
-    "      +arrayList(session.zeek_sip, 'call_id', 'sip call_id', 'zeek_sip.call_id')\n" +
-    "      +arrayList(session.zeek_sip, 'seq', 'sip seq', 'zeek_sip.seq')\n" +
-    "      +arrayList(session.zeek_sip, 'subject', 'sip subject', 'zeek_sip.subject')\n" +
-    "      +arrayList(session.zeek_sip, 'request_path', 'sip request_path', 'zeek_sip.request_path')\n" +
-    "      +arrayList(session.zeek_sip, 'response_path', 'sip response_path', 'zeek_sip.response_path')\n" +
-    "      +arrayList(session.zeek_sip, 'user_agent', 'sip user_agent', 'zeek_sip.user_agent')\n" +
-    "      +arrayList(session.zeek_sip, 'status_code', 'sip status_code', 'zeek_sip.status_code')\n" +
-    "      +arrayList(session.zeek_sip, 'status_msg', 'sip status_msg', 'zeek_sip.status_msg')\n" +
-    "      +arrayList(session.zeek_sip, 'warning', 'sip warning', 'zeek_sip.warning')\n" +
-    "      +arrayList(session.zeek_sip, 'request_body_len', 'sip request_body_len', 'zeek_sip.request_body_len')\n" +
-    "      +arrayList(session.zeek_sip, 'response_body_len', 'sip response_body_len', 'zeek_sip.response_body_len')\n" +
-    "      +arrayList(session.zeek_sip, 'content_type', 'sip content_type', 'zeek_sip.content_type')\n" +
-
-    // smb_files.log
-    "  if (session.zeek_smb_files)\n" +
-    "    dl.sessionDetailMeta(suffix=\"smb_files.log\")\n" +
-    "      +arrayList(session.zeek_smb_files, 'fuid', 'smb_files fuid', 'zeek_smb_files.fuid')\n" +
-    "      +arrayList(session.zeek_smb_files, 'action', 'smb_files action', 'zeek_smb_files.action')\n" +
-    "      +arrayList(session.zeek_smb_files, 'path', 'smb_files path', 'zeek_smb_files.path')\n" +
-    "      +arrayList(session.zeek_smb_files, 'name', 'smb_files name', 'zeek_smb_files.name')\n" +
-    "      +arrayList(session.zeek_smb_files, 'size', 'smb_files size', 'zeek_smb_files.size')\n" +
-    "      +arrayList(session.zeek_smb_files, 'prev_name', 'smb_files prev_name', 'zeek_smb_files.prev_name')\n" +
-    "      +arrayList(session.zeek_smb_files, 'times_modified', 'smb_files times_modified', 'zeek_smb_files.times_modified')\n" +
-    "      +arrayList(session.zeek_smb_files, 'times_accessed', 'smb_files times_accessed', 'zeek_smb_files.times_accessed')\n" +
-    "      +arrayList(session.zeek_smb_files, 'times_created', 'smb_files times_created', 'zeek_smb_files.times_created')\n" +
-    "      +arrayList(session.zeek_smb_files, 'times_changed', 'smb_files times_changed', 'zeek_smb_files.times_changed')\n" +
-
-    // smb_mapping.log
-    "  if (session.zeek_smb_mapping)\n" +
-    "    dl.sessionDetailMeta(suffix=\"smb_mapping.log\")\n" +
-    "      +arrayList(session.zeek_smb_mapping, 'path', 'smb_mapping path', 'zeek_smb_mapping.path')\n" +
-    "      +arrayList(session.zeek_smb_mapping, 'resource_type', 'smb_mapping resource_type', 'zeek_smb_mapping.resource_type')\n" +
-    "      +arrayList(session.zeek_smb_mapping, 'native_file_system', 'smb_mapping native_file_system', 'zeek_smb_mapping.native_file_system')\n" +
-    "      +arrayList(session.zeek_smb_mapping, 'share_type', 'smb_mapping share_type', 'zeek_smb_mapping.share_type')\n" +
-
-    // smtp.log
-    "  if (session.zeek_smtp)\n" +
-    "    dl.sessionDetailMeta(suffix=\"smtp.log\")\n" +
-    "      +arrayList(session.zeek_smtp, 'trans_depth', 'smtp trans_depth', 'zeek_smtp.trans_depth')\n" +
-    "      +arrayList(session.zeek_smtp, 'helo', 'smtp helo', 'zeek_smtp.helo')\n" +
-    "      +arrayList(session.zeek_smtp, 'mailfrom', 'smtp mailfrom', 'zeek_smtp.mailfrom')\n" +
-    "      +arrayList(session.zeek_smtp, 'rcptto', 'smtp rcptto', 'zeek_smtp.rcptto')\n" +
-    "      +arrayList(session.zeek_smtp, 'date', 'smtp date', 'zeek_smtp.date')\n" +
-    "      +arrayList(session.zeek_smtp, 'from', 'smtp from', 'zeek_smtp.from')\n" +
-    "      +arrayList(session.zeek_smtp, 'to', 'smtp to', 'zeek_smtp.to')\n" +
-    "      +arrayList(session.zeek_smtp, 'cc', 'smtp cc', 'zeek_smtp.cc')\n" +
-    "      +arrayList(session.zeek_smtp, 'reply_to', 'smtp reply_to', 'zeek_smtp.reply_to')\n" +
-    "      +arrayList(session.zeek_smtp, 'msg_id', 'smtp msg_id', 'zeek_smtp.msg_id')\n" +
-    "      +arrayList(session.zeek_smtp, 'in_reply_to', 'smtp in_reply_to', 'zeek_smtp.in_reply_to')\n" +
-    "      +arrayList(session.zeek_smtp, 'subject', 'smtp subject', 'zeek_smtp.subject')\n" +
-    "      +arrayList(session.zeek_smtp, 'x_originating_ip', 'smtp x_originating_ip', 'zeek_smtp.x_originating_ip')\n" +
-    "      +arrayList(session.zeek_smtp, 'first_received', 'smtp first_received', 'zeek_smtp.first_received')\n" +
-    "      +arrayList(session.zeek_smtp, 'second_received', 'smtp second_received', 'zeek_smtp.second_received')\n" +
-    "      +arrayList(session.zeek_smtp, 'last_reply', 'smtp last_reply', 'zeek_smtp.last_reply')\n" +
-    "      +arrayList(session.zeek_smtp, 'path', 'smtp path', 'zeek_smtp.path')\n" +
-    "      +arrayList(session.zeek_smtp, 'user_agent', 'smtp user_agent', 'zeek_smtp.user_agent')\n" +
-    "      +arrayList(session.zeek_smtp, 'tls', 'smtp tls', 'zeek_smtp.tls')\n" +
-    "      +arrayList(session.zeek_smtp, 'fuids', 'smtp fuids', 'zeek_smtp.fuids')\n" +
-    "      +arrayList(session.zeek_smtp, 'is_webmail', 'smtp is_webmail', 'zeek_smtp.is_webmail')\n" +
-
-    // snmp.log
-    "  if (session.zeek_snmp)\n" +
-    "    dl.sessionDetailMeta(suffix=\"snmp.log\")\n" +
-    "      +arrayList(session.zeek_snmp, 'duration', 'snmp duration', 'zeek_snmp.duration')\n" +
-    "      +arrayList(session.zeek_snmp, 'version', 'snmp version', 'zeek_snmp.version')\n" +
-    "      +arrayList(session.zeek_snmp, 'community', 'snmp community', 'zeek_snmp.community')\n" +
-    "      +arrayList(session.zeek_snmp, 'get_requests', 'snmp get_requests', 'zeek_snmp.get_requests')\n" +
-    "      +arrayList(session.zeek_snmp, 'get_bulk_requests', 'snmp get_bulk_requests', 'zeek_snmp.get_bulk_requests')\n" +
-    "      +arrayList(session.zeek_snmp, 'get_responses', 'snmp get_responses', 'zeek_snmp.get_responses')\n" +
-    "      +arrayList(session.zeek_snmp, 'set_requests', 'snmp set_requests', 'zeek_snmp.set_requests')\n" +
-    "      +arrayList(session.zeek_snmp, 'display_string', 'snmp display_string', 'zeek_snmp.display_string')\n" +
-    "      +arrayList(session.zeek_snmp, 'up_since', 'snmp up_since', 'zeek_snmp.up_since')\n" +
-
-    // socks.log
-    "  if (session.zeek_socks)\n" +
-    "    dl.sessionDetailMeta(suffix=\"socks.log\")\n" +
-    "      +arrayList(session.zeek_socks, 'version', 'socks version', 'zeek_socks.version')\n" +
-    "      +arrayList(session.zeek_socks, 'password', 'socks password', 'zeek_socks.password')\n" +
-    "      +arrayList(session.zeek_socks, 'server_status', 'socks server_status', 'zeek_socks.server_status')\n" +
-    "      +arrayList(session.zeek_socks, 'request_host', 'socks request_host', 'zeek_socks.request_host')\n" +
-    "      +arrayList(session.zeek_socks, 'request_name', 'socks request_name', 'zeek_socks.request_name')\n" +
-    "      +arrayList(session.zeek_socks, 'request_port', 'socks request_port', 'zeek_socks.request_port')\n" +
-    "      +arrayList(session.zeek_socks, 'bound_host', 'socks bound_host', 'zeek_socks.bound_host')\n" +
-    "      +arrayList(session.zeek_socks, 'bound_name', 'socks bound_name', 'zeek_socks.bound_name')\n" +
-    "      +arrayList(session.zeek_socks, 'bound_port', 'socks bound_port', 'zeek_socks.bound_port')\n" +
-
-    // software.log
-    "  if (session.zeek_software)\n" +
-    "    dl.sessionDetailMeta(suffix=\"software.log\")\n" +
-    "      +arrayList(session.zeek_software, 'software_type', 'software software_type', 'zeek_software.software_type')\n" +
-    "      +arrayList(session.zeek_software, 'name', 'software name', 'zeek_software.name')\n" +
-    "      +arrayList(session.zeek_software, 'version_major', 'software version_major', 'zeek_software.version_major')\n" +
-    "      +arrayList(session.zeek_software, 'version_minor', 'software version_minor', 'zeek_software.version_minor')\n" +
-    "      +arrayList(session.zeek_software, 'version_minor2', 'software version_minor2', 'zeek_software.version_minor2')\n" +
-    "      +arrayList(session.zeek_software, 'version_minor3', 'software version_minor3', 'zeek_software.version_minor3')\n" +
-    "      +arrayList(session.zeek_software, 'version_addl', 'software version_addl', 'zeek_software.version_addl')\n" +
-    "      +arrayList(session.zeek_software, 'unparsed_version', 'software unparsed_version', 'zeek_software.unparsed_version')\n" +
-
-    // ssh.log
-    "  if (session.zeek_ssh)\n" +
-    "    dl.sessionDetailMeta(suffix=\"ssh.log\")\n" +
-    "      +arrayList(session.zeek_ssh, 'version', 'ssh version', 'zeek_ssh.version')\n" +
-    "      +arrayList(session.zeek_ssh, 'auth_success', 'ssh auth_success', 'zeek_ssh.auth_success')\n" +
-    "      +arrayList(session.zeek_ssh, 'auth_attempts', 'ssh auth_attempts', 'zeek_ssh.auth_attempts')\n" +
-    "      +arrayList(session.zeek_ssh, 'direction', 'ssh direction', 'zeek_ssh.direction')\n" +
-    "      +arrayList(session.zeek_ssh, 'client', 'ssh client', 'zeek_ssh.client')\n" +
-    "      +arrayList(session.zeek_ssh, 'server', 'ssh server', 'zeek_ssh.server')\n" +
-    "      +arrayList(session.zeek_ssh, 'cipher_alg', 'ssh cipher_alg', 'zeek_ssh.cipher_alg')\n" +
-    "      +arrayList(session.zeek_ssh, 'mac_alg', 'ssh mac_alg', 'zeek_ssh.mac_alg')\n" +
-    "      +arrayList(session.zeek_ssh, 'compression_alg', 'ssh compression_alg', 'zeek_ssh.compression_alg')\n" +
-    "      +arrayList(session.zeek_ssh, 'kex_alg', 'ssh kex_alg', 'zeek_ssh.kex_alg')\n" +
-    "      +arrayList(session.zeek_ssh, 'host_key_alg', 'ssh host_key_alg', 'zeek_ssh.host_key_alg')\n" +
-    "      +arrayList(session.zeek_ssh, 'host_key', 'ssh host_key', 'zeek_ssh.host_key')\n" +
-    "      +arrayList(session.zeek_ssh, 'remote_location_country_code', 'ssh remote_location_country_code', 'zeek_ssh.remote_location_country_code')\n" +
-    "      +arrayList(session.zeek_ssh, 'remote_location_region', 'ssh remote_location_region', 'zeek_ssh.remote_location_region')\n" +
-    "      +arrayList(session.zeek_ssh, 'remote_location_city', 'ssh remote_location_city', 'zeek_ssh.remote_location_city')\n" +
-    "      +arrayList(session.zeek_ssh, 'remote_location_latitude', 'ssh remote_location_latitude', 'zeek_ssh.remote_location_latitude')\n" +
-    "      +arrayList(session.zeek_ssh, 'remote_location_longitude', 'ssh remote_location_longitude', 'zeek_ssh.remote_location_longitude')\n" +
-    "      +arrayList(session.zeek_ssh, 'hassh', 'HASSH Client Fingerprint', 'zeek_ssh.hassh')\n" +
-    "      +arrayList(session.zeek_ssh, 'hasshServer', 'HASSH Server Fingerprint', 'zeek_ssh.hasshServer')\n" +
-    "      +arrayList(session.zeek_ssh, 'hasshAlgorithms', 'HASSH Client Algorithms', 'zeek_ssh.hasshAlgorithms')\n" +
-    "      +arrayList(session.zeek_ssh, 'hasshServerAlgorithms', 'HASSH Server Algorithms', 'zeek_ssh.hasshServerAlgorithms')\n" +
-    "      +arrayList(session.zeek_ssh, 'cshka', 'HASSH Client Host Key Algorithms', 'zeek_ssh.cshka')\n" +
-    "      +arrayList(session.zeek_ssh, 'sshka', 'HASSH Server Host Key Algorithms', 'zeek_ssh.sshka')\n" +
-
-    // ssl.log
-    "  if (session.zeek_ssl)\n" +
-    "    dl.sessionDetailMeta(suffix=\"ssl.log\")\n" +
-    "      +arrayList(session.zeek_ssl, 'ssl_version', 'ssl ssl_version', 'zeek_ssl.ssl_version')\n" +
-    "      +arrayList(session.zeek_ssl, 'cipher', 'ssl cipher', 'zeek_ssl.cipher')\n" +
-    "      +arrayList(session.zeek_ssl, 'curve', 'ssl curve', 'zeek_ssl.curve')\n" +
-    "      +arrayList(session.zeek_ssl, 'server_name', 'ssl server_name', 'zeek_ssl.server_name')\n" +
-    "      +arrayList(session.zeek_ssl, 'resumed', 'ssl resumed', 'zeek_ssl.resumed')\n" +
-    "      +arrayList(session.zeek_ssl, 'last_alert', 'ssl last_alert', 'zeek_ssl.last_alert')\n" +
-    "      +arrayList(session.zeek_ssl, 'next_protocol', 'ssl next_protocol', 'zeek_ssl.next_protocol')\n" +
-    "      +arrayList(session.zeek_ssl, 'established', 'ssl established', 'zeek_ssl.established')\n" +
-    "      +arrayList(session.zeek_ssl, 'ja3', 'JA3 fingerprint', 'zeek_ssl.ja3')\n" +
-    "      +arrayList(session.zeek_ssl, 'ja3_desc', 'JA3 lookup', 'zeek_ssl.ja3_desc')\n" +
-    "      +arrayList(session.zeek_ssl, 'ja3s', 'JA3S fingerprint', 'zeek_ssl.ja3s')\n" +
-    "      +arrayList(session.zeek_ssl, 'ja3s_desc', 'JA3S lookup', 'zeek_ssl.ja3s_desc')\n" +
-    "      +arrayList(session.zeek_ssl, 'cert_chain_fuids', 'ssl cert_chain_fuids', 'zeek_ssl.cert_chain_fuids')\n" +
-    "      +arrayList(session.zeek_ssl, 'client_cert_chain_fuids', 'ssl client_cert_chain_fuids', 'zeek_ssl.client_cert_chain_fuids')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'CN', 'ssl subject common name', 'zeek_ssl.subject.CN')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'C', 'ssl subject country', 'zeek_ssl.subject.C')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'O', 'ssl subject organization', 'zeek_ssl.subject.O')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'OU', 'ssl subject organization unit', 'zeek_ssl.subject.OU')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'ST', 'ssl subject state', 'zeek_ssl.subject.ST')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'SN', 'ssl subject surname', 'zeek_ssl.subject.SN')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'L', 'ssl subject locality', 'zeek_ssl.subject.L')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'GN', 'ssl subject given name', 'zeek_ssl.subject.GN')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'pseudonym', 'ssl subject pseudonym', 'zeek_ssl.subject.pseudonym')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'serialNumber', 'ssl subject serial number', 'zeek_ssl.subject.serialNumber')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'title', 'ssl subject title', 'zeek_ssl.subject.title')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'initials', 'ssl subject initials', 'zeek_ssl.subject.initials')\n" +
-    "      +arrayList(session.zeek_ssl.subject, 'emailAddress', 'ssl subject email address', 'zeek_ssl.subject.emailAddress')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'CN', 'ssl client subject common name', 'zeek_ssl.client_subject.CN')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'C', 'ssl client subject country', 'zeek_ssl.client_subject.C')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'O', 'ssl client subject organization', 'zeek_ssl.client_subject.O')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'OU', 'ssl client subject organization unit', 'zeek_ssl.client_subject.OU')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'ST', 'ssl client subject state', 'zeek_ssl.client_subject.ST')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'SN', 'ssl client subject surname', 'zeek_ssl.client_subject.SN')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'L', 'ssl client subject locality', 'zeek_ssl.client_subject.L')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'GN', 'ssl client subject given name', 'zeek_ssl.client_subject.GN')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'pseudonym', 'ssl client subject pseudonym', 'zeek_ssl.client_subject.pseudonym')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'serialNumber', 'ssl client subject serial number', 'zeek_ssl.client_subject.serialNumber')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'title', 'ssl client subject title', 'zeek_ssl.client_subject.title')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'initials', 'ssl client subject initials', 'zeek_ssl.client_subject.initials')\n" +
-    "      +arrayList(session.zeek_ssl.client_subject, 'emailAddress', 'ssl client subject email address', 'zeek_ssl.client_subject.emailAddress')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'CN', 'ssl issuer common name', 'zeek_ssl.issuer.CN')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'C', 'ssl issuer country', 'zeek_ssl.issuer.C')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'O', 'ssl issuer organization', 'zeek_ssl.issuer.O')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'OU', 'ssl issuer organization unit', 'zeek_ssl.issuer.OU')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'ST', 'ssl issuer state', 'zeek_ssl.issuer.ST')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'SN', 'ssl issuer surname', 'zeek_ssl.issuer.SN')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'L', 'ssl issuer locality', 'zeek_ssl.issuer.L')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'DC', 'ssl issuer distinguished name', 'zeek_ssl.issuer.DC')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'GN', 'ssl issuer given name', 'zeek_ssl.issuer.GN')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'pseudonym', 'ssl issuer pseudonym', 'zeek_ssl.issuer.pseudonym')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'serialNumber', 'ssl issuer serial number', 'zeek_ssl.issuer.serialNumber')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'title', 'ssl issuer title', 'zeek_ssl.issuer.title')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'initials', 'ssl issuer initials', 'zeek_ssl.issuer.initials')\n" +
-    "      +arrayList(session.zeek_ssl.issuer, 'emailAddress', 'ssl issuer email address', 'zeek_ssl.issuer.emailAddress')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'CN', 'ssl client issuer common name', 'zeek_ssl.client_issuer.CN')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'C', 'ssl client issuer country', 'zeek_ssl.client_issuer.C')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'O', 'ssl client issuer organization', 'zeek_ssl.client_issuer.O')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'OU', 'ssl client issuer organization unit', 'zeek_ssl.client_issuer.OU')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'ST', 'ssl client issuer state', 'zeek_ssl.client_issuer.ST')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'SN', 'ssl client issuer surname', 'zeek_ssl.client_issuer.SN')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'L', 'ssl client issuer locality', 'zeek_ssl.client_issuer.L')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'DC', 'ssl client issuer distinguished name', 'zeek_ssl.client_issuer.DC')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'GN', 'ssl client issuer given name', 'zeek_ssl.client_issuer.GN')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'pseudonym', 'ssl client issuer pseudonym', 'zeek_ssl.client_issuer.pseudonym')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'serialNumber', 'ssl client issuer serial number', 'zeek_ssl.client_issuer.serialNumber')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'title', 'ssl client issuer title', 'zeek_ssl.client_issuer.title')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'initials', 'ssl client issuer initials', 'zeek_ssl.client_issuer.initials')\n" +
-    "      +arrayList(session.zeek_ssl.client_issuer, 'emailAddress', 'ssl client issuer email address', 'zeek_ssl.client_issuer.emailAddress')\n" +
-    "      +arrayList(session.zeek_ssl, 'validation_status', 'ssl validation_status', 'zeek_ssl.validation_status')\n" +
-
-    // syslog.log
-    "  if (session.zeek_syslog)\n" +
-    "    dl.sessionDetailMeta(suffix=\"syslog.log\")\n" +
-    "      +arrayList(session.zeek_syslog, 'facility', 'syslog facility', 'zeek_syslog.facility')\n" +
-    "      +arrayList(session.zeek_syslog, 'severity', 'syslog severity', 'zeek_syslog.severity')\n" +
-    "      +arrayList(session.zeek_syslog, 'message', 'syslog message', 'zeek_syslog.message')\n" +
-
-    // tunnel.log
-    "  if (session.zeek_tunnel)\n" +
-    "    dl.sessionDetailMeta(suffix=\"tunnel.log\")\n" +
-    "      +arrayList(session.zeek_tunnel, 'tunnel_type', 'tunnel tunnel_type', 'zeek_tunnel.tunnel_type')\n" +
-    "      +arrayList(session.zeek_tunnel, 'action', 'tunnel action', 'zeek_tunnel.action')\n" +
-
-    // weird.log
-    "  if (session.zeek_weird)\n" +
-    "    dl.sessionDetailMeta(suffix=\"weird.log\")\n" +
-    "      +arrayList(session.zeek_weird, 'name', 'weird name', 'zeek_weird.name')\n" +
-    "      +arrayList(session.zeek_weird, 'addl', 'weird addl', 'zeek_weird.addl')\n" +
-    "      +arrayList(session.zeek_weird, 'notice', 'weird notice', 'zeek_weird.notice')\n" +
-    "      +arrayList(session.zeek_weird, 'peer', 'weird peer', 'zeek_weird.peer')\n" +
-
-    // x509.log
-    "  if (session.zeek_x509)\n" +
-    "    dl.sessionDetailMeta(suffix=\"x509.log\")\n" +
-    "      +arrayList(session.zeek_x509, 'fuid', 'x509 fuid', 'zeek_x509.fuid')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_version', 'x509 certificate_version', 'zeek_x509.certificate_version')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_serial', 'x509 certificate_serial', 'zeek_x509.certificate_serial')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'CN', 'x509 certificate subject common name', 'zeek_x509.certificate_subject.CN')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'C', 'x509 certificate subject country', 'zeek_x509.certificate_subject.C')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'O', 'x509 certificate subject organization', 'zeek_x509.certificate_subject.O')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'OU', 'x509 certificate subject organization unit', 'zeek_x509.certificate_subject.OU')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'ST', 'x509 certificate subject state', 'zeek_x509.certificate_subject.ST')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'SN', 'x509 certificate subject surname', 'zeek_x509.certificate_subject.SN')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'L', 'x509 certificate subject locality', 'zeek_x509.certificate_subject.L')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'DC', 'x509 certificate subject distinguished name', 'zeek_x509.certificate_subject.DC')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'GN', 'x509 certificate subject given name', 'zeek_x509.certificate_subject.GN')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'pseudonym', 'x509 certificate subject pseudonym', 'zeek_x509.certificate_subject.pseudonym')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'serialNumber', 'x509 certificate subject serial number', 'zeek_x509.certificate_subject.serialNumber')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'title', 'x509 certificate subject title', 'zeek_x509.certificate_subject.title')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'initials', 'x509 certificate subject initials', 'zeek_x509.certificate_subject.initials')\n" +
-    "      +arrayList(session.zeek_x509.certificate_subject, 'emailAddress', 'x509 certificate subject email address', 'zeek_x509.certificate_subject.emailAddress')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'CN', 'x509 certificate issuer common name', 'zeek_x509.certificate_issuer.CN')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'C', 'x509 certificate issuer country', 'zeek_x509.certificate_issuer.C')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'O', 'x509 certificate issuer organization', 'zeek_x509.certificate_issuer.O')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'OU', 'x509 certificate issuer organization unit', 'zeek_x509.certificate_issuer.OU')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'ST', 'x509 certificate issuer state', 'zeek_x509.certificate_issuer.ST')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'SN', 'x509 certificate issuer surname', 'zeek_x509.certificate_issuer.SN')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'L', 'x509 certificate issuer locality', 'zeek_x509.certificate_issuer.L')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'GN', 'x509 certificate issuer given name', 'zeek_x509.certificate_issuer.GN')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'pseudonym', 'x509 certificate issuer pseudonym', 'zeek_x509.certificate_issuer.pseudonym')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'serialNumber', 'x509 certificate issuer serial number', 'zeek_x509.certificate_issuer.serialNumber')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'title', 'x509 certificate issuer title', 'zeek_x509.certificate_issuer.title')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'initials', 'x509 certificate issuer initials', 'zeek_x509.certificate_issuer.initials')\n" +
-    "      +arrayList(session.zeek_x509.certificate_issuer, 'emailAddress', 'x509 certificate issuer email address', 'zeek_x509.certificate_issuer.emailAddress')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_not_valid_before', 'x509 certificate_not_valid_before', 'zeek_x509.certificate_not_valid_before')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_not_valid_after', 'x509 certificate_not_valid_after', 'zeek_x509.certificate_not_valid_after')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_key_alg', 'x509 certificate_key_alg', 'zeek_x509.certificate_key_alg')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_sig_alg', 'x509 certificate_sig_alg', 'zeek_x509.certificate_sig_alg')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_key_type', 'x509 certificate_key_type', 'zeek_x509.certificate_key_type')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_key_length', 'x509 certificate_key_length', 'zeek_x509.certificate_key_length')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_exponent', 'x509 certificate_exponent', 'zeek_x509.certificate_exponent')\n" +
-    "      +arrayList(session.zeek_x509, 'certificate_curve', 'x509 certificate_curve', 'zeek_x509.certificate_curve')\n" +
-    "      +arrayList(session.zeek_x509, 'san_dns', 'x509 san_dns', 'zeek_x509.san_dns')\n" +
-    "      +arrayList(session.zeek_x509, 'san_uri', 'x509 san_uri', 'zeek_x509.san_uri')\n" +
-    "      +arrayList(session.zeek_x509, 'san_email', 'x509 san_email', 'zeek_x509.san_email')\n" +
-    "      +arrayList(session.zeek_x509, 'san_ip', 'x509 san_ip', 'zeek_x509.san_ip')\n" +
-    "      +arrayList(session.zeek_x509, 'basic_constraints_ca', 'x509 basic_constraints_ca', 'zeek_x509.basic_constraints_ca')\n" +
-    "      +arrayList(session.zeek_x509, 'basic_constraints_path_len', 'x509 basic_constraints_path_len', 'zeek_x509.basic_constraints_path_len')\n" +
-
     // ####################################################################
     "  br\n");
+
+  this.api.addView("zeek_bacnet", "require:zeek_bacnet;title:Zeek bacnet.log;fields:zeek_bacnet.bvlc_function,zeek_bacnet.bvlc_len,zeek_bacnet.apdu_type,zeek_bacnet.service_choice,zeek_bacnet.data")
+  this.api.addView("zeek_cip", "require:zeek_cip;title:Zeek cip.log;fields:zeek_cip.cip_service,zeek_cip.status,zeek_cip.cip_tags")
+  this.api.addView("zeek_conn", "require:zeek_conn;title:Zeek conn.log;fields:zeek_conn.duration,zeek_conn.orig_bytes,zeek_conn.resp_bytes,zeek_conn.conn_state,zeek_conn.conn_state_description,zeek_conn.local_orig,zeek_conn.local_resp,zeek_conn.missed_bytes,zeek_conn.history,zeek_conn.orig_pkts,zeek_conn.orig_ip_bytes,zeek_conn.resp_pkts,zeek_conn.resp_ip_bytes,zeek_conn.tunnel_parents,zeek_conn.vlan,zeek_conn.inner_vlan")
+  this.api.addView("zeek_dce_rpc", "require:zeek_dce_rpc;title:Zeek dce_rpc.log;fields:zeek_dce_rpc.rtt,zeek_dce_rpc.named_pipe,zeek_dce_rpc.endpoint,zeek_dce_rpc.operation")
+  this.api.addView("zeek_dhcp", "require:zeek_dhcp;title:Zeek dhcp.log;fields:zeek_dhcp.mac,zeek_dhcp.assigned_ip,zeek_dhcp.lease_time,zeek_dhcp.trans_id")
+  this.api.addView("zeek_dnp3", "require:zeek_dnp3;title:Zeek dnp3.log;fields:zeek_dnp3.fc_request,zeek_dnp3.fc_reply,zeek_dnp3.iin")
+  this.api.addView("zeek_dns", "require:zeek_dns;title:Zeek dns.log;fields:zeek_dns.trans_id,zeek_dns.rtt,zeek_dns.query,zeek_dns.qclass,zeek_dns.qclass_name,zeek_dns.qtype,zeek_dns.qtype_name,zeek_dns.rcode,zeek_dns.rcode_name,zeek_dns.AA,zeek_dns.TC,zeek_dns.RD,zeek_dns.RA,zeek_dns.Z,zeek_dns.answers,zeek_dns.TTLs,zeek_dns.rejected")
+  this.api.addView("zeek_dpd", "require:zeek_dpd;title:Zeek dpd.log;fields:zeek_dpd.service,zeek_dpd.failure_reason")
+  this.api.addView("zeek_enip", "require:zeek_enip;title:Zeek enip.log;fields:zeek_enip.command,zeek_enip.length,zeek_enip.session_handle,zeek_enip.status,zeek_enip.sender_context,zeek_enip.options")
+  this.api.addView("zeek_enip_list_identity", "require:zeek_enip_list_identity;title:Zeek enip_list_identity.log;fields:zeek_enip_list_identity.device_type,zeek_enip_list_identity.vendor,zeek_enip_list_identity.product_name,zeek_enip_list_identity.serial_number,zeek_enip_list_identity.product_code,zeek_enip_list_identity.revision,zeek_enip_list_identity.status,zeek_enip_list_identity.state,zeek_enip_list_identity.device_ip")
+  this.api.addView("zeek_files", "require:zeek_files;title:Zeek files.log;fields:zeek_files.fuid,zeek_files.tx_hosts,zeek_files.rx_hosts,zeek_files.conn_uids,zeek_files.source,zeek_files.depth,zeek_files.analyzers,zeek_files.mime_type,zeek_files.filename,zeek_files.duration,zeek_files.local_orig,zeek_files.is_orig,zeek_files.seen_bytes,zeek_files.total_bytes,zeek_files.missing_bytes,zeek_files.overflow_bytes,zeek_files.timedout,zeek_files.parent_fuid,zeek_files.md5,zeek_files.sha1,zeek_files.sha256,zeek_files.extracted,zeek_files.extracted_cutoff,zeek_files.extracted_size")
+  this.api.addView("zeek_ftp", "require:zeek_ftp;title:Zeek ftp.log;fields:zeek_ftp.password,zeek_ftp.command,zeek_ftp.arg,zeek_ftp.mime_type,zeek_ftp.file_size,zeek_ftp.reply_code,zeek_ftp.reply_msg,zeek_ftp.data_channel_passive,zeek_ftp.data_channel_orig_h,zeek_ftp.data_channel_resp_h,zeek_ftp.data_channel_resp_p,zeek_ftp.fuid")
+  this.api.addView("zeek_gquic", "require:zeek_gquic;title:Zeek gquic.log;fields:zeek_gquic.version,zeek_gquic.server_name,zeek_gquic.user_agent,zeek_gquic.tag_count,zeek_gquic.cyu,zeek_gquic.cyutags")
+  this.api.addView("zeek_http", "require:zeek_http;title:Zeek http.log;fields:zeek_http.trans_depth,zeek_http.method,zeek_http.host,zeek_http.uri,zeek_http.origin,zeek_http.referrer,zeek_http.version,zeek_http.user_agent,zeek_http.request_body_len,zeek_http.response_body_len,zeek_http.status_code,zeek_http.status_msg,zeek_http.info_code,zeek_http.info_msg,zeek_http.tags,zeek_http.user,zeek_http.password,zeek_http.proxied,zeek_http.orig_fuids,zeek_http.orig_filenames,zeek_http.orig_mime_types,zeek_http.resp_fuids,zeek_http.resp_filenames,zeek_http.resp_mime_types")
+  this.api.addView("zeek_intel", "require:zeek_intel;title:Zeek intel.log;fields:zeek_intel.indicator,zeek_intel.indicator_type,zeek_intel.seen_where,zeek_intel.seen_node,zeek_intel.matched,zeek_intel.sources,zeek_intel.fuid,zeek_intel.mimetype,zeek_intel.file_description")
+  this.api.addView("zeek_irc", "require:zeek_irc;title:Zeek irc.log;fields:zeek_irc.nick,zeek_irc.command,zeek_irc.value,zeek_irc.addl,zeek_irc.dcc_file_name,zeek_irc.dcc_file_size,zeek_irc.dcc_mime_type,zeek_irc.fuid")
+  this.api.addView("zeek_iso_cotp", "require:zeek_iso_cotp;title:Zeek iso_cotp.log;fields:zeek_iso_cotp.pdu_type")
+  this.api.addView("zeek_kerberos", "require:zeek_kerberos;title:Zeek kerberos.log;fields:zeek_kerberos.cname,zeek_kerberos.sname,zeek_kerberos.success,zeek_kerberos.error_msg,zeek_kerberos.from,zeek_kerberos.till,zeek_kerberos.cipher,zeek_kerberos.forwardable,zeek_kerberos.renewable,zeek_kerberos.client_cert_subject,zeek_kerberos.client_cert_fuid,zeek_kerberos.server_cert_subject,zeek_kerberos.server_cert_fuid")
+  this.api.addView("zeek_known_certs", "require:zeek_known_certs;title:Zeek known_certs.log;fields:zeek_known_certs.subject,zeek_known_certs.issuer_subject,zeek_known_certs.serial")
+  this.api.addView("zeek_modbus", "require:zeek_modbus;title:Zeek modbus.log;fields:zeek_modbus.func,zeek_modbus.exception")
+  this.api.addView("zeek_mqtt_connect", "require:zeek_mqtt_connect;title:Zeek mqtt_connect.log;fields:zeek_mqtt_connect.proto_name,zeek_mqtt_connect.proto_version,zeek_mqtt_connect.client_id,zeek_mqtt_connect.connect_status,zeek_mqtt_connect.will_topic,zeek_mqtt_connect.will_payload")
+  this.api.addView("zeek_mysql", "require:zeek_mysql;title:Zeek mysql.log;fields:zeek_mysql.cmd,zeek_mysql.arg,zeek_mysql.success,zeek_mysql.rows,zeek_mysql.response")
+  this.api.addView("zeek_notice", "require:zeek_notice;title:Zeek notice.log;fields:zeek_notice.fuid,zeek_notice.file_mime_type,zeek_notice.file_desc,zeek_notice.note,zeek_notice.msg,zeek_notice.sub,zeek_notice.src,zeek_notice.dst,zeek_notice.p,zeek_notice.n,zeek_notice.peer_descr,zeek_notice.actions,zeek_notice.suppress_for,zeek_notice.dropped,zeek_notice.remote_location_country_code,zeek_notice.remote_location_region,zeek_notice.remote_location_cityremote_location_latitude,zeek_notice.remote_location_longitude")
+  this.api.addView("zeek_ntlm", "require:zeek_ntlm;title:Zeek ntlm.log;fields:zeek_ntlm.host,zeek_ntlm.domain,zeek_ntlm.success,zeek_ntlm.status")
+  this.api.addView("zeek_ntp", "require:zeek_ntp;title:Zeek ntp.log;fields:zeek_ntp.version,zeek_ntp.mode,zeek_ntp.stratum,zeek_ntp.poll,zeek_ntp.precision,zeek_ntp.root_delay,zeek_ntp.root_disp,zeek_ntp.ref_id,zeek_ntp.ref_time,zeek_ntp.org_time,zeek_ntp.rec_time,zeek_ntp.xmt_time,zeek_ntp.num_exts")
+  this.api.addView("zeek_pe", "require:zeek_pe;title:Zeek pe.log;fields:zeek_pe.fuid,zeek_pe.machine,zeek_pe.compile_ts,zeek_pe.os,zeek_pe.subsystem,zeek_pe.is_exe,zeek_pe.is_64bit,zeek_pe.uses_aslr,zeek_pe.uses_dep,zeek_pe.uses_code_integrity,zeek_pe.uses_seh,zeek_pe.has_import_table,zeek_pe.has_export_table,zeek_pe.has_cert_table,zeek_pe.has_debug_data,zeek_pe.section_names")
+  this.api.addView("zeek_profinet", "require:zeek_profinet;title:Zeek profinet.log;fields:zeek_profinet.operation_type,zeek_profinet.block_version,zeek_profinet.slot_number,zeek_profinet.subslot_number,zeek_profinet.index")
+  this.api.addView("zeek_profinet_dce_rpc", "require:zeek_profinet_dce_rpc;title:Zeek profinet_dce_rpc.log;fields:zeek_profinet_dce_rpc.version,zeek_profinet_dce_rpc.packet_type,zeek_profinet_dce_rpc.object_uuid,zeek_profinet_dce_rpc.interface_uuid,zeek_profinet_dce_rpc.activity_uuid,zeek_profinet_dce_rpc.server_boot_time,zeek_profinet_dce_rpc.operation")
+  this.api.addView("zeek_radius", "require:zeek_radius;title:Zeek radius.log;fields:zeek_radius.mac,zeek_radius.framed_addr,zeek_radius.remote_ip,zeek_radius.connect_info,zeek_radius.reply_msg,zeek_radius.result,zeek_radius.ttl")
+  this.api.addView("zeek_rdp", "require:zeek_rdp;title:Zeek rdp.log;fields:zeek_rdp.cookie,zeek_rdp.result,zeek_rdp.security_protocol,zeek_rdp.client_channels,zeek_rdp.keyboard_layout,zeek_rdp.client_build,zeek_rdp.client_name,zeek_rdp.client_dig_product_id,zeek_rdp.desktop_width,zeek_rdp.desktop_height,zeek_rdp.requested_color_depth,zeek_rdp.cert_type,zeek_rdp.cert_count,zeek_rdp.cert_permanent,zeek_rdp.encryption_level,zeek_rdp.encryption_method")
+  this.api.addView("zeek_rfb", "require:zeek_rfb;title:Zeek rfb.log;fields:zeek_rfb.client_major_version,zeek_rfb.client_minor_version,zeek_rfb.server_major_version,zeek_rfb.server_minor_version,zeek_rfb.authentication_method,zeek_rfb.auth,zeek_rfb.share_flag,zeek_rfb.desktop_name,zeek_rfb.width,zeek_rfb.height")
+  this.api.addView("zeek_s7comm", "require:zeek_s7comm;title:Zeek s7comm.log;fields:zeek_s7comm.rosctr,zeek_s7comm.parameter,zeek_s7comm.item_count,zeek_s7comm.data_info")
+  this.api.addView("zeek_signatures", "require:zeek_signatures;title:Zeek signatures.log;fields:zeek_signatures.note,zeek_signatures.signature_id,zeek_signatures.engine,zeek_signatures.event_message,zeek_signatures.sub_message,zeek_signatures.signature_count,zeek_signatures.host_count")
+  this.api.addView("zeek_sip", "require:zeek_sip;title:Zeek sip.log;fields:zeek_sip.trans_depth,zeek_sip.method,zeek_sip.uri,zeek_sip.date,zeek_sip.request_from,zeek_sip.request_to,zeek_sip.response_from,zeek_sip.response_to,zeek_sip.reply_to,zeek_sip.call_id,zeek_sip.seq,zeek_sip.subject,zeek_sip.request_path,zeek_sip.response_path,zeek_sip.user_agent,zeek_sip.status_code,zeek_sip.status_msg,zeek_sip.warning,zeek_sip.request_body_len,zeek_sip.response_body_len,zeek_sip.content_type")
+  this.api.addView("zeek_smb_files", "require:zeek_smb_files;title:Zeek smb_files.log;fields:zeek_smb_files.fuid,zeek_smb_files.action,zeek_smb_files.path,zeek_smb_files.name,zeek_smb_files.size,zeek_smb_files.prev_name,zeek_smb_files.times_modified,zeek_smb_files.times_accessed,zeek_smb_files.times_created,zeek_smb_files.times_changed")
+  this.api.addView("zeek_smb_mapping", "require:zeek_smb_mapping;title:Zeek smb_mapping.log;fields:zeek_smb_mapping.path,zeek_smb_mapping.resource_type,zeek_smb_mapping.native_file_system,zeek_smb_mapping.share_type")
+  this.api.addView("zeek_smtp", "require:zeek_smtp;title:Zeek smtp.log;fields:zeek_smtp.trans_depth,zeek_smtp.helo,zeek_smtp.mailfrom,zeek_smtp.rcptto,zeek_smtp.date,zeek_smtp.from,zeek_smtp.to,zeek_smtp.cc,zeek_smtp.reply_to,zeek_smtp.msg_id,zeek_smtp.in_reply_to,zeek_smtp.subject,zeek_smtp.x_originating_ip,zeek_smtp.first_received,zeek_smtp.second_received,zeek_smtp.last_reply,zeek_smtp.path,zeek_smtp.user_agent,zeek_smtp.tls,zeek_smtp.fuids,zeek_smtp.is_webmail")
+  this.api.addView("zeek_snmp", "require:zeek_snmp;title:Zeek snmp.log;fields:zeek_snmp.duration,zeek_snmp.version,zeek_snmp.community,zeek_snmp.get_requests,zeek_snmp.get_bulk_requests,zeek_snmp.get_responses,zeek_snmp.set_requests,zeek_snmp.display_string,zeek_snmp.up_since")
+  this.api.addView("zeek_socks", "require:zeek_socks;title:Zeek socks.log;fields:zeek_socks.version,zeek_socks.password,zeek_socks.server_status,zeek_socks.request_host,zeek_socks.request_name,zeek_socks.request_port,zeek_socks.bound_host,zeek_socks.bound_name,zeek_socks.bound_port")
+  this.api.addView("zeek_software", "require:zeek_software;title:Zeek software.log;fields:zeek_software.software_type,zeek_software.name,zeek_software.version_major,zeek_software.version_minor,zeek_software.version_minor2,zeek_software.version_minor3,zeek_software.version_addl,zeek_software.unparsed_version")
+  this.api.addView("zeek_ssh", "require:zeek_ssh;title:Zeek ssh.log;fields:zeek_ssh.version,zeek_ssh.auth_success,zeek_ssh.auth_attempts,zeek_ssh.direction,zeek_ssh.client,zeek_ssh.server,zeek_ssh.cipher_alg,zeek_ssh.mac_alg,zeek_ssh.compression_alg,zeek_ssh.kex_alg,zeek_ssh.host_key_alg,zeek_ssh.host_key,zeek_ssh.remote_location_country_code,zeek_ssh.remote_location_region,zeek_ssh.remote_location_city,zeek_ssh.remote_location_latitude,zeek_ssh.remote_location_longitude,zeek_ssh.hassh,zeek_ssh.hasshServer,zeek_ssh.hasshAlgorithms,zeek_ssh.hasshServerAlgorithms,zeek_ssh.cshka,zeek_ssh.sshka")
+  this.api.addView("zeek_ssl", "require:zeek_ssl;title:Zeek ssl.log;fields:zeek_ssl.ssl_version,zeek_ssl.cipher,zeek_ssl.curve,zeek_ssl.server_name,zeek_ssl.resumed,zeek_ssl.last_alert,zeek_ssl.next_protocol,zeek_ssl.established,zeek_ssl.ja3,zeek_ssl.ja3_desc,zeek_ssl.ja3s,zeek_ssl.ja3s_desc,zeek_ssl.cert_chain_fuids,zeek_ssl.client_cert_chain_fuids,zeek_ssl.subject.CN,zeek_ssl.subject.C,zeek_ssl.subject.O,zeek_ssl.subject.OU,zeek_ssl.subject.ST,zeek_ssl.subject.SN,zeek_ssl.subject.L,zeek_ssl.subject.GN,zeek_ssl.subject.pseudonym,zeek_ssl.subject.serialNumber,zeek_ssl.subject.title,zeek_ssl.subject.initials,zeek_ssl.subject.emailAddress,zeek_ssl.client_subject.CN,zeek_ssl.client_subject.C,zeek_ssl.client_subject.O,zeek_ssl.client_subject.OU,zeek_ssl.client_subject.ST,zeek_ssl.client_subject.SN,zeek_ssl.client_subject.L,zeek_ssl.client_subject.GN,zeek_ssl.client_subject.pseudonym,zeek_ssl.client_subject.serialNumber,zeek_ssl.client_subject.title,zeek_ssl.client_subject.initials,zeek_ssl.client_subject.emailAddress,zeek_ssl.issuer.CN,zeek_ssl.issuer.C,zeek_ssl.issuer.O,zeek_ssl.issuer.OU,zeek_ssl.issuer.ST,zeek_ssl.issuer.SN,zeek_ssl.issuer.L,zeek_ssl.issuer.DC,zeek_ssl.issuer.GN,zeek_ssl.issuer.pseudonym,zeek_ssl.issuer.serialNumber,zeek_ssl.issuer.title,zeek_ssl.issuer.initials,zeek_ssl.issuer.emailAddress,zeek_ssl.client_issuer.CN,zeek_ssl.client_issuer.C,zeek_ssl.client_issuer.O,zeek_ssl.client_issuer.OU,zeek_ssl.client_issuer.ST,zeek_ssl.client_issuer.SN,zeek_ssl.client_issuer.L,zeek_ssl.client_issuer.DC,zeek_ssl.client_issuer.GN,zeek_ssl.client_issuer.pseudonym,zeek_ssl.client_issuer.serialNumber,zeek_ssl.client_issuer.title,zeek_ssl.client_issuer.initials,zeek_ssl.client_issuer.emailAddress,zeek_ssl.validation_status")
+  this.api.addView("zeek_syslog", "require:zeek_syslog;title:Zeek syslog.log;fields:zeek_syslog.facility,zeek_syslog.severity,zeek_syslog.message")
+  this.api.addView("zeek_tds", "require:zeek_tds;title:Zeek tds.log;fields:zeek_tds.command")
+  this.api.addView("zeek_tds_rpc", "require:zeek_tds_rpc;title:Zeek tds_rpc.log;fields:zeek_tds_rpc.procedure_name,zeek_tds_rpc.parameters")
+  this.api.addView("zeek_tds_sql_batch", "require:zeek_tds_sql_batch;title:Zeek tds_sql_batch.log;fields:zeek_tds_sql_batch.header_type,zeek_tds_sql_batch.query")
+  this.api.addView("zeek_tunnel", "require:zeek_tunnel;title:Zeek tunnel.log;fields:zeek_tunnel.tunnel_type,zeek_tunnel.action")
+  this.api.addView("zeek_weird", "require:zeek_weird;title:Zeek weird.log;fields:zeek_weird.name,zeek_weird.addl,zeek_weird.notice,zeek_weird.peer")
+  this.api.addView("zeek_x509", "require:zeek_x509;title:Zeek x509.log;fields:zeek_x509.fuid,zeek_x509.certificate_version,zeek_x509.certificate_serial,zeek_x509.certificate_subject.CN,zeek_x509.certificate_subject.C,zeek_x509.certificate_subject.O,zeek_x509.certificate_subject.OU,zeek_x509.certificate_subject.ST,zeek_x509.certificate_subject.SN,zeek_x509.certificate_subject.L,zeek_x509.certificate_subject.DC,zeek_x509.certificate_subject.GN,zeek_x509.certificate_subject.pseudonym,zeek_x509.certificate_subject.serialNumber,zeek_x509.certificate_subject.title,zeek_x509.certificate_subject.initials,zeek_x509.certificate_subject.emailAddress,zeek_x509.certificate_issuer.CN,zeek_x509.certificate_issuer.C,zeek_x509.certificate_issuer.O,zeek_x509.certificate_issuer.OU,zeek_x509.certificate_issuer.ST,zeek_x509.certificate_issuer.SN,zeek_x509.certificate_issuer.L,zeek_x509.certificate_issuer.GN,zeek_x509.certificate_issuer.pseudonym,zeek_x509.certificate_issuer.serialNumber,zeek_x509.certificate_issuer.title,zeek_x509.certificate_issuer.initials,zeek_x509.certificate_issuer.emailAddress,zeek_x509.certificate_not_valid_before,zeek_x509.certificate_not_valid_after,zeek_x509.certificate_key_alg,zeek_x509.certificate_sig_alg,zeek_x509.certificate_key_type,zeek_x509.certificate_key_length,zeek_x509.certificate_exponent,zeek_x509.certificate_curve,zeek_x509.san_dns,zeek_x509.san_uri,zeek_x509.san_email,zeek_x509.san_ip,zeek_x509.basic_constraints_ca,zeek_x509.basic_constraints_path_len")
 
   // Add the source as available
   this.api.addSource("zeek", this);
