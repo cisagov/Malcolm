@@ -16,6 +16,10 @@ var wiseSource     = require('./wiseSource.js')
 function ZeekLogs (api, section) {
   ZeekLogs.super_.call(this, api, section);
 
+  // todo: put in sane human-readable field names for all of them
+
+  // see https://docs.zeek.org/en/stable/script-reference/log-files.html for Zeek logfile documentation
+
   // id information
   this.uidField = this.api.addField("field:zeek.uid;db:zeek.uid;kind:termfield;friendly:Zeek Connection ID;help:Zeek Connection ID");
   this.communityIdField = this.api.addField("field:zeek.community_id;db:zeek.community_id;kind:termfield;friendly:Zeek Connection Community ID;help:Zeek Connection Community ID");
@@ -52,6 +56,7 @@ function ZeekLogs (api, section) {
   this.filetypeField = this.api.addField("field:zeek.filetype;db:zeek.filetype;kind:termfield;friendly:File Magic;help:File Magic");
 
   // conn.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/conn/main.zeek.html#type-Conn::Info
   this.conn_durationField = this.api.addField("field:zeek_conn.duration;db:zeek_conn.duration;kind:termfield;friendly:conn duration;help:conn duration");
   this.conn_orig_bytesField = this.api.addField("field:zeek_conn.orig_bytes;db:zeek_conn.orig_bytes;kind:integer;friendly:conn orig_bytes;help:conn orig_bytes");
   this.conn_resp_bytesField = this.api.addField("field:zeek_conn.resp_bytes;db:zeek_conn.resp_bytes;kind:integer;friendly:conn resp_bytes;help:conn resp_bytes");
@@ -69,36 +74,42 @@ function ZeekLogs (api, section) {
   this.conn_vlanField = this.api.addField("field:zeek_conn.vlan;db:zeek_conn.vlan;kind:integer;friendly:conn vlan;help:conn outer VLAN");
   this.conn_inner_vlanField = this.api.addField("field:zeek_conn.inner_vlan;db:zeek_conn.inner_vlan;kind:integer;friendly:conn inner_vlan;help:conn inner VLAN");
 
-  // bacnet.log - https://github.com/amzn/zeek-plugin-bacnet
+  // bacnet.log
+  // https://github.com/amzn/zeek-plugin-bacnet/blob/master/scripts/main.zeek
   this.bacnet_bvlc_functionField = this.api.addField("field:zeek_bacnet.bvlc_function;db:zeek_bacnet.bvlc_function;kind:termfield;friendly:bacnet bvlc_function;help:bacnet bvlc_function");
   this.bacnet_bvlc_lenField = this.api.addField("field:zeek_bacnet.bvlc_len;db:zeek_bacnet.bvlc_len;kind:integer;friendly:bacnet bvlc_len;help:bacnet bvlc_len");
   this.bacnet_apdu_typeField = this.api.addField("field:zeek_bacnet.apdu_type;db:zeek_bacnet.apdu_type;kind:termfield;friendly:bacnet apdu_type;help:bacnet apdu_type");
   this.bacnet_service_choiceField = this.api.addField("field:zeek_bacnet.service_choice;db:zeek_bacnet.service_choice;kind:termfield;friendly:bacnet service_choice;help:bacnet service_choice");
   this.bacnet_dataField = this.api.addField("field:zeek_bacnet.data;db:zeek_bacnet.data;kind:termfield;friendly:bacnet data;help:bacnet data");
 
-  // cip.log - https://github.com/amzn/zeek-plugin-enip
+  // cip.log
+  // https://github.com/amzn/zeek-plugin-enip/blob/master/scripts/main.zeek
   this.cip_serviceField = this.api.addField("field:zeek_cip.cip_service;db:zeek_cip.cip_service;kind:termfield;friendly:cip service;help:cip service");
   this.cip_statusField = this.api.addField("field:zeek_cip.status;db:zeek_cip.status;kind:termfield;friendly:cip status;help:cip status");
   this.cip_tagsField = this.api.addField("field:zeek_cip.cip_tags;db:zeek_cip.cip_tags;kind:termfield;friendly:cip tags;help:cip tags");
 
   // dce_rpc.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/dce-rpc/main.zeek.html#type-DCE_RPC::Info
   this.dce_rpc_rttField = this.api.addField("field:zeek_dce_rpc.rtt;db:zeek_dce_rpc.rtt;kind:termfield;friendly:dce_rpc rtt;help:dce_rpc rtt");
   this.dce_rpc_named_pipeField = this.api.addField("field:zeek_dce_rpc.named_pipe;db:zeek_dce_rpc.named_pipe;kind:termfield;friendly:dce_rpc named_pipe;help:dce_rpc named_pipe");
   this.dce_rpc_endpointField = this.api.addField("field:zeek_dce_rpc.endpoint;db:zeek_dce_rpc.endpoint;kind:termfield;friendly:dce_rpc endpoint;help:dce_rpc endpoint");
   this.dce_rpc_operationField = this.api.addField("field:zeek_dce_rpc.operation;db:zeek_dce_rpc.operation;kind:termfield;friendly:dce_rpc operation;help:dce_rpc operation");
 
   // dhcp.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/dhcp/main.zeek.html#type-DHCP::Info
   this.dhcp_macField = this.api.addField("field:zeek_dhcp.mac;db:zeek_dhcp.mac;kind:termfield;friendly:dhcp mac;help:dhcp mac");
   this.dhcp_assigned_ipField = this.api.addField("field:zeek_dhcp.assigned_ip;db:zeek_dhcp.assigned_ip;kind:termfield;friendly:dhcp assigned_ip;help:dhcp assigned_ip");
   this.dhcp_lease_timeField = this.api.addField("field:zeek_dhcp.lease_time;db:zeek_dhcp.lease_time;kind:termfield;friendly:dhcp lease_time;help:dhcp lease_time");
   this.dhcp_trans_idField = this.api.addField("field:zeek_dhcp.trans_id;db:zeek_dhcp.trans_id;kind:integer;friendly:dhcp trans_id;help:dhcp trans_id");
 
   // dnp3.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/dnp3/main.zeek.html#type-DNP3::Info
   this.dnp3_fc_requestField = this.api.addField("field:zeek_dnp3.fc_request;db:zeek_dnp3.fc_request;kind:termfield;friendly:dnp3 fc_request;help:dnp3 fc_request");
   this.dnp3_fc_replyField = this.api.addField("field:zeek_dnp3.fc_reply;db:zeek_dnp3.fc_reply;kind:termfield;friendly:dnp3 fc_reply;help:dnp3 fc_reply");
   this.dnp3_iinField = this.api.addField("field:zeek_dnp3.iin;db:zeek_dnp3.iin;kind:integer;friendly:dnp3 iin;help:dnp3 iin");
 
   // dns.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/dns/main.zeek.html#type-DNS::Info
   this.dns_trans_idField = this.api.addField("field:zeek_dns.trans_id;db:zeek_dns.trans_id;kind:integer;friendly:dns trans_id;help:dns trans_id");
   this.dns_rttField = this.api.addField("field:zeek_dns.rtt;db:zeek_dns.rtt;kind:termfield;friendly:dns rtt;help:dns rtt");
   this.dns_queryField = this.api.addField("field:zeek_dns.query;db:zeek_dns.query;kind:termfield;friendly:dns query;help:dns query");
@@ -118,10 +129,12 @@ function ZeekLogs (api, section) {
   this.dns_rejectedField = this.api.addField("field:zeek_dns.rejected;db:zeek_dns.rejected;kind:termfield;friendly:dns rejected;help:dns rejected");
 
   // dpd.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/dpd/main.zeek.html#type-DPD::Info
   this.dpd_serviceField = this.api.addField("field:zeek_dpd.service;db:zeek_dpd.service;kind:termfield;friendly:dpd service;help:dpd service");
   this.dpd_failure_reasonField = this.api.addField("field:zeek_dpd.failure_reason;db:zeek_dpd.failure_reason;kind:termfield;friendly:dpd failure_reason;help:dpd failure_reason");
 
-  // enip.log - https://github.com/amzn/zeek-plugin-enip
+  // enip.log
+  // https://github.com/amzn/zeek-plugin-enip/blob/master/scripts/main.zeek
   this.enip_commandField = this.api.addField("field:zeek_enip.command;db:zeek_enip.command;kind:termfield;friendly:enip command;help:enip command");
   this.enip_lengthField = this.api.addField("field:zeek_enip.length;db:zeek_enip.length;kind:integer;friendly:enip length;help:enip length");
   this.enip_session_handleField = this.api.addField("field:zeek_enip.session_handle;db:zeek_enip.session_handle;kind:termfield;friendly:enip session_handle;help:enip session_handle");
@@ -129,7 +142,8 @@ function ZeekLogs (api, section) {
   this.enip_sender_contextField = this.api.addField("field:zeek_enip.sender_context;db:zeek_enip.sender_context;kind:termfield;friendly:enip sender_context;help:enip sender_context");
   this.enip_optionsField = this.api.addField("field:zeek_enip.options;db:zeek_enip.options;kind:termfield;friendly:enip options;help:enip options");
 
-  // enip_list_identity.log - https://github.com/amzn/zeek-plugin-enip
+  // enip_list_identity.log
+  // https://github.com/amzn/zeek-plugin-enip/blob/master/scripts/main.zeek
   this.enip_list_identity_device_typeField = this.api.addField("field:zeek_enip_list_identity.device_type;db:zeek_enip_list_identity.device_type;kind:termfield;friendly:enip_list_identity device_type;help:enip_list_identity device_type");
   this.enip_list_identity_vendorField = this.api.addField("field:zeek_enip_list_identity.vendor;db:zeek_enip_list_identity.vendor;kind:termfield;friendly:enip_list_identity vendor;help:enip_list_identity vendor");
   this.enip_list_identity_product_nameField = this.api.addField("field:zeek_enip_list_identity.product_name;db:zeek_enip_list_identity.product_name;kind:termfield;friendly:enip_list_identity product_name;help:enip_list_identity product_name");
@@ -141,6 +155,7 @@ function ZeekLogs (api, section) {
   this.enip_list_identity_device_ipField = this.api.addField("field:zeek_enip_list_identity.device_ip;db:zeek_enip_list_identity.device_ip;kind:termfield;friendly:enip_list_identity device_ip;help:enip_list_identity device_ip");
 
   // files.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/files/main.zeek.html#type-Files::Info
   this.files_fuidField = this.api.addField("field:zeek_files.fuid;db:zeek_files.fuid;kind:termfield;friendly:files fuid;help:files fuid");
   this.files_tx_hostsField = this.api.addField("field:zeek_files.tx_hosts;db:zeek_files.tx_hosts;kind:termfield;friendly:files tx_hosts;help:files tx_hosts");
   this.files_rx_hostsField = this.api.addField("field:zeek_files.rx_hosts;db:zeek_files.rx_hosts;kind:termfield;friendly:files rx_hosts;help:files rx_hosts");
@@ -167,6 +182,7 @@ function ZeekLogs (api, section) {
   this.files_extracted_sizeField = this.api.addField("field:zeek_files.extracted_size;db:zeek_files.extracted_size;kind:termfield;friendly:files extracted_size;help:files extracted_size");
 
   // ftp.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/ftp/info.zeek.html#type-FTP::Info
   this.ftp_passwordField = this.api.addField("field:zeek_ftp.password;db:zeek_ftp.password;kind:termfield;friendly:ftp password;help:ftp password");
   this.ftp_commandField = this.api.addField("field:zeek_ftp.command;db:zeek_ftp.command;kind:termfield;friendly:ftp command;help:ftp command");
   this.ftp_argField = this.api.addField("field:zeek_ftp.arg;db:zeek_ftp.arg;kind:termfield;friendly:ftp arg;help:ftp arg");
@@ -181,6 +197,7 @@ function ZeekLogs (api, section) {
   this.ftp_fuidField = this.api.addField("field:zeek_ftp.fuid;db:zeek_ftp.fuid;kind:termfield;friendly:ftp fuid;help:ftp fuid");
 
   // gquic.log
+  // https://github.com/salesforce/GQUIC_Protocol_Analyzer/blob/master/scripts/Salesforce/GQUIC/main.bro
   this.gquic_versionField = this.api.addField("field:zeek_gquic.version;db:zeek_gquic.version;kind:termfield;friendly:gquic version;help:gquic version");
   this.gquic_server_nameField = this.api.addField("field:zeek_gquic.server_name;db:zeek_gquic.server_name;kind:termfield;friendly:gquic server_name;help:gquic server_name");
   this.gquic_user_agentField = this.api.addField("field:zeek_gquic.user_agent;db:zeek_gquic.user_agent;kind:termfield;friendly:gquic user_agent;help:gquic user_agent");
@@ -189,6 +206,7 @@ function ZeekLogs (api, section) {
   this.gquic_cyutagsField = this.api.addField("field:zeek_gquic.cyutags;db:zeek_gquic.cyutags;kind:termfield;friendly:gquic cyutags;help:gquic cyutags");
 
   // http.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/http/main.zeek.html#type-HTTP::Info
   this.http_trans_depthField = this.api.addField("field:zeek_http.trans_depth;db:zeek_http.trans_depth;kind:integer;friendly:http trans_depth;help:http trans_depth");
   this.http_methodField = this.api.addField("field:zeek_http.method;db:zeek_http.method;kind:termfield;friendly:http method;help:http method");
   this.http_hostField = this.api.addField("field:zeek_http.host;db:zeek_http.host;kind:termfield;friendly:http host;help:http host");
@@ -215,6 +233,7 @@ function ZeekLogs (api, section) {
   this.http_resp_mime_typesField = this.api.addField("field:zeek_http.resp_mime_types;db:zeek_http.resp_mime_types;kind:termfield;friendly:http resp_mime_types;help:http resp_mime_types");
 
   // intel.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Info
   this.intel_indicatorField = this.api.addField("field:zeek_intel.indicator;db:zeek_intel.indicator;kind:termfield;friendly:intel indicator;help:intel indicator");
   this.intel_indicator_typeField = this.api.addField("field:zeek_intel.indicator_type;db:zeek_intel.indicator_type;kind:termfield;friendly:intel indicator_type;help:intel indicator_type");
   this.intel_seen_whereField = this.api.addField("field:zeek_intel.seen_where;db:zeek_intel.seen_where;kind:termfield;friendly:intel seen_where;help:intel seen_where");
@@ -226,6 +245,7 @@ function ZeekLogs (api, section) {
   this.intel_file_descriptionField = this.api.addField("field:zeek_intel.file_description;db:zeek_intel.file_description;kind:termfield;friendly:intel file_description;help:intel file_description");
 
   // irc.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/irc/main.zeek.html#type-IRC::Info
   this.irc_nickField = this.api.addField("field:zeek_irc.nick;db:zeek_irc.nick;kind:termfield;friendly:irc nick;help:irc nick");
   this.irc_commandField = this.api.addField("field:zeek_irc.command;db:zeek_irc.command;kind:termfield;friendly:irc command;help:irc command");
   this.irc_valueField = this.api.addField("field:zeek_irc.value;db:zeek_irc.value;kind:termfield;friendly:irc value;help:irc value");
@@ -235,10 +255,12 @@ function ZeekLogs (api, section) {
   this.irc_dcc_mime_typeField = this.api.addField("field:zeek_irc.dcc_mime_type;db:zeek_irc.dcc_mime_type;kind:termfield;friendly:irc dcc_mime_type;help:irc dcc_mime_type");
   this.irc_fuidField = this.api.addField("field:zeek_irc.fuid;db:zeek_irc.fuid;kind:termfield;friendly:irc fuid;help:irc fuid");
 
-  // iso_cotp.log - https://github.com/amzn/zeek-plugin-s7comm
+  // iso_cotp.log
+  // https://github.com/amzn/zeek-plugin-s7comm/blob/master/scripts/main.zeek
   this.iso_cotp_pdu_typeField = this.api.addField("field:zeek_iso_cotp.pdu_type;db:zeek_iso_cotp.pdu_type;kind:termfield;friendly:iso_cotp pdu_type;help:iso_cotp pdu_type");
 
   // kerberos.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/krb/main.zeek.html#type-KRB::Info
   this.kerberos_cnameField = this.api.addField("field:zeek_kerberos.cname;db:zeek_kerberos.cname;kind:termfield;friendly:kerberos cname;help:kerberos cname");
   this.kerberos_snameField = this.api.addField("field:zeek_kerberos.sname;db:zeek_kerberos.sname;kind:termfield;friendly:kerberos sname;help:kerberos sname");
   this.kerberos_successField = this.api.addField("field:zeek_kerberos.success;db:zeek_kerberos.success;kind:termfield;friendly:kerberos success;help:kerberos success");
@@ -254,15 +276,18 @@ function ZeekLogs (api, section) {
   this.kerberos_server_cert_fuidField = this.api.addField("field:zeek_kerberos.server_cert_fuid;db:zeek_kerberos.server_cert_fuid;kind:termfield;friendly:kerberos server_cert_fuid;help:kerberos server_cert_fuid");
 
   // known_certs.log
+  // https://docs.zeek.org/en/stable/scripts/policy/protocols/ssl/known-certs.zeek.html#type-Known::CertsInfo
   this.known_certs_subjectField = this.api.addField("field:zeek_known_certs.subject;db:zeek_known_certs.subject;kind:termfield;friendly:known_certs subject;help:known_certs subject");
   this.known_certs_issuer_subjectField = this.api.addField("field:zeek_known_certs.issuer_subject;db:zeek_known_certs.issuer_subject;kind:termfield;friendly:known_certs issuer_subject;help:known_certs issuer_subject");
   this.known_certs_serialField = this.api.addField("field:zeek_known_certs.serial;db:zeek_known_certs.serial;kind:termfield;friendly:known_certs serial;help:known_certs serial");
 
   // modbus.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/modbus/main.zeek.html#type-Modbus::Info
   this.modbus_funcField = this.api.addField("field:zeek_modbus.func;db:zeek_modbus.func;kind:termfield;friendly:modbus func;help:modbus func");
   this.modbus_exceptionField = this.api.addField("field:zeek_modbus.exception;db:zeek_modbus.exception;kind:termfield;friendly:modbus exception;help:modbus exception");
 
   // mqtt_connect.log
+  // https://docs.zeek.org/en/stable/scripts/policy/protocols/mqtt/main.zeek.html
   this.mqtt_connect_proto_nameField = this.api.addField("field:zeek_mqtt_connect.proto_name;db:zeek_mqtt_connect.proto_name;kind:termfield;friendly:mqtt_connect proto_name;help:mqtt_connect proto_name");
   this.mqtt_connect_proto_versionField = this.api.addField("field:zeek_mqtt_connect.proto_version;db:zeek_mqtt_connect.proto_version;kind:termfield;friendly:mqtt_connect proto_version;help:mqtt_connect proto_version");
   this.mqtt_connect_client_idField = this.api.addField("field:zeek_mqtt_connect.client_id;db:zeek_mqtt_connect.client_id;kind:termfield;friendly:mqtt_connect client_id;help:mqtt_connect client_id");
@@ -271,6 +296,7 @@ function ZeekLogs (api, section) {
   this.mqtt_connect_will_payloadField = this.api.addField("field:zeek_mqtt_connect.will_payload;db:zeek_mqtt_connect.will_payload;kind:termfield;friendly:mqtt_connect will_payload;help:mqtt_connect will_payload");
 
   // mysql.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/mysql/main.zeek.html#type-MySQL::Info
   this.mysql_cmdField = this.api.addField("field:zeek_mysql.cmd;db:zeek_mysql.cmd;kind:termfield;friendly:mysql cmd;help:mysql cmd");
   this.mysql_argField = this.api.addField("field:zeek_mysql.arg;db:zeek_mysql.arg;kind:termfield;friendly:mysql arg;help:mysql arg");
   this.mysql_successField = this.api.addField("field:zeek_mysql.success;db:zeek_mysql.success;kind:termfield;friendly:mysql success;help:mysql success");
@@ -278,6 +304,7 @@ function ZeekLogs (api, section) {
   this.mysql_responseField = this.api.addField("field:zeek_mysql.response;db:zeek_mysql.response;kind:termfield;friendly:mysql response;help:mysql response");
 
   // notice.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/notice/main.zeek.html#type-Notice::Info
   this.notice_fuidField = this.api.addField("field:zeek_notice.fuid;db:zeek_notice.fuid;kind:termfield;friendly:notice fuid;help:notice fuid");
   this.notice_file_mime_typeField = this.api.addField("field:zeek_notice.file_mime_type;db:zeek_notice.file_mime_type;kind:termfield;friendly:notice file_mime_type;help:notice file_mime_type");
   this.notice_file_descField = this.api.addField("field:zeek_notice.file_desc;db:zeek_notice.file_desc;kind:termfield;friendly:notice file_desc;help:notice file_desc");
@@ -299,12 +326,14 @@ function ZeekLogs (api, section) {
   this.notice_remote_location_longitudeField = this.api.addField("field:zeek_notice.remote_location_longitude;db:zeek_notice.remote_location_longitude;kind:termfield;friendly:notice remote_location_longitude;help:notice remote_location_longitude");
 
   // ntlm.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/ntlm/main.zeek.html#type-NTLM::Info
   this.ntlm_hostField = this.api.addField("field:zeek_ntlm.host;db:zeek_ntlm.host;kind:termfield;friendly:ntlm host;help:ntlm host");
   this.ntlm_domainField = this.api.addField("field:zeek_ntlm.domain;db:zeek_ntlm.domain;kind:termfield;friendly:ntlm domain;help:ntlm domain");
   this.ntlm_successField = this.api.addField("field:zeek_ntlm.success;db:zeek_ntlm.success;kind:termfield;friendly:ntlm success;help:ntlm success");
   this.ntlm_statusField = this.api.addField("field:zeek_ntlm.status;db:zeek_ntlm.status;kind:termfield;friendly:ntlm status;help:ntlm status");
 
   // ntp.log
+  // https://docs.zeek.org/en/latest/scripts/base/protocols/ntp/main.zeek.html#type-NTP::Info
   this.ntp_versionField = this.api.addField("field:zeek_ntp.version;db:zeek_ntp.version;kind:integer;friendly:ntp version;help:ntp version");
   this.ntp_modeField = this.api.addField("field:zeek_ntp.mode;db:zeek_ntp.mode;kind:integer;friendly:ntp mode;help:ntp mode");
   this.ntp_stratumField = this.api.addField("field:zeek_ntp.stratum;db:zeek_ntp.stratum;kind:integer;friendly:ntp stratum;help:ntp stratum");
@@ -320,6 +349,7 @@ function ZeekLogs (api, section) {
   this.ntp_num_extsField = this.api.addField("field:zeek_ntp.num_exts;db:zeek_ntp.num_exts;kind:integer;friendly:ntp num_exts;help:ntp num_exts");
 
   // pe.log
+  // https://docs.zeek.org/en/stable/scripts/base/files/pe/main.zeek.html#type-PE::Info
   this.pe_fuidField = this.api.addField("field:zeek_pe.fuid;db:zeek_pe.fuid;kind:termfield;friendly:pe fuid;help:pe fuid");
   this.pe_machineField = this.api.addField("field:zeek_pe.machine;db:zeek_pe.machine;kind:termfield;friendly:pe machine;help:pe machine");
   this.pe_compile_tsField = this.api.addField("field:zeek_pe.compile_ts;db:zeek_pe.compile_ts;kind:termfield;friendly:pe compile_ts;help:pe compile_ts");
@@ -337,14 +367,16 @@ function ZeekLogs (api, section) {
   this.pe_has_debug_dataField = this.api.addField("field:zeek_pe.has_debug_data;db:zeek_pe.has_debug_data;kind:termfield;friendly:pe has_debug_data;help:pe has_debug_data");
   this.pe_section_namesField = this.api.addField("field:zeek_pe.section_names;db:zeek_pe.section_names;kind:termfield;friendly:pe section_names;help:pe section_names");
 
-  // profinet.log - https://github.com/amzn/zeek-plugin-profinet
+  // profinet.log
+  // https://docs.zeek.org/en/stable/scripts/base/files/pe/main.zeek.html#type-PE::Info
   this.profinet_operation_typeField = this.api.addField("field:zeek_profinet.operation_type;db:zeek_profinet.operation_type;kind:termfield;friendly:profinet operation_type;help:profinet operation_type");
   this.profinet_block_versionField = this.api.addField("field:zeek_profinet.block_version;db:zeek_profinet.block_version;kind:termfield;friendly:profinet block_version;help:profinet block_version");
   this.profinet_slot_numberField = this.api.addField("field:zeek_profinet.slot_number;db:zeek_profinet.slot_number;kind:integer;friendly:profinet slot_number;help:profinet slot_number");
   this.profinet_subslot_numberField = this.api.addField("field:zeek_profinet.subslot_number;db:zeek_profinet.subslot_number;kind:integer;friendly:profinet subslot_number;help:profinet subslot_number");
   this.profinet_indexField = this.api.addField("field:zeek_profinet.index;db:zeek_profinet.index;kind:termfield;friendly:profinet index;help:profinet index");
 
-  // profinet_dce_rpc.log - https://github.com/amzn/zeek-plugin-profinet
+  // profinet_dce_rpc.log
+  // https://docs.zeek.org/en/stable/scripts/base/files/pe/main.zeek.html#type-PE::Info
   this.profinet_dce_rpc_versionField = this.api.addField("field:zeek_profinet_dce_rpc.version;db:zeek_profinet_dce_rpc.version;kind:integer;friendly:profinet_dce_rpc version;help:profinet_dce_rpc version");
   this.profinet_dce_rpc_packet_typeField = this.api.addField("field:zeek_profinet_dce_rpc.packet_type;db:zeek_profinet_dce_rpc.packet_type;kind:integer;friendly:profinet_dce_rpc packet_type;help:profinet_dce_rpc packet_type");
   this.profinet_dce_rpc_object_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.object_uuid;db:zeek_profinet_dce_rpc.object_uuid;kind:termfield;friendly:profinet_dce_rpc object_uuid;help:profinet_dce_rpc object_uuid");
@@ -354,6 +386,7 @@ function ZeekLogs (api, section) {
   this.profinet_dce_rpc_operationField = this.api.addField("field:zeek_profinet_dce_rpc.operation;db:zeek_profinet_dce_rpc.operation;kind:termfield;friendly:profinet_dce_rpc operation;help:profinet_dce_rpc operation");
 
   // radius.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/radius/main.zeek.html#type-RADIUS::Info
   this.radius_macField = this.api.addField("field:zeek_radius.mac;db:zeek_radius.mac;kind:termfield;friendly:radius mac;help:radius mac");
   this.radius_framed_addrField = this.api.addField("field:zeek_radius.framed_addr;db:zeek_radius.framed_addr;kind:termfield;friendly:radius framed_addr;help:radius framed_addr");
   this.radius_remote_ipField = this.api.addField("field:zeek_radius.remote_ip;db:zeek_radius.remote_ip;kind:termfield;friendly:radius remote_ip;help:radius remote_ip");
@@ -363,6 +396,7 @@ function ZeekLogs (api, section) {
   this.radius_ttlField = this.api.addField("field:zeek_radius.ttl;db:zeek_radius.ttl;kind:termfield;friendly:radius ttl;help:radius ttl");
 
   // rdp.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/rdp/main.zeek.html#type-RDP::Info
   this.rdp_cookieField = this.api.addField("field:zeek_rdp.cookie;db:zeek_rdp.cookie;kind:termfield;friendly:rdp cookie;help:rdp cookie");
   this.rdp_resultField = this.api.addField("field:zeek_rdp.result;db:zeek_rdp.result;kind:termfield;friendly:rdp result;help:rdp result");
   this.rdp_security_protocolField = this.api.addField("field:zeek_rdp.security_protocol;db:zeek_rdp.security_protocol;kind:termfield;friendly:rdp security_protocol;help:rdp security_protocol");
@@ -381,6 +415,7 @@ function ZeekLogs (api, section) {
   this.rdp_encryption_methodField = this.api.addField("field:zeek_rdp.encryption_method;db:zeek_rdp.encryption_method;kind:termfield;friendly:rdp encryption_method;help:rdp encryption_method");
 
   // rfb.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/rfb/main.zeek.html#type-RFB::Info
   this.rfb_client_major_versionField = this.api.addField("field:zeek_rfb.client_major_version;db:zeek_rfb.client_major_version;kind:termfield;friendly:rfb client_major_version;help:rfb client_major_version");
   this.rfb_client_minor_versionField = this.api.addField("field:zeek_rfb.client_minor_version;db:zeek_rfb.client_minor_version;kind:termfield;friendly:rfb client_minor_version;help:rfb client_minor_version");
   this.rfb_server_major_versionField = this.api.addField("field:zeek_rfb.server_major_version;db:zeek_rfb.server_major_version;kind:termfield;friendly:rfb server_major_version;help:rfb server_major_version");
@@ -392,7 +427,8 @@ function ZeekLogs (api, section) {
   this.rfb_widthField = this.api.addField("field:zeek_rfb.width;db:zeek_rfb.width;kind:integer;friendly:rfb width;help:rfb width");
   this.rfb_heightField = this.api.addField("field:zeek_rfb.height;db:zeek_rfb.height;kind:integer;friendly:rfb height;help:rfb height");
 
-  // s7comm.log - https://github.com/amzn/zeek-plugin-s7comm
+  // s7comm.log
+  // https://github.com/amzn/zeek-plugin-s7comm/blob/master/scripts/main.zeek
   this.s7comm_rosctrField = this.api.addField("field:zeek_s7comm.rosctr;db:zeek_s7comm.rosctr;kind:termfield;friendly:s7comm rosctr;help:s7comm rosctr");
   this.s7comm_parameterField = this.api.addField("field:zeek_s7comm.parameter;db:zeek_s7comm.parameter;kind:termfield;friendly:s7comm parameter;help:s7comm parameter");
   this.s7comm_item_countField = this.api.addField("field:zeek_s7comm.item_count;db:zeek_s7comm.item_count;kind:integer;friendly:s7comm item_count;help:s7comm item_count");
@@ -409,6 +445,7 @@ function ZeekLogs (api, section) {
   this.signatures_hitsField = this.api.addField("field:zeek_signatures.hits;db:zeek_signatures.hits;kind:termfield;friendly:signatures hits;help:signatures hits");
 
   // sip.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/sip/main.zeek.html#type-SIP::Info
   this.sip_trans_depthField = this.api.addField("field:zeek_sip.trans_depth;db:zeek_sip.trans_depth;kind:integer;friendly:sip trans_depth;help:sip trans_depth");
   this.sip_methodField = this.api.addField("field:zeek_sip.method;db:zeek_sip.method;kind:termfield;friendly:sip method;help:sip method");
   this.sip_uriField = this.api.addField("field:zeek_sip.uri;db:zeek_sip.uri;kind:termfield;friendly:sip uri;help:sip uri");
@@ -432,6 +469,7 @@ function ZeekLogs (api, section) {
   this.sip_content_typeField = this.api.addField("field:zeek_sip.content_type;db:zeek_sip.content_type;kind:termfield;friendly:sip content_type;help:sip content_type");
 
   // smb_files.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/smb/main.zeek.html#type-SMB::FileInfo
   this.smb_files_fuidField = this.api.addField("field:zeek_smb_files.fuid;db:zeek_smb_files.fuid;kind:termfield;friendly:smb_files fuid;help:smb_files fuid");
   this.smb_files_actionField = this.api.addField("field:zeek_smb_files.action;db:zeek_smb_files.action;kind:termfield;friendly:smb_files action;help:smb_files action");
   this.smb_files_pathField = this.api.addField("field:zeek_smb_files.path;db:zeek_smb_files.path;kind:termfield;friendly:smb_files path;help:smb_files path");
@@ -444,12 +482,14 @@ function ZeekLogs (api, section) {
   this.smb_files_times_changedField = this.api.addField("field:zeek_smb_files.times_changed;db:zeek_smb_files.times_changed;kind:termfield;friendly:smb_files times_changed;help:smb_files times_changed");
 
   // smb_mapping.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/smb/main.zeek.html#type-SMB::TreeInfo
   this.smb_mapping_pathField = this.api.addField("field:zeek_smb_mapping.path;db:zeek_smb_mapping.path;kind:termfield;friendly:smb_mapping path;help:smb_mapping path");
   this.smb_mapping_resource_typeField = this.api.addField("field:zeek_smb_mapping.resource_type;db:zeek_smb_mapping.resource_type;kind:termfield;friendly:smb_mapping resource_type;help:smb_mapping resource_type");
   this.smb_mapping_native_file_systemField = this.api.addField("field:zeek_smb_mapping.native_file_system;db:zeek_smb_mapping.native_file_system;kind:termfield;friendly:smb_mapping native_file_system;help:smb_mapping native_file_system");
   this.smb_mapping_share_typeField = this.api.addField("field:zeek_smb_mapping.share_type;db:zeek_smb_mapping.share_type;kind:termfield;friendly:smb_mapping share_type;help:smb_mapping share_type");
 
   // smtp.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info
   this.smtp_trans_depthField = this.api.addField("field:zeek_smtp.trans_depth;db:zeek_smtp.trans_depth;kind:integer;friendly:smtp trans_depth;help:smtp trans_depth");
   this.smtp_heloField = this.api.addField("field:zeek_smtp.helo;db:zeek_smtp.helo;kind:termfield;friendly:smtp helo;help:smtp helo");
   this.smtp_mailfromField = this.api.addField("field:zeek_smtp.mailfrom;db:zeek_smtp.mailfrom;kind:termfield;friendly:smtp mailfrom;help:smtp mailfrom");
@@ -473,6 +513,7 @@ function ZeekLogs (api, section) {
   this.smtp_is_webmailField = this.api.addField("field:zeek_smtp.is_webmail;db:zeek_smtp.is_webmail;kind:termfield;friendly:smtp is_webmail;help:smtp is_webmail");
 
   // snmp.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/snmp/main.zeek.html#type-SNMP::Info
   this.snmp_durationField = this.api.addField("field:zeek_snmp.duration;db:zeek_snmp.duration;kind:termfield;friendly:snmp duration;help:snmp duration");
   this.snmp_versionField = this.api.addField("field:zeek_snmp.version;db:zeek_snmp.version;kind:termfield;friendly:snmp version;help:snmp version");
   this.snmp_communityField = this.api.addField("field:zeek_snmp.community;db:zeek_snmp.community;kind:termfield;friendly:snmp community;help:snmp community");
@@ -484,6 +525,7 @@ function ZeekLogs (api, section) {
   this.snmp_up_sinceField = this.api.addField("field:zeek_snmp.up_since;db:zeek_snmp.up_since;kind:termfield;friendly:snmp up_since;help:snmp up_since");
 
   // socks.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/socks/main.zeek.html#type-SOCKS::Info
   this.socks_versionField = this.api.addField("field:zeek_socks.version;db:zeek_socks.version;kind:integer;friendly:socks version;help:socks version");
   this.socks_passwordField = this.api.addField("field:zeek_socks.password;db:zeek_socks.password;kind:termfield;friendly:socks password;help:socks password");
   this.socks_server_statusField = this.api.addField("field:zeek_socks.server_status;db:zeek_socks.server_status;kind:termfield;friendly:socks server_status;help:socks server_status");
@@ -495,6 +537,7 @@ function ZeekLogs (api, section) {
   this.socks_bound_portField = this.api.addField("field:zeek_socks.bound_port;db:zeek_socks.bound_port;kind:integer;friendly:socks bound_port;help:socks bound_port");
 
   // software.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Info
   this.software_software_typeField = this.api.addField("field:zeek_software.software_type;db:zeek_software.software_type;kind:termfield;friendly:software software_type;help:software software_type");
   this.software_nameField = this.api.addField("field:zeek_software.name;db:zeek_software.name;kind:termfield;friendly:software name;help:software name");
   this.software_version_majorField = this.api.addField("field:zeek_software.version_major;db:zeek_software.version_major;kind:integer;friendly:software version_major;help:software version_major");
@@ -505,6 +548,7 @@ function ZeekLogs (api, section) {
   this.software_unparsed_versionField = this.api.addField("field:zeek_software.unparsed_version;db:zeek_software.unparsed_version;kind:termfield;friendly:software unparsed_version;help:software unparsed_version");
 
   // ssh.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/ssh/main.zeek.html#type-SSH::Info
   this.ssh_versionField = this.api.addField("field:zeek_ssh.version;db:zeek_ssh.version;kind:integer;friendly:ssh version;help:ssh version");
   this.ssh_auth_successField = this.api.addField("field:zeek_ssh.auth_success;db:zeek_ssh.auth_success;kind:termfield;friendly:ssh auth_success;help:ssh auth_success");
   this.ssh_auth_attemptsField = this.api.addField("field:zeek_ssh.auth_attempts;db:zeek_ssh.auth_attempts;kind:integer;friendly:ssh auth_attempts;help:ssh auth_attempts");
@@ -531,6 +575,7 @@ function ZeekLogs (api, section) {
   this.ssh_sshkaField = this.api.addField("field:zeek_ssh.sshka;db:zeek_ssh.sshka;kind:termfield;friendly:HASSH Server Host Key Algorithms;help:HASSH Server Host Key Algorithms");
 
   // ssl.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info
   this.ssl_ssl_versionField = this.api.addField("field:zeek_ssl.ssl_version;db:zeek_ssl.ssl_version;kind:termfield;friendly:ssl ssl_version;help:ssl ssl_version");
   this.ssl_cipherField = this.api.addField("field:zeek_ssl.cipher;db:zeek_ssl.cipher;kind:termfield;friendly:ssl cipher;help:ssl cipher");
   this.ssl_curveField = this.api.addField("field:zeek_ssl.curve;db:zeek_ssl.curve;kind:termfield;friendly:ssl curve;help:ssl curve");
@@ -606,32 +651,39 @@ function ZeekLogs (api, section) {
   this.ssl_ja3s_descField = this.api.addField("field:zeek_ssl.ja3s_desc;db:zeek_ssl.ja3s_desc;kind:termfield;friendly:JA3S Fingerprint Lookup;help:JA3S Fingerprint Lookup");
 
   // syslog.log
+  // https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info
   this.syslog_facilityField = this.api.addField("field:zeek_syslog.facility;db:zeek_syslog.facility;kind:termfield;friendly:syslog facility;help:syslog facility");
   this.syslog_severityField = this.api.addField("field:zeek_syslog.severity;db:zeek_syslog.severity;kind:termfield;friendly:syslog severity;help:syslog severity");
   this.syslog_messageField = this.api.addField("field:zeek_syslog.message;db:zeek_syslog.message;kind:termfield;friendly:syslog message;help:syslog message");
 
   // tds.log - https://github.com/amzn/zeek-plugin-tds
+  // https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek
   this.tds_commandField = this.api.addField("field:zeek_tds.command;db:zeek_tds.command;kind:termfield;friendly:tds command;help:tds command");
 
   // tds_rpc.log - https://github.com/amzn/zeek-plugin-tds
+  // https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek
   this.tds_rpc_procedure_nameField = this.api.addField("field:zeek_tds_rpc.procedure_name;db:zeek_tds_rpc.procedure_name;kind:termfield;friendly:tds_rpc procedure_name;help:tds_rpc procedure_name");
   this.tds_rpc_parametersField = this.api.addField("field:zeek_tds_rpc.parameters;db:zeek_tds_rpc.parameters;kind:termfield;friendly:tds_rpc parameters;help:tds_rpc parameters");
 
   // tds_sql_batch.log - https://github.com/amzn/zeek-plugin-tds
+  // https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek
   this.tds_sql_batch_header_typeField = this.api.addField("field:zeek_tds_sql_batch.header_type;db:zeek_tds_sql_batch.header_type;kind:termfield;friendly:tds_sql_batch header_type;help:tds_sql_batch header_type");
   this.tds_sql_batch_queryField = this.api.addField("field:zeek_tds_sql_batch.query;db:zeek_tds_sql_batch.query;kind:termfield;friendly:tds_sql_batch query;help:tds_sql_batch query");
 
   // tunnel.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info
   this.tunnel_tunnel_typeField = this.api.addField("field:zeek_tunnel.tunnel_type;db:zeek_tunnel.tunnel_type;kind:termfield;friendly:tunnel tunnel_type;help:tunnel tunnel_type");
   this.tunnel_actionField = this.api.addField("field:zeek_tunnel.action;db:zeek_tunnel.action;kind:termfield;friendly:tunnel action;help:tunnel action");
 
   // weird.log
+  // https://docs.zeek.org/en/stable/scripts/base/frameworks/notice/weird.zeek.html#type-Weird::Info
   this.weird_nameField = this.api.addField("field:zeek_weird.name;db:zeek_weird.name;kind:termfield;friendly:weird name;help:weird name");
   this.weird_addlField = this.api.addField("field:zeek_weird.addl;db:zeek_weird.addl;kind:termfield;friendly:weird addl;help:weird addl");
   this.weird_noticeField = this.api.addField("field:zeek_weird.notice;db:zeek_weird.notice;kind:termfield;friendly:weird notice;help:weird notice");
   this.weird_peerField = this.api.addField("field:zeek_weird.peer;db:zeek_weird.peer;kind:termfield;friendly:weird peer;help:weird peer");
 
   // x509.log
+  // https://docs.zeek.org/en/stable/scripts/base/files/x509/main.zeek.html#type-X509::Info
   this.x509_fuidField = this.api.addField("field:zeek_x509.fuid;db:zeek_x509.fuid;kind:termfield;friendly:x509 fuid;help:x509 fuid");
   this.x509_certificate_versionField = this.api.addField("field:zeek_x509.certificate_version;db:zeek_x509.certificate_version;kind:integer;friendly:x509 certificate_version;help:x509 certificate_version");
   this.x509_certificate_serialField = this.api.addField("field:zeek_x509.certificate_serial;db:zeek_x509.certificate_serial;kind:termfield;friendly:x509 certificate_serial;help:x509 certificate_serial");
