@@ -235,7 +235,7 @@ def main():
     # partition/format each candidate device
     for device in candidateDevs:
 
-      # we only need at most two drives (one for pcap, one for bro), or at least one
+      # we only need at most two drives (one for pcap, one for zeek), or at least one
       if (len(formattedDevs) >= 2): break
 
       if (not args.interactive) or YesOrNo(f'Partition and format {device}{" (dry-run)" if args.dryrun else ""}?'):
@@ -430,7 +430,7 @@ def main():
 
         userDirs = []
         if par.mount == CAPTURE_MOUNT_ROOT_PATH:
-          # only one drive, so we're mounted at /capture, create user directories for /capture/bro and /capture/pcap
+          # only one drive, so we're mounted at /capture, create user directories for CAPTURE_MOUNT_ZEEK_DIR and CAPTURE_MOUNT_PCAP_DIR
           userDirs.append(os.path.join(par.mount, CAPTURE_MOUNT_PCAP_DIR))
           userDirs.append(os.path.join(par.mount, CAPTURE_MOUNT_ZEEK_DIR))
         else:
@@ -439,7 +439,7 @@ def main():
 
         # set permissions on user dirs
         pcapDir = None
-        broDir = None
+        zeekDir = None
         for userDir in userDirs:
           os.makedirs(userDir, exist_ok=True)
           os.chown(userDir, CAPTURE_USER_UID, netdevGuid)
@@ -448,7 +448,7 @@ def main():
           if f"{os.path.sep}{CAPTURE_MOUNT_PCAP_DIR}{os.path.sep}" in userDir:
             pcapDir = userDir
           elif f"{os.path.sep}{CAPTURE_MOUNT_ZEEK_DIR}{os.path.sep}" in userDir:
-            broDir = userDir
+            zeekDir = userDir
 
         # replace capture paths in-place in SENSOR_CAPTURE_CONFIG
         if os.path.isfile(SENSOR_CAPTURE_CONFIG):
@@ -460,8 +460,8 @@ def main():
               if (log_path_match is not None):
                 if (log_path_match.group('key') == 'PCAP_PATH') and (pcapDir is not None):
                   print(capture_re.sub(r"\1=%s" % pcapDir, line))
-                elif (log_path_match.group('key') == 'ZEEK_LOG_PATH') and (broDir is not None):
-                  print(capture_re.sub(r"\1=%s" % broDir, line))
+                elif (log_path_match.group('key') == 'ZEEK_LOG_PATH') and (zeekDir is not None):
+                  print(capture_re.sub(r"\1=%s" % zeekDir, line))
                 else:
                   print(line)
               else:

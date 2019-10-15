@@ -78,7 +78,7 @@ ZKG_GITHUB_URLS=(
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
-  [[ -d "$SRC_DIR" ]] && zkg install --force "$SRC_DIR"
+  [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
 
 # install Zeek packages that need to be copied manually
@@ -108,6 +108,16 @@ if [[ -d "$SRC_DIR" ]]; then
     rm -rf CMakeLists.txt ./scripts ./src && \
     cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
     ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+    make && \
+    make install
+  cd "$CWD"
+fi
+
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/bro-af_packet-plugin")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$SRC_DIR" && \
+    ./configure --with-kernel=/usr --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
     make && \
     make install
   cd "$CWD"

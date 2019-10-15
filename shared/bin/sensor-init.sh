@@ -42,16 +42,16 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
   fi
 
-  # broctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user
-  if [[ -d /opt/bro.orig ]]; then
-    # as such, we're going to reset bro to a "clean" state after each reboot. the config files will get
-    # regenerated when we are about to deploy bro itself
-    [[ -d /opt/bro ]] && rm -rf /opt/bro
-    rsync -a /opt/bro.orig/ /opt/bro
+  # zeekctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user
+  if [[ -d /opt/zeek.orig ]]; then
+    # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
+    # regenerated when we are about to deploy zeek itself
+    [[ -d /opt/zeek ]] && rm -rf /opt/zeek
+    rsync -a /opt/zeek.orig/ /opt/zeek
   fi
-  if [[ -d /opt/bro ]]; then
-    chown -R 1000:1000 /opt/bro/*
-    [[ -f /opt/bro/bin/bro ]] && setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/bro/bin/bro
+  if [[ -d /opt/zeek ]]; then
+    chown -R 1000:1000 /opt/zeek/*
+    [[ -f /opt/zeek/bin/zeek ]] && setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
   fi
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
