@@ -1,5 +1,7 @@
 #!/usr/bin/env zeek
 
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
 @load ./extractor_params
 
 global extractor_extract_mode = (getenv("ZEEK_EXTRACTOR_MODE") == "") ? extractor_extract_known : getenv("ZEEK_EXTRACTOR_MODE");

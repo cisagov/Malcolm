@@ -1,5 +1,7 @@
 #!/usr/bin/env zeek
 
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
 export {
   const extractor_extract_none      = "none" &redef;
   const extractor_extract_known     = "known" &redef;

@@ -37,7 +37,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         groff-base \
         imagemagick \
         libcap-dev \
-        libgoogle-perftools-dev \
         libjson-perl \
         libkrb5-dev \
         libmaxminddb-dev \
@@ -161,7 +160,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       gettext \
       inotify-tools \
       libcap2-bin \
-      libgoogle-perftools4 \
       libjson-perl \
       libkrb5-3 \
       libmaxminddb0 \

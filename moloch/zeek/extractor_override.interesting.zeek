@@ -1,5 +1,7 @@
 #!/usr/bin/env zeek
 
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
 export {
   redef extractor_always_extract_unknown = F;
 
@@ -103,7 +105,8 @@ export {
 
   # TODO: this was:
   # } &default="dat";
-  # not allowed in 3.0.0, need to research why
-  # see https://github.com/zeek/zeek/commit/db79041b1924e95d0bbde81acfbfb8d8ba1814b5
+  # should be fixed in 3.0.1
+  # see http://mailman.icsi.berkeley.edu/pipermail/zeek/2019-October/014622.html
+  #     https://github.com/zeek/zeek/pull/632
 
 }

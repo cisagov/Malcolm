@@ -70,7 +70,6 @@ javascript-common
 less
 libffi6
 libffi-dev
-libgoogle-perftools4
 libgtk2.0-bin
 libnl-3-200
 libnl-genl-3-200

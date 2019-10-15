@@ -26,7 +26,6 @@ redef SOCKS::default_capture_password = T;
 @load protocols/http/detect-webapps
 @load protocols/http/software
 @load protocols/http/software-browser-plugins
-@load protocols/mqtt
 @load protocols/mysql/software
 @load protocols/smtp/software
 @load protocols/ssh/detect-bruteforcing
@@ -42,6 +41,7 @@ redef SOCKS::default_capture_password = T;
 @load policy/protocols/conn/mac-logging
 @load policy/protocols/modbus/track-memmap
 @load policy/protocols/modbus/known-masters-slaves
+@load policy/protocols/mqtt
 # @load frameworks/files/detect-MHR
 
 # custom packages installed manually
