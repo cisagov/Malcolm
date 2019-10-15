@@ -20,7 +20,7 @@ ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
 ADD https://www.zeek.org/downloads/zeek-$ZEEK_VERSION.tar.gz $SRC_BASE_DIR/zeek.tar.gz
-ADD moloch/scripts/zeek_install_plugins.sh /usr/local/bin/
+ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -204,7 +204,6 @@ ADD moloch/zeek/*.zeek $ZEEK_DIR/share/zeek/site/
 
 RUN groupadd --gid 1000 $MOLOCHUSER && \
     useradd -M --uid 1000 --gid 1000 --home $MOLOCHDIR $MOLOCHUSER && \
-    rm -f /data/zeek_install_plugins.sh && \
     chmod 755 /data/*.sh && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
     bash -c "zcat /tmp/GeoLite2-Country.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-Country.mmdb" && \
