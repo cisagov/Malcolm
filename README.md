@@ -222,6 +222,8 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/aol/moloch/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
 
+Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).
+
 As part of its network traffic analysis, Zeek can extract and analyze files transferred across the protocols it understands. In addition to generating logs for transferred files, deeper analysis is done into the following file types:
 
 * [Portable executable](https://docs.zeek.org/en/stable/scripts/base/files/pe/main.zeek.html#type-PE::Info) files
@@ -229,7 +231,7 @@ As part of its network traffic analysis, Zeek can extract and analyze files tran
 
 See [automatic file extraction and scanning](#ZeekFileExtraction) for additional features related to file scanning.
 
-Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).
+See [Zeek log integration](#MolochZeek) for more information on how Malcolm integrates [Moloch sessions and Zeek logs](#ZeekMolochFlowCorrelation) for analysis. 
 
 ## <a name="Development"></a>Development
 
