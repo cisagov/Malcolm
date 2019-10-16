@@ -77,7 +77,6 @@ ZKG_GITHUB_URLS=(
   https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
-  https://github.com/SoftwareConsultingEmporium/ldap-analyzer
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -121,6 +120,16 @@ if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
     ./configure --with-kernel=/usr --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+    make && \
+    make install
+  cd "$CWD"
+fi
+
+SRC_DIR="$(clone_github_repo "https://github.com/SoftwareConsultingEmporium/ldap-analyzer")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$SRC_DIR" && \
+    ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
     make && \
     make install
   cd "$CWD"
