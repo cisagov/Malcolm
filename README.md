@@ -171,13 +171,22 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Moloch understands and is able to understand in the same way it natively understands PCAP data
 * [Kibana](https://www.elastic.co/products/kibana) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
-* Amazon.com, Inc.'s [Zeek plugins for ICS protocols](https://github.com/amzn?q=zeek)
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
+* These third party Zeek plugins:
+    * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
+    * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
+    * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
+    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
+    * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
+    * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
+    * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
+    * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
 
 ## <a name="Protocols"></a>Supported Protocols
 

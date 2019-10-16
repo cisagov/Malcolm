@@ -73,8 +73,11 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
   https://github.com/corelight/bro-community-id
+  https://github.com/corelight/bro-xor-exe-plugin
+  https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
+  https://github.com/SoftwareConsultingEmporium/ldap-analyzer
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
