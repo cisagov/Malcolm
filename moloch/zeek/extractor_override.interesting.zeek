@@ -101,12 +101,6 @@ export {
     ["text/jscript"]= "jsx",
     ["text/rtf"]= "rtf",
     ["text/vbscript"]= "vbs"
-  };
-
-  # TODO: this was:
-  # } &default="dat";
-  # should be fixed in 3.0.1
-  # see http://mailman.icsi.berkeley.edu/pipermail/zeek/2019-October/014622.html
-  #     https://github.com/zeek/zeek/pull/632
+  } &default="dat";
 
 }

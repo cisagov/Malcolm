@@ -11,6 +11,7 @@ ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_VERSION "3.0.0"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
+ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV PATH="${ZEEK_DIR}/bin:${PATH}"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -20,6 +21,8 @@ ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
 ADD https://www.zeek.org/downloads/zeek-$ZEEK_VERSION.tar.gz $SRC_BASE_DIR/zeek.tar.gz
+# Fix redef'ing a table with a new &default attribute #632 -  https://github.com/zeek/zeek/pull/632/commits
+ADD https://github.com/zeek/zeek/commit/42b6040952030c44ce337704916cf89a065994b0.patch $ZEEK_PATCH_DIR/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
@@ -63,6 +66,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   cd "${SRC_BASE_DIR}" && \
     tar -xvf "zeek.tar.gz" && \
     cd "./zeek-${ZEEK_VERSION}" && \
+    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - < \$i || true; done" && \
     ./configure --prefix="${ZEEK_DIR}" --generator=Ninja && \
     cd build && \
     ninja && \
@@ -81,7 +85,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   cd /data && \
   tar -xvf "moloch.tar.gz" && \
     cd "./moloch-"$MOLOCH_VERSION && \
-    bash -c 'for i in /data/patches/*; do patch -p1 < $i; done' && \
+    bash -c 'for i in /data/patches/*; do patch -p 1 -r - < $i || true; done' && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_77.png ./viewer/public/moloch_77.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./parliament/vueapp/src/assets/header_logo.png && \
