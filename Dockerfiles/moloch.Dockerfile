@@ -66,7 +66,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   cd "${SRC_BASE_DIR}" && \
     tar -xvf "zeek.tar.gz" && \
     cd "./zeek-${ZEEK_VERSION}" && \
-    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - < \$i || true; done" && \
+    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
     ./configure --prefix="${ZEEK_DIR}" --generator=Ninja && \
     cd build && \
     ninja && \
@@ -85,7 +85,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   cd /data && \
   tar -xvf "moloch.tar.gz" && \
     cd "./moloch-"$MOLOCH_VERSION && \
-    bash -c 'for i in /data/patches/*; do patch -p 1 -r - < $i || true; done' && \
+    bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_77.png ./viewer/public/moloch_77.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./parliament/vueapp/src/assets/header_logo.png && \
