@@ -46,7 +46,7 @@ redef SOCKS::default_capture_password = T;
 
 # custom packages installed manually
 @load Salesforce/GQUIC
-@load Bro::LDAP
 @load ./bzar
 # custom packages managed by zkg via packages/packages.zeek
 @load ./packages/packages.zeek
+# and apparently some installed packages (BRO::LDAP) are loaded automatically

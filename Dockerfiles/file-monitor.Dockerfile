@@ -50,6 +50,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       wget && \
     apt-get  -y -q install \
       inotify-tools \
+      libzmq5 \
       psmisc \
       python3 \
       python3-bs4 \
@@ -57,7 +58,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-dev \
       python3-pip \
       python3-pyinotify \
-      python3-requests && \
+      python3-requests \
+      python3-zmq && \
     pip3 install clamd namedlist supervisor && \
     mkdir -p /var/log/supervisor && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove python3-dev build-essential && \
