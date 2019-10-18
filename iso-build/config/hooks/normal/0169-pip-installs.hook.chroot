@@ -5,16 +5,9 @@ export LANG=C.UTF-8
 
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
-  bat \
   beautifulsoup4 \
-  cachetools \
-  clamd \
   debinterface \
   docker-compose \
-  namedlist \
   netifaces \
-  numpy \
-  pyinotify \
   pythondialog \
-  requests[security] \
-  scapy
+  requests[security]

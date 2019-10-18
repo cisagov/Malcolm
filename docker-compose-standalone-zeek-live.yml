@@ -55,7 +55,6 @@ x-zeek-file-extraction-variables: &zeek-file-extraction-variables
   ZEEK_EXTRACTOR_MODE : 'none'
   EXTRACTED_FILE_IGNORE_EXISTING : 'false'
   EXTRACTED_FILE_PRESERVATION : 'quarantined'
-  EXTRACTED_FILE_START_SLEEP : 30
   EXTRACTED_FILE_MIN_BYTES : 64
   EXTRACTED_FILE_MAX_BYTES : 134217728
   VTOT_API2_KEY : '0'

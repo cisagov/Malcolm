@@ -9,7 +9,9 @@ ARG ZEEK_EXTRACTOR_PATH=/data/zeek/extract_files
 ARG ZEEK_LOG_DIRECTORY=/data/zeek/logs
 ARG EXTRACTED_FILE_IGNORE_EXISTING=false
 ARG EXTRACTED_FILE_PRESERVATION=quarantined
-ARG EXTRACTED_FILE_START_SLEEP=30
+ARG EXTRACTED_FILE_WATCHER_START_SLEEP=30
+ARG EXTRACTED_FILE_SCANNER_START_SLEEP=10
+ARG EXTRACTED_FILE_LOGGER_START_SLEEP=5
 ARG EXTRACTED_FILE_MIN_BYTES=64
 ARG EXTRACTED_FILE_MAX_BYTES=134217728
 ARG VTOT_API2_KEY=0
@@ -26,7 +28,9 @@ ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
 ENV EXTRACTED_FILE_IGNORE_EXISTING $EXTRACTED_FILE_IGNORE_EXISTING
 ENV EXTRACTED_FILE_PRESERVATION $EXTRACTED_FILE_PRESERVATION
-ENV EXTRACTED_FILE_START_SLEEP $EXTRACTED_FILE_START_SLEEP
+ENV EXTRACTED_FILE_WATCHER_START_SLEEP $EXTRACTED_FILE_WATCHER_START_SLEEP
+ENV EXTRACTED_FILE_SCANNER_START_SLEEP $EXTRACTED_FILE_SCANNER_START_SLEEP
+ENV EXTRACTED_FILE_LOGGER_START_SLEEP $EXTRACTED_FILE_LOGGER_START_SLEEP
 ENV EXTRACTED_FILE_MIN_BYTES $EXTRACTED_FILE_MIN_BYTES
 ENV EXTRACTED_FILE_MAX_BYTES $EXTRACTED_FILE_MAX_BYTES
 ENV VTOT_API2_KEY $VTOT_API2_KEY
@@ -50,15 +54,16 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       wget && \
     apt-get  -y -q install \
       inotify-tools \
+      libzmq5 \
       psmisc \
       python3 \
       python3-bs4 \
-      python3-cachetools \
       python3-dev \
       python3-pip \
       python3-pyinotify \
-      python3-requests && \
-    pip3 install clamd namedlist supervisor && \
+      python3-requests \
+      python3-zmq && \
+    pip3 install clamd supervisor && \
     mkdir -p /var/log/supervisor && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove python3-dev build-essential && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
@@ -84,9 +89,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
       sed -i 's/^DatabaseOwner .*$/DatabaseOwner monitor/g' /etc/clamav/freshclam.conf
 
-ADD shared/bin/zeek-carve-monitor.py /usr/local/bin
+ADD shared/bin/zeek_carve_*.py /usr/local/bin
 ADD shared/bin/malass_client.py /usr/local/bin
-ADD shared/bin/carveutils.py /usr/local/bin
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 
 WORKDIR /data/zeek/extract_files
