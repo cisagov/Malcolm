@@ -74,15 +74,14 @@ def scanFileWorker(checkConnInfo):
     # Socket to receive messages on
     new_files_socket = context.socket(zmq.PULL)
     new_files_socket.connect(f"tcp://localhost:{VENTILATOR_PORT}")
-    new_files_socket.SNDTIMEO = 5000
     new_files_socket.RCVTIMEO = 5000
     if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tbound to ventilator at {VENTILATOR_PORT}")
 
     # Socket to send messages to
     scanned_files_socket = context.socket(zmq.PUSH)
     scanned_files_socket.connect(f"tcp://localhost:{SINK_PORT}")
-    scanned_files_socket.SNDTIMEO = 5000
-    scanned_files_socket.RCVTIMEO = 5000
+    # todo: do I want to set this? probably not, since what else would we do if we can't send? just block
+    # scanned_files_socket.SNDTIMEO = 5000
     if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
 
     fileName = None
@@ -141,19 +140,19 @@ def scanFileWorker(checkConnInfo):
               elif isinstance(response.result, dict) and ("error" in response.result):
                 # scan errored out, report the error
                 scanResult = response.result["error"]
-                if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+                eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
 
               else:
                 # result is unrecognizable
                 scanResult = "Invalid scan result format"
-                if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+                eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
 
             else:
               # impossibru! abandon ship for this file?
               # todo? what else? touch it?
               requestComplete = True
               scanResult = "Error checking results"
-              if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t❗{fileName} {scanResult}")
+              eprint(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
 
         else:
           # we were denied (rate limiting, probably), so we'll need wait for a slot to clear up
@@ -168,7 +167,6 @@ def scanFileWorker(checkConnInfo):
           except zmq.Again as timeout:
             # todo: what to do here?
             if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
-            pass
 
   else:
     eprint(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")

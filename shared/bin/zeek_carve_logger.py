@@ -209,9 +209,10 @@ def main():
               shutil.move(fileName, quarantineDir)
               if debug: eprint(f"{scriptName}:\t⏩\t{fileName}")
             except Exception as e:
+              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
               # hm move failed, delete it i guess?
               os.remove(fileName)
-              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+
 
           elif (args.preserveMode == PRESERVE_ALL):
             # move non-triggering file to preserved directory
@@ -219,9 +220,9 @@ def main():
               shutil.move(fileName, preserveDir)
               if verboseDebug: eprint(f"{scriptName}:\t⏩\t{fileName}")
             except Exception as e:
+              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
               # hm move failed, delete it i guess?
               os.remove(fileName)
-              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
 
           else:
             # delete the file
