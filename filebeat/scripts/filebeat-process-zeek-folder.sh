@@ -77,7 +77,7 @@ if mkdir $LOCKDIR; then
       python -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
       find "$DESTDIR_EXTRACTED" -type f -name "*.log" | while read LOGFILE
       do
-        FIELDS_BITMAP="$($ZEEK_LOG_FIELD_BITMAP_SCRIPT "$LOGFILE")"
+        FIELDS_BITMAP="$($ZEEK_LOG_FIELD_BITMAP_SCRIPT "$LOGFILE" | head -n 1)"
         LINKNAME_BASE="$(basename "$LOGFILE" .log)"
         if [[ -n $FIELDS_BITMAP ]]; then
           LINKNAME="${LINKNAME_BASE}(${TAGS_JOINED},${FIELDS_BITMAP}).log"

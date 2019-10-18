@@ -75,8 +75,7 @@ FILES_IN_IMAGES=(
   "/data/moloch/etc/GeoLite2-Country.mmdb;moloch"
   "/data/moloch/etc/ipv4-address-space.csv;moloch"
   "/data/moloch/etc/oui.txt;moloch"
-  "/opt/bro/bin/bro;moloch"
-  "/opt/bro/share/bro/site/ja3/ja3.bro;moloch"
+  "/opt/zeek/bin/zeek;moloch"
   "/data/moloch/bin/moloch-capture;moloch"
 )
 for i in ${FILES_IN_IMAGES[@]}; do

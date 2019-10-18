@@ -20,6 +20,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Quick start](#QuickStart)
 * [Overview](#Overview)
 * [Components](#Components)
+* [Supported Protocols](#Protocols)
 * [Development](#Development)
     * [Building from source](#Build)
 * [Pre-Packaged installation files](#Packager)
@@ -112,17 +113,17 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.6.1               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.6.1               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.6.1               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.6.1               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.6.1               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.6.1               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.6.1               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.6.1               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.6.1               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.6.1               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.6.1               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/moloch                                1.7.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.7.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.7.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.7.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.7.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.7.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.7.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.7.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.7.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.7.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.7.0               xxxxxxxxxxxx        11 days ago         276MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.3               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
@@ -176,6 +177,71 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
+* These third party Zeek plugins:
+    * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
+    * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
+    * J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin
+    * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
+    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
+    * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
+    * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
+    * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
+    * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
+
+## <a name="Protocols"></a>Supported Protocols
+
+Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analyzers.html) and [Moloch](https://github.com/aol/moloch/tree/master/capture/parsers) to analyze network traffic. These tools provide varying degrees of visibility into traffic transmitted over the following network protocols:
+
+| Traffic | Wiki | Organization/Specification | Moloch | Zeek |
+|---|:---:|:---:|:---:|:---:|
+|Internet layer|[🔗](https://en.wikipedia.org/wiki/Internet_layer)|[🔗](https://tools.ietf.org/html/rfc791)|[✓](https://github.com/aol/moloch/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/conn/main.zeek.html#type-Conn::Info)|
+|Border Gateway Protocol (BGP)|[🔗](https://en.wikipedia.org/wiki/Border_Gateway_Protocol)|[🔗](https://tools.ietf.org/html/rfc2283)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/bgp.c)||
+|Building Automation and Control (BACnet)|[🔗](https://en.wikipedia.org/wiki/BACnet)|[🔗](http://www.bacnet.org/)||[✓](https://github.com/amzn/zeek-plugin-bacnet/blob/master/scripts/main.zeek)|
+|Distributed Computing Environment / Remote Procedure Calls (DCE/RPC)|[🔗](https://en.wikipedia.org/wiki/DCE/RPC)|[🔗](https://pubs.opengroup.org/onlinepubs/009629399/toc.pdf)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dce-rpc/main.zeek.html#type-DCE_RPC::Info)|
+|Dynamic Host Configuration Protocol (DHCP)|[🔗](https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol)|[🔗](https://tools.ietf.org/html/rfc2131)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/dhcp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dhcp/main.zeek.html#type-DHCP::Info)|
+|Distributed Network Protocol 3 (DNP3)|[🔗](https://en.wikipedia.org/wiki/DNP3)|[🔗](https://www.dnp.org)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dnp3/main.zeek.html#type-DNP3::Info)|
+|Domain Name System (DNS)|[🔗](https://en.wikipedia.org/wiki/Domain_Name_System)|[🔗](https://tools.ietf.org/html/rfc1035)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/dns.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dns/main.zeek.html#type-DNS::Info)|
+|EtherNet/IP / Common Industrial Protocol (CIP)|[🔗](https://en.wikipedia.org/wiki/EtherNet/IP) [🔗](https://en.wikipedia.org/wiki/Common_Industrial_Protocol)|[🔗](https://www.odva.org/Technology-Standards/EtherNet-IP/Overview)||[✓](https://github.com/amzn/zeek-plugin-enip/blob/master/scripts/main.zeek)|
+|FTP (File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc959)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ftp/info.zeek.html#type-FTP::Info)|
+|Google Quick UDP Internet Connections (gQUIC)|[🔗](https://en.wikipedia.org/wiki/QUIC#Google_QUIC_(gQUIC))|[🔗](https://www.chromium.org/quic)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/quic.c)|[✓](https://github.com/salesforce/GQUIC_Protocol_Analyzer/blob/master/scripts/Salesforce/GQUIC/main.bro)|
+|Hypertext Transfer Protocol (HTTP)|[🔗](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc7230)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/http.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/http/main.zeek.html#type-HTTP::Info)|
+|Internet Relay Chat (IRC)|[🔗](https://en.wikipedia.org/wiki/Internet_Relay_Chat)|[🔗](https://tools.ietf.org/html/rfc1459)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/irc.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/irc/main.zeek.html#type-IRC::Info)|
+|Kerberos|[🔗](https://en.wikipedia.org/wiki/Kerberos_(protocol))|[🔗](https://tools.ietf.org/html/rfc4120)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/krb5.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/krb/main.zeek.html#type-KRB::Info)|
+|Lightweight Directory Acess Protocol (LDAP)|[🔗](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol)|[🔗](https://tools.ietf.org/html/rfc4511)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/ldap.c)|[✓](https://github.com/SoftwareConsultingEmporium/ldap-analyzer/blob/master/scripts/main.bro)|
+|Modbus|[🔗](https://en.wikipedia.org/wiki/Modbus)|[🔗](http://www.modbus.org/)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/modbus/main.zeek.html#type-Modbus::Info)|
+|MQ Telemetry Transport (MQTT)|[🔗](https://en.wikipedia.org/wiki/MQTT)|[🔗](https://mqtt.org/)||[✓](https://docs.zeek.org/en/stable/scripts/policy/protocols/mqtt/main.zeek.html)|
+|MySQL|[🔗](https://en.wikipedia.org/wiki/MySQL)|[🔗](https://dev.mysql.com/doc/internals/en/client-server-protocol.html)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/mysql.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/mysql/main.zeek.html#type-MySQL::Info)|
+|NT Lan Manager (NTLM)|[🔗](https://en.wikipedia.org/wiki/NT_LAN_Manager)|[🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b38c36ed-2804-4868-a9ff-8dd3182128e4?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ntlm/main.zeek.html#type-NTLM::Info)|
+|Network Time Protocol (NTP)|[🔗](https://en.wikipedia.org/wiki/Network_Time_Protocol)|[🔗](http://www.ntp.org)||[✓](https://docs.zeek.org/en/latest/scripts/base/protocols/ntp/main.zeek.html#type-NTP::Info)|
+|Oracle|[🔗](https://en.wikipedia.org/wiki/Oracle_Net_Services)|[🔗](https://docs.oracle.com/cd/E11882_01/network.112/e41945/layers.htm#NETAG004)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/oracle.c)||
+|PostgreSQL|[🔗](https://en.wikipedia.org/wiki/PostgreSQL)|[🔗](https://www.postgresql.org/)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/postgresql.c)||
+|Process Field Net (PROFINET)|[🔗](https://en.wikipedia.org/wiki/PROFINET)|[🔗](https://us.profinet.com/technology/profinet/)||[✓](https://github.com/amzn/zeek-plugin-profinet/blob/master/scripts/main.zeek)|
+|Remote Authentication Dial-In User Service (RADIUS)|[🔗](https://en.wikipedia.org/wiki/RADIUS)|[🔗](https://tools.ietf.org/html/rfc2865)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/radius.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/radius/main.zeek.html#type-RADIUS::Info)|
+|Remote Desktop Protocol (RDP)|[🔗](https://en.wikipedia.org/wiki/Remote_Desktop_Protocol)|[🔗](https://docs.microsoft.com/en-us/windows/win32/termserv/remote-desktop-protocol?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/rdp/main.zeek.html#type-RDP::Info)|
+|Remote Framebuffer (RFB)|[🔗](https://en.wikipedia.org/wiki/RFB_protocol)|[🔗](https://tools.ietf.org/html/rfc6143)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/rfb/main.zeek.html#type-RFB::Info)|
+|S7comm / Connection Oriented Transport Protocol (COTP)|[🔗](https://wiki.wireshark.org/S7comm) [🔗](https://wiki.wireshark.org/COTP)|[🔗](https://support.industry.siemens.com/cs/document/26483647/what-properties-advantages-and-special-features-does-the-s7-protocol-offer-?dti=0&lc=en-WW) [🔗](https://www.ietf.org/rfc/rfc0905.txt)||[✓](https://github.com/amzn/zeek-plugin-s7comm/blob/master/scripts/main.zeek)|
+|Session Initiation Protocol (SIP)|[🔗](https://en.wikipedia.org/wiki/Session_Initiation_Protocol)|[🔗](https://tools.ietf.org/html/rfc3261)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/sip/main.zeek.html#type-SIP::Info)|
+|Server Message Block (SMB) / Common Internet File System (CIFS)|[🔗](https://en.wikipedia.org/wiki/Server_Message_Block)|[🔗](https://docs.microsoft.com/en-us/windows/win32/fileio/microsoft-smb-protocol-and-cifs-protocol-overview)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/smb.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smb/main.zeek.html)|
+|Simple Mail Transfer Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc5321)|[✓]()|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info)|
+|Simple Network Management Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)|[🔗](https://tools.ietf.org/html/rfc2578)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/snmp/main.zeek.html#type-SNMP::Info)|
+|SOCKS|[🔗](https://en.wikipedia.org/wiki/SOCKS)|[🔗](https://tools.ietf.org/html/rfc1928)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/socks/main.zeek.html#type-SOCKS::Info)|
+|Secure Shell (SSH)|[🔗](https://en.wikipedia.org/wiki/Secure_Shell)|[🔗](https://tools.ietf.org/html/rfc4253)|[✓]()|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssh/main.zeek.html#type-SSH::Info)|
+|Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
+|Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
+|Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
+|various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/aol/moloch/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
+
+Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).
+
+As part of its network traffic analysis, Zeek can extract and analyze files transferred across the protocols it understands. In addition to generating logs for transferred files, deeper analysis is done into the following file types:
+
+* [Portable executable](https://docs.zeek.org/en/stable/scripts/base/files/pe/main.zeek.html#type-PE::Info) files
+* [X.509](https://docs.zeek.org/en/stable/scripts/base/files/x509/main.zeek.html#type-X509::Info) certificates
+
+See [automatic file extraction and scanning](#ZeekFileExtraction) for additional features related to file scanning.
+
+See [Zeek log integration](#MolochZeek) for more information on how Malcolm integrates [Moloch sessions and Zeek logs](#ZeekMolochFlowCorrelation) for analysis. 
 
 ## <a name="Development"></a>Development
 
@@ -1360,17 +1426,17 @@ Pulling nginx-proxy   ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.6.1               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.6.1               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.6.1               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.6.1               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.6.1               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.6.1               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.6.1               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.6.1               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.6.1               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.6.1               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.6.1               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/moloch                                1.7.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/htadmin                               1.7.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.7.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.7.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.7.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/file-monitor                          1.7.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.7.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.7.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.7.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.7.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.7.0               xxxxxxxxxxxx        11 days ago         276MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.3               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 

@@ -16,8 +16,8 @@ ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
 ZEEK_EXTRACTOR_MODE_MAPPED = 'mapped'
 ZEEK_EXTRACTOR_MODE_NONE = 'none'
-ZEEK_EXTRACTOR_SCRIPT = "extractor.bro"
-ZEEK_EXTRACTOR_SCRIPT_INTERESTING = "extractor_override.interesting.bro"
+ZEEK_EXTRACTOR_SCRIPT = "extractor.zeek"
+ZEEK_EXTRACTOR_SCRIPT_INTERESTING = "extractor_override.interesting.zeek"
 ZEEK_LOCAL_SCRIPT = 'local'
 ZEEK_STATE_DIR = '.state'
 ZEEK_UPLOAD_DIR_DEFAULT = '/data/zeek/upload'
@@ -62,7 +62,7 @@ def main():
         os.chdir(tmpLogDir)
 
         # use Zeek to process the pcap
-        broCmd = [os.path.join(os.getenv(ZEEK_INSTALL_DIR_ENV_VAR, "/opt/bro"), "bin/bro"), "-r", pcapFile, ZEEK_LOCAL_SCRIPT]
+        broCmd = [os.path.join(os.getenv(ZEEK_INSTALL_DIR_ENV_VAR, "/opt/zeek"), "bin/zeek"), "-r", pcapFile, ZEEK_LOCAL_SCRIPT]
 
         # set file extraction parameters if required
         if (extractFileMode != ZEEK_EXTRACTOR_MODE_NONE):
@@ -71,7 +71,7 @@ def main():
             broCmd.append(ZEEK_EXTRACTOR_SCRIPT_INTERESTING)
             os.environ[ZEEK_EXTRACTOR_MODE_ENV_VAR] = ZEEK_EXTRACTOR_MODE_MAPPED
 
-        # execute bro
+        # execute zeek
         try:
           output = subprocess.check_output(broCmd, stderr=subprocess.STDOUT, universal_newlines=True)
         except Exception as e:
@@ -94,7 +94,7 @@ def main():
           errCode = os.EX_OK
 
         else:
-          # bro returned no log files (or an error)
+          # zeek returned no log files (or an error)
           eprint('Zeek failed to process {} (or no log files were generated)'.format(os.path.basename(pcapFile)))
           errCode = os.EX_DATAERR
 
