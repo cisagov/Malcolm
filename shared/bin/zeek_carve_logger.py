@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import signal
 import sys
 import time
@@ -140,7 +141,6 @@ def main():
 
   if debug: eprint(f"{scriptName}: bound sink port {SINK_PORT}")
 
-
   # open and write out header for our super legit zeek signature.log file
   with open(broSigLogSpec, 'w+', 1) if (broSigLogSpec is not None) else nullcontext() as broSigFile:
     if (broSigFile is not None):
@@ -151,9 +151,9 @@ def main():
       print('#path\tsignature', file=broSigFile, end='\n')
       print(f'#open\t{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}', file=broSigFile, end='\n')
       print(re.sub(r"\b((orig|resp)_[hp])\b", r"id.\1",
-                   f"#fields\t{BroStringFormat}".replace('{', '').replace('}', '')),
+                   f"#fields\t{BroSignatureLine.signature_format_line()}".replace('{', '').replace('}', '')),
             file=broSigFile, end='\n')
-      print(f'#types\t{BroSignatureTypes}', file=broSigFile, end='\n')
+      print(f'#types\t{BroSignatureLine.signature_types_line()}', file=broSigFile, end='\n')
 
     while (not shuttingDown):
 
@@ -161,14 +161,72 @@ def main():
         pdbFlagged = False
         breakpoint()
 
+
+      triggered = False
       try:
-
-        #
         scanResult = json.loads(scanned_files_socket.recv_string())
-        if debug: eprint(f"{scriptName}:\t✉\t{scanResult}")
-
+        if debug: eprint(f"{scriptName}:\t📨\t{scanResult}")
       except zmq.Again as timeout:
-        if verboseDebug: eprint(f"{scriptName}:\t🕑 (recv)")
+        scanResult = None
+        if verboseDebug: eprint(f"{scriptName}:\t🕑\t(recv)")
+
+      if isinstance(scanResult, dict) and all (k in scanResult for k in (FILE_SCAN_RESULT_FILE,
+                                                                         FILE_SCAN_RESULT_ENGINES,
+                                                                         FILE_SCAN_RESULT_HITS,
+                                                                         FILE_SCAN_RESULT_MESSAGE,
+                                                                         FILE_SCAN_RESULT_DESCRIPTION)):
+
+        triggered = (scanResult[FILE_SCAN_RESULT_HITS] > 0)
+        fileName = scanResult[FILE_SCAN_RESULT_FILE]
+
+        if triggered:
+          # this file had a "hit" in one of the virus engines, log it!
+
+          # format the line as it should appear in the signatures log file
+          fileSpecFields = extracted_filespec_to_fields(fileName)
+          broLine = BroSignatureLine(ts=f"{fileSpecFields.time}",
+                                     uid=fileSpecFields.uid if fileSpecFields.uid is not None else '-',
+                                     note=ZEEK_SIGNATURE_NOTICE,
+                                     signature_id=scanResult[FILE_SCAN_RESULT_MESSAGE],
+                                     event_message=scanResult[FILE_SCAN_RESULT_DESCRIPTION],
+                                     sub_message=fileSpecFields.fid if fileSpecFields.fid is not None else os.path.basename(fileName),
+                                     signature_count=scanResult[FILE_SCAN_RESULT_HITS],
+                                     host_count=scanResult[FILE_SCAN_RESULT_ENGINES])
+          broLineStr = str(broLine)
+
+          # write broLineStr event line out to the signatures log file or to stdout
+          if (broSigFile is not None):
+            print(broLineStr, file=broSigFile, end='\n', flush=True)
+          else:
+            print(broLineStr, file=broSigFile, flush=True)
+
+        # finally, what to do with the file itself
+        if os.path.isfile(fileName):
+
+          if triggered and (args.preserveMode != PRESERVE_NONE):
+            # move triggering file to quarantine
+            try:
+              shutil.move(fileName, quarantineDir)
+              if debug: eprint(f"{scriptName}:\t⏩\t{fileName}")
+            except Exception as e:
+              # hm move failed, delete it i guess?
+              os.remove(fileName)
+              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+
+          elif (args.preserveMode == PRESERVE_ALL):
+            # move non-triggering file to preserved directory
+            try:
+              shutil.move(fileName, preserveDir)
+              if verboseDebug: eprint(f"{scriptName}:\t⏩\t{fileName}")
+            except Exception as e:
+              # hm move failed, delete it i guess?
+              os.remove(fileName)
+              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+
+          else:
+            # delete the file
+            os.remove(fileName)
+            if verboseDebug: eprint(f"{scriptName}:\t🚫\t{fileName}")
 
   # graceful shutdown
   if debug:

@@ -4,12 +4,19 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import clamd
+import hashlib
 import os
+import re
+import requests
 import sys
 import time
 
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
+from collections import Counter
+from collections import deque
+from collections import defaultdict
+from datetime import datetime
 from multiprocessing import RawValue
 from threading import get_ident
 from threading import Lock
@@ -23,6 +30,13 @@ SINK_PORT       = 5988
 PRESERVE_QUARANTINED = "quarantined"
 PRESERVE_ALL         = "all"
 PRESERVE_NONE        = "none"
+
+###################################################################################################
+FILE_SCAN_RESULT_FILE = "file"
+FILE_SCAN_RESULT_ENGINES = "engines"
+FILE_SCAN_RESULT_HITS = "hits"
+FILE_SCAN_RESULT_MESSAGE = "message"
+FILE_SCAN_RESULT_DESCRIPTION = "description"
 
 ###################################################################################################
 # the notice field for the signature.log we're writing out mimicing Zeek
@@ -57,26 +71,35 @@ CLAM_ENGINE_ID = 'ClamAV'
 CLAM_FOUND_KEY = 'FOUND'
 
 ###################################################################################################
-# this has a literal tab delimiter, don't let your editor screw it up
-BroStringFormat = '{ts}	{uid}	{orig_h}	{orig_p}	{resp_h}	{resp_p}	{note}	{signature_id}	{event_message}	{sub_message}	{signature_count}	{host_count}'
-BroSignatureTypes = 'time	string	addr	port	addr	port	enum	string	string	string	count	count'
+
 
 # a structure representing the fields of a line of Zeek's signatures.log, and the corresponding string formatting and type definitions
 class BroSignatureLine:
-    __slots__ = ('ts',  'uid',  'orig_h',  'orig_p',  'resp_h',  'resp_p',  'note',  'signature_id',  'event_message',  'sub_message',  'signature_count',  'host_count')
-    def __init__(self, ts='-', uid='-', orig_h='-', orig_p='-', resp_h='-', resp_p='-', note='-', signature_id='-', event_message='-', sub_message='-', signature_count='-', host_count='-'):
-      self.ts = ts
-      self.uid = uid
-      self.orig_h = orig_h
-      self.orig_p = orig_p
-      self.resp_h = resp_h
-      self.resp_p = resp_p
-      self.note = note
-      self.signature_id = signature_id
-      self.event_message = event_message
-      self.sub_message = sub_message
-      self.signature_count = signature_count
-      self.host_count = host_count
+  __slots__ = ('ts',  'uid',  'orig_h',  'orig_p',  'resp_h',  'resp_p',  'note',  'signature_id',  'event_message',  'sub_message',  'signature_count',  'host_count')
+  def __init__(self, ts='-', uid='-', orig_h='-', orig_p='-', resp_h='-', resp_p='-', note='-', signature_id='-', event_message='-', sub_message='-', signature_count='-', host_count='-'):
+    self.ts = ts
+    self.uid = uid
+    self.orig_h = orig_h
+    self.orig_p = orig_p
+    self.resp_h = resp_h
+    self.resp_p = resp_p
+    self.note = note
+    self.signature_id = signature_id
+    self.event_message = event_message
+    self.sub_message = sub_message
+    self.signature_count = signature_count
+    self.host_count = host_count
+
+  def __str__(self):
+    return "\t".join(map(str, [self.ts, self.uid, self.orig_h, self.orig_p, self.resp_h, self.resp_p, self.note, self.signature_id, self.event_message, self.sub_message, self.signature_count, self.host_count]))
+
+  @classmethod
+  def signature_format_line(cls):
+    return "\t".join(['{'+x+'}' for x in cls.__slots__])
+
+  @classmethod
+  def signature_types_line(cls):
+    return "\t".join(['time', 'string', 'addr', 'port', 'addr', 'port', 'enum', 'string', 'string', 'string', 'count', 'count'])
 
 # AnalyzerScan
 # .provider - a FileScanProvider subclass doing the scan/lookup
@@ -100,6 +123,17 @@ class AnalyzerResult:
     self.success = success
     self.result = result
 
+# the filename parts used by our Zeek instance for extracted files:
+#   source-fuid-uid-time.ext, eg., SSL-FTnzwn4hEPJi7BfzRk-CsRaviydrGyYROuX3-20190402105425.crt
+class ExtractedFileNameParts:
+  __slots__ = ('source', 'fid', 'uid', 'time', 'ext')
+  def __init__(self, source=None, fid=None, uid=None, time=None, ext=None):
+    self.source = source
+    self.fid = fid
+    self.uid = uid
+    self.time = time
+    self.ext = ext
+
 ###################################################################################################
 # convenient boolean argument parsing
 def str2bool(v):
@@ -113,7 +147,7 @@ def str2bool(v):
 ###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
-  print(*args, file=sys.stderr, **kwargs)
+  print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), *args, file=sys.stderr, **kwargs)
 
 ###################################################################################################
 # calculate a sha256 hash of a file
@@ -125,6 +159,23 @@ def sha256sum(filename):
     for n in iter(lambda : f.readinto(mv), 0):
       h.update(mv[:n])
   return h.hexdigest()
+
+###################################################################################################
+# filespec to various fields as per the extractor zeek script
+#   source-fuid-uid-time.ext
+#   eg.
+#       SSL-FTnzwn4hEPJi7BfzRk-CsRaviydrGyYROuX3-20190402105425.crt
+#
+def extracted_filespec_to_fields(filespec):
+  match = re.search(r'^(?P<source>.*)-(?P<fid>.*)-(?P<uid>.*)-(?P<time>\d+)\.(?P<ext>.*)$', filespec)
+  if match is not None:
+    result = ExtractedFileNameParts(match.group('source'), match.group('fid'), match.group('uid'),
+                                    time.mktime(datetime.strptime(match.group('time'), "%Y%m%d%H%M%S").timetuple()),
+                                    match.group('ext'))
+  else:
+    result = ExtractedFileNameParts(None, None, None, time.time(), None)
+
+  return result
 
 ###################################################################################################
 # open a file and close it, updating its access time
@@ -155,13 +206,15 @@ class AtomicInt:
 ###################################################################################################
 class FileScanProvider(ABC):
 
+  @staticmethod
   @abstractmethod
-  def max_requests(self):
+  def max_requests(cls):
     # returns the maximum number of concurrently open requests this type of provider can handle
     pass
 
+  @staticmethod
   @abstractmethod
-  def check_interval(self):
+  def check_interval(cls):
     # returns the amount of seconds you should sleep between checking for results
     pass
 
@@ -177,8 +230,8 @@ class FileScanProvider(ABC):
 
   @staticmethod
   @abstractmethod
-  def format(cls, response):
-    # returns FileScanResult based on response
+  def format(cls, fileName, response):
+    # returns result dict based on response (see FILE_SCAN_RESULT_* above)
     pass
 
 ###################################################################################################
@@ -194,10 +247,12 @@ class VirusTotalSearch(FileScanProvider):
     self.reqLimit = reqLimit
     self.reqLimitSec = reqLimitSec
 
-  def max_requests(self):
+  @staticmethod
+  def max_requests():
     return VTOT_MAX_REQS
 
-  def check_interval(self):
+  @staticmethod
+  def check_interval():
     return VTOT_CHECK_INTERVAL
 
   # ---------------------------------------------------------------------------------
@@ -268,13 +323,14 @@ class VirusTotalSearch(FileScanProvider):
     return result
 
   # ---------------------------------------------------------------------------------
-  # static method for formatting the response JSON (from requests.get) as a FileScanResult
+  # static method for formatting the response JSON (from requests.get) as a dict
   @staticmethod
-  def format(response):
-    result = FileScanResult(engines=1,
-                            hits=0,
-                            message=None,
-                            description=None)
+  def format(fileName, response):
+    result = {FILE_SCAN_RESULT_FILE : fileName,
+              FILE_SCAN_RESULT_ENGINES : 0,
+              FILE_SCAN_RESULT_HITS : 0,
+              FILE_SCAN_RESULT_MESSAGE : None,
+              FILE_SCAN_RESULT_DESCRIPTION : None}
 
     if isinstance(response, AnalyzerResult):
       resp = response.result
@@ -291,28 +347,28 @@ class VirusTotalSearch(FileScanProvider):
     if isinstance(resp, dict):
       if 'response_code' in resp:
         if (resp['response_code'] == VTOT_RESP_FOUND) and ('positives' in resp) and (resp['positives'] >0):
-          result.hits = resp['positives']
+          result[FILE_SCAN_RESULT_HITS] = resp['positives']
           if ('scans' in resp):
-            result.engines = len(resp['scans'])
+            result[FILE_SCAN_RESULT_ENGINES] = len(resp['scans'])
             scans = {engine:resp['scans'][engine] for engine in resp['scans'] if ('detected' in resp['scans'][engine]) and (resp['scans'][engine]['detected'] == True)}
             hits = defaultdict(list)
             for k, v in scans.items():
               hits[v['result'] if 'result' in v else 'unknown'].append(k)
             if (len(hits) > 0):
               # short result is most common signature name
-              result.message = max(hits, key= lambda x: len(set(hits[x])))
+              result[FILE_SCAN_RESULT_MESSAGE] = max(hits, key= lambda x: len(set(hits[x])))
               # long result is list of the signature names and the engines which generated them
-              result.description = ";".join([f"{k}<{','.join(v)}>" for k, v in hits.items()])
+              result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{k}<{','.join(v)}>" for k, v in hits.items()])
           else:
             # we were reported positives, but no no details
-            result.message = "VirusTotal reported signature matches"
+            result[FILE_SCAN_RESULT_MESSAGE] = "VirusTotal reported signature matches"
             if 'permalink' in resp:
-              result.description = resp['permalink']
+              result[FILE_SCAN_RESULT_DESCRIPTION] = resp['permalink']
     else:
       # this shouldn't have happened after our checking above, so I guess just return the string
       # and let the caller deal with it
-      result.message = "Invalid response"
-      result.description = f"{resp}"
+      result[FILE_SCAN_RESULT_MESSAGE] = "Invalid response"
+      result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result
 
@@ -329,10 +385,12 @@ class MalassScan(FileScanProvider):
     self.transactionIdToFilenameDict = defaultdict(str)
     self.scanningFilesCount = AtomicInt(value=0)
 
-  def max_requests(self):
+  @staticmethod
+  def max_requests():
     return MAL_MAX_REQS
 
-  def check_interval(self):
+  @staticmethod
+  def check_interval():
     return MAL_CHECK_INTERVAL
 
   # ---------------------------------------------------------------------------------
@@ -447,13 +505,14 @@ class MalassScan(FileScanProvider):
     return result
 
   # ---------------------------------------------------------------------------------
-  # static method for formatting the response summaryDict (from check_result) as a FileScanResult
+  # static method for formatting the response summaryDict (from check_result)
   @staticmethod
-  def format(response):
-    result = FileScanResult(engines=0,
-                            hits=0,
-                            message=None,
-                            description=None)
+  def format(fileName, response):
+    result = {FILE_SCAN_RESULT_FILE : fileName,
+              FILE_SCAN_RESULT_ENGINES : 0,
+              FILE_SCAN_RESULT_HITS : 0,
+              FILE_SCAN_RESULT_MESSAGE : None,
+              FILE_SCAN_RESULT_DESCRIPTION : None}
 
     if isinstance(response, AnalyzerResult):
       resp = response.result
@@ -462,23 +521,23 @@ class MalassScan(FileScanProvider):
 
     if isinstance(resp, dict) and ('av' in resp) and (len(resp['av']) > 0):
       hitAvs = {k : v for k, v in resp['av'].items() if ('contains_a_virus' in resp['av'][k]) and (resp['av'][k]['contains_a_virus'].lower() == "yes")}
-      result.hits = len(hitAvs)
-      result.engines = len(resp['av'])
+      result[FILE_SCAN_RESULT_HITS] = len(hitAvs)
+      result[FILE_SCAN_RESULT_ENGINES] = len(resp['av'])
       hits = defaultdict(list)
       for k, v in hitAvs.items():
         hits[v['virus_name'] if 'virus_name' in v else 'unknown'].append(k)
       if (len(hits) > 0):
         # short result is most common signature name
-        result.message = max(hits, key= lambda x: len(set(hits[x])))
+        result[FILE_SCAN_RESULT_MESSAGE] = max(hits, key= lambda x: len(set(hits[x])))
         # long result is list of the signature names and the engines which generated them
-        result.description = ";".join([f"{k}<{','.join(v)}>" for k, v in hits.items()])
+        result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{k}<{','.join(v)}>" for k, v in hits.items()])
 
     else:
-      result.message = "Error or invalid response"
+      result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
       if isinstance(resp, dict) and ('error' in resp):
-        result.description = f"{resp['error']}"
+        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp['error']}"
       else:
-        result.description = f"{resp}"
+        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result
 
@@ -494,10 +553,12 @@ class ClamAVScan(FileScanProvider):
     self.verboseDebug = verboseDebug
     self.socketFileName = socketFileName
 
-  def max_requests(self):
+  @staticmethod
+  def max_requests():
     return CLAM_MAX_REQS
 
-  def check_interval(self):
+  @staticmethod
+  def check_interval():
     return CLAM_CHECK_INTERVAL
 
   # ---------------------------------------------------------------------------------
@@ -561,13 +622,14 @@ class ClamAVScan(FileScanProvider):
     return clamavResult if isinstance(clamavResult, AnalyzerResult) else AnalyzerResult(finished=True, success=False, result=None)
 
   # ---------------------------------------------------------------------------------
-  # static method for formatting the response summaryDict (from check_result) as a FileScanResult
+  # static method for formatting the response summaryDict (from check_result)
   @staticmethod
-  def format(response):
-    result = FileScanResult(engines=1,
-                            hits=0,
-                            message=None,
-                            description=None)
+  def format(fileName, response):
+    result = {FILE_SCAN_RESULT_FILE : fileName,
+              FILE_SCAN_RESULT_ENGINES : 1,
+              FILE_SCAN_RESULT_HITS : 0,
+              FILE_SCAN_RESULT_MESSAGE : None,
+              FILE_SCAN_RESULT_DESCRIPTION : None}
 
     if isinstance(response, AnalyzerResult):
       resp = response.result
@@ -579,19 +641,19 @@ class ClamAVScan(FileScanProvider):
       for filename, resultTuple in resp.items():
         if (len(resultTuple) == 2) and (resultTuple[0] == CLAM_FOUND_KEY):
           hits.append(resultTuple[1])
-      result.hits = len(hits)
+      result[FILE_SCAN_RESULT_HITS] = len(hits)
       if (len(hits) > 0):
         cnt = Counter(hits)
-        # short result is most common signature name
-        result.message = cnt.most_common(1)[0][0]
-        # long result is list of the signature names and the engines which generated them
-        result.description = ";".join([f"{x}<{CLAM_ENGINE_ID}>" for x in hits])
+        # short message is most common signature name
+        result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]
+        # long description is list of the signature names and the engines which generated them
+        result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{x}<{CLAM_ENGINE_ID}>" for x in hits])
 
     else:
-      result.message = "Error or invalid response"
+      result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
       if isinstance(resp, dict) and ('error' in resp):
-        result.description = f"{resp['error']}"
+        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp['error']}"
       else:
-        result.description = f"{resp}"
+        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result

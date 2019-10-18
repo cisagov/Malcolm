@@ -79,10 +79,10 @@ def event_process_generator(cls, method):
       if (args.minBytes <= os.path.getsize(event.pathname) <= args.maxBytes):
         # the entity is a right-sized file, and it exists, so send it to get scanned
 
-        if debug: eprint(f"{scriptName}:\t⤜\t{event.pathname}")
+        if debug: eprint(f"{scriptName}:\t📩\t{event.pathname}")
         try:
           self.ventilator_socket.send_string(event.pathname)
-          if debug: eprint(f"{scriptName}:\t⤞\t{event.pathname}")
+          if debug: eprint(f"{scriptName}:\t📫\t{event.pathname}")
         except zmq.Again as timeout:
           if verboseDebug: eprint(f"{scriptName}:\t🕑\t{event.pathname}")
 
