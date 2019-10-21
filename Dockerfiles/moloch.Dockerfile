@@ -7,9 +7,12 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV MOLOCH_VERSION "2.0.1"
 ENV MOLOCHDIR "/data/moloch"
-ENV ZEEK_VERSION "2.6.4"
-ENV ZEEK_DIR "/opt/bro"
-ENV ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER "1.2"
+ENV SRC_BASE_DIR "/usr/local/src"
+ENV ZEEK_VERSION "3.0.0"
+ENV ZEEK_DIR "/opt/zeek"
+ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
+ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
+ENV PATH="${ZEEK_DIR}/bin:${PATH}"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
@@ -17,8 +20,10 @@ ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
-ADD https://www.zeek.org/downloads/bro-$ZEEK_VERSION.tar.gz /data/bro.tar.gz
-ADD https://github.com/corelight/bro-community-id/archive/$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER.tar.gz /data/bro-community-id.tar.gz
+ADD https://www.zeek.org/downloads/zeek-$ZEEK_VERSION.tar.gz $SRC_BASE_DIR/zeek.tar.gz
+# Fix redef'ing a table with a new &default attribute #632 -  https://github.com/zeek/zeek/pull/632/commits
+ADD https://github.com/zeek/zeek/commit/42b6040952030c44ce337704916cf89a065994b0.patch $ZEEK_PATCH_DIR/
+ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -35,7 +40,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         groff-base \
         imagemagick \
         libcap-dev \
-        libgoogle-perftools-dev \
         libjson-perl \
         libkrb5-dev \
         libmaxminddb-dev \
@@ -51,55 +55,25 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         python-dev \
         python3-dev \
         python3-pip \
+        python3-setuptools \
+        python3-wheel \
         rename \
         sudo \
         swig \
         wget \
         zlib1g-dev && \
-  pip3 install --no-cache-dir beautifulsoup4 && \
-  cd /data && \
-  tar -xvf "bro.tar.gz" && \
-    rm -f "bro.tar.gz" && \
-    cd "./bro-"$ZEEK_VERSION && \
-    ./configure --prefix=$ZEEK_DIR --generator=Ninja && \
+  pip3 install --no-cache-dir beautifulsoup4 zkg && \
+  cd "${SRC_BASE_DIR}" && \
+    tar -xvf "zeek.tar.gz" && \
+    cd "./zeek-${ZEEK_VERSION}" && \
+    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
+    ./configure --prefix="${ZEEK_DIR}" --generator=Ninja && \
     cd build && \
     ninja && \
     ninja install && \
-    strip --strip-unneeded \
-      $ZEEK_DIR/bin/bro \
-      $ZEEK_DIR/bin/bro-cut \
-      $ZEEK_DIR/bin/binpac \
-      $ZEEK_DIR/lib/libbroker.so.. \
-      $ZEEK_DIR/lib/libcaf_core.so.0.16.2 \
-      $ZEEK_DIR/lib/libcaf_io.so.0.16.2 \
-      $ZEEK_DIR/lib/libcaf_openssl.so.0.16.2 && \
-  git clone --depth 1 https://github.com/salesforce/ja3 /tmp/ja3 && \
-    mkdir -p $ZEEK_DIR/share/bro/site/ja3 && \
-    cp -v /tmp/ja3/bro/* $ZEEK_DIR/share/bro/site/ja3 && \
-    rm -rf /tmp/ja3 && \
-  git clone --depth 1 https://github.com/salesforce/hassh /tmp/hassh && \
-    mkdir -p $ZEEK_DIR/share/bro/site/hassh && \
-    cp -v /tmp/hassh/bro/* $ZEEK_DIR/share/bro/site/hassh && \
-    rm -rf /tmp/hassh && \
-  cd /data && \
-    tar -xvf "bro-community-id.tar.gz" && \
-    cd "bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER && \
-    ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
-    make && \
-    make install && \
-  git clone --depth 1 https://github.com/salesforce/GQUIC_Protocol_Analyzer /tmp/gquic && \
-    cd /data/bro-$ZEEK_VERSION/aux/bro-aux/plugin-support/ && \
-    ./init-plugin ./bro-quic Salesforce GQUIC && \
-    cd ./bro-quic && \
-    rm -rf CMakeLists.txt ./scripts ./src && \
-    cp -vr /tmp/gquic/CMakeLists.txt /tmp/gquic/scripts /tmp/gquic/src ./ && \
-    ./configure --bro-dist="/data/bro-"$ZEEK_VERSION --install-root=$ZEEK_DIR/lib/bro/plugins && \
-    make && \
-    make install && \
-  git clone --depth 1 https://github.com/mitre-attack/car.git /tmp/car && \
-    mkdir -p $ZEEK_DIR/share/bro/site/bzar && \
-    cp -v /tmp/car/implementations/bzar/scripts/* $ZEEK_DIR/share/bro/site/bzar && \
-    rm -rf /tmp/car && \
+    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded" && \
+    zkg autoconfig && \
+    bash /usr/local/bin/zeek_install_plugins.sh && \
   cd $MOLOCHDIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
     cd $MOLOCHDIR/doc && \
@@ -110,9 +84,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     pandoc -s --self-contained --metadata title="Malcolm README" --css $MOLOCHDIR/doc/doc.css -o $MOLOCHDIR/doc/README.html $MOLOCHDIR/doc/README.md && \
   cd /data && \
   tar -xvf "moloch.tar.gz" && \
-    rm -f "moloch.tar.gz" && \
     cd "./moloch-"$MOLOCH_VERSION && \
-    bash -c 'for i in /data/patches/*; do patch -p1 < $i; done' && \
+    bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_77.png ./viewer/public/moloch_77.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./parliament/vueapp/src/assets/header_logo.png && \
@@ -126,16 +99,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     ./easybutton-build.sh --install && \
-    npm cache clean --force && \
-  apt-get clean && \
-  rm -rf $MOLOCHDIR"-"$MOLOCH_VERSION \
-         /data/bro.tar.gz \
-         "/data/bro-"$ZEEK_VERSION \
-         /data/bro-community-id.tar.gz \
-         "/data/bro-community-id-"$ZEEK_CORELIGHT_COMMUNITY_ID_PLUGIN_VER \
-         /var/lib/apt/lists/* \
-         /tmp/* \
-         /var/tmp/*
+    npm cache clean --force
 
 FROM debian:buster-slim AS runtime
 
@@ -156,7 +120,7 @@ ARG VIEWER=on
 ARG MANAGE_PCAP_FILES=false
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
-#Whether or not to run "bro -r XXXXX.pcap local" on each pcap file
+#Whether or not to run "zeek -r XXXXX.pcap local" on each pcap file
 ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
 ARG ZEEK_EXTRACTOR_MODE=none
@@ -181,7 +145,7 @@ ENV VIEWER $VIEWER
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
 ENV AUTOZEEK_DIR "/autozeek"
-ENV ZEEK_DIR "/opt/bro"
+ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
@@ -200,7 +164,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       gettext \
       inotify-tools \
       libcap2-bin \
-      libgoogle-perftools4 \
       libjson-perl \
       libkrb5-3 \
       libmaxminddb0 \
@@ -241,7 +204,7 @@ ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country /t
 ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN /tmp/GeoLite2-ASN.mmdb.gz
 ADD moloch/wise/source.*.js $MOLOCHDIR/wiseService/
 ADD moloch/supervisord.conf /etc/supervisord.conf
-ADD moloch/zeek/*.bro $ZEEK_DIR/share/bro/site/
+ADD moloch/zeek/*.zeek $ZEEK_DIR/share/zeek/site/
 
 RUN groupadd --gid 1000 $MOLOCHUSER && \
     useradd -M --uid 1000 --gid 1000 --home $MOLOCHDIR $MOLOCHUSER && \
