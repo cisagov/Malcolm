@@ -209,6 +209,7 @@ def main():
     if pdbFlagged:
       pdbFlagged = False
       breakpoint()
+    time.sleep(0.2)
 
   # graceful shutdown
   if debug: eprint(f"{scriptName}: shutting down...")

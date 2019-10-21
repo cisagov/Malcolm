@@ -161,7 +161,6 @@ def main():
         pdbFlagged = False
         breakpoint()
 
-
       triggered = False
       try:
         scanResult = json.loads(scanned_files_socket.recv_string())
