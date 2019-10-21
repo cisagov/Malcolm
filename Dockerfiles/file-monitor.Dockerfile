@@ -89,8 +89,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
       sed -i 's/^DatabaseOwner .*$/DatabaseOwner monitor/g' /etc/clamav/freshclam.conf
 
-ADD shared/bin/zeek_carve_*.py /usr/local/bin
-ADD shared/bin/malass_client.py /usr/local/bin
+ADD shared/bin/zeek_carve_*.py /usr/local/bin/
+ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 
 WORKDIR /data/zeek/extract_files
