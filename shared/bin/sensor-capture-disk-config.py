@@ -17,7 +17,6 @@ import uuid
 import argparse
 import fileinput
 from collections import defaultdict
-from namedlist import namedlist
 from sensorcommon import *
 from fstab import Fstab
 
@@ -40,7 +39,14 @@ debug = False
 
 ###################################################################################################
 # used to map output of lsblk
-PartitionInfo = namedlist('PartitionInfo', 'device partition mapper uuid mount', default=None)
+class PartitionInfo:
+  __slots__ = ('device', 'partition', 'mapper', 'uuid', 'mount')
+  def __init__(self, device=None, partition=None, mapper=None, uuid=None, mount=None):
+    self.device = device
+    self.partition = partition
+    self.mapper = mapper
+    self.uuid = uuid
+    self.mount = mount
 
 ###################################################################################################
 # get interactive user response to Y/N question

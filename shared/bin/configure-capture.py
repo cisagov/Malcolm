@@ -13,7 +13,7 @@ import sys
 import fileinput
 from collections import defaultdict
 from dialog import Dialog
-from carveutils import *
+from zeek_carve_utils import *
 from sensorcommon import *
 
 class Constants:
