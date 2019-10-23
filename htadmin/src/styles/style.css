@@ -1,0 +1,11 @@
+.box {
+        padding: 1em;
+}
+
+.list-item-with-button {
+	padding: 15px 15px;
+}
+
+.btn-list-item {
+	margin-top: -7px;
+}

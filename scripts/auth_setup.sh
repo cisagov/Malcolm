@@ -61,8 +61,7 @@ pushd ./nginx/ >/dev/null 2>&1
 # create or update the htpasswd file
 [[ ! -f ./htpasswd ]] && HTPASSWD_CREATE_FLAG="-c" || HTPASSWD_CREATE_FLAG=""
 htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
-# grab the hashed version of the password to also store in the htadmin/config.ini file
-PASSWORD_HTPASSWD_HASHED="$(grep "^$USERNAME:" ./htpasswd | head -n 1 | cut -d: -f2)"
+
 # if the admininstrator username has changed, remove the previous administrator username from htpasswd
 [[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
 
@@ -83,14 +82,16 @@ metadata_path  = ./config/metadata
 
 ; administrator user/password (htpasswd -b -c -B ...)
 admin_user = $USERNAME
-admin_pwd_hash = $PASSWORD_HTPASSWD_HASHED
 
-; SMTP server information for password reset:
-mail_from = admin@example.com
-mail_from_name = Administrator
-mail_user = admin@example.com
-mail_pwd  = xxxx
-mail_server = mail.example.com
+; username field quality checks
+;
+min_username_len = 4
+max_username_len = 12
+
+; Password field quality checks
+;
+min_password_len = 6
+max_password_len = 20
 
 EOF
 touch metadata
