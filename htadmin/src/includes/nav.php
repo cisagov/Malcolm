@@ -10,14 +10,13 @@ if (check_admin_login ()) {    # 'admin' user is logged in. Include code block b
 				echo $ini['app_title'];
 	?>
 				</a>
-				<li><a href="selfservice.php">Account Self Service</a></li>
 				<li><a href="admin_logout.php">Logout</a></li>
 			</ul>
 		</div>
 	</div>
 </nav>
 <?php
-} else {                  # The 'admin' user is NOT logged in. Display nav menu login options.
+} else {                  # The 'admin' user is NOT logged in. Display regular nav menu login options.
 	?>
 <nav class="navbar navbar-default">
 	<div class="container">
@@ -39,6 +38,3 @@ if (check_admin_login ()) {    # 'admin' user is logged in. Include code block b
 }
 
 ?>
-
-
-

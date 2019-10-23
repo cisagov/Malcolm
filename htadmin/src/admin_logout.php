@@ -6,7 +6,7 @@ session_start();
 include_once ('includes/head.php');
 $_SESSION ['admin_login'] = false;       # Mark the admin user as logged out.
 
-include_once ('includes/admin_nav.php');
+include_once ('includes/nav.php');
 ?>
 
 <div class="container box">

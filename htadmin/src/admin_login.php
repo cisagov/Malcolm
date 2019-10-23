@@ -62,8 +62,8 @@ if (isset ( $_POST ['user'] ) && isset ( $_POST ['password'] )) {    # User POST
 
 }
 
-include_once ('includes/head.php');                            # Load the 'HTML page' header lines
-include_once ('includes/admin_nav.php');                       # Load the 'HTML page' navigation-bar menu
+include_once ('includes/head.php');                      # Load the 'HTML page' header lines
+include_once ('includes/nav.php');                       # Load the 'HTML page' navigation-bar menu
 
 # end php
 ?>
@@ -71,7 +71,7 @@ include_once ('includes/admin_nav.php');                       # Load the 'HTML 
 <div class="container box">
   <div class="row">
     <div class="col-xs-12">
-      <h2>Please Login:</h2>
+      <h2>Administrator Login:</h2>
 <?php  # start php
 
 if (isset ( $error )) {    # The $_POST array was received (with the current page request)
@@ -94,7 +94,6 @@ if (isset ( $error )) {    # The $_POST array was received (with the current pag
 
 <form class="navbar-form navbar-left" action="admin_login.php" method="post">
   <div class="form-group">
-    <p>Administrator Login:</p>
     <input type="text" class="form-control" placeholder="Username" name="user">
     </p>
     <p>

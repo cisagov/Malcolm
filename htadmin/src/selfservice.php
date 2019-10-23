@@ -2,7 +2,7 @@
 session_start();
 include_once ('tools/htpasswd.php');
 include_once ('includes/head.php');
-include_once ('includes/user_nav.php');
+include_once ('includes/nav.php');
 
 # Set some variable values:
 $min_password_len = set_new_value_or_default($ini['min_password_len'], '8');
@@ -27,6 +27,7 @@ if (isset ( $_POST ['username'] ) && isset ( $_POST ['old_pwd'] ) && isset ( $_P
   $new_pwd_verify = $_POST ['new_pwd_verify'];
   $error_msg      = "";
   $error_msg2     = "";
+  $error_msg3     = "";
 
   $new_pwds_match  = ($new_pwd == $new_pwd_verify);
   $old_pwd_matches = $htpasswd->user_login_check ( $username, $old_pwd, $error_msg2);
@@ -38,14 +39,14 @@ if (isset ( $_POST ['username'] ) && isset ( $_POST ['old_pwd'] ) && isset ( $_P
 
   } elseif ($username == $ini['admin_user'] ) {
     echo_alert_danger_div("check_username");
-    echo "Error: administrator account password must be changed through the Administrator Login page ." . '</div>';
+    echo "Error: The administrator account password must be changed through the Administrator Login page." . '</div>';
 
   } elseif (! check_password_quality ( $new_pwd, $min_password_len, $max_password_len, $error_msg )) {
     echo_alert_danger_div("check_password_quality");
     echo "New password: " . $error_msg . '</div>';
 
   } elseif (! $old_pwd_matches) {
-    $error_msg_ex = 'Error: Old password doesn\'t match the stored password. ' . '(Raw error: ' . $error_msg2 . ')';
+    $error_msg_ex = 'Error: Old password doesn\'t match the stored password. (' . $error_msg2 . ')';
     echo_alert_danger_div("not_old_passwd_matches");
     echo $error_msg_ex . '</div>';
 
@@ -58,7 +59,7 @@ if (isset ( $_POST ['username'] ) && isset ( $_POST ['old_pwd'] ) && isset ( $_P
     # Success branch:
     echo_alert_info_div("pwds_changed");
     echo 'Password changed successfully.' . '</div>';
-    $htpasswd->user_update ( $username, $new_pwd );    # Write out the new user password.
+    $htpasswd->user_update ( $username, $new_pwd, $error_msg3 );    # Write out the new user password.
   }
 }
 ?>

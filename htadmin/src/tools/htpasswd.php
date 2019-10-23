@@ -19,15 +19,10 @@ class htpasswd {
     var $metafilename;  # Path to user's formal name, email address.
 
     function htpasswd( $htpasswdfile, $metadata_path = "") {
-      if (! file_exists ( $htpasswdfile )) {
-        $error_msg = "Error: File: " . $htpasswdfile . ", does not exist!";
-        dbg_print($error_msg, "htpasswd.php");
-      }
-
-      @$this->fp = @$this::open_a_file ( $htpasswdfile );
+      @$this->fp = @$this::open_or_create ( $htpasswdfile );
 
       if (!is_null_or_empty_string($metadata_path)) {
-        @$this->metafp      = @$this::open_or_create ( $metadata_path );
+        @$this->metafp = @$this::open_or_create ( $metadata_path );
         $this->metafilename = $metadata_path;
       }
 
@@ -109,16 +104,7 @@ class htpasswd {
       # array_shift() - Shift off first element of array and return it; Shortens orig array by one element;
       # trim() - Remove leading/trailing whitespace from $param;
 
-      while ( ! feof ( $this->fp ) ) {
-        $line         = rtrim ( fgets ( $this->fp ) );
-        $array_fields = explode ( ":", $line );
-        $lusername    = array_shift ( $array_fields );
-        $lusername    = trim ( $lusername );
-
-        if ( strlen($lusername) == 0) {
-          break;
-        }
-
+      while ( ! feof ( $this->fp ) && trim ( $lusername = array_shift ( explode ( ":", $line = rtrim ( fgets ( $this->fp ) ) ) ) ) ) {
         $users [$i] = $lusername;
         $i ++;
       }
@@ -301,27 +287,29 @@ class htpasswd {
 
 
     function user_update($username, $password, &$error_msg) {
-      $success = $this->user_delete($username, $error_msg);
 
-      if (! $success ) {
-        $error_msg = "(step 1) Error deleting exiting username: " . $username . ". (" . $error_msg . ")";
-        return False;
+      $error_msg = '';
+
+      rewind ( $this->fp );
+
+      while ( ! feof ( $this->fp ) && trim ( $lusername = array_shift (
+          explode ( ":", $line = rtrim ( fgets ( $this->fp ) ) ) ) ) ) {
+          if ($lusername == $username) {
+              fseek ( $this->fp, (- 1 - strlen($line)), SEEK_CUR );
+              $tmp_error_msg = '';
+              $success = self::delete($this->fp, $username, $this->filename, $tmp_error_msg, false);
+              if ($success) {
+                file_put_contents ($this->filename,
+                    $username . ':' . self::htcrypt ( $password ) . "\n" ,
+                    FILE_APPEND | LOCK_EX);
+                return true;
+              } elseif ($error_msg != '') {
+                $error_msg = $tmp_error_msg;
+              }
+          }
       }
-
-      fclose ( $this->fp );
-
-      # file_put_contents() actions: Open the file, write to the file, close the file.
-      $success = file_put_contents ( $this->filename,
-                                     $username . ':' . self::htcrypt ( $password ) . "\n" ,
-                                     FILE_APPEND | LOCK_EX);
-      if (! $success) {
-        $error_msg = "(step 2) Error adding username: " . $username . ". (" . $error_msg . ")";
-        return False;
-      }
-
-      # Re-open the file:
-      $this->fp = $this::open_a_file ( $this->filename );
-      return True;
+      $error_msg = "Error deleting existing username: " . $username . " (".$error_msg.")";
+      return false;
     } # user_update
 
     function meta_update(meta_model $meta_model, &$error_msg) {
@@ -352,43 +340,21 @@ class htpasswd {
     static function exists($fp, $username) {
       # See if the username exists in the specified $fp file:
       rewind ( $fp );
-
-      while ( ! feof ( $fp ) ) {
-        $line = rtrim ( fgets ( $fp ) );
-
-        if (strlen($line) == 0) {
-          return false;     # username not found.
-        }
-
-        $field_array = explode ( ":", $line );
-        $lusername   = array_shift ( $field_array );
-        $lusername   = trim ($lusername);
-
-        if ($lusername == $username) {
-          return true;    # username exists.
-        }
+      while ( ! feof ( $fp ) && trim ( $lusername = array_shift ( explode ( ":", $line = rtrim ( fgets ( $fp ) ) ) ) ) ) {
+          if ($lusername == $username)
+              return true;
       }
-
-      return false;
     } # exists
-
-    static function open_a_file($filename) {
-      # Open the file 'read, write. Place file ptr at start of file.'
-      #
-      # Returns a file handle if successful.  Else, returns False.
-
-      return (fopen ( $filename, 'r+' ));
-    } # open_a_file
 
     static function open_or_create($filename) {
       if (! file_exists ( $filename )) {
-        return fopen ( $filename, 'w+' );    # Open read, write; Truncate file to length 0.
+        return fopen ( $filename, 'w+' );
       } else {
-        return fopen ( $filename, 'r+' );    # Open read, write.
+        return fopen ( $filename, 'r+' );
       }
     } # open_or_create
 
-    static function delete(&$fp, $username, $filename, &$error_msg ) {
+    static function delete($fp, $username, $filename, &$error_msg, $dorewind = true) {
       #
       # Delete username's data from the (already open) $fp referenced file handle.
       #
@@ -396,58 +362,41 @@ class htpasswd {
       #   $filename - Filename of the $fp file
       #   $error_msg- in, out: On error, the returned error msg.
 
-      rewind ( $fp );     # Rewind to the start of the file.
       $data = '';
+      $pos = ftell($fp);
+      if ($dorewind) {
+        rewind ( $fp );
+      }
 
-      while ( True ) {
-        $tmp_array = explode ( ":", $line = rtrim ( fgets ( $fp ) ) );
-        $lusername = array_shift ( $tmp_array );
-        $lusername = trim( $lusername );
-
-        if (! feof ( $fp ) && $lusername) {
-          # Not at end of file; Found a username;
-        } else {
+      while ( ! feof ( $fp ) && trim ( $lusername = array_shift ( explode (
+        ":", $line = rtrim ( fgets ( $fp ) ) ) ) ) ) {
+        if (! trim ( $line ))
           break;
-        }
-
-        if (! trim ( $line )) {
-        # No more data; $line is empty.
-          break;
-        }
-
-        if ($lusername != $username) {
-          # If we match on $username..skip past the $username line entry.
+        if ($lusername != $username)
           $data .= $line . "\n";
-        }
       }
-
-      # Create a debug trace of the htpasswd, metadata files:
-      #$dbg_log_h = new dbg_log("debug_log.txt", ".", false);
-
-      rewind ( $fp );                      # Rewind to the start of the file.
-      $size    = 0;
-      $success = ftruncate( $fp, $size);   # Truncate file to 0 bytes.
-
-      if (! $success) {
-        $error_msg = ("Error truncating filename: " . $filename);
-        return False;
+      $fp = fopen ( $filename, 'r+' );
+      if (!$dorewind) {
+        fseek($fp, $pos);
       }
+      $success = fwrite ( $fp, rtrim ( $data ) . (trim ( $data ) ? "\n" : '') );
+      #if (! $success) {
+      #  $error_msg = ("Error writing to filename: " . $filename);
+      #  return False;
+      #}
 
-      # Remove leading, trailing whitespace; Append a <LF> to end of last line of text:
-      $final_char = trim ( $data ) ? "\n" : '';
-
-      #$dbg_log_h->log_msg("htpasswd:delete: " . $filename . ", before fwrite(); data=" . $data );
-      #
-      # Write out the updated 'data' block:
-      $success = fwrite ( $fp, (rtrim ( $data ) . $final_char) );
-
-      if (! $success) {
-        $error_msg = ("Error writing to filename: " . $filename);
-        return False;
+      # flush updates to disk, then reopen the file
+      ftruncate( $fp, ftell($fp));
+      fclose ( $fp );
+      $fp = fopen ( $filename, 'r+' );
+      if (! $fp ) {
+        $error_msg = "Error re-opening file after filename: " . $filename;
+        return false;
       }
 
       #$dbg_log_h->close_log();
-      return True;
+      return true;
+
     } # delete
 
     static function htcrypt($password) {

@@ -9,7 +9,7 @@ if (!isset($_SERVER["HTTP_HOST"])) {
 include_once ('includes/check_admin_login.php');    # Make sure an admin 'logged in' session exists
 include_once ('tools/htpasswd.php');
 include_once ('includes/head.php');          # Include the HTTP header; Load config.ini into $ini; tools/util.php included here
-include_once ('includes/admin_nav.php');     # Build the top navigation bar menu
+include_once ('includes/nav.php');           # Build the top navigation bar menu
 include_once ('tools/util.php');             # Include some utility functions
 
 
@@ -28,7 +28,7 @@ $min_username_len = set_new_value_or_default($ini['min_username_len'], '4');
 $max_username_len = set_new_value_or_default($ini['max_username_len'], '12');
 
 
-# The $ini array was loaded by the 'admin_nav.php' src file.
+# The $ini array was loaded by the 'nav.php' src file.
 # Create a new 'httpasswd' object. The metadata_path file contains the user account data.
 #
 $htpasswd = new htpasswd ( $htpasswd_path, $metadata_path );
@@ -45,7 +45,7 @@ $error_msg        = '';
 
 echo "<h2>" . $ini ['app_title'] . "</h2>";    # Output the app's title
 
-if (isset ( $_POST ['user'] )) {               # The username has been POSTED to this iteration of the current page
+if (isset ( $_POST ['user'] )) {         # The username has been POSTED to this iteration of the current page
   $username      = $_POST ['user'];      # (someone clicked on a 'username' on this page, to update it)
   $passwd        = $_POST ['pwd'];
   $passwd_verify = $_POST ['pwd_verify'];
@@ -77,7 +77,7 @@ if (isset ( $_POST ['user'] )) {               # The username has been POSTED to
   } elseif (! ( $passwd == $passwd_verify )) {
     #echo '<div class="alert alert-danger">';
     echo_alert_danger_div("password_verify");
-    echo "<p>Error: User's 'Password' and 'Password Verify' values don't match! (1)</p> ";
+    echo "<p>Error: New passwords don\'t match.</p> ";
     echo '</div>';
     $form_field_error = True;
     #dbg_print("passwd="        . $passwd);
@@ -174,7 +174,7 @@ if (isset ( $_POST ['user'] )) {               # The username has been POSTED to
       <div class="col-xs-12 col-md-6">
         <h3>Users:</h3>
       <?php
-            # Get list of user account usernames:
+      # Get list of user account usernames:
       $users = $htpasswd->get_users ();
 
             #dbg_var_dump($users, "index.php");
@@ -192,14 +192,6 @@ if (isset ( $_POST ['user'] )) {               # The username has been POSTED to
       }
       ?>
     </div>
-    </div>
-    <div class=row>
-      <br /> <br />
-      <div class="col-xs-12 col-md-10 well">
-        <p>
-          Create new users for the htpasswd file here.<br />
-        </p>
-      </div>
     </div>
   </div>
 <?php

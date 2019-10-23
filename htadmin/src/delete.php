@@ -31,17 +31,18 @@ $htpasswd      = new htpasswd ( $ini ['secure_path'], $metadata_path );
 
 if (isset ( $_POST['user'] )) {
   $user = $_POST['user'];      # Load the username
+  $del_error_msg = "";
+  $meta_error_msg = "";
 
-  if ($htpasswd->user_delete($user)) {
+  if ($htpasswd->user_delete($user, $del_error_msg)) {
 
     if ($use_metadata) {
 
-      if ($htpasswd->meta_delete($user)) {
+      if ($htpasswd->meta_delete($user, $meta_error_msg)) {
         echo "success|User account successfully deleted.";
 
       } else{
-        #echo "error";
-        echo "error|Error deleting user account metadata!";
+        echo "error|Error deleting user account metadata. (" . $meta_error_msg . ")";
       }
 
     } else {
@@ -49,12 +50,10 @@ if (isset ( $_POST['user'] )) {
     }
 
   } else {
-    #echo "error";
-    echo "error|Error deleting user account from htpasswd file!";
+    echo "error|Error deleting user account from htpasswd file. (" . $del_error_msg . ")";
   }
 
 } else {
-  #echo "error";
-  echo "error|Logic error: 'user' account entry not found in PHP \$_POST[] array!";
+  echo "error|Logic error: user account entry not found in \$_POST[] array!";
 }
 ?>
