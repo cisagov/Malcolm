@@ -24,7 +24,7 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     git clone --depth 1 https://github.com/mmguero/logstash-filter-ieee_oui.git /opt/logstash-filter-ieee_oui && \
     /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
-FROM docker.elastic.co/logstash/logstash-oss:6.8.3 AS runtime
+FROM docker.elastic.co/logstash/logstash-oss:6.8.4 AS runtime
 
 USER root
 
