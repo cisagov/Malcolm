@@ -1,4 +1,6 @@
-#!/usr/bin/env bro
+#!/usr/bin/env zeek
+
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 export {
   redef extractor_always_extract_unknown = F;
@@ -100,4 +102,5 @@ export {
     ["text/rtf"]= "rtf",
     ["text/vbscript"]= "vbs"
   } &default="dat";
+
 }

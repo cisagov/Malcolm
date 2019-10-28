@@ -13,13 +13,16 @@ apt-get -y --purge remove bluez-firmware \
                           gnome-user-guide \
                           gucharmap \
                           libasound2-plugins \
+                          libcupsfilters1 \
+                          libcupsimage2 \
                           lxmusic \
                           mpv \
                           pavucontrol \
+                          prelink \
                           pulseaudio \
                           smplayer \
-                          yelp \
                           xdg-user-dirs \
+                          yelp \
                           youtube-dl || true
 
 apt-get -y autoremove
@@ -29,10 +32,9 @@ apt-get clean
 dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 
 # disable automatic/initial running of some services (but don't abort if we fail)
-systemctl disable systemd-timesyncd || true
-systemctl disable kdump || true
-systemctl disable ctrl-alt-del || true
-systemctl disable hddtemp || true
+systemctl disable systemd-timesyncd.service || true
+systemctl disable ctrl-alt-del.target || true
+systemctl disable hddtemp.service || true
 systemctl disable apt-daily.service || true
 systemctl disable apt-daily.timer || true
 systemctl disable apt-daily-upgrade.timer || true

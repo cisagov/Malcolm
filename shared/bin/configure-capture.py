@@ -13,7 +13,7 @@ import sys
 import fileinput
 from collections import defaultdict
 from dialog import Dialog
-from carveutils import *
+from zeek_carve_utils import *
 from sensorcommon import *
 
 class Constants:
@@ -40,9 +40,9 @@ class Constants:
   ZEEK_FILE_CARVING_CUSTOM = 'custom'
   ZEEK_FILE_CARVING_CUSTOM_MIME = 'custom (mime-sorted)'
   ZEEK_FILE_CARVING_CUSTOM_EXT = 'custom (extension-sorted)'
-  ZEEK_FILE_CARVING_DEFAULTS = '/opt/bro/share/bro/site/extractor_params.bro'
-  ZEEK_FILE_CARVING_OVERRIDE_FILE = '/opt/sensor/sensor_ctl/extractor_override.bro'
-  ZEEK_FILE_CARVING_OVERRIDE_INTERESTING_FILE = '/opt/sensor/sensor_ctl/extractor_override.interesting.bro'
+  ZEEK_FILE_CARVING_DEFAULTS = '/opt/zeek/share/zeek/site/extractor_params.zeek'
+  ZEEK_FILE_CARVING_OVERRIDE_FILE = '/opt/sensor/sensor_ctl/extractor_override.zeek'
+  ZEEK_FILE_CARVING_OVERRIDE_INTERESTING_FILE = '/opt/sensor/sensor_ctl/extractor_override.interesting.zeek'
   ZEEK_FILE_CARVING_OVERRIDE_FILE_MAP_NAME = 'extractor_mime_to_ext_map'
   ZEEK_FILE_CARVING_PLAIN_TEXT_MIMES = {
     "application/json",
@@ -505,10 +505,10 @@ def main():
         capture_interface_re = re.compile(r"(\bCAPTURE_INTERFACE)\s*=\s*.+?$")
         capture_filter_re = re.compile(r"(\bCAPTURE_FILTER)\s*=\s*.*?$")
         pcap_path_re = re.compile(r"(\bPCAP_PATH)\s*=\s*.+?$")
-        bro_path_re = re.compile(r"(\bZEEK_LOG_PATH)\s*=\s*.+?$")
-        bro_carve_re = re.compile(r"(\bZEEK_EXTRACTOR_MODE)\s*=\s*.+?$")
-        bro_file_preservation_re = re.compile(r"(\bEXTRACTED_FILE_PRESERVATION)\s*=\s*.+?$")
-        bro_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
+        zeek_path_re = re.compile(r"(\bZEEK_LOG_PATH)\s*=\s*.+?$")
+        zeek_carve_re = re.compile(r"(\bZEEK_EXTRACTOR_MODE)\s*=\s*.+?$")
+        zeek_file_preservation_re = re.compile(r"(\bEXTRACTED_FILE_PRESERVATION)\s*=\s*.+?$")
+        zeek_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
 
         # get paths for captured PCAP and Zeek files
         while True:
@@ -529,7 +529,7 @@ def main():
             code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
 
         # configure file carving
-        code, bro_carve_mode = d.radiolist(Constants.MSG_CONFIG_ZEEK_CARVING, choices=[(Constants.ZEEK_FILE_CARVING_NONE,
+        code, zeek_carve_mode = d.radiolist(Constants.MSG_CONFIG_ZEEK_CARVING, choices=[(Constants.ZEEK_FILE_CARVING_NONE,
                                                                                         'Disable file carving',
                                                                                         (capture_config_dict["ZEEK_EXTRACTOR_MODE"] == Constants.ZEEK_FILE_CARVING_NONE)),
                                                                                       (Constants.ZEEK_FILE_CARVING_MAPPED,
@@ -555,20 +555,20 @@ def main():
 
         mime_tags = []
         capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = ""
-        bro_carved_file_preservation = PRESERVE_NONE
+        zeek_carved_file_preservation = PRESERVE_NONE
 
-        if bro_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM) or bro_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT):
+        if zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM) or zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT):
 
           # get all known mime-to-extension mappings into a dictionary
           all_mime_maps = mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_DEFAULTS)
 
-          if (bro_carve_mode == Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT):
+          if (zeek_carve_mode == Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT):
             # all mime types minus common text mime types
             mime_tags.extend([mime for mime in all_mime_maps.keys() if mime not in Constants.ZEEK_FILE_CARVING_PLAIN_TEXT_MIMES])
 
           else:
             # select mimes to carve (pre-selecting items previously in the override file)
-            if (bro_carve_mode == Constants.ZEEK_FILE_CARVING_CUSTOM_EXT):
+            if (zeek_carve_mode == Constants.ZEEK_FILE_CARVING_CUSTOM_EXT):
               mime_choices = [(pair[0], pair[1], pair[0] in mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE)) for pair in sorted(all_mime_maps.items(), key=lambda x: x[1].lower())]
             else:
               mime_choices = [(pair[0], pair[1], pair[0] in mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE)) for pair in sorted(all_mime_maps.items(), key=lambda x: x[0].lower())]
@@ -578,23 +578,23 @@ def main():
 
           mime_tags.sort()
           if (len(mime_tags) == 0):
-            bro_carve_mode = Constants.ZEEK_FILE_CARVING_NONE
+            zeek_carve_mode = Constants.ZEEK_FILE_CARVING_NONE
           elif (len(mime_tags) >= len(all_mime_maps)):
-            bro_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
+            zeek_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
           elif len(mime_tags) > 0:
-            bro_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
+            zeek_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
             capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE
           else:
-            bro_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
+            zeek_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
 
-        elif bro_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_INTERESTING):
+        elif zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_INTERESTING):
           shutil.copy(Constants.ZEEK_FILE_CARVING_OVERRIDE_INTERESTING_FILE, Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE)
-          bro_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
+          zeek_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
           capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE
 
-        if (bro_carve_mode != Constants.ZEEK_FILE_CARVING_NONE):
+        if (zeek_carve_mode != Constants.ZEEK_FILE_CARVING_NONE):
           # what to do with carved files
-          code, bro_carved_file_preservation = d.radiolist(Constants.MSG_CONFIG_CARVED_FILE_PRESERVATION,
+          code, zeek_carved_file_preservation = d.radiolist(Constants.MSG_CONFIG_CARVED_FILE_PRESERVATION,
                                                            choices=[(PRESERVE_QUARANTINED,
                                                                      'Preserve only quarantined files',
                                                                      (capture_config_dict["EXTRACTED_FILE_PRESERVATION"] == PRESERVE_QUARANTINED)),
@@ -613,8 +613,8 @@ def main():
         capture_config_dict["CAPTURE_FILTER"] = capture_filter
         capture_config_dict["PCAP_PATH"] = path_values[0]
         capture_config_dict["ZEEK_LOG_PATH"] = path_values[1]
-        capture_config_dict["ZEEK_EXTRACTOR_MODE"] = bro_carve_mode
-        capture_config_dict["EXTRACTED_FILE_PRESERVATION"] = bro_carved_file_preservation
+        capture_config_dict["ZEEK_EXTRACTOR_MODE"] = zeek_carve_mode
+        capture_config_dict["EXTRACTED_FILE_PRESERVATION"] = zeek_carved_file_preservation
 
         # get confirmation from user that we really want to do this
         code = d.yesno(Constants.MSG_CONFIG_CAP_CONFIRM.format("\n".join(sorted([f"{k}={v}" for k, v in capture_config_dict.items() if ("AUTOSTART" not in k) and ("PASSWORD" not in k)]))),
@@ -627,25 +627,25 @@ def main():
               line = line.rstrip("\n")
               if capture_interface_re.search(line) is not None:
                 print(capture_interface_re.sub(r"\1=%s" % ",".join(selected_ifaces), line))
-              elif bro_carve_override_re.search(line) is not None:
-                print(bro_carve_override_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"], line))
-              elif bro_carve_re.search(line) is not None:
-                print(bro_carve_re.sub(r"\1=%s" % bro_carve_mode, line))
-              elif bro_file_preservation_re.search(line) is not None:
-                print(bro_file_preservation_re.sub(r"\1=%s" % bro_carved_file_preservation, line))
+              elif zeek_carve_override_re.search(line) is not None:
+                print(zeek_carve_override_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"], line))
+              elif zeek_carve_re.search(line) is not None:
+                print(zeek_carve_re.sub(r"\1=%s" % zeek_carve_mode, line))
+              elif zeek_file_preservation_re.search(line) is not None:
+                print(zeek_file_preservation_re.sub(r"\1=%s" % zeek_carved_file_preservation, line))
               elif capture_filter_re.search(line) is not None:
                 print(capture_filter_re.sub(r'\1="%s"' % capture_filter, line))
               elif pcap_path_re.search(line) is not None:
                 print(pcap_path_re.sub(r'\1="%s"' % capture_config_dict["PCAP_PATH"], line))
-              elif bro_path_re.search(line) is not None:
-                print(bro_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
+              elif zeek_path_re.search(line) is not None:
+                print(zeek_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
               else:
                 print(line)
 
           # write out file carving overrides if specified
           if (len(mime_tags) > 0) and (len(capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"]) > 0):
             with open(capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"], "w+") as f:
-              f.write('#!/usr/bin/env bro\n')
+              f.write('#!/usr/bin/env zeek\n')
               f.write('\n')
               f.write('export {\n')
               f.write(f'  redef {Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE_MAP_NAME} : table[string] of string = {{\n')

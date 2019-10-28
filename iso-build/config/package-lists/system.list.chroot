@@ -1,6 +1,7 @@
 accountsservice
 apache2-utils
 apparmor
+apparmor-profiles
 apparmor-utils
 apt
 arj
@@ -69,7 +70,6 @@ javascript-common
 less
 libffi6
 libffi-dev
-libgoogle-perftools4
 libgtk2.0-bin
 libnl-3-200
 libnl-genl-3-200
@@ -149,4 +149,3 @@ zenity
 zenity-common
 zip
 zlib1g-dev
-
