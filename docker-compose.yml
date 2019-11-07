@@ -196,12 +196,7 @@ services:
         start_period: 600s
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines-default.yml:ro
-      - ./logstash/config/pipelines-external.yml:/usr/share/logstash/config/pipelines-external.yml:ro
-      - ./logstash/pipeline-input:/usr/share/logstash/pipeline-input.available:ro
-      - ./logstash/pipeline-main:/usr/share/logstash/pipeline-main.available:ro
-      - ./logstash/pipeline-output:/usr/share/logstash/pipeline-output.available:ro
-      - ./logstash/pipeline-external:/usr/share/logstash/pipeline-external.available:ro
+      - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       # - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
