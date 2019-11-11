@@ -57,7 +57,7 @@ RUN logstash-plugin install logstash-filter-translate logstash-filter-cidr logst
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
-ADD logstash/pipelines/* /usr/share/logstash/malcolm-pipelines/
+ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \

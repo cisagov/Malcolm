@@ -40,17 +40,17 @@ NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segmen
 ####################################################################################################################
 
 # copy over pipeline filters from host-mapped volumes (if any) into their final resting places
-find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z | \
+find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
   xargs -0 -n 1 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   PIPELINES_DEST_DIR="$PIPELINES_DIR"/"$PIPELINE_NAME"
-  mkdir -vp "$PIPELINES_DEST_DIR"
-  cp -fv "{}"/* "$PIPELINES_DEST_DIR"/
+  mkdir -p "$PIPELINES_DEST_DIR"
+  cp -f "{}"/* "$PIPELINES_DEST_DIR"/
 '
 
 # dynamically generate final pipelines.yml configuration file from all of the pipeline directories
 > "$PIPELINES_CFG"
-find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z | \
+find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
   xargs -0 -n 1 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
