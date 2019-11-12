@@ -42,7 +42,7 @@ COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y python-setuptools python-pip python-requests python-yaml && \
+    yum install -y gettext python-setuptools python-pip python-requests python-yaml && \
     yum clean all && \
     pip install py2-ipaddress
 

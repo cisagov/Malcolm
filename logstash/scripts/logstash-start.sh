@@ -26,8 +26,6 @@ ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 
 # the name of the pipeline(s) to which input will send logs for parsing (comma-separated list, no quotes)
 PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse"}
-# that same list with quotations around each item
-export MALCOLM_PARSE_PIPELINE_ADDRESSES=$(printf '"%s"\n' "${PARSE_PIPELINE_ADDRESSES//,/\",\"}")
 
 # pipeline addresses for forwarding from Logstash to Elasticsearch (both "internal" and "external" pipelines)
 export ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-es"}
@@ -53,12 +51,15 @@ find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null |
 find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
   xargs -0 -n 1 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
-  echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
-  echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
-  cat "{}"/"$PIPELINE_EXTRA_CONF_FILE" 2>/dev/null   >> "$PIPELINES_CFG"
-  rm -f "{}"/"$PIPELINE_EXTRA_CONF_FILE"
-  echo                                               >> "$PIPELINES_CFG"
-  echo                                               >> "$PIPELINES_CFG"
+  PIPELINE_ADDRESS_NAME="$(cat "{}"/*.conf | sed -e "s/:[\}]*.*\(}\)/\1/" | envsubst | grep -P "\baddress\s*=>" | awk "{print \$3}" | sed "s/[\"'']//g" | head -n 1)"
+  if [[ -n "$ES_EXTERNAL_HOSTS" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
+    echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
+    echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
+    cat "{}"/"$PIPELINE_EXTRA_CONF_FILE" 2>/dev/null   >> "$PIPELINES_CFG"
+    rm -f "{}"/"$PIPELINE_EXTRA_CONF_FILE"
+    echo                                               >> "$PIPELINES_CFG"
+    echo                                               >> "$PIPELINES_CFG"
+  fi
 '
 
 # create filters for network segment and host mapping in the enrichment directory
@@ -68,8 +69,14 @@ if [[ -z "$ES_EXTERNAL_HOSTS" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output
   ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES="$(echo "$ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES" | sed "s/,[[:blank:]]*$ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL//")"
 fi
-# insert quotes around the elasticsearch output pipelines
-export MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
+
+# insert quotes around the elasticsearch parsing and output pipeline list
+MALCOLM_PARSE_PIPELINE_ADDRESSES=$(printf '"%s"\n' "${PARSE_PIPELINE_ADDRESSES//,/\",\"}")
+MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
+
+# do a manual global replace on these particular values in the config files, as Logstash doesn't like the environment variables with quotes in them
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES_/${MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
 # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
 if [[ "$LOGSTASH_JAVA_EXECUTION_ENGINE" == 'true' ]]; then
