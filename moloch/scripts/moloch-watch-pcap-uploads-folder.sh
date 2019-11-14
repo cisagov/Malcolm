@@ -3,12 +3,12 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
-PROCESS_DIR="/data/pcap"
+PROCESS_DIR="/data/pcap/processed"
 UPLOAD_DIR="${PROCESS_DIR}/upload"
 ZEEK_UPLOAD_DIR="/data/zeek/upload"
 mkdir -p "$UPLOAD_DIR"
 
-# as new pcaps are closed for writing in /data/pcap/upload, move them to /data/pcap for processing
+# as new pcaps are closed for writing in /data/pcap/upload, move them to /data/pcap/processed for processing
 inotifywait -m -e close_write --format '%w%f' "${UPLOAD_DIR}" | while read NEWFILE
 do
   FILEMAGIC=$(file -b "$NEWFILE")
