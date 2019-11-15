@@ -81,7 +81,7 @@ def debug_toggle_handler(signum, frame):
   debugToggled = True
 
 ###################################################################################################
-def molochCaptureFileWorker(args):
+def molochCaptureFileWorker(molochWorkerArgs):
   global debug
   global verboseDebug
   global shuttingDown
@@ -89,7 +89,7 @@ def molochCaptureFileWorker(args):
 
   scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
 
-  newFileQueue, molochBin, autotag, notLocked = args[0], args[1], args[2], args[3]
+  newFileQueue, molochBin, autotag, notLocked = molochWorkerArgs[0], molochWorkerArgs[1], molochWorkerArgs[2], molochWorkerArgs[3]
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
@@ -123,7 +123,7 @@ def molochCaptureFileWorker(args):
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
 ###################################################################################################
-def zeekFileWorker(args):
+def zeekFileWorker(zeekWorkerArgs):
   global debug
   global verboseDebug
   global shuttingDown
@@ -131,7 +131,7 @@ def zeekFileWorker(args):
 
   scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
 
-  newFileQueue, zeekBin, autozeek, autotag, uploadDir, extractFileMode = args[0], args[1], args[2], args[3], args[4], args[5]
+  newFileQueue, zeekBin, autozeek, autotag, uploadDir, defaultExtractFileMode = zeekWorkerArgs[0], zeekWorkerArgs[1], zeekWorkerArgs[2], zeekWorkerArgs[3], zeekWorkerArgs[4], zeekWorkerArgs[5]
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
@@ -147,6 +147,8 @@ def zeekFileWorker(args):
 
         # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autozeek flag is turned on
         if autozeek or ((FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS]):
+
+          extractFileMode = defaultExtractFileMode
 
           # if file carving was specified via tag, make note of it
           if (FILE_INFO_DICT_TAGS in fileInfo):
