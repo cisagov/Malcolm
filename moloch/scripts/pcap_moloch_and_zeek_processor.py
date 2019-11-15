@@ -45,6 +45,7 @@ ZEEK_STATE_DIR = '.state'
 ZEEK_AUTOZEEK_TAG = 'AUTOZEEK'
 ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
 ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
+ZEEK_LOG_COMPRESSION_LEVEL = 6
 
 ###################################################################################################
 debug = False
@@ -190,12 +191,16 @@ def zeekFileWorker(args):
 
                 # tar up the results
                 tgzFileName = "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(fileInfo[FILE_INFO_DICT_TAGS]), processTimeUsec)
-                with tarfile.open(tgzFileName, "w:gz") as tar:
-                  tar.add(tmpLogDir, arcname=os.path.basename('.'))
+                try:
+                  with tarfile.open(tgzFileName, mode="w:gz", compresslevel=ZEEK_LOG_COMPRESSION_LEVEL) as tar:
+                    tar.add(tmpLogDir, arcname=os.path.basename('.'))
 
-                # relocate the tarball to the upload directory
-                shutil.move(tgzFileName, uploadDir)
-                if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
+                  # relocate the tarball to the upload directory (do it this way instead of with a shutil.move because of
+                  # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link")
+                  shutil.copyfile(tgzFileName, os.path.join(uploadDir, tgzFileName))
+                  if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
+                finally:
+                  if os.path.isfile(tgzFileName): os.remove(tgzFileName)
 
               else:
                 # zeek returned no log files (or an error)
