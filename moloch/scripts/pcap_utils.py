@@ -12,8 +12,7 @@ from multiprocessing import RawValue
 from threading import Lock
 
 ###################################################################################################
-PCAP_TOPIC_PORT = 53037
-PCAP_TOPIC_ADDR = "127.0.0.1"
+PCAP_TOPIC_PORT = 30441
 
 PCAP_MIME_TYPES = ['application/vnd.tcpdump.pcap', 'application/x-pcapng']
 
@@ -86,14 +85,14 @@ def check_output_input(*popenargs, **kwargs):
 
 ###################################################################################################
 # run command with arguments and return its exit code and output
-def run_process(command, stdout=True, stderr=True, stdin=None, debug=False):
+def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, debug=False):
 
   retcode = -1
   output = []
 
   try:
     # run the command
-    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None)
+    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd)
 
     # split the output on newlines to return a list
     if stderr and (len(cmderr) > 0): output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))

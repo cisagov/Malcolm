@@ -108,7 +108,7 @@ class EventWatcher(pyinotify.ProcessEvent):
     # Socket to send messages on
     if debug: eprint(f"{scriptName}:\tbinding publisher port {PCAP_TOPIC_PORT}")
     self.topic_socket = self.context.socket(zmq.PUB)
-    self.topic_socket.bind(f"tcp://{PCAP_TOPIC_ADDR}:{PCAP_TOPIC_PORT}")
+    self.topic_socket.bind(f"tcp://*:{PCAP_TOPIC_PORT}")
 
     # todo: do I want to set this? probably not since this guy's whole job is to send
     # and if he can't then what's the point? just block

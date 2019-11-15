@@ -31,6 +31,7 @@ MAX_WORKER_PROCESSES_DEFAULT = 1
 
 PCAP_PROCESSING_MODE_MOLOCH = "moloch"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
+PCAP_TOPIC_ADDR = "127.0.0.1"
 
 MOLOCH_CAPTURE_PATH = "/data/moloch/bin/moloch-capture"
 
@@ -158,12 +159,9 @@ def zeekFileWorker(args):
           fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
           if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-          # create and chdir to a temporary work directory
+          # create a temporary work directory where zeek will be executed to generate the log files
           with tempfile.TemporaryDirectory() as tmpLogDir:
             if os.path.isdir(tmpLogDir):
-              os.chdir(tmpLogDir)
-
-              processTimeUsec = int(round(time.time() * 1000000))
 
               # use Zeek to process the pcap
               zeekCmd = [zeekBin, "-r", fileInfo[FILE_INFO_DICT_NAME], ZEEK_LOCAL_SCRIPT]
@@ -175,40 +173,32 @@ def zeekFileWorker(args):
                   zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT_INTERESTING)
                   os.environ[ZEEK_EXTRACTOR_MODE_ENV_VAR] = ZEEK_EXTRACTOR_MODE_MAPPED
 
-              # execute zeek
-              retcode, output = run_process(zeekCmd, debug=verboseDebug)
+              # execute zeek with the cwd of tmpLogDir so that's where the logs go
+              processTimeUsec = int(round(time.time() * 1000000))
+              retcode, output = run_process(zeekCmd, cwd=tmpLogDir, debug=verboseDebug)
               if (retcode == 0):
                 if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
               else:
                 if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
 
               # clean up the .state directory we don't care to keep
-              if os.path.isdir(ZEEK_STATE_DIR): shutil.rmtree(ZEEK_STATE_DIR)
+              tmpStateDir = os.path.join(tmpLogDir, ZEEK_STATE_DIR)
+              if os.path.isdir(tmpStateDir): shutil.rmtree(tmpStateDir)
 
               # make sure log files were generated
               logFiles = [logFile for logFile in os.listdir(tmpLogDir) if logFile.endswith('.log')]
               if (len(logFiles) > 0):
 
                 # tar up the results
-                tgzFileName = "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(fileInfo[FILE_INFO_DICT_TAGS]), processTimeUsec)
-                try:
-                  with tarfile.open(tgzFileName, mode="w:gz", compresslevel=ZEEK_LOG_COMPRESSION_LEVEL) as tar:
-                    tar.add(tmpLogDir, arcname=os.path.basename('.'))
+                tgzFileName = os.path.join(tmpLogDir, "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(fileInfo[FILE_INFO_DICT_TAGS]), processTimeUsec))
+                with tarfile.open(tgzFileName, mode="w:gz", compresslevel=ZEEK_LOG_COMPRESSION_LEVEL) as tar:
+                  tar.add(tmpLogDir, arcname=os.path.basename('.'))
 
-                  # relocate the tarball to the upload directory (do it this way instead of with a shutil.move because of
-                  # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link")
-                  try:
-                    shutil.copyfile(tgzFileName, os.path.join(uploadDir, tgzFileName))
-                  except FileNotFoundError:
-                    # the inotify event for "close_write" watched by filebeat-watch-zeeklogs-uploads-folder.sh gets called
-                    # before python thinks it's done, even though it's fine. I think just the metadata isn't getting
-                    # set or something like that, but I don't care. so ignore FileNotFoundError
-                    pass
-
-                  if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
-
-                finally:
-                  if os.path.isfile(tgzFileName): os.remove(tgzFileName)
+                # relocate the tarball to the upload directory (do it this way instead of with a shutil.move because of
+                # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
+                # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
+                shutil.copy(tgzFileName, uploadDir)
+                if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
 
               else:
                 # zeek returned no log files (or an error)

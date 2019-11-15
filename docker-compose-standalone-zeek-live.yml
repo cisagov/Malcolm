@@ -238,6 +238,7 @@ services:
       - 8000
       - 8005
       - 8081
+      - 30441
     volumes:
       - ./pcap:/data/pcap
       - ./zeek-logs/upload:/data/zeek/upload
