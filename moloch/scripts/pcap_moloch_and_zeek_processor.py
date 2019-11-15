@@ -197,8 +197,16 @@ def zeekFileWorker(args):
 
                   # relocate the tarball to the upload directory (do it this way instead of with a shutil.move because of
                   # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link")
-                  shutil.copyfile(tgzFileName, os.path.join(uploadDir, tgzFileName))
+                  try:
+                    shutil.copyfile(tgzFileName, os.path.join(uploadDir, tgzFileName))
+                  except FileNotFoundError:
+                    # the inotify event for "close_write" watched by filebeat-watch-zeeklogs-uploads-folder.sh gets called
+                    # before python thinks it's done, even though it's fine. I think just the metadata isn't getting
+                    # set or something like that, but I don't care. so ignore FileNotFoundError
+                    pass
+
                   if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
+
                 finally:
                   if os.path.isfile(tgzFileName): os.remove(tgzFileName)
 

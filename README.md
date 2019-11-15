@@ -495,8 +495,10 @@ The host system (ie., the one running Docker) will need to be configured for the
 # the maximum number of open file handles
 fs.file-max=65536
 
-# the maximum number of user inotify watches
+# increase maximums for inotify watches
 fs.inotify.max_user_watches=131072
+fs.inotify.max_queued_events=131072
+fs.inotify.max_user_instances=512
 
 # the maximum number of memory map areas a process may have
 vm.max_map_count=262144
