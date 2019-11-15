@@ -85,14 +85,14 @@ def check_output_input(*popenargs, **kwargs):
 
 ###################################################################################################
 # run command with arguments and return its exit code and output
-def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, debug=False):
+def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None, debug=False):
 
   retcode = -1
   output = []
 
   try:
     # run the command
-    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd)
+    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
 
     # split the output on newlines to return a list
     if stderr and (len(cmderr) > 0): output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))

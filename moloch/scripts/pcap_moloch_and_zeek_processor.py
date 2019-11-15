@@ -148,12 +148,13 @@ def zeekFileWorker(args):
         # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autozeek flag is turned on
         if autozeek or ((FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS]):
 
-          # if file carving was specified via tag, make note of it (updating the environment for the child process)
+          # if file carving was specified via tag, make note of it
           if (FILE_INFO_DICT_TAGS in fileInfo):
             for autocarveTag in filter(lambda x: x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX), fileInfo[FILE_INFO_DICT_TAGS]):
               fileInfo[FILE_INFO_DICT_TAGS].remove(autocarveTag)
               extractFileMode = autocarveTag[len(ZEEK_AUTOCARVE_TAG_PREFIX):]
-            os.environ[ZEEK_EXTRACTOR_MODE_ENV_VAR] = extractFileMode
+
+          extractFileMode = extractFileMode.lower() if extractFileMode else ZEEK_EXTRACTOR_MODE_NONE
 
           # finalize tags list (removing AUTOZEEK and AUTOCARVE*)
           fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
@@ -163,6 +164,8 @@ def zeekFileWorker(args):
           with tempfile.TemporaryDirectory() as tmpLogDir:
             if os.path.isdir(tmpLogDir):
 
+              processTimeUsec = int(round(time.time() * 1000000))
+
               # use Zeek to process the pcap
               zeekCmd = [zeekBin, "-r", fileInfo[FILE_INFO_DICT_NAME], ZEEK_LOCAL_SCRIPT]
 
@@ -171,11 +174,12 @@ def zeekFileWorker(args):
                 zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT)
                 if (extractFileMode == ZEEK_EXTRACTOR_MODE_INTERESTING):
                   zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT_INTERESTING)
-                  os.environ[ZEEK_EXTRACTOR_MODE_ENV_VAR] = ZEEK_EXTRACTOR_MODE_MAPPED
+                  extractFileMode = ZEEK_EXTRACTOR_MODE_MAPPED
 
-              # execute zeek with the cwd of tmpLogDir so that's where the logs go
-              processTimeUsec = int(round(time.time() * 1000000))
-              retcode, output = run_process(zeekCmd, cwd=tmpLogDir, debug=verboseDebug)
+              # execute zeek with the cwd of tmpLogDir so that's where the logs go, and with the updated file carving environment variable
+              zeekEnv = os.environ.copy()
+              zeekEnv[ZEEK_EXTRACTOR_MODE_ENV_VAR] = extractFileMode
+              retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, debug=verboseDebug)
               if (retcode == 0):
                 if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
               else:
@@ -295,7 +299,7 @@ def main():
   if (processingMode == PCAP_PROCESSING_MODE_MOLOCH):
     scannerThreads = ThreadPool(args.threads, molochCaptureFileWorker, ([newFileQueue,args.executable,args.autotag,args.notLocked],))
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
-    scannerThreads = ThreadPool(args.threads, zeekFileWorker, ([newFileQueue,args.executable,args.autozeek,args.autotag,args.zeekUploadDir,args.zeekExtractFileMode.upper()],))
+    scannerThreads = ThreadPool(args.threads, zeekFileWorker, ([newFileQueue,args.executable,args.autozeek,args.autotag,args.zeekUploadDir,args.zeekExtractFileMode],))
 
   while (not shuttingDown):
     # for debugging
