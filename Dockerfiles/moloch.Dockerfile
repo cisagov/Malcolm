@@ -93,9 +93,9 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/vueapp/src/assets/logo.png && \
     find $MOLOCHDIR/doc/images/screenshots -name "*.png" -delete && \
     export PATH="$MOLOCHDIR/bin:${PATH}" && \
-    ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
-    ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
-    ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
+    ln -sfr $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
+    ln -sfr $MOLOCHDIR/bin/node /usr/local/bin/node && \
+    ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     ./easybutton-build.sh --install && \
@@ -125,6 +125,8 @@ ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
 ARG ZEEK_EXTRACTOR_MODE=none
 ARG ZEEK_EXTRACTOR_PATH=/data/zeek/extract_files
+ARG PCAP_PIPELINE_DEBUG=false
+ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 
 # Declare envs vars for each arg
 ENV ES_HOST $ES_HOST
@@ -144,12 +146,13 @@ ENV WISE $WISE
 ENV VIEWER $VIEWER
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
-ENV AUTOZEEK_DIR "/autozeek"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
+ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
+ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 
 COPY --from=build $MOLOCHDIR $MOLOCHDIR
 COPY --from=build $ZEEK_DIR $ZEEK_DIR
@@ -157,7 +160,6 @@ COPY --from=build $ZEEK_DIR $ZEEK_DIR
 RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
-      cron \
       curl \
       file \
       geoip-bin \
@@ -172,6 +174,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       libtool \
       libwww-perl \
       libyaml-0-2 \
+      libzmq5 \
+      procps \
       psmisc \
       python \
       python3 \
@@ -184,10 +188,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       vim-tiny \
       wget \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
-    pip3 install --no-cache-dir beautifulsoup4 elasticsearch manuf geoip2 patool entrypoint2 pyunpack && \
-    ln -sf $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
-      ln -sf $MOLOCHDIR/bin/node /usr/local/bin/node && \
-      ln -sf $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
+    pip3 install --no-cache-dir beautifulsoup4 elasticsearch elasticsearch_dsl manuf geoip2 patool pyzmq pyinotify python-magic entrypoint2 pyunpack && \
+    ln -sfr $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
+      ln -sfr $MOLOCHDIR/bin/node /usr/local/bin/node && \
+      ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     apt-get -q -y --purge remove gcc gcc-8 cpp cpp-8 libssl-dev && \
     apt-get -q -y autoremove && \
     apt-get clean && \
@@ -196,7 +200,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
 # add configuration and scripts
 ADD moloch/scripts /data/
 ADD shared/bin/elastic_search_status.sh /data/
-ADD shared/bin/cron_env_deb.sh /data/
 ADD moloch/etc $MOLOCHDIR/etc/
 ADD https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv $MOLOCHDIR/etc/ipv4-address-space.csv
 ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf $MOLOCHDIR/etc/oui.txt
@@ -209,6 +212,8 @@ ADD moloch/zeek/*.zeek $ZEEK_DIR/share/zeek/site/
 RUN groupadd --gid 1000 $MOLOCHUSER && \
     useradd -M --uid 1000 --gid 1000 --home $MOLOCHDIR $MOLOCHUSER && \
     chmod 755 /data/*.sh && \
+    ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
+    ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_zeek_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
     bash -c "zcat /tmp/GeoLite2-Country.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-Country.mmdb" && \
     rm -f /tmp/GeoLite2-Country.mmdb.gz && \
@@ -217,14 +222,10 @@ RUN groupadd --gid 1000 $MOLOCHUSER && \
     sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" $MOLOCHDIR/bin/Configure && \
     sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" $MOLOCHDIR/bin/Configure && \
     chmod u+s $MOLOCHDIR/bin/moloch-capture && \
-    mkdir $AUTOZEEK_DIR && \
-    chown -R 1000:1000 $MOLOCHDIR/logs $AUTOZEEK_DIR && \
-    bash -c 'echo -e "* * * * * su -c /data/moloch-parse-pcap-folder.sh $MOLOCHUSER >/dev/null 2>&1\n* * * * * su -c $MOLOCHDIR-parse-autozeek-folder.sh $MOLOCHUSER >/dev/null 2>&1" | crontab -'
+    chown -R 1000:1000 $MOLOCHDIR/logs
 
 #Update Path
 ENV PATH="/data:$MOLOCHDIR/bin:$ZEEK_DIR/bin:${PATH}"
-
-VOLUME $AUTOZEEK_DIR
 
 EXPOSE 8000 8005 8081
 WORKDIR $MOLOCHDIR

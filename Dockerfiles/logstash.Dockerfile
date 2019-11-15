@@ -4,8 +4,18 @@ FROM centos:7 AS build
 LABEL maintainer="Seth.Grover@inl.gov"
 
 ARG LOGSTASH_JAVA_EXECUTION_ENGINE=true
+ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
+ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse
+ARG LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-es
+ARG LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-es
+ARG LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-es,external-es
 
 ENV LOGSTASH_JAVA_EXECUTION_ENGINE $LOGSTASH_JAVA_EXECUTION_ENGINE
+ENV LOGSTASH_ENRICHMENT_PIPELINE $LOGSTASH_ENRICHMENT_PIPELINE
+ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
+ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL
+ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL
+ENV LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES
 
 RUN yum install -y epel-release && \
     yum update -y && \
@@ -32,7 +42,7 @@ COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y python-setuptools python-pip python-requests python-yaml && \
+    yum install -y gettext python-setuptools python-pip python-requests python-yaml && \
     yum clean all && \
     pip install py2-ipaddress
 
@@ -46,19 +56,14 @@ RUN logstash-plugin install logstash-filter-translate logstash-filter-cidr logst
 
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
-ADD logstash/config/pipelines.yml /usr/share/logstash/config/pipelines-default.yml
-ADD logstash/config/pipelines-external.yml /usr/share/logstash/config/pipelines-external.yml
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
-ADD logstash/pipeline-input /usr/share/logstash/pipeline-input/
-ADD logstash/pipeline-main /usr/share/logstash/pipeline-main/
-ADD logstash/pipeline-output /usr/share/logstash/pipeline-output/
-ADD logstash/pipeline-external /usr/share/logstash/pipeline-external/
+ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
-    mkdir /logstash-persistent-queue && \
-    bash -c "chown --silent -R logstash:root /usr/share/logstash/pipeline-{input,main,output,external} /logstash-persistent-queue" && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
+    mkdir /logstash-persistent-queue && \
+    bash -c "chown --silent -R logstash:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue" && \
     bash -c "curl -sSL --fail 'https://linuxnet.ca/ieee/oui.txt.gz' | gzip -d | grep 'base 16' | tr -d '\t' | sed 's/     (base 16)/\t/g' | sort | tr -d '\r' > /usr/share/logstash/config/oui-logstash.txt" && \
     python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
 
