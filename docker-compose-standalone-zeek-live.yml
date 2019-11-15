@@ -195,8 +195,8 @@ services:
       << : *common-upload-variables
       << : *common-beats-variables
       FILEBEAT_LOG_PATH : '/data/zeek/current'
-      FILEBEAT_LOG_CLEANUP_MINUTES : 0
-      FILEBEAT_ZIP_CLEANUP_MINUTES : 0
+      FILEBEAT_LOG_CLEANUP_MINUTES : 180
+      FILEBEAT_ZIP_CLEANUP_MINUTES : 360
       FILEBEAT_SCAN_FREQUENCY : '10s'
       FILEBEAT_CLEAN_INACTIVE : '180m'
       FILEBEAT_IGNORE_OLDER : '120m'
