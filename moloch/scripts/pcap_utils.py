@@ -27,6 +27,7 @@ FILE_INFO_FILE_MIME = "mime"
 # print to stderr
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
+  sys.stderr.flush()
 
 ###################################################################################################
 # convenient boolean argument parsing

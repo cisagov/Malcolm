@@ -4,7 +4,7 @@
 
 
 PROCESS_DIR="/data/pcap/processed"
-UPLOAD_DIR="${PROCESS_DIR}/upload"
+UPLOAD_DIR="/data/pcap/upload"
 ZEEK_UPLOAD_DIR="/data/zeek/upload"
 mkdir -p "$UPLOAD_DIR"
 

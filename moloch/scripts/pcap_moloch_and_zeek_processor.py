@@ -189,7 +189,7 @@ def zeekFileWorker(args):
               if (len(logFiles) > 0):
 
                 # tar up the results
-                tgzFileName = "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(tags), processTimeUsec)
+                tgzFileName = "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(fileInfo[FILE_INFO_DICT_TAGS]), processTimeUsec)
                 with tarfile.open(tgzFileName, "w:gz") as tar:
                   tar.add(tmpLogDir, arcname=os.path.basename('.'))
 
