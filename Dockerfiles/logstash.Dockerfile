@@ -2,6 +2,14 @@ FROM centos:7 AS build
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
+LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/logstash-oss'
+LABEL org.opencontainers.image.description='Malcolm container providing Logstash (the Apache-licensed variant)'
+
 
 ARG LOGSTASH_JAVA_EXECUTION_ENGINE=true
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
@@ -78,3 +86,13 @@ VOLUME ["/logstash-persistent-queue"]
 USER logstash
 
 ENTRYPOINT ["/usr/local/bin/logstash-start.sh"]
+
+
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION

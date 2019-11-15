@@ -2,6 +2,14 @@ FROM docker.elastic.co/kibana/kibana-oss:6.8.4
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
+LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/kibana-oss'
+LABEL org.opencontainers.image.description='Malcolm container providing Kibana (the Apache-licensed variant)'
+
 
 ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
 ARG CREATE_ES_MOLOCH_SESSION_INDEX="true"
@@ -89,3 +97,13 @@ RUN chmod 755 /data/*.sh /data/*.py && \
 ADD docs/images/kibana/ebdca7741674eca4e1fadeca157f3ae6.svg /usr/share/kibana/optimize/bundles/ebdca7741674eca4e1fadeca157f3ae6.svg
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+
+
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION

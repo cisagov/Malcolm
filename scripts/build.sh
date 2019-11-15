@@ -57,10 +57,15 @@ fi
 unset CONFIRMATION
 read -p "Malcolm Docker images will now be built and/or pulled, force full clean (non-cached) rebuild [y/N]? " CONFIRMATION
 CONFIRMATION=${CONFIRMATION:-N}
+
+BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+MALCOLM_VERSION="$(grep -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache "$@"
+  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND build "$@"
+  $DOCKER_COMPOSE_COMMAND build --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly

@@ -2,6 +2,13 @@ FROM debian:buster-slim
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
+LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/elastalert'
+LABEL org.opencontainers.image.description='Malcolm container providing curation for Elasticsearch indices'
 
 ARG ES_HOST=elasticsearch
 ARG ES_PORT=9200
@@ -70,3 +77,13 @@ ADD curator/scripts /usr/local/bin/
 ADD curator/config /config/
 
 CMD ["/usr/local/bin/cron_env_deb.sh"]
+
+
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION
