@@ -67,12 +67,13 @@ ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
+ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf /usr/share/logstash/config/oui.txt
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
     bash -c "chown --silent -R logstash:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue" && \
-    bash -c "curl -sSL --fail 'https://linuxnet.ca/ieee/oui.txt.gz' | gzip -d | grep 'base 16' | tr -d '\t' | sed 's/     (base 16)/\t/g' | sort | tr -d '\r' > /usr/share/logstash/config/oui-logstash.txt" && \
+    ( awk -F '\t' '{gsub(":", "", $1); if (length($1) == 6) {if ($3) {print $1"\t"$3} else if ($2) {print $1"\t"$2}}}' /usr/share/logstash/config/oui.txt > /usr/share/logstash/config/oui-logstash.txt) && \
     python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
 
 # As the keystore is encapsulated in logstash, this isn't really necessary. It's included
