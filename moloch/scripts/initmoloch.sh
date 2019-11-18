@@ -70,4 +70,4 @@ fi # if/else Elasticsearch database initialized
 
 touch $MOLOCHDIR/initialized
 
-# the (viewer|capture|wise)_service.sh scripts will start/restart those processes
+# the (viewer|wise)_service.sh scripts will start/restart those processes
