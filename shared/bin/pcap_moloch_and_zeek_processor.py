@@ -31,7 +31,6 @@ MAX_WORKER_PROCESSES_DEFAULT = 1
 
 PCAP_PROCESSING_MODE_MOLOCH = "moloch"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
-PCAP_TOPIC_ADDR = "127.0.0.1"
 
 MOLOCH_CAPTURE_PATH = "/data/moloch/bin/moloch-capture"
 
@@ -89,7 +88,7 @@ def molochCaptureFileWorker(molochWorkerArgs):
 
   scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
 
-  newFileQueue, molochBin, autotag, notLocked = molochWorkerArgs[0], molochWorkerArgs[1], molochWorkerArgs[2], molochWorkerArgs[3]
+  newFileQueue, pcapBaseDir, molochBin, autotag, notLocked = molochWorkerArgs[0], molochWorkerArgs[1], molochWorkerArgs[2], molochWorkerArgs[3], molochWorkerArgs[4]
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
@@ -101,23 +100,27 @@ def molochCaptureFileWorker(molochWorkerArgs):
     except IndexError:
       time.sleep(1)
     else:
-      if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+      if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
 
-        # finalize tags list
-        fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
-        if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+        if pcapBaseDir and os.path.isdir(pcapBaseDir):
+          fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
-        # put together moloch execution command
-        cmd = [molochBin, '-r', fileInfo[FILE_INFO_DICT_NAME]]
-        if notLocked: cmd.append('--nolockpcap')
-        cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
+        if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+          # finalize tags list
+          fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-        # execute moloch-capture for pcap file
-        retcode, output = run_process(cmd, debug=verboseDebug)
-        if (retcode == 0):
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
-        else:
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{molochBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
+          # put together moloch execution command
+          cmd = [molochBin, '-r', fileInfo[FILE_INFO_DICT_NAME]]
+          if notLocked: cmd.append('--nolockpcap')
+          cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
+
+          # execute moloch-capture for pcap file
+          retcode, output = run_process(cmd, debug=verboseDebug)
+          if (retcode == 0):
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+          else:
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{molochBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
 
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
@@ -131,7 +134,7 @@ def zeekFileWorker(zeekWorkerArgs):
 
   scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
 
-  newFileQueue, zeekBin, autozeek, autotag, uploadDir, defaultExtractFileMode = zeekWorkerArgs[0], zeekWorkerArgs[1], zeekWorkerArgs[2], zeekWorkerArgs[3], zeekWorkerArgs[4], zeekWorkerArgs[5]
+  newFileQueue, pcapBaseDir, zeekBin, autozeek, autotag, uploadDir, defaultExtractFileMode = zeekWorkerArgs[0], zeekWorkerArgs[1], zeekWorkerArgs[2], zeekWorkerArgs[3], zeekWorkerArgs[4], zeekWorkerArgs[5], zeekWorkerArgs[6]
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
@@ -143,75 +146,79 @@ def zeekFileWorker(zeekWorkerArgs):
     except IndexError:
       time.sleep(1)
     else:
-      if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]) and os.path.isdir(uploadDir):
+      if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isdir(uploadDir):
 
-        # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autozeek flag is turned on
-        if autozeek or ((FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS]):
+        if pcapBaseDir and os.path.isdir(pcapBaseDir):
+          fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
-          extractFileMode = defaultExtractFileMode
+        if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+          # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autozeek flag is turned on
+          if autozeek or ((FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS]):
 
-          # if file carving was specified via tag, make note of it
-          if (FILE_INFO_DICT_TAGS in fileInfo):
-            for autocarveTag in filter(lambda x: x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX), fileInfo[FILE_INFO_DICT_TAGS]):
-              fileInfo[FILE_INFO_DICT_TAGS].remove(autocarveTag)
-              extractFileMode = autocarveTag[len(ZEEK_AUTOCARVE_TAG_PREFIX):]
+            extractFileMode = defaultExtractFileMode
 
-          extractFileMode = extractFileMode.lower() if extractFileMode else ZEEK_EXTRACTOR_MODE_NONE
+            # if file carving was specified via tag, make note of it
+            if (FILE_INFO_DICT_TAGS in fileInfo):
+              for autocarveTag in filter(lambda x: x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX), fileInfo[FILE_INFO_DICT_TAGS]):
+                fileInfo[FILE_INFO_DICT_TAGS].remove(autocarveTag)
+                extractFileMode = autocarveTag[len(ZEEK_AUTOCARVE_TAG_PREFIX):]
 
-          # finalize tags list (removing AUTOZEEK and AUTOCARVE*)
-          fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+            extractFileMode = extractFileMode.lower() if extractFileMode else ZEEK_EXTRACTOR_MODE_NONE
 
-          # create a temporary work directory where zeek will be executed to generate the log files
-          with tempfile.TemporaryDirectory() as tmpLogDir:
-            if os.path.isdir(tmpLogDir):
+            # finalize tags list (removing AUTOZEEK and AUTOCARVE*)
+            fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-              processTimeUsec = int(round(time.time() * 1000000))
+            # create a temporary work directory where zeek will be executed to generate the log files
+            with tempfile.TemporaryDirectory() as tmpLogDir:
+              if os.path.isdir(tmpLogDir):
 
-              # use Zeek to process the pcap
-              zeekCmd = [zeekBin, "-r", fileInfo[FILE_INFO_DICT_NAME], ZEEK_LOCAL_SCRIPT]
+                processTimeUsec = int(round(time.time() * 1000000))
 
-              # set file extraction parameters if required
-              if (extractFileMode != ZEEK_EXTRACTOR_MODE_NONE):
-                zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT)
-                if (extractFileMode == ZEEK_EXTRACTOR_MODE_INTERESTING):
-                  zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT_INTERESTING)
-                  extractFileMode = ZEEK_EXTRACTOR_MODE_MAPPED
+                # use Zeek to process the pcap
+                zeekCmd = [zeekBin, "-r", fileInfo[FILE_INFO_DICT_NAME], ZEEK_LOCAL_SCRIPT]
 
-              # execute zeek with the cwd of tmpLogDir so that's where the logs go, and with the updated file carving environment variable
-              zeekEnv = os.environ.copy()
-              zeekEnv[ZEEK_EXTRACTOR_MODE_ENV_VAR] = extractFileMode
-              retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, debug=verboseDebug)
-              if (retcode == 0):
-                if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+                # set file extraction parameters if required
+                if (extractFileMode != ZEEK_EXTRACTOR_MODE_NONE):
+                  zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT)
+                  if (extractFileMode == ZEEK_EXTRACTOR_MODE_INTERESTING):
+                    zeekCmd.append(ZEEK_EXTRACTOR_SCRIPT_INTERESTING)
+                    extractFileMode = ZEEK_EXTRACTOR_MODE_MAPPED
+
+                # execute zeek with the cwd of tmpLogDir so that's where the logs go, and with the updated file carving environment variable
+                zeekEnv = os.environ.copy()
+                zeekEnv[ZEEK_EXTRACTOR_MODE_ENV_VAR] = extractFileMode
+                retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, debug=verboseDebug)
+                if (retcode == 0):
+                  if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+                else:
+                  if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
+
+                # clean up the .state directory we don't care to keep
+                tmpStateDir = os.path.join(tmpLogDir, ZEEK_STATE_DIR)
+                if os.path.isdir(tmpStateDir): shutil.rmtree(tmpStateDir)
+
+                # make sure log files were generated
+                logFiles = [logFile for logFile in os.listdir(tmpLogDir) if logFile.endswith('.log')]
+                if (len(logFiles) > 0):
+
+                  # tar up the results
+                  tgzFileName = os.path.join(tmpLogDir, "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(fileInfo[FILE_INFO_DICT_TAGS]), processTimeUsec))
+                  with tarfile.open(tgzFileName, mode="w:gz", compresslevel=ZEEK_LOG_COMPRESSION_LEVEL) as tar:
+                    tar.add(tmpLogDir, arcname=os.path.basename('.'))
+
+                  # relocate the tarball to the upload directory (do it this way instead of with a shutil.move because of
+                  # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
+                  # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
+                  shutil.copy(tgzFileName, uploadDir)
+                  if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
+
+                else:
+                  # zeek returned no log files (or an error)
+                  if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❓\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} generated no log files")
+
               else:
-                if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
-
-              # clean up the .state directory we don't care to keep
-              tmpStateDir = os.path.join(tmpLogDir, ZEEK_STATE_DIR)
-              if os.path.isdir(tmpStateDir): shutil.rmtree(tmpStateDir)
-
-              # make sure log files were generated
-              logFiles = [logFile for logFile in os.listdir(tmpLogDir) if logFile.endswith('.log')]
-              if (len(logFiles) > 0):
-
-                # tar up the results
-                tgzFileName = os.path.join(tmpLogDir, "{}-{}-{}.tar.gz".format(os.path.basename(fileInfo[FILE_INFO_DICT_NAME]), '_'.join(fileInfo[FILE_INFO_DICT_TAGS]), processTimeUsec))
-                with tarfile.open(tgzFileName, mode="w:gz", compresslevel=ZEEK_LOG_COMPRESSION_LEVEL) as tar:
-                  tar.add(tmpLogDir, arcname=os.path.basename('.'))
-
-                # relocate the tarball to the upload directory (do it this way instead of with a shutil.move because of
-                # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
-                # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
-                shutil.copy(tgzFileName, uploadDir)
-                if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
-
-              else:
-                # zeek returned no log files (or an error)
-                if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❓\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} generated no log files")
-
-            else:
-              if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}")
+                if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}")
 
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
@@ -245,7 +252,10 @@ def main():
   parser.add_argument('--extra-verbose', dest='verboseDebug', help="Super verbose output", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--start-sleep', dest='startSleepSec', help="Sleep for this many seconds before starting", metavar='<seconds>', type=int, default=0, required=False)
   parser.add_argument('-t', '--threads', dest='threads', help="Worker threads", metavar='<seconds>', type=int, default=MAX_WORKER_PROCESSES_DEFAULT, required=False)
+  parser.add_argument('--publisher', required=True, dest='publisherHost', help="host publishing PCAP events", metavar='<STR>', type=str, default="127.0.0.1")
   parser.add_argument('--autotag', dest='autotag', help="Autotag logs based on PCAP file names", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
+  requiredNamed = parser.add_argument_group('required arguments')
+  requiredNamed.add_argument('--pcap-directory', dest='pcapBaseDir', help='Base directory for PCAP files', metavar='<directory>', type=str, required=True)
   if (processingMode == PCAP_PROCESSING_MODE_MOLOCH):
     parser.add_argument('--moloch', required=False, dest='executable', help="moloch-capture executable path", metavar='<STR>', type=str, default=MOLOCH_CAPTURE_PATH)
     parser.add_argument('--managed', dest='notLocked', help="Allow Moloch to manage PCAP files", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
@@ -253,7 +263,6 @@ def main():
     parser.add_argument('--zeek', required=False, dest='executable', help="zeek executable path", metavar='<STR>', type=str, default=ZEEK_PATH)
     parser.add_argument('--autozeek', dest='autozeek', help="Autoanalyze all PCAP file with Zeek", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
     parser.add_argument('--extract', dest='zeekExtractFileMode', help='Zeek file carving mode', metavar=f'{ZEEK_EXTRACTOR_MODE_INTERESTING}|{ZEEK_EXTRACTOR_MODE_MAPPED}|{ZEEK_EXTRACTOR_MODE_NONE}', type=str, default=ZEEK_EXTRACTOR_MODE_NONE)
-    requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument('--zeek-directory', dest='zeekUploadDir', help='Destination directory for Zeek log files', metavar='<directory>', type=str, required=True)
   try:
     parser.error = parser.exit
@@ -288,7 +297,7 @@ def main():
 
   # Socket to subscribe to messages on
   new_files_socket = context.socket(zmq.SUB)
-  new_files_socket.connect(f"tcp://{PCAP_TOPIC_ADDR}:{PCAP_TOPIC_PORT}")
+  new_files_socket.connect(f"tcp://{args.publisherHost}:{PCAP_TOPIC_PORT}")
   new_files_socket.setsockopt(zmq.SUBSCRIBE, b"")  # All topics
   new_files_socket.setsockopt(zmq.LINGER, 0)       # All topics
   new_files_socket.RCVTIMEO = 1500
@@ -299,9 +308,9 @@ def main():
 
   # start worker threads which will pull filenames/tags to be processed by moloch-capture
   if (processingMode == PCAP_PROCESSING_MODE_MOLOCH):
-    scannerThreads = ThreadPool(args.threads, molochCaptureFileWorker, ([newFileQueue,args.executable,args.autotag,args.notLocked],))
+    scannerThreads = ThreadPool(args.threads, molochCaptureFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autotag,args.notLocked],))
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
-    scannerThreads = ThreadPool(args.threads, zeekFileWorker, ([newFileQueue,args.executable,args.autozeek,args.autotag,args.zeekUploadDir,args.zeekExtractFileMode],))
+    scannerThreads = ThreadPool(args.threads, zeekFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autozeek,args.autotag,args.zeekUploadDir,args.zeekExtractFileMode],))
 
   while (not shuttingDown):
     # for debugging

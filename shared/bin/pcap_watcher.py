@@ -162,11 +162,12 @@ def event_process_generator(cls, method):
           # the entity is a right-sized non-duplicate file, and it exists, so send it to get processed
           if debug: eprint(f"{scriptName}:\t📩\t{event.pathname}")
           try:
-            fileInfo = {FILE_INFO_DICT_NAME: event.pathname, \
+            relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
+            fileInfo = {FILE_INFO_DICT_NAME: event.pathname if args.includeAbsolutePath else relativePath, \
                         FILE_INFO_DICT_SIZE: fileSize, \
                         FILE_INFO_FILE_MIME: fileMime, \
                         FILE_INFO_FILE_TYPE: fileType, \
-                        FILE_INFO_DICT_TAGS: tags_from_filename(remove_prefix(event.pathname, args.baseDir))}
+                        FILE_INFO_DICT_TAGS: tags_from_filename(relativePath)}
             self.topic_socket.send_string(json.dumps(fileInfo))
             if debug: eprint(f"{scriptName}:\t📫\t{fileInfo}")
           except zmq.Again as timeout:
@@ -221,6 +222,7 @@ def main():
   parser.add_argument('--moloch-node', required=False, dest='molochNode', metavar='<STR>', type=str, default='moloch', help='Moloch node value for querying Moloch files index to ignore duplicates')
 
   parser.add_argument('--ignore-existing', dest='ignoreExisting', help="Ignore preexisting files in the monitor directory", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--absolute-path', dest='includeAbsolutePath', help="Publish absolute path for message (vs. path relative to monitored directory)", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--start-sleep', dest='startSleepSec', help="Sleep for this many seconds before starting", metavar='<seconds>', type=int, default=0, required=False)
   parser.add_argument('-r', '--recursive-directory', dest='recursiveDir', help="If specified, monitor all directories with this name underneath --directory", metavar='<name>', type=str, required=False)
   requiredNamed = parser.add_argument_group('required arguments')

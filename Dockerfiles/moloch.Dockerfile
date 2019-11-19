@@ -134,6 +134,7 @@ ARG ZEEK_EXTRACTOR_MODE=none
 ARG ZEEK_EXTRACTOR_PATH=/data/zeek/extract_files
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
+ARG PCAP_MONITOR_HOST=pcap-monitor
 
 # Declare envs vars for each arg
 ENV ES_HOST $ES_HOST
@@ -159,6 +160,7 @@ ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
+ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
 COPY --from=build $MOLOCHDIR $MOLOCHDIR
 COPY --from=build $ZEEK_DIR $ZEEK_DIR
@@ -170,7 +172,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       file \
       geoip-bin \
       gettext \
-      inotify-tools \
       libcap2-bin \
       libjson-perl \
       libkrb5-3 \
@@ -194,7 +195,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       vim-tiny \
       wget \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
-    pip3 install --no-cache-dir beautifulsoup4 elasticsearch elasticsearch_dsl manuf geoip2 patool pyzmq pyinotify python-magic entrypoint2 pyunpack && \
+    pip3 install --no-cache-dir beautifulsoup4 pyzmq && \
     ln -sfr $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $MOLOCHDIR/bin/node /usr/local/bin/node && \
       ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
@@ -205,6 +206,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
 
 # add configuration and scripts
 ADD moloch/scripts /data/
+ADD shared/bin/pcap_moloch_and_zeek_processor.py /data/
+ADD shared/bin/pcap_utils.py /data/
 ADD shared/bin/elastic_search_status.sh /data/
 ADD moloch/etc $MOLOCHDIR/etc/
 ADD https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv $MOLOCHDIR/etc/ipv4-address-space.csv

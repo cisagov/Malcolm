@@ -12,7 +12,7 @@
 docker-compose*yml
 Dockerfiles
 elasticsearch
-iso-build
+malcolm-iso
 moloch-logs
 moloch-raw
 pcap

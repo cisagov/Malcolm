@@ -226,6 +226,7 @@ services:
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
+      PCAP_MONITOR_HOST : 'pcap-monitor'
       VIEWER : 'on'
       WISE : 'on'
     ulimits:
@@ -273,6 +274,20 @@ services:
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
+  pcap-monitor:
+    image: malcolmnetsec/pcap-monitor:1.7.1
+    restart: "no"
+    hostname: pcapmon
+    environment:
+      << : *common-upload-variables
+      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+    depends_on:
+      - elasticsearch
+    expose:
+      - 30441
+    volumes:
+      - ./zeek-logs:/zeek
+      - ./pcap:/pcap
   upload:
     image: malcolmnetsec/file-upload:1.7.1
     restart: "no"

@@ -104,6 +104,7 @@ Pulling filebeat      ... done
 Pulling moloch        ... done
 Pulling file-monitor  ... done
 Pulling pcap-capture  ... done
+Pulling pcap-monitor  ... done
 Pulling upload        ... done
 Pulling htadmin       ... done
 Pulling nginx-proxy   ... done
@@ -118,6 +119,7 @@ malcolmnetsec/htadmin                               1.7.1               xxxxxxxx
 malcolmnetsec/nginx-proxy                           1.7.1               xxxxxxxxxxxx        4 hours ago         53MB
 malcolmnetsec/file-upload                           1.7.1               xxxxxxxxxxxx        24 hours ago        198MB
 malcolmnetsec/pcap-capture                          1.7.1               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          1.7.1               xxxxxxxxxxxx        24 hours ago        156MB
 malcolmnetsec/file-monitor                          1.7.1               xxxxxxxxxxxx        24 hours ago        355MB
 malcolmnetsec/logstash-oss                          1.7.1               xxxxxxxxxxxx        25 hours ago        1.24GB
 malcolmnetsec/curator                               1.7.1               xxxxxxxxxxxx        25 hours ago        303MB
@@ -257,15 +259,16 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
 * `htadmin` - configuration for the `htadmin` user account management container
-* `iso-build` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
+* `malcolm-iso` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
 * `moloch` - code and configuration for the `moloch` container which handles PCAP processing and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
+* `pcap-capture` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
