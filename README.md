@@ -102,6 +102,7 @@ Pulling curator       ... done
 Pulling logstash      ... done
 Pulling filebeat      ... done
 Pulling moloch        ... done
+Pulling zeek          ... done
 Pulling file-monitor  ... done
 Pulling pcap-capture  ... done
 Pulling pcap-monitor  ... done
@@ -115,6 +116,7 @@ You can then observe that the images have been retrieved by running `docker imag
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/moloch                                1.7.1               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  1.7.1               xxxxxxxxxxxx        27 minutes ago      489MB
 malcolmnetsec/htadmin                               1.7.1               xxxxxxxxxxxx        2 hours ago         180MB
 malcolmnetsec/nginx-proxy                           1.7.1               xxxxxxxxxxxx        4 hours ago         53MB
 malcolmnetsec/file-upload                           1.7.1               xxxxxxxxxxxx        24 hours ago        198MB
@@ -1423,8 +1425,10 @@ Pulling curator       ... done
 Pulling logstash      ... done
 Pulling filebeat      ... done
 Pulling moloch        ... done
+Pulling zeek          ... done
 Pulling file-monitor  ... done
 Pulling pcap-capture  ... done
+Pulling pcap-monitor  ... done
 Pulling upload        ... done
 Pulling htadmin       ... done
 Pulling nginx-proxy   ... done
@@ -1432,10 +1436,12 @@ Pulling nginx-proxy   ... done
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/moloch                                1.7.1               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  1.7.1               xxxxxxxxxxxx        27 minutes ago      489MB
 malcolmnetsec/htadmin                               1.7.1               xxxxxxxxxxxx        2 hours ago         180MB
 malcolmnetsec/nginx-proxy                           1.7.1               xxxxxxxxxxxx        4 hours ago         53MB
 malcolmnetsec/file-upload                           1.7.1               xxxxxxxxxxxx        24 hours ago        198MB
 malcolmnetsec/pcap-capture                          1.7.1               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          1.7.1               xxxxxxxxxxxx        24 hours ago        156MB
 malcolmnetsec/file-monitor                          1.7.1               xxxxxxxxxxxx        24 hours ago        355MB
 malcolmnetsec/logstash-oss                          1.7.1               xxxxxxxxxxxx        25 hours ago        1.24GB
 malcolmnetsec/curator                               1.7.1               xxxxxxxxxxxx        25 hours ago        303MB
@@ -1453,6 +1459,7 @@ Creating malcolm_file-monitor_1  ... done
 Creating malcolm_htadmin_1       ... done
 Creating malcolm_elasticsearch_1 ... done
 Creating malcolm_pcap-capture_1  ... done
+Creating malcolm_pcap-monitor_1  ... done
 Creating malcolm_curator_1       ... done
 Creating malcolm_logstash_1      ... done
 Creating malcolm_elastalert_1    ... done
@@ -1483,7 +1490,10 @@ malcolm_logstash_1        /usr/local/bin/logstash-st ...   Up (health: starting)
 malcolm_moloch_1          /usr/bin/supervisord -c /e ...   Up                      8000/tcp, 8005/tcp, 8081/tcp                                                                                                       
 malcolm_nginx-proxy_1     /app/docker-entrypoint.sh  ...   Up                      0.0.0.0:28991->28991/tcp, 0.0.0.0:3030->3030/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:488->488/tcp, 0.0.0.0:5601->5601/tcp, 80/tcp,      
                                                                                    0.0.0.0:8443->8443/tcp, 0.0.0.0:9200->9200/tcp, 0.0.0.0:9600->9600/tcp                                                             
-malcolm_pcap-capture_1    /usr/local/bin/supervisor.sh     Up                                                                                                                                                         
+malcolm_pcap-capture_1    /usr/local/bin/supervisor.sh     Up                                                          
+
+malcolm_pcap-monitor_1    /usr/local/bin/supervisor.sh     Up                                                          
+
 malcolm_upload_1          /docker-entrypoint.sh /usr ...   Up                      127.0.0.1:8022->22/tcp, 80/tcp                                                                                                     
 
 Attaching to malcolm_nginx-proxy_1, malcolm_upload_1, malcolm_filebeat_1, malcolm_kibana_1, malcolm_moloch_1, malcolm_elastalert_1, malcolm_logstash_1, malcolm_curator_1, malcolm_elasticsearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1

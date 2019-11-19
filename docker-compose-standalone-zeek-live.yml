@@ -7,9 +7,20 @@ version: '3.7'
 #-------------------------------------------------------------------------------
 x-moloch-variables: &moloch-variables
   MANAGE_PCAP_FILES : 'false'
-  ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
+
+x-zeek-variables: &zeek-variables
+  ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
   ZEEK_AUTO_ANALYZE_PCAP_THREADS : 1
+  ZEEK_EXTRACTOR_MODE : 'none'
+  EXTRACTED_FILE_IGNORE_EXISTING : 'false'
+  EXTRACTED_FILE_PRESERVATION : 'quarantined'
+  EXTRACTED_FILE_MIN_BYTES : 64
+  EXTRACTED_FILE_MAX_BYTES : 134217728
+  VTOT_API2_KEY : '0'
+  VTOT_REQUESTS_PER_MINUTE : 4
+  EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
+  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
 
 x-logstash-variables: &logstash-variables
   # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
@@ -47,27 +58,19 @@ x-curator-variables: &curator-variables
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
+  PCAP_PIPELINE_DEBUG : 'false'
+  PCAP_PIPELINE_DEBUG_EXTRA : 'false'
+  PCAP_MONITOR_HOST : 'pcap-monitor'
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
-
-x-zeek-file-extraction-variables: &zeek-file-extraction-variables
-  ZEEK_EXTRACTOR_MODE : 'none'
-  EXTRACTED_FILE_IGNORE_EXISTING : 'false'
-  EXTRACTED_FILE_PRESERVATION : 'quarantined'
-  EXTRACTED_FILE_MIN_BYTES : 64
-  EXTRACTED_FILE_MAX_BYTES : 134217728
-  VTOT_API2_KEY : '0'
-  VTOT_REQUESTS_PER_MINUTE : 4
-  EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
-  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
 
 x-pcap-capture-variables: &pcap-capture-variables
   PCAP_ENABLE_NETSNIFF : 'false'
   PCAP_ENABLE_TCPDUMP : 'false'
   PCAP_IFACE : 'eth0'
-  PCAP_ROTATE_MEGABYTES : 500
-  PCAP_ROTATE_MINUTES : 30
+  PCAP_ROTATE_MEGABYTES : 1024
+  PCAP_ROTATE_MINUTES : 10
   PCAP_FILTER : ''
 ################################################################################
 
@@ -221,12 +224,10 @@ services:
     environment:
       << : *common-upload-variables
       << : *moloch-variables
-      << : *zeek-file-extraction-variables
       MOLOCH_VERSION : '1.8.0'
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
-      PCAP_MONITOR_HOST : 'pcap-monitor'
       VIEWER : 'on'
       WISE : 'on'
     ulimits:
@@ -239,19 +240,35 @@ services:
       - 8000
       - 8005
       - 8081
-      - 30441
     volumes:
       - ./pcap:/data/pcap
-      - ./zeek-logs/upload:/data/zeek/upload
-      - ./zeek-logs/extract_files:/data/zeek/extract_files
       - ./moloch-logs:/data/moloch/logs
       - ./moloch-raw:/data/moloch/raw
+      - ./moloch/etc:/data/moloch/etc
+      - ./moloch/wise/source.zeeklogs.js:/data/moloch/wiseService/source.zeeklogs.js:ro
+  zeek:
+    image: malcolmnetsec/zeek:1.7.1
+    restart: "no"
+    hostname: zeek
+    environment:
+      << : *common-upload-variables
+      << : *zeek-variables
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./pcap:/pcap
+      - ./zeek-logs/upload:/zeek/upload
+      - ./zeek-logs/extract_files:/zeek/extract_files
   file-monitor:
     image: malcolmnetsec/file-monitor:1.7.1
     restart: "no"
     hostname: filemon
     environment:
-      << : *zeek-file-extraction-variables
+      << : *zeek-variables
     expose:
       - 3310
     volumes:

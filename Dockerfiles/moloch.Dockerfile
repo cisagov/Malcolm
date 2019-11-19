@@ -1,26 +1,11 @@
 FROM debian:buster-slim AS build
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="Seth.Grover@inl.gov"
-LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
-LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
-LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/moloch'
-LABEL org.opencontainers.image.description='Malcolm container providing Moloch and Zeek'
-
 
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV MOLOCH_VERSION "2.0.1"
 ENV MOLOCHDIR "/data/moloch"
-ENV SRC_BASE_DIR "/usr/local/src"
-ENV ZEEK_VERSION "3.0.0"
-ENV ZEEK_DIR "/opt/zeek"
-ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
-ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
-ENV PATH="${ZEEK_DIR}/bin:${PATH}"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
@@ -28,17 +13,15 @@ ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
-ADD https://www.zeek.org/downloads/zeek-$ZEEK_VERSION.tar.gz $SRC_BASE_DIR/zeek.tar.gz
-# Fix redef'ing a table with a new &default attribute #632 -  https://github.com/zeek/zeek/pull/632/commits
-ADD https://github.com/zeek/zeek/commit/42b6040952030c44ce337704916cf89a065994b0.patch $ZEEK_PATCH_DIR/
-ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
+        binutils \
         bison \
         cmake \
         curl \
+        file \
         flex \
         g++ \
         gcc \
@@ -57,7 +40,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         libwww-perl \
         libyaml-dev \
         make \
-        ninja-build \
         pandoc \
         patch \
         python-dev \
@@ -70,18 +52,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         swig \
         wget \
         zlib1g-dev && \
-  pip3 install --no-cache-dir beautifulsoup4 zkg && \
-  cd "${SRC_BASE_DIR}" && \
-    tar -xvf "zeek.tar.gz" && \
-    cd "./zeek-${ZEEK_VERSION}" && \
-    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
-    ./configure --prefix="${ZEEK_DIR}" --generator=Ninja && \
-    cd build && \
-    ninja && \
-    ninja install && \
-    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded" && \
-    zkg autoconfig && \
-    bash /usr/local/bin/zeek_install_plugins.sh && \
+  pip3 install --no-cache-dir beautifulsoup4 && \
   cd $MOLOCHDIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
     cd $MOLOCHDIR/doc && \
@@ -107,12 +78,21 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     ./easybutton-build.sh --install && \
-    npm cache clean --force
+    npm cache clean --force && \
+    bash -c "file ${MOLOCHDIR}/bin/* ${MOLOCHDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
-FROM debian:buster-slim AS runtime
+FROM debian:buster-slim
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
 LABEL maintainer="Seth.Grover@inl.gov"
+LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/moloch'
+LABEL org.opencontainers.image.description='Malcolm container providing Moloch'
+
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -127,11 +107,6 @@ ARG VIEWER=on
 ARG MANAGE_PCAP_FILES=false
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
-#Whether or not to run "zeek -r XXXXX.pcap local" on each pcap file
-ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
-ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
-ARG ZEEK_EXTRACTOR_MODE=none
-ARG ZEEK_EXTRACTOR_PATH=/data/zeek/extract_files
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
@@ -153,17 +128,11 @@ ENV WISE $WISE
 ENV VIEWER $VIEWER
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
-ENV ZEEK_DIR "/opt/zeek"
-ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
-ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
-ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
-ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
 COPY --from=build $MOLOCHDIR $MOLOCHDIR
-COPY --from=build $ZEEK_DIR $ZEEK_DIR
 
 RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -200,9 +169,9 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       ln -sfr $MOLOCHDIR/bin/node /usr/local/bin/node && \
       ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     apt-get -q -y --purge remove gcc gcc-8 cpp cpp-8 libssl-dev && \
-    apt-get -q -y autoremove && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+      apt-get -q -y autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
 ADD moloch/scripts /data/
@@ -216,13 +185,11 @@ ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country /t
 ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN /tmp/GeoLite2-ASN.mmdb.gz
 ADD moloch/wise/source.*.js $MOLOCHDIR/wiseService/
 ADD moloch/supervisord.conf /etc/supervisord.conf
-ADD moloch/zeek/*.zeek $ZEEK_DIR/share/zeek/site/
 
 RUN groupadd --gid 1000 $MOLOCHUSER && \
     useradd -M --uid 1000 --gid 1000 --home $MOLOCHDIR $MOLOCHUSER && \
     chmod 755 /data/*.sh && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
-    ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_zeek_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
     bash -c "zcat /tmp/GeoLite2-Country.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-Country.mmdb" && \
     rm -f /tmp/GeoLite2-Country.mmdb.gz && \
@@ -234,7 +201,7 @@ RUN groupadd --gid 1000 $MOLOCHUSER && \
     chown -R 1000:1000 $MOLOCHDIR/logs
 
 #Update Path
-ENV PATH="/data:$MOLOCHDIR/bin:$ZEEK_DIR/bin:${PATH}"
+ENV PATH="/data:$MOLOCHDIR/bin:${PATH}"
 
 EXPOSE 8000 8005 8081
 WORKDIR $MOLOCHDIR
