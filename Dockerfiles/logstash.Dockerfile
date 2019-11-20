@@ -42,8 +42,7 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     git clone --depth 1 https://github.com/mmguero/logstash-filter-ieee_oui.git /opt/logstash-filter-ieee_oui && \
     /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
-FROM docker.elastic.co/logstash/logstash-oss:6.8.4 AS runtime
-
+FROM docker.elastic.co/logstash/logstash-oss:6.8.4
 USER root
 
 COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
@@ -52,15 +51,14 @@ RUN yum install -y epel-release && \
     yum update -y && \
     yum install -y gettext python-setuptools python-pip python-requests python-yaml && \
     yum clean all && \
-    pip install py2-ipaddress
-
-RUN logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
+    pip install py2-ipaddress && \
+    logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                             logstash-filter-json logstash-filter-prune \
                             logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                             logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                             logstash-input-beats logstash-output-elasticsearch && \
     logstash-plugin install /opt/logstash-filter-ieee_oui/logstash-filter-ieee_oui-1.0.6.gem && \
-    rm -rf /opt/logstash-filter-ieee_oui
+    rm -rf /opt/logstash-filter-ieee_oui /root/.cache /root/.gem /root/.bundle
 
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
@@ -68,6 +66,7 @@ ADD logstash/config/logstash.yml /usr/share/logstash/config/
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
 ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf /usr/share/logstash/config/oui.txt
+
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \

@@ -65,7 +65,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     pip3 install elasticsearch-curator==${CURATOR_VERSION} && \
     groupadd --gid 1000 ${CURATOR_USER} && \
       useradd -M --uid 1000 --gid 1000 ${CURATOR_USER} && \
-    apt-get -q -y --purge remove python3-dev build-essential && \
+    apt-get -q -y --purge remove guile-2.2-libs python3-dev build-essential && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
