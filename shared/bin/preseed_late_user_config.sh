@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
 ##################################################################################
 # prompt whether to autologin or not
 # prompt whether or not to lock xscreensaver for the GUI session

@@ -7,9 +7,20 @@ version: '3.7'
 #-------------------------------------------------------------------------------
 x-moloch-variables: &moloch-variables
   MANAGE_PCAP_FILES : 'false'
-  ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
+
+x-zeek-variables: &zeek-variables
+  ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
   ZEEK_AUTO_ANALYZE_PCAP_THREADS : 1
+  ZEEK_EXTRACTOR_MODE : 'none'
+  EXTRACTED_FILE_IGNORE_EXISTING : 'false'
+  EXTRACTED_FILE_PRESERVATION : 'quarantined'
+  EXTRACTED_FILE_MIN_BYTES : 64
+  EXTRACTED_FILE_MAX_BYTES : 134217728
+  VTOT_API2_KEY : '0'
+  VTOT_REQUESTS_PER_MINUTE : 4
+  EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
+  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
 
 x-logstash-variables: &logstash-variables
   # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
@@ -47,27 +58,20 @@ x-curator-variables: &curator-variables
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
+  PCAP_PIPELINE_DEBUG : 'false'
+  PCAP_PIPELINE_DEBUG_EXTRA : 'false'
+  PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
+  PCAP_MONITOR_HOST : 'pcap-monitor'
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
-
-x-zeek-file-extraction-variables: &zeek-file-extraction-variables
-  ZEEK_EXTRACTOR_MODE : 'none'
-  EXTRACTED_FILE_IGNORE_EXISTING : 'false'
-  EXTRACTED_FILE_PRESERVATION : 'quarantined'
-  EXTRACTED_FILE_MIN_BYTES : 64
-  EXTRACTED_FILE_MAX_BYTES : 134217728
-  VTOT_API2_KEY : '0'
-  VTOT_REQUESTS_PER_MINUTE : 4
-  EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
-  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
 
 x-pcap-capture-variables: &pcap-capture-variables
   PCAP_ENABLE_NETSNIFF : 'false'
   PCAP_ENABLE_TCPDUMP : 'false'
   PCAP_IFACE : 'eth0'
-  PCAP_ROTATE_MEGABYTES : 500
-  PCAP_ROTATE_MINUTES : 30
+  PCAP_ROTATE_MEGABYTES : 1024
+  PCAP_ROTATE_MINUTES : 10
   PCAP_FILTER : ''
 ################################################################################
 
@@ -105,7 +109,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.7.0
+    image: malcolmnetsec/kibana-oss:1.7.1
     restart: "no"
     hostname: kibana
     environment:
@@ -131,7 +135,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.7.0
+    image: malcolmnetsec/elastalert:1.7.1
     restart: "no"
     hostname: elastalert
     environment:
@@ -159,7 +163,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.7.0
+    image: malcolmnetsec/curator:1.7.1
     restart: "no"
     hostname: curator
     environment:
@@ -174,7 +178,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.7.0
+    image: malcolmnetsec/logstash-oss:1.7.1
     restart: "no"
     hostname: logstash
     environment:
@@ -196,12 +200,7 @@ services:
         start_period: 600s
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines-default.yml:ro
-      - ./logstash/config/pipelines-external.yml:/usr/share/logstash/config/pipelines-external.yml:ro
-      - ./logstash/pipeline-input:/usr/share/logstash/pipeline-input.available:ro
-      - ./logstash/pipeline-main:/usr/share/logstash/pipeline-main.available:ro
-      - ./logstash/pipeline-output:/usr/share/logstash/pipeline-output.available:ro
-      - ./logstash/pipeline-external:/usr/share/logstash/pipeline-external.available:ro
+      - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       # - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
@@ -212,15 +211,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.7.0
+    image: malcolmnetsec/filebeat-oss:1.7.1
     restart: "no"
     hostname: filebeat
     environment:
       << : *common-upload-variables
       << : *common-beats-variables
       FILEBEAT_LOG_PATH : '/data/zeek/current'
-      FILEBEAT_LOG_CLEANUP_MINUTES : 0
-      FILEBEAT_ZIP_CLEANUP_MINUTES : 0
+      FILEBEAT_LOG_CLEANUP_MINUTES : 180
+      FILEBEAT_ZIP_CLEANUP_MINUTES : 360
       FILEBEAT_SCAN_FREQUENCY : '10s'
       FILEBEAT_CLEAN_INACTIVE : '45m'
       FILEBEAT_IGNORE_OLDER : '30m'
@@ -241,7 +240,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.7.0
+    image: malcolmnetsec/moloch:1.7.1
     restart: "no"
     hostname: moloch
     env_file:
@@ -249,7 +248,6 @@ services:
     environment:
       << : *common-upload-variables
       << : *moloch-variables
-      << : *zeek-file-extraction-variables
       MOLOCH_VERSION : '1.8.0'
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
@@ -268,22 +266,40 @@ services:
       - 8081
     volumes:
       - ./pcap:/data/pcap
-      - ./zeek-logs/upload:/data/zeek/upload
-      - ./zeek-logs/extract_files:/data/zeek/extract_files
       - ./moloch-logs:/data/moloch/logs
       - ./moloch-raw:/data/moloch/raw
       - ./moloch/etc:/data/moloch/etc
       - ./moloch/wise/source.zeeklogs.js:/data/moloch/wiseService/source.zeeklogs.js:ro
-      - ./moloch/zeek:/usr/share/zeek/site:ro
+  zeek:
+    build:
+      context: .
+      dockerfile: Dockerfiles/zeek.Dockerfile
+    image: malcolmnetsec/zeek:1.7.1
+    restart: "no"
+    hostname: zeek
+    environment:
+      << : *common-upload-variables
+      << : *zeek-variables
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./pcap:/pcap
+      - ./zeek-logs/upload:/zeek/upload
+      - ./zeek-logs/extract_files:/zeek/extract_files
+      - ./zeek/config:/usr/share/zeek/site:ro
   file-monitor:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.7.0
+    image: malcolmnetsec/file-monitor:1.7.1
     restart: "no"
     hostname: filemon
     environment:
-      << : *zeek-file-extraction-variables
+      << : *zeek-variables
     expose:
       - 3310
     volumes:
@@ -293,7 +309,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.7.0
+    image: malcolmnetsec/pcap-capture:1.7.1
     restart: "no"
     network_mode: host
     ulimits:
@@ -309,11 +325,28 @@ services:
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
+  pcap-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfiles/pcap-monitor.Dockerfile
+    image: malcolmnetsec/pcap-monitor:1.7.1
+    restart: "no"
+    hostname: pcapmon
+    environment:
+      << : *common-upload-variables
+      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+    depends_on:
+      - elasticsearch
+    expose:
+      - 30441
+    volumes:
+      - ./zeek-logs:/zeek
+      - ./pcap:/pcap
   upload:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.7.0
+    image: malcolmnetsec/file-upload:1.7.1
     restart: "no"
     hostname: upload
     env_file:
@@ -330,7 +363,7 @@ services:
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
-    image: malcolmnetsec/htadmin:1.7.0
+    image: malcolmnetsec/htadmin:1.7.1
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -348,7 +381,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.7.0
+    image: malcolmnetsec/nginx-proxy:1.7.1
     restart: "no"
     hostname: nginx-proxy
     depends_on:

@@ -69,7 +69,7 @@ else
   DOCKER_IMAGES_TGZ_REMOTE=""
 fi
 
-vm_execute "sudo bash -c \"whoami && cd /malcolm-build/iso-build && pwd && ./build.sh -d \\\"$DOCKER_IMAGES_TGZ_REMOTE\\\"\""
+vm_execute "sudo bash -c \"whoami && cd /malcolm-build/malcolm-iso && pwd && ./build.sh -d \\\"$DOCKER_IMAGES_TGZ_REMOTE\\\"\""
 
 if [[ -n $NEED_SHUTDOWN ]]; then
   echo "Shutting down $VM_NAME..." >&2

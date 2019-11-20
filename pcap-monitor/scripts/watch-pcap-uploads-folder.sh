@@ -2,14 +2,16 @@
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
+PCAP_BASE_PATH=${PCAP_PATH:-"/pcap"}
+ZEEK_BASE_PATH=${ZEEK_PATH:-"/zeek"}
 
-PROCESS_DIR="/data/pcap"
-UPLOAD_DIR="${PROCESS_DIR}/upload"
-ZEEK_UPLOAD_DIR="/data/zeek/upload"
-mkdir -p "$UPLOAD_DIR"
+PROCESS_DIR="$PCAP_BASE_PATH/processed"
+PCAP_UPLOAD_DIR="$PCAP_BASE_PATH/upload"
+ZEEK_UPLOAD_DIR="$ZEEK_BASE_PATH/upload"
+mkdir -p "$PCAP_UPLOAD_DIR"
 
-# as new pcaps are closed for writing in /data/pcap/upload, move them to /data/pcap for processing
-inotifywait -m -e close_write --format '%w%f' "${UPLOAD_DIR}" | while read NEWFILE
+# as new pcaps are closed for writing in /pcap/upload, move them to /pcap/processed for processing
+inotifywait -m -e close_write --format '%w%f' "${PCAP_UPLOAD_DIR}" | while read NEWFILE
 do
   FILEMAGIC=$(file -b "$NEWFILE")
   FILEMIME=$(file -b --mime-type "$NEWFILE")

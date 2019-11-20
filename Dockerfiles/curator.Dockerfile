@@ -2,6 +2,13 @@ FROM debian:buster-slim
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
+LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/elastalert'
+LABEL org.opencontainers.image.description='Malcolm container providing curation for Elasticsearch indices'
 
 ARG ES_HOST=elasticsearch
 ARG ES_PORT=9200
@@ -58,7 +65,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     pip3 install elasticsearch-curator==${CURATOR_VERSION} && \
     groupadd --gid 1000 ${CURATOR_USER} && \
       useradd -M --uid 1000 --gid 1000 ${CURATOR_USER} && \
-    apt-get -q -y --purge remove python3-dev build-essential && \
+    apt-get -q -y --purge remove guile-2.2-libs python3-dev build-essential && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -70,3 +77,13 @@ ADD curator/scripts /usr/local/bin/
 ADD curator/config /config/
 
 CMD ["/usr/local/bin/cron_env_deb.sh"]
+
+
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION

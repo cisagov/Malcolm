@@ -179,6 +179,29 @@
             "encryption_method"
         ]
     ],
+    "smb_files": [
+        [
+            "ts",
+            "uid",
+            "id.orig_h",
+            "id.orig_p",
+            "id.resp_h",
+            "id.resp_p",
+            "fuid",
+            "action",
+            "path",
+            "name",
+            "size",
+            "prev_name",
+            "times.modified",
+            "times.accessed",
+            "times.created",
+            "times.changed",
+            "data_offset_req",
+            "data_len_req",
+            "data_len_rsp"
+        ]
+    ],
     "ssh": [
         [
             "ts",

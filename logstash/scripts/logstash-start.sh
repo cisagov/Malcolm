@@ -4,51 +4,79 @@
 
 set -e
 
-PIPELINES_CFG_IN="/usr/share/logstash/config/pipelines-default.yml"
-PIPELINES_CFG_EXT_IN="/usr/share/logstash/config/pipelines-external.yml"
-PIPELINES_CFG_FINAL="/usr/share/logstash/config/pipelines.yml"
+# if any pipelines are volume-mounted inside this docker container, they should belong to subdirectories under this path
+HOST_PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines.available"
 
-PIPELINE_IN_DIR="/usr/share/logstash/pipeline-input"
-PIPELINE_MAIN_DIR="/usr/share/logstash/pipeline-main"
-PIPELINE_OUT_DIR="/usr/share/logstash/pipeline-output"
-PIPELINE_EXT_DIR="/usr/share/logstash/pipeline-external"
+# runtime pipelines parent directory
+export PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines"
 
-HOST_PIPELINE_IN_DIR="/usr/share/logstash/pipeline-input.available"
-HOST_PIPELINE_MAIN_DIR="/usr/share/logstash/pipeline-main.available"
-HOST_PIPELINE_OUT_DIR="/usr/share/logstash/pipeline-output.available"
-HOST_PIPELINE_EXT_DIR="/usr/share/logstash/pipeline-external.available"
+# runtime pipeliens configuration file
+export PIPELINES_CFG="/usr/share/logstash/config/pipelines.yml"
 
+# for each pipeline in /usr/share/logstash/malcolm-pipelines, append the contents of this file to the dynamically-generated
+# pipeline section in pipelines.yml (then delete 00_config.conf before starting)
+export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
+
+# files defining IP->host and MAC->host mapping
 INPUT_CIDR_MAP="/usr/share/logstash/config/cidr-map.txt"
 INPUT_HOST_MAP="/usr/share/logstash/config/host-map.txt"
-NETWORK_MAP_OUTPUT_FILTER="$PIPELINE_MAIN_DIR/16_host_segment_filters.conf"
 
-MAIN_OUTPUT_FILTER="$PIPELINE_MAIN_DIR/19_main_forward.conf"
-EXTERNAL_ES_PIPELINE_ADDRESS="external-es"
+# the name of the enrichment pipeline subdirectory under $PIPELINES_DIR
+ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 
-# copy over pipeline filters into their final resting places
-[[ -d "$HOST_PIPELINE_IN_DIR" ]] && cp -f "$HOST_PIPELINE_IN_DIR"/* "$PIPELINE_IN_DIR"/
-[[ -d "$HOST_PIPELINE_MAIN_DIR" ]] && cp -f "$HOST_PIPELINE_MAIN_DIR"/* "$PIPELINE_MAIN_DIR"/
-[[ -d "$HOST_PIPELINE_OUT_DIR" ]] && cp -f "$HOST_PIPELINE_OUT_DIR"/* "$PIPELINE_OUT_DIR"/
-[[ -d "$HOST_PIPELINE_EXT_DIR" ]] && cp -f "$HOST_PIPELINE_EXT_DIR"/* "$PIPELINE_EXT_DIR"/
+# the name of the pipeline(s) to which input will send logs for parsing (comma-separated list, no quotes)
+PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse"}
 
-# create filters for network segment and host mapping
+# pipeline addresses for forwarding from Logstash to Elasticsearch (both "internal" and "external" pipelines)
+export ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-es"}
+export ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL=${LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL:-"external-es"}
+ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES:-"$ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL,$ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL"}
+
+# ip-to-segment-logstash.py translate $INPUT_CIDR_MAP and $INPUT_HOST_MAP into this logstash filter file
+NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segment_filters.conf
+
+####################################################################################################################
+
+# copy over pipeline filters from host-mapped volumes (if any) into their final resting places
+find "$HOST_PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
+  xargs -0 -n 1 -I '{}' bash -c '
+  PIPELINE_NAME="$(basename "{}")"
+  PIPELINES_DEST_DIR="$PIPELINES_DIR"/"$PIPELINE_NAME"
+  mkdir -p "$PIPELINES_DEST_DIR"
+  cp -f "{}"/* "$PIPELINES_DEST_DIR"/
+'
+
+# dynamically generate final pipelines.yml configuration file from all of the pipeline directories
+> "$PIPELINES_CFG"
+find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z | \
+  xargs -0 -n 1 -I '{}' bash -c '
+  PIPELINE_NAME="$(basename "{}")"
+  PIPELINE_ADDRESS_NAME="$(cat "{}"/*.conf | sed -e "s/:[\}]*.*\(}\)/\1/" | envsubst | grep -P "\baddress\s*=>" | awk "{print \$3}" | sed "s/[\"'']//g" | head -n 1)"
+  if [[ -n "$ES_EXTERNAL_HOSTS" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
+    echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
+    echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
+    cat "{}"/"$PIPELINE_EXTRA_CONF_FILE" 2>/dev/null   >> "$PIPELINES_CFG"
+    rm -f "{}"/"$PIPELINE_EXTRA_CONF_FILE"
+    echo                                               >> "$PIPELINES_CFG"
+    echo                                               >> "$PIPELINES_CFG"
+  fi
+'
+
+# create filters for network segment and host mapping in the enrichment directory
 /usr/local/bin/ip-to-segment-logstash.py --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
-# combine the default and any external (if specified) pipeline configuration into pipelines.yml
-
-# default configuration
-cat "$PIPELINES_CFG_IN" > "$PIPELINES_CFG_FINAL"
-
-# external ES destination configuration
-if [[ -r "$PIPELINES_CFG_EXT_IN" ]] && [[ -n "$ES_EXTERNAL_HOSTS" ]]; then
-  # external ES host is specified, include external destination in pipeline config
-  echo "" >> "$PIPELINES_CFG_FINAL"
-  cat "$PIPELINES_CFG_EXT_IN" >> "$PIPELINES_CFG_FINAL"
-
-else
-  # external ES host is not specified, remove external-es destination from main log processing pipeline
-  sed -i "s/,[[:blank:]]*['\"]$EXTERNAL_ES_PIPELINE_ADDRESS['\"]//" "$MAIN_OUTPUT_FILTER"
+if [[ -z "$ES_EXTERNAL_HOSTS" ]]; then
+  # external ES host destination is not specified, remove external destination from enrichment pipeline output
+  ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES="$(echo "$ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES" | sed "s/,[[:blank:]]*$ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL//")"
 fi
+
+# insert quotes around the elasticsearch parsing and output pipeline list
+MALCOLM_PARSE_PIPELINE_ADDRESSES=$(printf '"%s"\n' "${PARSE_PIPELINE_ADDRESSES//,/\",\"}")
+MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
+
+# do a manual global replace on these particular values in the config files, as Logstash doesn't like the environment variables with quotes in them
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES_/${MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
 # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
 if [[ "$LOGSTASH_JAVA_EXECUTION_ENGINE" == 'true' ]]; then

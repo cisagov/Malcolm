@@ -2,6 +2,14 @@ FROM docker.elastic.co/beats/filebeat-oss:6.8.4
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
+LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/filebeat-oss'
+LABEL org.opencontainers.image.description='Malcolm container providing Filebeat (the Apache-licensed variant)'
+
 
 ARG FILEBEAT_LOG_CLEANUP_MINUTES=0
 ARG FILEBEAT_ZIP_CLEANUP_MINUTES=0
@@ -23,7 +31,8 @@ RUN yum install -y epel-release && \
     yum install -y cronie inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python-setuptools python-pip && \
     yum clean all && \
     easy_install supervisor && \
-    pip install patool entrypoint2 pyunpack python-magic ordered-set
+    pip install patool entrypoint2 pyunpack python-magic ordered-set && \
+    ln -sr /usr/sbin/fuser /bin/fuser
 
 ADD shared/bin/cron_env_centos.sh /data/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
@@ -53,3 +62,13 @@ ENV PATH="/data:${PATH}"
 VOLUME ["/usr/share/filebeat/data"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+
+
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION

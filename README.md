@@ -95,36 +95,40 @@ The `build.sh` script can build Malcolm's Docker images from scratch. See [Build
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
-Pulling elasticsearch ... done
-Pulling kibana        ... done
-Pulling elastalert    ... done
-Pulling curator       ... done
-Pulling logstash      ... done
-Pulling filebeat      ... done
-Pulling moloch        ... done
-Pulling file-monitor  ... done
-Pulling pcap-capture  ... done
-Pulling upload        ... done
-Pulling htadmin       ... done
-Pulling nginx-proxy   ... done
+Pulling curator         ... done
+Pulling elastalert      ... done
+Pulling elasticsearch   ... done
+Pulling file-monitor    ... done
+Pulling filebeat        ... done
+Pulling htadmin         ... done
+Pulling kibana          ... done
+Pulling logstash        ... done
+Pulling moloch          ... done
+Pulling nginx-proxy     ... done
+Pulling pcap-capture    ... done
+Pulling pcap-monitor    ... done
+Pulling upload          ... done
+Pulling zeek            ... done
 ```
 
 You can then observe that the images have been retrieved by running `docker images`:
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.7.0               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.7.0               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.7.0               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.7.0               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.7.0               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.7.0               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.7.0               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.7.0               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.7.0               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.7.0               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.7.0               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                1.7.1               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          1.7.1               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  1.7.1               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           1.7.1               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          1.7.1               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          1.7.1               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          1.7.1               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            1.7.1               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          1.7.1               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               1.7.1               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           1.7.1               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            1.7.1               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               1.7.1               xxxxxxxxxxxx        31 minutes ago      256MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -257,17 +261,19 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
 * `htadmin` - configuration for the `htadmin` user account management container
-* `iso-build` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
-* `moloch` - code and configuration for the `moloch` container which handles PCAP processing and which serves the Viewer application
+* `malcolm-iso` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
+* `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
+* `pcap-monitor` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
+* `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
 
 and the following files of special note:
@@ -277,7 +283,7 @@ and the following files of special note:
 * `host-map.txt` - specify custom IP and/or MAC address to host mapping
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
-* `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor live Zeek logs (ie., being actively written to)
+* `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor local live Zeek logs (ie., being actively written to on the same host running Malcolm)
 
 ### <a name="Build"></a>Building from source
 
@@ -291,15 +297,17 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 
 * `malcolmnetsec/curator` (based on `debian:buster-slim`)
 * `malcolmnetsec/elastalert` (based on `bitsensor/elastalert`)
+* `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
-* `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
-* `malcolmnetsec/logstash-oss` (based on `centos:7`)
+* `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
 * `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
+* `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
+* `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
 
 Additionally, the command will pull from Docker Hub:
 
@@ -495,8 +503,10 @@ The host system (ie., the one running Docker) will need to be configured for the
 # the maximum number of open file handles
 fs.file-max=65536
 
-# the maximum number of user inotify watches
+# increase maximums for inotify watches
 fs.inotify.max_user_watches=131072
+fs.inotify.max_queued_events=131072
+fs.inotify.max_user_instances=512
 
 # the maximum number of memory map areas a process may have
 vm.max_map_count=262144
@@ -742,17 +752,17 @@ A future release of Malcolm is planned which will include a customized Linux-bas
 
 ### <a name="LiveZeek"></a>Monitoring a local Zeek instance
 
-Another option for analyzing live network data is to run an external copy of Zeek (ie., not within Malcolm) so that the log files it creates are seen by Malcolm and automatically processed as they are written.
+Another option for analyzing live network data is to run an external local copy of Zeek (ie., not within Malcolm) so that the log files it creates are seen by Malcolm and automatically processed as they are written to a local directory on the same host.
 
-To do this, you'll need to configure Malcolm's local Filebeat log forwarder so that it will continue to look for changes to Zeek logs that are actively being written to even once it reaches the end of the file. You can do this by replacing `docker-compose.yml` with `docker-compose-zeek-live.yml` before starting Malcolm:
+To do this, you'll need to configure Malcolm's local Filebeat log forwarder so that it will continue to look for changes to Zeek logs that are actively being written to even once it reaches the end of the file. You can do this by replacing `docker-compose.yml` with `docker-compose-standalone-zeek-live.yml` before starting Malcolm:
 
 ```
-$ mv -f ./docker-compose-zeek-live.yml ./docker-compose.yml
+$ mv -f ./docker-compose-standalone-zeek-live.yml ./docker-compose.yml
 ```
 
 Alternately, you can run the `start.sh` script (and the other control scripts) like this, without modifying your original `docker-compose.yml` file:
 ```
-$ ./scripts/start.sh ./docker-compose-zeek-live.yml
+$ ./scripts/start.sh ./docker-compose-standalone-zeek-live.yml
 ```
 
 Once Malcolm has been [started](#Starting), `cd` into `./zeek-logs/current/` and run `bro` from inside that directory.
@@ -1411,32 +1421,36 @@ Store username/password for forwarding Logstash events to a secondary, external 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
-Pulling elasticsearch ... done
-Pulling kibana        ... done
-Pulling elastalert    ... done
 Pulling curator       ... done
-Pulling logstash      ... done
-Pulling filebeat      ... done
-Pulling moloch        ... done
+Pulling elastalert    ... done
+Pulling elasticsearch ... done
 Pulling file-monitor  ... done
-Pulling pcap-capture  ... done
-Pulling upload        ... done
+Pulling filebeat      ... done
 Pulling htadmin       ... done
+Pulling kibana        ... done
+Pulling logstash      ... done
+Pulling moloch        ... done
 Pulling nginx-proxy   ... done
+Pulling pcap-capture  ... done
+Pulling pcap-monitor  ... done
+Pulling upload        ... done
+Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.7.0               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/htadmin                               1.7.0               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.7.0               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.7.0               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.7.0               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/file-monitor                          1.7.0               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.7.0               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.7.0               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.7.0               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.7.0               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.7.0               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/moloch                                1.7.1               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  1.7.1               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               1.7.1               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.7.1               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.7.1               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.7.1               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          1.7.1               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          1.7.1               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.7.1               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.7.1               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.7.1               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.7.1               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.7.1               xxxxxxxxxxxx        11 days ago         276MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
@@ -1444,18 +1458,20 @@ Finally, we can start Malcolm. When Malcolm starts it will stream informational 
 ```
 user@host:~/Malcolm$ ./scripts/start.sh
 Creating network "malcolm_default" with the default driver
-Creating malcolm_file-monitor_1  ... done
-Creating malcolm_htadmin_1       ... done
-Creating malcolm_elasticsearch_1 ... done
-Creating malcolm_pcap-capture_1  ... done
 Creating malcolm_curator_1       ... done
-Creating malcolm_logstash_1      ... done
 Creating malcolm_elastalert_1    ... done
-Creating malcolm_kibana_1        ... done
-Creating malcolm_moloch_1        ... done
+Creating malcolm_elasticsearch_1 ... done
+Creating malcolm_file-monitor_1  ... done
 Creating malcolm_filebeat_1      ... done
-Creating malcolm_upload_1        ... done
+Creating malcolm_htadmin_1       ... done
+Creating malcolm_kibana_1        ... done
+Creating malcolm_logstash_1      ... done
+Creating malcolm_moloch_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
+Creating malcolm_pcap-capture_1  ... done
+Creating malcolm_pcap-monitor_1  ... done
+Creating malcolm_upload_1        ... done
+Creating malcolm_zeek_1          ... done
 
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
@@ -1464,32 +1480,17 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - PCAP Upload (web): https://localhost:8443/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Account management: https://localhost:488/
-
-         Name                        Command                       State                                                                          Ports                                                               
+…
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-malcolm_curator_1         /usr/local/bin/cron_env_deb.sh   Up                                                                                                                                                         
-malcolm_elastalert_1      /usr/local/bin/elastalert- ...   Up (health: starting)   3030/tcp, 3333/tcp                                                                                                                 
-malcolm_elasticsearch_1   /usr/local/bin/docker-entr ...   Up (health: starting)   9200/tcp, 9300/tcp                                                                                                                 
-malcolm_file-monitor_1    /usr/local/bin/supervisord ...   Up                      3310/tcp                                                                                                                           
-malcolm_filebeat_1        /usr/local/bin/docker-entr ...   Up                                                                                                                                                         
-malcolm_htadmin_1         /usr/bin/supervisord -c /s ...   Up                      80/tcp                                                                                                                             
-malcolm_kibana_1          /usr/bin/supervisord -c /e ...   Up (health: starting)   28991/tcp, 5601/tcp                                                                                                                
-malcolm_logstash_1        /usr/local/bin/logstash-st ...   Up (health: starting)   5000/tcp, 5044/tcp, 9600/tcp                                                                                                       
-malcolm_moloch_1          /usr/bin/supervisord -c /e ...   Up                      8000/tcp, 8005/tcp, 8081/tcp                                                                                                       
-malcolm_nginx-proxy_1     /app/docker-entrypoint.sh  ...   Up                      0.0.0.0:28991->28991/tcp, 0.0.0.0:3030->3030/tcp, 0.0.0.0:443->443/tcp, 0.0.0.0:488->488/tcp, 0.0.0.0:5601->5601/tcp, 80/tcp,      
-                                                                                   0.0.0.0:8443->8443/tcp, 0.0.0.0:9200->9200/tcp, 0.0.0.0:9600->9600/tcp                                                             
-malcolm_pcap-capture_1    /usr/local/bin/supervisor.sh     Up                                                                                                                                                         
-malcolm_upload_1          /docker-entrypoint.sh /usr ...   Up                      127.0.0.1:8022->22/tcp, 80/tcp                                                                                                     
-
-Attaching to malcolm_nginx-proxy_1, malcolm_upload_1, malcolm_filebeat_1, malcolm_kibana_1, malcolm_moloch_1, malcolm_elastalert_1, malcolm_logstash_1, malcolm_curator_1, malcolm_elasticsearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1
+…
+Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
 …
 ```
 
-It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 5 to 10 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
+It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
 ```
 …
-logstash_1  | [2019-06-11T15:45:41,938][INFO ][logstash.pipeline ] Pipeline started successfully {:pipeline_id=>"main", :thread=>"#<Thread:0x7a5910 sleep>"}
-logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>3, :running_pipelines=>[:input, :main, :output], :non_running_pipelines=>[]}
+logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>4, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
 logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
 …
 ```

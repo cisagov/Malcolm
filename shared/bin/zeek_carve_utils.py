@@ -5,6 +5,7 @@
 
 import clamd
 import hashlib
+import malass_client
 import os
 import re
 import requests
