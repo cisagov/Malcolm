@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Sensor Service Status
+Exec=/usr/bin/terminator -T "Sensor Service Status" -x bash -c "/opt/sensor/sensor_ctl/status && echo '' && read -p 'Press Enter to Continue'"
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=view-restore.png
+Categories=Network;
+StartupNotify=true

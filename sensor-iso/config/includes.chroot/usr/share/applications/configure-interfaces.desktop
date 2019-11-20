@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Configure Interfaces and Hostname
+Exec=/usr/bin/terminator --maximise -T "Configure Interfaces and Hostname" -x su -l -c /usr/local/bin/configure-interfaces.py
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=network-wired.png
+Categories=Network;
+StartupNotify=true

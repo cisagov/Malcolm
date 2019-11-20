@@ -1,0 +1,5 @@
+*.keystore
+sensor_ctl/*beat/data
+sensor_ctl/*beat/logs
+sensor_ctl/supervisor.d/*-*.conf
+sensor_ctl/extractor_override.zeek

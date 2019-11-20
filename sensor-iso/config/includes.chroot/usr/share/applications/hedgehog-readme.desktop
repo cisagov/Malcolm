@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Sensor README
+Exec=/usr/bin/chromium file:////usr/share/doc/hedgehog/HedgehogLinux.html
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=help-browser
+Categories=Network;
+StartupWMClass=chromium
+StartupNotify=true

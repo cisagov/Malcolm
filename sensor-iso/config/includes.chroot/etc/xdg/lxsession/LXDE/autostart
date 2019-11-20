@@ -1,0 +1,5 @@
+@lxpanel --profile LXDE
+@pcmanfm --desktop --profile LXDE
+@xscreensaver -no-splash
+@/usr/local/bin/capture-format-wait.sh
+@chromium --kiosk --app=http://127.0.0.1:5000 --password-store=basic --disable-seccomp-filter-sandbox --incognito --bwsi--disable-breakpad --disable-cloud-import --disable-speech-api --disable-sync --disable-voice-input --no-wifi --no-pings --disable-offline-auto-reload --disable-preconnect --disable-local-storage --media-cache-dir=/dev/null --disk-cache-dir=/dev/null --disk-cache-size=1

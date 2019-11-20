@@ -1,0 +1,2 @@
+# allow unprivileged mgmt of interface flags via ethtool prior to starting capture
+%netdev ALL=(root) NOPASSWD: /usr/local/bin/disable-nic-offloading.sh
