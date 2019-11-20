@@ -245,8 +245,6 @@ services:
       - ./pcap:/data/pcap
       - ./moloch-logs:/data/moloch/logs
       - ./moloch-raw:/data/moloch/raw
-      - ./moloch/etc:/data/moloch/etc
-      - ./moloch/wise/source.zeeklogs.js:/data/moloch/wiseService/source.zeeklogs.js:ro
   zeek:
     image: malcolmnetsec/zeek:1.7.1
     restart: "no"
