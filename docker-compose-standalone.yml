@@ -60,6 +60,7 @@ x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
   PCAP_PIPELINE_DEBUG : 'false'
   PCAP_PIPELINE_DEBUG_EXTRA : 'false'
+  PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
   PCAP_MONITOR_HOST : 'pcap-monitor'
 
 x-common-beats-variables: &common-beats-variables
