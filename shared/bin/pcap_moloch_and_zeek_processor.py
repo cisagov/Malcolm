@@ -111,7 +111,7 @@ def molochCaptureFileWorker(molochWorkerArgs):
           if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
           # put together moloch execution command
-          cmd = [molochBin, '-r', fileInfo[FILE_INFO_DICT_NAME]]
+          cmd = [molochBin, '--quiet', '-r', fileInfo[FILE_INFO_DICT_NAME]]
           if notLocked: cmd.append('--nolockpcap')
           cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
