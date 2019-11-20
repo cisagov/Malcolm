@@ -264,15 +264,16 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
 * `malcolm-iso` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
-* `moloch` - code and configuration for the `moloch` container which handles PCAP processing and which serves the Viewer application
+* `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
-* `pcap-capture` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
+* `pcap-monitor` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
+* `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
 
 and the following files of special note:
