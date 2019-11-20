@@ -140,13 +140,15 @@ def event_process_generator(cls, method):
       fileSize = os.path.getsize(event.pathname)
       if (args.minBytes <= fileSize <= args.maxBytes) and ((fileMime in PCAP_MIME_TYPES) or ('pcap-ng' in fileType)):
 
+        relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
+
         # check with Moloch's files index in Elasticsearch and make sure it's not a duplicate
         fileIsDuplicate = False
         if self.useElastic:
           s = elasticsearch_dsl.Search(index=MOLOCH_FILES_INDEX) \
               .filter("term", _type=MOLOCH_FILE_TYPE) \
               .filter("term", node=args.molochNode) \
-              .query("match", name=event.pathname)
+              .query("wildcard", name=f"*{os.path.sep}{relativePath}")
           response = s.execute()
           for hit in response:
             fileInfo = hit.to_dict()
@@ -162,7 +164,6 @@ def event_process_generator(cls, method):
           # the entity is a right-sized non-duplicate file, and it exists, so send it to get processed
           if debug: eprint(f"{scriptName}:\t📩\t{event.pathname}")
           try:
-            relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
             fileInfo = {FILE_INFO_DICT_NAME: event.pathname if args.includeAbsolutePath else relativePath, \
                         FILE_INFO_DICT_SIZE: fileSize, \
                         FILE_INFO_FILE_MIME: fileMime, \
