@@ -1,6 +1,6 @@
 # Notes on Sensor Development ("Hedgehog Linux")
 
-Hedgehog Linux is a trimmed-down Debian Linux with several common tools preinstalled for capturing and forwarding network traffic artifacts. This document outlines those tools and how they were installed and configured.
+Hedgehog Linux is a trimmed-down Debian Linux with several common tools preinstalled for capturing and forwarding network traffic artifacts. This document outlines those tools and how they were installed and configured in the hopes that the lessons learned in this project's development are useful to others deploying these tools in other environments.
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -99,7 +99,7 @@ $ /usr/sbin/tcpdump \
     * `-w` specifies a PCAP filename to write to, in this case timestamping each PCAP file with the current date and time
     * `-G` specifies a file rotation time threshold in seconds
     * `-C` specifies a file rotation size threshold in millions of bytes
-    * `-K` disables IP, TCP, and UDP checksum verfification
+    * `-K` disables IP, TCP, and UDP checksum verification
     * `-n` disables converting addresses (host addresses, port numbers, etc.) to names
     * `filter-expression` specifies an optional `tcpdump`-like capture filter expression
 
@@ -107,7 +107,7 @@ $ /usr/sbin/tcpdump \
 
 ## <a name="Moloch"></a>Moloch
 
-[Moloch](https://molo.ch/) [moloch-capture](https://github.com/aol/moloch/tree/master/capture) is a tool for traffic capture which also performs network protocal parsing and metadata insertion into an Elasticsearch instance for review using the Moloch viewer interface.
+[Moloch](https://molo.ch/) [moloch-capture](https://github.com/aol/moloch/tree/master/capture) is a tool for traffic capture which also performs network protocol parsing and metadata insertion into an Elasticsearch instance for review using the Moloch viewer interface.
 
 `moloch-capture` can be [downloaded](https://molo.ch/downloads) in the form of official Moloch package builds or built from source.
 
@@ -282,7 +282,7 @@ $ /opt/moloch/bin/moloch-capture
 
 #### <a name="molochRules"></a>capture rules
 
-Moloch allows [defining capture rules](https://molo.ch/rulesformat) to limit what is stored in PCAP and what is logged to the Elasticsearch database. Hedgehog Linux uses some rules similar to those examples in the [High Performance Settings](https://molo.ch/settings#high-performance-settings) page in the Moloch documentation in order to maximize peformance and tune PCAP storage utilization.
+Moloch allows [defining capture rules](https://molo.ch/rulesformat) to limit what is stored in PCAP and what is logged to the Elasticsearch database. Hedgehog Linux uses some rules similar to those examples in the [High Performance Settings](https://molo.ch/settings#high-performance-settings) page in the Moloch documentation in order to maximize performance and tune PCAP storage utilization.
 
 ```
 ---
