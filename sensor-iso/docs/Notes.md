@@ -2173,4 +2173,4 @@ Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Cop
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Hedgehog%20Linux)
+[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Network%20sensor%20development)
