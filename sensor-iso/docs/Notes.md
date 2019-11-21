@@ -1,6 +1,6 @@
 # Notes on Sensor Development ("Hedgehog Linux")
 
-Hedgehog Linux is simply a trimmed-down Debian Linux with several common tools preinstalled for capturing and forwarding network traffic artifacts. This document outlines those tools and how they were installed and configured.
+Hedgehog Linux is a trimmed-down Debian Linux with several common tools preinstalled for capturing and forwarding network traffic artifacts. This document outlines those tools and how they were installed and configured.
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -22,6 +22,10 @@ Hedgehog Linux is simply a trimmed-down Debian Linux with several common tools p
     - [`local.zeek`](#ZeekLocalPolicy)
     - [File carving](#ZeekFileCarving)
 * [Forwarding](#Forwarding)
+    - [Forwarding Zeek logs](#ForwardingZeekLogs)
+    - [Forwarding sensor system metrics](#ForwardingMetrics)
+    - [Forwarding audit logs](#ForwardingAuditLogs)
+    - [Forwarding syslogs](#ForwardingSyslogs)
 * [System considerations](#System)
     - [NIC offloading](#nicOffloading)
     - [Performance](#Performance)
@@ -1759,6 +1763,331 @@ export {
 Once carved, the files in the directory indicated by the `$ZEEK_EXTRACTOR_PATH` environment variable can be examined using a virus scanner or other file analysis utilities.
 
 # <a name="Forwarding"></a>Forwarding
+
+The Elastic Stack's [Beats](https://www.elastic.co/products/beats) platform is an excellent suite of data shippers for logs, packet metadata, performance metrics and more. These forwarders can be downloaded from the [Elastic downloads page](https://www.elastic.co/downloads/beats) or installed via a script as in this example:
+
+```bash
+#!/bin/bash
+
+set -e
+
+BEATS_VER="6.8.4"
+BEATS_OSS="-oss"
+BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
+BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
+
+# install filebeat/metricbeat/auditbeat/packetbeat
+for BEAT in filebeat metricbeat auditbeat packetbeat; do
+  BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
+  BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
+  pushd /tmp && \
+    curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
+    dpkg -i "$BEATS_DEB" && \
+    rm -f "$BEATS_DEB" && \
+    popd
+done
+```
+
+While the examples in this document use the Elastic Stack (particularly [Logstash](https://www.elastic.co/products/logstash) and [Elasticsearch](https://www.elastic.co/products/elasticsearch)) as destinations, Beats support [many](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-output.html) [other](https://www.elastic.co/guide/en/beats/auditbeat/current/configuring-output.html) [output](https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-output.html) [transports](https://www.elastic.co/guide/en/beats/packetbeat/current/configuring-output.html) as well.
+
+## <a name="ForwardingZeekLogs"></a>Forwarding Zeek logs
+
+[Filebeat](https://www.elastic.co/products/beats/filebeat) can be used to forward Zeek logs (or any other kind of log) to a variety of destinations, including a [Logstash](https://www.elastic.co/products/logstash) instance for additional [parsing](https://github.com/idaholab/Malcolm/blob/master/logstash/pipelines/zeek/11_zeek_logs.conf) and [enrichment](https://github.com/idaholab/Malcolm/blob/master/logstash/pipelines/enrichment/01_input_log_enrichment.conf) or directly into an [Elasticsearch](https://www.elastic.co/products/elasticsearch) instance.
+
+Here is an example `filebeat.yml` [configuration file](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) used to collect Zeek logs from a directory and forward them to a Logstash instance. Some values here are specified in the via environment variables with sane defaults if those environment variables are not specified:
+
+```
+logging.metrics.enabled: false
+
+filebeat.prospectors:
+- type: log
+  paths:
+    - ${BEAT_LOG_PATTERN:/home/sensor/bro_logs/*.log}
+  symlinks: true
+  fields_under_root: true
+  # tags: ["remote"]
+  fields:
+    type: "session"
+  compression_level: 0
+  exclude_lines: ['^\s*#']
+  scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${BEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${BEAT_IGNORE_OLDER:120m}
+  close_inactive: ${BEAT_CLOSE_INACTIVE:90m}
+  close_renamed: ${BEAT_CLOSE_RENAMED:true}
+  close_removed: ${BEAT_CLOSE_REMOVED:true}
+  close_eof: ${BEAT_CLOSE_EOF:false}
+  clean_renamed: ${BEAT_CLEAN_RENAMED:true}
+  clean_removed: ${BEAT_CLEAN_REMOVED:true}
+
+output.logstash:
+  hosts: ["${BEAT_LS_HOST}:${BEAT_LS_PORT}"]
+  ssl.enabled: ${BEAT_LS_SSL:false}
+  ssl.certificate_authorities: ["${BEAT_LS_SSL_CA_CRT}"]
+  ssl.certificate: "${BEAT_LS_SSL_CLIENT_CRT}"
+  ssl.key: "${BEAT_LS_SSL_CLIENT_KEY}"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "${BEAT_LS_SSL_VERIFY}"
+```
+
+Note that if the remote Logstash server is using SSL, Filebeat must also be configured to use SSL with the appropriate settings for `ssl.enabled`, `ssl.certificate_authorities`, `ssl.certificate`, `ssl.key`, `ssl.supported_protocols` and `ssl.verification_mode` corresponding to the values used by Logstash on the other side of the connection. See [Secure communication with Logstash](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html) for more information.
+
+## <a name="ForwardingMetrics"></a>Forwarding sensor system metrics
+
+[Metricbeat](https://www.elastic.co/products/beats/metricbeat) can be used to ship system metrics (CPU, memory, file system, disk IO, network IO, etc.) to a remote Elasticsearch [Elasticsearch](https://www.elastic.co/products/elasticsearch) instance. This may be useful to monitor the performance of a network sensor device.
+
+Here is a sample `metricbeat.yml` [configuration file](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-reference-yml.html) similar to the one used in Hedgehog Linux. This configuration includes setting up prebuilt [Kibana dashboards](https://www.elastic.co/guide/en/beats/metricbeat/current/view-kibana-dashboards.html) for visualizing the system metrics data. Credentials for the Elasticsearch database can be stored securely using a [secrets keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html).
+
+```
+metricbeat.config.modules:
+  path: ${path.config}/conf.d/*.yml
+  reload.period: 10s
+  reload.enabled: false
+
+metricbeat.max_start_delay: 10s
+
+#==========================  Modules configuration ============================
+metricbeat.modules:
+
+#------------------------------- System Module -------------------------------
+- module: system
+  period: ${BEAT_INTERVAL}
+  metricsets:
+    - cpu             # CPU usage
+    - load            # CPU load averages
+    - memory          # Memory usage
+    - network         # Network IO
+    - process         # Per process metrics
+    - process_summary # Process summary
+    - uptime          # System Uptime
+    - diskio          # Disk IO
+  enabled: true
+  processes: ['.*']
+  process.include_top_n:
+    enabled: true
+    by_cpu: 10
+    by_memory: 10
+
+  cpu.metrics:  ["percentages"]
+  core.metrics: ["percentages"]
+
+- module: system
+  period: 1m
+  metricsets:
+    - filesystem     # File system usage for each mountpoint
+    - fsstat         # File system summary metrics
+  processors:
+  - drop_event.when.regexp:
+      system.filesystem.mount_point: '^/(sys|cgroup|proc|dev|etc|host|lib|boot)($|/)'
+
+#================================ General ======================================
+fields_under_root: true
+
+#================================ Outputs ======================================
+
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+  enabled: true
+  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
+  protocol: "${BEAT_ES_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+
+#============================== Dashboards =====================================
+setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+
+#============================== Kibana =====================================
+setup.kibana:
+  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false
+```
+
+## <a name="ForwardingAuditLogs"></a>Forwarding audit logs
+
+[Auditbeat](https://www.elastic.co/products/beats/auditbeat) communicates directly with the Linux audit framework, collects the same data as `auditd`, and sends the events to the [Elastic Stack]([Elasticsearch](https://www.elastic.co/products/elasticsearch) using existing audit rules.
+
+Here is a sample `auditbeat.yml` [configuration file](https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-reference-yml.html) similar to the one used in Hedgehog Linux. This configuration includes setting up prebuilt [Kibana dashboards](https://www.elastic.co/guide/en/beats/auditbeat/current/view-kibana-dashboards.html) for visualizing the audit log data. Configuring Auditbeat may require some tuning by adding [`drop_event`](https://www.elastic.co/guide/en/beats/auditbeat/current/drop-event.html) processors to reduce verbosity for known/common functions, so some examples are listed here. Credentials for the Elasticsearch database can be stored securely using a [secrets keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html).
+
+```
+#==========================  Modules configuration =============================
+auditbeat.modules:
+
+- module: auditd
+  socket_type: multicast
+  resolve_ids: true
+  failure_mode: log
+  backlog_limit: 16384
+  rate_limit: 0
+  include_raw_message: false
+  include_warnings: false
+  backpressure_strategy: auto
+  # audit_rule_files: [ '${path.config}/audit.rules.d/*.conf' ]
+  # no rules specified, auditd will run and manage rules
+  # see https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-auditd.html
+
+  # don't forward some things that are always going to be happening
+  # (/proc/ accesses by beats and/or PCAP capture) to cut down on noise
+  # and some other approved common stuff that would clutter the logs
+  processors:
+  - drop_event:
+      when:
+        or:
+          - and:
+              - equals:
+                  auditd.data.syscall: 'setsockopt'
+              - equals:
+                  auditd.summary.object.type: 'network-device'
+              - or:
+                  - equals:
+                      auditd.summary.how: '/usr/sbin/tcpdump'
+                  - equals:
+                      auditd.summary.how: '/opt/zeek/bin/zeek'
+                  - equals:
+                      auditd.summary.how: '/usr/sbin/netsniff-ng'
+          - and:
+              - equals:
+                  event.type: 'syscall'
+              - equals:
+                  auditd.summary.object.type: 'file'
+              - or:
+                - and:
+                    - or:
+                        - equals:
+                            auditd.data.syscall: 'open'
+                        - equals:
+                            auditd.data.syscall: 'openat'
+                    - regexp:
+                        auditd.summary.object.primary: '^/(proc/|etc/localtime|usr/lib/x86_64-linux-gnu/gconv/gconv-modules\.cache)'
+                    - or:
+                        - equals:
+                            auditd.summary.how: '/usr/share/auditbeat/bin/auditbeat'
+                        - equals:
+                            auditd.summary.how: '/usr/share/metricbeat/bin/metricbeat'
+                        - equals:
+                            auditd.summary.how: '/usr/sbin/tcpdump'
+                        - equals:
+                            auditd.summary.how: '/opt/zeek/bin/zeek'
+                        - equals:
+                            auditd.summary.how: '/usr/sbin/netsniff-ng'
+                - and:
+                    - or:
+                        - equals:
+                            auditd.data.syscall: 'open'
+                        - equals:
+                            auditd.data.syscall: 'openat'
+                    - not:
+                        has_fields: ['auditd.summary.object.primary']
+                    - equals:
+                        auditd.summary.how: '/usr/share/metricbeat/bin/metricbeat'
+
+- module: file_integrity
+  paths:
+  - /bin
+  - /opt/zeek
+  - /sbin
+  - /usr/bin
+  - /usr/local/bin
+  - /usr/sbin
+
+#================================ General ======================================
+fields_under_root: true
+
+#================================ Outputs ======================================
+
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+  enabled: true
+  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
+  protocol: "${BEAT_ES_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+
+#============================== Dashboards =====================================
+setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+
+#============================== Kibana =====================================
+setup.kibana:
+  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false
+```
+
+## <a name="ForwardingSyslogs"></a>Forwarding syslogs
+
+[Filebeat](https://www.elastic.co/products/beats/filebeat)'s [syslog input module](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) can be used to forward Linux system logs to a remote Elasticsearch [Elasticsearch](https://www.elastic.co/products/elasticsearch) instance.
+
+Here is an example `filebeat.yml` [configuration file](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) for this purpose. In this example, the local `rsyslog` instance has been configured to forward syslogs over UDP to the loopback interface on port 9514, which is being monitored by `filebeat` for forwarding. This is accomplished by appending `*.* @127.0.0.1:9514` to `/etc/rsyslog.conf` and restarting `rsyslog`.
+
+Credentials for the Elasticsearch database can be stored securely using a [secrets keystore](https://www.elastic.co/guide/en/beats/filebeat/current/keystore.html).
+
+```
+filebeat.inputs:
+- type: syslog
+  protocol.udp:
+    host: "127.0.0.1:9514"
+
+#================================ General ======================================
+fields_under_root: true
+
+#================================ Outputs ======================================
+
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+  enabled: true
+  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
+  protocol: "${BEAT_ES_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+
+#============================== Dashboards =====================================
+setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+
+#============================== Kibana =====================================
+setup.kibana:
+  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false
+```
 
 # <a name="System"></a>System considerations
 
