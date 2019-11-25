@@ -1,0 +1,49 @@
+protologbeat:
+  address: "127.0.0.1"
+  port: 9515
+  protocol: udp
+  json_mode: true
+  merge_fields_to_root: true
+  max_msg_size: 8192
+  default_es_log_type: protologbeat
+
+#================================ General ======================================
+fields_under_root: true
+
+#============================== Template =======================================
+
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+setup.template.json.enabled: true
+setup.template.json.path: "${path.config}/protologbeat.template.json"
+setup.template.json.name: "protologbeat"
+
+#================================ Outputs ======================================
+
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+  enabled: true
+  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
+  protocol: "${BEAT_ES_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+  template.versions.2x.enabled: false
+
+#============================== Dashboards =====================================
+setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+
+#============================== Kibana =====================================
+setup.kibana:
+  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false

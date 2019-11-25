@@ -1,0 +1,250 @@
+#!/bin/bash
+
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
+NETSNIFF_VER="0.6.6"
+NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
+
+ZEEK_VER="3.0.0"
+ZEEK_URL="https://www.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
+ZEEK_PATCH_URLS=(
+  # Fix redef'ing a table with a new &default attribute - https://github.com/zeek/zeek/pull/632
+  https://github.com/zeek/zeek/pull/632/commits/42b6040952030c44ce337704916cf89a065994b0.patch
+)
+
+BEATS_VER="6.8.4"
+BEATS_OSS="-oss"
+BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
+BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
+
+# a moloch .deb is built and installed in a different context
+
+# Install netsniff-ng
+cd /tmp
+curl -L -o netsniff-$NETSNIFF_VER.tar.gz "$NETSNIFF_URL"
+tar -xzvf netsniff-$NETSNIFF_VER.tar.gz
+cd netsniff-ng-$NETSNIFF_VER
+./configure --prefix=/usr --disable-geoip
+make netsniff-ng
+# make netsniff-ng_install
+checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="netsniff-ng" --pkgversion="$NETSNIFF_VER" --pkgarch="amd64" --pkgsource="$NETSNIFF_URL" make netsniff-ng_install
+
+cd ..
+rm -Rf netsniff-$NETSNIFF_VER.tar.gz netsniff-ng-$NETSNIFF_VER
+##
+
+# Build and install zeek
+mkdir -p /usr/local/src/zeek-patches
+cd /usr/local/src/zeek-patches
+for i in ${ZEEK_PATCH_URLS[@]}; do
+  curl -L -J -O "$i"
+done
+cd /tmp
+curl -L -o zeek-$ZEEK_VER.tar.gz "$ZEEK_URL"
+tar -xvzf zeek-$ZEEK_VER.tar.gz
+cd zeek-$ZEEK_VER
+for i in /usr/local/src/zeek-patches/*; do
+  patch -p 1 -r - --no-backup-if-mismatch < "$i" || true
+done
+./configure --prefix=/opt/zeek --generator=Ninja
+cd build
+ninja
+# ninja install
+checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
+
+# install 3rd party Zeek plugins and scripts
+export PATH=/opt/zeek/bin:$PATH
+zkg autoconfig
+bash /usr/local/bin/zeek_install_plugins.sh
+rm -Rf /root/.zkg /usr/local/src/*/.git
+
+cat << 'EOF' >> /opt/zeek/etc/zeekctl.cfg
+# all interfaces using lb_method=custom should use AF_PACKET
+lb_custom.InterfacePrefix=af_packet::
+
+EOF
+
+# set up default zeek local policy
+cat << 'EOF' > /opt/zeek/share/zeek/site/local.zeek
+##! Zeek local site policy. Customize as appropriate.
+##!
+##! See https://github.com/zeek/zeekctl
+##!     https://docs.zeek.org/en/stable/script-reference/scripts.html
+##!     https://github.com/zeek/zeek/blob/master/scripts/site/local.zeek
+
+redef Broker::default_listen_address = "127.0.0.1";
+redef ignore_checksums = T;
+redef HTTP::default_capture_password = T;
+redef FTP::default_capture_password = T;
+redef SOCKS::default_capture_password = T;
+
+@load tuning/defaults
+@load misc/scan
+@load frameworks/software/vulnerable
+@load frameworks/software/version-changes
+@load frameworks/software/windows-version-detection
+@load-sigs frameworks/signatures/detect-windows-shells
+@load protocols/conn/known-hosts
+@load protocols/conn/known-services
+@load protocols/dhcp/software
+@load protocols/dns/detect-external-names
+@load protocols/ftp/detect
+@load protocols/ftp/software
+@load protocols/http/detect-sqli
+@load protocols/http/detect-webapps
+@load protocols/http/software
+@load protocols/http/software-browser-plugins
+@load protocols/mysql/software
+@load protocols/smtp/software
+@load protocols/ssh/detect-bruteforcing
+@load protocols/ssh/geo-data
+@load protocols/ssh/interesting-hostnames
+@load protocols/ssh/software
+@load protocols/ssl/known-certs
+@load protocols/ssl/log-hostcerts-only
+@load protocols/ssl/validate-certs
+@load tuning/track-all-assets.zeek
+@load frameworks/files/hash-all-files
+@load policy/protocols/conn/vlan-logging
+@load policy/protocols/conn/mac-logging
+@load policy/protocols/modbus/track-memmap
+@load policy/protocols/modbus/known-masters-slaves
+@load policy/protocols/mqtt
+# @load frameworks/files/detect-MHR
+
+# custom packages installed manually
+@load Salesforce/GQUIC
+@load ./bzar
+# custom packages managed by zkg via packages/packages.zeek
+@load ./packages/packages.zeek
+# and apparently some installed packages (BRO::LDAP) are loaded automatically
+
+EOF
+
+# cleanup
+cd /tmp
+rm -Rf zeek-$ZEEK_VER*
+###
+
+# update clamav signatures
+freshclam --stdout --quiet --no-warnings
+###
+
+# tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat
+for BEAT in filebeat metricbeat auditbeat packetbeat; do
+  BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
+  BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
+  BEATS_NEW_DEB="$BEAT-dark-$BEATS_VER-amd64.deb"
+  BEATS_TMP_DIR="$BEAT-deb"
+  pushd /tmp && \
+    curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
+    dpkg-deb -x "$BEATS_DEB" "$BEATS_TMP_DIR" && \
+    dpkg-deb -e "$BEATS_DEB" "$BEATS_TMP_DIR/DEBIAN" && \
+    sed -i 's@\(\\"darkTheme\\" *: *\)false@\1true@g' "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/*.json && \
+    ( [[ "$BEAT" == "metricbeat" ]] && sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/* || true ) && \
+    pushd "$BEATS_TMP_DIR" && ( rm -f DEBIAN/md5sums && find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -l -0 md5sum >> DEBIAN/md5sums ) && popd && \
+    dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
+    rm -rf "$BEATS_TMP_DIR" && \
+    dpkg -i "$BEATS_NEW_DEB" && \
+    rm -rf "$BEATS_TMP_DIR" "$BEATS_DEB" "$BEATS_NEW_DEB" && \
+    popd
+done
+
+# remove some dashboards we don't care about (for clutter)
+rm -f /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-apache-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-containers-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-docker-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-golang-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-haproxy-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-kafka-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-kubernetes-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-mongodb-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-mysql-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-nginx-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-rabbitmq-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-redis-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-uwsgi-*json \
+      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-windows-*json \
+      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-executions.json \
+      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-overview.json \
+      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-sockets.json \
+      /usr/share/filebeat/kibana/6/dashboard/*json
+
+# add symlinks to our custom dashboards
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/filebeat/kibana/6/dashboard-custom/* /usr/share/filebeat/kibana/6/dashboard/
+fi
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/metricbeat/kibana/6/dashboard-custom/* /usr/share/metricbeat/kibana/6/dashboard/
+fi
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/auditbeat/kibana/6/dashboard-custom/* /usr/share/auditbeat/kibana/6/dashboard/
+fi
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/packetbeat/kibana/6/dashboard-custom/*)
+if (( ${#FILES} )) ; then
+  ln -s -r -f /usr/share/packetbeat/kibana/6/dashboard-custom/* /usr/share/packetbeat/kibana/6/dashboard/
+fi
+
+###
+
+# set up capabilities for network-related tools
+chown root:netdev /usr/sbin/netsniff-ng && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
+chown root:netdev /opt/zeek/bin/zeek && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/zeek/bin/zeek
+chown root:netdev /sbin/ethtool && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
+chown root:netdev /opt/zeek/bin/capstats && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/capstats
+chown root:netdev /usr/sbin/tcpdump && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump
+chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
+  setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
+chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
+chown root:netdev /opt/moloch/bin/moloch-capture && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/moloch/bin/moloch-capture
+
+ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
+ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
+ln -s -f /usr/sbin/tcpdump /usr/local/bin/
+ln -s -f /opt/moloch/bin/moloch-capture /usr/local/bin/
+ln -s -f /opt/moloch/bin/npm /usr/local/bin
+ln -s -f /opt/moloch/bin/node /usr/local/bin
+ln -s -f /opt/moloch/bin/npx /usr/local/bin
+###
+
+# zeekctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user.
+# as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
+# regenerated when we are about to deploy zeek itself.
+# so, now make a complete backup of /opt/zeek as it's going to have its ownership changed during runtime
+rsync -a /opt/zeek/ /opt/zeek.orig
+
+# enable sensor init scripts
+
+# run kiosk system process information daemon under systemd
+if [ -f /opt/sensor/kiosk.service ]; then
+  mv /opt/sensor/kiosk.service /etc/systemd/system/
+  chown root:root /etc/systemd/system/kiosk.service
+  chmod 644 /etc/systemd/system/kiosk.service
+  systemctl daemon-reload
+  systemctl enable kiosk
+fi
+
+# run resource logging services as unprivileged user.
+# supervisor is run via /etc/rc.local  (vs. here with a @reboot directive)
+#   so as to work for both live-usb and installed versions
+#   (see 0900-setup-rc-local.hook.chroot)
+if [ -d /opt/sensor/sensor_ctl/scripts ]; then
+  cat << 'EOF' >> /etc/cron.d/sensor_ctl
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+*/10 * * * * root /opt/sensor/sensor_ctl/scripts/log_temperature.sh
+EOF
+fi
+
+###

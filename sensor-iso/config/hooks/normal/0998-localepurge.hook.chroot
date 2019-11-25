@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
+# remove excess locales
+if [ -f /etc/localepurge-preseed.cfg ] ; then
+  debconf-set-selections < /etc/localepurge-preseed.cfg
+  apt-get -y install localepurge
+  dpkg-reconfigure localepurge
+  localepurge
+fi

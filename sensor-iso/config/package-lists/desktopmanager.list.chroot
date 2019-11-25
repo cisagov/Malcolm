@@ -1,0 +1,16 @@
+arandr
+dconf-cli
+lightdm
+lxde
+lxpanel
+lxsession
+x11-apps
+x11-session-utils
+x11-xfs-utils
+x11-xserver-utils
+xinit
+xorg
+xscreensaver
+xserver-xorg
+xserver-xorg-video-qxl
+xserver-xorg-video-vmware

@@ -1,0 +1,75 @@
+metricbeat.config.modules:
+  path: ${path.config}/conf.d/*.yml
+  reload.period: 10s
+  reload.enabled: false
+
+metricbeat.max_start_delay: 10s
+
+#==========================  Modules configuration ============================
+metricbeat.modules:
+
+#------------------------------- System Module -------------------------------
+- module: system
+  period: ${BEAT_INTERVAL}
+  metricsets:
+    - cpu             # CPU usage
+    - load            # CPU load averages
+    - memory          # Memory usage
+    - network         # Network IO
+    - process         # Per process metrics
+    - process_summary # Process summary
+    - uptime          # System Uptime
+    - diskio          # Disk IO
+  enabled: true
+  processes: ['.*']
+  process.include_top_n:
+    enabled: true
+    by_cpu: 10
+    by_memory: 10
+
+  cpu.metrics:  ["percentages"]
+  core.metrics: ["percentages"]
+
+- module: system
+  period: 1m
+  metricsets:
+    - filesystem     # File system usage for each mountpoint
+    - fsstat         # File system summary metrics
+  processors:
+  - drop_event.when.regexp:
+      system.filesystem.mount_point: '^/(sys|cgroup|proc|dev|etc|host|lib|boot)($|/)'
+
+#================================ General ======================================
+fields_under_root: true
+
+#================================ Outputs ======================================
+
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+  enabled: true
+  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
+  protocol: "${BEAT_ES_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+
+#============================== Dashboards =====================================
+setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+
+#============================== Kibana =====================================
+setup.kibana:
+  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  username: "${BEAT_HTTP_USERNAME}"
+  password: "${BEAT_HTTP_PASSWORD}"
+  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false

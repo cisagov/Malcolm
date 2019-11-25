@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
+# remove development packages
+apt-get -y --purge remove checkinstall cmake gdb git libc6-dbg ninja-build \
+                    $(dpkg --get-selections | grep -Pv "(^libyaml-dev|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+
+# remove unwanted packages
+apt-get -y --purge remove bluez-firmware \
+                          cracklib-runtime \
+                          deluge \
+                          enchant \
+                          ffmpeg \
+                          gnome-accessibility-themes \
+                          gnome-user-guide \
+                          gucharmap \
+                          libasound2-plugins \
+                          libcupsfilters1 \
+                          libcupsimage2 \
+                          lxmusic \
+                          mpv \
+                          pavucontrol \
+                          prelink \
+                          pulseaudio \
+                          python-wicd \
+                          smplayer \
+                          wamerican \
+                          wicd \
+                          wicd-daemon \
+                          wicd-gtk \
+                          xdg-user-dirs \
+                          yelp \
+                          youtube-dl || true
+
+apt-get -y autoremove
+apt-get clean
+
+# remove any residual configs
+dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
+
+# disable automatic running of some services (but don't abort if we fail)
+systemctl disable supervisor.service || true
+systemctl disable systemd-timesyncd.service || true
+systemctl disable ctrl-alt-del.target || true
+systemctl disable hddtemp.service || true
+systemctl disable apt-daily.service || true
+systemctl disable apt-daily.timer || true
+systemctl disable apt-daily-upgrade.timer || true
+systemctl disable apt-daily-upgrade.service || true
+systemctl disable clamav-daemon.service || true
+systemctl disable clamav-freshclam.service || true

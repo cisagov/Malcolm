@@ -69,7 +69,6 @@ if mkdir $LOCKDIR; then
           fi
         done
       fi
-      TAGS_JOINED=$(printf "%s," "${TAGS[@]}")${PROCESS_TIME}
 
       mkdir -p "$DESTDIR"
       mkdir -p "$DESTDIR_EXTRACTED"
@@ -77,6 +76,8 @@ if mkdir $LOCKDIR; then
       python -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
       find "$DESTDIR_EXTRACTED" -type f -name "*.log" | while read LOGFILE
       do
+        PROCESS_TIME=$(date +%s%N)
+        TAGS_JOINED=$(printf "%s," "${TAGS[@]}")${PROCESS_TIME}
         FIELDS_BITMAP="$($ZEEK_LOG_FIELD_BITMAP_SCRIPT "$LOGFILE" | head -n 1)"
         LINKNAME_BASE="$(basename "$LOGFILE" .log)"
         if [[ -n $FIELDS_BITMAP ]]; then

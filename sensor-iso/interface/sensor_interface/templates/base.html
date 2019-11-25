@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/freeboard.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body>
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">Sensor Menu</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation mdl-layout--large-screen-only">
+                <a class="mdl-navigation__link" href="/buttons">Services</a>
+                <a class="mdl-navigation__link" href="/">System</a>
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Menu</span>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" href="/buttons">Services</a>
+            <a class="mdl-navigation__link" href="/">System</a>
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+        <div class="page-content">{% block content %}{% endblock %}</div>
+    </main>
+    <div class="mdl-mega-footer"></div>
+</div>
+
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/material.min.js') }}"></script>
+{% endblock %}
+
+</body>
+</html>
