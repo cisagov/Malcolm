@@ -2,7 +2,7 @@
 
 ![](./docs/images/logo/Malcolm_banner.png)
 
-[Malcolm](https://github.com/idaholab/malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
+[Malcolm](https://malcolm.fyi) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
 * **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Moloch, a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
@@ -84,7 +84,7 @@ For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linu
 
 #### Source code
 
-The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/malcolm). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 #### Building Malcolm from scratch
 
@@ -249,7 +249,7 @@ See [Zeek log integration](#MolochZeek) for more information on how Malcolm inte
 
 ## <a name="Development"></a>Development
 
-Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) results in the following subdirectories in your `malcolm/` working copy:
+Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm) results in the following subdirectories in your `malcolm/` working copy:
 
 * `curator` - code and configuration for the `curator` container which define rules for closing and/or deleting old Elasticsearch indices
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
@@ -1499,7 +1499,7 @@ You can now open a web browser and navigate to one of the [Malcolm user interfac
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://malcolm.fyi) is Copyright 2019 Battelle Energy Alliance, LLC, and is [developed and released](https://github.com/idaholab/Malcolm) through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See `License.txt` for the terms of its release.
 
