@@ -147,8 +147,8 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
 * Moloch: [https://localhost:443](https://localhost:443)
-* Kibana: [https://localhost:5601](https://localhost:5601)
-* Capture File and Log Archive Upload (Web): [https://localhost:8443](https://localhost:8443)
+* Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
+* Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/) or [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
 * Account Management: [https://localhost:488](https://localhost:488)
 
@@ -355,8 +355,8 @@ To start, stop, restart, etc. Malcolm:
 
 A minute or so after starting Malcolm, the following services will be accessible:
   - Moloch: https://localhost/
-  - Kibana: https://localhost:5601/
-  - PCAP Upload (web): https://localhost:8443/
+  - Kibana: https://localhost/kibana/
+  - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
   - Account management: https://localhost:488/
 ```
@@ -458,7 +458,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
 
-* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (eg., `'enp0s25'` or `'enp10s0,enp11s0'`)
+* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
 
 * `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it closed for processing and a new PCAP file created 
 
@@ -614,7 +614,7 @@ Installing and configuring Docker to run under Windows must be done manually, ra
     + **General**
         * Ensure *Start Docker Desktop when you log in* is checked.
     + **Shared Drives**
-        * Mark the drive onto which Malcolm is installed as *Shared* (eg., check *Shared* for drive *C*).
+        * Mark the drive onto which Malcolm is installed as *Shared* (e.g., check *Shared* for drive *C*).
     + **Advanced**
         + Increase *CPUs* to as many as you're comfortable with (at least *4* is best).
         + Increase *Memory* to as much as you're comfortable with (at least *16* is recommended, no fewer than *10*).
@@ -648,7 +648,7 @@ Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in orde
 
 #### <a name="AccountManagement"></a>Account management
 
-[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (eg., [https://localhost:488](https://localhost:488) if you are connecting locally).
+[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
 
 Malcolm user accounts can be used to access the [interfaces](#UserInterfaceURLs) of all of its [components](#Components), including Moloch. Moloch uses its own internal database of user accounts, so when a Malcolm user account logs in to Moloch for the first time Malcolm creates a corresponding Moloch user account automatically. This being the case, it is *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as those settings would not be consistently used across Malcolm.
 
@@ -678,11 +678,11 @@ Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch 
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
-Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs over HTTPS on port 8443 (eg., [https://localhost:8443](https://localhost:8443) if you are connecting locally).
+Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs at [https://localhost/upload/](https://localhost/upload/) if you are connecting locally.
 
 ![Capture File and Log Archive Upload](./docs/images/screenshots/malcolm_upload.png)
 
-Additionally, there is a writable `files` directory on an SFTP server served on port 8022 (eg., `sftp://USERNAME@localhost:8022/files/` if you are connecting locally).
+Additionally, there is a writable `files` directory on an SFTP server served on port 8022 (e.g., `sftp://USERNAME@localhost:8022/files/` if you are connecting locally).
 
 The types of files supported are:
 
@@ -769,7 +769,7 @@ Once Malcolm has been [started](#Starting), `cd` into `./zeek-logs/current/` and
 
 ## <a name="Moloch"></a>Moloch
 
-The Moloch interface will be accessible over HTTPS on port 443 at the docker hosts IP address (eg., [https://localhost](https://localhost) if you are connecting locally).
+The Moloch interface will be accessible over HTTPS on port 443 at the docker hosts IP address (e.g., [https://localhost](https://localhost) if you are connecting locally).
 
 ### <a name="MolochZeek"></a>Zeek log integration
 
@@ -793,11 +793,11 @@ The Moloch interface displays both Zeek logs and Moloch sessions alongside each 
 
 A few fields of particular mention that help limit returned results to those Zeek logs and Moloch session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`communityId` and `zeek.community_id` in Moloch and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Moloch's `rootId` field.
 
-Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (eg., Moloch sessions) to another (eg., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
+Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Moloch sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
 The `rootId` field is used by Moloch to link session records together when a particular session has too many packets to be represented by a single session. When normalizing Zeek logs to Moloch's schema, Malcolm piggybacks on `rootId` to store Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) to crossreference entries across Zeek log types. The connection UID is also stored in `zeek.uid`.
 
-Filtering on community ID OR'ed with zeek UID (eg., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Moloch sessions and Zeek logs generated by a particular network connection.
+Filtering on community ID OR'ed with zeek UID (e.g., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Moloch sessions and Zeek logs generated by a particular network connection.
 
 ![Correlating Moloch sessions and Zeek logs](./docs/images/screenshots/moloch_correlate_communityid_uid.png)
 
@@ -846,7 +846,7 @@ See the [issues](#Issues) section of this document for an error that can occur u
 
 ### <a name="MolochSPIView"></a>SPIView
 
-Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (eg., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Moloch and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
+Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (e.g., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Moloch and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
 
 ![Moloch's SPIView](./docs/images/screenshots/moloch_spiview.png)
 
@@ -949,7 +949,7 @@ See Moloch's usage documentation for more information on [settings](https://loca
 
 While Moloch provides very nice visualizations, especially for network traffic, [Kibana](https://www.elastic.co/guide/en/kibana/current/getting-started.html) (an open source general-purpose data visualization tool for Elasticsearch) can be used to create custom visualizations (tables, charts, graphs, dashboards, etc.) using the same data.
 
-The Kibana container can be accessed over HTTPS on port 5601 (eg., [https://localhost:5601](https://localhost:5601) if you are connecting locally). Several preconfigured dashboards for Zeek logs are included in Malcolm's Kibana configuration.
+The Kibana container can be accessed at [https://localhost/kibana/](https://localhost/kibana/) if you are connecting locally. Several preconfigured dashboards for Zeek logs are included in Malcolm's Kibana configuration.
 
 The official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) has excellent tutorials for a variety of topics.
 
@@ -1141,7 +1141,7 @@ The `host-map.txt` file in the Malcolm installation directory can be used to def
 #
 # where:
 #   address: comma-separated list of IPv4, IPv6, or MAC addresses
-#          eg., 172.16.10.41, 02:42:45:dc:a2:96, 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+#          e.g., 172.16.10.41, 02:42:45:dc:a2:96, 2001:0db8:85a3:0000:0000:8a2e:0370:7334
 #
 #   host name: host name to be assigned when event address(es) match
 #
@@ -1170,7 +1170,7 @@ The `cidr-map.txt` file in the Malcolm installation directory can be used to def
 #
 # where:
 #   IP(s): comma-separated list of CIDR-formatted network IP addresses
-#          eg., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
+#          e.g., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
 #
 #   segment name: segment name to be assigned when event IP address(es) match
 #
@@ -1349,7 +1349,7 @@ Periodically close old Elasticsearch indices? (Y/n): y
 
 Indices older than 5 years will be periodically closed. Is this OK? (Y/n): n
 
-Enter index close threshold (eg., 90 days, 2 years, etc.): 1 years
+Enter index close threshold (e.g., 90 days, 2 years, etc.): 1 years
 
 Indices older than 1 years will be periodically closed. Is this OK? (Y/n): y
 
@@ -1357,7 +1357,7 @@ Periodically delete old Elasticsearch indices? (Y/n): y
 
 Indices older than 10 years will be periodically deleted. Is this OK? (Y/n): n
 
-Enter index delete threshold (eg., 90 days, 2 years, etc.): 5 years
+Enter index delete threshold (e.g., 90 days, 2 years, etc.): 5 years
 
 Indices older than 5 years will be periodically deleted. Is this OK? (Y/n): y
 
@@ -1475,9 +1475,9 @@ Creating malcolm_zeek_1          ... done
 
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
-  - Moloch: https://localhost:443/
-  - Kibana: https://localhost:5601/
-  - PCAP Upload (web): https://localhost:8443/
+  - Moloch: https://localhost/
+  - Kibana: https://localhost/kibana/
+  - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Account management: https://localhost:488/
 …
