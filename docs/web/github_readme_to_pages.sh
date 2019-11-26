@@ -18,28 +18,34 @@ function GenerateMarkdownHeader() {
 EOF
 }
 
+if [[ -n "$1" ]]; then
+  BRANCH="$1"
+else
+  BRANCH="master"
+fi
+
 OUTPUT_DIR=./pages
 
 # main page
 OUTPUT_FILE="$OUTPUT_DIR"/index.md
 > $OUTPUT_FILE
-GenerateMarkdownHeader "Malcolm" "index" >> $OUTPUT_FILE
-curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/master/README.md \
+GenerateMarkdownHeader " " "index" >> $OUTPUT_FILE
+curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/README.md \
   | sed '/name="TableOfContents"/,$d' \
   | sed 's/^# Malcolm$//' \
   | sed "s@\](https://github.com/idaholab/malcolm)@\](https://malcolm.fyi/)@g" \
-  | sed "s@\./docs/images/@https://raw.githubusercontent.com/idaholab/Malcolm/master/docs/images/@g" \
+  | sed "s@\./docs/images/@https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/docs/images/@g" \
   >> $OUTPUT_FILE
 
 # documentation page
 OUTPUT_FILE="$OUTPUT_DIR"/documentation.md
 > $OUTPUT_FILE
 GenerateMarkdownHeader "Documentation" "documentation" >> $OUTPUT_FILE
-curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/master/README.md \
+curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/README.md \
   | sed '0,/name="TableOfContents"/d' \
   | sed '/## Other Software/,$d' \
   | sed "s@\](https://github.com/idaholab/malcolm)@\](https://malcolm.fyi/)@g" \
-  | sed "s@\./docs/images/@https://raw.githubusercontent.com/idaholab/Malcolm/master/docs/images/@g" \
+  | sed "s@\./docs/images/@https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/docs/images/@g" \
   >> $OUTPUT_FILE
 
 # build site
