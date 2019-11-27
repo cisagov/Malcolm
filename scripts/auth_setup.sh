@@ -60,7 +60,7 @@ chmod 600 ./auth.env
 pushd ./nginx/ >/dev/null 2>&1
 # create or update the htpasswd file
 [[ ! -f ./htpasswd ]] && HTPASSWD_CREATE_FLAG="-c" || HTPASSWD_CREATE_FLAG=""
-htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
+htpasswd -b $HTPASSWD_CREATE_FLAG -m ./htpasswd "$USERNAME" "$PASSWORD" >/dev/null 2>&1
 
 # if the admininstrator username has changed, remove the previous administrator username from htpasswd
 [[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
@@ -80,7 +80,7 @@ secure_path  = ./config/htpasswd
 ; metadata file
 metadata_path  = ./config/metadata
 
-; administrator user/password (htpasswd -b -c -B ...)
+; administrator user/password (htpasswd -b -c -m ...)
 admin_user = $USERNAME
 
 ; username field quality checks
