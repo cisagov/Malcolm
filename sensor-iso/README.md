@@ -1,7 +1,7 @@
 # Hedgehog Linux 
 ## Network Traffic Capture Appliance
 
-![](./docs/images/hedgehog-color-w-text.png)
+![](./docs/logo/hedgehog-color-w-text.png)
 
 ### <a name="TableOfContents"></a>Table of Contents
 

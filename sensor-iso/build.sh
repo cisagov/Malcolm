@@ -115,6 +115,7 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
   cp README.md HedgehogLinux.jpg.md
   sed -i "s/.png/.jpg/g" HedgehogLinux.jpg.md
+  sed -i "s@/docs/logo/@/docs/images/@g" HedgehogLinux.jpg.md
   sed -i "s/^# Hedgehog Linux$//" HedgehogLinux.jpg.md
   pandoc -s --self-contained --metadata title="Hedgehog Linux" --css doc.css -o HedgehogLinux.html HedgehogLinux.jpg.md
   rm -f HedgehogLinux.jpg.md
