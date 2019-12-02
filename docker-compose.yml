@@ -403,3 +403,5 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
+
