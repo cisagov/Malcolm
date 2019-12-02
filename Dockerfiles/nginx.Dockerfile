@@ -10,8 +10,9 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/nginx-proxy'
 LABEL org.opencontainers.image.description='Malcolm container providing an NGINX reverse proxy for the other services'
 
-ARG NGINX_LDAP_AUTH=false
-ENV NGINX_LDAP_AUTH $NGINX_LDAP_AUTH
+# authentication method: encrypted HTTP basic authentication ('true') vs nginx-auth-ldap ('false')
+ARG NGINX_BASIC_AUTH=true
+ENV NGINX_BASIC_AUTH $NGINX_BASIC_AUTH
 
 # build latest nginx with nginx-auth-ldap
 # thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
@@ -162,8 +163,8 @@ COPY --from=jwilder/nginx-proxy:alpine /app/ /app/
 ADD nginx/*.conf /etc/nginx/
 ADD docs/images/icon/favicon.ico /etc/nginx/favicon.ico
 
-# based on the NGINX_LDAP_AUTH environment variable (true|false), create symlinks for ldap/basic auth settings to be included in main nginx.conf
-RUN sed -i '/^exec[[:space:]]/i [[ "$NGINX_LDAP_AUTH" == "true" ]] && (ln -sf /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_ldap_rt.conf ; ln -sf /etc/nginx/nginx_auth_ldap.conf /etc/nginx/nginx_auth_rt.conf) || (ln -sf /etc/nginx/nginx_blank.conf /etc/nginx/nginx_ldap_rt.conf ; ln -sf /etc/nginx/nginx_auth_basic.conf /etc/nginx/nginx_auth_rt.conf)' /app/docker-entrypoint.sh && \
+# based on the NGINX_BASIC_AUTH environment variable (true|false), create symlinks for basic/ldap auth settings to be included in main nginx.conf
+RUN sed -i '/^exec[[:space:]]/i [[ "$NGINX_BASIC_AUTH" == "true" ]] && (ln -sf /etc/nginx/nginx_blank.conf /etc/nginx/nginx_ldap_rt.conf ; ln -sf /etc/nginx/nginx_auth_basic.conf /etc/nginx/nginx_auth_rt.conf) || (ln -sf /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_ldap_rt.conf ; ln -sf /etc/nginx/nginx_auth_ldap.conf /etc/nginx/nginx_auth_rt.conf)' /app/docker-entrypoint.sh && \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf
 
 EXPOSE 80
