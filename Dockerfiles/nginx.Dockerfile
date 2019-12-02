@@ -11,9 +11,9 @@ LABEL org.opencontainers.image.title='malcolmnetsec/nginx-proxy'
 LABEL org.opencontainers.image.description='Malcolm container providing an NGINX reverse proxy for the other services'
 
 # build latest nginx with nginx-auth-ldap
-# thanks to:  kvspb/nginx-auth-ldap       -  https://github.com/kvspb/nginx-auth-ldap
+# thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
+#             kvspb/nginx-auth-ldap       -  https://github.com/kvspb/nginx-auth-ldap
 #             tiredofit/docker-nginx-ldap -  https://github.com/tiredofit/docker-nginx-ldap/blob/master/Dockerfile
-#             nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
 #             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
 ENV NGINX_VERSION=1.17.6
 ENV DOCKER_GEN_VERSION=0.7.4
