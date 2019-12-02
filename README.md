@@ -304,7 +304,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
