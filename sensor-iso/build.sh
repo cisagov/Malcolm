@@ -110,17 +110,17 @@ if [ -d "$WORKDIR" ]; then
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/docs/"
-  pushd ./images
+  pushd ./docs/images
   ls -1 *.png | xargs -n 1 bash -c 'convert "$0" "${0%.*}.jpg"'
   popd >/dev/null 2>&1
-  cp HedgehogLinux.md HedgehogLinux.jpg.md
+  cp README.md HedgehogLinux.jpg.md
   sed -i "s/.png/.jpg/g" HedgehogLinux.jpg.md
   sed -i "s/^# Hedgehog Linux$//" HedgehogLinux.jpg.md
   pandoc -s --self-contained --metadata title="Hedgehog Linux" --css doc.css -o HedgehogLinux.html HedgehogLinux.jpg.md
   rm -f HedgehogLinux.jpg.md
   popd >/dev/null 2>&1
   mkdir -p ./config/includes.chroot/usr/share/doc/hedgehog
-  cp "$SCRIPT_PATH/docs/"*.html ./config/includes.chroot/usr/share/doc/hedgehog/
+  cp "$SCRIPT_PATH/"*.html ./config/includes.chroot/usr/share/doc/hedgehog/
   mkdir -p ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ ./config/includes.chroot/usr/share/images/hedgehog/ ./config/includes.chroot/usr/share/images/desktop-base/
   cp "$SCRIPT_PATH/docs/logo/"*.png ./config/includes.chroot/usr/share/images/hedgehog/
   ln -r -s ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/

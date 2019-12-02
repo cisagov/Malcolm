@@ -7,4 +7,5 @@
 
 # we're storing PNGs, generating JPGs at build time but we don't need to keep them
 /docs/images/*.jpg
-/docs/HedgehogLinux.html
+/HedgehogLinux.html
+/HedgehogLinux.jpg.md

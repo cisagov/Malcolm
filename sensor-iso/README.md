@@ -1,7 +1,7 @@
 # Hedgehog Linux 
 ## Network Traffic Capture Appliance
 
-![](./images/hedgehog-color-w-text.png)
+![](./docs/images/hedgehog-color-w-text.png)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -37,7 +37,7 @@
 
 The Hedgehog Linux installation image, when provided on an optical disc, USB thumb drive, or other removable medium, can be used to install or reinstall the sensor software.
 
-![Sensor installation image boot menu](./images/boot_options.png)
+![Sensor installation image boot menu](./docs/images/boot_options.png)
 
 The boot menu of the sensor installer image provides several options:
 
@@ -57,11 +57,11 @@ The installer will ask for two or three pieces of information prior to installin
 
 Each of these passwords must be entered twice to ensure they were entered correctly.
 
-![Example of the installer's password prompt](./images/users_and_passwords.png)
+![Example of the installer's password prompt](./docs/images/users_and_passwords.png)
 
 After the passwords have been entered, the installer will proceed and reboot unattended.
 
-![Installer progress](./images/installer_progress.png)
+![Installer progress](./docs/images/installer_progress.png)
 
 # <a name="Boot"></a>Boot
 
@@ -69,23 +69,23 @@ Each time the sensor boots, a grub boot menu will be shown briefly, after which 
 
 ## <a name="KioskMode"></a>Kiosk mode
 
-![Kiosk mode sensor menu: resource statistics](./images/kiosk_mode_sensor_menu.png)
+![Kiosk mode sensor menu: resource statistics](./docs/images/kiosk_mode_sensor_menu.png)
 
 The sensor automatically logs in as the sensor user account and runs in **kiosk mode**, which is intended to show an at-a-glance view of the its resource utilization. Clicking the **☰** icon in allows you to switch between the resource statistics view and the services view.
 
-![Kiosk mode sensor menu: services](./images/kiosk_mode_services_menu.png)
+![Kiosk mode sensor menu: services](./docs/images/kiosk_mode_services_menu.png)
 
 The kiosk's services screen (designed with large clickable labels for small portable touch screens) can be used to start and stop essential services, get a status report of the currently running services, and clean all captured data from the sensor.
 
-!["Clean Sensor" confirmation prompt before deleting sensor data](./images/kiosk_mode_wipe_prompt.png)
+!["Clean Sensor" confirmation prompt before deleting sensor data](./docs/images/kiosk_mode_wipe_prompt.png)
 
-!["Sensor Status" report from the kiosk services menu](./images/kiosk_mode_status.png)
+!["Sensor Status" report from the kiosk services menu](./docs/images/kiosk_mode_status.png)
 
 # <a name="Configuration"></a>Configuration
 
 Kiosk mode can be exited by connecting an external USB keyboard and pressing **Alt+F4**, upon which the *sensor* user's desktop is shown.
 
-![Sensor login session desktop](./images/desktop.png)
+![Sensor login session desktop](./docs/images/desktop.png)
 
 A few icons are present on the desktop:
 
@@ -102,11 +102,11 @@ The first step of sensor configuration is to configure the network interfaces an
 
 You may next select whether to configure the network interfaces, hostname, or time synchronization.
 
-![Selection to configure network interfaces, hostname, or time synchronization](./images/root_config_mode.png)
+![Selection to configure network interfaces, hostname, or time synchronization](./docs/images/root_config_mode.png)
 
 Selecting **Hostname**, you will be presented with a summary of the current sensor identification information, after which you may specify a new sensor hostname.  This name will be used to tag all events forwarded from this sensor in the events' **host.name** field.
 
-![Specifying a new sensor hostname](./images/hostname_setting.png)
+![Specifying a new sensor hostname](./docs/images/hostname_setting.png)
 
 ### <a name="ConfigIface"></a>Interfaces
 
@@ -114,15 +114,15 @@ Returning to the configuration mode selection, choose **Interface**. You will be
 
 You will be presented with a list of interfaces to configure as the sensor management interface. This is the interface the sensor itself will use to communicate with the network in order to, for example, forward captured logs to an aggregate server. In order to do so, the management interface must be assigned an IP address. This is generally **not** the interface used for capturing data. Select the interface to which you wish to assign an IP address. The interfaces are listed by name and MAC address and the associated link speed is also displayed if it can be determined. For interfaces without a connected network cable, generally a `-1` will be displayed instead of the interface speed.
 
-![Management interface selection](./images/select_iface.png)
+![Management interface selection](./docs/images/select_iface.png)
 
 Depending on the configuration of your network, you may now specify how the management interface will be assigned an IP address. In order to communicate with an event aggregator over the management interface, either **static** or **dhcp** must be selected.
 
-![Interface address source](./images/iface_mode.png)
+![Interface address source](./docs/images/iface_mode.png)
 
 If you select static, you will be prompted to enter the IP address, netmask, and gateway to assign to the management interface.
 
-![Static IP configuration](./images/iface_static.png)
+![Static IP configuration](./docs/images/iface_static.png)
 
 In either case, upon selecting **OK** the network interface will be brought down, configured, and brought back up, and the result of the operation will be displayed. You may choose **Quit** upon returning to the configuration tool’s welcome screen.
 
@@ -130,15 +130,15 @@ In either case, upon selecting **OK** the network interface will be brought down
 
 Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/idaholab/malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
 
-![Time synchronization method](./images/time_sync_mode.png)
+![Time synchronization method](./docs/images/time_sync_mode.png)
 
 If **htpdate** is selected, you will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for a Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
 
-![*htpdate* configuration](./images/htpdate_setup.png)
+![*htpdate* configuration](./docs/images/htpdate_setup.png)
 
 If *ntpdate* is selected, you will be prompted to enter the IP address or hostname of the NTP server.
 
-![NTP configuration](./images/ntp_host.png)
+![NTP configuration](./docs/images/ntp_host.png)
 
 Upon configuring time synchronization, a "Time synchronization configured successfully!" message will be displayed, after which you will be returned to the welcome screen.
 
@@ -146,7 +146,7 @@ Upon configuring time synchronization, a "Time synchronization configured succes
 
 Double-clicking the **Configure Capture and Forwarding** icon (or, if you are at a command prompt, running `configure-capture`) will launch the configuration tool for capture and forwarding. The root password is not required as it was for the interface and hostname configuration, as sensor services are run under the non-privileged sensor account. Select **Continue** to proceed. You may select from a list of configuration options.
 
-![Select configuration mode](./images/capture_config_main.png)
+![Select configuration mode](./docs/images/capture_config_main.png)
 
 ### <a name="ConfigCapture"></a>Capture
 
@@ -154,27 +154,27 @@ Choose **Configure Capture** to configure parameters related to traffic capture 
 
 You will be presented with a list of network interfaces and prompted to select one or more capture interfaces. An interface used to capture traffic is generally a different interface than the one selected previously as the management interface, and each capture interface should be connected to a network tap or span port for traffic monitoring. Capture interfaces are usually not assigned an IP address as they are only used to passively “listen” to the traffic on the wire. The interfaces are listed by name and MAC address and the associated link speed is also displayed if it can be determined. For interfaces without a connected network cable, generally a `-1` will be displayed instead of the interface speed.
 
-![Select capture interfaces](./images/capture_iface_select.png)
+![Select capture interfaces](./docs/images/capture_iface_select.png)
 
 Upon choosing the capture interfaces and selecting OK, you may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([`tcpdump`](https://www.tcpdump.org/)) and the traffic analysis service ([`zeek`](https://www.zeek.org/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
 
-![Specify capture filters](./images/capture_filter.png)
+![Specify capture filters](./docs/images/capture_filter.png)
 
 Next you must specify the paths where captured PCAP files and Zeek logs will be stored locally on the sensor. If the installation worked as expected, these paths should be prepopulated to reflect paths on the volumes formatted at install time for the purpose storing these artifacts. Usually these paths will exist on separate storage volumes. Enabling the PCAP and Zeek log pruning autostart services (see the section on autostart services below) will enable monitoring of these paths to ensure that their contents do not consume more than 90% of their respective volumes’ space. Choose **OK** to continue.
 
-![Specify capture paths](./images/capture_paths.png)
+![Specify capture paths](./docs/images/capture_paths.png)
 
 You will next be able to specify Zeek file carving mode. This experimental feature is currently under development and is not yet ready for production use. Choose **OK** to continue.
 
 You will then be presented with the list of configuration variables that will be used for capture, including those values which you have configured up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. It is not recommended that you edit this file manually. After confirming these values, you will be presented with a confirmation that these settings have been written to the configuration file, and you will be returned to the welcome screen.
 
-![Capture parameters summary](./images/capture_confirm.png)
+![Capture parameters summary](./docs/images/capture_confirm.png)
 
 ### <a name="ConfigForwarding"></a>Forwarding
 
 Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/idaholab/malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
 
-![Configure forwarders](./images/forwarder_config.png)
+![Configure forwarders](./docs/images/forwarder_config.png)
 
 There are five forwarder services used on the sensor, each for forwarding a different type of log or sensor metric.
 
@@ -184,25 +184,25 @@ There are five forwarder services used on the sensor, each for forwarding a diff
 
 To configure filebeat, first provide the log path (the same path previously configured for Zeek log file generation). You must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
-![Configure filebeat for Zeek log forwrding](./images/filebeat_dest.png)
+![Configure filebeat for Zeek log forwrding](./docs/images/filebeat_dest.png)
 
 Next you are asked whether the connection used for Zeek log forwarding should be done **unencrypted** or over **SSL**. Unencrypted communication requires less processing overhead and is simpler to configure, but the contents of the logs may be visible to anyone who is able to intercept that traffic.
 
-![Filebeat SSL certificate verification](./images/filebeat_ssl.png)
+![Filebeat SSL certificate verification](./docs/images/filebeat_ssl.png)
 
 If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during Malcolm's configuration), choose **None**.
 
-![Unencrypted vs. SSL encryption for Zeek log forwarding](./images/filebeat_ssl_verify.png)
+![Unencrypted vs. SSL encryption for Zeek log forwarding](./docs/images/filebeat_ssl_verify.png)
 
 The last step for SSL-encrypted Zeek log forwarding is to specify the SSL certificate authority, certificate, and key files. These files must match those used by the Logstash instance receiving the Zeek logs on the aggregator. If Malcolm's `auth_setup.sh` script was used to generate these files they would be found in the `filebeat/certs/` subdirectory of the Malcolm installation and must be manually copied to the sensor (stored under `/opt/sensor/sensor_ctl/filebeat/` or in any other path accessible to the sensor account). Specify the location of the certificate authorities file (eg., `ca.crt`), the certificate file (eg., `client.crt`), and the key file (eg., `client.key`).
 
-![SSL certificate files](./images/filebeat_certs.png)
+![SSL certificate files](./docs/images/filebeat_certs.png)
 
 The Logstash instance receiving the events must be similarly configured with matching SSL certificate and key files. Under Malcolm, the `BEATS_SSL` variable must be set to true in Malcolm's `docker-compose.yml` file and the SSL files must exist in the `logstash/certs/` subdirectory of the Malcolm installation.
 
 Once you have specified all of the filebeat parameters, you will be presented with a summary of the settings related to the forwarding of these logs. Selecting **OK** will cause the parameters to be written to filebeat’s configuration keystore under `/opt/sensor/sensor_ctl/filebeat` and you will be returned to the configuration tool’s welcome screen.
 
-![Confirm filebeat settings](./images/filebeat_confirm.png)
+![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
 ### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
 
@@ -210,15 +210,15 @@ The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) t
 
 Metricbeat gathers system resource metrics at an interval you specify. The default interval is 30 seconds, but it can be set to any value between 1 and 60 seconds.
 
-![Metricbeat interval](./images/metricbeat_interval.png)
+![Metricbeat interval](./docs/images/metricbeat_interval.png)
 
 Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm](https://github.com/idaholab/malcolm)'s configuration), choose **None**.
 
-![Elasticsearch connection protocol](./images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./images/metricbeat_elastic_ssl.png)
+![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
 Next, enter the **Elasticsearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an Elasticsearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
-![Elasticsearch host and port](./images/metricbeat_elastic_host.png)
+![Elasticsearch host and port](./docs/images/metricbeat_elastic_host.png)
 
 Next, you will be asked if you wish to configure **Kibana** connectivity. [Kibana](https://www.elastic.co/products/kibana) is the Elastic Stack’s data visualization tool. If you choose **Yes** and proceed to configure Kibana connectivity, metricbeat will create custom search indexes, visualizations, and dashboards for Kibana to display the sensor’s resource metrics.
 
@@ -230,11 +230,11 @@ Finally, you will be asked to enter authentication credentials for the sensor’
 
 After you’ve entered the username and the password, the sensor will attempt test connections to the Elasticsearch and Kibana APIs using the connection information provided.
 
-![Elasticsearch/Kibana username](./images/metricbeat_elastic_username.png) ![Elasticsearch/Kibana password](./images/metricbeat_elastic_password.png) ![Successful Elasticsearch connection](./images/metricbeat_elasticsearch_success.png) ![Successful Kibana connection](./images/metricbeat_kibana_success.png)
+![Elasticsearch/Kibana username](./docs/images/metricbeat_elastic_username.png) ![Elasticsearch/Kibana password](./docs/images/metricbeat_elastic_password.png) ![Successful Elasticsearch connection](./docs/images/metricbeat_elasticsearch_success.png) ![Successful Kibana connection](./docs/images/metricbeat_kibana_success.png)
 
 Finally, you’ll be given the opportunity to review the all of the metricbeat options you’ve specified. Selecting **OK** will cause the parameters to be written to metricbeat’s configuration keystore under `/opt/sensor/sensor_ctl/metricbeat` and you will be returned to the configuration tool’s welcome screen.
 
-![Metricbeat settings confirmation](./images/metricbeat_confirm.png) ![Metricbeat settings applied successfully](./images/metricbeat_success.png)
+![Metricbeat settings confirmation](./docs/images/metricbeat_confirm.png) ![Metricbeat settings applied successfully](./docs/images/metricbeat_success.png)
 
 ### <a name="auditbeat"></a>auditbeat: audit log forwarding
 
@@ -271,11 +271,11 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_SYSLOGBEAT** † – filebeat system log forwarder
 * **AUTOSTART_TCPDUMP** † – tcpdump PCAP engine for saving packet capture (PCAP) files
 
-![Autostart services](./images/autostarts.png)
+![Autostart services](./docs/images/autostarts.png)
 
 Once you have selected the autostart services, you will be prompted to confirm your selections. Doing so will cause these values to be written back out to the `/opt/sensor/sensor_ctl/control_vars.conf` configuration file.
 
-![Autostart services confirmation](./images/autostarts_confirm.png)
+![Autostart services confirmation](./docs/images/autostarts_confirm.png)
 
 After you have completed configuring the sensor it is recommended that you reboot the sensor to ensure all new settings take effect. If rebooting is not an option, you may open a terminal and run:
 
@@ -456,19 +456,6 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See `License.txt` for the terms of its release.
-
 ### Contact information of author(s):
 
-[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Hedgehog%20Linux)
-
-## Other Software
-Idaho National Laboratory is a cutting edge research facility which is a constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
-
-[Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
-
-[Supported Open Source Software](https://github.com/idaholab)
-
-[Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
-
-[Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
+[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Network%20sensor%20development)
