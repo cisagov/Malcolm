@@ -36,13 +36,13 @@ pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 # if we are in an interactive shell and we're missing any of the auth files, prompt to create them now
 # ( another way to check this: [[ "${-}" =~ 'i' ]] )
 if [[ -t 1 ]] && \
-   ( [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]] )
+   ( [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./nginx/nginx_ldap.conf ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]] )
 then
   echo "Malcolm administrator account authentication files are missing, running ./scripts/auth_setup.sh..."
   ./scripts/auth_setup.sh
 fi
 # still missing? sorry charlie
-if [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]]; then
+if [[ ! -f ./nginx/htpasswd ]] || [[ ! -f ./nginx/nginx_ldap.conf ]] || [[ ! -f ./htadmin/config.ini ]] || [[ ! -f ./nginx/certs/cert.pem ]] || [[ ! -f ./nginx/certs/key.pem ]] || [[ ! -r ./auth.env ]]; then
   echo "Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup.sh to generate them"
   exit 1
 fi
@@ -61,7 +61,7 @@ EOF
 fi
 
 # make sure a read permission is set correctly for the nginx worker processes
-chmod 644 ./nginx/htpasswd ./htadmin/config.ini ./htadmin/metadata >/dev/null 2>&1
+chmod 644 ./nginx/htpasswd ./nginx/nginx_ldap.conf ./htadmin/config.ini ./htadmin/metadata >/dev/null 2>&1
 
 # make sure some directories exist before we start
 mkdir -p ./elasticsearch/

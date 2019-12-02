@@ -5,6 +5,9 @@ version: '3.7'
 ################################################################################
 # Commonly tweaked configuration options
 #-------------------------------------------------------------------------------
+x-auth-variables: &auth-variables
+  NGINX_LDAP_AUTH : 'false'
+
 x-moloch-variables: &moloch-variables
   MANAGE_PCAP_FILES : 'false'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
@@ -337,6 +340,8 @@ services:
     image: malcolmnetsec/nginx-proxy:1.8.0
     restart: "no"
     hostname: nginx-proxy
+    environment:
+      << : *auth-variables
     depends_on:
       - moloch
       - kibana
@@ -353,6 +358,7 @@ services:
       - "28991:28991"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro

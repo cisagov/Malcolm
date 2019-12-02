@@ -10,6 +10,7 @@
 /filebeat/certs
 /nginx/certs
 /nginx/htpasswd
+/nginx/nginx_ldap.conf
 /htadmin/config.ini
 /htadmin/metadata
 /elastalert/config/smtp-auth.yaml
