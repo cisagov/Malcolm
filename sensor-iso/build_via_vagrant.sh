@@ -20,6 +20,10 @@ function vm_execute() {
   vagrant ssh --no-tty --command "$1"
 }
 
+function cleanup_shared {
+  rm -rf "$SCRIPT_PATH"/shared
+}
+
 unset FORCE_PROVISION
 while getopts 'f' OPTION; do
   case "$OPTION" in
@@ -64,6 +68,11 @@ until [ "$(vm_execute 'sudo whoami')" == "root" ] ; do
   sleep 1
 done
 echo "SSH available." >&2
+
+# need to make a temporary local copy of the ../shared directory (and clean it up when we're done)
+cleanup_shared
+cp -r "$SCRIPT_PATH"/../shared "$SCRIPT_PATH"/
+trap cleanup_shared EXIT
 
 vm_execute "sudo bash -c \"whoami && cd /sensor-build && pwd && ./build.sh\""
 
