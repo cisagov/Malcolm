@@ -104,8 +104,8 @@ if [ -d "$WORKDIR" ]; then
   docker run --rm -v "$SCRIPT_PATH"/moloch:/build moloch-build:latest -o /build
   mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
 
-  # copy shared scripts from parent (Malcolm) directory
-  rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
+  # copy shared scripts
+  rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   # format and copy documentation

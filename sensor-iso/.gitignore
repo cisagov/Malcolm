@@ -5,6 +5,9 @@
 /config/packages.chroot/*.deb
 /moloch/*.deb
 
+# a temporary copy of ../shared
+/shared
+
 # we're storing PNGs, generating JPGs at build time but we don't need to keep them
 /docs/images/*.jpg
 /HedgehogLinux.html
