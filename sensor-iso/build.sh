@@ -109,7 +109,7 @@ if [ -d "$WORKDIR" ]; then
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   # format and copy documentation
-  pushd "$SCRIPT_PATH/docs/"
+  pushd "$SCRIPT_PATH/"
   pushd ./docs/images
   ls -1 *.png | xargs -n 1 bash -c 'convert "$0" "${0%.*}.jpg"'
   popd >/dev/null 2>&1
