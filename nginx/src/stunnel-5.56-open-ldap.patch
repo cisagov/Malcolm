@@ -1,15 +1,16 @@
 diff -Nurp a/src/protocol.c b/src/protocol.c
 --- a/src/protocol.c	2019-05-15 13:35:16.000000000 -0600
-+++ b/src/protocol.c	2019-12-03 08:39:18.942831089 -0700
-@@ -64,6 +64,7 @@ NOEXPORT char *pop3_server(CLI *, SERVIC
++++ b/src/protocol.c	2019-12-03 13:54:47.536940900 -0700
+@@ -64,6 +64,8 @@ NOEXPORT char *pop3_server(CLI *, SERVIC
  NOEXPORT char *imap_client(CLI *, SERVICE_OPTIONS *, const PHASE);
  NOEXPORT char *imap_server(CLI *, SERVICE_OPTIONS *, const PHASE);
  NOEXPORT char *nntp_client(CLI *, SERVICE_OPTIONS *, const PHASE);
 +NOEXPORT char *openldap_client(CLI *, SERVICE_OPTIONS *, const PHASE);
++NOEXPORT char *winldap_client(CLI *, SERVICE_OPTIONS *, const PHASE);
  NOEXPORT char *connect_server(CLI *, SERVICE_OPTIONS *, const PHASE);
  NOEXPORT char *connect_client(CLI *, SERVICE_OPTIONS *, const PHASE);
  #ifndef OPENSSL_NO_MD4
-@@ -113,6 +114,10 @@ char *protocol(CLI *c, SERVICE_OPTIONS *
+@@ -113,6 +115,14 @@ char *protocol(CLI *c, SERVICE_OPTIONS *
          return opt->option.client ?
              nntp_client(c, opt, phase) :
              "The 'nntp' protocol is not supported in the server mode";
@@ -17,10 +18,14 @@ diff -Nurp a/src/protocol.c b/src/protocol.c
 +        return opt->option.client ?
 +            openldap_client(c, opt, phase) :
 +            "The 'openldap' protocol is not supported in the server mode";
++    if(!strcasecmp(opt->protocol, "winldap"))
++        return opt->option.client ?
++            winldap_client(c, opt, phase) :
++            "The 'winldap' protocol is not supported in the server mode";
      if(!strcasecmp(opt->protocol, "connect"))
          return opt->option.client ?
              connect_client(c, opt, phase) :
-@@ -1119,6 +1124,89 @@ NOEXPORT char *nntp_client(CLI *c, SERVI
+@@ -1119,6 +1129,182 @@ NOEXPORT char *nntp_client(CLI *c, SERVI
      return NULL;
  }
  
@@ -53,58 +58,151 @@ diff -Nurp a/src/protocol.c b/src/protocol.c
 +  /* No requestValue, as per RFC2830 (in 2.1: "The requestValue field is absent") */
 +};
 +
-+NOEXPORT char *openldap_client(CLI *c, SERVICE_OPTIONS *opt, const PHASE phase) {
++typedef enum {
++    LDAP_OPENLDAP,
++    LDAP_WINLDAP
++} LDAP_MODE;
 +
-+    uint8_t buffer[1];
++#define LDAP_UNIVERSAL_SEQUENCE                0x30
++#define LDAP_WINLDAP_FOUR_BYTE_LEN_FLAG        0x84
++#define LDAP_RESPONSE_MSG_ID_TYPE_INT          0x02
++#define LDAP_RESPONSE_EXPECTED_MSG_ID_LEN      0x01
++#define LDAP_RESPONSE_EXPECTED_MSG_ID          0x01
++#define LDAP_RESPONSE_EXT_RESP                 0x0a
++#define LDAP_RESPONSE_EXT_RESP_APPLICATION     0x78
++#define LDAP_RESPONSE_EXPECTED_ERR_LEN         0x01
++#define LDAP_RESPONSE_SUCCESS                  0x00
++
++NOEXPORT char *ldap_client(CLI *c, SERVICE_OPTIONS *opt, const PHASE phase, const LDAP_MODE ldap_mode) {
++
++    /* thanks to these threads for help with these PDUs
++         https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html
++         https://www.openldap.org/lists/openldap-software/200401/msg00800.html */
++
++    uint8_t buffer_8[1];
++    uint32_t buffer_32[1];
++    uint32_t resp_len;
 +    uint8_t ldap_response[256];
++    uint8_t *resp_ptr;
 +
++    (void)opt; /* squash the unused parameter warning */
++
++    if(phase!=PROTOCOL_MIDDLE)
++        return NULL;
++
++    /* send "Start TLS" request to AD server */
 +    s_log(LOG_DEBUG, "Requesting LDAP Start TLS");
 +    s_write(c, c->remote_fd.fd, ldap_startssl_message, (size_t)ldap_startssl_message[1] + 2);
 +
-+    s_read(c, c->remote_fd.fd, buffer, 1);
-+    if(buffer[0] != 0x30) {
++    /* LDAP_UNIVERSAL_SEQUENCE (1 byte) */
++    s_read(c, c->remote_fd.fd, buffer_8, 1);
++    if(buffer_8[0] != LDAP_UNIVERSAL_SEQUENCE) {
 +        s_log(LOG_ERR, "start tag is not UNIVERSAL SEQUENCE");
 +        throw_exception(c, 1);
 +    }
 +
-+    s_log(LOG_DEBUG, "Reading LDAP message size (1 byte).");
-+    s_read(c, c->remote_fd.fd, buffer, 1);
++    if(ldap_mode == LDAP_OPENLDAP) {
++      /* OpenLDAP - response length (1 byte) */
++      s_log(LOG_DEBUG, "Reading OpenLDAP message size (1 byte)");
++      s_read(c, c->remote_fd.fd, buffer_8, 1);
++      resp_len = buffer_8;
 +
-+    s_log(LOG_DEBUG, "Reading LDAP message (%u byte(s))", buffer[0]);
-+    s_read(c, c->remote_fd.fd, ldap_response, buffer[0]);
++    } else if(ldap_mode == LDAP_WINLDAP) {
 +
-+    if(ldap_response[0] != 0x02) {
-+        s_log(LOG_ERR, "LDAP response does not start with type messageID");
++      /* WinLDAP - "response length is 4 bytes" flag - LDAP_WINLDAP_FOUR_BYTE_LEN_FLAG (1-byte) */
++      s_read(c, c->remote_fd.fd, buffer_8, 1);
++      if(buffer_8[0] != LDAP_WINLDAP_FOUR_BYTE_LEN_FLAG) {
++          s_log(LOG_ERR, "LDAP message length flag is an unexpected value");
++          throw_exception(c, 1);
++      }
++
++      /* WinLDAP - response length (4 bytes, network byte order) */
++      s_log(LOG_DEBUG, "Reading WinLDAP message size (4 bytes)");
++      s_read(c, c->remote_fd.fd, buffer_32, 4);
++      resp_len = ntohl(buffer_32[0]);
++
++    } else {
++      s_log(LOG_ERR, "Unsupported LDAP mode");
++      throw_exception(c, 1);
++    }
++
++    /* LDAP response message */
++    s_log(LOG_DEBUG, "Reading LDAP message (%u byte(s))", resp_len);
++    s_read(c, c->remote_fd.fd, ldap_response, resp_len);
++
++    resp_ptr = &ldap_response[0];
++
++    /* LDAP_RESPONSE_MSG_ID_TYPE_INT - 1 byte */
++    if(*resp_ptr != LDAP_RESPONSE_MSG_ID_TYPE_INT) {
++        s_log(LOG_ERR, "LDAP response has an incorrect message ID type");
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[1] != 0x01) {
-+        s_log(LOG_ERR, "This is not an extendedResp(1)");
++    resp_ptr++;
++
++    /* LDAP_RESPONSE_EXPECTED_MSG_ID_LEN - 1 byte */
++    if(*resp_ptr != LDAP_RESPONSE_EXPECTED_MSG_ID_LEN) {
++        s_log(LOG_ERR, "LDAP response has an unexpected message ID length");
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[2] != 0x01) {
-+        s_log(LOG_ERR, "Non-matching messageID");
++    resp_ptr++;
++
++    /* LDAP_RESPONSE_EXPECTED_MSG_ID - 1 byte */
++    if(*resp_ptr != LDAP_RESPONSE_EXPECTED_MSG_ID) {
++        s_log(LOG_ERR, "LDAP response has an unexpected message ID");
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[3] != 0x78) {
-+        s_log(LOG_ERR, "This is not a protocolOp for APPLICATION ExtendedResponse");
++    resp_ptr++;
++
++    /* LDAP_RESPONSE_EXT_RESP_APPLICATION - 1 byte */
++    if(*resp_ptr != LDAP_RESPONSE_EXT_RESP_APPLICATION) {
++        s_log(LOG_ERR, "LDAP response protocolOp is not APPLICATION");
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[4] != 0x07) {
-+        s_log(LOG_ERR, "Expected 0x07 indicating extendedResp is 7 bytes long");
++    resp_ptr++;
++
++    if(ldap_mode == LDAP_WINLDAP) {
++      /* WinLDAP - "response length is 4 bytes" flag - LDAP_WINLDAP_FOUR_BYTE_LEN_FLAG (1-byte) */
++      if(*resp_ptr != LDAP_WINLDAP_FOUR_BYTE_LEN_FLAG) {
++          s_log(LOG_ERR, "LDAP extendedResp length flag is an unexpected value");
++          throw_exception(c, 1);
++      }
++      /* WinLDAP - extended response message length (4-bytes) */
++      resp_ptr += 5;
++
++    } else {
++      /* OpenLDAP - extended response message length (1-byte) */
++      resp_ptr++;
++    }
++
++    /* LDAP_RESPONSE_EXT_RESP - 1 byte */
++    if(*resp_ptr != LDAP_RESPONSE_EXT_RESP) {
++        s_log(LOG_ERR, "LDAP response type is not EXT_RESP");
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[5] != 0x0a) {
-+        s_log(LOG_ERR, "This is not an extendedResp");
++    resp_ptr++;
++
++    /* LDAP_RESPONSE_EXT_RESP - 1 byte */
++    if(*resp_ptr != LDAP_RESPONSE_EXPECTED_ERR_LEN) {
++        s_log(LOG_ERR, "LDAP response has an unexpected error code length");
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[6] != 0x01) {
-+        s_log(LOG_ERR, "This is not an extendedResp");
++    resp_ptr++;
++
++    if(*resp_ptr != LDAP_RESPONSE_SUCCESS) {
++        s_log(LOG_ERR, "LDAP response has indicated an error (%u)", *resp_ptr);
 +        throw_exception(c, 1);
 +    }
-+    if(ldap_response[7] != 0x00) {
-+        s_log(LOG_ERR, "This is not resultCode success");
-+        throw_exception(c, 1);
-+    }
++
++    return NULL;
++}
++
++
++NOEXPORT char *openldap_client(CLI *c, SERVICE_OPTIONS *opt, const PHASE phase) {
++  return ldap_client(c, opt, phase, LDAP_OPENLDAP);
++}
++
++NOEXPORT char *winldap_client(CLI *c, SERVICE_OPTIONS *opt, const PHASE phase) {
++  return ldap_client(c, opt, phase, LDAP_WINLDAP);
 +}
 +
  /**************************************** connect */
