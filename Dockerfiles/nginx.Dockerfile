@@ -150,7 +150,7 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd stunnel tzdata; \
   update-ca-certificates; \
   tar -zxC /usr/local/bin -f /forego-stable-linux-amd64.tgz; \
   tar -C /usr/local/bin -xzf /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
