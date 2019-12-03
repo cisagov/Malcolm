@@ -23,10 +23,12 @@ ENV NGINX_VERSION=1.17.6
 ENV DOCKER_GEN_VERSION=0.7.4
 ENV FOREGO_STABLE_VERSION=ekMN3bCZFUn
 ENV NGINX_AUTH_LDAP_BRANCH=master
+ENV NGINX_AUTH_PAM_BRANCH=master
 
 ADD https://bin.equinox.io/c/$FOREGO_STABLE_VERSION/forego-stable-linux-amd64.tgz /forego-stable-linux-amd64.tgz
 ADD https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 ADD https://codeload.github.com/kvspb/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
+ADD https://codeload.github.com/sto/ngx_http_auth_pam_module/tar.gz/$NGINX_AUTH_PAM_BRANCH /ngx_http_auth_pam_module.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
 
 RUN set -x ; \
@@ -76,9 +78,11 @@ RUN set -x ; \
     --with-file-aio \
     --with-http_v2_module \
     --add-module=/usr/src/nginx-auth-ldap \
+    --add-module=/usr/src/ngx_http_auth_pam_module \
   " ; \
   addgroup -g 101 -S nginx ; \
   adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx ; \
+  addgroup nginx shadow ; \
   mkdir -p /var/cache/nginx ; \
   chown nginx:nginx /var/cache/nginx ; \
   apk add --no-cache curl; \
@@ -93,15 +97,17 @@ RUN set -x ; \
     linux-headers \
     make \
     openldap-dev \
+    linux-pam-dev \
     pcre-dev \
     perl-dev \
     tar \
     zlib-dev \
     ; \
     \
-  mkdir -p /usr/src/nginx-auth-ldap /www /www/logs/nginx ; \
+  mkdir -p /usr/src/nginx-auth-ldap /usr/src/ngx_http_auth_pam_module /www /www/logs/nginx ; \
   tar -zxC /usr/src -f /nginx.tar.gz ; \
   tar -zxC /usr/src/nginx-auth-ldap --strip=1 -f /nginx-auth-ldap.tar.gz ; \
+  tar -zxC /usr/src/ngx_http_auth_pam_module --strip=1 -f /ngx_http_auth_pam_module.tar.gz ; \
   cd /usr/src/nginx-$NGINX_VERSION ; \
   ./configure $CONFIG --with-debug ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
@@ -144,7 +150,7 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd tzdata; \
   update-ca-certificates; \
   tar -zxC /usr/local/bin -f /forego-stable-linux-amd64.tgz; \
   tar -C /usr/local/bin -xzf /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
@@ -153,7 +159,7 @@ RUN set -x ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /forego-stable-linux-amd64.tgz /nginx.tar.gz /nginx-auth-ldap.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /forego-stable-linux-amd64.tgz /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
   ln -sf /dev/stdout /var/log/nginx/access.log; \
   ln -sf /dev/stderr /var/log/nginx/error.log;
 
