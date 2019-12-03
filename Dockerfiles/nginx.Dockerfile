@@ -1,6 +1,40 @@
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
+####################################################################################
+# build a patched APK of stunnel supporting ldap StartTLS (patched protocols.c)
+# (based on https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html)
+
+FROM alpine:3.10 as stunnel_build
+
+ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
+ADD nginx/src/*.patch /usr/src/patches/
+
+USER root
+
+RUN set -x ; \
+    apk add --no-cache alpine-sdk patchutils sudo ; \
+    sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers ; \
+    adduser -D -u 1000 -h /apkbuild -G abuild builder ; \
+    addgroup builder wheel ; \
+    chmod 644 /aports-master.tar.gz
+
+USER builder
+
+RUN set -x ; \
+    cd /apkbuild ; \
+    tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
+    cp /usr/src/patches/stunnel-5.56-open-ldap.patch /apkbuild/aports-master/community/stunnel/ ; \
+    cd /apkbuild/aports-master/community/stunnel ; \
+    sed -i 's/\(^makedepends="\)/\1patchutils /' APKBUILD ; \
+    sed -i '/^source=/a \ \ \ \ \ \ \ \ stunnel-5.56-open-ldap.patch' APKBUILD ; \
+    sed -i "/^sha512sums=/a $(sha512sum stunnel-5.56-open-ldap.patch)" APKBUILD ; \
+    abuild-keygen -a -i -n ; \
+    abuild -R
+
+####################################################################################
+
 FROM alpine:3.10
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
 LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -30,6 +64,8 @@ ADD https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/
 ADD https://codeload.github.com/kvspb/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
 ADD https://codeload.github.com/sto/ngx_http_auth_pam_module/tar.gz/$NGINX_AUTH_PAM_BRANCH /ngx_http_auth_pam_module.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
+
+COPY --from=stunnel_build /apkbuild/packages/community/x86_64/stunnel-*.apk /tmp/
 
 RUN set -x ; \
     CONFIG="\
@@ -150,8 +186,9 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd stunnel tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd tzdata; \
   update-ca-certificates; \
+  apk add --no-cache --allow-untrusted /tmp/stunnel-*.apk; \
   tar -zxC /usr/local/bin -f /forego-stable-linux-amd64.tgz; \
   tar -C /usr/local/bin -xzf /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
   chown root:root /usr/local/bin/forego /usr/local/bin/docker-gen; \
@@ -159,7 +196,7 @@ RUN set -x ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /forego-stable-linux-amd64.tgz /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /forego-stable-linux-amd64.tgz /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
   ln -sf /dev/stdout /var/log/nginx/access.log; \
   ln -sf /dev/stderr /var/log/nginx/error.log;
 
