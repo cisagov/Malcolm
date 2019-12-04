@@ -1,7 +1,7 @@
 # moloch
 /moloch/etc/GeoLite2-*
-/moloch/etc/oui.txt
-/moloch/etc/ipv4-address-space.csv
+/moloch/etc/oui.txt*
+/moloch/etc/ipv4-address-space.csv*
 /README.css
 
 # auth-related

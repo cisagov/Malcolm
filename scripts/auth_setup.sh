@@ -71,7 +71,7 @@ cat <<EOF > nginx_ldap.conf
 # See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
 
 ldap_server ad_server {
-  url "ldaps://localhost:3269/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
+  url "ldaps://ds.example.com:3269/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
 
   binddn "bind_dn";
   binddn_passwd "bind_dn_password";

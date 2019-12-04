@@ -1,6 +1,12 @@
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ####################################################################################
+# thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
+#             kvspb/nginx-auth-ldap       -  https://github.com/kvspb/nginx-auth-ldap
+#             tiredofit/docker-nginx-ldap -  https://github.com/tiredofit/docker-nginx-ldap/blob/master/Dockerfile
+#             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
+
+####################################################################################
 # build a patched APK of stunnel supporting ldap StartTLS (patched protocols.c)
 # (based on https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html)
 
@@ -46,20 +52,26 @@ LABEL org.opencontainers.image.description='Malcolm container providing an NGINX
 
 # authentication method: encrypted HTTP basic authentication ('true') vs nginx-auth-ldap ('false')
 ARG NGINX_BASIC_AUTH=true
+
+# NGINX LDAP (NGINX_BASIC_AUTH=false) can support LDAP, LDAPS, or LDAP+StartTLS.
+#   For StartTLS, set NGINX_LDAP_TLS_STUNNEL=true to issue the StartTLS command
+#   and use stunnel to tunnel the connection.
+ARG NGINX_LDAP_TLS_STUNNEL=false
+
+# when initiating the "extendedReq(1) LDAP_START_TLS_OID" command, which protocol to use: winldap or openldap
+ARG NGINX_LDAP_TLS_STUNNEL_PROTOCOL=winldap
+
 ENV NGINX_BASIC_AUTH $NGINX_BASIC_AUTH
+ENV NGINX_LDAP_TLS_STUNNEL $NGINX_LDAP_TLS_STUNNEL
+ENV NGINX_LDAP_TLS_STUNNEL_PROTOCOL $NGINX_LDAP_TLS_STUNNEL_PROTOCOL
+
 
 # build latest nginx with nginx-auth-ldap
-# thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
-#             kvspb/nginx-auth-ldap       -  https://github.com/kvspb/nginx-auth-ldap
-#             tiredofit/docker-nginx-ldap -  https://github.com/tiredofit/docker-nginx-ldap/blob/master/Dockerfile
-#             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
 ENV NGINX_VERSION=1.17.6
 ENV DOCKER_GEN_VERSION=0.7.4
-ENV FOREGO_STABLE_VERSION=ekMN3bCZFUn
 ENV NGINX_AUTH_LDAP_BRANCH=master
 ENV NGINX_AUTH_PAM_BRANCH=master
 
-ADD https://bin.equinox.io/c/$FOREGO_STABLE_VERSION/forego-stable-linux-amd64.tgz /forego-stable-linux-amd64.tgz
 ADD https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 ADD https://codeload.github.com/kvspb/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
 ADD https://codeload.github.com/sto/ngx_http_auth_pam_module/tar.gz/$NGINX_AUTH_PAM_BRANCH /ngx_http_auth_pam_module.tar.gz
@@ -186,40 +198,37 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd supervisor tzdata; \
   update-ca-certificates; \
   apk add --no-cache --allow-untrusted /tmp/stunnel-*.apk; \
-  tar -zxC /usr/local/bin -f /forego-stable-linux-amd64.tgz; \
   tar -C /usr/local/bin -xzf /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
-  chown root:root /usr/local/bin/forego /usr/local/bin/docker-gen; \
-  chmod u+x /usr/local/bin/forego /usr/local/bin/docker-gen; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /forego-stable-linux-amd64.tgz /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
+  mkdir -p /var/log/supervisor ; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
   ln -sf /dev/stdout /var/log/nginx/access.log; \
-  ln -sf /dev/stderr /var/log/nginx/error.log;
+  ln -sf /dev/stderr /var/log/nginx/error.log; \
+  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
+COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
-COPY --from=jwilder/nginx-proxy:alpine /app/ /app/
+COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 
+ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
+ADD nginx/supervisord.conf /etc/
 ADD docs/images/icon/favicon.ico /etc/nginx/favicon.ico
 
-# based on the NGINX_BASIC_AUTH environment variable (true|false), create symlinks for basic/ldap auth settings to be included in main nginx.conf
-RUN sed -i '/^exec[[:space:]]/i [[ "$NGINX_BASIC_AUTH" == "true" ]] && (ln -sf /etc/nginx/nginx_blank.conf /etc/nginx/nginx_ldap_rt.conf ; ln -sf /etc/nginx/nginx_auth_basic.conf /etc/nginx/nginx_auth_rt.conf) || (ln -sf /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_ldap_rt.conf ; ln -sf /etc/nginx/nginx_auth_ldap.conf /etc/nginx/nginx_auth_rt.conf)' /app/docker-entrypoint.sh && \
-  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf
-
 EXPOSE 80
-
-WORKDIR /app/
 
 ENV DOCKER_HOST unix:///tmp/docker.sock
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["forego", "start", "-r"]
+ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
+
+CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
