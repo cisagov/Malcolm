@@ -2,7 +2,7 @@
 
 # Copyright (c) 2018 Battelle Energy Alliance, LLC.  All rights reserved.
 
-VERSION="6.8.4"
+VERSION="6.8.5"
 while getopts b:v: opts; do
    case ${opts} in
       b) BEAT=${OPTARG} ;;

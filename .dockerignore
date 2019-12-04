@@ -15,6 +15,7 @@ elasticsearch
 malcolm-iso
 moloch-logs
 moloch-raw
+nginx/nginx_ldap.conf
 pcap
 scripts
 zeek-logs

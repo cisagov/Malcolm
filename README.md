@@ -115,20 +115,20 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.7.2               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          1.7.2               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  1.7.2               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           1.7.2               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          1.7.2               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          1.7.2               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          1.7.2               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            1.7.2               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          1.7.2               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               1.7.2               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           1.7.2               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            1.7.2               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               1.7.2               xxxxxxxxxxxx        31 minutes ago      256MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         825MB
+malcolmnetsec/moloch                                1.8.0               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          1.8.0               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  1.8.0               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           1.8.0               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          1.8.0               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          1.8.0               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          1.8.0               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            1.8.0               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          1.8.0               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               1.8.0               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           1.8.0               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            1.8.0               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               1.8.0               xxxxxxxxxxxx        31 minutes ago      256MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.5               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -304,7 +304,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
@@ -1438,20 +1438,20 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.7.2               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  1.7.2               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               1.7.2               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.7.2               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.7.2               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.7.2               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          1.7.2               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          1.7.2               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.7.2               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.7.2               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.7.2               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.7.2               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.7.2               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                1.8.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  1.8.0               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               1.8.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.8.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.8.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.8.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          1.8.0               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          1.8.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.8.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.8.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.8.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.8.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.8.0               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.5               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

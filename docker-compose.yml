@@ -5,6 +5,17 @@ version: '3.7'
 ################################################################################
 # Commonly tweaked configuration options
 #-------------------------------------------------------------------------------
+x-auth-variables: &auth-variables
+  # authentication method: encrypted HTTP basic authentication ('true') vs LDAP ('false')
+  NGINX_BASIC_AUTH : 'true'
+  # NGINX LDAP (NGINX_BASIC_AUTH=false) can support LDAP, LDAPS, or LDAP+StartTLS.
+  #   For StartTLS, set NGINX_LDAP_TLS_STUNNEL=true to issue the StartTLS command
+  #   and use stunnel to tunnel the connection.
+  NGINX_LDAP_TLS_STUNNEL : 'false'
+  # When NGINX_LDAP_TLS_STUNNEL=true, which protocol to use when initiating the
+  # "extendedReq(1) LDAP_START_TLS_OID" command: winldap or openldap
+  NGINX_LDAP_TLS_STUNNEL_PROTOCOL : 'winldap'
+
 x-moloch-variables: &moloch-variables
   MANAGE_PCAP_FILES : 'false'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
@@ -77,7 +88,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.4
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.5
     restart: "no"
     hostname: elasticsearch
     environment:
@@ -109,7 +120,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.7.2
+    image: malcolmnetsec/kibana-oss:1.8.0
     restart: "no"
     hostname: kibana
     environment:
@@ -135,7 +146,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.7.2
+    image: malcolmnetsec/elastalert:1.8.0
     restart: "no"
     hostname: elastalert
     environment:
@@ -163,7 +174,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.7.2
+    image: malcolmnetsec/curator:1.8.0
     restart: "no"
     hostname: curator
     environment:
@@ -178,7 +189,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.7.2
+    image: malcolmnetsec/logstash-oss:1.8.0
     restart: "no"
     hostname: logstash
     environment:
@@ -211,7 +222,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.7.2
+    image: malcolmnetsec/filebeat-oss:1.8.0
     restart: "no"
     hostname: filebeat
     environment:
@@ -240,7 +251,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.7.2
+    image: malcolmnetsec/moloch:1.8.0
     restart: "no"
     hostname: moloch
     env_file:
@@ -274,7 +285,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:1.7.2
+    image: malcolmnetsec/zeek:1.8.0
     restart: "no"
     hostname: zeek
     environment:
@@ -295,7 +306,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.7.2
+    image: malcolmnetsec/file-monitor:1.8.0
     restart: "no"
     hostname: filemon
     environment:
@@ -309,7 +320,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.7.2
+    image: malcolmnetsec/pcap-capture:1.8.0
     restart: "no"
     network_mode: host
     ulimits:
@@ -329,7 +340,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:1.7.2
+    image: malcolmnetsec/pcap-monitor:1.8.0
     restart: "no"
     hostname: pcapmon
     environment:
@@ -346,7 +357,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.7.2
+    image: malcolmnetsec/file-upload:1.8.0
     restart: "no"
     hostname: upload
     env_file:
@@ -363,13 +374,14 @@ services:
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
-    image: malcolmnetsec/htadmin:1.7.2
+    image: malcolmnetsec/htadmin:1.8.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
     restart: "no"
     hostname: htadmin
     environment:
+      << : *auth-variables
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     expose:
       - 80
@@ -381,9 +393,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.7.2
+    image: malcolmnetsec/nginx-proxy:1.8.0
     restart: "no"
     hostname: nginx-proxy
+    environment:
+      << : *auth-variables
     depends_on:
       - moloch
       - kibana
@@ -401,5 +415,8 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
+
