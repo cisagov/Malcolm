@@ -23,6 +23,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Supported Protocols](#Protocols)
 * [Development](#Development)
     * [Building from source](#Build)
+* [Malcolm Installer ISO](#ISO)
 * [Pre-Packaged installation files](#Packager)
 * [Preparing your system](#Preparing)
     * [Recommended system requirements](#SystemRequirements)
@@ -263,7 +264,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm) resu
 * `htadmin` - configuration for the `htadmin` user account management container
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
-* `malcolm-iso` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
+* `malcolm-iso` - code and configuration for building an [installer ISO](#ISO) for a minimal Debian-based Linux installation for running Malcolm
 * `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
@@ -312,6 +313,12 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 Additionally, the command will pull from Docker Hub:
 
 * `docker.elastic.co/elasticsearch/elasticsearch-oss`
+
+## <a name="ISO"></a>Malcolm Installer ISO
+
+Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
+
+Malcolm can be built into a 
 
 ## <a name="Packager"></a>Pre-Packaged installation files
 

@@ -92,6 +92,15 @@ if [ -d "$WORKDIR" ]; then
   # replace capture interface for now, it'll need to be automatically detected/configured on boot
   sed -i "s/CAPTURE_INTERFACE=.*/CAPTURE_INTERFACE=xxxx/g" ./config/includes.chroot/opt/sensor/sensor_ctl/control_vars.conf
 
+  # copy shared scripts
+  rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
+  chown -R root:root ./config/includes.chroot/usr/local/bin/
+
+  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
+    SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
+    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
+  fi
+
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/
   bash "$SCRIPT_PATH/beats/build-docker-image.sh"
@@ -103,15 +112,6 @@ if [ -d "$WORKDIR" ]; then
   bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/moloch:/build moloch-build:latest -o /build
   mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
-
-  # copy shared scripts
-  rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
-  chown -R root:root ./config/includes.chroot/usr/local/bin/
-
-  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
-    $SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
-    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
-  fi
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"
