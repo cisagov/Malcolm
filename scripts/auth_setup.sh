@@ -65,7 +65,7 @@ htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/nu
 # if the admininstrator username has changed, remove the previous administrator username from htpasswd
 [[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
 
-cat <<EOF > nginx_ldap.conf
+[[ ! -f nginx_ldap.conf ]] && cat <<EOF > nginx_ldap.conf
 # This is a sample configuration for the ldap_server section of nginx.conf.
 # Yours will vary depending on how your Active Directory/LDAP server is configured.
 # See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
