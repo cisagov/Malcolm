@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=hedgehog
-IMAGE_VERSION=1.7.2
+IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=buster
 
 BUILD_ERROR_CODE=1
@@ -107,6 +107,11 @@ if [ -d "$WORKDIR" ]; then
   # copy shared scripts
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
+
+  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
+    $SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
+    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
+  fi
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"
