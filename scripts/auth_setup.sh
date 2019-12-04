@@ -103,7 +103,7 @@ secure_path  = ./config/htpasswd
 ; metadata file
 metadata_path  = ./config/metadata
 
-; administrator user/password (htpasswd -b -c -m ...)
+; administrator user/password (htpasswd -b -c -B ...)
 admin_user = $USERNAME
 
 ; username field quality checks
