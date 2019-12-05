@@ -44,7 +44,8 @@ The Hedgehog Linux installation image, when provided on an optical disc, USB thu
 The boot menu of the sensor installer image provides several options:
 
 * **Live system** and **Live system (fully in RAM)** may also be used to run the sensor in a "live USB" mode without installing any software or making any persistent configuration changes on the sensor hardware.
-* **Install sensor** and **Install sensor (encrypted)** are used to install the sensor onto the current system. Both selections install the same operating system and sensor software, the only difference being that the **encrypted** option encrypts the hard disks with a password (provided in a subsequent step during installation) that must be provided each time the sensor boots. There is some CPU overhead involved in an encrypted installation, so it is recommended that encrypted installations only be used for mobile installations (eg., on a sensor that may be shipped or carried for an incident response) and that the unencrypted option be used for fixed sensors in secure environments.
+* **Install Hedgehog Linux** and **Install Hedgehog Linux (encrypted)** are used to [install the sensor](#Installer) onto the current system. Both selections install the same operating system and sensor software, the only difference being that the **encrypted** option encrypts the hard disks with a password (provided in a subsequent step during installation) that must be provided each time the sensor boots. There is some CPU overhead involved in an encrypted installation, so it is recommended that encrypted installations only be used for mobile installations (eg., on a sensor that may be shipped or carried for an incident response) and that the unencrypted option be used for fixed sensors in secure environments.
+* **Install Hedgehog Linux (advanced configuration)** allows you to configure installation fully using all of the [Debian installer](https://www.debian.org/releases/stable/amd64/) settings and should only be selected for advanced users who know what they're doing.
 * **Rescue system** is included for debugging and/or system recovery and should not be needed in most cases.
 
 ## <a name="Installer"></a>Installer
@@ -72,7 +73,7 @@ At the end of the installation process, you will be prompted with a few self-exp
 * **Should the GUI session be locked due to inactivity?**
 * **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
 
-Following these prompts, the installer will reboot and the Malcolm base operating system will boot.
+Following these prompts, the installer will reboot and Hedgehog Linux will boot.
 
 # <a name="Boot"></a>Boot
 
@@ -522,6 +523,8 @@ Please review the notes for these additional guidelines. While not claiming an e
 # <a name="Footer"></a>Copyright
 
 Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+
+See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 

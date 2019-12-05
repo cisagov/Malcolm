@@ -1707,7 +1707,7 @@ You can now open a web browser and navigate to one of the [Malcolm user interfac
 
 [Malcolm](https://malcolm.fyi) is Copyright 2019 Battelle Energy Alliance, LLC, and is [developed and released](https://github.com/idaholab/Malcolm) through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See `License.txt` for the terms of its release.
+See [`License.txt`](./License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 
