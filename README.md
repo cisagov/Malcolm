@@ -1273,9 +1273,9 @@ A system installed from the resulting ISO will load the Malcolm Docker images up
 
 ### <a name="ISOInstallation"></a>Installation
 
-The ISO medium boots on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use as and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+The ISO medium boots on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
-The installer will ask for two or three pieces of information prior to installing the Malcolm base operating system:
+The installer will ask for several pieces of information prior to installing the Malcolm base operating system:
 
 * Hostname
 * Domain name

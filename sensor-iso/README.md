@@ -17,8 +17,10 @@
         + [Time synchronization](#ConfigTime)
     - [Capture, forwarding, and autostart services](#ConfigRoot)
         + [Capture](#ConfigCapture)
+            * [Automatic file extraction and scanning](#ZeekFileExtraction)
         + [Forwarding](#ConfigForwarding)
             * [filebeat](#filebeat): Zeek log forwarding
+            * [moloch-capture](#moloch-capture): Moloch session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
             * [auditbeat](#auditbeat): audit log forwarding
             * [filebeat-syslog](#syslogbeat): syslog forwarding
@@ -47,21 +49,30 @@ The boot menu of the sensor installer image provides several options:
 
 ## <a name="Installer"></a>Installer
 
-The sensor installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the sensor. The sensor installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use by the sensor as system or storage drives, and will partition and format them without warning.
+The sensor installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the sensor. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
-The installer will ask for two or three pieces of information prior to installing the sensor operating system:
+The installer will ask for a few pieces of information prior to installing the sensor operating system:
 
-* Root password – a password for the privileged root account which is rarely needed (only during the configuration of the sensors network interfaces and setting the sensor host name)
-* User password – a password for the non-privileged sensor account under which the various sensor capture and forwarding services run
-* Encryption password (optional) – if the encrypted installation option was selected at boot time, the encryption password must be entered every time the sensor boots
+* **Root password** – a password for the privileged root account which is rarely needed (only during the configuration of the sensors network interfaces and setting the sensor host name)
+* **User password** – a password for the non-privileged sensor account under which the various sensor capture and forwarding services run
+* **Encryption password** (optional) – if the encrypted installation option was selected at boot time, the encryption password must be entered every time the sensor boots
 
 Each of these passwords must be entered twice to ensure they were entered correctly.
 
 ![Example of the installer's password prompt](./docs/images/users_and_passwords.png)
 
-After the passwords have been entered, the installer will proceed and reboot unattended.
+After the passwords have been entered, the installer will proceed to format the system drive and install Hedgehog Linux.
 
 ![Installer progress](./docs/images/installer_progress.png)
+
+At the end of the installation process, you will be prompted with a few self-explanatory yes/no questions:
+
+* **Disable IPv6?**
+* **Automatically login to the GUI session?**
+* **Should the GUI session be locked due to inactivity?**
+* **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
+
+Following these prompts, the installer will reboot and the Malcolm base operating system will boot.
 
 # <a name="Boot"></a>Boot
 
@@ -87,12 +98,16 @@ Kiosk mode can be exited by connecting an external USB keyboard and pressing **A
 
 ![Sensor login session desktop](./docs/images/desktop.png)
 
-A few icons are present on the desktop:
+Several icons are available in the top menu bar:
 
-* **Configure Capture and Forwarding** – opens a dialog for configuring the sensor's capture and forwarding services, as well as specifying which services should autostart upon boot.
-* **Configure Interfaces and Hostname** – opens a dialog for configuring the sensor's network interfaces and setting the sensor's hostname.
-* **Sensor Kiosk** – returns the sensor to kiosk mode.
-* **Sensor Service Status** – displays a list of the status' of each sensor service.
+* **Terminal** - opens a command prompt in a terminal emulator
+* **Browser** - opens a web browser
+* **Kiosk** – returns the sensor to kiosk mode
+* **README** – displays this document
+* **Sensor status** – displays a list with the status of each sensor service
+* **Configure capture and forwarding** – opens a dialog for configuring the sensor's capture and forwarding services, as well as specifying which services should autostart upon boot
+* **Configure interfaces and hostname** – opens a dialog for configuring the sensor's network interfaces and setting the sensor's hostname
+* **Restart sensor services** - stops and restarts all of the [autostart services](#ConfigAutostart)
 
 ## <a name="ConfigRoot"></a>Interfaces, hostname, and time synchronization
 
@@ -164,9 +179,28 @@ Next you must specify the paths where captured PCAP files and Zeek logs will be 
 
 ![Specify capture paths](./docs/images/capture_paths.png)
 
-You will next be able to specify Zeek file carving mode. This experimental feature is currently under development and is not yet ready for production use. Choose **OK** to continue.
+#### <a name="ZeekFileExtraction"></a>Automatic file extraction and scanning
 
-You will then be presented with the list of configuration variables that will be used for capture, including those values which you have configured up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. It is not recommended that you edit this file manually. After confirming these values, you will be presented with a confirmation that these settings have been written to the configuration file, and you will be returned to the welcome screen.
+Hedgehog Linux can leverage Zeek's knowledge of network protocols to automatically detect file transfers and extract those files from PCAPs as Zeek processes them.
+
+To specify which files should be extracted, specify the Zeek file carving mode:
+
+![Zeek file carving mode](./docs/images/zeek_file_carve_mode.png)
+
+If you're not sure what to choose, either of **mapped (except common plain text files)** (if you want to carve and scan almost all files) or **interesting** (if you only want to carve and scan files with [mime types of common attack vectors](./interface/sensor_ctl/extractor_override.interesting.zeek)) is probably a good choice.
+
+Extracted files can be examined through either (but not both) of two methods:
+
+* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, enable **AUTOSTART_CLAMAV_SERVICE** when configuring [autostart services](#ConfigAutostart) and leave `VTOT_API2_KEY` value (described below) blank
+* submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method manually edit `/opt/sensor/sensor_ctl/control_vars.conf` and specify your [VirusTotal API key](https://developers.virustotal.com/reference) in `VTOT_API2_KEY`
+
+Files which are flagged as potentially malicious via either of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
+
+Next, specify which carved files to preserve (saved on the sensor under `/capture/bro/capture/extract_files/quarantine` by default). In order to not consume all of the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#ConfigAutostart) section.
+
+![File quarantine](./docs/images/file_quarantine.png)
+
+Finally, you will then be presented with the list of configuration variables that will be used for capture, including the values which you have configured up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. It is not recommended that you edit this file manually. After confirming these values, you will be presented with a confirmation that these settings have been written to the configuration file, and you will be returned to the welcome screen.
 
 ![Capture parameters summary](./docs/images/capture_confirm.png)
 
@@ -190,7 +224,7 @@ Next you are asked whether the connection used for Zeek log forwarding should be
 
 ![Filebeat SSL certificate verification](./docs/images/filebeat_ssl.png)
 
-If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during Malcolm's configuration), choose **None**.
+If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication), choose **None**.
 
 ![Unencrypted vs. SSL encryption for Zeek log forwarding](./docs/images/filebeat_ssl_verify.png)
 
@@ -204,6 +238,30 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
+### <a name="moloch-capture"></a>moloch-capture: Moloch session forwarding
+
+[moloch-capture](https://github.com/aol/moloch/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Moloch viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Moloch sessions](https://github.com/idaholab/malcolm#ZeekMolochFlowCorrelation) in the Malcolm documentation for more information.
+
+First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication)), choose **None**.
+
+![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
+
+Next, enter the **Elasticsearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an Elasticsearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+
+![Elasticsearch host and port](./docs/images/moloch-capture-ip-port.png)
+
+You will be asked to enter authentication credentials for the sensor’s connections to the aggregator’s Elasticsearch API. After you’ve entered the username and the password, the sensor will attempt a test connection to Elasticsearch using the connection information provided.
+
+![Elasticsearch username](./docs/images/elasticsearch-username.png) ![Elasticsearch password](./docs/images/elasticsearch_password.png) ![Successful Elasticsearch connection](./docs/images/metricbeat_elasticsearch_success.png)
+
+Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Moloch viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
+
+![PCAP retrieval ACL](./docs/images/malcolm_moloch_reachback_acl.png)
+
+Finally, you’ll be given the opportunity to review the all of the moloch-capture forwrading options you’ve specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool’s welcome screen.
+
+![moloch-capture settings confirmation](./docs/images/moloch_confirm.png) ![moloch-capture settings applied successfully](./docs/images/moloch_success.png)
+
 ### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
 
 The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an Elasticsearch database using a RESTful API using HTTP/HTTPS as the transport protocol. Select **metricbeat** from the forwarding configuration mode options.
@@ -212,7 +270,7 @@ Metricbeat gathers system resource metrics at an interval you specify. The defau
 
 ![Metricbeat interval](./docs/images/metricbeat_interval.png)
 
-Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm](https://github.com/idaholab/malcolm)'s configuration), choose **None**.
+Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -226,7 +284,7 @@ You will be prompted to specify the **connection protocol** and (for HTTPS) **SS
 
 The final settings required to configure Kibana are whether or not to configure **Kibana dashboards** and the local directory on the sensor containing the dashboards to be imported. The default values are probably what you want.
 
-Finally, you will be asked to enter authentication credentials for the sensor’s connections to the aggregator’s Elasticsearch and Kibana APIs. If Malcolm’s `auth_setup.sh` script was used to configure authentication, the username and password provided to that script are the values you want to enter here. 
+Finally, you will be asked to enter authentication credentials for the sensor’s connections to the aggregator’s Elasticsearch and Kibana APIs.
 
 After you’ve entered the username and the password, the sensor will attempt test connections to the Elasticsearch and Kibana APIs using the connection information provided.
 
@@ -256,20 +314,25 @@ The sensor employs a custom agent using the beats protocol to forward hardware m
 
 Once the forwarders have been configured, the final step is to **Configure Autostart Services**. Choose this option from the configuration mode menu after the welcome screen of the sensor configuration tool.
 
-Despite configuring capture and/or forwarder services as described in previous sections, only services enabled in the autostart configuration will run when the sensor starts up. The available autostart processes are as follows (recommended services are marked with **†**):
+Despite configuring capture and/or forwarder services as described in previous sections, only services enabled in the autostart configuration will run when the sensor starts up. The available autostart processes are as follows (recommended services are in **bold text**):
 
-* **AUTOSTART_AUDITBEAT** † – auditbeat audit log forwarder
-* **AUTOSTART_ZEEK** † – Zeek traffic analysis engine
-* **AUTOSTART_ZEEK_FILE_WATCH** – monitor for files carved from traffic streams by Zeek (This feature is currently under development and is not yet ready for production use.)
-* **AUTOSTART_FILEBEAT** † – filebeat Zeek log forwarder
-* **AUTOSTART_METRICBEAT** † – system resource metric forwarder
-* **AUTOSTART_HEATBEAT** † – sensor hardware (eg., CPU and storage device temperature) metrics forwarder
-* **AUTOSTART_HEATBEAT_SENSORS** † – the background process monitoring hardware sensors for temperatures, voltages, fan speeds, etc., for miscbeat (This is required in addition to **AUTOSTART_MISCBEAT** for miscbeat.)
-* **AUTOSTART_NETSNIFF** – netsniff-ng PCAP engine for saving packet capture (PCAP) files (netsniff-ng can be used as an drop-in alternative to tcpdump as the sensor’s packet capture engine, although tcpdump has been tested more thoroughly during development of this sensor. Generally you would not enable both netsniff-ng and tcpdump.)
-* **AUTOSTART_PRUNE_ZEEK** † – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
-* **AUTOSTART_PRUNE_PCAP** † – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
-* **AUTOSTART_SYSLOGBEAT** † – filebeat system log forwarder
-* **AUTOSTART_TCPDUMP** † – tcpdump PCAP engine for saving packet capture (PCAP) files
+* **AUTOSTART_AUDITBEAT** – [auditbeat](#auditbeat) audit log forwarder
+* **AUTOSTART_CLAMAV_SERVICE** – ClamAV service for scanning [files carved from traffic streams by Zeek](#ZeekFileExtraction) for trojans, viruses, malware and other malicious threats
+* **AUTOSTART_CLAMAV_UPDATES** – Virus database update service for ClamAV (requires sensor to be connected to the internet)
+* **AUTOSTART_FILEBEAT** – [filebeat](#filebeat) Zeek log forwarder 
+* **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
+* **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
+* **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
+* **AUTOSTART_MOLOCH** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Moloch](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/malcolm) or another Moloch installation, this is probably the packet capture engine you want to use.
+* *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
+* **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
+* **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
+* **AUTOSTART_SYSLOGBEAT** – filebeat [system log forwarder](#syslogbeat)
+* *AUTOSTART_TCPDUMP* – [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
+* **AUTOSTART_ZEEK** – [Zeek](https://www.zeek.org/) traffic analysis engine
+* **AUTOSTART_ZEEK_FILE_WATCH** – monitor for [files carved from traffic streams by Zeek](#ZeekFileExtraction)
+
+Note that only one packet capture engine ([moloch-capture](https://molo.ch/), [netsniff-ng](http://netsniff-ng.org/), or [tcpdump](https://www.tcpdump.org/)) can be used.
 
 ![Autostart services](./docs/images/autostarts.png)
 
@@ -277,7 +340,7 @@ Once you have selected the autostart services, you will be prompted to confirm y
 
 ![Autostart services confirmation](./docs/images/autostarts_confirm.png)
 
-After you have completed configuring the sensor it is recommended that you reboot the sensor to ensure all new settings take effect. If rebooting is not an option, you may open a terminal and run:
+After you have completed configuring the sensor it is recommended that you reboot the sensor to ensure all new settings take effect. If rebooting is not an option, you may click the **Restart Sensor Services** menu icon in the top menu bar, or open a terminal and run:
 
 ```
 /opt/sensor/sensor_ctl/shutdown && sleep 10 && /opt/sensor/sensor_ctl/supervisor.sh
@@ -287,20 +350,24 @@ This will cause the sensor services controller to stop, wait a few seconds, and 
 
 ```
 $ /opt/sensor/sensor_ctl/status 
-beats:auditbeat                  RUNNING   pid 24359, uptime 4:40:52
-beats:filebeat                   RUNNING   pid 24358, uptime 4:40:52
-beats:heatbeat                   RUNNING   pid 24366, uptime 4:40:52
-beats:metricbeat                 RUNNING   pid 24362, uptime 4:40:52
-beats:sensors                    RUNNING   pid 24371, uptime 4:40:52
-beats:syslogbeat                 RUNNING   pid 24360, uptime 4:40:52
-zeek:logger                      STOPPED   Not started
-zeek:scanner                     STOPPED   Not started
-zeek:watcher                     STOPPED   Not started
-zeek:zeekctl                     RUNNING   pid 24357, uptime 4:40:52
+beats:auditbeat                  RUNNING   pid 14470, uptime 8 days, 20:22:32
+beats:filebeat                   RUNNING   pid 14460, uptime 8 days, 20:22:32
+beats:heatbeat                   RUNNING   pid 14481, uptime 8 days, 20:22:32
+beats:metricbeat                 RUNNING   pid 14476, uptime 8 days, 20:22:32
+beats:sensors                    RUNNING   pid 14484, uptime 8 days, 20:22:32
+beats:syslogbeat                 RUNNING   pid 14471, uptime 8 days, 20:22:32
+clamav:clamav-service            RUNNING   pid 14454, uptime 8 days, 20:22:32
+clamav:clamav-updates            RUNNING   pid 14450, uptime 8 days, 20:22:32
+moloch:moloch-capture            RUNNING   pid 14432, uptime 8 days, 20:22:32
+moloch:moloch-viewer             RUNNING   pid 14431, uptime 8 days, 20:22:32
 netsniff:netsniff-enp8s0         STOPPED   Not started
-prune:prune-zeek                 RUNNING   pid 24388, uptime 4:40:52
-prune:prune-pcap                 RUNNING   pid 24401, uptime 4:40:52
-tcpdump:tcpdump-enp8s0           RUNNING   pid 24377, uptime 4:40:52
+prune:prune-pcap                 RUNNING   pid 14446, uptime 8 days, 20:22:32
+prune:prune-zeek                 RUNNING   pid 14442, uptime 8 days, 20:22:32
+tcpdump:tcpdump-enp8s0           STOPPED   Not started
+zeek:logger                      RUNNING   pid 14434, uptime 8 days, 20:22:32
+zeek:scanner                     RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
+zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 ```
 
 # <a name="ConfigSSH"></a>Appendix A - Configuring SSH access
@@ -329,9 +396,9 @@ Should the sensor not function as expected, first try rebooting the device. If t
 
 * Stop / start services – Using the sensor’s kiosk mode, attempt a **Services Stop** followed by a **Services Start**, then check **Sensor Status** to see which service(s) may not be running correctly.
 * Sensor configuration file – See `/opt/sensor/sensor_ctl/control_vars.conf` for sensor service settings. It is not recommended to manually edit this file unless you are sure of what you are doing.
-* Sensor control scripts † – There are scripts under ``/opt/sensor/sensor_ctl/`` to control sensor services (eg., `shutdown`, `start`, `status`, `stop`, etc.)
-* Sensor debug logs † – Log files under `/opt/sensor/sensor_ctl/log/` may contain clues to processes that are not working correctly. If you can determine which service is failing, you can attempt to reconfigure it using the instructions in the Configure Capture and Forwarding section of this document.
-* `sensorwatch` script † – Running `sensorwatch` on the command line will display the most recently modified PCAP and Zeek log files in their respective directories, how much storage space they are consuming, and the amount of used/free space on the volumes containing those files.
+* Sensor control scripts – There are scripts under ``/opt/sensor/sensor_ctl/`` to control sensor services (eg., `shutdown`, `start`, `status`, `stop`, etc.)
+* Sensor debug logs – Log files under `/opt/sensor/sensor_ctl/log/` may contain clues to processes that are not working correctly. If you can determine which service is failing, you can attempt to reconfigure it using the instructions in the Configure Capture and Forwarding section of this document.
+* `sensorwatch` script – Running `sensorwatch` on the command line will display the most recently modified PCAP and Zeek log files in their respective directories, how much storage space they are consuming, and the amount of used/free space on the volumes containing those files.
 
 # <a name="Hardening"></a>Appendix C - Hardening
 
