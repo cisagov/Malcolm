@@ -43,7 +43,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Live analysis](#LiveAnalysis)
     * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
-    * [Zeek logs from an external source](#ZeekForward)
+    * [Manually forwarding Zeek logs from an external source](#ZeekForward)
     * [Monitoring a local Zeek instance](#LiveZeek) 
 * [Moloch](#Moloch)
     * [Zeek log integration](#MolochZeek)
@@ -165,7 +165,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 
 ![Malcolm Network Diagram](./docs/images/malcolm_network_diagram.png)
 
-Malcolm processes network traffic data in the form of packet capture (PCAP) files or Zeek logs. A packet capture appliance ("[sensor](./sensor-iso)") monitors network traffic mirrored to it over a SPAN port on a network switch or router, or using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for examination later.
+Malcolm processes network traffic data in the form of packet capture (PCAP) files or Zeek logs. A [sensor](#Hedgehog) (packet capture appliance) monitors network traffic mirrored to it over a SPAN port on a network switch or router, or using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for examination later.
 
 Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments](#SegmentNaming) and [hosts](#HostNaming) based on user-defined IP address and MAC mappings, performing [TLS fingerprinting](#https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
 
@@ -726,7 +726,7 @@ Note that currently Microsoft Windows and Apple macOS platforms run Docker insid
 
 A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Moloch sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/master/sensor-iso) is a network traffic capture appliance operating system designed to be easy to configure and deploy for this purpose. Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/README.md) for more information.
 
-### <a name="ZeekForward"></a>Zeek logs from an external source
+### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
 Malcolm’s Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
 
