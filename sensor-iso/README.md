@@ -32,6 +32,7 @@
 * [Appendix D - Hardening](#Hardening)
     - [STIG compliance exceptions](#STIGExceptions)
     - [CIS benchmark compliance exceptions](#CISExceptions)
+* [Appendix E - Notes](#MiscNotes)
 * [Copyright](#Footer)
 
 # <a name="Installation"></a>Sensor installation
@@ -542,6 +543,10 @@ Please review the notes for these additional guidelines. While not claiming an e
 **8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` utility.
 
 **8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of Hedgehog Linux's trimming-down process. All non-locale-related system files pass intergrity checks.
+
+# <a name="MiscNotes"></a>Appendix E - Notes
+
+If you are interesting in developing your own network traffic capture appliance or would like to know more about the inner-workings of Hedgehog Linux, please read the [Notes](./docs/Notes.md) document that captures some of those details.
 
 # <a name="Footer"></a>Copyright
 
