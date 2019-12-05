@@ -3,6 +3,13 @@
 
 ![](./docs/logo/hedgehog-color-w-text.png)
 
+Hedgehog Linux is a Debian-based operating system built to
+
+* monitor network interfaces
+* capture packets to PCAP files
+* detect file transfers in network traffic and extract and scan those files for threats
+* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
+
 ### <a name="TableOfContents"></a>Table of Contents
 
 * [Sensor installation](#Installation)
@@ -184,7 +191,7 @@ Next you must specify the paths where captured PCAP files and Zeek logs will be 
 
 #### <a name="ZeekFileExtraction"></a>Automatic file extraction and scanning
 
-Hedgehog Linux can leverage Zeek's knowledge of network protocols to automatically detect file transfers and extract those files from PCAPs as Zeek processes them.
+Hedgehog Linux can leverage Zeek's knowledge of network protocols to automatically detect file transfers and extract those files from network traffic as Zeek sees them.
 
 To specify which files should be extracted, specify the Zeek file carving mode:
 

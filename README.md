@@ -724,7 +724,14 @@ Note that currently Microsoft Windows and Apple macOS platforms run Docker insid
 
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Moloch sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/master/sensor-iso) is a network traffic capture appliance operating system designed to be easy to configure and deploy for this purpose. Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/README.md) for more information.
+A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Moloch sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/) is a Debian-based operating system built to
+
+* monitor network interfaces
+* capture packets to PCAP files
+* detect file transfers in network traffic and extract and scan those files for threats
+* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
+
+Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/README.md) for more information.
 
 ### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
