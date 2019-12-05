@@ -26,9 +26,10 @@
             * [filebeat-syslog](#syslogbeat): syslog forwarding
             * [heatbeat](#heatbeat): temperature forwarding
         + [Autostart services](#ConfigAutostart)
-* [Appendix A - Configuring SSH access](#ConfigSSH)
-* [Appendix B - Troubleshooting](#Troubleshooting)
-* [Appendix C - Hardening](#Hardening)
+* [Appendix A - Generating the ISO](#ISOBuild)
+* [Appendix B - Configuring SSH access](#ConfigSSH)
+* [Appendix C - Troubleshooting](#Troubleshooting)
+* [Appendix D - Hardening](#Hardening)
     - [STIG compliance exceptions](#STIGExceptions)
     - [CIS benchmark compliance exceptions](#CISExceptions)
 * [Copyright](#Footer)
@@ -371,7 +372,29 @@ zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
 zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 ```
 
-# <a name="ConfigSSH"></a>Appendix A - Configuring SSH access
+# <a name="ISOBuild"></a>Appendix A - Generating the ISO
+
+Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/).
+
+To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/idaholab/Malcolm/) working copy and run:
+
+```
+$ ./sensor-iso/build_via_vagrant.sh -f
+…
+Starting build machine...
+Bringing machine 'default' up with 'virtualbox' provider...
+…
+```
+
+Building the ISO may take 90 minutes or more depending on your system. As the build finishes, you will see the following message indicating success:
+
+```
+…
+Finished, created "/sensor-build/hedgehog-1.8.0.iso"
+…
+```
+
+# <a name="ConfigSSH"></a>Appendix B - Configuring SSH access
 
 SSH access to the sensor’s non-privileged sensor account is only available using secure key-based authentication which can be enabled by adding a public SSH key to the **/home/sensor/.ssh/authorized_keys** file as illustrated below:
 
@@ -391,7 +414,7 @@ ssh-rsa AAA...kff analyst@SOC
 
 SSH access should only be configured when necessary.
 
-# <a name="Troubleshooting"></a>Appendix B - Troubleshooting
+# <a name="Troubleshooting"></a>Appendix C - Troubleshooting
 
 Should the sensor not function as expected, first try rebooting the device. If the behavior continues, here are a few things that may help you diagnose the problem (items which may require Linux command line use are marked with **†**)
 
@@ -401,7 +424,7 @@ Should the sensor not function as expected, first try rebooting the device. If t
 * Sensor debug logs – Log files under `/opt/sensor/sensor_ctl/log/` may contain clues to processes that are not working correctly. If you can determine which service is failing, you can attempt to reconfigure it using the instructions in the Configure Capture and Forwarding section of this document.
 * `sensorwatch` script – Running `sensorwatch` on the command line will display the most recently modified PCAP and Zeek log files in their respective directories, how much storage space they are consuming, and the amount of used/free space on the volumes containing those files.
 
-# <a name="Hardening"></a>Appendix C - Hardening
+# <a name="Hardening"></a>Appendix D - Hardening
 
 Hedgehog Linux targets the following guidelines for establishing a secure configuration posture:
 
