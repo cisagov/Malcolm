@@ -686,7 +686,7 @@ The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as
 # See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
 
 ldap_server ad_server {
-  url "ldaps://ds.example.com:3269/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
+  url "ldap://ds.example.com:3268/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
 
   binddn "bind_dn";
   binddn_passwd "bind_dn_password";
@@ -713,7 +713,7 @@ The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is 
 * **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
 * **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
 
-Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs.sh` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
+Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs.sh` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
 
 The **Malcolm User Management** page described above is not available when using LDAP authentication.
 

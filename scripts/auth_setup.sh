@@ -65,13 +65,18 @@ htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/nu
 # if the admininstrator username has changed, remove the previous administrator username from htpasswd
 [[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
 
+source ../.ldap_config_defaults 2>/dev/null || true
+LDAP_DEFAULT_PROTO=${LDAP_PROTO:-"ldap://"}
+LDAP_DEFAULT_HOST=${LDAP_HOST:-"ds.example.com"}
+LDAP_DEFAULT_PORT=${LDAP_PORT:-"3268"}
+
 [[ ! -f nginx_ldap.conf ]] && cat <<EOF > nginx_ldap.conf
 # This is a sample configuration for the ldap_server section of nginx.conf.
 # Yours will vary depending on how your Active Directory/LDAP server is configured.
 # See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
 
 ldap_server ad_server {
-  url "ldaps://ds.example.com:3269/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
+  url "${LDAP_DEFAULT_PROTO}${LDAP_DEFAULT_HOST}:${LDAP_DEFAULT_PORT}/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
 
   binddn "bind_dn";
   binddn_passwd "bind_dn_password";

@@ -5,6 +5,7 @@
 /README.css
 
 # auth-related
+/.ldap_config_defaults
 /auth.env
 /logstash/certs
 /filebeat/certs

@@ -482,6 +482,23 @@ class Installer(object):
       restartMode = 'no'
     if (restartMode == 'no'): restartMode = '"no"'
 
+    ldapStartTLS = False
+    ldapServerType = 'winldap'
+    useBasicAuth = not YesOrNo('Authenticate against Lightweight Directory Acess Protocol (LDAP) server?', default=False)
+    if not useBasicAuth:
+      ldapStartTLS = YesOrNo('Use StartTLS for LDAP connection security?', default=True)
+      if ldapStartTLS:
+        ldapServerType = None
+        allowedLdapModes = ('winldap', 'openldap')
+        while ldapServerType not in allowedLdapModes:
+          ldapServerType = AskForString('Select LDAP server type {}'.format(allowedLdapModes), default='winldap')
+      try:
+        with open(os.path.join(os.path.realpath(os.path.join(scriptPath, "..")), ".ldap_config_defaults"), "w") as ldapDefaultsFile:
+          print(f"LDAP_PROTO='{'ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'}'", file=ldapDefaultsFile)
+          print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
+      except:
+        pass
+
     curatorSnapshots = YesOrNo('Create daily snapshots (backups) of Elasticsearch indices?', default=False)
     curatorSnapshotDir = './elasticsearch-backup'
     if curatorSnapshots:
@@ -633,6 +650,15 @@ class Installer(object):
           if (currentService is not None) and (restartMode is not None) and re.match(r'^\s*restart\s*:.*$', line):
             # elasticsearch backup directory
             line = "{}restart: {}".format(serviceIndent * 2, restartMode)
+          elif 'NGINX_BASIC_AUTH' in line:
+            # basic (useBasicAuth=true) vs ldap (useBasicAuth=false)
+            line = re.sub(r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if useBasicAuth else "'false'"), line)
+          elif 'NGINX_LDAP_TLS_STUNNEL_PROTOCOL' in line:
+            # ldap server type (windldap|openldap) for StartTLS
+            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL_PROTOCOL\s*:\s*)(\S+)', r"\g<1>'{}'".format(ldapServerType), line)
+          elif 'NGINX_LDAP_TLS_STUNNEL' in line:
+            # StartTLS vs. ldap:// or ldaps://
+            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if ((not useBasicAuth) and ldapStartTLS) else "'false'"), line)
           elif 'ZEEK_EXTRACTOR_MODE' in line:
             # zeek file extraction mode
             line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', r"\g<1>'{}'".format(fileCarveMode), line)
