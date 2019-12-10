@@ -32,6 +32,8 @@ x-zeek-variables: &zeek-variables
   VTOT_REQUESTS_PER_MINUTE : 4
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
   EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
+  EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
+  EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
 
 x-logstash-variables: &logstash-variables
   # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
