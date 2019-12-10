@@ -28,7 +28,7 @@ diff -Nurp a/src/protocol.c b/src/protocol.c
 @@ -1119,6 +1129,182 @@ NOEXPORT char *nntp_client(CLI *c, SERVI
      return NULL;
  }
- 
+
 +/**************************************** LDAP, RFC 2830 */
 +uint8_t ldap_startssl_message[0x1d + 2] =
 +{
@@ -105,7 +105,7 @@ diff -Nurp a/src/protocol.c b/src/protocol.c
 +      /* OpenLDAP - response length (1 byte) */
 +      s_log(LOG_DEBUG, "Reading OpenLDAP message size (1 byte)");
 +      s_read(c, c->remote_fd.fd, buffer_8, 1);
-+      resp_len = buffer_8;
++      resp_len = buffer_8[0];
 +
 +    } else if(ldap_mode == LDAP_WINLDAP) {
 +
@@ -206,5 +206,5 @@ diff -Nurp a/src/protocol.c b/src/protocol.c
 +}
 +
  /**************************************** connect */
- 
+
  NOEXPORT char *connect_server(CLI *c, SERVICE_OPTIONS *opt, const PHASE phase) {
