@@ -484,7 +484,7 @@ class Installer(object):
 
     ldapStartTLS = False
     ldapServerType = 'winldap'
-    useBasicAuth = not YesOrNo('Authenticate against Lightweight Directory Acess Protocol (LDAP) server?', default=False)
+    useBasicAuth = not YesOrNo('Authenticate against Lightweight Directory Access Protocol (LDAP) server?', default=False)
     if not useBasicAuth:
       ldapStartTLS = YesOrNo('Use StartTLS for LDAP connection security?', default=True)
       if ldapStartTLS:
