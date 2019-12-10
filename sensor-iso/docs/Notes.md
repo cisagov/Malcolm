@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.0](https://github.com/aol/moloch/releases/tag/v2.1.0). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.1](https://github.com/aol/moloch/releases/tag/v2.1.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.1.0"
+MOLOCH_VERSION="2.1.1"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
