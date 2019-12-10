@@ -33,7 +33,9 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         * [Windows host system configuration](#HostSystemConfigWindows)
 * [Running Malcolm](#Running)
     * [Configure authentication](#AuthSetup)
-        * [Account management](#AccountManagement)
+        * [Local account management](#AuthBasicAccountManagement)
+        * [Lightweight Directory Acess Protocol (LDAP) authentication](#AuthLDAP)
+            - [LDAP connection security](#AuthLDAPSecurity)
     * [Starting Malcolm](#Starting)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
@@ -188,7 +190,8 @@ Malcolm leverages the following excellent open source tools, among others.
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
-* [nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
+* [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
+* [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
 * These third party Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
@@ -417,6 +420,8 @@ Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
+* `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Acess Protocol (LDAP)](#AuthLDAP) authentication
+
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
@@ -644,9 +649,17 @@ Once Docker is installed, configured and running as described in the previous se
 
 ### <a name="AuthSetup"></a>Configure authentication
 
-Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+Malcolm requires authentication to access the [user interface](#UserInterfaceURLs). [Nginx](https://nginx.org/) can authenticate users with either local TLS-encrypted HTTP basic authentication or using a remote Lightweight Directory Acess Protocol (LDAP) authentication server.
 
-* define the administrator account username and password
+With the local basic authentication method, user accounts are managed by Malcolm and can be created, modified, and deleted using a [user management web interface](#AccountManagement). This method is suitable in instances where accounts and credentials do not need to be synced across many Malcolm installations.
+
+LDAP authentication are managed on a remote directory service, such as a [Microsoft Active Directory Domain Services](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) or [OpenLDAP](https://www.openldap.org/).
+
+Malcolm's authentication method is defined in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file with the `NGINX_BASIC_AUTH` environment variable: `true` for local TLS-encrypted HTTP basic authentication, `false` for LDAP authentication.
+
+In either case, you **must** run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+
+* define the local Malcolm administrator account username and password (although these credentials will only be used for basic authentication, not LDAP authentication)
 * specify whether or not to (re)generate the self-signed certificates used for HTTPS access
     * key and certificate files are located in the `nginx/certs/` directory
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
@@ -655,13 +668,75 @@ Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in orde
 * specify whether or not to store the username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (see the `ES_EXTERNAL_HOSTS`, `ES_EXTERNAL_SSL`, and `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
     * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
 
-#### <a name="AccountManagement"></a>Account management
+##### <a name="AuthBasicAccountManagement"></a>Local account management
 
 [`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
 
 Malcolm user accounts can be used to access the [interfaces](#UserInterfaceURLs) of all of its [components](#Components), including Moloch. Moloch uses its own internal database of user accounts, so when a Malcolm user account logs in to Moloch for the first time Malcolm creates a corresponding Moloch user account automatically. This being the case, it is *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as those settings would not be consistently used across Malcolm.
 
 Users may change their passwords via the **Malcolm User Management** page by clicking **User Self Service**. A forgotten password can also be reset via an emailed link, though this requires SMTP server settings to be specified in `htadmin/config.ini` in the Malcolm installation directory.
+
+#### <a name="AuthLDAP"></a>Lightweight Directory Acess Protocol (LDAP) authentication
+
+The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup.sh`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
+
+```
+# This is a sample configuration for the ldap_server section of nginx.conf.
+# Yours will vary depending on how your Active Directory/LDAP server is configured.
+# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
+
+ldap_server ad_server {
+  url "ldaps://ds.example.com:3269/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
+
+  binddn "bind_dn";
+  binddn_passwd "bind_dn_password";
+
+  group_attribute member;
+  group_attribute_is_dn on;
+  require group "CN=Malcolm,CN=Users,DC=ds,DC=example,DC=com";
+  require valid_user;
+  satisfy all;
+}
+
+auth_ldap_cache_enabled on;
+auth_ldap_cache_expiration_time 10000;
+auth_ldap_cache_size 1000;
+```
+
+This file is mounted into the `nginx` container when Malcolm is started to provide connection information for the LDAP server.
+
+The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is configured. Some of the [avaiable parameters](https://github.com/kvspb/nginx-auth-ldap#available-config-parameters) in that file include:
+
+* **`url`** - the `ldap://` or `ldaps://` connection URL for the remote LDAP server, which has the [following syntax](https://www.ietf.org/rfc/rfc2255.txt): `ldap[s]://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>`
+* **`binddn`** and **`binddn_password`** - the account credentials used to query the LDAP directory
+* **`group_attribute`** - the group attribute name which contains the member object
+* **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
+* **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
+
+Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs.sh` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
+
+The **Malcolm User Management** page described above is not available when using LDAP authentication.
+
+##### <a name="AuthLDAPSecurity"></a>LDAP connection security
+
+Authentication over LDAP can be done using one of three ways, [two of which](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/8e73932f-70cf-46d6-88b1-8d9f86235e81) offer data confidentiality protection: 
+
+* **StartTLS** - the [standard extension](https://tools.ietf.org/html/rfc2830) to the LDAP protocol to establish an encrypted SSL/TLS connection within an already established LDAP connection
+* **LDAPS** - a commonly used (though unofficial and considered deprecated) method in which SSL negotiation takes place before any commands are sent from the client to the server
+* **Unencrypted** (clear text) (***not recommended***)
+
+In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file, the `NGINX_LDAP_TLS_STUNNEL` and `NGINX_LDAP_TLS_STUNNEL` environment variables are used in conjunction with the values in `nginx/nginx_ldap.conf` to define the LDAP connection security level. Use the following combinations of values to achieve the connection security methods above, respectively:
+
+* **StartTLS**
+    - `NGINX_LDAP_TLS_STUNNEL` set to `true` in [`docker-compose.yml`](#DockerComposeYml)
+    - `NGINX_LDAP_TLS_STUNNEL_PROTOCOL` set to `winldap` (for Microsoft Active Directory Domain Services) or `openldap` (for OpenLDAP) in [`docker-compose.yml`](#DockerComposeYml)
+    - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
+* **LDAPS**
+    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](#DockerComposeYml)
+    - `url` should begin with `ldaps://` and its port should be either the default LDAPS port (636) or the default LDAPS Global Catalog port (3269) in `nginx/nginx_ldap.conf` 
+* **Unencrypted** (clear text) (***not recommended***)
+    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](#DockerComposeYml)
+    - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
 
 ### <a name="Starting"></a>Starting Malcolm
 
