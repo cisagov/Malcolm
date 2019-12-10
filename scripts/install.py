@@ -486,14 +486,14 @@ class Installer(object):
     ldapServerType = 'winldap'
     useBasicAuth = not YesOrNo('Authenticate against Lightweight Directory Access Protocol (LDAP) server?', default=False)
     if not useBasicAuth:
+      allowedLdapModes = ('winldap', 'openldap')
+      ldapServerType = None
+      while ldapServerType not in allowedLdapModes:
+        ldapServerType = AskForString('Select LDAP server compatibility type {}'.format(allowedLdapModes), default='winldap')
       ldapStartTLS = YesOrNo('Use StartTLS for LDAP connection security?', default=True)
-      if ldapStartTLS:
-        ldapServerType = None
-        allowedLdapModes = ('winldap', 'openldap')
-        while ldapServerType not in allowedLdapModes:
-          ldapServerType = AskForString('Select LDAP server type {}'.format(allowedLdapModes), default='winldap')
       try:
         with open(os.path.join(os.path.realpath(os.path.join(scriptPath, "..")), ".ldap_config_defaults"), "w") as ldapDefaultsFile:
+          print(f"LDAP_SERVER_TYPE='{ldapServerType}'", file=ldapDefaultsFile)
           print(f"LDAP_PROTO='{'ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'}'", file=ldapDefaultsFile)
           print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
       except:
