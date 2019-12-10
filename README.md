@@ -1582,6 +1582,12 @@ fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 fs.inotify.max_user_watches increases allowed maximum for monitored files
 fs.inotify.max_user_watches= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
+fs.inotify.max_queued_events increases queue size for monitored files
+fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+fs.inotify.max_user_instances increases allowed maximum monitor file watchers
+fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
 
 vm.max_map_count increases allowed maximum for memory segments
 vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
@@ -1632,6 +1638,8 @@ Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
 Restart Malcolm upon system or Docker daemon restart? (y/N): y
 
 Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
+
+Authenticate against Lightweight Directory Acess Protocol (LDAP) server? (y/N): n
 
 Periodically close old Elasticsearch indices? (Y/n): y
 
