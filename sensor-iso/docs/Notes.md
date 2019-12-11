@@ -327,7 +327,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.0](https://github.com/zeek/zeek/releases/tag/v3.0.0). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.1](https://github.com/zeek/zeek/releases/tag/v3.0.1). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
@@ -336,7 +336,7 @@ The following bash script was used to download, [build and install](https://docs
 ```bash
 #!/bin/bash
 
-ZEEK_VER="3.0.0"
+ZEEK_VER="3.0.1"
 ZEEK_URL="https://www.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # Fix redef'ing a table with a new &default attribute - https://github.com/zeek/zeek/pull/632
@@ -365,7 +365,7 @@ checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgnam
 * Notes:
     - Zeek is installed to `/opt/zeek` in this configuration
     - `ninja` was used instead of `make` to reduce build times
-    - a [regression](https://github.com/zeek/zeek/pull/632) bug in Zeek 3.0.0 is patched inline in this installation of Zeek
+    - a [regression](https://github.com/zeek/zeek/pull/632) bug in Zeek 3.0.1 is patched inline in this installation of Zeek
     - `checkinstall` is used instead of `make install` to generate a Debian `.deb` package that can be installed and uninstalled with standard system package management utilities
 
 ## <a name="ZeekThirdParty"></a>Third party plugins
