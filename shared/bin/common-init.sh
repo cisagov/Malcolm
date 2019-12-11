@@ -31,7 +31,7 @@ function DetermineCaptureInterface()
 
 # remove default accounts/groups we don't want, create/set directories for non-user users for stig to not complain
 function CleanDefaultAccounts() {
-  for systemuser in games gnats irc list lp news uucp www-data
+  for systemuser in games gnats irc list lp news www-data
   do
     deluser $systemuser 2>/dev/null || true
   done
