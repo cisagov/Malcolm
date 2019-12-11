@@ -515,7 +515,7 @@ The host system (ie., the one running Docker) will need to be configured for the
 
 ```
 # the maximum number of open file handles
-fs.file-max=65536
+fs.file-max=2097152
 
 # increase maximums for inotify watches
 fs.inotify.max_user_watches=131072

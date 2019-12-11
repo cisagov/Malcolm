@@ -1092,7 +1092,7 @@ class LinuxInstaller(Installer):
                                     'fs.file-max=',
                                     'fs.file-max increases allowed maximum for file handles',
                                     ['# the maximum number of open file handles',
-                                     'fs.file-max=65536']),
+                                     'fs.file-max=2097152']),
                         ConfigLines([],
                                     '/etc/sysctl.conf',
                                     'fs.inotify.max_user_watches=',

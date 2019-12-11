@@ -18,7 +18,7 @@ cat << 'EOF' >> /etc/sysctl.conf
 kernel.dmesg_restrict=0
 
 # the maximum number of open file handles
-fs.file-max=518144
+fs.file-max=2097152
 
 # increase maximums for inotify watches
 fs.inotify.max_user_watches=131072

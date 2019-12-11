@@ -2108,7 +2108,7 @@ Varoius system settings need to be modified for a Linux distribution to perform 
 * appended to [`/etc/sysctl.conf`](http://man7.org/linux/man-pages/man5/sysctl.conf.5.html)
 ```
 # the maximum number of open file handles
-fs.file-max=518144
+fs.file-max=2097152
 
 # increase maximums for inotify watches
 fs.inotify.max_user_watches=131072
