@@ -129,6 +129,21 @@ auditbeat.modules:
                         auditd.summary.object.primary: '/opt/sensor/sensor_ctl/filebeat/data/registry.new'
                     - equals:
                         auditd.summary.how: '/usr/share/filebeat/bin/filebeat'
+                # I don't like filtering this, but see https://github.com/zeek/zeek/issues/259#issuecomment-564735946
+                # zeekctl is doing this, but there's nothing to indicate that's what it is.
+                # For now I've tried to narrow it as much as possible, because it's *so* much noise
+                - and:
+                    - or:
+                        - equals:
+                            auditd.data.syscall: 'unlink'
+                        - equals:
+                            auditd.data.syscall: 'openat'
+                    - equals:
+                        auditd.result: 'fail'
+                    - equals:
+                        auditd.summary.how: 'python'
+                    - regexp:
+                        auditd.summary.object.primary: '^/usr/lib/python'
 
 
 - module: file_integrity
