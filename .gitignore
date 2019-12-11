@@ -1,15 +1,17 @@
 # moloch
 /moloch/etc/GeoLite2-*
-/moloch/etc/oui.txt
-/moloch/etc/ipv4-address-space.csv
+/moloch/etc/oui.txt*
+/moloch/etc/ipv4-address-space.csv*
 /README.css
 
 # auth-related
+/.ldap_config_defaults
 /auth.env
 /logstash/certs
 /filebeat/certs
 /nginx/certs
 /nginx/htpasswd
+/nginx/nginx_ldap.conf
 /htadmin/config.ini
 /htadmin/metadata
 /elastalert/config/smtp-auth.yaml

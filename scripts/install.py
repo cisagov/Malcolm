@@ -470,8 +470,8 @@ class Installer(object):
       lsMemory = '3g'
 
     while not YesOrNo('Setting {} for Elasticsearch and {} for Logstash. Is this OK?'.format(esMemory, lsMemory), default=True):
-      esMemory = AskForString('Enter memory for Elasticsearch (eg., 16g, 9500m, etc.)')
-      lsMemory = AskForString('Enter memory for LogStash (eg., 4g, 2500m, etc.)')
+      esMemory = AskForString('Enter memory for Elasticsearch (e.g., 16g, 9500m, etc.)')
+      lsMemory = AskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
 
     restartMode = None
     allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
@@ -481,6 +481,23 @@ class Installer(object):
     else:
       restartMode = 'no'
     if (restartMode == 'no'): restartMode = '"no"'
+
+    ldapStartTLS = False
+    ldapServerType = 'winldap'
+    useBasicAuth = not YesOrNo('Authenticate against Lightweight Directory Access Protocol (LDAP) server?', default=False)
+    if not useBasicAuth:
+      allowedLdapModes = ('winldap', 'openldap')
+      ldapServerType = None
+      while ldapServerType not in allowedLdapModes:
+        ldapServerType = AskForString('Select LDAP server compatibility type {}'.format(allowedLdapModes), default='winldap')
+      ldapStartTLS = YesOrNo('Use StartTLS for LDAP connection security?', default=True)
+      try:
+        with open(os.path.join(os.path.realpath(os.path.join(scriptPath, "..")), ".ldap_config_defaults"), "w") as ldapDefaultsFile:
+          print(f"LDAP_SERVER_TYPE='{ldapServerType}'", file=ldapDefaultsFile)
+          print(f"LDAP_PROTO='{'ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'}'", file=ldapDefaultsFile)
+          print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
+      except:
+        pass
 
     curatorSnapshots = YesOrNo('Create daily snapshots (backups) of Elasticsearch indices?', default=False)
     curatorSnapshotDir = './elasticsearch-backup'
@@ -497,7 +514,7 @@ class Installer(object):
     if YesOrNo('Periodically close old Elasticsearch indices?', default=False):
       while not YesOrNo('Indices older than {} {} will be periodically closed. Is this OK?'.format(curatorCloseCount, curatorCloseUnits), default=True):
         while True:
-          curatorPeriod = AskForString('Enter index close threshold (eg., 90 days, 2 years, etc.)').lower().split()
+          curatorPeriod = AskForString('Enter index close threshold (e.g., 90 days, 2 years, etc.)').lower().split()
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
@@ -515,7 +532,7 @@ class Installer(object):
     if YesOrNo('Periodically delete old Elasticsearch indices?', default=False):
       while not YesOrNo('Indices older than {} {} will be periodically deleted. Is this OK?'.format(curatorDeleteCount, curatorDeleteUnits), default=True):
         while True:
-          curatorPeriod = AskForString('Enter index delete threshold (eg., 90 days, 2 years, etc.)').lower().split()
+          curatorPeriod = AskForString('Enter index delete threshold (e.g., 90 days, 2 years, etc.)').lower().split()
           if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
             curatorPeriod[1] += 's'
           if ((len(curatorPeriod) == 2) and
@@ -546,7 +563,7 @@ class Installer(object):
     logstashSsl = logstashOpen and YesOrNo('Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)', default=False)
     externalEsForward = YesOrNo('Forward Logstash logs to external Elasticstack instance?', default=False)
     if externalEsForward:
-      externalEsHost = AskForString('Enter external Elasticstack host:port (eg., 10.0.0.123:9200)')
+      externalEsHost = AskForString('Enter external Elasticstack host:port (e.g., 10.0.0.123:9200)')
       externalEsSsl = YesOrNo('Connect to "{}" using SSL?'.format(externalEsHost), default=True)
       externalEsSslVerify = externalEsSsl and YesOrNo('Require SSL certificate validation for communication with "{}"?'.format(externalEsHost), default=False)
     else:
@@ -633,6 +650,15 @@ class Installer(object):
           if (currentService is not None) and (restartMode is not None) and re.match(r'^\s*restart\s*:.*$', line):
             # elasticsearch backup directory
             line = "{}restart: {}".format(serviceIndent * 2, restartMode)
+          elif 'NGINX_BASIC_AUTH' in line:
+            # basic (useBasicAuth=true) vs ldap (useBasicAuth=false)
+            line = re.sub(r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if useBasicAuth else "'false'"), line)
+          elif 'NGINX_LDAP_TLS_STUNNEL_PROTOCOL' in line:
+            # ldap server type (windldap|openldap) for StartTLS
+            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL_PROTOCOL\s*:\s*)(\S+)', r"\g<1>'{}'".format(ldapServerType), line)
+          elif 'NGINX_LDAP_TLS_STUNNEL' in line:
+            # StartTLS vs. ldap:// or ldaps://
+            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if ((not useBasicAuth) and ldapStartTLS) else "'false'"), line)
           elif 'ZEEK_EXTRACTOR_MODE' in line:
             # zeek file extraction mode
             line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', r"\g<1>'{}'".format(fileCarveMode), line)
@@ -759,7 +785,7 @@ class LinuxInstaller(Installer):
     self.distro = "linux"
     self.codename = None
 
-    # determine the distro (eg., ubuntu) and code name (eg., bionic) if applicable
+    # determine the distro (e.g., ubuntu) and code name (e.g., bionic) if applicable
     err, out = self.run_process(['lsb_release', '-is'], stderr=False)
     if (err == 0) and (len(out) > 0):
       self.distro = out[0].lower()
@@ -1066,7 +1092,7 @@ class LinuxInstaller(Installer):
                                     'fs.file-max=',
                                     'fs.file-max increases allowed maximum for file handles',
                                     ['# the maximum number of open file handles',
-                                     'fs.file-max=65536']),
+                                     'fs.file-max=2097152']),
                         ConfigLines([],
                                     '/etc/sysctl.conf',
                                     'fs.inotify.max_user_watches=',
@@ -1335,8 +1361,8 @@ class MacInstaller(Installer):
         newMemoryGiB = 2
 
       while not YesOrNo('Setting {} for CPU cores and {} GiB for RAM. Is this OK?'.format(newCpus if newCpus else "(unchanged)", newMemoryGiB if newMemoryGiB else "(unchanged)"), default=True):
-        newCpus = AskForString('Enter Docker CPU cores (eg., 4, 8, 16)')
-        newMemoryGiB = AskForString('Enter Docker RAM MiB (eg., 8, 16, etc.)')
+        newCpus = AskForString('Enter Docker CPU cores (e.g., 4, 8, 16)')
+        newMemoryGiB = AskForString('Enter Docker RAM MiB (e.g., 8, 16, etc.)')
 
       if newCpus or newMemoryMiB:
         with open(settingsFile, 'r+') as f:

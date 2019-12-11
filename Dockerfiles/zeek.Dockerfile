@@ -5,15 +5,13 @@ FROM debian:buster-slim AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV SRC_BASE_DIR "/usr/local/src"
-ENV ZEEK_VERSION "3.0.0"
+ENV ZEEK_VERSION "3.0.1"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV PATH="${ZEEK_DIR}/bin:${PATH}"
 
 ADD https://www.zeek.org/downloads/zeek-$ZEEK_VERSION.tar.gz $SRC_BASE_DIR/zeek.tar.gz
-# Fix redef'ing a table with a new &default attribute #632 -  https://github.com/zeek/zeek/pull/632/commits
-ADD https://github.com/zeek/zeek/commit/42b6040952030c44ce337704916cf89a065994b0.patch $ZEEK_PATCH_DIR/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \

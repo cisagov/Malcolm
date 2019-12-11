@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.0](https://github.com/aol/moloch/releases/tag/v2.1.0). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.1](https://github.com/aol/moloch/releases/tag/v2.1.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.1.0"
+MOLOCH_VERSION="2.1.1"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
@@ -327,7 +327,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.0](https://github.com/zeek/zeek/releases/tag/v3.0.0). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.1](https://github.com/zeek/zeek/releases/tag/v3.0.1). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
@@ -336,11 +336,10 @@ The following bash script was used to download, [build and install](https://docs
 ```bash
 #!/bin/bash
 
-ZEEK_VER="3.0.0"
+ZEEK_VER="3.0.1"
 ZEEK_URL="https://www.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
-  # Fix redef'ing a table with a new &default attribute - https://github.com/zeek/zeek/pull/632
-  https://github.com/zeek/zeek/pull/632/commits/42b6040952030c44ce337704916cf89a065994b0.patch
+  # nothing here for now
 )
 
 # Build and install zeek
@@ -365,7 +364,6 @@ checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgnam
 * Notes:
     - Zeek is installed to `/opt/zeek` in this configuration
     - `ninja` was used instead of `make` to reduce build times
-    - a [regression](https://github.com/zeek/zeek/pull/632) bug in Zeek 3.0.0 is patched inline in this installation of Zeek
     - `checkinstall` is used instead of `make install` to generate a Debian `.deb` package that can be installed and uninstalled with standard system package management utilities
 
 ## <a name="ZeekThirdParty"></a>Third party plugins
@@ -1771,7 +1769,7 @@ The Elastic Stack's [Beats](https://www.elastic.co/products/beats) platform is a
 
 set -e
 
-BEATS_VER="6.8.4"
+BEATS_VER="6.8.5"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
@@ -2110,7 +2108,7 @@ Varoius system settings need to be modified for a Linux distribution to perform 
 * appended to [`/etc/sysctl.conf`](http://man7.org/linux/man-pages/man5/sysctl.conf.5.html)
 ```
 # the maximum number of open file handles
-fs.file-max=518144
+fs.file-max=2097152
 
 # increase maximums for inotify watches
 fs.inotify.max_user_watches=131072
@@ -2170,6 +2168,8 @@ Hedgehog Linux targets the following guidelines for establishing a secure config
 # <a name="Footer"></a>Copyright
 
 Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+
+See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 

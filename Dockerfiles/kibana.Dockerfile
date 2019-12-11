@@ -1,4 +1,4 @@
-FROM docker.elastic.co/kibana/kibana-oss:6.8.4
+FROM docker.elastic.co/kibana/kibana-oss:6.8.5
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="Seth.Grover@inl.gov"
@@ -71,25 +71,25 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
       unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
-      sed -i "s/6\.8\.0/6\.8\.4/g" kibana/elastalert-kibana-plugin/package.json && \
+      sed -i "s/6\.8\.0/6\.8\.5/g" kibana/elastalert-kibana-plugin/package.json && \
       zip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip && \
       rm -f /tmp/elastalert-kibana-plugin.zip && \
     echo "Installing Swimlanes visualization..." && \
       unzip kibana-swimlane.zip kibana/prelert_swimlane_vis-6.8.1/package.json && \
-      sed -i "s/6\.8\.1/6\.8\.4/g" kibana/prelert_swimlane_vis-6.8.1/package.json && \
+      sed -i "s/6\.8\.1/6\.8\.5/g" kibana/prelert_swimlane_vis-6.8.1/package.json && \
       zip kibana-swimlane.zip kibana/prelert_swimlane_vis-6.8.1/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip && \
       rm -f /tmp/kibana-swimlane.zip && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
-      sed -i "s/6\.7\.1/6\.8\.4/g" kibana/kibana-comments-app-plugin/package.json && \
+      sed -i "s/6\.7\.1/6\.8\.5/g" kibana/kibana-comments-app-plugin/package.json && \
       zip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-comments.zip && \
       rm -rf /tmp/kibana-comments.zip /tmp/kibana && \
     echo "Installing Milestones visualization..." && \
       unzip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
-      sed -i "s/6\.8\.2/6\.8\.4/g" kibana/kibana-milestones-vis/package.json && \
+      sed -i "s/6\.8\.2/6\.8\.5/g" kibana/kibana-milestones-vis/package.json && \
       zip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-milestones.zip && \
       rm -rf /tmp/kibana-milestones.zip /tmp/kibana

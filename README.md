@@ -2,7 +2,7 @@
 
 ![](./docs/images/logo/Malcolm_banner.png)
 
-[Malcolm](https://github.com/idaholab/malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
+[Malcolm](https://malcolm.fyi) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
 * **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Moloch, a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
@@ -33,7 +33,9 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         * [Windows host system configuration](#HostSystemConfigWindows)
 * [Running Malcolm](#Running)
     * [Configure authentication](#AuthSetup)
-        * [Account management](#AccountManagement)
+        * [Local account management](#AuthBasicAccountManagement)
+        * [Lightweight Directory Access Protocol (LDAP) authentication](#AuthLDAP)
+            - [LDAP connection security](#AuthLDAPSecurity)
     * [Starting Malcolm](#Starting)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
@@ -42,7 +44,8 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek)
 * [Live analysis](#LiveAnalysis)
     * [Capturing traffic on local network interfaces](#LocalPCAP)
-    * [Zeek logs from an external source](#ZeekForward)
+    * [Using a network sensor appliance](#Hedgehog)
+    * [Manually forwarding Zeek logs from an external source](#ZeekForward)
     * [Monitoring a local Zeek instance](#LiveZeek) 
 * [Moloch](#Moloch)
     * [Zeek log integration](#MolochZeek)
@@ -72,6 +75,14 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index curation](#Curator)
+* [Malcolm installer ISO](#ISO)
+    * [Installation](#ISOInstallation)
+    * [Generating the ISO](#ISOBuild)
+    * [Setup](#ISOSetup)
+    * [Time synchronization](#ConfigTime)
+    * [Hardening](#Hardening)
+        * [STIG compliance exceptions](#STIGExceptions)
+        * [CIS benchmark compliance exceptions](#CISExceptions)
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 18.04 LTS](#InstallationExample)
 * [Copyright](#Footer)
@@ -84,7 +95,7 @@ For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linu
 
 #### Source code
 
-The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/malcolm). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 #### Building Malcolm from scratch
 
@@ -115,20 +126,20 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.7.2               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          1.7.2               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  1.7.2               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           1.7.2               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          1.7.2               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          1.7.2               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          1.7.2               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            1.7.2               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          1.7.2               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               1.7.2               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           1.7.2               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            1.7.2               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               1.7.2               xxxxxxxxxxxx        31 minutes ago      256MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         825MB
+malcolmnetsec/moloch                                1.8.0               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          1.8.0               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  1.8.0               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           1.8.0               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          1.8.0               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          1.8.0               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          1.8.0               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            1.8.0               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          1.8.0               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               1.8.0               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           1.8.0               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            1.8.0               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               1.8.0               xxxxxxxxxxxx        31 minutes ago      256MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.5               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -147,8 +158,8 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
 * Moloch: [https://localhost:443](https://localhost:443)
-* Kibana: [https://localhost:5601](https://localhost:5601)
-* Capture File and Log Archive Upload (Web): [https://localhost:8443](https://localhost:8443)
+* Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
+* Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/) or [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
 * Account Management: [https://localhost:488](https://localhost:488)
 
@@ -156,7 +167,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 
 ![Malcolm Network Diagram](./docs/images/malcolm_network_diagram.png)
 
-Malcolm processes network traffic data in the form of packet capture (PCAP) files or Zeek logs. A packet capture appliance ("sensor") monitors network traffic mirrored to it over a SPAN port on a network switch or router, or using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for examination later.
+Malcolm processes network traffic data in the form of packet capture (PCAP) files or Zeek logs. A [sensor](#Hedgehog) (packet capture appliance) monitors network traffic mirrored to it over a SPAN port on a network switch or router, or using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs and [Moloch](https://molo.ch/) sessions are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for examination later.
 
 Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments](#SegmentNaming) and [hosts](#HostNaming) based on user-defined IP address and MAC mappings, performing [TLS fingerprinting](#https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
 
@@ -179,7 +190,8 @@ Malcolm leverages the following excellent open source tools, among others.
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
-* [nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
+* [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
+* [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
 * These third party Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
@@ -212,7 +224,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Hypertext Transfer Protocol (HTTP)|[🔗](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc7230)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/http.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/http/main.zeek.html#type-HTTP::Info)|
 |Internet Relay Chat (IRC)|[🔗](https://en.wikipedia.org/wiki/Internet_Relay_Chat)|[🔗](https://tools.ietf.org/html/rfc1459)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/irc.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/irc/main.zeek.html#type-IRC::Info)|
 |Kerberos|[🔗](https://en.wikipedia.org/wiki/Kerberos_(protocol))|[🔗](https://tools.ietf.org/html/rfc4120)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/krb5.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/krb/main.zeek.html#type-KRB::Info)|
-|Lightweight Directory Acess Protocol (LDAP)|[🔗](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol)|[🔗](https://tools.ietf.org/html/rfc4511)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/ldap.c)|[✓](https://github.com/SoftwareConsultingEmporium/ldap-analyzer/blob/master/scripts/main.bro)|
+|Lightweight Directory Access Protocol (LDAP)|[🔗](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol)|[🔗](https://tools.ietf.org/html/rfc4511)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/ldap.c)|[✓](https://github.com/SoftwareConsultingEmporium/ldap-analyzer/blob/master/scripts/main.bro)|
 |Modbus|[🔗](https://en.wikipedia.org/wiki/Modbus)|[🔗](http://www.modbus.org/)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/modbus/main.zeek.html#type-Modbus::Info)|
 |MQ Telemetry Transport (MQTT)|[🔗](https://en.wikipedia.org/wiki/MQTT)|[🔗](https://mqtt.org/)||[✓](https://docs.zeek.org/en/stable/scripts/policy/protocols/mqtt/main.zeek.html)|
 |MySQL|[🔗](https://en.wikipedia.org/wiki/MySQL)|[🔗](https://dev.mysql.com/doc/internals/en/client-server-protocol.html)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/mysql.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/mysql/main.zeek.html#type-MySQL::Info)|
@@ -249,7 +261,7 @@ See [Zeek log integration](#MolochZeek) for more information on how Malcolm inte
 
 ## <a name="Development"></a>Development
 
-Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) results in the following subdirectories in your `malcolm/` working copy:
+Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm) results in the following subdirectories in your `malcolm/` working copy:
 
 * `curator` - code and configuration for the `curator` container which define rules for closing and/or deleting old Elasticsearch indices
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
@@ -263,7 +275,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/malcolm) resu
 * `htadmin` - configuration for the `htadmin` user account management container
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
-* `malcolm-iso` - code and configuration for building an installer ISO for a minimal Debian-based Linux installation for running Malcolm
+* `malcolm-iso` - code and configuration for building an [installer ISO](#ISO) for a minimal Debian-based Linux installation for running Malcolm
 * `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
@@ -304,7 +316,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `jwilder/nginx-proxy:alpine`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
@@ -355,8 +367,8 @@ To start, stop, restart, etc. Malcolm:
 
 A minute or so after starting Malcolm, the following services will be accessible:
   - Moloch: https://localhost/
-  - Kibana: https://localhost:5601/
-  - PCAP Upload (web): https://localhost:8443/
+  - Kibana: https://localhost/kibana/
+  - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
   - Account management: https://localhost:488/
 ```
@@ -408,6 +420,8 @@ Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
+* `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
+
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
@@ -458,7 +472,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
 
-* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (eg., `'enp0s25'` or `'enp10s0,enp11s0'`)
+* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
 
 * `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it closed for processing and a new PCAP file created 
 
@@ -501,7 +515,7 @@ The host system (ie., the one running Docker) will need to be configured for the
 
 ```
 # the maximum number of open file handles
-fs.file-max=65536
+fs.file-max=2097152
 
 # increase maximums for inotify watches
 fs.inotify.max_user_watches=131072
@@ -614,7 +628,7 @@ Installing and configuring Docker to run under Windows must be done manually, ra
     + **General**
         * Ensure *Start Docker Desktop when you log in* is checked.
     + **Shared Drives**
-        * Mark the drive onto which Malcolm is installed as *Shared* (eg., check *Shared* for drive *C*).
+        * Mark the drive onto which Malcolm is installed as *Shared* (e.g., check *Shared* for drive *C*).
     + **Advanced**
         + Increase *CPUs* to as many as you're comfortable with (at least *4* is best).
         + Increase *Memory* to as much as you're comfortable with (at least *16* is recommended, no fewer than *10*).
@@ -635,9 +649,17 @@ Once Docker is installed, configured and running as described in the previous se
 
 ### <a name="AuthSetup"></a>Configure authentication
 
-Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+Malcolm requires authentication to access the [user interface](#UserInterfaceURLs). [Nginx](https://nginx.org/) can authenticate users with either local TLS-encrypted HTTP basic authentication or using a remote Lightweight Directory Access Protocol (LDAP) authentication server.
 
-* define the administrator account username and password
+With the local basic authentication method, user accounts are managed by Malcolm and can be created, modified, and deleted using a [user management web interface](#AccountManagement). This method is suitable in instances where accounts and credentials do not need to be synced across many Malcolm installations.
+
+LDAP authentication are managed on a remote directory service, such as a [Microsoft Active Directory Domain Services](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) or [OpenLDAP](https://www.openldap.org/).
+
+Malcolm's authentication method is defined in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file with the `NGINX_BASIC_AUTH` environment variable: `true` for local TLS-encrypted HTTP basic authentication, `false` for LDAP authentication.
+
+In either case, you **must** run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+
+* define the local Malcolm administrator account username and password (although these credentials will only be used for basic authentication, not LDAP authentication)
 * specify whether or not to (re)generate the self-signed certificates used for HTTPS access
     * key and certificate files are located in the `nginx/certs/` directory
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
@@ -646,13 +668,75 @@ Run `./scripts/auth_setup.sh` before starting Malcolm for the first time in orde
 * specify whether or not to store the username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (see the `ES_EXTERNAL_HOSTS`, `ES_EXTERNAL_SSL`, and `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
     * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
 
-#### <a name="AccountManagement"></a>Account management
+##### <a name="AuthBasicAccountManagement"></a>Local account management
 
-[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (eg., [https://localhost:488](https://localhost:488) if you are connecting locally).
+[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
 
 Malcolm user accounts can be used to access the [interfaces](#UserInterfaceURLs) of all of its [components](#Components), including Moloch. Moloch uses its own internal database of user accounts, so when a Malcolm user account logs in to Moloch for the first time Malcolm creates a corresponding Moloch user account automatically. This being the case, it is *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as those settings would not be consistently used across Malcolm.
 
 Users may change their passwords via the **Malcolm User Management** page by clicking **User Self Service**. A forgotten password can also be reset via an emailed link, though this requires SMTP server settings to be specified in `htadmin/config.ini` in the Malcolm installation directory.
+
+#### <a name="AuthLDAP"></a>Lightweight Directory Access Protocol (LDAP) authentication
+
+The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup.sh`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
+
+```
+# This is a sample configuration for the ldap_server section of nginx.conf.
+# Yours will vary depending on how your Active Directory/LDAP server is configured.
+# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
+
+ldap_server ad_server {
+  url "ldap://ds.example.com:3268/DC=ds,DC=example,DC=com?sAMAccountName?sub?(objectClass=person)";
+
+  binddn "bind_dn";
+  binddn_passwd "bind_dn_password";
+
+  group_attribute member;
+  group_attribute_is_dn on;
+  require group "CN=Malcolm,CN=Users,DC=ds,DC=example,DC=com";
+  require valid_user;
+  satisfy all;
+}
+
+auth_ldap_cache_enabled on;
+auth_ldap_cache_expiration_time 10000;
+auth_ldap_cache_size 1000;
+```
+
+This file is mounted into the `nginx` container when Malcolm is started to provide connection information for the LDAP server.
+
+The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is configured. Some of the [avaiable parameters](https://github.com/kvspb/nginx-auth-ldap#available-config-parameters) in that file include:
+
+* **`url`** - the `ldap://` or `ldaps://` connection URL for the remote LDAP server, which has the [following syntax](https://www.ietf.org/rfc/rfc2255.txt): `ldap[s]://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>`
+* **`binddn`** and **`binddn_password`** - the account credentials used to query the LDAP directory
+* **`group_attribute`** - the group attribute name which contains the member object
+* **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
+* **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
+
+Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs.sh` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
+
+The **Malcolm User Management** page described above is not available when using LDAP authentication.
+
+##### <a name="AuthLDAPSecurity"></a>LDAP connection security
+
+Authentication over LDAP can be done using one of three ways, [two of which](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/8e73932f-70cf-46d6-88b1-8d9f86235e81) offer data confidentiality protection: 
+
+* **StartTLS** - the [standard extension](https://tools.ietf.org/html/rfc2830) to the LDAP protocol to establish an encrypted SSL/TLS connection within an already established LDAP connection
+* **LDAPS** - a commonly used (though unofficial and considered deprecated) method in which SSL negotiation takes place before any commands are sent from the client to the server
+* **Unencrypted** (clear text) (***not recommended***)
+
+In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file, the `NGINX_LDAP_TLS_STUNNEL` and `NGINX_LDAP_TLS_STUNNEL` environment variables are used in conjunction with the values in `nginx/nginx_ldap.conf` to define the LDAP connection security level. Use the following combinations of values to achieve the connection security methods above, respectively:
+
+* **StartTLS**
+    - `NGINX_LDAP_TLS_STUNNEL` set to `true` in [`docker-compose.yml`](#DockerComposeYml)
+    - `NGINX_LDAP_TLS_STUNNEL_PROTOCOL` set to `winldap` (for Microsoft Active Directory Domain Services) or `openldap` (for OpenLDAP) in [`docker-compose.yml`](#DockerComposeYml)
+    - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
+* **LDAPS**
+    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](#DockerComposeYml)
+    - `url` should begin with `ldaps://` and its port should be either the default LDAPS port (636) or the default LDAPS Global Catalog port (3269) in `nginx/nginx_ldap.conf` 
+* **Unencrypted** (clear text) (***not recommended***)
+    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](#DockerComposeYml)
+    - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
 
 ### <a name="Starting"></a>Starting Malcolm
 
@@ -678,11 +762,11 @@ Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch 
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
-Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs over HTTPS on port 8443 (eg., [https://localhost:8443](https://localhost:8443) if you are connecting locally).
+Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs at [https://localhost/upload/](https://localhost/upload/) if you are connecting locally.
 
 ![Capture File and Log Archive Upload](./docs/images/screenshots/malcolm_upload.png)
 
-Additionally, there is a writable `files` directory on an SFTP server served on port 8022 (eg., `sftp://USERNAME@localhost:8022/files/` if you are connecting locally).
+Additionally, there is a writable `files` directory on an SFTP server served on port 8022 (e.g., `sftp://USERNAME@localhost:8022/files/` if you are connecting locally).
 
 The types of files supported are:
 
@@ -713,7 +797,18 @@ The environment variables prefixed with `PCAP_` in the [`docker-compose.yml`](#D
 
 Note that currently Microsoft Windows and Apple macOS platforms run Docker inside of a virtualized environment. This would require additional configuration of virtual interfaces and port forwarding in Docker, the process for which is outside of the scope of this document.
 
-### <a name="ZeekForward"></a>Zeek logs from an external source
+### <a name="Hedgehog"></a>Using a network sensor appliance
+
+A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Moloch sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/) is a Debian-based operating system built to
+
+* monitor network interfaces
+* capture packets to PCAP files
+* detect file transfers in network traffic and extract and scan those files for threats
+* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
+
+Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/README.md) for more information.
+
+### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
 Malcolm’s Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
 
@@ -748,8 +843,6 @@ output.logstash:
   ssl.verification_mode: "none"
 ```
 
-A future release of Malcolm is planned which will include a customized Linux-based network sensor appliance OS installation image to help automate this setup.
-
 ### <a name="LiveZeek"></a>Monitoring a local Zeek instance
 
 Another option for analyzing live network data is to run an external local copy of Zeek (ie., not within Malcolm) so that the log files it creates are seen by Malcolm and automatically processed as they are written to a local directory on the same host.
@@ -769,7 +862,7 @@ Once Malcolm has been [started](#Starting), `cd` into `./zeek-logs/current/` and
 
 ## <a name="Moloch"></a>Moloch
 
-The Moloch interface will be accessible over HTTPS on port 443 at the docker hosts IP address (eg., [https://localhost](https://localhost) if you are connecting locally).
+The Moloch interface will be accessible over HTTPS on port 443 at the docker hosts IP address (e.g., [https://localhost](https://localhost) if you are connecting locally).
 
 ### <a name="MolochZeek"></a>Zeek log integration
 
@@ -793,11 +886,11 @@ The Moloch interface displays both Zeek logs and Moloch sessions alongside each 
 
 A few fields of particular mention that help limit returned results to those Zeek logs and Moloch session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`communityId` and `zeek.community_id` in Moloch and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Moloch's `rootId` field.
 
-Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (eg., Moloch sessions) to another (eg., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
+Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Moloch sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
 The `rootId` field is used by Moloch to link session records together when a particular session has too many packets to be represented by a single session. When normalizing Zeek logs to Moloch's schema, Malcolm piggybacks on `rootId` to store Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) to crossreference entries across Zeek log types. The connection UID is also stored in `zeek.uid`.
 
-Filtering on community ID OR'ed with zeek UID (eg., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Moloch sessions and Zeek logs generated by a particular network connection.
+Filtering on community ID OR'ed with zeek UID (e.g., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Moloch sessions and Zeek logs generated by a particular network connection.
 
 ![Correlating Moloch sessions and Zeek logs](./docs/images/screenshots/moloch_correlate_communityid_uid.png)
 
@@ -846,7 +939,7 @@ See the [issues](#Issues) section of this document for an error that can occur u
 
 ### <a name="MolochSPIView"></a>SPIView
 
-Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (eg., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Moloch and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
+Moloch's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (e.g., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Moloch and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
 
 ![Moloch's SPIView](./docs/images/screenshots/moloch_spiview.png)
 
@@ -949,7 +1042,7 @@ See Moloch's usage documentation for more information on [settings](https://loca
 
 While Moloch provides very nice visualizations, especially for network traffic, [Kibana](https://www.elastic.co/guide/en/kibana/current/getting-started.html) (an open source general-purpose data visualization tool for Elasticsearch) can be used to create custom visualizations (tables, charts, graphs, dashboards, etc.) using the same data.
 
-The Kibana container can be accessed over HTTPS on port 5601 (eg., [https://localhost:5601](https://localhost:5601) if you are connecting locally). Several preconfigured dashboards for Zeek logs are included in Malcolm's Kibana configuration.
+The Kibana container can be accessed at [https://localhost/kibana/](https://localhost/kibana/) if you are connecting locally. Several preconfigured dashboards for Zeek logs are included in Malcolm's Kibana configuration.
 
 The official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) has excellent tutorials for a variety of topics.
 
@@ -1141,7 +1234,7 @@ The `host-map.txt` file in the Malcolm installation directory can be used to def
 #
 # where:
 #   address: comma-separated list of IPv4, IPv6, or MAC addresses
-#          eg., 172.16.10.41, 02:42:45:dc:a2:96, 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+#          e.g., 172.16.10.41, 02:42:45:dc:a2:96, 2001:0db8:85a3:0000:0000:8a2e:0370:7334
 #
 #   host name: host name to be assigned when event address(es) match
 #
@@ -1170,7 +1263,7 @@ The `cidr-map.txt` file in the Malcolm installation directory can be used to def
 #
 # where:
 #   IP(s): comma-separated list of CIDR-formatted network IP addresses
-#          eg., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
+#          e.g., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
 #
 #   segment name: segment name to be assigned when event IP address(es) match
 #
@@ -1222,6 +1315,201 @@ Other custom [filters](https://www.elastic.co/guide/en/elasticsearch/client/cura
 The settings governing index curation can affect Malcolm's performance in both log ingestion and queries, and there are caveats that should be taken into consideration when configuring this feature. Please read the Elasticsearch documentation linked in this section with regards to index curation.
 
 Index curation only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Moloch to prune old PCAP files based on available disk space.
+
+## <a name="ISO"></a>Malcolm installer ISO
+
+Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
+
+Malcolm can be packaged into an installer ISO based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
+
+### <a name="ISOBuild"></a>Generating the ISO
+
+Official downloads of the Malcolm installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/).
+
+To perform a clean build the Malcolm installer ISO, navigate to your local Malcolm working copy and run:
+
+```
+$ ./malcolm-iso/build_via_vagrant.sh -f
+…
+Starting build machine...
+Bringing machine 'default' up with 'virtualbox' provider...
+…
+```
+
+Building the ISO may take 30 minutes or more depending on your system. As the build finishes, you will see the following message indicating success:
+
+```
+…
+Finished, created "/malcolm-build/malcolm-iso/malcolm-1.8.0.iso"
+…
+```
+
+By default, Malcolm's Docker images are not packaged with the installer ISO, assuming instead that you will pull the [latest images](https://hub.docker.com/u/malcolmnetsec) with a `docker-compose pull` command as described in the [Quick start](#QuickStart) section. If you wish to build an ISO with the latest Malcolm images included, follow the directions to create [pre-packaged installation files](#Packager), which include a tarball with a name like `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz`. Then, pass that images tarball to the ISO build script with a `-d`, like this:
+
+```
+$ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz
+…
+```
+
+A system installed from the resulting ISO will load the Malcolm Docker images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
+
+### <a name="ISOInstallation"></a>Installation
+
+The ISO medium boots on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+
+The installer will ask for several pieces of information prior to installing the Malcolm base operating system:
+
+* Hostname
+* Domain name
+* Root password – (optional) a password for the privileged root account which is rarely needed
+* User name: the name for the non-privileged service account user account under which the Malcolm runs
+* User password – a password for the non-privileged sensor account
+* Encryption password (optional) – if the encrypted installation option was selected at boot time, the encryption password must be entered every time the system boots
+
+At the end of the installation process, you will be prompted with a few self-explanatory yes/no questions:
+
+* **Disable IPv6?**
+* **Automatically login to the GUI session?**
+* **Should the GUI session be locked due to inactivity?**
+* **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
+
+Following these prompts, the installer will reboot and the Malcolm base operating system will boot.
+
+### <a name="ISOSetup"></a>Setup
+
+When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
+
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup.sh`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+
+Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
+
+### <a name="ConfigTime"></a>Time synchronization
+
+If you wish to set up time synchronization via [NTP](http://www.ntp.org/) or `htpdate`, open a terminal and run `sudo configure-interfaces.py`. Select **Continue**, then choose **Time Sync**. Here you can configure the operating system to keep its time synchronized with either an NTP server (using the NTP protocol), another Malcolm instance, or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
+
+If **htpdate** is selected, you will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for a Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+
+If *ntpdate* is selected, you will be prompted to enter the IP address or hostname of the NTP server.
+
+Upon configuring time synchronization, a "Time synchronization configured successfully!" message will be displayed.
+
+### <a name="Hardening"></a>Hardening
+
+The Malcolm aggregator base operating system targets the following guidelines for establishing a secure configuration posture:
+
+* DISA STIG (Security Technical Implementation Guides) [ported](https://github.com/hardenedlinux/STIG-4-Debian) from [DISA RHEL 7 STIG](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v1r1 to a Debian 9 base platform
+* [CIS Debian Linux 9 Benchmark](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/) with additional recommendations by the [hardenedlinux/harbian-audit](https://github.com/hardenedlinux/harbian-audit) project
+
+#### <a name="STIGExceptions"></a>STIG compliance exceptions
+
+[Currently](https://github.com/hardenedlinux/STIG-4-Debian/blob/master/stig-debian.txt) there are 158 compliance checks that can be verified automatically and 23 compliance checks that must be verified manually.
+
+The Malcolm aggregator base operating system claims the following exceptions to STIG compliance:
+
+| # | ID  | Title | Justification |
+| --- | --- | --- | --- |
+| 1 | [SV-86535r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71911) | When passwords are changed a minimum of eight of the total number of characters must be changed. | Account/password policy exception: As an aggregator running Malcolm is intended to be used as an appliance rather than a general user-facing software platform, some exceptions to password enforcement policies are claimed. |
+| 2 | [SV-86537r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71913) | When passwords are changed a minimum of four character classes must be changed. | Account/password policy exception |
+| 3 | [SV-86549r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71925) | Passwords for new users must be restricted to a 24 hours/1 day minimum lifetime. | Account/password policy exception |
+| 4 | [SV-86551r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71927) | Passwords must be restricted to a 24 hours/1 day minimum lifetime. | Account/password policy exception |
+| 5 | [SV-86553r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71929) | Passwords for new users must be restricted to a 60-day maximum lifetime. | Account/password policy exception |
+| 6 | [SV-86555r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71931) | Existing passwords must be restricted to a 60-day maximum lifetime. | Account/password policy exception |
+| 7 | [SV-86557r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71933) | Passwords must be prohibited from reuse for a minimum of five generations. | Account/password policy exception |
+| 8 | [SV-86565r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71941) | The operating system must disable account identifiers (individuals, groups, roles, and devices) if the password expires. | Account/password policy exception |
+| 9 | [SV-86567r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71943) | Accounts subject to three unsuccessful logon attempts within 15 minutes must be locked for the maximum configurable period. | Account/password policy exception |
+| 10 | [SV-86569r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71945) | If three unsuccessful root logon attempts within 15 minutes occur the associated account must be locked. | Account/password policy exception |
+| 11 | [SV-86603r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2018-11-28/finding/V-71979) | The … operating system must prevent the installation of software, patches, service packs, device drivers, or operating system components of local packages without verification they have been digitally signed using a certificate that is issued by a Certificate Authority (CA) that is recognized and approved by the organization. | As the base distribution is not using embedded signatures, `debsig-verify` would reject all packages (see comment in `/etc/dpkg/dpkg.cfg`). Enabling it after installation would disallow any future updates. |
+| 12 | [SV-86607r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71983) | USB mass storage must be disabled. | The ability to ingest data (such as PCAP files) from a mounted USB mass storage device is a requirement of the system. |
+| 13 | [SV-86609r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71985) | File system automounter must be disabled unless required. | The ability to ingest data (such as PCAP files) from a mounted USB mass storage device is a requirement of the system. |
+| 14 | [SV-86705r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72081) | The operating system must shut down upon audit processing failure, unless availability is an overriding concern. If availability is a concern, the system must alert the designated staff (System Administrator [SA] and Information System Security Officer [ISSO] at a minimum) in the event of an audit processing failure. | As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. |
+| 15 | [SV-86713r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72089) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | same as above |
+| 16 | [SV-86715r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72093) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer (ISSO) (at a minimum) when the threshold for the repository maximum audit record storage capacity is reached. | same as above |
+| 17 | [SV-86597r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71973) | A file integrity tool must verify the baseline operating system configuration at least weekly. | This functionality is not configured by default, but it could be configured post-install using [Auditbeat](https://www.elastic.co/products/beats/auditbeat) or `aide` |
+| 18 | [SV-86697r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72073) | The file integrity tool must use FIPS 140-2 approved cryptographic hashes for validating file contents and directories. | same as above |
+| 19 | [SV-86707r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72083) | The operating system must off-load audit records onto a different system or media from the system being audited. | same as above |
+| 20 | [SV-86709r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72085) | The operating system must encrypt the transfer of audit records off-loaded onto a different system or media from the system being audited. | same as above  |
+| 21 | [SV-86833r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72209) | The system must send rsyslog output to a log aggregation server. | same as above  |
+| 22 | [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | same as above  |
+| 23 | [SV-86693r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72069) | The file integrity tool must be configured to verify Access Control Lists (ACLs). | As this is not a multi-user system, the ACL check would be irrelevant. |
+| 24 | [SV-86837r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/2016-12-16/finding/V-38666) | The system must use and update a DoD-approved virus scan program. | As this is a network traffic analysis appliance rather than an end-user device, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
+| 25 | [SV-86839r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72215) | The system must update the virus scan program every seven days or more frequently. | As this is a network traffic analysis appliance rather than an end-user device, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
+| 26 | [SV-86847r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72223) | All network connections associated with a communication session must be terminated at the end of the session or after 10 minutes of inactivity from the user at a command prompt, except to fulfill documented and validated mission requirements. | Malcolm be controlled from the command line in a manual capture scenario, so timing out a session based on command prompt inactivity would be inadvisable. | 
+| 27 | [SV-86893r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72269) | The operating system must, for networked systems, synchronize clocks with a server that is synchronized to one of the redundant United States Naval Observatory (USNO) time servers, a time server designated for the appropriate DoD network (NIPRNet/SIPRNet), and/or the Global Positioning System (GPS). | While [time synchronization](#ConfigTime) is supported on the Malcolm aggregator base operating system, an exception is claimed for this rule as the device may be configured to sync to servers other than the ones listed in the STIG. |
+| 28 | [SV-86905r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72281) | For systems using DNS resolution, at least two name servers must be configured. | STIG recommendations for DNS servers are not enforced on the Malcolm aggregator base operating system to allow for use in a variety of network scenarios. |
+| 29 | [SV-86919r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72295) | Network interfaces must not be in promiscuous mode. | One purpose of the Malcolm aggregator base operating system is to sniff and capture network traffic. |
+| 30 | [SV-86931r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72307) | An X Windows display manager must not be installed unless approved. | A locked-down X Windows session is required for the sensor's kiosk display. |
+| 31 | [SV-86519r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71895) | The operating system must set the idle delay setting for all connection types. | As this is a network traffic aggregation and analysis appliance rather than an end-user device, timing out displays or connections would not be desirable. |
+| 32 | [SV-86523r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71899) | The operating system must initiate a session lock for the screensaver after a period of inactivity for graphical user interfaces. | This option is configurable during install time. Some installations of the Malcolm aggregator base operating system may be on appliance hardware not equipped with a keyboard by default, in which case it may not be desirable to lock the session.|
+| 33 | [SV-86525r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71901) | The operating system must initiate a session lock for graphical user interfaces when the screensaver is activated. | This option is configurable during install time. Some installations of the Malcolm aggregator base operating system may be on appliance hardware not equipped with a keyboard by default, in which case it may not be desirable to lock the session. |
+| 34 | [SV-86589r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71965) | The operating system must uniquely identify and must authenticate organizational users (or processes acting on behalf of organizational users) using multifactor authentication. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| 35 | [SV-86921r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72297) | The system must be configured to prevent unrestricted mail relaying. | Does not apply as the Malcolm aggregator base operating system not does run a mail server service. |
+| 36 | [SV-86929r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72305) | If the Trivial File Transfer Protocol (TFTP) server is required, the TFTP daemon must be configured to operate in secure mode. | Does not apply as the Malcolm aggregator base operating system does not run a TFTP server. |
+| 37 | [SV-86935r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72311) | The Network File System (NFS) must be configured to use RPCSEC_GSS. | Does not apply as the Malcolm aggregator base operating system does not run an NFS server. |
+| 38 | [SV-87041r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72417) | The operating system must have the required packages for multifactor authentication installed. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| 39 | [SV-87051r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72427) | The operating system must implement multifactor authentication for access to privileged accounts via pluggable authentication modules (PAM). | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| 40 | [SV-87059r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72435) | The operating system must implement smart card logons for multifactor authentication for access to privileged accounts. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| 41 | [SV-87829r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-73177) | Wireless network adapters must be disabled. | As an appliance intended to capture network traffic in a variety of network environments, wireless adapters may be needed to capture and/or report wireless traffic. |
+| 42 | [SV-86699r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72075) | The system must not allow removable media to be used as the boot loader unless approved. | the Malcolm aggregator base operating system supports a live boot mode that can be booted from removable media. |
+
+Please review the notes for these additional rules. While not claiming an exception, they may be implemented or checked in a different way than outlined by the RHEL STIG as the Malcolm aggregator base operating system is not built on RHEL or for other reasons.
+
+| # | ID  | Title | Note |
+| --- | --- | --- | --- |
+| 1 | [SV-86585r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71961) | Systems with a Basic Input/Output System (BIOS) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
+| 2 | [SV-86587r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71963) | Systems using Unified Extensible Firmware Interface (UEFI) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
+| 3 | [SV-86651r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72027) | All files and directories contained in local interactive user home directories must have mode 0750 or less permissive. | Depending on when the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is run, some ephemeral files may exist in the service account's home directory which will cause this check to fail. For practical purposes the Malcolm aggregator base operating system's configuration does, however, comply.
+| 4 | [SV-86623r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71999) | Vendor packaged system security patches and updates must be installed and up to date. | When the the Malcolm aggregator base operating system sensor appliance software is built, all of the latest applicable security patches and updates are included in it. How future updates are to be handled is still in design. |
+| 6 | [SV-86691r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72067) | The operating system must implement NIST FIPS-validated cryptography for the following: to provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | the Malcolm aggregator base operating system does use FIPS-compatible libraries for cryptographic functions. However, the kernel parameter being checked by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is incompatible with some of the systems initialization scripts.|
+
+In addition, DISA STIG rules SV-86663r1, SV-86695r2, SV-86759r3, SV-86761r3, SV-86763r3, SV-86765r3, SV-86595r1, and SV-86615r2 relate to the SELinux kernel which is not used in the Malcolm aggregator base operating system, and are thus skipped.
+
+#### <a name="CISExceptions"></a>CIS benchmark compliance exceptions
+
+[Currently](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening) there are 271 checks to determine compliance with the CIS Debian Linux 9 Benchmark.
+
+The Malcolm aggregator base operating system claims exceptions from the recommendations in this benchmark in the following categories:
+
+**1.1 Install Updates, Patches and Additional Security Software** - When the the Malcolm aggregator appliance software is built, all of the latest applicable security patches and updates are included in it. How future updates are to be handled is still in design.
+
+**1.3 Enable verify the signature of local packages** - As the base distribution is not using embedded signatures, `debsig-verify` would reject all packages (see comment in `/etc/dpkg/dpkg.cfg`). Enabling it after installation would disallow any future updates.
+
+**2.14 Add nodev option to /run/shm Partition**, **2.15 Add nosuid Option to /run/shm Partition**, **2.16 Add noexec Option to /run/shm Partition** - The Malcolm aggregator base operating system does not mount `/run/shm` as a separate partition, so these recommendations do not apply.
+
+**2.18 Disable Mounting of cramfs Filesystems**, **2.19 Disable Mounting of freevxfs Filesystems**, **2.20 Disable Mounting of jffs2 Filesystems**, **2.21 Disable Mounting of hfs Filesystems**, **2.22 Disable Mounting of hfsplus Filesystems**, **2.23 Disable Mounting of squashfs Filesystems**, **2.24 Disable Mounting of udf Filesystems** - The Malcolm aggregator base operating system is not compiling a custom Linux kernel, so these filesystems are inherently supported as they are part Debian Linux's default kernel.
+
+**4.6 Disable USB Devices** - The ability to ingest data (such as PCAP files) from a mounted USB mass storage device is a requirement of the system.
+
+**6.1 Ensure the X Window system is not installed**, **6.2 Ensure Avahi Server is not enabled**, **6.3 Ensure print server is not enabled** - An X Windows session is provided for displaying dashboards. The library packages `libavahi-common-data`, `libavahi-common3`, and `libcups2` are dependencies of some of the X components used by the Malcolm aggregator base operating system, but the `avahi` and `cups` services themselves are disabled.
+
+**6.17 Ensure virus scan Server is enabled**, **6.18 Ensure virus scan Server update is enabled** - As this is a network traffic analysis appliance rather than an end-user device, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary.
+
+**7.2.4 Log Suspicious Packets**, **7.2.7 Enable RFC-recommended Source Route Validation**, **7.4.1 Install TCP Wrappers** - As Malcolm may operate as a network traffic capture appliance sniffing packets on a network interface configured in promiscuous mode, these recommendations do not apply.
+
+**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - This functionality is not configured by default, but it could be configured post-install using [Auditbeat](https://www.elastic.co/products/beats/auditbeat) or `aide`.
+
+**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote_server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. `auditd` is set up to syslog when its local storage capacity is reached.
+
+Password-related recommendations under **9.2** and **10.1** - The library package `libpam-pwquality` is used in favor of `libpam-cracklib` which is what the [compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening) are looking for. Also, as an appliance running Malcolm is intended to be used as an appliance rather than a general user-facing software platform, some exceptions to password enforcement policies are claimed.
+
+**9.3.13 Limit Access via SSH** - The Malcolm aggregator base operating system does not create multiple regular user accounts: only `root` and an aggregator service account are used. SSH access for `root` is disabled. SSH login with a password is also disallowed: only key-based authentication is accepted. The service account accepts no keys by default. As such, the `AllowUsers`, `AllowGroups`, `DenyUsers`, and `DenyGroups` values in `sshd_config` do not apply.
+
+**9.5 Restrict Access to the su Command** - The Malcolm aggregator base operating system does not create multiple regular user accounts: only `root` and an aggregator service account are used.
+
+**10.1.10 Set maxlogins for all accounts** and **10.5 Set Timeout on ttys** - The Malcolm aggregator base operating system does not create multiple regular user accounts: only `root` and an aggregator service account are used.
+
+**12.10 Find SUID System Executables**, **12.11 Find SGID System Executables** - The few files found by [these](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/12.10_find_suid_files.sh) [scripts](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/12.11_find_sgid_files.sh) are valid exceptions required by the Malcolm aggregator base operating system's core requirements.
+
+Please review the notes for these additional guidelines. While not claiming an exception, the Malcolm aggregator base operating system may implement them in a manner different than is described by the [CIS Debian Linux 9 Benchmark](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/) or the [hardenedlinux/harbian-audit](https://github.com/hardenedlinux/harbian-audit) audit scripts.
+
+**4.1 Restrict Core Dumps** - The Malcolm aggregator base operating system disables core dumps using a configuration file for `ulimit` named `/etc/security/limits.d/limits.conf`. The [audit script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/4.1_restrict_core_dumps.sh) checking for this does not check the `limits.d` subdirectory, which is why this is incorrectly flagged as noncompliant.
+
+**5.4 Ensure ctrl-alt-del is disabled** - The Malcolm aggregator base operating system disables the `ctrl+alt+delete` key sequence by executing `systemctl disable ctrl-alt-del.target` during installation and the command `systemctl mask ctrl-alt-del.target` at boot time.
+
+**6.19 Configure Network Time Protocol (NTP)** - While [time synchronization](#ConfigTime) is supported on the Malcolm aggregator base operating system, an exception is claimed for this rule as the network sensor device may be configured to sync to servers in a different way than specified in the benchmark.
+
+**7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - The Malcolm aggregator base operating system **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
+
+**8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass intergrity checks.
 
 ## <a name="Issues"></a>Known issues
 
@@ -1294,6 +1582,12 @@ fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 fs.inotify.max_user_watches increases allowed maximum for monitored files
 fs.inotify.max_user_watches= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
+fs.inotify.max_queued_events increases queue size for monitored files
+fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
+fs.inotify.max_user_instances increases allowed maximum monitor file watchers
+fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+
 
 vm.max_map_count increases allowed maximum for memory segments
 vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
@@ -1345,11 +1639,13 @@ Restart Malcolm upon system or Docker daemon restart? (y/N): y
 
 Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
 
+Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
+
 Periodically close old Elasticsearch indices? (Y/n): y
 
 Indices older than 5 years will be periodically closed. Is this OK? (Y/n): n
 
-Enter index close threshold (eg., 90 days, 2 years, etc.): 1 years
+Enter index close threshold (e.g., 90 days, 2 years, etc.): 1 years
 
 Indices older than 1 years will be periodically closed. Is this OK? (Y/n): y
 
@@ -1357,7 +1653,7 @@ Periodically delete old Elasticsearch indices? (Y/n): y
 
 Indices older than 10 years will be periodically deleted. Is this OK? (Y/n): n
 
-Enter index delete threshold (eg., 90 days, 2 years, etc.): 5 years
+Enter index delete threshold (e.g., 90 days, 2 years, etc.): 5 years
 
 Indices older than 5 years will be periodically deleted. Is this OK? (Y/n): y
 
@@ -1438,20 +1734,20 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.7.2               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  1.7.2               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               1.7.2               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.7.2               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.7.2               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.7.2               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          1.7.2               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          1.7.2               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.7.2               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.7.2               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.7.2               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.7.2               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.7.2               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.4               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                1.8.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  1.8.0               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               1.8.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.8.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.8.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.8.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          1.8.0               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          1.8.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.8.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.8.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.8.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.8.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.8.0               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.5               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1475,9 +1771,9 @@ Creating malcolm_zeek_1          ... done
 
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
-  - Moloch: https://localhost:443/
-  - Kibana: https://localhost:5601/
-  - PCAP Upload (web): https://localhost:8443/
+  - Moloch: https://localhost/
+  - Kibana: https://localhost/kibana/
+  - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Account management: https://localhost:488/
 …
@@ -1499,9 +1795,9 @@ You can now open a web browser and navigate to one of the [Malcolm user interfac
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://malcolm.fyi) is Copyright 2019 Battelle Energy Alliance, LLC, and is [developed and released](https://github.com/idaholab/Malcolm) through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See `License.txt` for the terms of its release.
+See [`License.txt`](./License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 

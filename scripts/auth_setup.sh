@@ -65,6 +65,42 @@ htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/nu
 # if the admininstrator username has changed, remove the previous administrator username from htpasswd
 [[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
 
+source ../.ldap_config_defaults 2>/dev/null || true
+LDAP_DEFAULT_PROTO=${LDAP_PROTO:-"ldap://"}
+LDAP_DEFAULT_HOST=${LDAP_HOST:-"ds.example.com"}
+LDAP_DEFAULT_PORT=${LDAP_PORT:-"3268"}
+LDAP_DEFAULT_SERVER_TYPE=${LDAP_SERVER_TYPE:-"winldap"}
+if [[ "$LDAP_DEFAULT_SERVER_TYPE" = 'openldap' ]]; then
+  LDAP_DEFAULT_URI='DC=example,DC=com?uid?sub?(objectClass=posixAccount)'
+  LDAP_DEFAULT_GROUP_ATTR=memberuid
+else
+  LDAP_DEFAULT_URI='DC=example,DC=com?sAMAccountName?sub?(objectClass=person)'
+  LDAP_DEFAULT_GROUP_ATTR=member
+fi
+
+[[ ! -f nginx_ldap.conf ]] && cat <<EOF > nginx_ldap.conf
+# This is a sample configuration for the ldap_server section of nginx.conf.
+# Yours will vary depending on how your Active Directory/LDAP server is configured.
+# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.
+
+ldap_server ad_server {
+  url "${LDAP_DEFAULT_PROTO}${LDAP_DEFAULT_HOST}:${LDAP_DEFAULT_PORT}/${LDAP_DEFAULT_URI}";
+
+  binddn "bind_dn";
+  binddn_passwd "bind_dn_password";
+
+  group_attribute ${LDAP_DEFAULT_GROUP_ATTR};
+  group_attribute_is_dn on;
+  require group "CN=malcolm,OU=groups,DC=example,DC=com";
+  require valid_user;
+  satisfy all;
+}
+
+auth_ldap_cache_enabled on;
+auth_ldap_cache_expiration_time 10000;
+auth_ldap_cache_size 1000;
+EOF
+
 popd >/dev/null 2>&1
 
 pushd ./htadmin/ >/dev/null 2>&1
