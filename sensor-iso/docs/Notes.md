@@ -339,8 +339,7 @@ The following bash script was used to download, [build and install](https://docs
 ZEEK_VER="3.0.1"
 ZEEK_URL="https://www.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
-  # Fix redef'ing a table with a new &default attribute - https://github.com/zeek/zeek/pull/632
-  https://github.com/zeek/zeek/pull/632/commits/42b6040952030c44ce337704916cf89a065994b0.patch
+  # nothing here for now
 )
 
 # Build and install zeek
@@ -365,7 +364,6 @@ checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgnam
 * Notes:
     - Zeek is installed to `/opt/zeek` in this configuration
     - `ninja` was used instead of `make` to reduce build times
-    - a [regression](https://github.com/zeek/zeek/pull/632) bug in Zeek 3.0.1 is patched inline in this installation of Zeek
     - `checkinstall` is used instead of `make install` to generate a Debian `.deb` package that can be installed and uninstalled with standard system package management utilities
 
 ## <a name="ZeekThirdParty"></a>Third party plugins
