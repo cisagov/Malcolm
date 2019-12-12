@@ -90,7 +90,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.5
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.5.0
     restart: "no"
     hostname: elasticsearch
     environment:

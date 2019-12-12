@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:6.8.5
+FROM docker.elastic.co/beats/filebeat-oss:7.5.0
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
