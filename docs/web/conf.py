@@ -24,7 +24,7 @@ SITE_URL = "https://malcolm.fyi/"
 # This is the URL where Nikola's output will be deployed.
 # If not set, defaults to SITE_URL
 # BASE_URL = "https://malcolm.fyi/"
-BLOG_EMAIL = "Seth.Grover@inl.gov?subject=Malcolm"
+BLOG_EMAIL = "malcolm.netsec@gmail.com"
 BLOG_DESCRIPTION = "Malcolm is a powerful, easily deployable network traffic analysis tool suite for full packet capture artifacts (PCAP files) and Zeek logs."  # (translatable)
 
 # Nikola is multilingual!
