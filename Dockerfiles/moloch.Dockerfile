@@ -84,8 +84,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
 FROM debian:buster-slim
 
 
-LABEL maintainer="Seth.Grover@inl.gov"
-LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL maintainer="malcolm.netsec@gmail.com"
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'

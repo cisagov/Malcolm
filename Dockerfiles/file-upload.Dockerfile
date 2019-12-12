@@ -1,8 +1,8 @@
 FROM debian:buster-slim AS build
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="Seth.Grover@inl.gov"
-LABEL org.opencontainers.image.authors='Seth.Grover@inl.gov'
+LABEL maintainer="malcolm.netsec@gmail.com"
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'

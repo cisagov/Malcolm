@@ -1801,7 +1801,7 @@ See [`License.txt`](./License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Malcolm)
+[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Malcolm)
 
 ## Other Software
 Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:

@@ -2173,4 +2173,4 @@ See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/Li
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:Seth.Grover@inl.gov?subject=Network%20sensor%20development)
+[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Network%20sensor%20development)
