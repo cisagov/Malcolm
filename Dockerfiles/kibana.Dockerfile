@@ -49,6 +49,8 @@ ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/maps /opt/maps
 ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
 
+# todo: these extra plugins are kind of gutted right now with 7.5.0, need to fix
+
 # ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.4.2/prelert_swimlane_vis-7.4.2.zip /tmp/kibana-swimlane.zip
 # ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
 

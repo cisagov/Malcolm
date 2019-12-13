@@ -97,6 +97,8 @@ services:
       bootstrap.memory_lock : 'true'
       ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
+      discovery.type : 'single-node'
+      # cluster.initial_master_nodes : 'elasticsearch'
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       cluster.max_shards_per_node : 2500
@@ -139,7 +141,7 @@ services:
       - 5601
       - 28991
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+        test: ["CMD", "curl", "-f", "http://localhost:5601/kibana/api/status"]
         interval: 30s
         timeout: 15s
         retries: 3
