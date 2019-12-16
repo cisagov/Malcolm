@@ -34,10 +34,12 @@ do
       cp "$BEAT-$BEATS_VERSION-linux-amd64.tar.gz" /build
 
     elif [[ "$BEAT" =~ ^https*://(gogs\..*|github\.com) ]] ; then
+      BRANCH=${THIRD_PARTY_BRANCH:-"master"}
+
       # clone from git manually rather than do a "go get"
       mkdir -p "$GOPATH/src/$(dirname "$(echo "$BEAT" | sed "s@^https*://@@")")"
       cd "$GOPATH/src/$(dirname "$(echo "$BEAT" | sed "s@^https*://@@")")"
-      git clone "$BEAT"
+      git clone --depth=1 --single-branch --branch "$BRANCH" "$BEAT"
       BEAT_EXE_NAME="$(basename "$BEAT" | sed "s/\.git$//")"
       cd "$BEAT_EXE_NAME"
       go install
