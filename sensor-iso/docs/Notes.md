@@ -1958,7 +1958,7 @@ auditbeat.modules:
                       auditd.summary.how: '/usr/sbin/netsniff-ng'
           - and:
               - equals:
-                  event.type: 'syscall'
+                  auditd.message_type: 'syscall'
               - equals:
                   auditd.summary.object.type: 'file'
               - or:
