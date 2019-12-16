@@ -71,7 +71,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"gridData\":{\"h\":10,\"i\":\"1\",\"w\":10,\"x\":2,\"y\":0},\"id\":\"7fe0a885-b172-48b9-ac34-0c8e8d5c2f82\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"gridData\":{\"h\":11,\"i\":\"2\",\"w\":2,\"x\":0,\"y\":0},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.1.1\"}]",
-        "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
+        "optionsJSON": "{\"useMargins\":true}",
         "uiStateJSON": "{\"P-1\":{\"mapCenter\":[24.846565348219734,0.087890625],\"mapZoom\":2}}",
         "version": 1,
         "timeRestore": false,

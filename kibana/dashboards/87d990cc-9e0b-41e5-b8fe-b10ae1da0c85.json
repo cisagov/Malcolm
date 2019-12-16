@@ -119,7 +119,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":2,\"h\":11,\"i\":\"1\"},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":4,\"y\":0,\"w\":8,\"h\":2,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"id\":\"097640cc-167e-453d-bf5a-0e92ac1347fc\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"9\",\"gridData\":{\"x\":0,\"y\":11,\"w\":12,\"h\":10,\"i\":\"9\"},\"columns\":[\"srcIp\",\"zeek_software.name\",\"zeek_software.software_type\"],\"id\":\"7d54b196-5c2b-485e-9798-f116fb668413\",\"sort\":[\"firstPacket\",\"desc\"],\"type\":\"search\",\"version\":\"6.1.1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":2,\"y\":0,\"w\":2,\"h\":2,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"id\":\"AWDHEKJUxQT5EBNmq4jW\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"11\",\"gridData\":{\"x\":2,\"y\":2,\"w\":10,\"h\":9,\"i\":\"11\"},\"id\":\"bb882862-2f74-440a-bb62-41a9dca2b463\",\"type\":\"visualization\",\"version\":\"6.2.4\"}]",
-        "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
+        "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
