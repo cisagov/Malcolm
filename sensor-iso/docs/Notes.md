@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.1](https://github.com/aol/moloch/releases/tag/v2.1.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.2](https://github.com/aol/moloch/releases/tag/v2.1.2). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.1.1"
+MOLOCH_VERSION="2.1.2"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
@@ -2089,14 +2089,28 @@ logging.metrics.enabled: false
 
 # <a name="System"></a>System considerations
 
-## <a name="nicOffloading"></a>NIC offloading
+## <a name="nicOffloading"></a>NIC offloading and ring buffer sizes.
 
-Modern operating systems offload various functions from the OS to the hardware of the network interface cards. In order for packet capture tools to capture what is actually crossing the wire (vs. what the OS networking stack sees), the offloading of these functions should be disabled prior to capture. This short script can be called with a network interface name (e.g., `disable-nic-offloading.sh enp8s0`) to disable NIC offloading for these features.
+Modern operating systems offload various functions from the OS to the hardware of the network interface cards. In order for packet capture tools to capture what is actually crossing the wire (vs. what the OS networking stack sees), the offloading of these functions should be disabled prior to capture. Additionally, the NIC ring buffer sizes should be increased for capture.
+
+This short script can be called with a network interface name (e.g., `nic-capture-setup.sh enp8s0`) to disable NIC offloading for these features.
 
 ```bash
 #!/bin/bash
 
-[[ -n "$1" ]] && /sbin/ethtool -K "$1" rx off tx off sg off tso off ufo off gso off gro off lro off
+IFACE_NAME="$1"
+
+if [[ -n "$IFACE_NAME" ]]; then
+  # disable NIC feature offloading
+  /sbin/ethtool -K "$IFACE_NAME" rx off tx off sg off tso off ufo off gso off gro off lro off
+
+  # increase ring buffer sizes to maximum (may increase latency, but maximize throughput)
+  MAX_BUFFER_SIZES=($(/sbin/ethtool -g "$IFACE_NAME" | grep -E "^(RX|TX):" | head -n 2 | awk '{print $2}'))
+  if ((${#MAX_BUFFER_SIZES[@]} == 2)); then
+    /sbin/ethtool -G "$IFACE_NAME" rx ${MAX_BUFFER_SIZES[0]} tx ${MAX_BUFFER_SIZES[1]}
+  fi
+
+fi
 ```
 
 For more reading on this subject, see [Large send offload](https://en.wikipedia.org/wiki/Large_send_offload), [Generic Segmentation Offload](https://lwn.net/Articles/188489/), [Generic receive offload](https://lwn.net/Articles/358910/), [Super packets](https://www.unleashnetworks.com/blog/?p=307), [Offloading](https://wiki.wireshark.org/CaptureSetup/Offloading), [Packet Acquisition](http://manual-snort-org.s3-website-us-east-1.amazonaws.com/node7.html) and [Security Onion](https://blog.securityonion.net/2011/10/when-is-full-packet-capture-not-full.html).

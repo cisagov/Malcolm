@@ -160,6 +160,7 @@ strace
 sudo
 supervisor
 swig
+sysstat
 tar
 terminator
 tmux

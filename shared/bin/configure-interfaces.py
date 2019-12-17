@@ -408,7 +408,7 @@ def main():
             'addrFam': 'inet',
             'source': Constants.UNASSIGNED,
             'pre-up': 'ip link set dev $IFACE up',
-            'post-up': '/usr/local/bin/disable-nic-offloading.sh $IFACE',
+            'post-up': '/usr/local/bin/nic-capture-setup.sh $IFACE',
             'post-down': 'ip link set dev $IFACE down'}, 0)
 
           write_and_display_results(interfaces, selected_iface)
