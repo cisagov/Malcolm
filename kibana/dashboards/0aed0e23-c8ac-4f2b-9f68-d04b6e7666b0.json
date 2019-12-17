@@ -1,5 +1,5 @@
 {
-  "version": "6.8.5",
+  "version": "7.5.0",
   "objects": [
     {
       "id": "53854a54-2b8b-474e-a36c-bce80276004e",
@@ -71,7 +71,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"gridData\":{\"h\":10,\"i\":\"1\",\"w\":10,\"x\":2,\"y\":0},\"id\":\"53854a54-2b8b-474e-a36c-bce80276004e\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"gridData\":{\"h\":11,\"i\":\"2\",\"w\":2,\"x\":0,\"y\":0},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.1.1\"}]",
-        "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
+        "optionsJSON": "{\"useMargins\":true}",
         "uiStateJSON": "{\"P-1\":{\"mapCenter\":[39.639537564366684,0.17578125],\"mapZoom\":2}}",
         "version": 1,
         "timeRestore": false,

@@ -1,5 +1,5 @@
 {
-  "version": "6.8.5",
+  "version": "7.5.0",
   "objects": [
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
@@ -153,7 +153,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"gridData\":{\"h\":12,\"i\":\"2\",\"w\":2,\"x\":0,\"y\":0},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":2,\"i\":\"3\",\"w\":8,\"x\":4,\"y\":0},\"id\":\"a44daac6-37e2-4fef-8b78-32232c4f32e8\",\"panelIndex\":\"3\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"gridData\":{\"h\":4,\"i\":\"5\",\"w\":5,\"x\":7,\"y\":2},\"id\":\"6b1bf8b4-399b-4ef2-baeb-7f9b1740b657\",\"panelIndex\":\"5\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"gridData\":{\"h\":4,\"i\":\"7\",\"w\":5,\"x\":2,\"y\":2},\"id\":\"59b3dd10-2de5-40d2-88ea-caf2bd3da549\",\"panelIndex\":\"7\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"columns\":[\"zeek_pe.fuid\",\"zeek_pe.machine\",\"zeek_pe.is_exe\",\"zeek_pe.is_64bit\",\"zeek_pe.subsystem\",\"_id\"],\"gridData\":{\"h\":7,\"i\":\"8\",\"w\":12,\"x\":0,\"y\":12},\"id\":\"13f6cda1-6b4d-4a7d-b72e-25eeabec8768\",\"panelIndex\":\"8\",\"sort\":[\"firstPacket\",\"desc\"],\"type\":\"search\",\"version\":\"6.1.1\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":6,\"i\":\"9\",\"w\":5,\"x\":7,\"y\":6},\"id\":\"7c810b56-5297-4aed-abac-cff41dfa5c77\",\"panelIndex\":\"9\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":6,\"i\":\"10\",\"w\":5,\"x\":2,\"y\":6},\"id\":\"0b774699-b798-40ae-ae92-2ac2a619eeb9\",\"panelIndex\":\"10\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":2,\"i\":\"11\",\"w\":2,\"x\":2,\"y\":0},\"id\":\"AWDHCUeZxQT5EBNmq4Xy\",\"panelIndex\":\"11\",\"type\":\"visualization\",\"version\":\"6.1.1\"}]",
-        "optionsJSON": "{\"darkTheme\":true,\"hidePanelTitles\":false,\"useMargins\":true}",
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {

@@ -104,7 +104,7 @@ if [ -d "$WORKDIR" ]; then
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/
   bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero/protologbeat" -t "v6.8.3"
+  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero/protologbeat" -t "master"
   mv github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # clone and build Moloch .deb package in its own clean environment (rather than in hooks/)

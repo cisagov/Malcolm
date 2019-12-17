@@ -11,7 +11,7 @@ ZEEK_PATCH_URLS=(
   # nothing here for now
 )
 
-BEATS_VER="6.8.5"
+BEATS_VER="7.5.0"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
@@ -133,13 +133,12 @@ freshclam --stdout --quiet --no-warnings
 for BEAT in filebeat metricbeat auditbeat packetbeat; do
   BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
   BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
-  BEATS_NEW_DEB="$BEAT-dark-$BEATS_VER-amd64.deb"
+  BEATS_NEW_DEB="$BEAT-tweaked-$BEATS_VER-amd64.deb"
   BEATS_TMP_DIR="$BEAT-deb"
   pushd /tmp && \
     curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
     dpkg-deb -x "$BEATS_DEB" "$BEATS_TMP_DIR" && \
     dpkg-deb -e "$BEATS_DEB" "$BEATS_TMP_DIR/DEBIAN" && \
-    sed -i 's@\(\\"darkTheme\\" *: *\)false@\1true@g' "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/*.json && \
     ( [[ "$BEAT" == "metricbeat" ]] && sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/* || true ) && \
     pushd "$BEATS_TMP_DIR" && ( rm -f DEBIAN/md5sums && find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -l -0 md5sum >> DEBIAN/md5sums ) && popd && \
     dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \

@@ -2,7 +2,7 @@
 
 # Copyright (c) 2018 Battelle Energy Alliance, LLC.  All rights reserved.
 
-VERSION="6.8.5"
+VERSION="7.5.0"
 THIRD_PARTY_BRANCH="master"
 while getopts b:v:t: opts; do
    case ${opts} in

@@ -90,13 +90,15 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.5
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.5.0
     restart: "no"
     hostname: elasticsearch
     environment:
       bootstrap.memory_lock : 'true'
       ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
+      discovery.type : 'single-node'
+      # cluster.initial_master_nodes : 'elasticsearch'
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       cluster.max_shards_per_node : 2500
@@ -122,7 +124,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.8.0
+    image: malcolmnetsec/kibana-oss:1.8.1
     restart: "no"
     hostname: kibana
     environment:
@@ -139,7 +141,7 @@ services:
       - 5601
       - 28991
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+        test: ["CMD", "curl", "-f", "http://localhost:5601/kibana/api/status"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -148,7 +150,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.8.0
+    image: malcolmnetsec/elastalert:1.8.1
     restart: "no"
     hostname: elastalert
     environment:
@@ -176,7 +178,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.8.0
+    image: malcolmnetsec/curator:1.8.1
     restart: "no"
     hostname: curator
     environment:
@@ -191,7 +193,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.8.0
+    image: malcolmnetsec/logstash-oss:1.8.1
     restart: "no"
     hostname: logstash
     environment:
@@ -224,7 +226,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.8.0
+    image: malcolmnetsec/filebeat-oss:1.8.1
     restart: "no"
     hostname: filebeat
     environment:
@@ -253,7 +255,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.8.0
+    image: malcolmnetsec/moloch:1.8.1
     restart: "no"
     hostname: moloch
     env_file:
@@ -261,7 +263,7 @@ services:
     environment:
       << : *common-upload-variables
       << : *moloch-variables
-      MOLOCH_VERSION : '1.8.0'
+      MOLOCH_VERSION : '1.8.1'
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
@@ -287,7 +289,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:1.8.0
+    image: malcolmnetsec/zeek:1.8.1
     restart: "no"
     hostname: zeek
     environment:
@@ -308,7 +310,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.8.0
+    image: malcolmnetsec/file-monitor:1.8.1
     restart: "no"
     hostname: filemon
     environment:
@@ -322,7 +324,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.8.0
+    image: malcolmnetsec/pcap-capture:1.8.1
     restart: "no"
     network_mode: host
     ulimits:
@@ -342,7 +344,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:1.8.0
+    image: malcolmnetsec/pcap-monitor:1.8.1
     restart: "no"
     hostname: pcapmon
     environment:
@@ -359,7 +361,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.8.0
+    image: malcolmnetsec/file-upload:1.8.1
     restart: "no"
     hostname: upload
     env_file:
@@ -376,7 +378,7 @@ services:
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
-    image: malcolmnetsec/htadmin:1.8.0
+    image: malcolmnetsec/htadmin:1.8.1
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -395,7 +397,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.8.0
+    image: malcolmnetsec/nginx-proxy:1.8.1
     restart: "no"
     hostname: nginx-proxy
     environment:

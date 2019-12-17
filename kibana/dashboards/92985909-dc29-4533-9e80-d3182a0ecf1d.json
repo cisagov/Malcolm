@@ -1,5 +1,5 @@
 {
-  "version": "6.8.5",
+  "version": "7.5.0",
   "objects": [
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
@@ -172,7 +172,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":2,\"h\":14,\"i\":\"1\"},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":4,\"y\":0,\"w\":8,\"h\":2,\"i\":\"3\"},\"id\":\"cf553dfa-f641-47cf-916d-041cf46a80c4\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":14,\"w\":12,\"h\":6,\"i\":\"4\"},\"columns\":[\"srcIp\",\"dstIp\",\"dstPort\",\"zeek.uid\",\"_id\"],\"id\":\"7d7fd24e-51be-4040-83b3-a6630e989e2d\",\"sort\":[\"firstPacket\",\"desc\"],\"type\":\"search\",\"version\":\"6.1.1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":2,\"y\":8,\"w\":3,\"h\":6,\"i\":\"5\"},\"id\":\"46cba2ad-03cd-4eef-8e3a-c35ac3ac1b76\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":5,\"y\":8,\"w\":3,\"h\":6,\"i\":\"6\"},\"id\":\"f54d6418-1499-4a14-9a8e-f706249b9962\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":8,\"y\":8,\"w\":4,\"h\":6,\"i\":\"7\"},\"id\":\"6a006054-309e-447f-9371-99f119d18291\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"8\",\"gridData\":{\"x\":9,\"y\":2,\"w\":3,\"h\":6,\"i\":\"8\"},\"id\":\"ab31bef3-9eaf-458b-8ff8-6fba232a6a06\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"9\",\"gridData\":{\"x\":2,\"y\":2,\"w\":7,\"h\":6,\"i\":\"9\"},\"id\":\"1c50098c-be32-4f8e-bdf3-d78c0bfa2c0c\",\"type\":\"visualization\",\"version\":\"6.1.1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":2,\"y\":0,\"w\":2,\"h\":2,\"i\":\"10\"},\"id\":\"AWDHE-_wxQT5EBNmq4n3\",\"type\":\"visualization\",\"version\":\"6.1.1\"}]",
-        "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
+        "optionsJSON": "{\"useMargins\":true}",
         "uiStateJSON": "{\"P-2\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-5\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-6\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-7\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-8\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-10\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}}",
         "version": 1,
         "timeRestore": false,

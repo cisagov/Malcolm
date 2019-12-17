@@ -1,5 +1,5 @@
 {
-  "version": "6.8.5",
+  "version": "7.5.0",
   "objects": [
     {
       "id": "1c337cf4-8030-4760-9828-7c0f5305c5bb",
@@ -156,7 +156,7 @@
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"panelIndex\":\"2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"2\"},\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"id\":\"1c337cf4-8030-4760-9828-7c0f5305c5bb\",\"type\":\"visualization\",\"version\":\"6.3.2\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":60,\"i\":\"3\"},\"id\":\"df9e399b-efa5-4e33-b0ac-a7668a8ac2b3\",\"type\":\"visualization\",\"version\":\"6.3.2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":60,\"w\":48,\"h\":24,\"i\":\"4\"},\"columns\":[\"srcIp\",\"srcPort\",\"dstIp\",\"dstPort\",\"zeek.uid\",\"_id\"],\"id\":\"20ff62a1-06d6-4738-b611-945628d80305\",\"sort\":[\"firstPacket\",\"desc\"],\"type\":\"search\",\"version\":\"6.3.2\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":22,\"y\":36,\"w\":14,\"h\":24,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"id\":\"82fff513-b971-452e-a0fb-492c3091b771\",\"type\":\"visualization\",\"version\":\"6.3.2\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":8,\"y\":36,\"w\":14,\"h\":24,\"i\":\"7\"},\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"id\":\"78b8c460-7dc9-4b76-9bc4-ea831c0d7802\",\"type\":\"visualization\",\"version\":\"6.3.2\"},{\"panelIndex\":\"8\",\"gridData\":{\"x\":36,\"y\":36,\"w\":12,\"h\":24,\"i\":\"8\"},\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"id\":\"23975603-24ed-40f6-bb45-0780f4645d92\",\"type\":\"visualization\",\"version\":\"6.3.2\"},{\"panelIndex\":\"9\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"9\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"id\":\"AWDG80RwxQT5EBNmq38x\",\"type\":\"visualization\",\"version\":\"6.3.2\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":8,\"y\":8,\"w\":40,\"h\":28,\"i\":\"10\"},\"version\":\"6.3.2\",\"type\":\"visualization\",\"id\":\"1d178ca4-f067-4f46-bbc7-777a3fd69d47\"}]",
-        "optionsJSON": "{\"darkTheme\":true,\"useMargins\":true}",
+        "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
