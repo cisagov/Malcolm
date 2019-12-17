@@ -95,7 +95,7 @@ services:
     hostname: elasticsearch
     environment:
       bootstrap.memory_lock : 'true'
-      ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
+      ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Des.logger.level=INFO -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
       discovery.type : 'single-node'
       # cluster.initial_master_nodes : 'elasticsearch'
