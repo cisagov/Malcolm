@@ -102,7 +102,6 @@ services:
       # cluster.initial_master_nodes : 'elasticsearch'
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
-      cluster.max_shards_per_node : 2500
       path.repo : '/opt/elasticsearch/backup'
     expose:
       - 9200
@@ -245,6 +244,7 @@ services:
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
+      ES_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
       WISE : 'on'
     ulimits:

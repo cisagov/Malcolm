@@ -68,6 +68,12 @@ else
   fi # if /data/moloch-needs-upgrade.sh
 fi # if/else Elasticsearch database initialized
 
+# increase Elasticsearch max shards per node from default if desired
+if [[ -n $ES_MAX_SHARDS_PER_NODE ]]; then
+  # see https://github.com/elastic/elasticsearch/issues/40803
+  curl -sS -H'Content-Type: application/json' -XPUT http://$ES_HOST:$ES_PORT/_cluster/settings -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$ES_MAX_SHARDS_PER_NODE\" } }"
+fi
+
 touch $MOLOCHDIR/initialized
 
 # the (viewer|wise)_service.sh scripts will start/restart those processes
