@@ -1797,7 +1797,7 @@ Here is an example `filebeat.yml` [configuration file](https://www.elastic.co/gu
 ```
 logging.metrics.enabled: false
 
-filebeat.prospectors:
+filebeat.inputs:
 - type: log
   paths:
     - ${BEAT_LOG_PATTERN:/home/sensor/bro_logs/*.log}

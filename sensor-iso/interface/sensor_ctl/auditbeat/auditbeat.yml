@@ -126,7 +126,7 @@ auditbeat.modules:
                         auditd.summary.how: '/usr/lib/chromium/chromium'
                 - and:
                     - equals:
-                        auditd.summary.object.primary: '/opt/sensor/sensor_ctl/filebeat/data/registry.new'
+                        auditd.summary.object.primary: '/opt/sensor/sensor_ctl/filebeat/data/registry/filebeat/data.json'
                     - equals:
                         auditd.summary.how: '/usr/share/filebeat/bin/filebeat'
                 # I don't like filtering this, but see https://github.com/zeek/zeek/issues/259#issuecomment-564735946
