@@ -493,9 +493,9 @@ class Installer(object):
       ldapStartTLS = YesOrNo('Use StartTLS for LDAP connection security?', default=True)
       try:
         with open(os.path.join(os.path.realpath(os.path.join(scriptPath, "..")), ".ldap_config_defaults"), "w") as ldapDefaultsFile:
-          print(f"LDAP_SERVER_TYPE='{ldapServerType}'", file=ldapDefaultsFile)
-          print(f"LDAP_PROTO='{'ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'}'", file=ldapDefaultsFile)
-          print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
+          print("LDAP_SERVER_TYPE='{}'".format(ldapServerType), file=ldapDefaultsFile)
+          print("LDAP_PROTO='{}'".format('ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'), file=ldapDefaultsFile)
+          print("LDAP_PORT='{}'".format(3268 if ldapStartTLS else 3269), file=ldapDefaultsFile)
       except:
         pass
 
