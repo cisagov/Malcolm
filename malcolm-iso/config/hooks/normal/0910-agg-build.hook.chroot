@@ -25,26 +25,6 @@ for BEAT in filebeat metricbeat auditbeat packetbeat; do
     popd
 done
 
-# remove some dashboards we don't care about (for clutter)
-rm -f /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-apache-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-containers-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-docker-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-golang-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-haproxy-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-kafka-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-kubernetes-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-mongodb-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-mysql-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-nginx-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-rabbitmq-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-redis-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-uwsgi-*json \
-      /usr/share/metricbeat/kibana/6/dashboard/?etricbeat-windows-*json \
-      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-executions.json \
-      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-overview.json \
-      /usr/share/auditbeat/kibana/6/dashboard/auditbeat-kernel-sockets.json \
-      /usr/share/filebeat/kibana/6/dashboard/*json
-
 # add symlinks to our custom dashboards
 FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/6/dashboard-custom/*)
 if (( ${#FILES} )) ; then
