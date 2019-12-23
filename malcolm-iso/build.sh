@@ -119,6 +119,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./logstash/certs/Makefile ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./elastalert/config/* "$MALCOLM_DEST_DIR/elastalert/config/"
   cp ./elastalert/rules/* "$MALCOLM_DEST_DIR/elastalert/rules/" 2>/dev/null || true
+  cp ./elastalert/sample-rules/* "$MALCOLM_DEST_DIR/elastalert/sample-rules/" 2>/dev/null || true
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
 
