@@ -26,17 +26,17 @@ for BEAT in filebeat metricbeat auditbeat packetbeat; do
 done
 
 # add symlinks to our custom dashboards
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/6/dashboard-custom/*)
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/7/dashboard-custom/*)
 if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/filebeat/kibana/6/dashboard-custom/* /usr/share/filebeat/kibana/6/dashboard/
+  ln -s -r -f /usr/share/filebeat/kibana/7/dashboard-custom/* /usr/share/filebeat/kibana/7/dashboard/
 fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/6/dashboard-custom/*)
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/7/dashboard-custom/*)
 if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/metricbeat/kibana/6/dashboard-custom/* /usr/share/metricbeat/kibana/6/dashboard/
+  ln -s -r -f /usr/share/metricbeat/kibana/7/dashboard-custom/* /usr/share/metricbeat/kibana/7/dashboard/
 fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/6/dashboard-custom/*)
+FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/7/dashboard-custom/*)
 if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/auditbeat/kibana/6/dashboard-custom/* /usr/share/auditbeat/kibana/6/dashboard/
+  ln -s -r -f /usr/share/auditbeat/kibana/7/dashboard-custom/* /usr/share/auditbeat/kibana/7/dashboard/
 fi
 
 ###
