@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - Kibana
-Exec=/usr/bin/chromium https://localhost:5601/
+Exec=/usr/bin/chromium https://localhost/kibana/
 Terminal=false
 X-MultipleArgs=false
 Type=Application
