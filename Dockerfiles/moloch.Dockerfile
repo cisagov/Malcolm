@@ -181,8 +181,17 @@ ADD shared/bin/elastic_search_status.sh /data/
 ADD moloch/etc $MOLOCHDIR/etc/
 ADD https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv $MOLOCHDIR/etc/ipv4-address-space.csv
 ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf $MOLOCHDIR/etc/oui.txt
-ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country /tmp/GeoLite2-Country.mmdb.gz
-ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN /tmp/GeoLite2-ASN.mmdb.gz
+
+# todo MaxMind now requires an API license to download databases, not sure how this will be handled
+# this is a temporary, not-great solution.
+#   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
+#   see https://github.com/aol/moloch/issues/1350
+#   see https://github.com/aol/moloch/issues/1352
+# ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country /tmp/GeoLite2-Country.mmdb.gz
+# ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN /tmp/GeoLite2-ASN.mmdb.gz
+ADD https://s3.amazonaws.com/files.molo.ch/testing/GeoLite2-Country.mmdb $MOLOCHDIR/etc/GeoLite2-Country.mmdb
+ADD https://s3.amazonaws.com/files.molo.ch/testing/GeoLite2-ASN.mmdb $MOLOCHDIR/etc/GeoLite2-ASN.mmdb
+
 ADD moloch/wise/source.*.js $MOLOCHDIR/wiseService/
 ADD moloch/supervisord.conf /etc/supervisord.conf
 
@@ -191,10 +200,10 @@ RUN groupadd --gid 1000 $MOLOCHUSER && \
     chmod 755 /data/*.sh && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
-    bash -c "zcat /tmp/GeoLite2-Country.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-Country.mmdb" && \
-    rm -f /tmp/GeoLite2-Country.mmdb.gz && \
-    bash -c "zcat /tmp/GeoLite2-ASN.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-ASN.mmdb" && \
-    rm -f /tmp/GeoLite2-ASN.mmdb.gz && \
+#    bash -c "zcat /tmp/GeoLite2-Country.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-Country.mmdb" && \
+#    rm -f /tmp/GeoLite2-Country.mmdb.gz && \
+#    bash -c "zcat /tmp/GeoLite2-ASN.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-ASN.mmdb" && \
+#    rm -f /tmp/GeoLite2-ASN.mmdb.gz && \
     sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" $MOLOCHDIR/bin/Configure && \
     sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" $MOLOCHDIR/bin/Configure && \
     chmod u+s $MOLOCHDIR/bin/moloch-capture && \
