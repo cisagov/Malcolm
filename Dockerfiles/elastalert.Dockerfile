@@ -1,4 +1,4 @@
-FROM bitsensor/elastalert:2.0.0
+FROM mmguero/elastalert:2.0.2
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"

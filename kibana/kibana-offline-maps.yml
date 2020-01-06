@@ -5,14 +5,14 @@ server.name: kibana
 server.host: "0"
 server.basePath: "/kibana"
 server.rewriteBasePath: true
-elasticsearch.url: ${ELASTICSEARCH_URL}
+elasticsearch.hosts: ["${ELASTICSEARCH_URL}"]
 elasticsearch.requestTimeout: 180000
 kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
 elastalert-kibana-plugin.serverHost: elastalert
 elastalert-kibana-plugin.serverPort: 3030
 
 # offline region map
-regionmap:
+map.regionmap:
   includeElasticMapsService: false
   layers:
      - name: "World (offline)"

@@ -21,7 +21,7 @@ lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__fi
 broDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/data/zeek/"), '')
 cleanLogSeconds = int(os.getenv('FILEBEAT_LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('FILEBEAT_ZIP_CLEANUP_MINUTES', "120")) * 60
-fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat/data/registry")
+fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat/data/registry/filebeat/data.json")
 currentDir = broDir + "current/"
 processedDir = broDir + "processed/"
 
