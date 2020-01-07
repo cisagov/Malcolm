@@ -1133,29 +1133,29 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/curr
 
 ## <a name="SearchCheatSheet"></a>Search Queries in Moloch and Kibana
 
-[Kibana's query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) is somewhat different than Moloch's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Moloch interface is for searching and visualizing both Moloch sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Moloch sessions. Here are some common patterns used in building search query strings for Moloch and Kibana, respectively. See the links provided for further documentation.
+Kibana support two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) stynax and the new [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html), both of which are somewhat different than Moloch's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Moloch interface is for searching and visualizing both Moloch sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Moloch sessions. Here are some common patterns used in building search query strings for Moloch and Kibana, respectively. See the links provided for further documentation.
 
-| | [Moloch Search String](https://localhost/help#search) | [Kibana Search String](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) |
-|---|:---:|:---:|
-| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|
-| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|
-| Field matches a value |`port.dst == 22`|`dstPort:22`|
-| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|
-| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|
-| Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|
-| Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|
-| Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|
-| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|
-| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|
-| Global string search (anywhere in the document) |`all Moloch search expressions are field-based`|`microsoft`|
-| Wildcards (`?` for single character, `*` for any characters) |`host.dns == "*micro?oft*"`|`dns.host:*micro?oft*`|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|
-| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
-| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|
-| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|
-| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|
-| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|
-| Search time frame |`Use Moloch time bounding controls under the search bar`|`Use Kibana time range controls in the upper right-hand corner`|
+| | [Moloch Search String](https://localhost/help#search) | [Kibana Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [Kibana Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
+|---|:---:|:---:|:---:|
+| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|`zeek.logType:*`|
+| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|`NOT zeek.logType:*`|
+| Field matches a value |`port.dst == 22`|`dstPort:22`|`dstPort:22`|
+| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|`NOT dstPort:22`|
+| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|`tags:(external_source or external_destination)`|
+| Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|`http.statuscode >= 200 and http.statuscode <= 300`|
+| Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
+| Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|`http.statuscode >= 200 and http.statuscode < 300`|
+| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|`tags:(external_source or external_destination) and http.statuscode:401`|
+| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|`zeek_ftp.password:* or zeek_http.password:* or zeek.user:"anonymous"`|
+| Global string search (anywhere in the document) |all Moloch search expressions are field-based|`microsoft`|`microsoft`|
+| Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
+| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
+| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|`(srcIp:* and not srcIp:"0.0.0.0/0") or (dstIp:* and not dstIp:"0.0.0.0/0")`|
+| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|`zeek.destination_geo:* or zeek.source_geo:*`|
+| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|`zeek.logType:notice`|
+| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|`srcIp:"172.16.0.0/12"`|
+| Search time frame |Use Moloch time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
 
 When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
 
