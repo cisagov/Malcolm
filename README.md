@@ -1104,6 +1104,16 @@ Many of Malcolm's prebuilt visualizations for Zeek logs are heavily inspired by 
 
 ![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/kibana_modbus.png)
 
+![BACnet is a communications protocol for Building Automation and Control (BAC) networks](./docs/images/screenshots/kibana_bacnet.png)
+
+![EtherNet/IP is an industrial network protocol that adapts the Common Industrial Protocol to standard Ethernet](./docs/images/screenshots/kibana_ethernetip.png)
+
+![MQTT is a lightweight publish-subscribe network protocol that transports messages between devices](./docs/images/screenshots/kibana_mqtt.png)
+
+![PROFINET is an industry technical standard for data communication over Industrial Ethernet](./docs/images/screenshots/kibana_profinet.png)
+
+![S7comm is a Siemens proprietary protocol that runs between programmable logic controllers (PLCs) of the Siemens family](./docs/images/screenshots/kibana_s7comm.png)
+
 #### <a name="BuildDashboard"></a>Building your own visualizations and dashboards
 
 See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) for information on creating your own visualizations and dashboards:
