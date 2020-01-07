@@ -42,10 +42,20 @@ npm install license-checker; release/notice.txt.pl $MOLOCHDIR NOTICE release/CAP
 
 curl -L -o "$MOLOCHDIR"/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
 curl -L -o "$MOLOCHDIR"/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
-curl -L -o /tmp/GeoLite2-Country.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country"
-curl -L -o /tmp/GeoLite2-ASN.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN"
-zcat /tmp/GeoLite2-Country.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-Country.mmdb
-zcat /tmp/GeoLite2-ASN.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-ASN.mmdb
+
+# todo MaxMind now requires an API license to download databases, not sure how this will be handled
+# this is a temporary, not-great solution as these are old out-of-date files used for Moloch testing
+#   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
+#   see https://github.com/aol/moloch/issues/1350
+#   see https://github.com/aol/moloch/issues/1352
+
+curl -L -o "$MOLOCHDIR"/etc/GeoLite2-Country.mmdb 'https://s3.amazonaws.com/files.molo.ch/testing/GeoLite2-Country.mmdb'
+curl -L -o "$MOLOCHDIR"/etc/GeoLite2-ASN.mmdb 'https://s3.amazonaws.com/files.molo.ch/testing/GeoLite2-ASN.mmdb'
+
+# curl -L -o /tmp/GeoLite2-Country.mmdb.gz 'https://s3.amazonaws.com/files.molo.ch/testing/GeoLite2-Country.mmdb'
+# curl -L -o /tmp/GeoLite2-ASN.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN"
+# zcat /tmp/GeoLite2-Country.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-Country.mmdb
+# zcat /tmp/GeoLite2-ASN.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-ASN.mmdb
 
 fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $MOLOCH_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Moloch Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$MOLOCHDIR"
 
