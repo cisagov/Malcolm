@@ -204,6 +204,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
+* [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
 ## <a name="Protocols"></a>Supported Protocols
 
@@ -425,6 +426,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
+
+* `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 
 * `MOLOCH_ANALYZE_PCAP_THREADS` – the number of threads available to Moloch for analyzing PCAP files (default `1`)
 

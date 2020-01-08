@@ -19,6 +19,7 @@ x-auth-variables: &auth-variables
 x-moloch-variables: &moloch-variables
   MANAGE_PCAP_FILES : 'false'
   MOLOCH_ANALYZE_PCAP_THREADS : 1
+  MAXMIND_GEOIP_DB_LICENSE_KEY : '0'
 
 x-zeek-variables: &zeek-variables
   ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
