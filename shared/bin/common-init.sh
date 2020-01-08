@@ -115,6 +115,7 @@ function BadGoogle() {
     echo '127.0.0.1 _googlecast._tcp.local' >> /etc/hosts
     echo '127.0.0.1 accounts.google.com' >> /etc/hosts
     echo '127.0.0.1 clients.l.google.com' >> /etc/hosts
+    echo '127.0.0.1 fonts.googleapis.com' >> /etc/hosts
     echo '127.0.0.1 safebrowsing-cache.google.com' >> /etc/hosts
     echo '127.0.0.1 safebrowsing.clients.google.com' >> /etc/hosts
     echo '127.0.0.1 update.googleapis.com' >> /etc/hosts
