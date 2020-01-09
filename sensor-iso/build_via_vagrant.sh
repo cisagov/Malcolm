@@ -74,6 +74,7 @@ cleanup_shared
 cp -r "$SCRIPT_PATH"/../shared "$SCRIPT_PATH"/
 YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 [[ -n $YML_IMAGE_VERSION ]] && echo "$YML_IMAGE_VERSION" > "$SCRIPT_PATH"/shared/version.txt
+[[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]] && echo "$MAXMIND_GEOIP_DB_LICENSE_KEY" > "$SCRIPT_PATH"/shared/maxmind_license.txt
 trap cleanup_shared EXIT
 
 vm_execute "sudo bash -c \"whoami && cd /sensor-build && pwd && ./build.sh\""
