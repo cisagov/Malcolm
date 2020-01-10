@@ -97,6 +97,7 @@ libnl-route-3-200
 libnl-route-3-dev
 libpam-pwquality
 libpcap0.8-dev
+librocksdb5.17
 libsodium-dev
 libssl-dev
 liburcu-dev
