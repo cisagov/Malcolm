@@ -126,20 +126,20 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.8.0               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          1.8.0               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  1.8.0               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           1.8.0               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          1.8.0               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          1.8.0               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          1.8.0               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            1.8.0               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          1.8.0               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               1.8.0               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           1.8.0               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            1.8.0               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               1.8.0               xxxxxxxxxxxx        31 minutes ago      256MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.5               xxxxxxxxxxxx        5 weeks ago         825MB
+malcolmnetsec/moloch                                1.8.1               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          1.8.1               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  1.8.1               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           1.8.1               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          1.8.1               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          1.8.1               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          1.8.1               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            1.8.1               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          1.8.1               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               1.8.1               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           1.8.1               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            1.8.1               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               1.8.1               xxxxxxxxxxxx        31 minutes ago      256MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -204,6 +204,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
+* [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
 ## <a name="Protocols"></a>Supported Protocols
 
@@ -425,6 +426,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
+
+* `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 
 * `MOLOCH_ANALYZE_PCAP_THREADS` – the number of threads available to Moloch for analyzing PCAP files (default `1`)
 
@@ -1104,6 +1107,16 @@ Many of Malcolm's prebuilt visualizations for Zeek logs are heavily inspired by 
 
 ![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/kibana_modbus.png)
 
+![BACnet is a communications protocol for Building Automation and Control (BAC) networks](./docs/images/screenshots/kibana_bacnet.png)
+
+![EtherNet/IP is an industrial network protocol that adapts the Common Industrial Protocol to standard Ethernet](./docs/images/screenshots/kibana_ethernetip.png)
+
+![MQTT is a lightweight publish-subscribe network protocol that transports messages between devices](./docs/images/screenshots/kibana_mqtt.png)
+
+![PROFINET is an industry technical standard for data communication over Industrial Ethernet](./docs/images/screenshots/kibana_profinet.png)
+
+![S7comm is a Siemens proprietary protocol that runs between programmable logic controllers (PLCs) of the Siemens family](./docs/images/screenshots/kibana_s7comm.png)
+
 #### <a name="BuildDashboard"></a>Building your own visualizations and dashboards
 
 See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) for information on creating your own visualizations and dashboards:
@@ -1123,29 +1136,29 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/curr
 
 ## <a name="SearchCheatSheet"></a>Search Queries in Moloch and Kibana
 
-[Kibana's query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) is somewhat different than Moloch's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Moloch interface is for searching and visualizing both Moloch sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Moloch sessions. Here are some common patterns used in building search query strings for Moloch and Kibana, respectively. See the links provided for further documentation.
+Kibana support two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) stynax and the new [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html), both of which are somewhat different than Moloch's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Moloch interface is for searching and visualizing both Moloch sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Moloch sessions. Here are some common patterns used in building search query strings for Moloch and Kibana, respectively. See the links provided for further documentation.
 
-| | [Moloch Search String](https://localhost/help#search) | [Kibana Search String](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) |
-|---|:---:|:---:|
-| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|
-| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|
-| Field matches a value |`port.dst == 22`|`dstPort:22`|
-| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|
-| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|
-| Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|
-| Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|
-| Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|
-| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|
-| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|
-| Global string search (anywhere in the document) |`all Moloch search expressions are field-based`|`microsoft`|
-| Wildcards (`?` for single character, `*` for any characters) |`host.dns == "*micro?oft*"`|`dns.host:*micro?oft*`|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|
-| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
-| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|
-| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|
-| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|
-| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|
-| Search time frame |`Use Moloch time bounding controls under the search bar`|`Use Kibana time range controls in the upper right-hand corner`|
+| | [Moloch Search String](https://localhost/help#search) | [Kibana Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [Kibana Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
+|---|:---:|:---:|:---:|
+| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|`zeek.logType:*`|
+| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|`NOT zeek.logType:*`|
+| Field matches a value |`port.dst == 22`|`dstPort:22`|`dstPort:22`|
+| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|`NOT dstPort:22`|
+| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|`tags:(external_source or external_destination)`|
+| Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|`http.statuscode >= 200 and http.statuscode <= 300`|
+| Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
+| Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|`http.statuscode >= 200 and http.statuscode < 300`|
+| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|`tags:(external_source or external_destination) and http.statuscode:401`|
+| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|`zeek_ftp.password:* or zeek_http.password:* or zeek.user:"anonymous"`|
+| Global string search (anywhere in the document) |all Moloch search expressions are field-based|`microsoft`|`microsoft`|
+| Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
+| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
+| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|`(srcIp:* and not srcIp:"0.0.0.0/0") or (dstIp:* and not dstIp:"0.0.0.0/0")`|
+| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|`zeek.destination_geo:* or zeek.source_geo:*`|
+| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|`zeek.logType:notice`|
+| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|`srcIp:"172.16.0.0/12"`|
+| Search time frame |Use Moloch time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
 
 When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
 
@@ -1340,7 +1353,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-1.8.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-1.8.1.iso"
 …
 ```
 
@@ -1734,20 +1747,20 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.8.0               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  1.8.0               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               1.8.0               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.8.0               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.8.0               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.8.0               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          1.8.0               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          1.8.0               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.8.0               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.8.0               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.8.0               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.8.0               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.8.0               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   6.8.5               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                1.8.1               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  1.8.1               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               1.8.1               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           1.8.1               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           1.8.1               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          1.8.1               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          1.8.1               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          1.8.1               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          1.8.1               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               1.8.1               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            1.8.1               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          1.8.1               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            1.8.1               xxxxxxxxxxxx        11 days ago         276MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

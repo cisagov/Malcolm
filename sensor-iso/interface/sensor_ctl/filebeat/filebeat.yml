@@ -1,6 +1,8 @@
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
 logging.metrics.enabled: false
 
-filebeat.prospectors:
+filebeat.inputs:
 - type: log
   paths:
     - ${BEAT_LOG_PATTERN:/home/sensor/bro_logs/*.log}

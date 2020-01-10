@@ -101,17 +101,35 @@ if [ -d "$WORKDIR" ]; then
     [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
   fi
 
-  # clone and build custom protologbeat from github for logging temperature, etc.
-  mkdir -p ./config/includes.chroot/usr/local/bin/
-  bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero/protologbeat" -t "v6.8.3"
-  mv github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
+  # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
+  mkdir -p "$SCRIPT_PATH/moloch/etc"
+  pushd "$SCRIPT_PATH/moloch/etc"
+  MAXMIND_GEOIP_DB_LICENSE_KEY=""
+  if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
+    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
+    if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
+      for DB in ASN Country City; do
+        curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
+        tar xvf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1
+        rm -f "GeoLite2-$DB.mmdb.tar.gz"
+      done
+    fi
+  fi
+  curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
+  curl -s -S -L -o oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
+  popd >/dev/null 2>&1
 
   # clone and build Moloch .deb package in its own clean environment (rather than in hooks/)
   mkdir -p ./config/packages.chroot/
   bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/moloch:/build moloch-build:latest -o /build
   mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
+
+  # clone and build custom protologbeat from github for logging temperature, etc.
+  mkdir -p ./config/includes.chroot/usr/local/bin/
+  bash "$SCRIPT_PATH/beats/build-docker-image.sh"
+  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero/protologbeat" -t "master"
+  mv github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"

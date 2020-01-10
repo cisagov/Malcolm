@@ -419,9 +419,9 @@ def main():
       if debug: eprint(f"Creating {par.mount}")
       os.makedirs(par.mount, exist_ok=True)
       if args.encrypt:
-        entry = Fstab.add(device=f"{par.mapper}", mountpoint=par.mount, options=f"rw,auto,user,x-systemd.device-timeout=600s", fs_passno=2, filesystem='xfs', path=FSTAB_FILE)
+        entry = Fstab.add(device=f"{par.mapper}", mountpoint=par.mount, options=f"defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s", fs_passno=2, filesystem='xfs', path=FSTAB_FILE)
       else:
-        entry = Fstab.add(device=f"UUID={par.uuid}", mountpoint=par.mount, options=f"rw,auto,user,x-systemd.device-timeout=600s", fs_passno=2, filesystem='xfs', path=FSTAB_FILE)
+        entry = Fstab.add(device=f"UUID={par.uuid}", mountpoint=par.mount, options=f"defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s", fs_passno=2, filesystem='xfs', path=FSTAB_FILE)
       eprint(f'Added "{entry}" to {FSTAB_FILE} for {par.partition}')
 
     # reload tab files with systemctl

@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:6.8.5
+FROM docker.elastic.co/beats/filebeat-oss:7.5.1
 
 # Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -55,7 +55,7 @@ ENV FILEBEAT_CLEAN_REMOVED $FILEBEAT_CLEAN_REMOVED
 ENV FILEBEAT_LOG_PATH $FILEBEAT_LOG_PATH
 ENV AUTO_TAG $AUTO_TAG
 
-ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat/data/registry"
+ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat/data/registry/filebeat/data.json"
 ENV FILEBEAT_ZEEK_DIR "/data/zeek/"
 ENV PATH="/data:${PATH}"
 
