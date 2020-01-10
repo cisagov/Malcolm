@@ -2,7 +2,7 @@
   "index_patterns" : ["sessions2-*"],
   "order" : 0,
   "mappings": {
-    "_default_": {
+    "session": {
       "properties": {
         "zeek.destination_geo.location": { "type": "geo_point" },
         "zeek.source_geo.location": { "type": "geo_point" },

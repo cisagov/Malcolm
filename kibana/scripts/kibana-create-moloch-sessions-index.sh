@@ -34,11 +34,20 @@ if [[ "$CREATE_ES_MOLOCH_SESSION_INDEX" = "true" ]] ; then
         "$KIBANA_URL/api/kibana/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
 
-        # install default dashboards, index patterns, etc.
-        for i in /opt/kibana/dashboards/*.json; do
-          curl -XPOST "$KIBANA_URL/api/kibana/dashboards/import?force=true" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
-        done
+      # install default dashboards, index patterns, etc.
+      for i in /opt/kibana/dashboards/*.json; do
+        curl -XPOST "$KIBANA_URL/api/kibana/dashboards/import?force=true" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+      done
 
+      # set dark theme
+      curl -XPOST "$KIBANA_URL/api/kibana/settings/theme:darkMode" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+
+      # set default query time range
+      curl -XPOST "$KIBANA_URL/api/kibana/settings" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d \
+        '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}'
+
+      # turn off telemetry
+      curl -XPOST "$KIBANA_URL/api/telemetry/v2/optIn" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"enabled":false}'
     fi
   fi
 fi

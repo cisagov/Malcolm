@@ -71,7 +71,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; t
   if [[ -n $CAPTURE_INTERFACE ]]; then
     IFS=","
     for IFACE_NAME in $CAPTURE_INTERFACE; do
-      sudo --non-interactive /usr/local/bin/disable-nic-offloading.sh "$IFACE_NAME" >/dev/null 2>&1
+      sudo --non-interactive /usr/local/bin/nic-capture-setup.sh "$IFACE_NAME" >/dev/null 2>&1
     done
     unset IFS
   fi

@@ -129,6 +129,7 @@ squashfs-tools
 strace
 sudo
 swig
+sysstat
 tar
 tmux
 tofrodos

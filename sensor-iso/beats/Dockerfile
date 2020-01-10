@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     bash -c "curl https://glide.sh/get | bash"
 
 ENV BEATS=metricbeat
-ENV BEATS_VERSION=6.8.5
+ENV BEATS_VERSION=7.5.1
 
 ADD ./build.sh /build.sh
 RUN [ "chmod", "+x", "/build.sh" ]

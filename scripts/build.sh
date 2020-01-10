@@ -62,10 +62,19 @@ BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 MALCOLM_VERSION="$(grep -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
-if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+# MaxMind now requires a (free) license key to download the free versions of their GeoIP databases.
+if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
+  # prefer a local environment variable
+  MAXMIND_API_KEY="$MAXMIND_GEOIP_DB_LICENSE_KEY"
 else
-  $DOCKER_COMPOSE_COMMAND build --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  # but default to what they have saved in the docker-compose YML file
+  MAXMIND_API_KEY="$(grep -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
+fi
+
+if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+else
+  $DOCKER_COMPOSE_COMMAND build --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly

@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.1.1"
+ENV MOLOCH_VERSION "2.1.2"
 ENV MOLOCHDIR "/data/moloch"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -110,6 +110,7 @@ ARG AUTO_TAG=true
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
+ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
 ENV ES_HOST $ES_HOST
@@ -179,22 +180,30 @@ ADD shared/bin/pcap_moloch_and_zeek_processor.py /data/
 ADD shared/bin/pcap_utils.py /data/
 ADD shared/bin/elastic_search_status.sh /data/
 ADD moloch/etc $MOLOCHDIR/etc/
-ADD https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv $MOLOCHDIR/etc/ipv4-address-space.csv
-ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf $MOLOCHDIR/etc/oui.txt
-ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country /tmp/GeoLite2-Country.mmdb.gz
-ADD https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN /tmp/GeoLite2-ASN.mmdb.gz
 ADD moloch/wise/source.*.js $MOLOCHDIR/wiseService/
 ADD moloch/supervisord.conf /etc/supervisord.conf
+
+# MaxMind now requires a (free) license key to download the free versions of
+# their GeoIP databases. This should be provided as a build argument.
+#   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
+#   see https://github.com/aol/moloch/issues/1350
+#   see https://github.com/aol/moloch/issues/1352
+RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do \
+      cd /tmp && \
+      curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
+      tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
+      mkdir -p $MOLOCHDIR/etc/ && \
+      mv -v "GeoLite2-$DB.mmdb" $MOLOCHDIR/etc/; \
+      rm -f "GeoLite2-$DB*"; \
+    done; \
+  curl -s -S -L -o $MOLOCHDIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
+  curl -s -S -L -o $MOLOCHDIR/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
 
 RUN groupadd --gid 1000 $MOLOCHUSER && \
     useradd -M --uid 1000 --gid 1000 --home $MOLOCHDIR $MOLOCHUSER && \
     chmod 755 /data/*.sh && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
-    bash -c "zcat /tmp/GeoLite2-Country.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-Country.mmdb" && \
-    rm -f /tmp/GeoLite2-Country.mmdb.gz && \
-    bash -c "zcat /tmp/GeoLite2-ASN.mmdb.gz > $MOLOCHDIR/etc/GeoLite2-ASN.mmdb" && \
-    rm -f /tmp/GeoLite2-ASN.mmdb.gz && \
     sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" $MOLOCHDIR/bin/Configure && \
     sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" $MOLOCHDIR/bin/Configure && \
     chmod u+s $MOLOCHDIR/bin/moloch-capture && \
