@@ -207,8 +207,6 @@ RUN set -x ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
   mkdir -p /var/log/supervisor ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
-  ln -sf /dev/stdout /var/log/nginx/access.log; \
-  ln -sf /dev/stderr /var/log/nginx/error.log; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/

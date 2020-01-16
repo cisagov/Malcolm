@@ -424,6 +424,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 
+* `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to Elasticsearch (default `false`)
+
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
