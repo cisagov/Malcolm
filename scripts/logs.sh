@@ -37,7 +37,7 @@ BASE_PATH=`pwd`;
 # tail logs
 $DOCKER_COMPOSE_COMMAND ps
 echo ""
-IGNORE_LOG_TEXT="(deprecated|eshealth|update_mapping|throttling index|but no there are no living connections|saved_objects|\b(d|es)?stats\.json|esindices\/list|_cat\/indices|use_field_mapping|reaped unknown pid|Successfully handled GET request for '/'|GET /(_cat/health|api/status|sessions2-).+HTTP/[\d\.].+\b200\b|POST /(d?stats/d?stat|_bulk|fields/field/_search).+HTTP/[\d\.].+\b20[01]\b|POST  HTTP/[\d\.].+\b200\b|POST\s+/server/php/\s+HTTP/\d+\.\d+\"\s+\d+\s+\d+.*:8443/|kibana.+curl.+localhost.+GET /api/status 200|moloch.+GET /_ns_/nstest.html 200)"
+IGNORE_LOG_TEXT="(deprecated|eshealth|update_mapping|throttling index|but no there are no living connections|saved_objects|\b(d|es)?stats\.json|\/_ns_\/nstest\.html|esindices\/list|_cat\/indices|use_field_mapping|reaped unknown pid|Successfully handled GET request for '/'|GET /(_cat/health|api/status|sessions2-).+HTTP/[\d\.].+\b200\b|POST /(d?stats/d?stat|_bulk|fields/field/_search).+HTTP/[\d\.].+\b20[01]\b|POST  HTTP/[\d\.].+\b200\b|POST\s+/server/php/\s+HTTP/\d+\.\d+\"\s+\d+\s+\d+.*:8443/|kibana.+curl.+localhost.+GET /api/status 200)"
 
 $DOCKER_COMPOSE_COMMAND logs -f | grep --line-buffered -Piv "$IGNORE_LOG_TEXT"
 
