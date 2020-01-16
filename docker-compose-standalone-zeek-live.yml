@@ -254,6 +254,12 @@ services:
         hard: -1
     depends_on:
       - elasticsearch
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8005/_ns_/nstest.html"]
+        interval: 90s
+        timeout: 30s
+        retries: 3
+        start_period: 180s
     expose:
       - 8000
       - 8005
