@@ -85,12 +85,9 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
   cp $VERBOSE ./host-map.txt "$DESTDIR/"
   cp $VERBOSE ./scripts/auth_setup.sh "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/start.sh "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/stop.sh "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/restart.sh "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/wipe.sh "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/logs.sh "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./nginx/certs/*.sh "$DESTDIR/nginx/certs/"
   cp $VERBOSE ./logstash/certs/Makefile ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
@@ -98,6 +95,13 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./elastalert/rules/* "$DESTDIR/elastalert/rules/" 2>/dev/null || true
   cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
   pushd "$DESTDIR" >/dev/null 2>&1
+  pushd "./scripts" >/dev/null 2>&1
+  ln -s ./control.py start
+  ln -s ./control.py stop
+  ln -s ./control.py restart
+  ln -s ./control.py wipe
+  ln -s ./control.py logs
+  popd  >/dev/null 2>&1
   echo "You must set an administrator username and password for Malcolm, and self-signed X.509 certificates will be generated"
   ./scripts/auth_setup.sh
   rm -rf logstash/certs/ca.key
@@ -107,6 +111,7 @@ if mkdir "$DESTDIR"; then
   README_HTML="$RUN_PATH/$(basename $DESTDIR).README.html"
   docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/moloch' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /data/moloch/doc/README.html" > "$README_HTML" || true
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
+  cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
   echo ""

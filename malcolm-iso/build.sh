@@ -108,12 +108,16 @@ if [ -d "$WORKDIR" ]; then
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
   cp ./scripts/auth_setup.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/start.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/stop.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/restart.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/wipe.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/logs.sh "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
+  pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
+  ln -s ./control.py start
+  ln -s ./control.py stop
+  ln -s ./control.py restart
+  ln -s ./control.py wipe
+  ln -s ./control.py logs
+  popd >/dev/null 2>&1
+  cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"
   cp ./nginx/certs/*.sh "$MALCOLM_DEST_DIR/nginx/certs/"
   cp ./logstash/certs/Makefile ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
