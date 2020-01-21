@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.2.0"
+ENV MOLOCH_VERSION "2.2.1"
 ENV MOLOCHDIR "/data/moloch"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
