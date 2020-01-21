@@ -1,5 +1,5 @@
 {
-  "version": "7.5.1",
+  "version": "7.5.2",
   "objects": [
     {
       "id": "665d1610-523d-11e9-a30e-e3576242f3ed",
@@ -10,7 +10,7 @@
         "title": "Signatures",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"gridData\":{\"h\":56,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":8,\"i\":\"9\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"9\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"10\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"10\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":48,\"i\":\"11\",\"w\":40,\"x\":8,\"y\":32},\"panelIndex\":\"11\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"12\",\"w\":20,\"x\":8,\"y\":8},\"panelIndex\":\"12\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"13\",\"w\":20,\"x\":28,\"y\":8},\"panelIndex\":\"13\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_5\"}]",
+        "panelsJSON": "[{\"gridData\":{\"h\":56,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.5.2\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":8,\"i\":\"9\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"9\",\"version\":\"7.5.2\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"10\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"10\",\"version\":\"7.5.2\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":48,\"i\":\"11\",\"w\":40,\"x\":8,\"y\":32},\"panelIndex\":\"11\",\"version\":\"7.5.2\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"12\",\"w\":20,\"x\":8,\"y\":8},\"panelIndex\":\"12\",\"version\":\"7.5.2\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"13\",\"w\":20,\"x\":28,\"y\":8},\"panelIndex\":\"13\",\"version\":\"7.5.2\",\"panelRefName\":\"panel_5\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
