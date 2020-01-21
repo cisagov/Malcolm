@@ -7,6 +7,14 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
+[[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
+[[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
+[[ "$(uname -s)" = 'Darwin' ]] && FIND=gfind || FIND=find
+if ! (type "$REALPATH" && type "$DIRNAME" && type "$FIND") > /dev/null; then
+  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME and $FIND"
+  exit 1
+fi
+
 if docker-compose version >/dev/null 2>&1; then
   DOCKER_COMPOSE_BIN=docker-compose
 elif grep -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2>&1; then
@@ -24,12 +32,6 @@ else
 fi
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
-[[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
-[[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
-if ! (type "$REALPATH" && type "$DIRNAME") > /dev/null; then
-  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME"
-  exit 1
-fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 
@@ -41,8 +43,8 @@ $SCRIPT_PATH/stop.sh "$CONFIG_FILE" wipe
 
 # completely clean out elasticsearch database and local files
 rm -rf ./elasticsearch/nodes 2>/dev/null
-find ./elasticsearch-backup/ ./zeek-logs/ ./moloch-logs/ ./pcap/ ./moloch-raw/ \( \( -type f -o -type l \) -a ! -name ".gitignore" \) -delete 2>/dev/null
-find ./elasticsearch-backup/logs/ ./zeek-logs/processed/ ./zeek-logs/current/ -mindepth 1 -type d -delete 2>/dev/null
+$FIND ./elasticsearch-backup/ ./zeek-logs/ ./moloch-logs/ ./pcap/ ./moloch-raw/ \( \( -type f -o -type l \) -a ! -name ".gitignore" \) -delete 2>/dev/null
+$FIND ./elasticsearch-backup/logs/ ./zeek-logs/processed/ ./zeek-logs/current/ -mindepth 1 -type d -delete 2>/dev/null
 
 echo "Malcolm has been stopped and its data cleared."
 echo ""
