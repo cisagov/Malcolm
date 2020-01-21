@@ -1,7 +1,7 @@
 #!/usr/bin/env xdg-open
 [Desktop Entry]
 Name=Restart Malcolm
-Exec=lxterminal --command=/bin/bash\ -l\ -c\ ~/Malcolm/scripts/restart.sh
+Exec=lxterminal --command=/bin/bash\ -l\ -c\ "/usr/bin/python3 ~/Malcolm/scripts/control.py --restart"
 Comment=Restart Malcolm
 Terminal=false
 Type=Application
