@@ -236,9 +236,6 @@ def main():
   else:
     sys.tracebacklimit = 0
 
-  if not ImportRequests(debug=args.debug):
-    exit(2)
-
   os.chdir(MalcolmPath)
 
   # make sure docker/docker-compose is available

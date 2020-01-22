@@ -28,7 +28,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION="1.24.0"
+DOCKER_COMPOSE_INSTALL_VERSION="1.25.1"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88' # used to verify GPG key for Docker Debian repository
 
@@ -553,28 +553,75 @@ class LinuxInstaller(Installer):
     else:
       super(LinuxInstaller, self).__init__(debug)
 
-    self.distro = "linux"
+    self.distro = None
     self.codename = None
+    self.release = None
 
     # determine the distro (e.g., ubuntu) and code name (e.g., bionic) if applicable
-    err, out = self.run_process(['lsb_release', '-is'], stderr=False)
-    if (err == 0) and (len(out) > 0):
-      self.distro = out[0].lower()
+
+    # check /etc/os-release values first
+    if os.path.isfile('/etc/os-release'):
+      osInfo = dict()
+
+      with open("/etc/os-release", 'r') as f:
+        for line in f:
+          try:
+            k, v = line.rstrip().split("=")
+            osInfo[k] = v.strip('"')
+          except:
+            pass
+
+      if ('NAME' in osInfo) and (len(osInfo['NAME']) > 0):
+        distro = osInfo['NAME'].lower().split()[0]
+
+      if ('VERSION_CODENAME' in osInfo) and (len(osInfo['VERSION_CODENAME']) > 0):
+        codename = osInfo['VERSION_CODENAME'].lower().split()[0]
+
+      if ('VERSION_ID' in osInfo) and (len(osInfo['VERSION_ID']) > 0):
+        release = osInfo['VERSION_ID'].lower().split()[0]
+
+    # try lsb_release next
+    if (self.distro is None):
+      err, out = self.run_process(['lsb_release', '-is'], stderr=False)
+      if (err == 0) and (len(out) > 0):
+        self.distro = out[0].lower()
+
+    if (self.codename is None):
       err, out = self.run_process(['lsb_release', '-cs'], stderr=False)
       if (err == 0) and (len(out) > 0):
         self.codename = out[0].lower()
-    else:
+
+    if (self.release is None):
+      err, out = self.run_process(['lsb_release', '-rs'], stderr=False)
+      if (err == 0) and (len(out) > 0):
+        self.release = out[0].lower()
+
+    # try release-specific files
+    if (self.distro is None):
+      if os.path.isfile('/etc/centos-release'):
+        distroFile = '/etc/centos-release'
       if os.path.isfile('/etc/redhat-release'):
         distroFile = '/etc/redhat-release'
       elif os.path.isfile('/etc/issue'):
         distroFile = '/etc/issue'
       else:
         distroFile = None
-      if distroFile:
+      if (distroFile is not None):
         with open(distroFile, 'r') as f:
-          self.distro = f.read().lower().split()[0]
+          distroVals = f.read().lower().split()
+          distroNums = [x for x in distroVals if x[0].isdigit()]
+          self.distro = distroVals[0]
+          if (self.release is None) and (len(distroNums) > 0):
+            self.release = distroNums[0]
+
+    if (self.distro is None):
+      self.distro = "linux"
+
     if self.debug:
-      eprint("distro: {}{}".format(self.distro, " {}".format(self.codename) if self.codename else ""))
+      eprint("distro: {}{}{}".format(self.distro,
+                                     " {}".format(self.codename) if self.codename else "",
+                                     " {}".format(self.release) if self.release else ""))
+
     if not self.codename: self.codename = self.distro
 
     # determine packages required by Malcolm itself (not docker, those will be done later)
@@ -610,7 +657,7 @@ class LinuxInstaller(Installer):
     elif Which('apt', debug=self.debug):
       self.installPackageCmds.append(['apt', 'install', '-y', '-qq'])
     elif Which('dnf', debug=self.debug):
-      self.installPackageCmds.append(['dnf', '-y', 'install'])
+      self.installPackageCmds.append(['dnf', '-y', 'install', '--nobest'])
     elif Which('yum', debug=self.debug):
       self.installPackageCmds.append(['yum', '-y', 'install'])
 
@@ -953,9 +1000,10 @@ class LinuxInstaller(Installer):
     # install haveged
     if (not self.package_is_installed('haveged') and
         InstallerYesOrNo('The "haveged" utility may help improve Malcolm startup times by providing entropy for the Linux kernel. Install haveged?', default=False)):
+      if (self.distro == PLATFORM_LINUX_CENTOS) and (self.release is not None):
+        eprint("Installing EPEL repo")
+        self.install_package(['https://dl.fedoraproject.org/pub/epel/epel-release-latest-{}.noarch.rpm'.format(self.release.split('.')[0])])
       havegedPackages = ['haveged']
-      if self.distro == PLATFORM_LINUX_CENTOS:
-        havegedPackages.append('https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm')
       eprint("Installing haveged packages: {}".format(havegedPackages))
       if self.install_package(havegedPackages):
         eprint("Installation of haveged packages apparently succeeded")
