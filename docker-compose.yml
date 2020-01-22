@@ -48,7 +48,7 @@ x-logstash-variables: &logstash-variables
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
   # ES_EXTERNAL_SSL : 'true'
   # ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
-  # For security, ES_EXTERNAL_USER and ES_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup.sh
+  # For security, ES_EXTERNAL_USER and ES_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
   #   See also volume mount for logstash.keystore below.
   # ES_EXTERNAL_USER : 'janedoe'
   # ES_EXTERNAL_PASSWORD : 'secret'

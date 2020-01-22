@@ -107,7 +107,6 @@ if [ -d "$WORKDIR" ]; then
   cp ./docker-compose-standalone-zeek-live.yml "$MALCOLM_DEST_DIR/docker-compose-zeek-live.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
-  cp ./scripts/auth_setup.sh "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
@@ -116,6 +115,7 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py restart
   ln -s ./control.py wipe
   ln -s ./control.py logs
+  ln -s ./control.py auth_setup
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"

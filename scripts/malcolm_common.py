@@ -116,6 +116,12 @@ def AskForString(question, default=None, forceInteraction=False, acceptDefault=F
   return reply
 
 ###################################################################################################
+# get interactive password (without echoing)
+def AskForPassword(prompt):
+  reply = getpass.getpass(prompt=prompt)
+  return reply
+
+###################################################################################################
 # convenient boolean argument parsing
 def str2bool(v):
   if v.lower() in ('yes', 'true', 't', 'y', '1'):

@@ -142,7 +142,7 @@ malcolmnetsec/htadmin                               1.9.0               xxxxxxxx
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.2               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
-You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
+You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Import from pre-packaged tarballs
 
@@ -292,7 +292,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 
 and the following files of special note:
 
-* `auth.env` - the script `./scripts/auth_setup.sh` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
+* `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
 * `cidr-map.txt` - specify custom IP address to network segment mapping
 * `host-map.txt` - specify custom IP and/or MAC address to host mapping
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
@@ -365,7 +365,7 @@ To start, stop, restart, etc. Malcolm:
    - restart.sh    (restart Malcolm)
    - logs.sh       (monitor Malcolm logs)
    - wipe.sh       (stop Malcolm and clear its database)
-   - auth_setup.sh (change authentication-related settings)
+   - auth_setup (change authentication-related settings)
 
 A minute or so after starting Malcolm, the following services will be accessible:
   - Moloch: https://localhost/
@@ -663,7 +663,7 @@ LDAP authentication are managed on a remote directory service, such as a [Micros
 
 Malcolm's authentication method is defined in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file with the `NGINX_BASIC_AUTH` environment variable: `true` for local TLS-encrypted HTTP basic authentication, `false` for LDAP authentication.
 
-In either case, you **must** run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+In either case, you **must** run `./scripts/auth_setup` before starting Malcolm for the first time in order to:
 
 * define the local Malcolm administrator account username and password (although these credentials will only be used for basic authentication, not LDAP authentication)
 * specify whether or not to (re)generate the self-signed certificates used for HTTPS access
@@ -676,7 +676,7 @@ In either case, you **must** run `./scripts/auth_setup.sh` before starting Malco
 
 ##### <a name="AuthBasicAccountManagement"></a>Local account management
 
-[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
+[`auth_setup`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
 
 Malcolm user accounts can be used to access the [interfaces](#UserInterfaceURLs) of all of its [components](#Components), including Moloch. Moloch uses its own internal database of user accounts, so when a Malcolm user account logs in to Moloch for the first time Malcolm creates a corresponding Moloch user account automatically. This being the case, it is *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as those settings would not be consistently used across Malcolm.
 
@@ -684,7 +684,7 @@ Users may change their passwords via the **Malcolm User Management** page by cli
 
 #### <a name="AuthLDAP"></a>Lightweight Directory Access Protocol (LDAP) authentication
 
-The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup.sh`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
+The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
 
 ```
 # This is a sample configuration for the ldap_server section of nginx.conf.
@@ -1395,7 +1395,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup.sh`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
@@ -1718,7 +1718,7 @@ At this point you should **reboot your computer** so that the new system setting
 
 Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
-user@host:~/Malcolm$ ./scripts/auth_setup.sh
+user@host:~/Malcolm$ ./scripts/auth_setup
 Username: analyst
 analyst password:
 analyst password (again):
