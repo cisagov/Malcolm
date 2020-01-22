@@ -65,7 +65,7 @@ htpasswd -b $HTPASSWD_CREATE_FLAG -B ./htpasswd "$USERNAME" "$PASSWORD" >/dev/nu
 # if the admininstrator username has changed, remove the previous administrator username from htpasswd
 [[ -n "$USERNAME_PREVIOUS" ]] && [ "$USERNAME" != "$USERNAME_PREVIOUS" ] && sed -i "/^$USERNAME_PREVIOUS:/d" ./htpasswd
 
-source ../.ldap_config_defaults 2>/dev/null || true
+[[ -r ../.ldap_config_defaults ]] && source ../.ldap_config_defaults 2>/dev/null || true
 LDAP_DEFAULT_PROTO=${LDAP_PROTO:-"ldap://"}
 LDAP_DEFAULT_HOST=${LDAP_HOST:-"ds.example.com"}
 LDAP_DEFAULT_PORT=${LDAP_PORT:-"3268"}
