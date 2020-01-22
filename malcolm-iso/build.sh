@@ -119,8 +119,7 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"
-  cp ./nginx/certs/*.sh "$MALCOLM_DEST_DIR/nginx/certs/"
-  cp ./logstash/certs/Makefile ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
+  cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./elastalert/config/* "$MALCOLM_DEST_DIR/elastalert/config/"
   cp ./elastalert/rules/* "$MALCOLM_DEST_DIR/elastalert/rules/" 2>/dev/null || true
   cp ./elastalert/sample-rules/* "$MALCOLM_DEST_DIR/elastalert/sample-rules/" 2>/dev/null || true

@@ -88,8 +88,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
-  cp $VERBOSE ./nginx/certs/*.sh "$DESTDIR/nginx/certs/"
-  cp $VERBOSE ./logstash/certs/Makefile ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
+  cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./elastalert/config/* "$DESTDIR/elastalert/config/"
   cp $VERBOSE ./elastalert/rules/* "$DESTDIR/elastalert/rules/" 2>/dev/null || true
   cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
