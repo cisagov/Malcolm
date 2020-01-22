@@ -30,6 +30,7 @@ ansiEscape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 args = None
 dockerBin = None
 dockerComposeBin = None
+opensslBin = None
 
 ###################################################################################################
 try:
@@ -208,6 +209,7 @@ def authSetup(wipe=False):
   global args
   global dockerBin
   global dockerComposeBin
+  global opensslBin
 
   # prompt usernamd and password
   usernamePrevious = None
@@ -238,7 +240,7 @@ def authSetup(wipe=False):
       usernamePrevious = prevAuthInfo['MALCOLM_USERNAME']
 
   # get openssl hash of password
-  err, out = run_process(['openssl', 'passwd', '-1', '-stdin'], stdin=password, stderr=False, debug=args.debug)
+  err, out = run_process([opensslBin, 'passwd', '-1', '-stdin'], stdin=password, stderr=False, debug=args.debug)
   if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
     passwordEncrypted = out[0]
   else:
@@ -357,13 +359,13 @@ def authSetup(wipe=False):
       for oldfile in glob.glob("*.pem"):
         os.remove(oldfile)
 
-      # generate dhparam
-      err, out = run_process(['openssl', 'dhparam', '-out', 'dhparam.pem', '2048'], stderr=True, debug=args.debug)
+      # generate dhparam -------------------------------
+      err, out = run_process([opensslBin, 'dhparam', '-out', 'dhparam.pem', '2048'], stderr=True, debug=args.debug)
       if (err != 0):
         raise Exception('Unable to generate dhparam.pem file: {}'.format(out))
 
-      # generate key/cert
-      err, out = run_process(['openssl', 'req', '-subj', '/CN=localhost', '-x509', '-newkey', 'rsa:4096', '-nodes', '-keyout', 'key.pem', '-out', 'cert.pem', '-days', '3650'], stderr=True, debug=args.debug)
+      # generate key/cert -------------------------------
+      err, out = run_process([opensslBin, 'req', '-subj', '/CN=localhost', '-x509', '-newkey', 'rsa:4096', '-nodes', '-keyout', 'key.pem', '-out', 'cert.pem', '-days', '3650'], stderr=True, debug=args.debug)
       if (err != 0):
         raise Exception('Unable to generate key.pem/cert.pem file(s): {}'.format(out))
 
@@ -378,16 +380,45 @@ def authSetup(wipe=False):
     try:
 
       # make clean to clean previous files
-      err, out = run_process(['make', 'clean'], stderr=True, debug=args.debug)
-      if (err != 0):
-        raise Exception('Unable to generate clean remote log forwarder certificates: {}'.format(out))
+      for pat in ['*.srl', '*.csr', '*.key', '*.crt', '*.pem']:
+        for oldfile in glob.glob(pat):
+          os.remove(oldfile)
 
-      # make to generate new files
-      err, out = run_process(['make'], stderr=True, debug=args.debug)
-      if (err != 0):
-        raise Exception('Unable to generate remote log forwarder certificates: {}'.format(out))
+      # -----------------------------------------------
+      # generate new ca/server/client certificates/keys
+      # ca -------------------------------
+      err, out = run_process([opensslBin, 'genrsa', '-out', 'ca.key', '2048'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate ca.key: {}'.format(out))
 
-      # generate filebeat/certs if it doesn't exist
+      err, out = run_process([opensslBin, 'req', '-x509', '-new', '-nodes', '-key', 'ca.key', '-sha256', '-days', '9999', '-subj', '/C=US/ST=ID/O=sensor/OU=ca', '-out', 'ca.crt'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate ca.crt: {}'.format(out))
+
+      # server -------------------------------
+      err, out = run_process([opensslBin, 'genrsa', '-out', 'server.key', '2048'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate server.key: {}'.format(out))
+
+      err, out = run_process([opensslBin, 'req', '-sha512', '-new', '-key', 'server.key', '-out', 'server.csr', '-config', 'server.conf'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate server.csr: {}'.format(out))
+
+      err, out = run_process([opensslBin, 'x509', '-days', '3650', '-req', '-sha512', '-in', 'server.csr', '-CAcreateserial', '-CA', 'ca.crt', '-CAkey', 'ca.key', '-out', 'server.crt', '-extensions', 'v3_req', '-extfile', 'server.conf'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate server.crt: {}'.format(out))
+
+      shutil.move("server.key", "server.key.pem")
+      err, out = run_process([opensslBin, 'pkcs8', '-in', 'server.key.pem', '-topk8', '-nocrypt', '-out', 'server.key'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate server.key: {}'.format(out))
+
+      # client -------------------------------
+      err, out = run_process([opensslBin, 'genrsa', '-out', 'client.key', '2048'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate client.key: {}'.format(out))
+
+      err, out = run_process([opensslBin, 'req', '-sha512', '-new', '-key', 'client.key', '-out', 'client.csr', '-config', 'client.conf'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate client.csr: {}'.format(out))
+
+      err, out = run_process([opensslBin, 'x509', '-days', '3650', '-req', '-sha512', '-in', 'client.csr', '-CAcreateserial', '-CA', 'ca.crt', '-CAkey', 'ca.key', '-out', 'client.crt', '-extensions', 'v3_req', '-extensions', 'usr_cert', '-extfile', 'client.conf'], stderr=True, debug=args.debug)
+      if (err != 0): raise Exception('Unable to generate client.crt: {}'.format(out))
+      # -----------------------------------------------
+
+      # mkdir filebeat/certs if it doesn't exist
       try:
         os.makedirs(filebeatPath)
       except OSError as exc:
@@ -396,7 +427,7 @@ def authSetup(wipe=False):
         else:
           raise
 
-      # remove any leftover files in filebeat/certs
+      # remove previous files in filebeat/certs
       for oldfile in glob.glob(os.path.join(filebeatPath, "*")):
         os.remove(oldfile)
 
@@ -409,8 +440,8 @@ def authSetup(wipe=False):
 
       # remove leftovers
       for pat in ['*.srl', '*.csr', '*.pem']:
-        for f in glob.glob(pat):
-          os.remove(f)
+        for oldfile in glob.glob(pat):
+          os.remove(oldfile)
 
     finally:
       os.chdir(MalcolmPath)
@@ -476,6 +507,7 @@ def main():
   global args
   global dockerBin
   global dockerComposeBin
+  global opensslBin
 
   # extract arguments from the command line
   # print (sys.argv[1:]);
@@ -518,6 +550,9 @@ def main():
   err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], debug=args.debug)
   if (err != 0):
     raise Exception('{} requires docker-compose, please run install.py'.format(ScriptName))
+
+  # identify openssl binary
+  opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('openssl.exe')) else 'openssl'
 
   # if executed via a symlink, figure out what was intended via the symlink name
   if os.path.islink(os.path.join(ScriptPath, ScriptName)):
