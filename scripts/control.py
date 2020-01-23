@@ -82,7 +82,7 @@ def logs():
   process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], stdout=PIPE)
   while True:
     output = process.stdout.readline()
-    if (output == '') and process.poll() is not None:
+    if (len(output) == 0) and (process.poll() is not None):
       break
     if output:
       outputStr = output.decode().strip()
