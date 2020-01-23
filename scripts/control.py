@@ -447,7 +447,7 @@ def authSetup(wipe=False):
       os.chdir(MalcolmPath)
 
   # create and populate keystore for remote
-  if YesOrNo('Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance', default=True):
+  if YesOrNo('Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance', default=False):
 
     # prompt usernamd and password
     esPassword = None
