@@ -22,7 +22,10 @@ import tarfile
 import tempfile
 import time
 
-from pwd import getpwuid
+try:
+  from pwd import getpwuid
+except ImportError:
+  getpwuid = None
 from collections import defaultdict, namedtuple
 
 from malcolm_common import *

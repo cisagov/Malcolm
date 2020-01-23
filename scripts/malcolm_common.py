@@ -13,7 +13,10 @@ import sys
 import time
 
 from collections import defaultdict
-from pwd import getpwuid
+try:
+  from pwd import getpwuid
+except ImportError:
+  getpwuid = None
 from subprocess import (PIPE, STDOUT, Popen, CalledProcessError)
 
 ###################################################################################################
