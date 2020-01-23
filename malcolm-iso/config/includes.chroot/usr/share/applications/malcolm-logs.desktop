@@ -1,7 +1,7 @@
 #!/usr/bin/env xdg-open
 [Desktop Entry]
 Name=Malcolm Debug Logs
-Exec=lxterminal --command=/bin/bash\ -l\ -c\ "/usr/bin/python3 ~/Malcolm/scripts/control.py --logs"
+Exec=lxterminal --command=/bin/bash\ -l\ -c\ "/usr/bin/python3\ ~/Malcolm/scripts/control.py\ --logs"
 Comment=Monitor the debug output of Malcolm containers
 Terminal=false
 Type=Application

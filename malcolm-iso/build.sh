@@ -116,6 +116,7 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py wipe
   ln -s ./control.py logs
   ln -s ./control.py auth_setup
+  sed -i 's@#!/usr/bin/env[[:space:]]*python$@#!/usr/bin/env python3@g' *.py
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"

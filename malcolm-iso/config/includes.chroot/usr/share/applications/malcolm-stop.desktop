@@ -1,7 +1,7 @@
 #!/usr/bin/env xdg-open
 [Desktop Entry]
 Name=Stop Malcolm
-Exec=lxterminal --command=/bin/bash\ -l\ -c\ "/usr/bin/python3 ~/Malcolm/scripts/control.py --stop"
+Exec=lxterminal --command=/bin/bash\ -l\ -c\ "/usr/bin/python3\ ~/Malcolm/scripts/control.py\ --stop"
 Comment=Stop Malcolm
 Terminal=false
 Type=Application
