@@ -12,7 +12,3 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   netifaces \
   pythondialog \
   requests[security]
-
-# make python3 the default python
-update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2
