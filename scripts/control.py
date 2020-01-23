@@ -536,9 +536,6 @@ def main():
   else:
     sys.tracebacklimit = 0
 
-  if not os.path.isabs(args.composeFile):
-    args.composeFile = os.path.join(MalcolmPath, args.composeFile)
-
   os.chdir(MalcolmPath)
 
   # make sure docker/docker-compose is available
