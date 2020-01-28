@@ -333,6 +333,7 @@ class Installer(object):
     autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
     reverseDns = InstallerYesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
     autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
+    autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=False)
     logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
     logstashSsl = logstashOpen and InstallerYesOrNo('Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)', default=False)
     externalEsForward = InstallerYesOrNo('Forward Logstash logs to external Elasticstack instance?', default=False)
@@ -472,6 +473,9 @@ class Installer(object):
           elif 'LOGSTASH_OUI_LOOKUP' in line:
             # automatic MAC OUI lookup
             line = re.sub(r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if autoOui else "'false'"), line)
+          elif 'FREQ_LOOKUP' in line:
+            # freq.py string randomness calculations
+            line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if autoFreq else "'false'"), line)
           elif 'BEATS_SSL' in line:
             # enable/disable beats SSL
             line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if logstashOpen and logstashSsl else "'false'"), line)
