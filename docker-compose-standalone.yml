@@ -364,6 +364,14 @@ services:
       - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
+  freq:
+    image: malcolmnetsec/freq:1.9.0
+    restart: "no"
+    hostname: freq
+    environment:
+      VIRTUAL_HOST : 'freq.malcolm.local'
+    expose:
+      - 10004
   nginx-proxy:
     image: malcolmnetsec/nginx-proxy:1.9.0
     restart: "no"

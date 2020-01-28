@@ -111,6 +111,7 @@ Pulling elastalert      ... done
 Pulling elasticsearch   ... done
 Pulling file-monitor    ... done
 Pulling filebeat        ... done
+Pulling freq            ... done
 Pulling htadmin         ... done
 Pulling kibana          ... done
 Pulling logstash        ... done
@@ -139,6 +140,7 @@ malcolmnetsec/curator                               1.9.0               xxxxxxxx
 malcolmnetsec/nginx-proxy                           1.9.0               xxxxxxxxxxxx        29 minutes ago      54.5MB
 malcolmnetsec/elastalert                            1.9.0               xxxxxxxxxxxx        30 minutes ago      276MB
 malcolmnetsec/htadmin                               1.9.0               xxxxxxxxxxxx        31 minutes ago      256MB
+malcolmnetsec/freq                                  1.9.0               xxxxxxxxxxxx        32 minutes ago      188MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
@@ -193,6 +195,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
+* [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * These third party Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
@@ -314,6 +317,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
+* `malcolmnetsec/freq` (based on `debian:buster-slim`)
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
@@ -1740,6 +1744,7 @@ Pulling elastalert    ... done
 Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
+Pulling freq          ... done
 Pulling htadmin       ... done
 Pulling kibana        ... done
 Pulling logstash      ... done
@@ -1765,6 +1770,7 @@ malcolmnetsec/curator                               1.9.0               xxxxxxxx
 malcolmnetsec/kibana-oss                            1.9.0               xxxxxxxxxxxx        33 hours ago        944MB
 malcolmnetsec/filebeat-oss                          1.9.0               xxxxxxxxxxxx        11 days ago         459MB
 malcolmnetsec/elastalert                            1.9.0               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/freq                                  1.9.0               xxxxxxxxxxxx        11 days ago         188MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
@@ -1777,6 +1783,7 @@ Creating malcolm_elastalert_1    ... done
 Creating malcolm_elasticsearch_1 ... done
 Creating malcolm_file-monitor_1  ... done
 Creating malcolm_filebeat_1      ... done
+Creating malcolm_freq_1          ... done
 Creating malcolm_htadmin_1       ... done
 Creating malcolm_kibana_1        ... done
 Creating malcolm_logstash_1      ... done
@@ -1797,7 +1804,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
 …
 ```
 
