@@ -81,6 +81,9 @@ x-common-upload-variables: &common-upload-variables
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
   PCAP_MONITOR_HOST : 'pcap-monitor'
 
+x-common-lookup-variables: &common-lookup-variables
+  FREQ_LOOKUP : 'false'
+
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
 
@@ -204,6 +207,7 @@ services:
     environment:
       << : *logstash-variables
       << : *common-beats-variables
+      << : *common-lookup-variables
       ES_HOSTS : 'elasticsearch:9200'
       LS_JAVA_OPTS : '-Xms2g -Xmx2g -Djava.security.egd=file:/dev/./urandom'
     depends_on:
@@ -416,6 +420,7 @@ services:
     restart: "no"
     hostname: freq
     environment:
+      << : *common-lookup-variables
       VIRTUAL_HOST : 'freq.malcolm.local'
     expose:
       - 10004

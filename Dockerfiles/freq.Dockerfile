@@ -12,16 +12,15 @@ LABEL org.opencontainers.image.description='Malcolm container providing an inter
 
 ARG FREQ_USER=freq
 ARG FREQ_PORT=10004
-ARG FREQ_ENABLED=true
+ARG FREQ_LOOKUP=true
 
-ENV FREQ_USER    $FREQ_USER
-ENV FREQ_PORT    $FREQ_PORT
-ENV FREQ_ENABLED $FREQ_ENABLED
+ENV FREQ_USER   $FREQ_USER
+ENV FREQ_PORT   $FREQ_PORT
+ENV FREQ_LOOKUP $FREQ_LOOKUP
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
     apt-get  -y -q install \
-      build-essential \
       curl \
       git \
       procps \
@@ -37,7 +36,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     groupadd --gid 1000 $FREQ_USER && \
       useradd -M --uid 1000 --gid 1000 --home /nonexistant $FREQ_USER && \
       chown -R $FREQ_USER:$FREQ_USER /opt/freq_server && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git python3-dev build-essential && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git python3-dev && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
