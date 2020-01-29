@@ -53,7 +53,7 @@ RUN yum install -y epel-release && \
     yum clean all && \
     pip install py2-ipaddress && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
-                            logstash-filter-json logstash-filter-prune \
+                            logstash-filter-json logstash-filter-prune logstash-filter-http \
                             logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                             logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                             logstash-input-beats logstash-output-elasticsearch && \

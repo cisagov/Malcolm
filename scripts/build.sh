@@ -7,10 +7,18 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
+[[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
+[[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
+[[ "$(uname -s)" = 'Darwin' ]] && GREP=ggrep || GREP=grep
+if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP") > /dev/null; then
+  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME and $GREP"
+  exit 1
+fi
+
 if docker-compose version >/dev/null 2>&1; then
   DOCKER_COMPOSE_BIN=docker-compose
   DOCKER_BIN=docker
-elif grep -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2>&1; then
+elif $GREP -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2>&1; then
   DOCKER_COMPOSE_BIN=docker-compose.exe
   DOCKER_BIN=docker.exe
 fi
@@ -26,17 +34,11 @@ fi
 
 function filesize_in_image() {
   FILESPEC="$2"
-  IMAGE="$(grep -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
   $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\""
 }
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
-[[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
-[[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
-if ! (type "$REALPATH" && type "$DIRNAME") > /dev/null; then
-  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME"
-  exit 1
-fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 
@@ -59,7 +61,7 @@ read -p "Malcolm Docker images will now be built and/or pulled, force full clean
 CONFIRMATION=${CONFIRMATION:-N}
 
 BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-MALCOLM_VERSION="$(grep -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+MALCOLM_VERSION="$($GREP -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
 # MaxMind now requires a (free) license key to download the free versions of their GeoIP databases.
@@ -68,7 +70,7 @@ if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
   MAXMIND_API_KEY="$MAXMIND_GEOIP_DB_LICENSE_KEY"
 else
   # but default to what they have saved in the docker-compose YML file
-  MAXMIND_API_KEY="$(grep -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
+  MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 fi
 
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then

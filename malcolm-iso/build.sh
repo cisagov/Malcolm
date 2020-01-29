@@ -107,16 +107,20 @@ if [ -d "$WORKDIR" ]; then
   cp ./docker-compose-standalone-zeek-live.yml "$MALCOLM_DEST_DIR/docker-compose-zeek-live.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
-  cp ./scripts/auth_setup.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/start.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/stop.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/restart.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/wipe.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/logs.sh "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
+  pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
+  ln -s ./control.py start
+  ln -s ./control.py stop
+  ln -s ./control.py restart
+  ln -s ./control.py wipe
+  ln -s ./control.py logs
+  ln -s ./control.py auth_setup
+  sed -i 's@#!/usr/bin/env[[:space:]]*python$@#!/usr/bin/env python3@g' *.py
+  popd >/dev/null 2>&1
+  cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"
-  cp ./nginx/certs/*.sh "$MALCOLM_DEST_DIR/nginx/certs/"
-  cp ./logstash/certs/Makefile ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
+  cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./elastalert/config/* "$MALCOLM_DEST_DIR/elastalert/config/"
   cp ./elastalert/rules/* "$MALCOLM_DEST_DIR/elastalert/rules/" 2>/dev/null || true
   cp ./elastalert/sample-rules/* "$MALCOLM_DEST_DIR/elastalert/sample-rules/" 2>/dev/null || true

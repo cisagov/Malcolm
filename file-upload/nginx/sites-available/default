@@ -3,10 +3,7 @@ server {
 
     sendfile on;
     client_max_body_size 20G;
-
-    proxy_buffer_size 128k;
-    proxy_buffers 4 256k;
-    proxy_busy_buffers_size 256k;
+    client_body_buffer_size 4M;
 
     root /var/www/upload;
     index index.php index.html index.htm;
@@ -19,7 +16,12 @@ server {
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_read_timeout 300;
+        fastcgi_buffers 16 64k;
+        fastcgi_buffer_size 256k;
+        fastcgi_read_timeout 300s;
+        fastcgi_send_timeout 300s;
+        fastcgi_busy_buffers_size 384k;
+        fastcgi_request_buffering off;
         fastcgi_pass unix:/run/php/php7.3-fpm.sock;
     }
 

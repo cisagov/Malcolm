@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.2](https://github.com/aol/moloch/releases/tag/v2.1.2). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.2.1](https://github.com/aol/moloch/releases/tag/v2.2.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.1.2"
+MOLOCH_VERSION="2.2.1"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
@@ -137,10 +137,6 @@ if [[ -n $VERBOSE ]]; then
 fi
 
 apt-get -q update
-apt-get install -q -y --no-install-recommends \
-    curl iproute2 git python python-dev sudo ruby ruby-dev rubygems build-essential 
-
-gem install --no-ri --no-rdoc fpm
 
 mkdir -p /opt
 curl -L -o /tmp/moloch.tar.gz "https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz"
@@ -163,19 +159,17 @@ cp -r ./capture/plugins/lua/samples "$MOLOCHDIR"/lua
 
 npm install license-checker; release/notice.txt.pl $MOLOCHDIR NOTICE release/CAPTURENOTICE > $MOLOCHDIR/NOTICE.txt
 
-curl -L -o "$MOLOCHDIR"/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-curl -L -o "$MOLOCHDIR"/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
-curl -L -o /tmp/GeoLite2-Country.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country"
-curl -L -o /tmp/GeoLite2-ASN.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN"
-zcat /tmp/GeoLite2-Country.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-Country.mmdb
-zcat /tmp/GeoLite2-ASN.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-ASN.mmdb
+ETC_FILES=$(shopt -s nullglob dotglob; echo /moloch-etc/*)
+if (( ${#ETC_FILES} )) ; then
+  mkdir -p $MOLOCHDIR/etc
+  cp -r /moloch-etc/* $MOLOCHDIR/etc/
+fi
 
 fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $MOLOCH_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Moloch Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$MOLOCHDIR"
 
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 
 cd /tmp
-rm -rf /tmp/moloch-$MOLOCH_VER.tar.gz /tmp/moloch-$MOLOCH_VER /tmp/GeoLite2-Country.mmdb.gz /tmp/GeoLite2-ASN.mmdb.gz
 
 if [[ -n $VERBOSE ]]; then
   set +x

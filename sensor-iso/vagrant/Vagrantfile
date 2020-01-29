@@ -4,6 +4,13 @@ unless Vagrant.has_plugin?("vagrant-reload")
   raise 'vagrant-reload plugin is not installed!'
 end
 
+# hack: https://github.com/hashicorp/vagrant/issues/8878#issuecomment-345112810
+class VagrantPlugins::ProviderVirtualBox::Action::Network
+  def dhcp_server_matches_config?(dhcp_server, config)
+    true
+  end
+end
+
 Vagrant.configure("2") do |config|
 
   config.vm.box = "bento/debian-10"

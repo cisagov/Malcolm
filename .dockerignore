@@ -13,7 +13,9 @@
 docker-compose*yml
 Dockerfiles
 elasticsearch
+elasticsearch-backup
 malcolm-iso
+sensor-iso
 moloch-logs
 moloch-raw
 nginx/nginx_ldap.conf

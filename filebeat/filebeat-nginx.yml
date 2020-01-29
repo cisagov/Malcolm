@@ -1,0 +1,40 @@
+# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+
+#================================ Modules ======================================
+filebeat.modules:
+- module: nginx
+  access:
+    enabled: true
+    var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/data/nginx}/access.log*"]
+  error:
+    enabled: true
+    var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/data/nginx}/error.log*"]
+
+#================================ Outputs ======================================
+
+#-------------------------- Elasticsearch output -------------------------------
+output.elasticsearch:
+  enabled: true
+  hosts: ["elasticsearch:9200"]
+  indices:
+    - index: "filebeat-%{[agent.version]}-nginx-%{+yyyy.MM.dd}"
+      when.equals:
+        event.module: "nginx"
+
+setup.template.enabled: true
+setup.template.overwrite: false
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+
+#============================== Dashboards =====================================
+setup.dashboards.enabled: true
+setup.dashboards.directory: "/usr/share/filebeat/kibana"
+
+#============================== Kibana =====================================
+setup.kibana:
+  host: "kibana:5601"
+  path: "/kibana"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false

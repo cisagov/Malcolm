@@ -77,6 +77,7 @@ ZKG_GITHUB_URLS=(
   https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
+  https://github.com/0xxon/cve-2020-0601
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"

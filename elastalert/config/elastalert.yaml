@@ -43,7 +43,7 @@ buffer_time:
 # elastalert-create-index to set a mapping
 writeback_index: elastalert_status
 index_settings:
-  shards: 2
+  shards: 1
   replicas: 0
 
 # If an alert fails for some reason, ElastAlert will retry
