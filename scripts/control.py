@@ -125,7 +125,7 @@ def stop(wipe=False):
       for root, dirnames, filenames in os.walk(os.path.join(MalcolmPath, dataDir), topdown=True, onerror=None):
         for file in filenames:
           fileSpec = os.path.join(root, file)
-          if os.path.isfile(fileSpec) and (not file.startswith('.git')):
+          if (os.path.isfile(fileSpec) or os.path.islink(fileSpec)) and (not file.startswith('.git')):
             try:
               os.remove(fileSpec)
             except:
