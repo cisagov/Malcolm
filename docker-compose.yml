@@ -132,7 +132,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:1.9.0
+    image: malcolmnetsec/kibana-oss:2.0.0
     restart: "no"
     hostname: kibana
     environment:
@@ -158,7 +158,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:1.9.0
+    image: malcolmnetsec/elastalert:2.0.0
     restart: "no"
     hostname: elastalert
     environment:
@@ -186,7 +186,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:1.9.0
+    image: malcolmnetsec/curator:2.0.0
     restart: "no"
     hostname: curator
     environment:
@@ -201,7 +201,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:1.9.0
+    image: malcolmnetsec/logstash-oss:2.0.0
     restart: "no"
     hostname: logstash
     environment:
@@ -235,7 +235,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:1.9.0
+    image: malcolmnetsec/filebeat-oss:2.0.0
     restart: "no"
     hostname: filebeat
     environment:
@@ -267,7 +267,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:1.9.0
+    image: malcolmnetsec/moloch:2.0.0
     restart: "no"
     hostname: moloch
     env_file:
@@ -308,7 +308,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:1.9.0
+    image: malcolmnetsec/zeek:2.0.0
     restart: "no"
     hostname: zeek
     environment:
@@ -329,7 +329,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:1.9.0
+    image: malcolmnetsec/file-monitor:2.0.0
     restart: "no"
     hostname: filemon
     environment:
@@ -343,7 +343,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:1.9.0
+    image: malcolmnetsec/pcap-capture:2.0.0
     restart: "no"
     network_mode: host
     ulimits:
@@ -363,7 +363,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:1.9.0
+    image: malcolmnetsec/pcap-monitor:2.0.0
     restart: "no"
     hostname: pcapmon
     environment:
@@ -380,7 +380,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:1.9.0
+    image: malcolmnetsec/file-upload:2.0.0
     restart: "no"
     hostname: upload
     env_file:
@@ -397,7 +397,7 @@ services:
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
-    image: malcolmnetsec/htadmin:1.9.0
+    image: malcolmnetsec/htadmin:2.0.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -413,7 +413,7 @@ services:
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
   freq:
-    image: malcolmnetsec/freq:1.9.0
+    image: malcolmnetsec/freq:2.0.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -428,7 +428,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:1.9.0
+    image: malcolmnetsec/nginx-proxy:2.0.0
     restart: "no"
     hostname: nginx-proxy
     environment:
