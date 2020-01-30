@@ -29,6 +29,7 @@ redef SOCKS::default_capture_password = T;
 @load protocols/http/software-browser-plugins
 @load protocols/mysql/software
 @load protocols/ssl/weak-keys
+@load protocols/smb/log-cmds
 @load protocols/smtp/software
 @load protocols/ssh/detect-bruteforcing
 @load protocols/ssh/geo-data
