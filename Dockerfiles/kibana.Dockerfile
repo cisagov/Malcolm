@@ -51,7 +51,7 @@ ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.
 
 # todo: these extra plugins are kind of gutted right now with 7.5.x, need to fix
 
-# ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.4.2/prelert_swimlane_vis-7.4.2.zip /tmp/kibana-swimlane.zip
+ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.5.1/prelert_swimlane_vis-7.5.1.zip /tmp/kibana-swimlane.zip
 # ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
 
 # see https://github.com/walterra/kibana-milestones-vis/issues/9
@@ -79,16 +79,15 @@ RUN chmod 755 /data/*.sh /data/*.py && \
       sed -i "s/7\.5\.0/7\.5\.1/g" kibana/elastalert-kibana-plugin/package.json && \
       zip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip --allow-root && \
-      rm -f /tmp/elastalert-kibana-plugin.zip
-
+      rm -f /tmp/elastalert-kibana-plugin.zip && \
+    echo "Installing Swimlanes visualization..." && \
+      unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
+      sed -i "s/7\.5\.1/7\.5\.1/g" kibana/prelert_swimlane_vis/package.json && \
+      zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
+      /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
+      bash -c "find /usr/share/kibana/plugins/prelert_swimlane_vis/ -type f -exec chmod 644 '{}' \;" && \
+      rm -f /tmp/kibana-swimlane.zip
     ## && \
-    ## echo "Installing Swimlanes visualization..." && \
-    ##  unzip kibana-swimlane.zip kibana/prelert_swimlane_vis-7.4.2/package.json && \
-    ##  sed -i "s/7\.4\.2/7\.5\.1/g" kibana/prelert_swimlane_vis-7.4.2/package.json && \
-    ##  zip kibana-swimlane.zip kibana/prelert_swimlane_vis-7.4.2/package.json && \
-    ##  /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
-    ##  bash -c "find /usr/share/kibana/plugins/prelert_swimlane_vis/ -type f -exec chmod 644 '{}' \;" && \
-    ##  rm -f /tmp/kibana-swimlane.zip && \
     ## echo "Installing Comments visualization..." && \
     ##   unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
     ##   sed -i "s/7\.4\.0/7\.5\.1/g" kibana/kibana-comments-app-plugin/package.json && \

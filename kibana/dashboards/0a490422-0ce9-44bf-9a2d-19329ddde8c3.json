@@ -10,7 +10,7 @@
         "title": "PE",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"gridData\":{\"w\":8,\"h\":48,\"x\":0,\"y\":0,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_0\",\"embeddableConfig\":{}},{\"embeddableConfig\":{},\"gridData\":{\"w\":32,\"h\":8,\"x\":16,\"y\":0,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"w\":20,\"h\":16,\"x\":28,\"y\":8,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_2\",\"embeddableConfig\":{}},{\"gridData\":{\"w\":20,\"h\":16,\"x\":8,\"y\":8,\"i\":\"7\"},\"panelIndex\":\"7\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_3\",\"embeddableConfig\":{}},{\"gridData\":{\"w\":48,\"h\":28,\"x\":0,\"y\":48,\"i\":\"8\"},\"panelIndex\":\"8\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_4\",\"embeddableConfig\":{\"columns\":[\"zeek_pe.fuid\",\"zeek_pe.machine\",\"zeek_pe.is_exe\",\"zeek_pe.is_64bit\",\"zeek_pe.subsystem\",\"_id\"],\"sort\":[\"firstPacket\",\"desc\"]}},{\"embeddableConfig\":{},\"gridData\":{\"w\":20,\"h\":24,\"x\":28,\"y\":24,\"i\":\"9\"},\"panelIndex\":\"9\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"w\":20,\"h\":24,\"x\":8,\"y\":24,\"i\":\"10\"},\"panelIndex\":\"10\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"w\":8,\"h\":8,\"x\":8,\"y\":0,\"i\":\"11\"},\"panelIndex\":\"11\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_7\"}]",
+        "panelsJSON": "[{\"gridData\":{\"w\":8,\"h\":48,\"x\":0,\"y\":0,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_0\",\"embeddableConfig\":{}},{\"embeddableConfig\":{},\"gridData\":{\"w\":32,\"h\":8,\"x\":16,\"y\":0,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_1\"},{\"gridData\":{\"w\":20,\"h\":16,\"x\":28,\"y\":8,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_2\",\"embeddableConfig\":{}},{\"gridData\":{\"w\":20,\"h\":16,\"x\":8,\"y\":8,\"i\":\"7\"},\"panelIndex\":\"7\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_3\",\"embeddableConfig\":{}},{\"gridData\":{\"w\":48,\"h\":28,\"x\":0,\"y\":48,\"i\":\"8\"},\"panelIndex\":\"8\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_4\",\"embeddableConfig\":{\"columns\":[\"zeek.fuid\",\"zeek_pe.machine\",\"zeek_pe.is_exe\",\"zeek_pe.is_64bit\",\"zeek_pe.subsystem\",\"_id\"],\"sort\":[\"firstPacket\",\"desc\"]}},{\"embeddableConfig\":{},\"gridData\":{\"w\":20,\"h\":24,\"x\":28,\"y\":24,\"i\":\"9\"},\"panelIndex\":\"9\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"w\":20,\"h\":24,\"x\":8,\"y\":24,\"i\":\"10\"},\"panelIndex\":\"10\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"w\":8,\"h\":8,\"x\":8,\"y\":0,\"i\":\"11\"},\"panelIndex\":\"11\",\"version\":\"7.3.0\",\"panelRefName\":\"panel_7\"}]",
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -186,7 +186,7 @@
         },
         "columns": [
           "zeek_pe.machine",
-          "zeek_pe.fuid",
+          "zeek.fuid",
           "_id"
         ]
       },
