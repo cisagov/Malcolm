@@ -285,7 +285,8 @@ services:
       - ./pcap:/data/pcap
       - ./moloch-logs:/data/moloch/logs
       - ./moloch-raw:/data/moloch/raw
-      - ./moloch/etc:/data/moloch/etc
+      - ./moloch/etc/config.ini:/data/moloch/etc/config.ini:ro
+      - ./moloch/etc/user_settings.json:/data/moloch/etc/user_settings.json:ro
       - ./moloch/wise/source.zeeklogs.js:/data/moloch/wiseService/source.zeeklogs.js:ro
   zeek:
     build:
