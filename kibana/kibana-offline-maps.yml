@@ -16,7 +16,7 @@ map.regionmap:
   includeElasticMapsService: false
   layers:
      - name: "World (offline)"
-       url: "http://localhost:${KIBANA_OFFLINE_REGION_MAPS_PORT}/world.geojson"
+       url: "/world.geojson"
        attribution: "https://exploratory.io/maps"
        fields:
           - name: "ISO_A2"
@@ -25,3 +25,6 @@ map.regionmap:
             description: "Country Code2"
           - name: "NAME"
             description: "Country Name"
+
+server.cors: true
+server.cors.origin: ['*']
