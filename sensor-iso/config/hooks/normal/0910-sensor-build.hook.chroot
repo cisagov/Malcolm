@@ -88,12 +88,15 @@ redef SOCKS::default_capture_password = T;
 @load protocols/dhcp/software
 @load protocols/dns/detect-external-names
 @load protocols/ftp/detect
+@load protocols/ftp/detect-bruteforcing.zeek
 @load protocols/ftp/software
 @load protocols/http/detect-sqli
 @load protocols/http/detect-webapps
 @load protocols/http/software
 @load protocols/http/software-browser-plugins
 @load protocols/mysql/software
+@load protocols/ssl/weak-keys
+@load protocols/smb/log-cmds
 @load protocols/smtp/software
 @load protocols/ssh/detect-bruteforcing
 @load protocols/ssh/geo-data
