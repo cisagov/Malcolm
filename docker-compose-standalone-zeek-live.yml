@@ -397,7 +397,6 @@ services:
       - "8443:8443"
       - "9200:9200"
       - "9600:9600"
-      - "28991:28991"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
       - /var/run/docker.sock:/tmp/docker.sock:ro
