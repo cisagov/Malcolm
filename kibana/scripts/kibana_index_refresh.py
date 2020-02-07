@@ -84,7 +84,7 @@ def main():
     params={
       'type': 'index-pattern',
       'fields': 'id',
-      'search': f'"{args.index}"'
+      'search': '"{}"'.format(args.index)
     }
   )
   getIndexInfoResponse.raise_for_status()
