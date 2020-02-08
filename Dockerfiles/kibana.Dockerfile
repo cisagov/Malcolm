@@ -72,7 +72,7 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
     chmod 400 /opt/maps/* && \
     mkdir -p /var/log/supervisor && \
-    (echo -e "*/5 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 * * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -) && \
+    (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 * * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -) && \
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
       unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \

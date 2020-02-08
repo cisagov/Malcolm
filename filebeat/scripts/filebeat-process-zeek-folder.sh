@@ -10,8 +10,6 @@
 # 1. move file to processed/ (preserving original subdirectory heirarchy, if any)
 # 2. calculate tags based on splitting the file path and filename (splitting on
 #    on [, -/_])
-# 3. TODO: create symlinks in /data/zeek/current/ so that filebeat can find and process them
-# 4. TODO: who cleans them up later?
 
 FILEBEAT_PREPARE_PROCESS_COUNT=1
 
