@@ -1,5 +1,5 @@
 {
-  "version": "7.5.1",
+  "version": "7.6.0",
   "objects": [
     {
       "id": "b9f247c0-3f99-11e9-a58e-8bdedb0915e8",
@@ -10,7 +10,7 @@
         "title": "Connections - Destination - Top Connection Duration (region map)",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":44,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.5.1\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":40,\"i\":\"3\"},\"version\":\"7.5.1\",\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":[0,0],\"mapZoom\":3},\"panelRefName\":\"panel_1\"}]",
+        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":44,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.6.0\",\"panelRefName\":\"panel_0\"},{\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":40,\"i\":\"3\"},\"version\":\"7.6.0\",\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":[0,0],\"mapZoom\":3},\"panelRefName\":\"panel_1\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
