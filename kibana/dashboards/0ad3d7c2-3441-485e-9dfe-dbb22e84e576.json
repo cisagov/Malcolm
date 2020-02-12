@@ -216,7 +216,7 @@
         {
           "type": "search",
           "name": "search_0",
-          "id": "6b8b8d7e-49eb-46b6-8bbf-cdbf295bccbd"
+          "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e"
         }
       ],
       "migrationVersion": {
@@ -355,32 +355,31 @@
       }
     },
     {
-      "id": "6b8b8d7e-49eb-46b6-8bbf-cdbf295bccbd",
+      "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e",
       "type": "search",
-      "updated_at": "2020-02-04T14:20:08.110Z",
-      "version": "WzIxOSwxXQ==",
+      "updated_at": "2020-02-12T16:25:47.761Z",
+      "version": "WzkwMywxXQ==",
       "attributes": {
+        "title": "DNS - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "zeek_dns.query",
+          "zeek_dns.answers",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "DNS - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"zeek.logType:dns\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"zeek.logType:dns\",\"time_zone\":\"America/Denver\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {

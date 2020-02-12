@@ -191,7 +191,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"(zeek.service:ssh AND zeek.service_version < 2) OR (zeek.service:smb AND zeek.service_version < 2) OR (zeek.service:tls AND zeek.service_version:* AND NOT zeek.service_version:(*TLS*v12* OR *TLS*v13*)) OR (zeek.service:ntp AND zeek.service_version < 4) OR (zeek.service:rfb AND zeek.service_version < 3.8) OR (zeek.service:rdp AND zeek.service_version < 6.0) OR (zeek.service:snmp AND zeek.service_version < 3) OR (zeek.service:ftp)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"(NOT zeek.logType:known*) AND ((zeek.service:ssh AND zeek.service_version < 2) OR (zeek.service:smb AND zeek.service_version < 2) OR (zeek.service:tls AND NOT zeek.service_version:(*TLS*v12* OR *TLS*v13*)) OR (zeek.service:ntp AND zeek.service_version < 4) OR (zeek.service:rfb AND zeek.service_version < 3.8) OR (zeek.service:rdp AND zeek.service_version < 6.0) OR (zeek.service:snmp AND zeek.service_version < 3) OR (zeek.service:ftp))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -481,30 +481,29 @@
     {
       "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e",
       "type": "search",
-      "updated_at": "2020-02-04T14:20:54.154Z",
-      "version": "WzcxMiwxXQ==",
+      "updated_at": "2020-02-12T16:25:47.761Z",
+      "version": "WzkwMywxXQ==",
       "attributes": {
+        "title": "DNS - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "zeek_dns.query",
+          "zeek_dns.answers",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "DNS - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"zeek.logType:dns\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"zeek.logType:dns\",\"time_zone\":\"America/Denver\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {
