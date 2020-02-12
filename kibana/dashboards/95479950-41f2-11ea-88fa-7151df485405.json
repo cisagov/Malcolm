@@ -191,7 +191,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"(zeek.service:ssh AND zeek.service_version < 2) OR (zeek.service:smb AND zeek.service_version < 2) OR (zeek.service:tls AND NOT zeek.service_version:(*TLS*v12* OR *TLS*v13*)) OR (zeek.service:ntp AND zeek.service_version < 4) OR (zeek.service:rfb AND zeek.service_version < 3.8) OR (zeek.service:rdp AND zeek.service_version < 6.0) OR (zeek.service:snmp AND zeek.service_version < 3) OR (zeek.service:ftp)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"(zeek.service:ssh AND zeek.service_version < 2) OR (zeek.service:smb AND zeek.service_version < 2) OR (zeek.service:tls AND zeek.service_version:* AND NOT zeek.service_version:(*TLS*v12* OR *TLS*v13*)) OR (zeek.service:ntp AND zeek.service_version < 4) OR (zeek.service:rfb AND zeek.service_version < 3.8) OR (zeek.service:rdp AND zeek.service_version < 6.0) OR (zeek.service:snmp AND zeek.service_version < 3) OR (zeek.service:ftp)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
