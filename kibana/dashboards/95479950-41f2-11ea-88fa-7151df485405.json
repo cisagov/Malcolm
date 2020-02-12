@@ -442,30 +442,32 @@
     {
       "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
       "type": "search",
-      "updated_at": "2020-02-04T14:21:01.381Z",
-      "version": "Wzc2MywxXQ==",
+      "updated_at": "2020-02-12T22:48:55.398Z",
+      "version": "WzgwMiwxXQ==",
       "attributes": {
+        "title": "Connections - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "zeek.proto",
+          "zeek.service",
+          "srcIp",
+          "srcPort",
+          "dstIp",
+          "dstPort",
+          "totBytes",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "Connections - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"size\":10,\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {
