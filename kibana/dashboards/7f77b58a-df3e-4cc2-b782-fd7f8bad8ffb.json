@@ -4,8 +4,8 @@
     {
       "id": "7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb",
       "type": "dashboard",
-      "updated_at": "2020-02-13T20:07:58.919Z",
-      "version": "Wzg3NSwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxMSwxXQ==",
       "attributes": {
         "title": "SSL",
         "hits": 0,
@@ -122,8 +122,8 @@
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:05:04.060Z",
-      "version": "WzgwMCwxXQ==",
+      "updated_at": "2020-02-13T20:45:03.886Z",
+      "version": "WzgwNiwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
         "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/kibana#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/kibana#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/kibana#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/kibana#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Files](/kibana/app/kibana#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/kibana#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/kibana#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n\\n[Notices](/kibana/app/kibana#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/kibana#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/kibana#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/kibana#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/kibana#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/kibana#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/kibana#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/kibana#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b)   ●   [HTTP](/kibana/app/kibana#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/kibana#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/kibana#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/kibana#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/kibana#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/kibana#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/kibana#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/kibana#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/kibana#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/kibana#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/kibana#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/kibana#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/kibana#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/kibana#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/kibana#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/kibana#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/kibana#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/kibana#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/kibana#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/kibana#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/kibana#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/kibana#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Tunnels](/kibana/app/kibana#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/kibana#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [DNP3](/kibana/app/kibana#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/kibana#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/kibana#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/kibana#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/kibana#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/kibana#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -142,8 +142,8 @@
     {
       "id": "dc0b1b11-52da-4cc0-bddf-db127bd6cfee",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUwOSwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxMywxXQ==",
       "attributes": {
         "visState": "{\"title\":\"SSL - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"line\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
         "description": "",
@@ -169,8 +169,8 @@
     {
       "id": "d988522e-b3a8-4d74-98d4-96aff3e0f3f9",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxMCwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxNCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"SSL - Certificate Subject\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.subject_full\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Subject\"}}],\"listeners\":{}}",
         "description": "",
@@ -196,8 +196,8 @@
     {
       "id": "20fa1fd0-f204-499d-996f-e41e1ee3d40f",
       "type": "visualization",
-      "updated_at": "2020-02-13T20:07:29.419Z",
-      "version": "Wzg3NCwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxNSwxXQ==",
       "attributes": {
         "title": "SSL - Version",
         "visState": "{\"title\":\"SSL - Version\",\"type\":\"pie\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":false,\"type\":\"pie\",\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"zeek_ssl.ssl_version: Descending\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_ssl.ssl_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
@@ -223,8 +223,8 @@
     {
       "id": "df8bd09c-064c-45b3-8d54-9797ccb58d74",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxMiwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxNiwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"SSL - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcIp\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -250,8 +250,8 @@
     {
       "id": "f81fe18d-c2ff-4757-9de3-8b943a759169",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxMywxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxNywxXQ==",
       "attributes": {
         "visState": "{\"title\":\"SSL - Destination Port\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstPort\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Port\"}}],\"listeners\":{}}",
         "description": "",
@@ -277,8 +277,8 @@
     {
       "id": "b50ee1a8-d83d-46bf-9ba2-419d089d4797",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxNCwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUxOCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"SSL - Destination Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -304,13 +304,13 @@
     {
       "id": "8486949c-3592-4831-9020-59bfd968ccfa",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxNSwxXQ==",
+      "updated_at": "2020-02-13T20:54:48.292Z",
+      "version": "WzgyNSwxXQ==",
       "attributes": {
-        "visState": "{\"title\":\"SSL - Server\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.server_name\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Server\"}}],\"listeners\":{}}",
-        "description": "",
         "title": "SSL - Server",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "visState": "{\"title\":\"SSL - Server\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Server\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"number\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Randomness Score (method 1)\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.server_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Server\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.freq_score_v1\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Randomness Score (method 1)\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.freq_score_v2\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Randomness Score (method 2)\"}}]}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}}",
+        "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[]}"
@@ -319,8 +319,8 @@
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "b945a684-0841-4e86-87aa-0f1af6fb6579"
         }
       ],
@@ -331,8 +331,8 @@
     {
       "id": "d7a673bc-4a11-423b-acd3-a446425551c1",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxNiwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyMCwxXQ==",
       "attributes": {
         "title": "SSL - Destination Country",
         "visState": "{\"title\":\"SSL - Destination Country\",\"type\":\"histogram\",\"params\":{\"addLegend\":false,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"zeek.destination_geo.country_name: Descending\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Count\"},\"type\":\"value\"}],\"type\":\"histogram\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.destination_geo.country_name\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\"}}]}",
@@ -358,8 +358,8 @@
     {
       "id": "f821c7fe-0dd3-4c3c-b5df-77b926f4007a",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxNywxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyMSwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"SSL - Validation Status\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.validation_status\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Validation Status\"}}],\"listeners\":{}}",
         "description": "",
@@ -385,8 +385,8 @@
     {
       "id": "AWDHElRWxQT5EBNmq4lz",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxOCwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyMiwxXQ==",
       "attributes": {
         "title": "SSL - Log Count",
         "visState": "{\"title\":\"SSL - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
@@ -412,8 +412,8 @@
     {
       "id": "1567ea7f-8d0e-470b-adbf-f605dd68bdce",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUxOSwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyMywxXQ==",
       "attributes": {
         "title": "SSL - Summary",
         "visState": "{\"title\":\"SSL - Summary\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.server_name\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Server Name\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.subject.CN\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Common Name\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.validation_status\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Validation Status\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.ssl_version\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"TLS Version\"}}]}",
@@ -439,8 +439,8 @@
     {
       "id": "371b06d0-72a1-11e9-b0f3-590266f42743",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUyMCwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyNCwxXQ==",
       "attributes": {
         "title": "SSL - Client JA3 Lookup",
         "visState": "{\"title\":\"SSL - Client JA3 Lookup\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.ja3_desc\",\"size\":500,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Client JA3 Lookup\"}}]}",
@@ -466,8 +466,8 @@
     {
       "id": "bdda87a0-72a0-11e9-b0f3-590266f42743",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUyMSwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyNSwxXQ==",
       "attributes": {
         "title": "SSL - Server JA3 Lookup",
         "visState": "{\"title\":\"SSL - Server JA3 Lookup\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.ja3s_desc\",\"size\":500,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Server JA3 Lookup\"}}]}",
@@ -493,8 +493,8 @@
     {
       "id": "fa696510-4e9b-11ea-b504-97aa449f6abc",
       "type": "visualization",
-      "updated_at": "2020-02-13T20:04:01.633Z",
-      "version": "Wzg3MiwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyNiwxXQ==",
       "attributes": {
         "title": "SSL - Relevant Notices",
         "visState": "{\"title\":\"SSL - Relevant Notices\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":4,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Notice Category\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Notice Subcategory\",\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Source IP\",\"aggType\":\"terms\"},{\"accessor\":3,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"1\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Destination IP\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_notice.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Notice Category\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_notice.sub_category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Notice Subcategory\"}}]}",
@@ -520,8 +520,8 @@
     {
       "id": "41325860-4dd6-11ea-8336-d3388483188b",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUyMiwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyNywxXQ==",
       "attributes": {
         "title": "SSL - Connection Established",
         "visState": "{\"title\":\"SSL - Connection Established\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Established\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_ssl.established\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Established\"}}]}",
@@ -547,8 +547,8 @@
     {
       "id": "9c20d940-4dd6-11ea-8336-d3388483188b",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUyMywxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyOCwxXQ==",
       "attributes": {
         "title": "SSL - Elliptic Curve",
         "visState": "{\"title\":\"SSL - Elliptic Curve\",\"type\":\"horizontal_bar\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://localhost\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"}}},\"params\":{},\"label\":\"Elliptic Curve\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_ssl.curve\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Elliptic Curve\"}}]}",
@@ -574,8 +574,8 @@
     {
       "id": "f13ba720-4dd6-11ea-8336-d3388483188b",
       "type": "visualization",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUyNCwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUyOSwxXQ==",
       "attributes": {
         "title": "SSL - Next Protocol",
         "visState": "{\"title\":\"SSL - Next Protocol\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_ssl.next_protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Next Protocol\"}}]}",
@@ -601,8 +601,8 @@
     {
       "id": "b945a684-0841-4e86-87aa-0f1af6fb6579",
       "type": "search",
-      "updated_at": "2020-02-13T19:04:37.359Z",
-      "version": "WzUyNSwxXQ==",
+      "updated_at": "2020-02-13T20:44:37.133Z",
+      "version": "WzUzMCwxXQ==",
       "attributes": {
         "title": "SSL - Logs",
         "description": "",
@@ -641,8 +641,8 @@
     {
       "id": "8f003748-a6f8-4244-9d4e-e38e4a48da4c",
       "type": "search",
-      "updated_at": "2020-02-13T19:05:00.984Z",
-      "version": "Wzc3NiwxXQ==",
+      "updated_at": "2020-02-13T20:45:00.802Z",
+      "version": "Wzc4MiwxXQ==",
       "attributes": {
         "title": "Notices - Logs",
         "description": "",
