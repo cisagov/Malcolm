@@ -55,6 +55,8 @@ def main():
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
   parser.add_argument('-k', '--kibana', dest='url', metavar='<protocol://host:port>', type=str, default='http://localhost:5601/kibana', help='Kibana URL')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
+  parser.add_argument('-f', '--filter-prefix', dest='filterPrefixes', type=str, nargs='*', default=['network.mac_oui.'], help="Exclude fields with these \"name\" prefixes")
+  parser.add_argument('-a', '--add-fields', dest='addFields', type=str, nargs='*', default=['network.mac_oui'], help="Add extra string fields with these \"name\" values")
   try:
     parser.error = parser.exit
     args = parser.parse_args()
@@ -101,6 +103,21 @@ def main():
                                               'meta_fields': ["_source","_id","_type","_index","_score"] })
     getFieldsResponse.raise_for_status()
     getFieldsList = getFieldsResponse.json()['fields']
+
+    # filter out the network.mac_oui.##:##:##:##:##:## from the fields for the index pattern
+    if isinstance(getFieldsList, list):
+      for namePrefix in args.filterPrefixes:
+        getFieldsList = [x for x in getFieldsList if ('name' in x) and (not x['name'].startswith(namePrefix))]
+
+    for addField in args.addFields:
+      getFieldsList.append({"name": addField,
+                            "type": "string",
+                            "esTypes": ["text"],
+                            "scripted": False,
+                            "searchable": True,
+                            "aggregatable": True,
+                            "readFromDocValues": True})
+
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
