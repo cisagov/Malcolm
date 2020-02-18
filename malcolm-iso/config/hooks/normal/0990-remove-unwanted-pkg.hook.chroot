@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # remove development packages
-apt-get -y --purge remove checkinstall $(dpkg --get-selections | grep -v deinstall$ | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+apt-get -y --purge remove build-essential checkinstall devscripts debian-keyring equivs $(dpkg --get-selections | grep -v deinstall$ | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \

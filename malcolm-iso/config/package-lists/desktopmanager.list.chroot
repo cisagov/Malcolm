@@ -1,6 +1,7 @@
 arandr
 dconf-cli
 fonts-noto-color-emoji
+libnotify-bin
 lightdm
 lxde
 lxpanel
@@ -13,5 +14,6 @@ xinit
 xorg
 xscreensaver
 xserver-xorg
+xserver-xorg-core
 xserver-xorg-video-qxl
 xserver-xorg-video-vmware
