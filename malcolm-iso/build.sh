@@ -80,8 +80,18 @@ if [ -d "$WORKDIR" ]; then
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
 
+  # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
+  mkdir -p ./config/packages.chroot/
+  bash "$SCRIPT_PATH/vbox-guest-build/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/vbox-guest-build:/build vboxguest-build:latest -o /build
+  rm -f "$SCRIPT_PATH/vbox-guest-build"/*-source*.deb \
+        "$SCRIPT_PATH/vbox-guest-build"/*-dbgsym*.deb \
+        "$SCRIPT_PATH/vbox-guest-build"/virtualbox_*.deb \
+        "$SCRIPT_PATH/vbox-guest-build"/virtualbox-qt_*.deb
+  mv "$SCRIPT_PATH/vbox-guest-build"/*.deb ./config/packages.chroot/
+
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
-  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&10
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
   mkdir -p "$MALCOLM_DEST_DIR"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"

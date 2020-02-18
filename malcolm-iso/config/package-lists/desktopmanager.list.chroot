@@ -6,6 +6,7 @@ lightdm
 lxde
 lxpanel
 lxsession
+open-vm-tools-desktop
 x11-apps
 x11-session-utils
 x11-xfs-utils

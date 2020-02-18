@@ -46,5 +46,10 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get install -y \
       rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    apt-get update
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    usermod -a -G docker vagrant
   STEP2
 end
