@@ -91,7 +91,7 @@ if [ -d "$WORKDIR" ]; then
   mv "$SCRIPT_PATH/vbox-guest-build"/*.deb ./config/packages.chroot/
 
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
-  pushd "$SCRIPT_PATH/.." >/dev/null 2>&10
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
   mkdir -p "$MALCOLM_DEST_DIR"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"
