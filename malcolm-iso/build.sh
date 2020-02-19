@@ -50,6 +50,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
+  rsync -a "$SCRIPT_PATH/../shared/vbox-guest-build" .
 
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
@@ -82,13 +83,14 @@ if [ -d "$WORKDIR" ]; then
 
   # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
   mkdir -p ./config/packages.chroot/
-  bash "$SCRIPT_PATH/vbox-guest-build/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/vbox-guest-build:/build vboxguest-build:latest -o /build
-  rm -f "$SCRIPT_PATH/vbox-guest-build"/*-source*.deb \
-        "$SCRIPT_PATH/vbox-guest-build"/*-dbgsym*.deb \
-        "$SCRIPT_PATH/vbox-guest-build"/virtualbox_*.deb \
-        "$SCRIPT_PATH/vbox-guest-build"/virtualbox-qt_*.deb
-  mv "$SCRIPT_PATH/vbox-guest-build"/*.deb ./config/packages.chroot/
+  bash ./vbox-guest-build/build-docker-image.sh
+  docker run --rm -v "$(pwd)"/vbox-guest-build:/build vboxguest-build:latest -o /build
+  rm -f ./vbox-guest-build/*-source*.deb \
+        ./vbox-guest-build/*-dbgsym*.deb \
+        ./vbox-guest-build/virtualbox_*.deb \
+        ./vbox-guest-build/virtualbox-dkms_*.deb \
+        ./vbox-guest-build/virtualbox-qt_*.deb
+  mv ./vbox-guest-build/*.deb ./config/packages.chroot/
 
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
@@ -170,7 +172,7 @@ if [ -d "$WORKDIR" ]; then
     --bootloaders "syslinux,grub-efi" \
     --memtest none \
     --chroot-filesystem squashfs \
-    --backports false \
+    --backports true \
     --security true \
     --updates true \
     --source false \
