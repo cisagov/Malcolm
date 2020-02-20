@@ -399,7 +399,6 @@ services:
       - "9600:9600"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
-      - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
