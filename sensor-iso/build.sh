@@ -38,7 +38,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
-  rsync -a "$SCRIPT_PATH/../shared/vbox-guest-build" .
+  rsync -a "$SCRIPT_PATH/shared/vbox-guest-build" .
 
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
