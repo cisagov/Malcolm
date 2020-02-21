@@ -1,5 +1,5 @@
 {
-  "version": "7.5.1",
+  "version": "7.6.0",
   "objects": [
     {
       "id": "95479950-41f2-11ea-88fa-7151df485405",
@@ -10,7 +10,7 @@
         "title": "Security Overview",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":12,\"h\":23,\"i\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\"},\"panelIndex\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":20,\"y\":0,\"w\":15,\"h\":23,\"i\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\"},\"panelIndex\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":35,\"y\":0,\"w\":13,\"h\":23,\"i\":\"119a8b45-c803-4c71-93b4-a9514803021a\"},\"panelIndex\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":15,\"h\":18,\"i\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\"},\"panelIndex\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":15,\"y\":23,\"w\":15,\"h\":38,\"i\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\"},\"panelIndex\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_5\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":30,\"y\":23,\"w\":9,\"h\":18,\"i\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\"},\"panelIndex\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":39,\"y\":23,\"w\":9,\"h\":18,\"i\":\"61f158d0-8c28-499f-af09-4df087948d42\"},\"panelIndex\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":41,\"w\":15,\"h\":20,\"i\":\"071a1c98-695f-4708-92c9-2c950e515131\"},\"panelIndex\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":null}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":30,\"y\":41,\"w\":18,\"h\":20,\"i\":\"a5c3b5c2-37c3-488d-81ab-d74a89d4be84\"},\"panelIndex\":\"a5c3b5c2-37c3-488d-81ab-d74a89d4be84\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":61,\"w\":48,\"h\":19,\"i\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\"},\"panelIndex\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_10\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":12,\"h\":23,\"i\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\"},\"panelIndex\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":20,\"y\":0,\"w\":15,\"h\":23,\"i\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\"},\"panelIndex\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":35,\"y\":0,\"w\":13,\"h\":23,\"i\":\"119a8b45-c803-4c71-93b4-a9514803021a\"},\"panelIndex\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":15,\"h\":18,\"i\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\"},\"panelIndex\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":15,\"y\":23,\"w\":15,\"h\":38,\"i\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\"},\"panelIndex\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_5\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":30,\"y\":23,\"w\":9,\"h\":18,\"i\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\"},\"panelIndex\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":39,\"y\":23,\"w\":9,\"h\":18,\"i\":\"61f158d0-8c28-499f-af09-4df087948d42\"},\"panelIndex\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":41,\"w\":15,\"h\":20,\"i\":\"071a1c98-695f-4708-92c9-2c950e515131\"},\"panelIndex\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":null}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":30,\"y\":41,\"w\":18,\"h\":20,\"i\":\"a5c3b5c2-37c3-488d-81ab-d74a89d4be84\"},\"panelIndex\":\"a5c3b5c2-37c3-488d-81ab-d74a89d4be84\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":61,\"w\":48,\"h\":19,\"i\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\"},\"panelIndex\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_10\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -191,7 +191,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"(zeek.service:ssh AND zeek.service_version < 2) OR (zeek.service:smb AND zeek.service_version < 2) OR (zeek.service:tls AND NOT zeek.service_version:(*TLS*v12* OR *TLS*v13*)) OR (zeek.service:ntp AND zeek.service_version < 4) OR (zeek.service:rfb AND zeek.service_version < 3.8) OR (zeek.service:rdp AND zeek.service_version < 6.0) OR (zeek.service:snmp AND zeek.service_version < 3) OR (zeek.service:ftp)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"(NOT zeek.logType:known*) AND ((zeek.service:ssh AND zeek.service_version < 2) OR (zeek.service:smb AND zeek.service_version < 2) OR (zeek.service:tls AND NOT zeek.service_version:(*TLS*v12* OR *TLS*v13*)) OR (zeek.service:ntp AND zeek.service_version < 4) OR (zeek.service:rfb AND zeek.service_version < 3.8) OR (zeek.service:rdp AND zeek.service_version < 6.0) OR (zeek.service:snmp AND zeek.service_version < 3) OR (zeek.service:ftp))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -442,30 +442,32 @@
     {
       "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
       "type": "search",
-      "updated_at": "2020-02-04T14:21:01.381Z",
-      "version": "Wzc2MywxXQ==",
+      "updated_at": "2020-02-12T22:48:55.398Z",
+      "version": "WzgwMiwxXQ==",
       "attributes": {
+        "title": "Connections - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "zeek.proto",
+          "zeek.service",
+          "srcIp",
+          "srcPort",
+          "dstIp",
+          "dstPort",
+          "totBytes",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "Connections - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"size\":10,\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {
@@ -481,30 +483,29 @@
     {
       "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e",
       "type": "search",
-      "updated_at": "2020-02-04T14:20:54.154Z",
-      "version": "WzcxMiwxXQ==",
+      "updated_at": "2020-02-12T16:25:47.761Z",
+      "version": "WzkwMywxXQ==",
       "attributes": {
+        "title": "DNS - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "zeek_dns.query",
+          "zeek_dns.answers",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "DNS - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"zeek.logType:dns\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"zeek.logType:dns\",\"time_zone\":\"America/Denver\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {

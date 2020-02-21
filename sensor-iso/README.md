@@ -557,7 +557,7 @@ If you are interesting in developing your own network traffic capture appliance 
 
 # <a name="Footer"></a>Copyright
 
-Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
 

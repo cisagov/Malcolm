@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 version: '3.7'
 
@@ -98,7 +98,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.5.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.0
     restart: "no"
     hostname: elasticsearch
     environment:
@@ -399,7 +399,6 @@ services:
       - "9600:9600"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
-      - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro

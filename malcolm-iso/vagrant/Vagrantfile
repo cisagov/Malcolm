@@ -1,3 +1,5 @@
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+
 unless Vagrant.has_plugin?("vagrant-reload")
   raise 'vagrant-reload plugin is not installed!'
 end
@@ -23,7 +25,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "4096"
+    vb.memory = "8192"
     vb.cpus = 4
   end
 
@@ -32,6 +34,8 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get dist-upgrade -y
     sed -i "s/main/main contrib non-free/g" /etc/apt/sources.list
+    echo "deb http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
+    echo "deb-src http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
     apt-get update
     export KERNEL_VERSION=$(apt-cache search linux-image-4 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
     apt-get install -y \
@@ -45,6 +49,12 @@ Vagrant.configure("2") do |config|
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get install -y \
-      rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick
+      rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick \
+      apt-transport-https ca-certificates curl gnupg2 software-properties-common
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    apt-get update
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    usermod -a -G docker vagrant
   STEP2
 end

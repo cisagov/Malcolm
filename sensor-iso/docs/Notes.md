@@ -1763,7 +1763,7 @@ The Elastic Stack's [Beats](https://www.elastic.co/products/beats) platform is a
 
 set -e
 
-BEATS_VER="7.5.1"
+BEATS_VER="7.6.0"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
@@ -2175,7 +2175,7 @@ Hedgehog Linux targets the following guidelines for establishing a secure config
 
 # <a name="Footer"></a>Copyright
 
-Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
 

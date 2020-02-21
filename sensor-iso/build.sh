@@ -38,6 +38,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
+  rsync -a "$SCRIPT_PATH/shared/vbox-guest-build" .
 
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
@@ -82,6 +83,17 @@ if [ -d "$WORKDIR" ]; then
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+
+  # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
+  mkdir -p ./config/packages.chroot/
+  bash ./vbox-guest-build/build-docker-image.sh
+  docker run --rm -v "$(pwd)"/vbox-guest-build:/build vboxguest-build:latest -o /build
+  rm -f ./vbox-guest-build/*-source*.deb \
+        ./vbox-guest-build/*-dbgsym*.deb \
+        ./vbox-guest-build/virtualbox_*.deb \
+        ./vbox-guest-build/virtualbox-dkms_*.deb \
+        ./vbox-guest-build/virtualbox-qt_*.deb
+  mv ./vbox-guest-build/*.deb ./config/packages.chroot/
 
   # copy the interface code into place for the resultant image
   mkdir -p ./config/includes.chroot/opt

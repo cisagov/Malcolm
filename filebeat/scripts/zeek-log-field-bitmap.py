@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
 # parse the fields names from the header of of the log file and compare them to the

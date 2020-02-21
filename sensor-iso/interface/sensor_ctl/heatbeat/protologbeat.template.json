@@ -2,7 +2,7 @@
   "index_patterns": ["protologbeat-*"],
   "mappings": {
     "_meta": {
-      "version": "7.5.1"
+      "version": "7.6.0"
     },
     "dynamic_templates": [{
       "strings_as_keyword": {

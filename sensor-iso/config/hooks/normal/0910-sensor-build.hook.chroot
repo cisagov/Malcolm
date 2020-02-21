@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 NETSNIFF_VER="0.6.6"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
@@ -11,7 +11,7 @@ ZEEK_PATCH_URLS=(
   # nothing here for now
 )
 
-BEATS_VER="7.5.1"
+BEATS_VER="7.6.0"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"

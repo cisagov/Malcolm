@@ -8,8 +8,8 @@ server.rewriteBasePath: true
 elasticsearch.hosts: ["${ELASTICSEARCH_URL}"]
 elasticsearch.requestTimeout: 180000
 kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
-elastalert-kibana-plugin.serverHost: elastalert
-elastalert-kibana-plugin.serverPort: 3030
+# elastalert-kibana-plugin.serverHost: elastalert
+# elastalert-kibana-plugin.serverPort: 3030
 
 # offline region map
 map.regionmap:

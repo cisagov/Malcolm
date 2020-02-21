@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ##################################################################################
 # prompt whether to autologin or not

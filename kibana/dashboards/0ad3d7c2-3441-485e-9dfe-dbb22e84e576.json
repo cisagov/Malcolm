@@ -1,5 +1,5 @@
 {
-  "version": "7.5.1",
+  "version": "7.6.0",
   "objects": [
     {
       "id": "0ad3d7c2-3441-485e-9dfe-dbb22e84e576",
@@ -10,7 +10,7 @@
         "title": "Overview",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":8,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":26,\"w\":36,\"h\":18,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":8,\"y\":8,\"w\":11,\"h\":18,\"i\":\"21\"},\"panelIndex\":\"21\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":8,\"i\":\"32\"},\"panelIndex\":\"32\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":36,\"y\":26,\"w\":12,\"h\":18,\"i\":\"43\"},\"panelIndex\":\"43\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":19,\"y\":8,\"w\":13,\"h\":18,\"i\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\"},\"panelIndex\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":32,\"y\":8,\"w\":16,\"h\":18,\"i\":\"e25371b4-5477-4d3f-9f68-df3399d1ef6a\"},\"panelIndex\":\"e25371b4-5477-4d3f-9f68-df3399d1ef6a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.5.1\",\"gridData\":{\"x\":0,\"y\":44,\"w\":48,\"h\":27,\"i\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\"},\"panelIndex\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":8,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":26,\"w\":36,\"h\":18,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":8,\"w\":11,\"h\":18,\"i\":\"21\"},\"panelIndex\":\"21\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":8,\"i\":\"32\"},\"panelIndex\":\"32\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":36,\"y\":26,\"w\":12,\"h\":18,\"i\":\"43\"},\"panelIndex\":\"43\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":19,\"y\":8,\"w\":13,\"h\":18,\"i\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\"},\"panelIndex\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":32,\"y\":8,\"w\":16,\"h\":18,\"i\":\"e25371b4-5477-4d3f-9f68-df3399d1ef6a\"},\"panelIndex\":\"e25371b4-5477-4d3f-9f68-df3399d1ef6a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":44,\"w\":48,\"h\":27,\"i\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\"},\"panelIndex\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -216,7 +216,7 @@
         {
           "type": "search",
           "name": "search_0",
-          "id": "6b8b8d7e-49eb-46b6-8bbf-cdbf295bccbd"
+          "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e"
         }
       ],
       "migrationVersion": {
@@ -318,30 +318,32 @@
     {
       "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
       "type": "search",
-      "updated_at": "2020-02-04T14:21:01.381Z",
-      "version": "Wzc2MywxXQ==",
+      "updated_at": "2020-02-12T22:48:55.398Z",
+      "version": "WzgwMiwxXQ==",
       "attributes": {
+        "title": "Connections - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "zeek.proto",
+          "zeek.service",
+          "srcIp",
+          "srcPort",
+          "dstIp",
+          "dstPort",
+          "totBytes",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "Connections - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"size\":10,\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {
@@ -355,32 +357,31 @@
       }
     },
     {
-      "id": "6b8b8d7e-49eb-46b6-8bbf-cdbf295bccbd",
+      "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e",
       "type": "search",
-      "updated_at": "2020-02-04T14:20:08.110Z",
-      "version": "WzIxOSwxXQ==",
+      "updated_at": "2020-02-12T16:25:47.761Z",
+      "version": "WzkwMywxXQ==",
       "attributes": {
+        "title": "DNS - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "zeek_dns.query",
+          "zeek_dns.answers",
+          "zeek.uid"
+        ],
         "sort": [
           [
             "firstPacket",
             "desc"
           ]
         ],
-        "hits": 0,
-        "description": "",
-        "title": "DNS - Logs",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"zeek.logType:dns\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "columns": [
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "zeek.uid",
-          "_id"
-        ]
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"zeek.logType:dns\",\"time_zone\":\"America/Denver\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
       },
       "references": [
         {

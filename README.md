@@ -141,7 +141,7 @@ malcolmnetsec/nginx-proxy                           2.0.0               xxxxxxxx
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        30 minutes ago      276MB
 malcolmnetsec/htadmin                               2.0.0               xxxxxxxxxxxx        31 minutes ago      256MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        32 minutes ago      188MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         825MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.0               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -1771,7 +1771,7 @@ malcolmnetsec/kibana-oss                            2.0.0               xxxxxxxx
 malcolmnetsec/filebeat-oss                          2.0.0               xxxxxxxxxxxx        11 days ago         459MB
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        11 days ago         276MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        11 days ago         188MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         769MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.0               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1820,7 +1820,7 @@ You can now open a web browser and navigate to one of the [Malcolm user interfac
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](./License.txt) for the terms of its release.
 
