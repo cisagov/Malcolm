@@ -1820,7 +1820,7 @@ You can now open a web browser and navigate to one of the [Malcolm user interfac
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](./License.txt) for the terms of its release.
 

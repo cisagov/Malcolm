@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ####################################################################################
 # thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile

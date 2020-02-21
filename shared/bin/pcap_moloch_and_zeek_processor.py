@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
 # Process queued files reported by pcap_watcher.py, using either moloch-capture or zeek to process
