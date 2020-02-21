@@ -77,6 +77,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
+    rm -rf ./viewer/vueapp/src/components/upload && \
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
     bash -c "file ${MOLOCHDIR}/bin/* ${MOLOCHDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"

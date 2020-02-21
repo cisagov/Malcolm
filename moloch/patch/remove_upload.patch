@@ -1,0 +1,24 @@
+diff --git a/viewer/vueapp/src/router/index.js b/viewer/vueapp/src/router/index.js
+index 02494926..a3c974f9 100644
+--- a/viewer/vueapp/src/router/index.js
++++ b/viewer/vueapp/src/router/index.js
+@@ -11,7 +11,6 @@ import Spiview from '@/components/spiview/Spiview';
+ import Spigraph from '@/components/spigraph/Spigraph';
+ import Connections from '@/components/connections/Connections';
+ import Settings from '@/components/settings/Settings';
+-import Upload from '@/components/upload/Upload';
+ import Hunt from '@/components/hunt/Hunt';
+ import Moloch404 from '@/components/utils/404';
+ 
+@@ -86,11 +85,6 @@ const router = new Router({
+       name: 'Settings',
+       component: Settings
+     },
+-    {
+-      path: '/upload',
+-      name: 'Upload',
+-      component: Upload
+-    },
+     {
+       path: '/hunt',
+       name: 'Hunt',
