@@ -5128,7 +5128,7 @@ function buildConnections(req, res, cb) {
   let fdst                 = req.query.dstField;
   let minConn              = req.query.minConn || 1;
 
-  let doBaseline           = 0;
+  let doBaseline = 0;
   if ((req.query.date !== '-1') && (req.query.startTime !== undefined) && (req.query.stopTime !== undefined)) {
     doBaseline = req.query.baseline || 0;
   }
@@ -5168,7 +5168,7 @@ function buildConnections(req, res, cb) {
     }
   }
 
-  function process (vsrc, vdst, f, fields, resultid) {
+  function process (vsrc, vdst, f, fields, resultId) {
     // ES 6 is returning formatted timestamps instead of ms like pre 6 did
     // https://github.com/elastic/elasticsearch/issues/27740
     if (vsrc.length === 24 && vsrc[23] === 'Z' && vsrc.match(/^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/)) {
@@ -5184,7 +5184,7 @@ function buildConnections(req, res, cb) {
 
     nodesHash[vsrc].sessions++;
     nodesHash[vsrc].type |= 1;
-    nodesHash[vsrc].inresult |= resultid;
+    nodesHash[vsrc].inresult |= resultId;
     updateValues(f, nodesHash[vsrc], fields);
 
     if (nodesHash[vdst] === undefined) {
@@ -5193,7 +5193,7 @@ function buildConnections(req, res, cb) {
 
     nodesHash[vdst].sessions++;
     nodesHash[vdst].type |= 2;
-    nodesHash[vdst].inresult |= resultid;
+    nodesHash[vdst].inresult |= resultId;
     updateValues(f, nodesHash[vdst], fields);
 
     let linkId = `${vsrc}->${vdst}`;
@@ -5207,12 +5207,19 @@ function buildConnections(req, res, cb) {
     updateValues(f, connects[linkId], fields);
   }
 
-  let resultidMax = doBaseline+1;
-  for (let resultid = 1; resultid <= resultidMax; resultid++) {
+  let maxResultId = 1 + ((doBaseline == 0) ? 0 : 1);
+  for (let resultId = 1; resultId <= maxResultId; resultId++) {
 
-    if (resultid > 1) {
-      // replace query date with baseline date
-      return cb(null, nodes, links, totalHits);
+    if (resultId > 1) {
+      // replace current time frame start/stop values with baseline start/stop values
+      let currentQueryTimes = determineQueryTimes(req);
+      console.log("buildConnections baseline.0", "startTime", currentQueryTimes[0], "stopTime", currentQueryTimes[1])
+      if ((currentQueryTimes[0] !== undefined) && (currentQueryTimes[1] !== undefined)) {
+        let diff = currentQueryTimes[1] - currentQueryTimes[0];
+        req.query.stopTime = currentQueryTimes[0]-1;
+        req.query.startTime = req.query.stopTime-diff;
+        console.log("buildConnections baseline.1", "startTime", req.query.startTime, "stopTime", req.query.stopTime, "diff", diff)
+      }
     }
 
     buildSessionQuery(req, function(bsqErr, query, indices) {
@@ -5277,44 +5284,45 @@ function buildConnections(req, res, cb) {
                   vdst += ':' + f.dstPort;
                 }
               }
-              process(vsrc, vdst, f, fields, resultid);
+              process(vsrc, vdst, f, fields, resultId);
             }
           }
           setImmediate(hitCb);
 
         }, function (err) {
-          let nodeKeys = Object.keys(nodesHash);
-          if (Config.get('regressionTests', false)) {
-            nodeKeys = nodeKeys.sort(function (a,b) { return nodesHash[a].id.localeCompare(nodesHash[b].id); });
-          }
-          for (let node of nodeKeys) {
-            if (nodesHash[node].cnt < minConn) {
-              nodesHash[node].pos = -1;
-            } else {
-              nodesHash[node].pos = nodes.length;
-              nodes.push(nodesHash[node]);
-            }
-          }
-
-          for (let key in connects) {
-            var c = connects[key];
-            c.source = nodesHash[c.source].pos;
-            c.target = nodesHash[c.target].pos;
-            if (c.source >= 0 && c.target >= 0) {
-              links.push(connects[key]);
-            }
-          }
 
           totalHits += graph.hits.total;
 
-          if (Config.debug) {
-            console.log('nodesHash', nodesHash);
-            console.log('connects', connects);
-            console.log('nodes', nodes.length, nodes);
-            console.log('links', links.length, links);
-          }
+          if (resultId >= maxResultId) {
+            let nodeKeys = Object.keys(nodesHash);
+            if (Config.get('regressionTests', false)) {
+              nodeKeys = nodeKeys.sort(function (a,b) { return nodesHash[a].id.localeCompare(nodesHash[b].id); });
+            }
+            for (let node of nodeKeys) {
+              if (nodesHash[node].cnt < minConn) {
+                nodesHash[node].pos = -1;
+              } else {
+                nodesHash[node].pos = nodes.length;
+                nodes.push(nodesHash[node]);
+              }
+            }
 
-          if (resultid >= resultidMax) {
+            for (let key in connects) {
+              var c = connects[key];
+              c.source = nodesHash[c.source].pos;
+              c.target = nodesHash[c.target].pos;
+              if (c.source >= 0 && c.target >= 0) {
+                links.push(connects[key]);
+              }
+            }
+
+            if (Config.debug) {
+              console.log('nodesHash', nodesHash);
+              console.log('connects', connects);
+              console.log('nodes', nodes.length, nodes);
+              console.log('links', links.length, links);
+            }
+
             return cb(null, nodes, links, totalHits);
           }
         });
