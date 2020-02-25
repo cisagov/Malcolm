@@ -116,7 +116,13 @@ var internals = {
     settings: {},
     welcomeMsgNum: 1,
     found: true
-  }
+  },
+  scriptAggs: {}
+};
+
+internals.scriptAggs['ip.dst:port'] = {
+  script: 'if (doc.dstIp.value.indexOf(".") > 0) {return doc.dstIp.value + ":" + doc.dstPort.value} else {return doc.dstIp.value + "." + doc.dstPort.value}',
+  dbField: 'dstIp'
 };
 
 // make sure there's an _ after the prefix
@@ -270,8 +276,12 @@ if (_accesslogfile) {
   _stream = fs.createWriteStream(_accesslogfile, {flags: 'a'});
 }
 
+var _logger_format = decodeURIComponent(Config.get("accessLogFormat",
+       ':date :username %1b[1m:method%1b[0m %1b[33m:url%1b[0m :status :res[content-length] bytes :response-time ms'));
+var _suppressPaths = Config.getArray("accessLogSuppressPaths", ";", "");
 
-app.use(logger(':date :username \x1b[1m:method\x1b[0m \x1b[33m:url\x1b[0m :status :res[content-length] bytes :response-time ms',{stream: _stream}));
+app.use(logger(_logger_format, {stream: _stream,
+  skip: (req, res) => { return _suppressPaths.includes(req.path); }}));
 app.use(compression());
 app.use(methodOverride());
 
@@ -3100,12 +3110,11 @@ function continueBuildQuery(req, query, err, finalCb) {
 
   lookupQueryItems(query.query.bool.filter, function (lerr) {
     if (req.query.date === '-1' ||                                      // An all query
-        (req.query.bounding || "last") !== "last" ||                    // Not a last bounded query
         Config.get("queryAllIndices", Config.get("multiES", false))) {  // queryAllIndices (default: multiES)
       return finalCb(err || lerr, query, "sessions2-*"); // Then we just go against all indices for a slight overhead
     }
 
-    Db.getIndices(req.query.startTime, req.query.stopTime, Config.get("rotateIndex", "daily"), function(indices) {
+    Db.getIndices(req.query.startTime, req.query.stopTime, req.query.bounding, Config.get("rotateIndex", "daily"), function(indices) {
       if (indices.length > 3000) { // Will url be too long
         return finalCb(err || lerr, query, "sessions2-*");
       } else {
@@ -4354,7 +4363,7 @@ app.get('/stats.json', [noCacheJson, recordResponseTime, checkPermissions(['hide
 
     // sort after all the results are aggregated
     req.query.sortField = req.query.sortField || 'nodeName';
-    if (results.results[0] && results.results[0][req.query.sortField]) { // make sure the field exists to sort on
+    if (results.results[0] && results.results[0][req.query.sortField] !== undefined) { // make sure the field exists to sort on
       results.results = results.results.sort((a, b) => {
         if (req.query.desc === 'true') {
           if (!isNaN(a[req.query.sortField])) {
@@ -5444,6 +5453,113 @@ app.get(/\/sessions.csv.*/, logAction(), function(req, res) {
       csvListWriter(req, res, list, reqFields);
     });
   }
+});
+
+app.get('/spigraphpie', noCacheJson, logAction(), (req, res) => {
+
+  if (req.query.exp === undefined) {
+    return res.molochError(403, 'Missing exp parameter');
+  }
+
+  let fields = [];
+  let parts = req.query.exp.split(',');
+  for (let i = 0; i < parts.length; i++) {
+    if (internals.scriptAggs[parts[i]] !== undefined) {
+      fields.push(internals.scriptAggs[parts[i]]);
+      continue;
+    }
+    let field = Config.getFieldsMap()[parts[i]];
+    if (!field) {
+      return res.molochError(403, `Unknown expression ${parts[i]}\n`);
+    }
+    fields.push(field);
+  }
+
+  buildSessionQuery(req, function(err, query, indices) {
+    query.size = 0; // Don't need any real results, just aggregations
+    delete query.sort;
+    delete query.aggregations;
+    const size = +req.query.size || 20;
+
+    if (!query.query.bool.must) {
+      query.query.bool.must = [];
+    }
+
+    let lastQ = query;
+    for (let i = 0; i < fields.length; i++) {
+      // Require that each field exists
+      query.query.bool.must.push({ exists: { field: fields[i].dbField } });
+
+      if (fields[i].script) {
+        lastQ.aggregations = {field: {terms: {script: {lang: "painless", source: fields[i].script}, size: size}}};
+      } else {
+        lastQ.aggregations = {field: {terms: {field: fields[i].dbField, size: size}}};
+      }
+      lastQ = lastQ.aggregations.field;
+    }
+
+    if (Config.debug > 2) {
+      console.log('spigraph pie aggregations', indices, JSON.stringify(query, false, 2));
+    }
+
+    Db.searchPrimary(indices, 'session', query, null, function (err, result) {
+      if (err) {
+        console.log('spigraphpie ERROR', err);
+        res.status(400);
+        return res.end(err);
+      }
+
+      if (Config.debug > 2) {
+        console.log('result', JSON.stringify(result, false, 2));
+      }
+
+      // format the data for the pie graph
+      let pieResults = { name: 'Top Talkers', children: [] };
+      function addDataToPie (buckets, addTo) {
+        for (let i = 0; i < buckets.length; i++) {
+          let bucket = buckets[i];
+          addTo.push({
+            name: bucket.key,
+            size: bucket.doc_count
+          });
+          if (bucket.field) {
+            addTo[i].children = [];
+            addTo[i].size = undefined; // size is interpreted from children
+            addTo[i].sizeValue = bucket.doc_count; // keep sizeValue for display
+            addDataToPie(bucket.field.buckets, addTo[i].children);
+          }
+        }
+      }
+
+      let grandparent;
+      let tableResults = [];
+      // assumes only 3 levels deep
+      function addDataToTable (buckets, parent) {
+        for (let i = 0; i < buckets.length; i++) {
+          let bucket = buckets[i];
+          if (bucket.field) {
+            if (parent) { grandparent = parent; }
+            addDataToTable(bucket.field.buckets, {
+              name: bucket.key,
+              size: bucket.doc_count
+            });
+          } else {
+            tableResults.push({
+              parent: parent,
+              grandparent: grandparent,
+              name: bucket.key,
+              size: bucket.doc_count
+            });
+          }
+        }
+      }
+
+      addDataToPie(result.aggregations.field.buckets, pieResults.children);
+      addDataToTable(result.aggregations.field.buckets);
+
+      return res.send({success:true, pieResults: pieResults, tableResults: tableResults});
+    });
+  });
 });
 
 app.get('/multiunique.txt', logAction(), function(req, res) {
@@ -8925,13 +9041,17 @@ function main () {
     internals.previousNodesStats.push(info.nodes);
   });
 
-  expireCheckAll();
-  setInterval(expireCheckAll, 60*1000);
-
   loadFields();
   setInterval(loadFields, 2*60*1000);
 
   loadPlugins();
+
+  var pcapWriteMethod = Config.get("pcapWriteMethod");
+  var writer = internals.writers[pcapWriteMethod];
+  if (!writer || writer.localNode === true) {
+    expireCheckAll();
+    setInterval(expireCheckAll, 60*1000);
+  }
 
   createRightClicks();
   setInterval(createRightClicks, 5*60*1000);
