@@ -18,7 +18,7 @@ Hedgehog Linux is a trimmed-down Debian Linux with several common tools preinsta
     - [Compiling Zeek from source](#ZeekCompile)
     - [Third party plugins](#ZeekThirdParty)
         + [bash script to install third party plugins for Zeek](#ZeekThirdPartyBash)
-        + [Bro::AF_Packet configuration](#BroAfPacket)
+        + [Zeek::AF_Packet configuration](#ZeekAfPacket)
     - [`local.zeek`](#ZeekLocalPolicy)
     - [File carving](#ZeekFileCarving)
 * [Forwarding](#Forwarding)
@@ -369,7 +369,7 @@ Hedgehog Linux utilizest he following third party Zeek packages:
 * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
 * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
 * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
-* J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin
+* J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
 * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
 * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
 * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
@@ -497,7 +497,7 @@ if [[ -d "$SRC_DIR" ]]; then
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/bro-af_packet-plugin")"
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
@@ -518,9 +518,9 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 ```
 
-### <a name="BroAfPacket"></a>Bro::AF_Packet configuration
+### <a name="ZeekAfPacket"></a>Zeek::AF_Packet configuration
 
-Of particular mention is J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin to allow Zeek to use the Linux kernel's AF_PACKET capabilities natively for packet capture. To determine if your Linux distribution's kernel supports AF_PACKET:
+Of particular mention is J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin to allow Zeek to use the Linux kernel's AF_PACKET capabilities natively for packet capture. To determine if your Linux distribution's kernel supports AF_PACKET:
 
 ```bash
 $ grep -x 'CONFIG_PACKET=[ym]' "/boot/config-$(uname -r)"
