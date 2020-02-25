@@ -78,6 +78,7 @@ ZKG_GITHUB_URLS=(
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
   https://github.com/0xxon/cve-2020-0601
+  https://github.com/J-Gras/zeek-af_packet-plugin
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -111,16 +112,6 @@ if [[ -d "$SRC_DIR" ]]; then
     rm -rf CMakeLists.txt ./scripts ./src && \
     cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
     ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-    make && \
-    make install
-  cd "$CWD"
-fi
-
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  cd "$SRC_DIR" && \
-    ./configure --with-kernel=/usr --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
     make && \
     make install
   cd "$CWD"
