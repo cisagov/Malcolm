@@ -2835,14 +2835,25 @@ function lookupQueryItems(query, doneCb) {
   finished = 1;
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+//// determineQueryTimes(req)
+////
+//// Returns [startTimeSec, stopTimeSec, interval] using values from req.query.date,
+////   req.query.startTime, req.query.stopTime, req.query.interval, and
+////   req.query.segments.
+////
+//// This code was factored out from buildSessionQuery.
+//////////////////////////////////////////////////////////////////////////////////
 function determineQueryTimes (req) {
   let startTimeSec = undefined;
   let stopTimeSec = undefined;
   let interval = 60*60;
 
   if (Config.debug) {
-    console.log("determineQueryTimes", "req.query.date", req.query.date, "req.query.segments", req.query.segments,
-                "req.query.startTime", req.query.startTime, "req.query.stopTime", req.query.stopTime)
+    console.log("determineQueryTimes", "req.query.date", req.query.date,
+                "req.query.segments", req.query.segments,
+                "req.query.startTime", req.query.startTime,
+                "req.query.stopTime", req.query.stopTime)
   }
 
   if ((req.query.date && req.query.date === '-1') ||
@@ -2913,6 +2924,7 @@ function buildSessionQuery (req, buildCb) {
   let timeLimitExceeded = false;
   var interval;
 
+  // determineQueryTimes calculates startTime, stopTime, and interval from req.query
   let startAndStopParams = determineQueryTimes(req);
   if (startAndStopParams[0] !== undefined) req.query.startTime = startAndStopParams[0];
   if (startAndStopParams[1] !== undefined) req.query.stopTime = startAndStopParams[1];
@@ -5128,6 +5140,15 @@ function buildConnections(req, res, cb) {
   let fdst                 = req.query.dstField;
   let minConn              = req.query.minConn || 1;
 
+  // If network graph baseline is enabled (enabled: req.query.baseline=1, disabled:req.query.baseline=0 or undefined)
+  //   then two queries will be run (ie., run buildSessionQuery->searchPrimary->process twice): first for the
+  //   original specified time frame and second for the same time frame immediately preceding it.
+  // Nodes have an .inresult attribute where:
+  //   0 = 00 = not in either result set (although you'll never see these, obviously)
+  //   1 = 01 = seen during the "current" time frame but not in the "baseline" time frame (ie., "new")
+  //   2 = 10 = seen during the "baseline" time frame but not in the "current" time frame (ie., "old")
+  //   3 = 11 = seen during both the "current" time frame and the "baseline" time frame
+  // This is only performed where startTime/startTime are defined, and never for "all" time range (date=-1).
   let doBaseline = 0;
   if ((req.query.date !== '-1') && (req.query.startTime !== undefined) && (req.query.stopTime !== undefined)) {
     doBaseline = req.query.baseline || 0;
@@ -5207,11 +5228,19 @@ function buildConnections(req, res, cb) {
     updateValues(f, connects[linkId], fields);
   }
 
+  // This loop (which handles buildSessionQuery->searchPrimary->process) will be run
+  //   once or twice, depending on if baseline is enabled:
+  //   1. for the "current" time frame, the one specified originally in req.query
+  //   2. for the "baseline" time frame immediately prior to the time frame of "1."
+  //      (only if baseline is enabled)
+  // The call to process() will ensure the resultId value is OR'ed into the .inresult
+  //   attribute of each node.
   let maxResultId = 1 + ((doBaseline == 0) ? 0 : 1);
+
   for (let resultId = 1; resultId <= maxResultId; resultId++) {
 
     if (resultId > 1) {
-      // replace current time frame start/stop values with baseline start/stop values
+      // replace current time frame start/stop values with baseline time frame start/stop values
       let currentQueryTimes = determineQueryTimes(req);
       console.log("buildConnections baseline.0", "startTime", currentQueryTimes[0], "stopTime", currentQueryTimes[1])
       if ((currentQueryTimes[0] !== undefined) && (currentQueryTimes[1] !== undefined)) {
@@ -5291,8 +5320,11 @@ function buildConnections(req, res, cb) {
 
         }, function (err) {
 
+          // accumulate graph.hits.total into totalHits so that recordsFiltered
+          // represents both current and baseline queries if baseline is enabled
           totalHits += graph.hits.total;
 
+          // only calculate final return values if we are in the last loop iteration
           if (resultId >= maxResultId) {
             let nodeKeys = Object.keys(nodesHash);
             if (Config.get('regressionTests', false)) {
