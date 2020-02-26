@@ -39,6 +39,7 @@ RUN apt-get -q update && \
         rename \
         sudo \
         swig \
+        vim-tiny \
         wget \
         zlib1g-dev
 
