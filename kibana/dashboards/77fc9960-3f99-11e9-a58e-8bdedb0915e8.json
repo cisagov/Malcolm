@@ -1,5 +1,5 @@
 {
-  "version": "7.6.0",
+  "version": "7.6.1",
   "objects": [
     {
       "id": "77fc9960-3f99-11e9-a58e-8bdedb0915e8",
@@ -10,7 +10,7 @@
         "title": "Connections - Destination - Responder Bytes (region map)",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"18ef74a3-0457-4cdd-acdc-2c0d967c4b7c\"},\"panelIndex\":\"18ef74a3-0457-4cdd-acdc-2c0d967c4b7c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"bf8d1e0a-e6dd-4ea2-8466-220565d99081\"},\"panelIndex\":\"bf8d1e0a-e6dd-4ea2-8466-220565d99081\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"18ef74a3-0457-4cdd-acdc-2c0d967c4b7c\"},\"panelIndex\":\"18ef74a3-0457-4cdd-acdc-2c0d967c4b7c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"bf8d1e0a-e6dd-4ea2-8466-220565d99081\"},\"panelIndex\":\"bf8d1e0a-e6dd-4ea2-8466-220565d99081\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

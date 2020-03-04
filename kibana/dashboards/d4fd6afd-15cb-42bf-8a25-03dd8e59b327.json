@@ -1,5 +1,5 @@
 {
-  "version": "7.6.0",
+  "version": "7.6.1",
   "objects": [
     {
       "id": "d4fd6afd-15cb-42bf-8a25-03dd8e59b327",
@@ -10,7 +10,7 @@
         "title": "Connections - Destination - Responder Bytes",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"d4b659f9-f6be-441e-a6c4-ea4acab7619d\"},\"panelIndex\":\"d4b659f9-f6be-441e-a6c4-ea4acab7619d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"a23bbf3d-6744-4dc7-a46a-50f450b6bff4\"},\"panelIndex\":\"a23bbf3d-6744-4dc7-a46a-50f450b6bff4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"d4b659f9-f6be-441e-a6c4-ea4acab7619d\"},\"panelIndex\":\"d4b659f9-f6be-441e-a6c4-ea4acab7619d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"a23bbf3d-6744-4dc7-a46a-50f450b6bff4\"},\"panelIndex\":\"a23bbf3d-6744-4dc7-a46a-50f450b6bff4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

@@ -1,5 +1,5 @@
 {
-  "version": "7.6.0",
+  "version": "7.6.1",
   "objects": [
     {
       "id": "1ce42250-3f99-11e9-a58e-8bdedb0915e8",
@@ -10,7 +10,7 @@
         "title": "Connections - Source - Sum of Total Bytes (region map)",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"5cf06729-4907-4824-a561-a3c50a23136c\"},\"panelIndex\":\"5cf06729-4907-4824-a561-a3c50a23136c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"b397c221-819d-4fdd-b3e1-3a424d643ef0\"},\"panelIndex\":\"b397c221-819d-4fdd-b3e1-3a424d643ef0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"5cf06729-4907-4824-a561-a3c50a23136c\"},\"panelIndex\":\"5cf06729-4907-4824-a561-a3c50a23136c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"b397c221-819d-4fdd-b3e1-3a424d643ef0\"},\"panelIndex\":\"b397c221-819d-4fdd-b3e1-3a424d643ef0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
