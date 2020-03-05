@@ -1,5 +1,5 @@
 {
-  "version": "7.6.0",
+  "version": "7.6.1",
   "objects": [
     {
       "id": "b50c8d17-6ed3-4de6-aed4-5181032810b2",
@@ -10,7 +10,7 @@
         "title": "Connections - Source - Originator Bytes",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"5a871ebe-5904-4f52-ab3a-e3da4846933d\"},\"panelIndex\":\"5a871ebe-5904-4f52-ab3a-e3da4846933d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"3b635110-907e-457a-bfdf-b86a667a8483\"},\"panelIndex\":\"3b635110-907e-457a-bfdf-b86a667a8483\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"5a871ebe-5904-4f52-ab3a-e3da4846933d\"},\"panelIndex\":\"5a871ebe-5904-4f52-ab3a-e3da4846933d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"3b635110-907e-457a-bfdf-b86a667a8483\"},\"panelIndex\":\"3b635110-907e-457a-bfdf-b86a667a8483\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

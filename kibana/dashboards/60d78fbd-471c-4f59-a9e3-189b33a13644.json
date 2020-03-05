@@ -1,5 +1,5 @@
 {
-  "version": "7.6.0",
+  "version": "7.6.1",
   "objects": [
     {
       "id": "60d78fbd-471c-4f59-a9e3-189b33a13644",
@@ -10,7 +10,7 @@
         "title": "Connections - Destination - Sum of Total Bytes",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":39,\"h\":50,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"185e3f31-3f18-4df8-93c1-617c0323f051\"},\"panelIndex\":\"185e3f31-3f18-4df8-93c1-617c0323f051\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"887a57e9-3078-4fe1-9ea9-0ee63abe554f\"},\"panelIndex\":\"887a57e9-3078-4fe1-9ea9-0ee63abe554f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":39,\"h\":50,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"185e3f31-3f18-4df8-93c1-617c0323f051\"},\"panelIndex\":\"185e3f31-3f18-4df8-93c1-617c0323f051\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"887a57e9-3078-4fe1-9ea9-0ee63abe554f\"},\"panelIndex\":\"887a57e9-3078-4fe1-9ea9-0ee63abe554f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

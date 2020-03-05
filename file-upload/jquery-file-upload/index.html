@@ -20,8 +20,21 @@
 .bootstrap-tagsinput .tag {
   margin-right: 2px;
   margin-left: 2px;
-  color: white;
-  background-color: #6A5ACD;
+  color: #fff;
+  background-image: linear-gradient(#78cc78, #62c462 60%, #53be53);
+  background-repeat: no-repeat;
+}
+.label {
+  display: inline;
+  padding: .2em .6em .3em;
+  font-size: 100%;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
 }
 .center {
   text-align: center;
@@ -73,16 +86,16 @@ function toggle(checkboxID, toggleSelectID) {
         <div class="row fileupload-buttonbar">
             <div class="col-lg-7">
                 <!-- The fileinput-button span is used to style the file input field as button -->
-                <span class="btn btn-success fileinput-button">
+                <span class="btn btn-info fileinput-button">
                     <i class="glyphicon glyphicon-plus"></i>
                     <span>Add files...</span>
                     <input type="file" name="files[]" multiple>
                 </span>
-                <button type="submit" class="btn btn-primary start">
+                <button type="submit" class="btn btn-success start">
                     <i class="glyphicon glyphicon-upload"></i>
                     <span>Start upload</span>
                 </button>
-                <button type="reset" class="btn btn-warning cancel">
+                <button type="reset" class="btn btn-danger cancel">
                     <i class="glyphicon glyphicon-ban-circle"></i>
                     <span>Cancel upload</span>
                 </button>&nbsp;&nbsp;
@@ -149,13 +162,13 @@ function toggle(checkboxID, toggleSelectID) {
         </td>
         <td>
             {% if (!i && !o.options.autoUpload) { %}
-                <button class="btn btn-primary start" disabled>
+                <button class="btn btn-success start" disabled>
                     <i class="glyphicon glyphicon-upload"></i>
                     <span>Start</span>
                 </button>
             {% } %}
             {% if (!i) { %}
-                <button class="btn btn-warning cancel">
+                <button class="btn btn-danger cancel">
                     <i class="glyphicon glyphicon-ban-circle"></i>
                     <span>Cancel</span>
                 </button>

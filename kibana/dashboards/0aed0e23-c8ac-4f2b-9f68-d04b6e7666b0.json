@@ -1,5 +1,5 @@
 {
-  "version": "7.6.0",
+  "version": "7.6.1",
   "objects": [
     {
       "id": "0aed0e23-c8ac-4f2b-9f68-d04b6e7666b0",
@@ -10,7 +10,7 @@
         "title": "Connections - Destination - Top Connection Duration",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"2e33c0bf-ffb8-408b-ab32-0c6539074ea6\"},\"panelIndex\":\"2e33c0bf-ffb8-408b-ab32-0c6539074ea6\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"92ba4d29-ba43-4806-b545-79f60788c795\"},\"panelIndex\":\"92ba4d29-ba43-4806-b545-79f60788c795\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"2e33c0bf-ffb8-408b-ab32-0c6539074ea6\"},\"panelIndex\":\"2e33c0bf-ffb8-408b-ab32-0c6539074ea6\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"92ba4d29-ba43-4806-b545-79f60788c795\"},\"panelIndex\":\"92ba4d29-ba43-4806-b545-79f60788c795\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

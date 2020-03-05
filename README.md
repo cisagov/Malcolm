@@ -141,7 +141,7 @@ malcolmnetsec/nginx-proxy                           2.0.0               xxxxxxxx
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        30 minutes ago      276MB
 malcolmnetsec/htadmin                               2.0.0               xxxxxxxxxxxx        31 minutes ago      256MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        32 minutes ago      188MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.0               xxxxxxxxxxxx        5 weeks ago         825MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.1               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -200,7 +200,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
-    * J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin
+    * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
@@ -1771,7 +1771,7 @@ malcolmnetsec/kibana-oss                            2.0.0               xxxxxxxx
 malcolmnetsec/filebeat-oss                          2.0.0               xxxxxxxxxxxx        11 days ago         459MB
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        11 days ago         276MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        11 days ago         188MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.0               xxxxxxxxxxxx        5 weeks ago         769MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

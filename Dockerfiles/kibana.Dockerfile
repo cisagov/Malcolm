@@ -1,4 +1,4 @@
-FROM docker.elastic.co/kibana/kibana-oss:7.6.0
+FROM docker.elastic.co/kibana/kibana-oss:7.6.1
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -77,7 +77,7 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     # cd /tmp && \
     # echo "Installing ElastAlert plugin..." && \
       # unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
-      # sed -i "s/7\.5\.0/7\.6\.0/g" kibana/elastalert-kibana-plugin/package.json && \
+      # sed -i "s/7\.5\.0/7\.6\.1/g" kibana/elastalert-kibana-plugin/package.json && \
       # zip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
       # cd /usr/share/kibana/plugins && \
       # /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip --allow-root && \
@@ -85,7 +85,7 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     cd /tmp && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
-      sed -i "s/7\.4\.0/7\.6\.0/g" kibana/kibana-comments-app-plugin/package.json && \
+      sed -i "s/7\.4\.0/7\.6\.1/g" kibana/kibana-comments-app-plugin/package.json && \
       zip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-comments.zip --allow-root && \
@@ -93,7 +93,7 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     # && \ cd /tmp && \
     # echo "Installing Swimlanes visualization..." && \
       # unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
-      # sed -i "s/7\.5\.2/7\.6\.0/g" kibana/prelert_swimlane_vis/package.json && \
+      # sed -i "s/7\.5\.2/7\.6\.1/g" kibana/prelert_swimlane_vis/package.json && \
       # zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
       # cd /usr/share/kibana/plugins && \
       # /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
@@ -102,7 +102,7 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     # cd /tmp && \
     # echo "Installing Milestones visualization..." && \
       # unzip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
-      # sed -i "s/7\.1\.1/7\.6\.0/g" kibana/kibana-milestones-vis/package.json && \
+      # sed -i "s/7\.1\.1/7\.6\.1/g" kibana/kibana-milestones-vis/package.json && \
       # zip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
       # cd /usr/share/kibana/plugins && \
       # /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-milestones.zip --allow-root && \
