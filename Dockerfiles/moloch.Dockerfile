@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.2.2"
+ENV MOLOCH_VERSION "2.2.3"
 ENV MOLOCHDIR "/data/moloch"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -67,7 +67,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   cd /data && \
   # TODO: see comment above about aol/moloch vs. mmguero-dev/moloch
   # tar -xvf "moloch.tar.gz" && \
-  git clone --recursive --depth=1 --single-branch -b "topic/netdiff_2.2.2" "https://github.com/mmguero-dev/moloch.git" "./moloch-"$MOLOCH_VERSION && \
+  git clone --recursive --depth=1 --single-branch -b "topic/netdiff_2.2.3" "https://github.com/mmguero-dev/moloch.git" "./moloch-"$MOLOCH_VERSION && \
     cd "./moloch-"$MOLOCH_VERSION && \
     rm -rf ./.git && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
