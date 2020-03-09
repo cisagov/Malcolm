@@ -3,7 +3,7 @@ FROM debian:buster-slim AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV GITHUB_URL "https://github.com/mmguero-dev/moloch/"
-ENV GITHUB_BRANCH "topic/netdiff_2.2.2"
+ENV GITHUB_BRANCH "topic/netdiff_2.2.3"
 ENV MOLOCHDIR "/data/moloch"
 ENV MOLOCHUSER "moloch"
 
