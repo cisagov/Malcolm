@@ -5,7 +5,7 @@
 NETSNIFF_VER="0.6.6"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-ZEEK_VER="3.0.2"
+ZEEK_VER="3.0.3"
 ZEEK_URL="https://www.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
