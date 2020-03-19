@@ -337,7 +337,7 @@ The following bash script was used to download, [build and install](https://docs
 #!/bin/bash
 
 ZEEK_VER="3.0.1"
-ZEEK_URL="https://www.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
+ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
 )
