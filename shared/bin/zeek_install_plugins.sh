@@ -67,6 +67,7 @@ function clone_github_repo() {
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
+  https://github.com/0xxon/cve-2020-0601
   https://github.com/amzn/zeek-plugin-bacnet
   https://github.com/amzn/zeek-plugin-enip
   https://github.com/amzn/zeek-plugin-profinet
@@ -75,28 +76,13 @@ ZKG_GITHUB_URLS=(
   https://github.com/corelight/bro-community-id
   https://github.com/corelight/bro-xor-exe-plugin
   https://github.com/lexibrent/zeek-EternalSafety
+  https://github.com/mitre-attack/bzar
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
   [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
-done
-
-# install Zeek packages that need to be copied manually
-MANUAL_COPY_GITHUB_URLS_AND_SCRIPT_PATHS=(
-  "https://github.com/mitre-attack/car|implementations/bzar/scripts|bzar"
-)
-for i in ${MANUAL_COPY_GITHUB_URLS_AND_SCRIPT_PATHS[@]}; do
-  URL="$(echo "$i" | cut -d'|' -f1)"
-  SCRIPT_SRC_SUBDIR="$(echo "$i" | cut -d'|' -f2)"
-  SCRIPT_DST_SUBDIR="$(echo "$i" | cut -d'|' -f3)"
-  SRC_DIR="$(clone_github_repo "$URL")"
-  if [[ -d "$SRC_DIR" ]] && [[ -d "$SRC_DIR"/"$SCRIPT_SRC_SUBDIR" ]]; then
-    PLUGIN_DIR="$ZEEK_SCRIPTS_DIR"/"$SCRIPT_DST_SUBDIR"
-    mkdir -p "$PLUGIN_DIR"
-    cp -v "$SRC_DIR"/"$SCRIPT_SRC_SUBDIR"/* "$PLUGIN_DIR"/
-  fi
 done
 
 # manual build processes that don't fit the other patterns
