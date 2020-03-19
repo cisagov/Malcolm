@@ -1,2 +1,0 @@
-https://localhost/connections.json?date=0&startTime=1582614000&stopTime=1582700399&expression=zeek.logType==EXISTS!&baseline=0
-
