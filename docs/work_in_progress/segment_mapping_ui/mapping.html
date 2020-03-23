@@ -1,0 +1,157 @@
+<!doctype html>
+
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <link rel="stylesheet" href="./mapping.css">
+  <script src="./jquery.min.js"></script>
+  <title>Host and Network Segment Mapping</title>
+</head>
+
+<body>
+
+  <div id="container" class="mapping-page">
+    <div id="main">
+      <div class="c1">
+        <h1>Host and Network Segment Mapping</h1>
+        <div id="mapping">
+          <table>
+            <thead>
+              <tr>
+                <th class="sort" data-sort="address">Address</th>
+                <th class="sort" data-sort="name">Name</th>
+                <th class="sort" data-sort="tag">Tag (optional)</th>
+                <th colspan="2">
+                  <input type="text" class="search" placeholder="Search mappings" />
+                </th>
+              </tr>
+            </thead>
+            <tbody class="list"/>
+            <tfoot>
+              <tr>
+                <td class="address">
+                  <input type="hidden" id="id-field" />
+                  <input type="text" id="address-field" placeholder="Address" />
+                </td>
+                <td class="name">
+                  <input type="text" id="name-field" placeholder="Name" />
+                </td>
+                <td class="tag">
+                  <input type="text" id="tag-field" placeholder="Tag (optional)" />
+                </td>
+                <td class="add" colspan="2">
+                  <button id="add-btn">Add</button>
+                  <button id="save-btn">Save</button>
+                  <button id="cancel-btn">Cancel</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div> <!-- end of #container .mapping-page -->
+
+  <script src="./list.min.js"></script>
+  <script type="text/javascript">
+
+    // define value names and template for new list items
+    var options = {
+      valueNames: [ 'id', 'address', 'name', 'tag' ],
+      item: '<tr><td class="id" style="display:none;"></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="save"><button class="edit-item-btn">Edit</button></td><td class="remove"><button class="remove-item-btn">Remove</button></td></tr>'
+    };
+
+    // initialize list and other elements
+    var mappingList = new List('mapping', options);
+
+    var idField = $('#id-field'),
+        addressField = $('#address-field'),
+        nameField = $('#name-field'),
+        tagField = $('#tag-field'),
+        addBtn = $('#add-btn'),
+        saveBtn = $('#save-btn').hide(),
+        cancelBtn = $('#cancel-btn').hide(),
+        removeBtns = $('.remove-item-btn'),
+        editBtns = $('.edit-item-btn');
+
+    // sets callbacks to the buttons in the list
+    refreshCallbacks();
+
+    // store a new value from the edit inputs into the list
+    addBtn.click(function() {
+      mappingList.add({
+        id: Math.floor(Math.random()*110000),
+        address: addressField.val(),
+        name: nameField.val(),
+        tag: tagField.val()
+      });
+      clearFields();
+      refreshCallbacks();
+    });
+
+    // save an item being edited back into the list
+    saveBtn.click(function() {
+      var item = mappingList.get('id', idField.val())[0];
+      item.values({
+        id:idField.val(),
+        address: addressField.val(),
+        name: nameField.val(),
+        tag: tagField.val()
+      });
+      clearFields();
+      saveBtn.hide();
+      cancelBtn.hide();
+      addBtn.show();
+    });
+
+    // revert edits without saving
+    cancelBtn.click(function() {
+      clearFields();
+      saveBtn.hide();
+      cancelBtn.hide();
+      addBtn.show();
+    });
+
+    // apply callbacks for the buttons on the list items
+    function refreshCallbacks() {
+
+      removeBtns = $(removeBtns.selector);
+      editBtns = $(editBtns.selector);
+
+      // delete item
+      removeBtns.click(function() {
+        var itemId = $(this).closest('tr').find('.id').text();
+        mappingList.remove('id', itemId);
+      });
+
+      // populate the edit inputs from the values of row where Edit was clicked
+      editBtns.click(function() {
+        var itemId = $(this).closest('tr').find('.id').text();
+        var itemValues = mappingList.get('id', itemId)[0].values();
+        idField.val(itemValues.id);
+        addressField.val(itemValues.address);
+        nameField.val(itemValues.name);
+        tagField.val(itemValues.tag);
+
+        saveBtn.show();
+        cancelBtn.show();
+        addBtn.hide();
+      });
+    }
+
+    // clear edit inputs
+    function clearFields() {
+      addressField.val('');
+      nameField.val('');
+      tagField.val('');
+    }
+  </script> <!-- end of ListJS-related scripts -->
+
+</body>
+</html>
