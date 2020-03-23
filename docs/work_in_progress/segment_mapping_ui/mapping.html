@@ -11,7 +11,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <link rel="stylesheet" href="./mapping.css">
   <script src="./jquery.min.js"></script>
-  <title>Host and Network Segment Mapping</title>
+  <title>Host and Network Segment Name Mapping</title>
 </head>
 
 <body>
@@ -19,11 +19,12 @@
   <div id="container" class="mapping-page">
     <div id="main">
       <div class="c1">
-        <h1>Host and Network Segment Mapping</h1>
+        <h1>Host and Network Segment Name Mapping</h1>
         <div id="mapping">
           <table>
             <thead>
               <tr>
+                <th class="sort" data-sort="type">Type</th>
                 <th class="sort" data-sort="address">Address</th>
                 <th class="sort" data-sort="name">Name</th>
                 <th class="sort" data-sort="tag">Tag (optional)</th>
@@ -35,8 +36,14 @@
             <tbody class="list"/>
             <tfoot>
               <tr>
-                <td class="address">
+                <td class="type">
                   <input type="hidden" id="id-field" />
+                  <select id="type-field">
+                    <option value="host">host</option>
+                    <option value="segment">segment</option>
+                  </select>
+                </td>
+                <td class="address">
                   <input type="text" id="address-field" placeholder="Address" />
                 </td>
                 <td class="name">
@@ -63,14 +70,15 @@
 
     // define value names and template for new list items
     var options = {
-      valueNames: [ 'id', 'address', 'name', 'tag' ],
-      item: '<tr><td class="id" style="display:none;"></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="save"><button class="edit-item-btn">Edit</button></td><td class="remove"><button class="remove-item-btn">Remove</button></td></tr>'
+      valueNames: [ 'id', 'type', 'address', 'name', 'tag' ],
+      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="save"><button class="edit-item-btn">Edit</button></td><td class="remove"><button class="remove-item-btn">Remove</button></td></tr>'
     };
 
     // initialize list and other elements
     var mappingList = new List('mapping', options);
 
     var idField = $('#id-field'),
+        typeField = $('#type-field'),
         addressField = $('#address-field'),
         nameField = $('#name-field'),
         tagField = $('#tag-field'),
@@ -87,6 +95,7 @@
     addBtn.click(function() {
       mappingList.add({
         id: Math.floor(Math.random()*110000),
+        type: typeField.val(),
         address: addressField.val(),
         name: nameField.val(),
         tag: tagField.val()
@@ -100,6 +109,7 @@
       var item = mappingList.get('id', idField.val())[0];
       item.values({
         id:idField.val(),
+        type: typeField.val(),
         address: addressField.val(),
         name: nameField.val(),
         tag: tagField.val()
@@ -135,6 +145,7 @@
         var itemId = $(this).closest('tr').find('.id').text();
         var itemValues = mappingList.get('id', itemId)[0].values();
         idField.val(itemValues.id);
+        typeField.val(itemValues.type);
         addressField.val(itemValues.address);
         nameField.val(itemValues.name);
         tagField.val(itemValues.tag);
@@ -147,6 +158,7 @@
 
     // clear edit inputs
     function clearFields() {
+      typeField.val('host');
       addressField.val('');
       nameField.val('');
       tagField.val('');

@@ -75,12 +75,15 @@ address {
 }
 
 #container {
-  width: 750px;
-  margin: 0 auto 80px;
+  width: 800px;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .c1 {
-  width: 750px;
+  width: 800px;
   float: left;
 }
 
@@ -92,18 +95,6 @@ address {
 .c3 {
   width: 235px;
   float: left;
-}
-
-.m10l {
-  margin-left: 10px;
-}
-
-.m20l {
-  margin-left: 20px;
-}
-
-.p10 {
-  padding: 10px;
 }
 
 p {
@@ -165,6 +156,14 @@ td {
   width: auto;
 }
 
+td.type {
+  text-align: center;
+}
+
+td.address {
+  font-family: monospace;
+}
+
 #container.mapping-page {
   margin-top: 10px;
 }
@@ -186,4 +185,8 @@ td {
   width: 130px;
   margin: 0;
   border-radius: 5px;
+}
+
+#mapping input.search {
+  width: 185px;
 }
