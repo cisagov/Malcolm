@@ -155,8 +155,25 @@
       addBtn.show();
     });
 
+    function download(filename, text, contentType="text/plain") {
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+
     saveBtn.click(function() {
-      console.log('save');
+      if (mappingList) {
+        // create list of all items (minus the random "id" index field)
+        let items = mappingList.items.map(
+          function(item) { return (({ id, ...o }) => o)(item.values()); }
+        );
+        // console.log(JSON.stringify(items, null, 2));
+        download('mappings.json', JSON.stringify(items, null, 2), "application/json");
+      }
     });
 
     restartBtn.click(function() {
