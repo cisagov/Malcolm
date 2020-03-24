@@ -163,6 +163,45 @@
       nameField.val('');
       tagField.val('');
     }
+
+    // load old delimited plain text format
+    //   IP or MAC address to host name map:
+    //     address|host name|required tag
+    //   CIDR to network segment format:
+    //     IP(s)|segment name|required tag
+    ['/maps/cidr-map.txt', '/maps/host-map.txt'].forEach(function (txtUrl, txtUrlIdx) {
+      const mapType = (txtUrlIdx === 0) ? "segment" : "host";
+      var txtFile = new XMLHttpRequest();
+      txtFile.open("GET", txtUrl, true);
+      txtFile.send();
+      txtFile.onreadystatechange = function() {
+        if ((txtFile.readyState === 4) && (txtFile.status === 200)) {
+          txtFile.responseText.split(/\r?\n/).forEach(function (line, lineIdx) {
+            if (!line.startsWith("#")) {
+              const vals = line.split("|");
+              const valsLen = vals.length;
+              if ((valsLen >= 2) && (valsLen < 4)) {
+                const name = vals[1].trim();
+                const tag = (valsLen > 2) ? vals[2].trim() : "";
+                const addrs = vals[0].trim().split(",");
+                addrs.forEach(function (addr, addrIdx) {
+                  mappingList.add({
+                    id: Math.floor(Math.random()*110000),
+                    type: mapType,
+                    address: addr,
+                    name: name,
+                    tag: tag
+                  });
+                  // todo: this is stupid to call this for every item... js callbacks are dumb
+                  refreshCallbacks();
+                });
+              }
+            }
+          });
+        }
+      }
+    });
+
   </script> <!-- end of ListJS-related scripts -->
 
 </body>
