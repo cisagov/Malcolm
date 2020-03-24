@@ -120,34 +120,50 @@
 
     // store a new value from the edit inputs into the list
     addBtn.click(function() {
-      mappingList.add({
-        // todo: better random ID generator (if necessary)
-        id: Math.floor(Math.random()*110000),
-        type: typeField.val(),
-        address: addressField.val(),
-        name: nameField.val(),
-        tag: tagField.val()
-      });
-      clearFields();
-      refreshCallbacks();
+      const type = typeField.val();
+      const address = addressField.val().trim();
+      const name = nameField.val().trim();
+      const tag = tagField.val().trim();
+      if ((file_types_valid.has(type)) &&
+          (address) && (address.length > 0) &&
+          (name) && (name.length > 0)) {
+        mappingList.add({
+          // todo: better random ID generator (if necessary)
+          id: Math.floor(Math.random()*110000),
+          type: type,
+          address: address,
+          name: name,
+          tag: tag
+        });
+        clearFields();
+        refreshCallbacks();
+      }
     });
 
     // update an item being edited back into the list
     updateBtn.click(function() {
       const itemId = idField.val();
-      var item = mappingList.get('id', itemId)[0];
-      item.values({
-        id: itemId,
-        type: typeField.val(),
-        address: addressField.val(),
-        name: nameField.val(),
-        tag: tagField.val()
-      });
-      clearFields();
-      updateBtn.hide();
-      cancelBtn.hide();
-      addBtn.show();
-      focusItem(itemId);
+      const type = typeField.val();
+      const address = addressField.val().trim();
+      const name = nameField.val().trim();
+      const tag = tagField.val().trim();
+      if ((file_types_valid.has(type)) &&
+          (address) && (address.length > 0) &&
+          (name) && (name.length > 0)) {
+        var item = mappingList.get('id', itemId)[0];
+        item.values({
+          id: itemId,
+          type: type,
+          address: addressField.val(),
+          name: nameField.val(),
+          tag: tagField.val()
+        });
+        clearFields();
+        updateBtn.hide();
+        cancelBtn.hide();
+        addBtn.show();
+        focusItem(itemId);
+      }
     });
 
     // revert edits without updating
