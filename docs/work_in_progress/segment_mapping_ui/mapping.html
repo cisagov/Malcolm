@@ -104,6 +104,20 @@
     // sets callbacks to the buttons in the list
     refreshCallbacks();
 
+    function focusItem(itemId) {
+      // scroll back up to item that was updated
+      // todo: is there a more efficient way to do this? there's got to be with list.js
+      for (const editBtnKey in editBtns) {
+        if (editBtnKey && (editBtns[editBtnKey])) {
+          entry = (editBtns[editBtnKey].closest) ? editBtns[editBtnKey].closest('tr').firstChild : null;
+          if (entry && entry.firstChild && entry.firstChild.data && (String(entry.firstChild.data) === String(itemId))) {
+            editBtns[editBtnKey].focus();
+            break;
+          }
+        }
+      }
+    } // focusItem
+
     // store a new value from the edit inputs into the list
     addBtn.click(function() {
       mappingList.add({
@@ -123,7 +137,7 @@
       const itemId = idField.val();
       var item = mappingList.get('id', itemId)[0];
       item.values({
-        id:idField.val(),
+        id: itemId,
         type: typeField.val(),
         address: addressField.val(),
         name: nameField.val(),
@@ -133,26 +147,17 @@
       updateBtn.hide();
       cancelBtn.hide();
       addBtn.show();
-
-      // scroll back up to item that was updated
-      // todo: is there a more efficient way to do this? there's got to be with list.js
-      for (const editBtnKey in editBtns) {
-        if (editBtnKey && (editBtns[editBtnKey])) {
-          entry = (editBtns[editBtnKey].closest) ? editBtns[editBtnKey].closest('tr').firstChild : null;
-          if (entry && entry.firstChild && entry.firstChild.data && (String(entry.firstChild.data) === String(itemId))) {
-            editBtns[editBtnKey].focus();
-            break;
-          }
-        }
-      }
+      focusItem(itemId);
     });
 
     // revert edits without updating
     cancelBtn.click(function() {
+      const itemId = idField.val();
       clearFields();
       updateBtn.hide();
       cancelBtn.hide();
       addBtn.show();
+      focusItem(itemId);
     });
 
     function download(filename, text, contentType="text/plain") {
