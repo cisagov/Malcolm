@@ -11,7 +11,7 @@ body {
   line-height: 1.5;
   color: #cecece;
   text-align: left;
-  background-color: #272B30
+  background-color: #272B30;
 }
 
 body,
@@ -155,6 +155,10 @@ th {
   font-weight: bold;
   color: #ddd;
   width: auto;
+}
+
+tr:hover {
+  background-color: #454c54;
 }
 
 td {

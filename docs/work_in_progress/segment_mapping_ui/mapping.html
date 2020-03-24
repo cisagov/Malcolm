@@ -25,10 +25,10 @@
           <table>
             <thead>
               <tr>
-                <th class="sort" data-sort="type">Type</th>
-                <th class="sort" data-sort="address">Address</th>
-                <th class="sort" data-sort="name">Name</th>
-                <th class="sort" data-sort="tag">Tag (optional)</th>
+                <th class="sort" title="Mapping type (host or network segment)" data-sort="type">Type</th>
+                <th class="sort" title="Host address (IP or MAC) or CIDR-formatted IP range" data-sort="address">Address</th>
+                <th class="sort" title="Host or network segment name" data-sort="name">Name</th>
+                <th class="sort" title="Assign name only if the event contains this tag (optional)" data-sort="tag">Tag</th>
                 <th colspan="2">
                   <input type="text" class="search" placeholder="Search mappings" />
                 </th>
@@ -353,10 +353,14 @@
                         filePath: '/maps/host-map.txt'},
                        {fileType: null,
                         filePath: '/maps/net-map.json'}], function (mapsArray) {
+
+      // convert to a hash to resolve any duplicates
       var mapsHash = mapsArray.reduce(function(acc, cur) {
         acc[cur.type + '|' + cur.address] = cur;
         return acc;
       }, {});
+
+      // populate the list.js List object
       for (mapKey in mapsHash) {
         let map = mapsHash[mapKey];
         if ((file_types_valid.has(map.type)) &&
