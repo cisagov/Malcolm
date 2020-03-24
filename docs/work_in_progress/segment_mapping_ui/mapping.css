@@ -188,6 +188,10 @@ td.address {
   width: 300px;
 }
 
+#mapping td.foot {
+  text-align: center;
+}
+
 #mapping input {
   width: 130px;
   margin: 0;

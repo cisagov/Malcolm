@@ -59,6 +59,16 @@
                   <button id="cancel-btn">Cancel</button>
                 </td>
               </tr>
+              <tr>
+                <td/>
+                <td/>
+                <td class="foot" colspan="2">
+                  <button id="save-btn">Save Mappings</button>
+                </td>
+                <td class="foot" colspan="2">
+                  <button id="restart-btn">Restart Log Ingestion</button>
+                </td>
+              </tr>
             </tfoot>
           </table>
         </div>
@@ -86,6 +96,8 @@
         addBtn = $('#add-btn'),
         updateBtn = $('#update-btn').hide(),
         cancelBtn = $('#cancel-btn').hide(),
+        saveBtn = $('#save-btn'),
+        restartBtn = $('#restart-btn'),
         removeBtns = $('.remove-item-btn'),
         editBtns = $('.edit-item-btn');
 
@@ -141,6 +153,14 @@
       updateBtn.hide();
       cancelBtn.hide();
       addBtn.show();
+    });
+
+    saveBtn.click(function() {
+      console.log('save');
+    });
+
+    restartBtn.click(function() {
+      console.log('restart');
     });
 
     // apply callbacks for the buttons on the list items
