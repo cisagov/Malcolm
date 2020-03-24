@@ -30,7 +30,7 @@
                 <th class="sort" title="Host or network segment name" data-sort="name">Name</th>
                 <th class="sort" title="Assign name only if the event contains this tag (optional)" data-sort="tag">Tag</th>
                 <th colspan="2">
-                  <input type="text" class="search" placeholder="Search mappings" />
+                  <input type="text" class="search" placeholder="🔎 Search mappings" />
                 </th>
               </tr>
             </thead>
@@ -40,8 +40,8 @@
                 <td class="type">
                   <input type="hidden" id="id-field" />
                   <select id="type-field">
-                    <option value="host">host</option>
-                    <option value="segment">segment</option>
+                    <option value="host">🖳 host</option>
+                    <option value="segment">🖧 segment</option>
                   </select>
                 </td>
                 <td class="address">
@@ -54,19 +54,19 @@
                   <input type="text" id="tag-field" placeholder="Tag (optional)" />
                 </td>
                 <td class="add" colspan="2">
-                  <button id="add-btn">Add</button>
-                  <button id="update-btn">Update</button>
-                  <button id="cancel-btn">Cancel</button>
+                  <button title="Create new mapping" class="add-btn" id="add-btn">💾</button>
+                  <button title="Modify mapping" class="update-btn" id="update-btn">💾</button>
+                  <button title="Cancel changes" class="cancel-btn" id="cancel-btn">❌</button>
                 </td>
               </tr>
               <tr>
                 <td/>
                 <td/>
                 <td class="foot" colspan="2">
-                  <button id="save-btn">Save Mappings</button>
+                  <button class="save-btn" id="save-btn">💾 Save Mappings</button>
                 </td>
                 <td class="foot" colspan="2">
-                  <button id="restart-btn">Restart Log Ingestion</button>
+                  <button class="restart-btn" id="restart-btn">🔁 Restart Parser</button>
                 </td>
               </tr>
             </tfoot>
@@ -82,7 +82,7 @@
     // define value names and template for new list items
     var options = {
       valueNames: [ 'id', 'type', 'address', 'name', 'tag' ],
-      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="update"><button class="edit-item-btn">Edit</button></td><td class="remove"><button class="remove-item-btn">Remove</button></td></tr>'
+      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="update"><button title="Modify this mapping" class="edit-item-btn">📝</button></td><td class="remove"><button title="Remove this entry" class="remove-item-btn">🚫</button></td></tr>'
     };
 
     // initialize list and other elements

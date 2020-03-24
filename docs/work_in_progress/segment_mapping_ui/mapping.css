@@ -167,12 +167,29 @@ td {
   width: auto;
 }
 
+td.update,
+td.remove,
 td.type {
   text-align: center;
 }
 
 td.address {
   font-family: monospace;
+}
+
+button.add-btn,
+button.update-btn,
+button.cancel-btn,
+button.edit-item-btn,
+button.remove-item-btn {
+  font-size: 1.33rem;
+  border: 2px #ddd;
+  border-radius: 4px;
+}
+
+button.save-btn,
+button.restart-btn {
+  font-size: 1.0rem;
 }
 
 #container.mapping-page {
@@ -190,6 +207,7 @@ td.address {
 
 #mapping td.add {
   width: 300px;
+  text-align: center;
 }
 
 #mapping td.foot {
