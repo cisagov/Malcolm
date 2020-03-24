@@ -51,6 +51,13 @@ img {
   border: 0;
 }
 
+img.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
 ol,
 ul,
 dl {
@@ -172,7 +179,7 @@ td.address {
   margin-bottom: 20px;
 }
 
-#mapping td.save,
+#mapping td.update,
 #mapping td.remove {
   width: 130px;
 }

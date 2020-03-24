@@ -19,6 +19,7 @@
   <div id="container" class="mapping-page">
     <div id="main">
       <div class="c1">
+        <img class="center" src="Malcolm_banner.png" alt="">
         <h1>Host and Network Segment Name Mapping</h1>
         <div id="mapping">
           <table>
@@ -54,7 +55,7 @@
                 </td>
                 <td class="add" colspan="2">
                   <button id="add-btn">Add</button>
-                  <button id="save-btn">Save</button>
+                  <button id="update-btn">Update</button>
                   <button id="cancel-btn">Cancel</button>
                 </td>
               </tr>
@@ -71,7 +72,7 @@
     // define value names and template for new list items
     var options = {
       valueNames: [ 'id', 'type', 'address', 'name', 'tag' ],
-      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="save"><button class="edit-item-btn">Edit</button></td><td class="remove"><button class="remove-item-btn">Remove</button></td></tr>'
+      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="update"><button class="edit-item-btn">Edit</button></td><td class="remove"><button class="remove-item-btn">Remove</button></td></tr>'
     };
 
     // initialize list and other elements
@@ -83,7 +84,7 @@
         nameField = $('#name-field'),
         tagField = $('#tag-field'),
         addBtn = $('#add-btn'),
-        saveBtn = $('#save-btn').hide(),
+        updateBtn = $('#update-btn').hide(),
         cancelBtn = $('#cancel-btn').hide(),
         removeBtns = $('.remove-item-btn'),
         editBtns = $('.edit-item-btn');
@@ -94,6 +95,7 @@
     // store a new value from the edit inputs into the list
     addBtn.click(function() {
       mappingList.add({
+        // todo: better random ID generator (if necessary)
         id: Math.floor(Math.random()*110000),
         type: typeField.val(),
         address: addressField.val(),
@@ -104,9 +106,10 @@
       refreshCallbacks();
     });
 
-    // save an item being edited back into the list
-    saveBtn.click(function() {
-      var item = mappingList.get('id', idField.val())[0];
+    // update an item being edited back into the list
+    updateBtn.click(function() {
+      const itemId = idField.val();
+      var item = mappingList.get('id', itemId)[0];
       item.values({
         id:idField.val(),
         type: typeField.val(),
@@ -115,15 +118,27 @@
         tag: tagField.val()
       });
       clearFields();
-      saveBtn.hide();
+      updateBtn.hide();
       cancelBtn.hide();
       addBtn.show();
+
+      // scroll back up to item that was updated
+      // todo: is there a more efficient way to do this? there's got to be with list.js
+      for (const editBtnKey in editBtns) {
+        if (editBtnKey && (editBtns[editBtnKey])) {
+          entry = (editBtns[editBtnKey].closest) ? editBtns[editBtnKey].closest('tr').firstChild : null;
+          if (entry && entry.firstChild && entry.firstChild.data && (String(entry.firstChild.data) === String(itemId))) {
+            editBtns[editBtnKey].focus();
+            break;
+          }
+        }
+      }
     });
 
-    // revert edits without saving
+    // revert edits without updating
     cancelBtn.click(function() {
       clearFields();
-      saveBtn.hide();
+      updateBtn.hide();
       cancelBtn.hide();
       addBtn.show();
     });
@@ -150,9 +165,13 @@
         nameField.val(itemValues.name);
         tagField.val(itemValues.tag);
 
-        saveBtn.show();
+        updateBtn.show();
         cancelBtn.show();
         addBtn.hide();
+        window.scrollTo(0,document.body.scrollHeight);
+        // focus and scroll to editing fields
+        addressField.focus();
+        addressField.select();
       });
     }
 
@@ -185,6 +204,7 @@
                 const tag = (valsLen > 2) ? vals[2].trim() : "";
                 const addrs = vals[0].trim().split(",");
                 addrs.forEach(function (addr, addrIdx) {
+                  // todo: better random ID generator (if necessary)
                   mappingList.add({
                     id: Math.floor(Math.random()*110000),
                     type: mapType,
