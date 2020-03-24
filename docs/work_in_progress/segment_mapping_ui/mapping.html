@@ -363,6 +363,7 @@
             (map.address) && (map.address.length > 0) &&
             (map.name) && (map.name.length > 0)) {
           mappingList.add({
+            // todo: better random ID generator (if necessary)
             id: Math.floor(Math.random()*110000),
             type: map.type,
             address: map.address,
@@ -371,6 +372,7 @@
           });
         }
       }
+      mappingList.sort('address');
       refreshCallbacks();
     });
 
