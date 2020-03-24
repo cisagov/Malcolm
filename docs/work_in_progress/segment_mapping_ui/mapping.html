@@ -165,19 +165,29 @@
       document.body.removeChild(element);
     }
 
+    function hasJsonStructure(str) {
+      if (typeof str !== 'string') return false;
+      try {
+        const result = JSON.parse(str);
+        const type = Object.prototype.toString.call(result);
+        return type === '[object Object]'
+            || type === '[object Array]';
+      } catch (err) {
+        return false;
+      }
+    }
+
     saveBtn.click(function() {
       if (mappingList) {
         // create list of all items (minus the random "id" index field)
         let items = mappingList.items.map(
           function(item) { return (({ id, ...o }) => o)(item.values()); }
         );
-        // console.log(JSON.stringify(items, null, 2));
         download('mappings.json', JSON.stringify(items, null, 2), "application/json");
       }
     });
 
     restartBtn.click(function() {
-      console.log('restart');
     });
 
     // apply callbacks for the buttons on the list items
@@ -220,43 +230,148 @@
       tagField.val('');
     }
 
+    const file_type_txt_cidr = 'segment';
+    const file_type_txt_host = 'host';
+    const file_types_valid = new Set([file_type_txt_cidr, file_type_txt_host]);
+
+    // given an array of filespecs (eg.,
+    // [{fileType: file_type_txt_cidr, filePath: '/maps/cidr-map.txt'},
+    //  {fileType: file_type_txt_host, filePath: '/maps/host-map.txt'}])
+    // read and return an array of the mappings within those files
+
+    function loadMapsFromFiles(fileSpecs, cb) {
+
+      let result = []
+
+      if ((fileSpecs.length > 0) && (fileSpecs[0])) {
+
+        // if this is a delimited file (not JSON) mark the type
+        let mapType = null;
+        if (fileSpecs[0].fileType === file_type_txt_cidr) {
+          mapType = "segment";
+        } else if (fileSpecs[0].fileType === file_type_txt_host) {
+          mapType = "host";
+        }
+        // else the type is per-item in the JSON
+
+        // GET the file from the server
+        var txtFile = new XMLHttpRequest();
+        txtFile.open("GET", fileSpecs[0].filePath, true);
+        txtFile.send();
+        txtFile.onreadystatechange = function() {
+          if (txtFile.status === 200) {
+            if (txtFile.readyState === 4) {
+              if (hasJsonStructure(txtFile.responseText)) {
+                result = JSON.parse(txtFile.responseText);
+                if (fileSpecs.length > 1) {
+                  // we have processed this fileSpec, process the next
+                  loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
+                    return cb(result.concat(nextFileResult));
+                  });
+                } else {
+                  // we have processed this fileSpec, and there are no more to process
+                  return cb(result);
+                }
+
+              } else {
+                const lines = txtFile.responseText.split(/\r?\n/);
+                for (lineIdx in lines) {
+                  let line = lines[lineIdx];
+                  if (!line.startsWith("#")) {
+                    const vals = line.split("|");
+                    const valsLen = vals.length;
+                    if ((valsLen >= 2) && (valsLen < 4)) {
+                      const name = vals[1].trim();
+                      const tag = (valsLen > 2) ? vals[2].trim() : "";
+                      const addrs = vals[0].trim().split(",");
+                      for (addrIdx in addrs) {
+                        result.push({
+                          type: mapType,
+                          address: addrs[addrIdx],
+                          name: name,
+                          tag: tag
+                        });
+                      }
+                    }
+                  }
+                } // for (lineIdx in lines)
+              } // JSON vs. delimited text
+
+              if (fileSpecs.length > 1) {
+                // we have processed this fileSpec, process the next
+                loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
+                  return cb(result.concat(nextFileResult));
+                });
+              } else {
+                // we have processed this fileSpec, and there are no more to process
+                return cb(result);
+              }
+            } // txtFile.readyState is ready
+
+          } else if (fileSpecs.length > 1) {
+            // the GET returned an error, process the next fileSpec
+            loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
+              return cb(result.concat(nextFileResult));
+            });
+
+          } else {
+            // the GET returned an error, and there are no more fileSpecs to process
+            return cb(result);
+          }
+
+        } // txtFile.onreadystatechange
+
+      } else if (fileSpecs.length > 1) {
+        // the first fileSpec is invalid, process the next
+        loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
+          return cb(result.concat(nextFileResult));
+        });
+
+      } else {
+        // the first fileSpec is missing or invalid, and there are no more to process
+        return cb(result);
+      }
+
+    } // loadMapsFromFiles
+
     // load old delimited plain text format
     //   IP or MAC address to host name map:
     //     address|host name|required tag
     //   CIDR to network segment format:
     //     IP(s)|segment name|required tag
-    ['/maps/cidr-map.txt', '/maps/host-map.txt'].forEach(function (txtUrl, txtUrlIdx) {
-      const mapType = (txtUrlIdx === 0) ? "segment" : "host";
-      var txtFile = new XMLHttpRequest();
-      txtFile.open("GET", txtUrl, true);
-      txtFile.send();
-      txtFile.onreadystatechange = function() {
-        if ((txtFile.readyState === 4) && (txtFile.status === 200)) {
-          txtFile.responseText.split(/\r?\n/).forEach(function (line, lineIdx) {
-            if (!line.startsWith("#")) {
-              const vals = line.split("|");
-              const valsLen = vals.length;
-              if ((valsLen >= 2) && (valsLen < 4)) {
-                const name = vals[1].trim();
-                const tag = (valsLen > 2) ? vals[2].trim() : "";
-                const addrs = vals[0].trim().split(",");
-                addrs.forEach(function (addr, addrIdx) {
-                  // todo: better random ID generator (if necessary)
-                  mappingList.add({
-                    id: Math.floor(Math.random()*110000),
-                    type: mapType,
-                    address: addr,
-                    name: name,
-                    tag: tag
-                  });
-                  // todo: this is stupid to call this for every item... js callbacks are dumb
-                  refreshCallbacks();
-                });
-              }
-            }
+    // and JSON-formatted native format:
+    // [
+    //   {
+    //     "type": "segment",
+    //     "address": "172.16.0.0/24",
+    //     "name": "home",
+    //     "tag": ""
+    //   }, ...
+    loadMapsFromFiles([{fileType: file_type_txt_cidr,
+                        filePath: '/maps/cidr-map.txt'},
+                       {fileType: file_type_txt_host,
+                        filePath: '/maps/host-map.txt'},
+                       {fileType: null,
+                        filePath: '/maps/net-map.json'}], function (mapsArray) {
+      var mapsHash = mapsArray.reduce(function(acc, cur) {
+        acc[cur.type + '|' + cur.address] = cur;
+        return acc;
+      }, {});
+      for (mapKey in mapsHash) {
+        let map = mapsHash[mapKey];
+        if ((file_types_valid.has(map.type)) &&
+            (map.address) && (map.address.length > 0) &&
+            (map.name) && (map.name.length > 0)) {
+          mappingList.add({
+            id: Math.floor(Math.random()*110000),
+            type: map.type,
+            address: map.address,
+            name: map.name,
+            tag: map.tag ? map.tag : ""
           });
         }
       }
+      refreshCallbacks();
     });
 
   </script> <!-- end of ListJS-related scripts -->
