@@ -378,6 +378,18 @@ services:
       VIRTUAL_HOST : 'freq.malcolm.local'
     expose:
       - 10004
+  name-map-ui:
+    image: malcolmnetsec/name-map-ui:2.0.0
+    restart: "no"
+    hostname: name-map-ui
+    environment:
+      VIRTUAL_HOST : 'name-map-ui.malcolm.local'
+    expose:
+      - 80
+    volumes:
+      - ./cidr-map.txt:/usr/share/nginx/html/maps/cidr-map.txt:ro
+      - ./host-map.txt:/usr/share/nginx/html/maps/host-map.txt:ro
+      - ./net-map.json:/usr/share/nginx/html/maps/net-map.json:ro
   nginx-proxy:
     image: malcolmnetsec/nginx-proxy:2.0.0
     restart: "no"
@@ -390,6 +402,7 @@ services:
       - kibana
       - upload
       - htadmin
+      - name-map-ui
     ports:
       - "443:443"
       - "488:488"

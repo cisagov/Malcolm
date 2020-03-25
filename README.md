@@ -116,6 +116,7 @@ Pulling htadmin         ... done
 Pulling kibana          ... done
 Pulling logstash        ... done
 Pulling moloch          ... done
+Pulling name-map-ui     ... done
 Pulling nginx-proxy     ... done
 Pulling pcap-capture    ... done
 Pulling pcap-monitor    ... done
@@ -141,6 +142,7 @@ malcolmnetsec/nginx-proxy                           2.0.0               xxxxxxxx
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        30 minutes ago      276MB
 malcolmnetsec/htadmin                               2.0.0               xxxxxxxxxxxx        31 minutes ago      256MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        32 minutes ago      188MB
+malcolmnetsec/name-map-ui                           2.0.0               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.1               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
@@ -191,6 +193,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
+* [List.js](https://github.com/javve/list.js) - for the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
@@ -277,6 +280,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
+* `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
 * `htadmin` - configuration for the `htadmin` user account management container
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
@@ -284,11 +288,13 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
+* `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
 * `pcap-monitor` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
+* `sensor-iso` - code and configuration for building a [Hedgehog Linux](#Hedgehog) ISO
 * `shared` - miscellaneous code used by various Malcolm components 
 * `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
@@ -298,6 +304,7 @@ and the following files of special note:
 * `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
 * `cidr-map.txt` - specify custom IP address to network segment mapping
 * `host-map.txt` - specify custom IP and/or MAC address to host mapping
+* `net-map.json` - an alternative to `cidr-map.txt` and `host-map.txt`, mapping hosts and network segments to their names in a JSON-formatted file
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 * `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor local live Zeek logs (ie., being actively written to on the same host running Malcolm)
@@ -321,6 +328,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
+* `malcolmnetsec/name-map-ui` (based on `nginx:alpine`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
 * `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
@@ -1745,6 +1753,7 @@ Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
 Pulling freq          ... done
+Pulling name-map-ui   ... done
 Pulling htadmin       ... done
 Pulling kibana        ... done
 Pulling logstash      ... done
@@ -1771,6 +1780,7 @@ malcolmnetsec/kibana-oss                            2.0.0               xxxxxxxx
 malcolmnetsec/filebeat-oss                          2.0.0               xxxxxxxxxxxx        11 days ago         459MB
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        11 days ago         276MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        11 days ago         188MB
+malcolmnetsec/name-map-ui                           2.0.0               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
@@ -1787,6 +1797,7 @@ Creating malcolm_freq_1          ... done
 Creating malcolm_htadmin_1       ... done
 Creating malcolm_kibana_1        ... done
 Creating malcolm_logstash_1      ... done
+Creating malcolm_name-map-ui_1   ... done
 Creating malcolm_moloch_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
 Creating malcolm_pcap-capture_1  ... done
@@ -1804,7 +1815,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
 …
 ```
 

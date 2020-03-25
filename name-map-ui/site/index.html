@@ -1,5 +1,7 @@
 <!doctype html>
 
+<!-- Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved. -->
+
 <!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
 <!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
 <!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
@@ -9,8 +11,8 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <link rel="stylesheet" href="./mapping.css">
-  <script src="./jquery.min.js"></script>
+  <link rel="stylesheet" href="name-map-ui/mapping.css">
+  <script src="name-map-ui/jquery.min.js"></script>
   <title>Host and Network Segment Name Mapping</title>
 </head>
 
@@ -19,7 +21,7 @@
   <div id="container" class="mapping-page">
     <div id="main">
       <div class="c1">
-        <img class="center" src="Malcolm_banner.png" alt="">
+        <img class="center" src="name-map-ui/Malcolm_banner.png" alt="">
         <h1>Host and Network Segment Name Mapping</h1>
         <div id="mapping">
           <table>
@@ -76,7 +78,7 @@
     </div>
   </div> <!-- end of #container .mapping-page -->
 
-  <script src="./list.min.js"></script>
+  <script src="name-map-ui/list.min.js"></script>
   <script type="text/javascript">
 
     // define value names and template for new list items
@@ -256,9 +258,9 @@
     const file_types_valid = new Set([file_type_txt_cidr, file_type_txt_host]);
 
     // given an array of filespecs (eg.,
-    // [{fileType: file_type_txt_cidr, filePath: '/maps/cidr-map.txt'},
-    //  {fileType: file_type_txt_host, filePath: '/maps/host-map.txt'},
-    //  {fileType: null, filePath: '/maps/net-map.json'}]
+    // [{fileType: file_type_txt_cidr, filePath: 'maps/cidr-map.txt'},
+    //  {fileType: file_type_txt_host, filePath: 'maps/host-map.txt'},
+    //  {fileType: null, filePath: 'maps/net-map.json'}]
     // read and return an array of the mappings within those files
 
     function loadMapsFromFiles(fileSpecs, cb) {
@@ -370,11 +372,11 @@
     //     "tag": ""
     //   }, ...
     loadMapsFromFiles([{fileType: file_type_txt_cidr,
-                        filePath: '/maps/cidr-map.txt'},
+                        filePath: 'name-map-ui/maps/cidr-map.txt'},
                        {fileType: file_type_txt_host,
-                        filePath: '/maps/host-map.txt'},
+                        filePath: 'name-map-ui/maps/host-map.txt'},
                        {fileType: null,
-                        filePath: '/maps/net-map.json'}], function (mapsArray) {
+                        filePath: 'name-map-ui/maps/net-map.json'}], function (mapsArray) {
 
       // convert to a hash to resolve any duplicates
       var mapsHash = mapsArray.reduce(function(acc, cur) {
