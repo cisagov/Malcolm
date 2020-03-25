@@ -12,6 +12,7 @@ import argparse
 import struct
 import ipaddress
 import itertools
+import json
 import pprint
 import uuid
 from collections import defaultdict
@@ -20,10 +21,30 @@ UNSPECIFIED_TAG = '<~<~<none>~>~>'
 HOST_LIST_IDX = 0
 SEGMENT_LIST_IDX = 1
 
+JSON_MAP_TYPE_SEGMENT = 'segment'
+JSON_MAP_TYPE_HOST = 'host'
+JSON_MAP_KEY_ADDR = 'address'
+JSON_MAP_KEY_NAME = 'name'
+JSON_MAP_KEY_TAG = 'tag'
+JSON_MAP_KEY_TYPE = 'type'
+
 ###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
+
+###################################################################################################
+# recursively convert unicode strings to utf-8 strings
+def byteify(input):
+  if isinstance(input, dict):
+    return {byteify(key): byteify(value)
+      for key, value in input.iteritems()}
+  elif isinstance(input, list):
+    return [byteify(element) for element in input]
+  elif isinstance(input, unicode):
+    return input.encode('utf-8')
+  else:
+    return input
 
 ###################################################################################################
 # main
@@ -32,6 +53,7 @@ def main():
   # extract arguments from the command line
   # print (sys.argv[1:]);
   parser = argparse.ArgumentParser(description='Logstash IP address to Segment Filter Creator', add_help=False, usage='ip-to-segment-logstash.py <arguments>')
+  parser.add_argument('-m', '--mixed', dest='mixedInput', metavar='<STR>', type=str, nargs='*', default='', help='Input mixed JSON mapping file(s)')
   parser.add_argument('-s', '--segment', dest='segmentInput', metavar='<STR>', type=str, nargs='*', default='', help='Input segment mapping file(s)')
   parser.add_argument('-h', '--host', dest='hostInput', metavar='<STR>', type=str, nargs='*', default='', help='Input host mapping file(s)')
   parser.add_argument('-o', '--output', dest='output', metavar='<STR>', type=str, default='-', help='Output file')
@@ -42,9 +64,10 @@ def main():
     parser.print_help()
     exit(2)
 
-  # read segment input files into a single list, and host input files into another
+  # read each input file into its own list
   segmentLines = []
   hostLines = []
+  mixedEntries = []
 
   for inFile in args.segmentInput:
     if os.path.isfile(inFile):
@@ -54,11 +77,19 @@ def main():
     if os.path.isfile(inFile):
       hostLines.extend([line.strip() for line in open(inFile)])
 
+  for inFile in args.mixedInput:
+    try:
+      tmpMixedEntries = json.load(open(inFile, 'r'))
+      if isinstance(tmpMixedEntries, list):
+        mixedEntries.extend(byteify(tmpMixedEntries));
+    except:
+      pass
+
   # remove comments
   segmentLines = list(filter(lambda x: (len(x) > 0) and (not x.startswith('#')), segmentLines))
   hostLines = list(filter(lambda x: (len(x) > 0) and (not x.startswith('#')), hostLines))
 
-  if (len(segmentLines) > 0) or (len(hostLines) > 0):
+  if (len(segmentLines) > 0) or (len(hostLines) > 0) or (len(mixedEntries) > 0):
 
     filterId = 0
     addedFields = set()
@@ -142,6 +173,50 @@ def main():
         else:
           eprint('"{}" is not formatted correctly, ignoring'.format(line))
 
+      # handle mixed entries from the JSON-formatted file
+      for entry in mixedEntries:
+
+        # the entry must at least contain type, address, name; may optionally contain tag
+        if (isinstance(entry, dict) and
+            all(key in entry for key in (JSON_MAP_KEY_TYPE, JSON_MAP_KEY_NAME, JSON_MAP_KEY_ADDR)) and
+            entry[JSON_MAP_KEY_TYPE] in (JSON_MAP_TYPE_SEGMENT, JSON_MAP_TYPE_HOST) and
+            (len(entry[JSON_MAP_KEY_NAME]) > 0) and
+            (len(entry[JSON_MAP_KEY_ADDR]) > 0)):
+
+          addressList = []
+          networkList = []
+
+          tagReq = entry[JSON_MAP_KEY_TAG] if (JSON_MAP_KEY_TAG in entry) and (len(entry[JSON_MAP_KEY_TAG]) > 0) else UNSPECIFIED_TAG
+
+          # account for comma-separated multiple addresses per 'address' value
+          for addr in ''.join(entry[JSON_MAP_KEY_ADDR].split()).split(','):
+
+            if (entry[JSON_MAP_KEY_TYPE] == JSON_MAP_TYPE_SEGMENT):
+              # potentially interpret address as a CIDR-formatted subnet
+              try:
+                networkList.append(str(ipaddress.ip_network(unicode(addr))).lower() if ('/' in addr) else str(ipaddress.ip_address(unicode(addr))).lower())
+              except ValueError:
+                eprint('"{}" is not a valid IP address, ignoring'.format(addr))
+
+            else:
+              # should be an IP or MAC address
+              try:
+                # see if it's an IP address
+                addressList.append(str(ipaddress.ip_address(unicode(addr))).lower())
+              except ValueError:
+                # see if it's a MAC address
+                if re.match(macAddrRegex, addr):
+                  # prepend _ temporarily to distinguish a mac address
+                  addressList.append("_{}".format(addr.replace('-', ':').lower()))
+                else:
+                  eprint('"{}" is not a valid IP or MAC address, ignoring'.format(ip))
+
+          if (len(networkList) > 0):
+            tagListMap[tagReq][SEGMENT_LIST_IDX][entry[JSON_MAP_KEY_NAME]].extend(networkList)
+
+          if (len(addressList) > 0):
+            tagListMap[tagReq][HOST_LIST_IDX][entry[JSON_MAP_KEY_NAME]].extend(addressList)
+
       # go through the lists of segments/hosts, which will now be organized by required tag first, then
       # segment/host name, then the list of addresses
       for tag, nameMaps in tagListMap.iteritems():
@@ -156,7 +231,7 @@ def main():
           for hostName, addrList in nameMaps[HOST_LIST_IDX].iteritems():
 
             # ip addresses mapped to hostname
-            ipList = [a for a in addrList if not a.startswith('_')]
+            ipList = list(set([a for a in addrList if not a.startswith('_')]))
             if (len(ipList) >= 1):
               for source in ['orig', 'resp']:
                 filterId += 1
@@ -171,7 +246,7 @@ def main():
                 addedFields.add("[zeek][{}]".format(newFieldName))
 
             # mac addresses mapped to hostname
-            macList = [a for a in addrList if a.startswith('_')]
+            macList = list(set([a for a in addrList if a.startswith('_')]))
             if (len(macList) >= 1):
               for source in ['orig', 'resp']:
                 filterId += 1
@@ -187,6 +262,7 @@ def main():
 
           # for the segment(s) to be checked, create two cidr filters, one for source IP and one for dest IP
           for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].iteritems():
+            ipList = list(set(ipList))
             for source in ['orig', 'resp']:
               filterId += 1
               # ip addresses/ranges mapped to network segment names

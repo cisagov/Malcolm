@@ -257,7 +257,8 @@
 
     // given an array of filespecs (eg.,
     // [{fileType: file_type_txt_cidr, filePath: '/maps/cidr-map.txt'},
-    //  {fileType: file_type_txt_host, filePath: '/maps/host-map.txt'}])
+    //  {fileType: file_type_txt_host, filePath: '/maps/host-map.txt'},
+    //  {fileType: null, filePath: '/maps/net-map.json'}]
     // read and return an array of the mappings within those files
 
     function loadMapsFromFiles(fileSpecs, cb) {

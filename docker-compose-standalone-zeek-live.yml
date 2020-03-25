@@ -215,6 +215,7 @@ services:
       - ./logstash/certs/server.key:/certs/server.key:ro
       - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
       - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
+      - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
   filebeat:
     image: malcolmnetsec/filebeat-oss:2.0.0
     restart: "no"
