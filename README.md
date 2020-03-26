@@ -1320,8 +1320,18 @@ If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if t
 
 ![Cross-segment traffic in Connections](./docs/images/screenshots/moloch_connections_segments.png)
 
+#### <a name="NameMapUI"></a>Defining hostname and CIDR subnet names interface
+
+As an alternative to manually editing `cidr-map.txt` and `host-map.txt`, a **Host and Subnet Name Mapping** editor is available at [https://localhost/name-map-ui/](https://localhost/name-map-ui/) if you are connecting locally. Upon loading, the editor is populated from `cidr-map.txt`, `host-map.txt` and `net-map.json`. 
+
+Clicking the **Save Mappings** button at the bottom of this page will generate a file named `net-map.json`, which, when saved in the Malcolm directory, will be used to define host and subnet name maps.
+
+![Host and Subnet Name Mapping Editor](./docs/images/screenshots/malcolm_name_map_ui.png)
+
+Future improvements to this editor may include automatically applying the changes and restarting log parsing. For now, the file must be generated and saved as described above, and Logstash restarted manually.
+
 #### <a name="ApplyMapping"></a>Applying mapping changes
-When changes are made to either `cidr-map.txt` or `host-map.txt`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)).
+When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)).
 
 ## <a name="Curator"></a>Elasticsearch index curation
 

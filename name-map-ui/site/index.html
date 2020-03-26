@@ -68,7 +68,7 @@
                   <button class="save-btn" id="save-btn">💾 Save Mappings</button>
                 </td>
                 <td class="foot" colspan="2">
-                  <button class="restart-btn" id="restart-btn">🔁 Restart Parser</button>
+                  <button class="restart-btn" id="restart-btn" disabled>🔁 Restart Parser</button>
                 </td>
               </tr>
             </tfoot>
@@ -206,7 +206,7 @@
         let items = mappingList.items.map(
           function(item) { return (({ id, ...o }) => o)(item.values()); }
         );
-        download('mappings.json', JSON.stringify(items, null, 2), "application/json");
+        download('net-map.json', JSON.stringify(items, null, 2), "application/json");
       }
     });
 
