@@ -51,7 +51,7 @@ RUN yum install -y epel-release && \
     yum update -y && \
     yum install -y gettext python-setuptools python-pip python-requests python-yaml && \
     yum clean all && \
-    pip install py2-ipaddress && \
+    pip install py2-ipaddress supervisor && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                             logstash-filter-json logstash-filter-prune logstash-filter-http \
                             logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
@@ -65,9 +65,11 @@ ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
+ADD logstash/supervisord.conf /etc/supervisord.conf
 ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf /usr/share/logstash/config/oui.txt
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
+    mkdir -p /var/log/supervisor && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
@@ -83,10 +85,7 @@ ENV LOGSTASH_KEYSTORE_PASS "a410a267b1404c949284dee25518a917"
 
 VOLUME ["/logstash-persistent-queue"]
 
-USER logstash
-
-ENTRYPOINT ["/usr/local/bin/logstash-start.sh"]
-
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
