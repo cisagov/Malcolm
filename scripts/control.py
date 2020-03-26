@@ -196,8 +196,9 @@ def start():
     eprint("------------------------------------------------------------------------------")
     eprint("  - Moloch: https://localhost/")
     eprint("  - Kibana: https://localhost/kibana/")
-    eprint("  - PCAP Upload (web): https://localhost/upload/")
-    eprint("  - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/")
+    eprint("  - PCAP upload (web): https://localhost/upload/")
+    eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
+    eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/\n")
     eprint("  - Account management: https://localhost:488/\n")
   else:
     eprint("Malcolm failed to start\n")

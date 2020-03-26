@@ -165,6 +165,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
 * Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/) or [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
+* [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
 * Account Management: [https://localhost:488](https://localhost:488)
 
 ## <a name="Overview"></a>Overview
@@ -382,8 +383,9 @@ To start, stop, restart, etc. Malcolm:
 A minute or so after starting Malcolm, the following services will be accessible:
   - Moloch: https://localhost/
   - Kibana: https://localhost/kibana/
-  - PCAP Upload (web): https://localhost/upload/
-  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - PCAP upload (web): https://localhost/upload/
+  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 ```
 
@@ -1811,6 +1813,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - Kibana: https://localhost/kibana/
   - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -145,8 +145,9 @@ if mkdir "$DESTDIR"; then
   echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
   echo "  - Moloch: https://localhost/" | tee -a "$README"
   echo "  - Kibana: https://localhost/kibana/" | tee -a "$README"
-  echo "  - PCAP Upload (web): https://localhost/upload/" | tee -a "$README"
-  echo "  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
+  echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
+  echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
+  echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"
   echo "  - Account management: https://localhost:488/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1
