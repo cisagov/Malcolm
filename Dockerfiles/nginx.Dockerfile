@@ -10,7 +10,7 @@
 # build a patched APK of stunnel supporting ldap StartTLS (patched protocols.c)
 # (based on https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html)
 
-FROM alpine:3.10 as stunnel_build
+FROM alpine:3.11 as stunnel_build
 
 ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
 ADD nginx/src/*.patch /usr/src/patches/
@@ -18,7 +18,7 @@ ADD nginx/src/*.patch /usr/src/patches/
 USER root
 
 RUN set -x ; \
-    apk add --no-cache alpine-sdk patchutils sudo ; \
+    apk add --no-cache alpine-sdk patchutils sudo openssl-dev linux-headers; \
     sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers ; \
     adduser -D -u 1000 -h /apkbuild -G abuild builder ; \
     addgroup builder wheel ; \
@@ -39,7 +39,7 @@ RUN set -x ; \
 
 ####################################################################################
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
@@ -67,8 +67,7 @@ ENV NGINX_LDAP_TLS_STUNNEL_PROTOCOL $NGINX_LDAP_TLS_STUNNEL_PROTOCOL
 
 
 # build latest nginx with nginx-auth-ldap
-ENV NGINX_VERSION=1.17.6
-ENV DOCKER_GEN_VERSION=0.7.4
+ENV NGINX_VERSION=1.17.9
 ENV NGINX_AUTH_LDAP_BRANCH=master
 ENV NGINX_AUTH_PAM_BRANCH=master
 

@@ -120,7 +120,7 @@ services:
     cap_add:
       - IPC_LOCK
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:9200"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -149,7 +149,7 @@ services:
       - 5601
       - 28991
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:5601/kibana/api/status"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/kibana/api/status"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -172,7 +172,7 @@ services:
       - 3030
       - 3333
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:3030"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:3030"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -217,7 +217,7 @@ services:
       - 5044
       - 9600
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:9600"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -290,7 +290,7 @@ services:
     depends_on:
       - elasticsearch
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:8005/_ns_/nstest.html"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8005/_ns_/nstest.html"]
         interval: 90s
         timeout: 30s
         retries: 3
@@ -436,7 +436,13 @@ services:
     environment:
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     expose:
-      - 80
+      - 8080
+    healthcheck:
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8080/fpm-ping"]
+        interval: 60s
+        timeout: 15s
+        retries: 3
+        start_period: 90s
     volumes:
       - ./cidr-map.txt:/usr/share/nginx/html/maps/cidr-map.txt:ro
       - ./host-map.txt:/usr/share/nginx/html/maps/host-map.txt:ro

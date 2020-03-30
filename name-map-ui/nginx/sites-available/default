@@ -1,8 +1,0 @@
-server {
-    listen 80 default_server;
-
-    sendfile on;
-
-    root /usr/share/nginx/html;
-    index index.html;
-}
