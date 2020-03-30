@@ -79,12 +79,8 @@ MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${ELASTICSEARCH_OUTPUT
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES_/${MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
-# experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
-if [[ "$LOGSTASH_JAVA_EXECUTION_ENGINE" == 'true' ]]; then
-  LOGSTASH_JAVA_FLAG="--java-execution"
-else
-  LOGSTASH_JAVA_FLAG=""
-fi
 
-# start logstash
-/usr/local/bin/docker-entrypoint $LOGSTASH_JAVA_FLAG
+# start logstash (adapted from docker-entrypoint)
+env2yaml /usr/share/logstash/config/logstash.yml
+export LS_JAVA_OPTS="-Dls.cgroup.cpuacct.path.override=/ -Dls.cgroup.cpu.path.override=/ $LS_JAVA_OPTS"
+exec logstash

@@ -41,8 +41,6 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
 
 x-logstash-variables: &logstash-variables
-  # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
-  LOGSTASH_JAVA_EXECUTION_ENGINE : 'true'
   LOGSTASH_OUI_LOOKUP  : 'true'
   LOGSTASH_REVERSE_DNS : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
@@ -199,8 +197,8 @@ services:
     depends_on:
       - elasticsearch
     expose:
-      - 5000
       - 5044
+      - 9001
       - 9600
     healthcheck:
         test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
@@ -395,7 +393,7 @@ services:
     volumes:
       - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
       - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
-      - ./net-map.json:/var/www/html/maps/net-map.json:ro
+      - ./net-map.json:/var/www/html/maps/net-map.json:rw
   nginx-proxy:
     image: malcolmnetsec/nginx-proxy:2.0.0
     restart: "no"

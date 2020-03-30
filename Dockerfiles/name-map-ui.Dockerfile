@@ -20,7 +20,8 @@ RUN apk --no-cache add php7 php7-fpm php7-mysqli php7-json php7-openssl php7-cur
 COPY name-map-ui/config/nginx.conf /etc/nginx/nginx.conf
 COPY name-map-ui/config/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
 COPY name-map-ui/config/php.ini /etc/php7/conf.d/custom.ini
-COPY name-map-ui/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY name-map-ui/config/supervisord.conf /etc/supervisord.conf
+COPY name-map-ui/config/supervisor_logstash_ctl.conf /etc/supervisor/logstash/supervisord.conf
 
 ADD https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js /tmp/jquery.min.js
 ADD https://raw.githubusercontent.com/javve/list.js/${LISTJS_VERSION}/dist/list.min.js /tmp/list.min.js
@@ -48,7 +49,7 @@ COPY --chown=nobody docs/images/favicon/favicon.ico /var/www/html/
 
 EXPOSE 8080
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
