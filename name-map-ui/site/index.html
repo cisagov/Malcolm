@@ -62,8 +62,9 @@
                 </td>
               </tr>
               <tr>
-                <td/>
-                <td/>
+                <td class="foot" colspan="2">
+                  <button class="export-btn" id="export-btn">📤 Export Mappings</button>
+                </td>
                 <td class="foot" colspan="2">
                   <button class="save-btn" id="save-btn">💾 Save Mappings</button>
                 </td>
@@ -99,6 +100,7 @@
         updateBtn = $('#update-btn').hide(),
         cancelBtn = $('#cancel-btn').hide(),
         saveBtn = $('#save-btn'),
+        exportBtn = $('#export-btn'),
         restartBtn = $('#restart-btn'),
         removeBtns = $('.remove-item-btn'),
         editBtns = $('.edit-item-btn');
@@ -178,16 +180,6 @@
       focusItem(itemId);
     });
 
-    function download(filename, text, contentType="text/plain") {
-      var element = document.createElement('a');
-      element.setAttribute('href', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(text));
-      element.setAttribute('download', filename);
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    }
-
     function hasJsonStructure(str) {
       if (typeof str !== 'string') return false;
       try {
@@ -200,7 +192,38 @@
       }
     }
 
+    function download(filename, text, contentType="text/plain") {
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+
+    async function uploadNameMap(jsonStr) {
+      let formData = new FormData();
+      var upBlob = new Blob([jsonStr], { type: 'application/json' });
+      formData.append("upfile", upBlob);
+      try {
+        let r = await fetch('name-map-ui/upload.php', {method: "POST", body: formData});
+      } catch(e) {
+        console.log('uploadNameMap error: ', e);
+      }
+    }
+
     saveBtn.click(function() {
+      if (mappingList) {
+        // create list of all items (minus the random "id" index field)
+        let items = mappingList.items.map(
+          function(item) { return (({ id, ...o }) => o)(item.values()); }
+        );
+        uploadNameMap(JSON.stringify(items, null, 2));
+      }
+    });
+
+    exportBtn.click(function() {
       if (mappingList) {
         // create list of all items (minus the random "id" index field)
         let items = mappingList.items.map(

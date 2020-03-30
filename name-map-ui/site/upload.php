@@ -50,7 +50,8 @@ try {
   echo 'Success';
 
 } catch (RuntimeException $e) {
-    echo $e->getMessage();
+  error_log ($e->getMessage());
+  echo $e->getMessage();
 }
 
 ?>

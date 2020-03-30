@@ -190,6 +190,7 @@ button.remove-item-btn {
 }
 
 button.save-btn,
+button.export-btn,
 button.restart-btn {
   font-size: 1.0rem;
 }
