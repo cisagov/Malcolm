@@ -444,9 +444,9 @@ services:
         retries: 3
         start_period: 90s
     volumes:
-      - ./cidr-map.txt:/usr/share/nginx/html/maps/cidr-map.txt:ro
-      - ./host-map.txt:/usr/share/nginx/html/maps/host-map.txt:ro
-      - ./net-map.json:/usr/share/nginx/html/maps/net-map.json:ro
+      - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
+      - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
+      - ./net-map.json:/var/www/html/maps/net-map.json:ro
   nginx-proxy:
     build:
       context: .
