@@ -62,8 +62,12 @@
                 </td>
               </tr>
               <tr>
-                <td class="foot" colspan="2">
-                  <button title="Download mappings as a JSON file" class="export-btn" id="export-btn">📤 Export Mappings</button>
+                <td class="foot">
+                  <input type="file" id="import-file" name="import-file" style="display:none;"/>
+                  <button title="Import mappings from a JSON file" class="import-btn" id="import-btn">📥 Import</button>
+                </td>
+                <td class="foot">
+                  <button title="Download mappings as a JSON file" class="export-btn" id="export-btn">📤 Export</button>
                 </td>
                 <td class="foot" colspan="2">
                   <button title="Write mappings to Malcolm's net-map.json" class="save-btn" id="save-btn">💾 Save Mappings</button>
@@ -103,6 +107,8 @@
         saveBtn = $('#save-btn'),
         saveState = $('#save-state'),
         exportBtn = $('#export-btn'),
+        importBtn = $('#import-btn'),
+        importFile = $('#import-file'),
         restartBtn = $('#restart-btn'),
         removeBtns = $('.remove-item-btn'),
         editBtns = $('.edit-item-btn');
@@ -246,6 +252,35 @@
       }
     });
 
+    importFile.change(function (event) {
+      if ((event) && (event.target) && (event.target.files) && (event.target.files.length > 0)) {
+        let f = event.target.files[0];
+        if (((f.type === 'application/json') || (f.type === 'text/plain')) && (f.size <= 67108864)) {
+          let reader = new FileReader();
+          reader.onload = function(e) {
+            if (hasJsonStructure(e.target.result)) {
+              // replace current map list with that from imported file
+              populateMapList([{fileType: null,
+                                fileSrc: file_spec_in_memory,
+                                filePath: e.target.result}], -1);
+
+            } else {
+              alert('Invalid file format: ' + f.name + ', ' + f.type + ', ' + f.size + ' bytes');
+            }
+          };
+          reader.readAsText(f);
+        } else {
+          alert('Invalid file: ' + f.name + ', ' + f.type + ', ' + f.size + ' bytes');
+        }
+      }
+    });
+
+    importBtn.click(function() {
+      if ((mappingList) && (confirm("Clear and replace current name mappings with those from a file?") === true )) {
+        importFile.click();
+      }
+    });
+
     restartBtn.click(function() {
       let confirmMsg = '';
       if (parseInt(saveState.val()) > 0) {
@@ -254,6 +289,7 @@
       confirmMsg = confirmMsg.concat("Apply the saved name mappings and restart Logstash?");
       if (confirm(confirmMsg) == true ) {
          restartLogstash();
+         alert("Logstash is restarting in the background.\nLog ingestion will be resumed in a few minutes.");
       }
     });
 
@@ -298,9 +334,57 @@
       tagField.val('');
     }
 
-    const file_type_txt_cidr = 'segment';
-    const file_type_txt_host = 'host';
-    const file_types_valid = new Set([file_type_txt_cidr, file_type_txt_host]);
+    const file_type_txt_cidr  = 'segment';
+    const file_type_txt_host  = 'host';
+    const file_types_valid    = new Set([file_type_txt_cidr, file_type_txt_host]);
+
+    const file_spec_on_server = 'SERVER';
+    const file_spec_in_memory = 'LOCALSTR';
+    const file_specs_valid    = new Set([file_spec_on_server, file_spec_in_memory]);
+
+
+    // given the text of a mapping file (eg., net-map.json, cidr-map.txt, host-map.txt)
+    // populate an array containing the mapping entries from that file
+    function parseMapFileText(fileTxt, mapType=null) {
+      let result;
+
+      if (hasJsonStructure(fileTxt)) {
+        // is already JSON text, should be the format we want
+        result = JSON.parse(fileTxt);
+
+      } else {
+        // parse the lines from the cidr-map.txt/host-map.txt format
+        result = [];
+        const lines = fileTxt.split(/\r?\n/);
+        for (lineIdx in lines) {
+          let line = lines[lineIdx];
+          if (!line.startsWith("#")) {
+            const vals = line.split("|");
+            const valsLen = vals.length;
+            if ((valsLen >= 2) && (valsLen < 4)) {
+              const name = vals[1].trim();
+              const tag = (valsLen > 2) ? vals[2].trim() : "";
+              const addrs = vals[0].trim().split(",");
+              for (addrIdx in addrs) {
+                result.push({
+                  type: mapType,
+                  address: addrs[addrIdx],
+                  name: name,
+                  tag: tag
+                });
+              }
+            } // line has the right number of delimited fields
+          } // line is not a # comment
+        } // for (lineIdx in lines)
+      } // if/else hasJsonStructure
+
+      if (!Array.isArray(result)) {
+        result = null;
+      }
+      return result;
+
+    } // parseMapFileText
+
 
     // given an array of filespecs (eg.,
     // [{fileType: file_type_txt_cidr, filePath: 'maps/cidr-map.txt'},
@@ -312,7 +396,7 @@
 
       let result = []
 
-      if ((fileSpecs.length > 0) && (fileSpecs[0])) {
+      if ((fileSpecs.length > 0) && (fileSpecs[0]) && (file_specs_valid.has(fileSpecs[0].fileSrc))) {
 
         // if this is a delimited file (not JSON) mark the type
         let mapType = null;
@@ -323,15 +407,20 @@
         }
         // else the type is per-item in the JSON
 
-        // GET the file from the server
-        var txtFile = new XMLHttpRequest();
-        txtFile.open("GET", fileSpecs[0].filePath, true);
-        txtFile.send();
-        txtFile.onreadystatechange = function() {
-          if (txtFile.status === 200) {
-            if (txtFile.readyState === 4) {
-              if (hasJsonStructure(txtFile.responseText)) {
-                result = JSON.parse(txtFile.responseText);
+        if (fileSpecs[0].fileSrc === file_spec_in_memory) {
+          // the text of the file is already in memory
+          result = parseMapFileText(fileSpecs[0].filePath, mapType);
+          return cb(result);
+
+        } else {
+          // GET the file from the server
+          var txtFile = new XMLHttpRequest();
+          txtFile.open("GET", fileSpecs[0].filePath, true);
+          txtFile.send();
+          txtFile.onreadystatechange = function() {
+            if (txtFile.status === 200) {
+              if (txtFile.readyState === 4) {
+                result = parseMapFileText(txtFile.responseText, mapType);
                 if (fileSpecs.length > 1) {
                   // we have processed this fileSpec, process the next
                   loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
@@ -341,54 +430,21 @@
                   // we have processed this fileSpec, and there are no more to process
                   return cb(result);
                 }
+              } // txtFile.readyState is ready
 
-              } else {
-                const lines = txtFile.responseText.split(/\r?\n/);
-                for (lineIdx in lines) {
-                  let line = lines[lineIdx];
-                  if (!line.startsWith("#")) {
-                    const vals = line.split("|");
-                    const valsLen = vals.length;
-                    if ((valsLen >= 2) && (valsLen < 4)) {
-                      const name = vals[1].trim();
-                      const tag = (valsLen > 2) ? vals[2].trim() : "";
-                      const addrs = vals[0].trim().split(",");
-                      for (addrIdx in addrs) {
-                        result.push({
-                          type: mapType,
-                          address: addrs[addrIdx],
-                          name: name,
-                          tag: tag
-                        });
-                      }
-                    }
-                  }
-                } // for (lineIdx in lines)
-              } // JSON vs. delimited text
+            } else if (fileSpecs.length > 1) {
+              // the GET returned an error, process the next fileSpec
+              loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
+                return cb(result.concat(nextFileResult));
+              });
 
-              if (fileSpecs.length > 1) {
-                // we have processed this fileSpec, process the next
-                loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
-                  return cb(result.concat(nextFileResult));
-                });
-              } else {
-                // we have processed this fileSpec, and there are no more to process
-                return cb(result);
-              }
-            } // txtFile.readyState is ready
+            } else {
+              // the GET returned an error, and there are no more fileSpecs to process
+              return cb(result);
+            }
 
-          } else if (fileSpecs.length > 1) {
-            // the GET returned an error, process the next fileSpec
-            loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
-              return cb(result.concat(nextFileResult));
-            });
-
-          } else {
-            // the GET returned an error, and there are no more fileSpecs to process
-            return cb(result);
-          }
-
-        } // txtFile.onreadystatechange
+          } // txtFile.onreadystatechange
+        }
 
       } else if (fileSpecs.length > 1) {
         // the first fileSpec is invalid, process the next
@@ -403,53 +459,61 @@
 
     } // loadMapsFromFiles
 
-    // load old delimited plain text format
-    //   IP or MAC address to host name map:
-    //     address|host name|required tag
-    //   CIDR to network segment format:
-    //     IP(s)|segment name|required tag
-    // and JSON-formatted native format:
-    // [
-    //   {
-    //     "type": "segment",
-    //     "address": "172.16.0.0/24",
-    //     "name": "home",
-    //     "tag": ""
-    //   }, ...
-    mappingList.clear();
-    loadMapsFromFiles([{fileType: file_type_txt_cidr,
-                        filePath: 'name-map-ui/maps/cidr-map.txt'},
-                       {fileType: file_type_txt_host,
-                        filePath: 'name-map-ui/maps/host-map.txt'},
-                       {fileType: null,
-                        filePath: 'name-map-ui/maps/net-map.json'}], function (mapsArray) {
+    function populateMapList(fileSpecs, newSaveState=0) {
+      // load old delimited plain text format
+      //   IP or MAC address to host name map:
+      //     address|host name|required tag
+      //   CIDR to network segment format:
+      //     IP(s)|segment name|required tag
+      // and JSON-formatted native format:
+      // [
+      //   {
+      //     "type": "segment",
+      //     "address": "172.16.0.0/24",
+      //     "name": "home",
+      //     "tag": ""
+      //   }, ...
+      mappingList.clear();
+      loadMapsFromFiles(fileSpecs, function (mapsArray) {
 
-      // convert to a hash to resolve any duplicates
-      var mapsHash = mapsArray.reduce(function(acc, cur) {
-        acc[cur.type + '|' + cur.address] = cur;
-        return acc;
-      }, {});
+        // convert to a hash to resolve any duplicates
+        var mapsHash = mapsArray.reduce(function(acc, cur) {
+          acc[cur.type + '|' + cur.address] = cur;
+          return acc;
+        }, {});
 
-      // populate the list.js List object
-      for (mapKey in mapsHash) {
-        let map = mapsHash[mapKey];
-        if ((file_types_valid.has(map.type)) &&
-            (map.address) && (map.address.length > 0) &&
-            (map.name) && (map.name.length > 0)) {
-          mappingList.add({
-            // todo: better random ID generator (if necessary)
-            id: Math.floor(Math.random()*110000),
-            type: map.type,
-            address: map.address,
-            name: map.name,
-            tag: map.tag ? map.tag : ""
-          });
+        // populate the list.js List object
+        for (mapKey in mapsHash) {
+          let map = mapsHash[mapKey];
+          if ((file_types_valid.has(map.type)) &&
+              (map.address) && (map.address.length > 0) &&
+              (map.name) && (map.name.length > 0)) {
+            mappingList.add({
+              // todo: better random ID generator (if necessary)
+              id: Math.floor(Math.random()*110000),
+              type: map.type,
+              address: map.address,
+              name: map.name,
+              tag: map.tag ? map.tag : ""
+            });
+          }
         }
-      }
-      mappingList.sort('address');
-      refreshCallbacks();
-      saveState.val(0);
-    });
+        mappingList.sort('address');
+        refreshCallbacks();
+        saveState.val((newSaveState >= 0) ? newSaveState : Math.max(Object.keys(mapsHash).length, 1));
+      });
+    } // populateMapList
+
+    // initial page load from cidr-map.txt, host-map.txt, and/or net-map.json
+    populateMapList([{fileType: file_type_txt_cidr,
+                      fileSrc: file_spec_on_server,
+                      filePath: 'name-map-ui/maps/cidr-map.txt',},
+                     {fileType: file_type_txt_host,
+                      fileSrc: file_spec_on_server,
+                      filePath: 'name-map-ui/maps/host-map.txt'},
+                     {fileType: null,
+                      fileSrc: file_spec_on_server,
+                      filePath: 'name-map-ui/maps/net-map.json'}]);
 
   </script> <!-- end of ListJS-related scripts -->
 

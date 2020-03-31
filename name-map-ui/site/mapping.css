@@ -191,8 +191,9 @@ button.remove-item-btn {
 
 button.save-btn,
 button.export-btn,
+button.import-btn,
 button.restart-btn {
-  font-size: 1.0rem;
+  font-size: 0.9rem;
 }
 
 #container.mapping-page {
