@@ -214,7 +214,7 @@
 
     async function uploadNameMap(jsonStr) {
       let formData = new FormData();
-      var upBlob = new Blob([jsonStr], { type: 'application/json' });
+      let upBlob = new Blob([jsonStr], { type: 'application/json' });
       formData.append("upfile", upBlob);
       try {
         let r = await fetch('name-map-ui/upload.php', {method: "POST", body: formData});
@@ -224,8 +224,10 @@
     }
 
     async function restartLogstash() {
+      let formData = new FormData();
+      formData.append("save-state", saveState.val());
       try {
-        let r = await fetch('name-map-ui/restart-logstash.php', {method: "GET"});
+        let r = await fetch('name-map-ui/restart-logstash.php', {method: "POST", body: formData});
       } catch(e) {
         console.log('restartLogstash error: ', e);
       }
