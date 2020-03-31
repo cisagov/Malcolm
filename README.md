@@ -73,6 +73,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
         + [IP/MAC address to hostname mapping via `host-map.txt`](#HostNaming)
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
+        + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index curation](#Curator)
 * [Malcolm installer ISO](#ISO)
@@ -329,9 +330,9 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
-* `malcolmnetsec/name-map-ui` (based on `nginx:alpine`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.11`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.11`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
@@ -1322,14 +1323,25 @@ If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if t
 
 As an alternative to manually editing `cidr-map.txt` and `host-map.txt`, a **Host and Subnet Name Mapping** editor is available at [https://localhost/name-map-ui/](https://localhost/name-map-ui/) if you are connecting locally. Upon loading, the editor is populated from `cidr-map.txt`, `host-map.txt` and `net-map.json`. 
 
-Clicking the **Save Mappings** button at the bottom of this page will generate a file named `net-map.json`, which, when saved in the Malcolm directory, will be used to define host and subnet name maps.
+This editor provides the following controls:
+
+* 🔎 **Search mappings** - narrow the list of visible items using a search filter
+* **Type**, **Address**, **Name** and **Tag** *(column headings)* - sort the list of items by clicking a column header
+* 📝 *(per item)* - modify the selected item
+* 🚫 *(per item)* - remove the selected item
+* 🖳 **host** / 🖧 **segment**, **Address**, **Name**, **Tag (optional)** and 💾 - save the item with these values (either adding a new item or updating the item being modified)
+* 📥 **Import** - clear the list and replace it with the contents of an uploaded `net-map.json` file
+* 📤 **Export** - format and download the list as a `net-map.json` file
+* 💾 **Save Mappings** - format and store `net-map.json` in the Malcolm directory (replacing the existing `net-map.json` file)
+* 🔁 **Restart Logstash** - restart log ingestion, parsing and enrichment (e.g., restart Logstash)
 
 ![Host and Subnet Name Mapping Editor](./docs/images/screenshots/malcolm_name_map_ui.png)
 
-Future improvements to this editor may include automatically applying the changes and restarting log parsing. For now, the file must be generated and saved as described above, and Logstash restarted manually.
-
 #### <a name="ApplyMapping"></a>Applying mapping changes
-When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)).
+
+When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)) or by clicking the 🔁 **Restart Logstash** button in the [name mapping interface](#NameMapUI) interface.
+
+Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
 ## <a name="Curator"></a>Elasticsearch index curation
 
