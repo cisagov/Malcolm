@@ -67,6 +67,7 @@
                 </td>
                 <td class="foot" colspan="2">
                   <button title="Write mappings to Malcolm's net-map.json" class="save-btn" id="save-btn">💾 Save Mappings</button>
+                  <input type="hidden" value=0 id="save-state"/>
                 </td>
                 <td class="foot" colspan="2">
                   <button title="Restart log ingestion, parsing and enrichment" class="restart-btn" id="restart-btn">🔁 Restart Logstash</button>
@@ -100,6 +101,7 @@
         updateBtn = $('#update-btn').hide(),
         cancelBtn = $('#cancel-btn').hide(),
         saveBtn = $('#save-btn'),
+        saveState = $('#save-state'),
         exportBtn = $('#export-btn'),
         restartBtn = $('#restart-btn'),
         removeBtns = $('.remove-item-btn'),
@@ -139,6 +141,7 @@
           name: name,
           tag: tag
         });
+        saveState.val(parseInt(saveState.val()) + 1);
         clearFields();
         refreshCallbacks();
       }
@@ -162,6 +165,7 @@
           name: nameField.val(),
           tag: tagField.val()
         });
+        saveState.val(parseInt(saveState.val()) + 1);
         clearFields();
         updateBtn.hide();
         cancelBtn.hide();
@@ -222,12 +226,13 @@
     }
 
     saveBtn.click(function() {
-      if (mappingList) {
+      if ((mappingList) && (confirm("Save name mappings?") === true )) {
         // create list of all items (minus the random "id" index field)
         let items = mappingList.items.map(
           function(item) { return (({ id, ...o }) => o)(item.values()); }
         );
         uploadNameMap(JSON.stringify(items, null, 2));
+        saveState.val(0);
       }
     });
 
@@ -242,7 +247,14 @@
     });
 
     restartBtn.click(function() {
-      restartLogstash();
+      let confirmMsg = '';
+      if (parseInt(saveState.val()) > 0) {
+        saveBtn.click();
+      }
+      confirmMsg = confirmMsg.concat("Apply the saved name mappings and restart Logstash?");
+      if (confirm(confirmMsg) == true ) {
+         restartLogstash();
+      }
     });
 
     // apply callbacks for the buttons on the list items
@@ -255,6 +267,7 @@
       removeBtns.click(function() {
         var itemId = $(this).closest('tr').find('.id').text();
         mappingList.remove('id', itemId);
+        saveState.val(parseInt(saveState.val()) + 1);
       });
 
       // populate the edit inputs from the values of row where Edit was clicked
@@ -403,6 +416,7 @@
     //     "name": "home",
     //     "tag": ""
     //   }, ...
+    mappingList.clear();
     loadMapsFromFiles([{fileType: file_type_txt_cidr,
                         filePath: 'name-map-ui/maps/cidr-map.txt'},
                        {fileType: file_type_txt_host,
@@ -434,6 +448,7 @@
       }
       mappingList.sort('address');
       refreshCallbacks();
+      saveState.val(0);
     });
 
   </script> <!-- end of ListJS-related scripts -->
