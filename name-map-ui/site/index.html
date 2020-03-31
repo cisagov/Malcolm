@@ -63,13 +63,13 @@
               </tr>
               <tr>
                 <td class="foot" colspan="2">
-                  <button class="export-btn" id="export-btn">📤 Export Mappings</button>
+                  <button title="Download mappings as a JSON file" class="export-btn" id="export-btn">📤 Export Mappings</button>
                 </td>
                 <td class="foot" colspan="2">
-                  <button class="save-btn" id="save-btn">💾 Save Mappings</button>
+                  <button title="Write mappings to Malcolm's net-map.json" class="save-btn" id="save-btn">💾 Save Mappings</button>
                 </td>
                 <td class="foot" colspan="2">
-                  <button class="restart-btn" id="restart-btn" disabled>🔁 Restart Parser</button>
+                  <button title="Restart log ingestion, parsing and enrichment" class="restart-btn" id="restart-btn">🔁 Restart Logstash</button>
                 </td>
               </tr>
             </tfoot>
@@ -213,6 +213,14 @@
       }
     }
 
+    async function restartLogstash() {
+      try {
+        let r = await fetch('name-map-ui/restart-logstash.php', {method: "GET"});
+      } catch(e) {
+        console.log('restartLogstash error: ', e);
+      }
+    }
+
     saveBtn.click(function() {
       if (mappingList) {
         // create list of all items (minus the random "id" index field)
@@ -234,6 +242,7 @@
     });
 
     restartBtn.click(function() {
+      restartLogstash();
     });
 
     // apply callbacks for the buttons on the list items
