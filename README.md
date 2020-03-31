@@ -1333,7 +1333,7 @@ This editor provides the following controls:
 * 📥 **Import** - clear the list and replace it with the contents of an uploaded `net-map.json` file
 * 📤 **Export** - format and download the list as a `net-map.json` file
 * 💾 **Save Mappings** - format and store `net-map.json` in the Malcolm directory (replacing the existing `net-map.json` file)
-* 🔁 **Restart Logstash** - restart log ingestion, parsing and enrichment (e.g., restart Logstash)
+* 🔁 **Restart Logstash** - restart log ingestion, parsing and enrichment
 
 ![Host and Subnet Name Mapping Editor](./docs/images/screenshots/malcolm_name_map_ui.png)
 
