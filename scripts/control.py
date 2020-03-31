@@ -25,8 +25,6 @@ ScriptName = os.path.basename(__file__)
 PY3 = (sys.version_info.major >= 3)
 pyPlatform = platform.system()
 
-ansiEscape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-
 args = None
 dockerBin = None
 dockerComposeBin = None
