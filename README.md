@@ -406,7 +406,7 @@ total 2.0G
 If you have obtained pre-packaged installation files to install Malcolm on a non-networked machine via an internal network share or on a USB key, you likely have the following files:
 
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains a minimal set up instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
-* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternately, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternatively, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` - This tarball contains the Docker images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz`
 * `install.py` - This install script can load the Docker images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
 
@@ -773,7 +773,7 @@ You can also use `docker stats` to monitor the resource utilization of running c
 
 ### <a name="StopAndRestart"></a>Stopping and restarting Malcolm
 
-You can run `./scripts/stop` to stop the docker containers and remove their virtual network. Alternately, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
+You can run `./scripts/stop` to stop the docker containers and remove their virtual network. Alternatively, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
 
 Malcolm can be configured to be automatically restarted when the Docker system daemon restart (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
 
@@ -874,7 +874,7 @@ To do this, you'll need to configure Malcolm's local Filebeat log forwarder so t
 $ mv -f ./docker-compose-standalone-zeek-live.yml ./docker-compose.yml
 ```
 
-Alternately, you can run the `start` script (and the other control scripts) like this, without modifying your original `docker-compose.yml` file:
+Alternatively, you can run the `start` script (and the other control scripts) like this, without modifying your original `docker-compose.yml` file:
 ```
 $ ./scripts/start -f ./docker-compose-standalone-zeek-live.yml
 ```
@@ -1678,7 +1678,7 @@ Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/M
 Malcolm runtime files extracted to /home/user/Malcolm
 ```
 
-Alternately, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
+Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
 user@host:~/Malcolm$ python3 scripts/install.py --configure
 ```
