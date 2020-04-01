@@ -73,6 +73,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
         + [IP/MAC address to hostname mapping via `host-map.txt`](#HostNaming)
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
+        + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index curation](#Curator)
 * [Malcolm installer ISO](#ISO)
@@ -116,6 +117,7 @@ Pulling htadmin         ... done
 Pulling kibana          ... done
 Pulling logstash        ... done
 Pulling moloch          ... done
+Pulling name-map-ui     ... done
 Pulling nginx-proxy     ... done
 Pulling pcap-capture    ... done
 Pulling pcap-monitor    ... done
@@ -141,6 +143,7 @@ malcolmnetsec/nginx-proxy                           2.0.0               xxxxxxxx
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        30 minutes ago      276MB
 malcolmnetsec/htadmin                               2.0.0               xxxxxxxxxxxx        31 minutes ago      256MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        32 minutes ago      188MB
+malcolmnetsec/name-map-ui                           2.0.0               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.1               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
@@ -163,6 +166,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
 * Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/) or [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
+* [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
 * Account Management: [https://localhost:488](https://localhost:488)
 
 ## <a name="Overview"></a>Overview
@@ -191,6 +195,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
+* [List.js](https://github.com/javve/list.js) - for the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
@@ -277,6 +282,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
+* `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
 * `htadmin` - configuration for the `htadmin` user account management container
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
@@ -284,11 +290,13 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
+* `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
 * `pcap-monitor` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
+* `sensor-iso` - code and configuration for building a [Hedgehog Linux](#Hedgehog) ISO
 * `shared` - miscellaneous code used by various Malcolm components 
 * `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
@@ -298,6 +306,7 @@ and the following files of special note:
 * `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
 * `cidr-map.txt` - specify custom IP address to network segment mapping
 * `host-map.txt` - specify custom IP and/or MAC address to host mapping
+* `net-map.json` - an alternative to `cidr-map.txt` and `host-map.txt`, mapping hosts and network segments to their names in a JSON-formatted file
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 * `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor local live Zeek logs (ie., being actively written to on the same host running Malcolm)
@@ -321,8 +330,9 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.11`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.11`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
@@ -374,8 +384,9 @@ To start, stop, restart, etc. Malcolm:
 A minute or so after starting Malcolm, the following services will be accessible:
   - Moloch: https://localhost/
   - Kibana: https://localhost/kibana/
-  - PCAP Upload (web): https://localhost/upload/
-  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - PCAP upload (web): https://localhost/upload/
+  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 ```
 
@@ -439,8 +450,6 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `MOLOCH_ANALYZE_PCAP_THREADS` – the number of threads available to Moloch for analyzing PCAP files (default `1`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
-
-* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing
 
 * `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
 
@@ -1310,8 +1319,29 @@ If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if t
 
 ![Cross-segment traffic in Connections](./docs/images/screenshots/moloch_connections_segments.png)
 
+#### <a name="NameMapUI"></a>Defining hostname and CIDR subnet names interface
+
+As an alternative to manually editing `cidr-map.txt` and `host-map.txt`, a **Host and Subnet Name Mapping** editor is available at [https://localhost/name-map-ui/](https://localhost/name-map-ui/) if you are connecting locally. Upon loading, the editor is populated from `cidr-map.txt`, `host-map.txt` and `net-map.json`. 
+
+This editor provides the following controls:
+
+* 🔎 **Search mappings** - narrow the list of visible items using a search filter
+* **Type**, **Address**, **Name** and **Tag** *(column headings)* - sort the list of items by clicking a column header
+* 📝 *(per item)* - modify the selected item
+* 🚫 *(per item)* - remove the selected item
+* 🖳 **host** / 🖧 **segment**, **Address**, **Name**, **Tag (optional)** and 💾 - save the item with these values (either adding a new item or updating the item being modified)
+* 📥 **Import** - clear the list and replace it with the contents of an uploaded `net-map.json` file
+* 📤 **Export** - format and download the list as a `net-map.json` file
+* 💾 **Save Mappings** - format and store `net-map.json` in the Malcolm directory (replacing the existing `net-map.json` file)
+* 🔁 **Restart Logstash** - restart log ingestion, parsing and enrichment
+
+![Host and Subnet Name Mapping Editor](./docs/images/screenshots/malcolm_name_map_ui.png)
+
 #### <a name="ApplyMapping"></a>Applying mapping changes
-When changes are made to either `cidr-map.txt` or `host-map.txt`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)).
+
+When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)) or by clicking the 🔁 **Restart Logstash** button in the [name mapping interface](#NameMapUI) interface.
+
+Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
 ## <a name="Curator"></a>Elasticsearch index curation
 
@@ -1745,6 +1775,7 @@ Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
 Pulling freq          ... done
+Pulling name-map-ui   ... done
 Pulling htadmin       ... done
 Pulling kibana        ... done
 Pulling logstash      ... done
@@ -1771,6 +1802,7 @@ malcolmnetsec/kibana-oss                            2.0.0               xxxxxxxx
 malcolmnetsec/filebeat-oss                          2.0.0               xxxxxxxxxxxx        11 days ago         459MB
 malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        11 days ago         276MB
 malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        11 days ago         188MB
+malcolmnetsec/name-map-ui                           2.0.0               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.1               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
@@ -1787,6 +1819,7 @@ Creating malcolm_freq_1          ... done
 Creating malcolm_htadmin_1       ... done
 Creating malcolm_kibana_1        ... done
 Creating malcolm_logstash_1      ... done
+Creating malcolm_name-map-ui_1   ... done
 Creating malcolm_moloch_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
 Creating malcolm_pcap-capture_1  ... done
@@ -1800,11 +1833,12 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - Kibana: https://localhost/kibana/
   - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
 …
 ```
 

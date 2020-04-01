@@ -41,8 +41,6 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
 
 x-logstash-variables: &logstash-variables
-  # experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
-  LOGSTASH_JAVA_EXECUTION_ENGINE : 'true'
   LOGSTASH_OUI_LOOKUP  : 'true'
   LOGSTASH_REVERSE_DNS : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
@@ -120,7 +118,7 @@ services:
     cap_add:
       - IPC_LOCK
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:9200"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -146,7 +144,7 @@ services:
       - 5601
       - 28991
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:5601/kibana/api/status"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/kibana/api/status"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -166,7 +164,7 @@ services:
       - 3030
       - 3333
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:3030"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:3030"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -199,11 +197,11 @@ services:
     depends_on:
       - elasticsearch
     expose:
-      - 5000
       - 5044
+      - 9001
       - 9600
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:9600"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
         interval: 30s
         timeout: 15s
         retries: 3
@@ -215,6 +213,7 @@ services:
       - ./logstash/certs/server.key:/certs/server.key:ro
       - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
       - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
+      - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
   filebeat:
     image: malcolmnetsec/filebeat-oss:2.0.0
     restart: "no"
@@ -266,7 +265,7 @@ services:
     depends_on:
       - elasticsearch
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:8005/_ns_/nstest.html"]
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8005/_ns_/nstest.html"]
         interval: 90s
         timeout: 30s
         retries: 3
@@ -377,6 +376,24 @@ services:
       VIRTUAL_HOST : 'freq.malcolm.local'
     expose:
       - 10004
+  name-map-ui:
+    image: malcolmnetsec/name-map-ui:2.0.0
+    restart: "no"
+    hostname: name-map-ui
+    environment:
+      VIRTUAL_HOST : 'name-map-ui.malcolm.local'
+    expose:
+      - 8080
+    healthcheck:
+        test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8080/fpm-ping"]
+        interval: 60s
+        timeout: 15s
+        retries: 3
+        start_period: 90s
+    volumes:
+      - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
+      - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
+      - ./net-map.json:/var/www/html/maps/net-map.json:rw
   nginx-proxy:
     image: malcolmnetsec/nginx-proxy:2.0.0
     restart: "no"
@@ -389,6 +406,7 @@ services:
       - kibana
       - upload
       - htadmin
+      - name-map-ui
     ports:
       - "443:443"
       - "488:488"

@@ -119,6 +119,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./docker-compose-standalone-zeek-live.yml "$MALCOLM_DEST_DIR/docker-compose-zeek-live.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
+  cp ./net-map.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1

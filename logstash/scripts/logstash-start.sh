@@ -20,6 +20,7 @@ export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
 # files defining IP->host and MAC->host mapping
 INPUT_CIDR_MAP="/usr/share/logstash/config/cidr-map.txt"
 INPUT_HOST_MAP="/usr/share/logstash/config/host-map.txt"
+INPUT_MIXED_MAP="/usr/share/logstash/config/net-map.json"
 
 # the name of the enrichment pipeline subdirectory under $PIPELINES_DIR
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
@@ -32,7 +33,7 @@ export ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_ELASTICSEARCH_PIPELINE
 export ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL=${LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL:-"external-es"}
 ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES:-"$ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL,$ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL"}
 
-# ip-to-segment-logstash.py translate $INPUT_CIDR_MAP and $INPUT_HOST_MAP into this logstash filter file
+# ip-to-segment-logstash.py translate $INPUT_CIDR_MAP, $INPUT_HOST_MAP, $INPUT_MIXED_MAP into this logstash filter file
 NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segment_filters.conf
 
 ####################################################################################################################
@@ -63,7 +64,8 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
 '
 
 # create filters for network segment and host mapping in the enrichment directory
-/usr/local/bin/ip-to-segment-logstash.py --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
+rm -f "$NETWORK_MAP_OUTPUT_FILTER"
+/usr/local/bin/ip-to-segment-logstash.py --mixed "$INPUT_MIXED_MAP" --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
 if [[ -z "$ES_EXTERNAL_HOSTS" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output
@@ -78,12 +80,8 @@ MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${ELASTICSEARCH_OUTPUT
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES_/${MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
-# experimental java execution engine (https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine)
-if [[ "$LOGSTASH_JAVA_EXECUTION_ENGINE" == 'true' ]]; then
-  LOGSTASH_JAVA_FLAG="--java-execution"
-else
-  LOGSTASH_JAVA_FLAG=""
-fi
 
-# start logstash
-/usr/local/bin/docker-entrypoint $LOGSTASH_JAVA_FLAG
+# start logstash (adapted from docker-entrypoint)
+env2yaml /usr/share/logstash/config/logstash.yml
+export LS_JAVA_OPTS="-Dls.cgroup.cpuacct.path.override=/ -Dls.cgroup.cpu.path.override=/ $LS_JAVA_OPTS"
+exec logstash
