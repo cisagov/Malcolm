@@ -47,13 +47,12 @@ ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
 ADD kibana/supervisord.conf /etc/supervisord.conf
 ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/maps /opt/maps
-# ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
 ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
-
+ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.0/prelert_swimlane_vis-7.6.0.zip /tmp/kibana-swimlane.zip
 
 # todo: these extra plugins are kind of gutted right now with 7.5.x, need to fix
 
-# ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.5.2/prelert_swimlane_vis-7.5.2.zip /tmp/kibana-swimlane.zip
+# ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
 
 # see https://github.com/walterra/kibana-milestones-vis/issues/9
 # ADD https://github.com/walterra/kibana-milestones-vis/releases/download/v7.1.1/kibana-milestones-vis-7.1.1.zip /tmp/kibana-milestones.zip
@@ -89,16 +88,16 @@ RUN chmod 755 /data/*.sh /data/*.py && \
       zip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-comments.zip --allow-root && \
-      rm -rf /tmp/kibana-comments.zip /tmp/kibana
-    # && \ cd /tmp && \
-    # echo "Installing Swimlanes visualization..." && \
-      # unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
-      # sed -i "s/7\.5\.2/7\.6\.1/g" kibana/prelert_swimlane_vis/package.json && \
-      # zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
-      # cd /usr/share/kibana/plugins && \
-      # /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
-      # bash -c "find /usr/share/kibana/plugins/prelert_swimlane_vis/ -type f -exec chmod 644 '{}' \;" && \
-      # rm -rf /tmp/kibana-swimlane.zip /tmp/kibana && \
+      rm -rf /tmp/kibana-comments.zip /tmp/kibana && \
+    cd /tmp && \
+    echo "Installing Swimlanes visualization..." && \
+      unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
+      sed -i "s/7\.6\.0/7\.6\.1/g" kibana/prelert_swimlane_vis/package.json && \
+      zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
+      cd /usr/share/kibana/plugins && \
+      /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
+      bash -c "find /usr/share/kibana/plugins/prelert_swimlane_vis/ -type f -exec chmod 644 '{}' \;" && \
+      rm -rf /tmp/kibana-swimlane.zip /tmp/kibana
     # cd /tmp && \
     # echo "Installing Milestones visualization..." && \
       # unzip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
