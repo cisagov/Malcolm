@@ -1,5 +1,5 @@
 {
-  "version": "7.6.1",
+  "version": "7.6.2",
   "objects": [
     {
       "id": "87d990cc-9e0b-41e5-b8fe-b10ae1da0c85",
@@ -10,7 +10,7 @@
         "title": "Software",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":44,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":8,\"w\":40,\"h\":36,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":44,\"w\":48,\"h\":36,\"i\":\"f99c68bd-2da6-41d5-bbd1-45f85e79526c\"},\"panelIndex\":\"f99c68bd-2da6-41d5-bbd1-45f85e79526c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":44,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":8,\"w\":40,\"h\":36,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":44,\"w\":48,\"h\":36,\"i\":\"f99c68bd-2da6-41d5-bbd1-45f85e79526c\"},\"panelIndex\":\"f99c68bd-2da6-41d5-bbd1-45f85e79526c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
