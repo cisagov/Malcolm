@@ -1,5 +1,5 @@
 {
-  "version": "7.6.1",
+  "version": "7.6.2",
   "objects": [
     {
       "id": "50ced171-1b10-4c3f-8b67-2db9635661a6",
@@ -10,7 +10,7 @@
         "title": "MySQL",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":24,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":true},\"legendOpen\":false},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":24,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":9,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":9,\"w\":8,\"h\":15,\"i\":\"13\"},\"panelIndex\":\"13\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":24,\"w\":48,\"h\":32,\"i\":\"04e96790-2a76-4656-956b-bdf780792c40\"},\"panelIndex\":\"04e96790-2a76-4656-956b-bdf780792c40\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":56,\"w\":48,\"h\":26,\"i\":\"27a5666b-5633-4982-b276-ecafa4a38b74\"},\"panelIndex\":\"27a5666b-5633-4982-b276-ecafa4a38b74\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":24,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":true},\"legendOpen\":false},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":24,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":9,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":9,\"w\":8,\"h\":15,\"i\":\"13\"},\"panelIndex\":\"13\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":24,\"w\":48,\"h\":32,\"i\":\"04e96790-2a76-4656-956b-bdf780792c40\"},\"panelIndex\":\"04e96790-2a76-4656-956b-bdf780792c40\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":56,\"w\":48,\"h\":26,\"i\":\"27a5666b-5633-4982-b276-ecafa4a38b74\"},\"panelIndex\":\"27a5666b-5633-4982-b276-ecafa4a38b74\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

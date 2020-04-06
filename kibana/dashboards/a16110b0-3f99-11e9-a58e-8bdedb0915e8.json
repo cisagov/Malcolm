@@ -1,5 +1,5 @@
 {
-  "version": "7.6.1",
+  "version": "7.6.2",
   "objects": [
     {
       "id": "a16110b0-3f99-11e9-a58e-8bdedb0915e8",
@@ -10,7 +10,7 @@
         "title": "Connections - Destination - Sum of Total Bytes (region map)",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"95f9b964-c2a2-416b-9903-8b969247e1ab\"},\"panelIndex\":\"95f9b964-c2a2-416b-9903-8b969247e1ab\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.1\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"7f315dd1-7809-49af-bed1-edfa12322240\"},\"panelIndex\":\"7f315dd1-7809-49af-bed1-edfa12322240\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":50,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":23,\"w\":8,\"h\":15,\"i\":\"95f9b964-c2a2-416b-9903-8b969247e1ab\"},\"panelIndex\":\"95f9b964-c2a2-416b-9903-8b969247e1ab\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":12,\"i\":\"7f315dd1-7809-49af-bed1-edfa12322240\"},\"panelIndex\":\"7f315dd1-7809-49af-bed1-edfa12322240\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,

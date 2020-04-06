@@ -1,5 +1,5 @@
 {
-  "version": "7.6.1",
+  "version": "7.6.2",
   "objects": [
     {
       "id": "05e3e000-f118-11e9-acda-83a8e29e1a24",
@@ -10,7 +10,7 @@
         "title": "LDAP",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":27,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"4\"},\"panelIndex\":\"4\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":21,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":8,\"y\":8,\"w\":18,\"h\":19,\"i\":\"6\"},\"panelIndex\":\"6\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":26,\"y\":8,\"w\":22,\"h\":19,\"i\":\"7\"},\"panelIndex\":\"7\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":27,\"w\":25,\"h\":27,\"i\":\"8\"},\"panelIndex\":\"8\",\"version\":\"7.6.1\",\"panelRefName\":\"panel_6\"},{\"gridData\":{\"x\":25,\"y\":27,\"w\":23,\"h\":27,\"i\":\"9\"},\"version\":\"7.6.1\",\"panelIndex\":\"9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"}]",
+        "panelsJSON": "[{\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":27,\"i\":\"2\"},\"panelIndex\":\"2\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"4\"},\"panelIndex\":\"4\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":21,\"i\":\"5\"},\"panelIndex\":\"5\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":8,\"y\":8,\"w\":18,\"h\":19,\"i\":\"6\"},\"panelIndex\":\"6\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":26,\"y\":8,\"w\":22,\"h\":19,\"i\":\"7\"},\"panelIndex\":\"7\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":27,\"w\":25,\"h\":27,\"i\":\"8\"},\"panelIndex\":\"8\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_6\"},{\"gridData\":{\"x\":25,\"y\":27,\"w\":23,\"h\":27,\"i\":\"9\"},\"version\":\"7.6.2\",\"panelIndex\":\"9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
