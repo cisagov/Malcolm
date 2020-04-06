@@ -75,11 +75,15 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 * * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -) && \
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
-      unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json && \
+      unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json kibana/elastalert-kibana-plugin/public/components/main/main.js && \
       sed -i "s/7\.5\.0/7\.6\.2/g" kibana/elastalert-kibana-plugin/package.json && \
+      sed -i "s/^import.*eui_theme_light.css.*$//" kibana/elastalert-kibana-plugin/public/components/main/main.js && \
       mkdir -p kibana/elastalert-kibana-plugin/server/routes/ && \
       cp /tmp/elastalert-server-routes.js kibana/elastalert-kibana-plugin/server/routes/elastalert.js && \
-      zip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json kibana/elastalert-kibana-plugin/server/routes/elastalert.js && \
+      zip elastalert-kibana-plugin.zip \
+          kibana/elastalert-kibana-plugin/package.json \
+          kibana/elastalert-kibana-plugin/public/components/main/main.js \
+          kibana/elastalert-kibana-plugin/server/routes/elastalert.js && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip --allow-root && \
       rm -rf /tmp/elastalert-kibana-plugin.zip /tmp/elastalert.js /tmp/kibana && \
