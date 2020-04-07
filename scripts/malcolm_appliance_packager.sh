@@ -80,7 +80,6 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/"
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
-  cp $VERBOSE ./docker-compose-standalone-zeek-live.yml "$DESTDIR/docker-compose-zeek-live.yml"
   cp $VERBOSE ./auth.env "$DESTDIR/"
   cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
   cp $VERBOSE ./host-map.txt "$DESTDIR/"
