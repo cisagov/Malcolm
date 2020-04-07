@@ -116,7 +116,6 @@ if [ -d "$WORKDIR" ]; then
   YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" ./docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
   cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
-  cp ./docker-compose-standalone-zeek-live.yml "$MALCOLM_DEST_DIR/docker-compose-zeek-live.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
   cp ./net-map.json "$MALCOLM_DEST_DIR/"

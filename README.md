@@ -46,7 +46,6 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
     * [Manually forwarding Zeek logs from an external source](#ZeekForward)
-    * [Monitoring a local Zeek instance](#LiveZeek) 
 * [Moloch](#Moloch)
     * [Zeek log integration](#MolochZeek)
         - [Correlating Zeek logs and Moloch sessions](#ZeekMolochFlowCorrelation)
@@ -309,7 +308,6 @@ and the following files of special note:
 * `net-map.json` - an alternative to `cidr-map.txt` and `host-map.txt`, mapping hosts and network segments to their names in a JSON-formatted file
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
-* `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor local live Zeek logs (ie., being actively written to on the same host running Malcolm)
 
 ### <a name="Build"></a>Building from source
 
@@ -863,23 +861,6 @@ output.logstash:
   ssl.supported_protocols: "TLSv1.2"
   ssl.verification_mode: "none"
 ```
-
-### <a name="LiveZeek"></a>Monitoring a local Zeek instance
-
-Another option for analyzing live network data is to run an external local copy of Zeek (ie., not within Malcolm) so that the log files it creates are seen by Malcolm and automatically processed as they are written to a local directory on the same host.
-
-To do this, you'll need to configure Malcolm's local Filebeat log forwarder so that it will continue to look for changes to Zeek logs that are actively being written to even once it reaches the end of the file. You can do this by replacing `docker-compose.yml` with `docker-compose-standalone-zeek-live.yml` before starting Malcolm:
-
-```
-$ mv -f ./docker-compose-standalone-zeek-live.yml ./docker-compose.yml
-```
-
-Alternatively, you can run the `start` script (and the other control scripts) like this, without modifying your original `docker-compose.yml` file:
-```
-$ ./scripts/start -f ./docker-compose-standalone-zeek-live.yml
-```
-
-Once Malcolm has been [started](#Starting), `cd` into `./zeek-logs/current/` and run `bro` from inside that directory.
 
 ## <a name="Moloch"></a>Moloch
 
