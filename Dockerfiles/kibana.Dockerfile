@@ -48,7 +48,7 @@ ADD kibana/supervisord.conf /etc/supervisord.conf
 ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/maps /opt/maps
 ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
-ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.0/prelert_swimlane_vis-7.6.0.zip /tmp/kibana-swimlane.zip
+ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip /tmp/kibana-swimlane.zip
 ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
 ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-server-routes.js
 
@@ -98,7 +98,7 @@ RUN chmod 755 /data/*.sh /data/*.py && \
     cd /tmp && \
     echo "Installing Swimlanes visualization..." && \
       unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
-      sed -i "s/7\.6\.0/7\.6\.2/g" kibana/prelert_swimlane_vis/package.json && \
+      sed -i "s/7\.6\.2/7\.6\.2/g" kibana/prelert_swimlane_vis/package.json && \
       zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
