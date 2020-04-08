@@ -49,7 +49,7 @@ def logs():
   global dockerBin
   global dockerComposeBin
 
-  # noisy logs
+  # noisy logs (a lot of it is NGINX logs from health checks)
   ignoreRegEx = re.compile(r"""
     .+(
         deprecated
@@ -71,6 +71,7 @@ def logs():
       | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
       | curl.+localhost.+GET\s+/api/status\s+200
+      | \b1.+GET\s+/\s+.+401.+curl
     )
   """, re.VERBOSE | re.IGNORECASE)
 
