@@ -46,7 +46,6 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
     * [Manually forwarding Zeek logs from an external source](#ZeekForward)
-    * [Monitoring a local Zeek instance](#LiveZeek) 
 * [Moloch](#Moloch)
     * [Zeek log integration](#MolochZeek)
         - [Correlating Zeek logs and Moloch sessions](#ZeekMolochFlowCorrelation)
@@ -73,6 +72,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
         + [IP/MAC address to hostname mapping via `host-map.txt`](#HostNaming)
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
+        + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index curation](#Curator)
 * [Malcolm installer ISO](#ISO)
@@ -111,10 +111,12 @@ Pulling elastalert      ... done
 Pulling elasticsearch   ... done
 Pulling file-monitor    ... done
 Pulling filebeat        ... done
+Pulling freq            ... done
 Pulling htadmin         ... done
 Pulling kibana          ... done
 Pulling logstash        ... done
 Pulling moloch          ... done
+Pulling name-map-ui     ... done
 Pulling nginx-proxy     ... done
 Pulling pcap-capture    ... done
 Pulling pcap-monitor    ... done
@@ -126,23 +128,25 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.8.1               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          1.8.1               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  1.8.1               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           1.8.1               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          1.8.1               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          1.8.1               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          1.8.1               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            1.8.1               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          1.8.1               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               1.8.1               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           1.8.1               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            1.8.1               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               1.8.1               xxxxxxxxxxxx        31 minutes ago      256MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         825MB
+malcolmnetsec/moloch                                2.0.0               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          2.0.0               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  2.0.0               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           2.0.0               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          2.0.0               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          2.0.0               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          2.0.0               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            2.0.0               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          2.0.0               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               2.0.0               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           2.0.0               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               2.0.0               xxxxxxxxxxxx        31 minutes ago      256MB
+malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        32 minutes ago      188MB
+malcolmnetsec/name-map-ui                           2.0.0               xxxxxxxxxxxx        35 minutes ago      20MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
-You must run [`auth_setup.sh`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
+You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Import from pre-packaged tarballs
 
@@ -161,6 +165,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
 * Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/) or [https://localhost:8443](https://localhost:8443)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
+* [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
 * Account Management: [https://localhost:488](https://localhost:488)
 
 ## <a name="Overview"></a>Overview
@@ -189,21 +194,24 @@ Malcolm leverages the following excellent open source tools, among others.
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
+* [List.js](https://github.com/javve/list.js) - for the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
+* [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * These third party Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
-    * J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin
+    * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
+    * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
 ## <a name="Protocols"></a>Supported Protocols
@@ -273,6 +281,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
+* `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
 * `htadmin` - configuration for the `htadmin` user account management container
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
@@ -280,23 +289,25 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `moloch` - code and configuration for the `moloch` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
 * `moloch-logs` - an initially empty directory to which the `moloch` container will write some debug log files
 * `moloch-raw` - an initially empty directory to which the `moloch` container will write captured PCAP files; as Moloch as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
+* `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
 * `pcap-monitor` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
+* `sensor-iso` - code and configuration for building a [Hedgehog Linux](#Hedgehog) ISO
 * `shared` - miscellaneous code used by various Malcolm components 
 * `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
 
 and the following files of special note:
 
-* `auth.env` - the script `./scripts/auth_setup.sh` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
+* `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
 * `cidr-map.txt` - specify custom IP address to network segment mapping
 * `host-map.txt` - specify custom IP and/or MAC address to host mapping
+* `net-map.json` - an alternative to `cidr-map.txt` and `host-map.txt`, mapping hosts and network segments to their names in a JSON-formatted file
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
-* `docker-compose-standalone-zeek-live.yml` - identical to `docker-compose-standalone.yml`, only Filebeat is configured to monitor local live Zeek logs (ie., being actively written to on the same host running Malcolm)
 
 ### <a name="Build"></a>Building from source
 
@@ -313,11 +324,13 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
+* `malcolmnetsec/freq` (based on `debian:buster-slim`)
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 * `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.11`)
 * `malcolmnetsec/moloch` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.10`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.11`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
@@ -359,18 +372,19 @@ To install Malcolm:
 
 To start, stop, restart, etc. Malcolm:
   Use the control scripts in the "scripts/" directory:
-   - start.sh      (start Malcolm)
-   - stop.sh       (stop Malcolm)
-   - restart.sh    (restart Malcolm)
-   - logs.sh       (monitor Malcolm logs)
-   - wipe.sh       (stop Malcolm and clear its database)
-   - auth_setup.sh (change authentication-related settings)
+   - start         (start Malcolm)
+   - stop          (stop Malcolm)
+   - restart       (restart Malcolm)
+   - logs          (monitor Malcolm logs)
+   - wipe          (stop Malcolm and clear its database)
+   - auth_setup    (change authentication-related settings)
 
 A minute or so after starting Malcolm, the following services will be accessible:
   - Moloch: https://localhost/
   - Kibana: https://localhost/kibana/
-  - PCAP Upload (web): https://localhost/upload/
-  - PCAP Upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - PCAP upload (web): https://localhost/upload/
+  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 ```
 
@@ -390,7 +404,7 @@ total 2.0G
 If you have obtained pre-packaged installation files to install Malcolm on a non-networked machine via an internal network share or on a USB key, you likely have the following files:
 
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains a minimal set up instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
-* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternately, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternatively, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` - This tarball contains the Docker images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz`
 * `install.py` - This install script can load the Docker images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
 
@@ -423,6 +437,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 
+* `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to Elasticsearch (default `false`)
+
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
@@ -432,8 +448,6 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `MOLOCH_ANALYZE_PCAP_THREADS` – the number of threads available to Moloch for analyzing PCAP files (default `1`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
-
-* `LOGSTASH_JAVA_EXECUTION_ENGINE` – if set to `true`, Logstash will use the new [Logstash Java Execution Engine](https://www.elastic.co/blog/meet-the-new-logstash-java-execution-engine) which may significantly speed up Logstash startup and processing
 
 * `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
 
@@ -619,7 +633,7 @@ After making these changes, right click on the Docker 🐋 icon in the system tr
 Installing and configuring Docker to run under Windows must be done manually, rather than through the `install.py` script as is done for Linux and macOS.
 
 1. In order to be able to configure Docker volume mounts correctly, you should be running [Windows 10, version 1803](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-1803) or higher.
-1. The control scripts in the `scripts/` directory are written in the Bash command language. The easiest way to run Bash in Windows is using the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL). To install WSL, run the following command in PowerShell as Administrator:
+1. The control scripts in the `scripts/` directory are written in the Python. They also rely on a few other utilities such as OpenSSL and htpasswd. The easiest way to run these tools in Windows is using the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL) (however, they may also be installed and configured manually: [Python](https://www.python.org/downloads/windows); [OpenSSL](https://wiki.openssl.org/index.php/Binaries); [htpasswd](https://httpd.apache.org/docs/current/platform/windows.html#down), download the `httpd….zip` file and extract `htpasswd.exe` from the `Apache…\bin\` directory). To install WSL, run the following command in PowerShell as Administrator:
     + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
 1. Install the [Linux distribution of your choice](https://docs.microsoft.com/en-us/windows/wsl/install-win10#install-your-linux-distribution-of-choice) in WSL. These instructions have been tested using Debian, but will probably work with other distributions as well.
 1. Run the following commands in PowerShell as Administrator to enable required Windows features:
@@ -648,6 +662,8 @@ Installing and configuring Docker to run under Windows must be done manually, ra
 
 Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo python3 ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
 
+The control scripts outlined in the [Running Malcolm](#Running) section may not be symlinked correctly under Windows. Rather than running `./scripts/start`, `./scripts/stop`, etc., you can run `python3 ./scripts/control.py --start`, `python3 ./scripts/control.py --stop`, etc. to the same effect.
+
 ## <a name="Running"></a>Running Malcolm
 
 ### <a name="AuthSetup"></a>Configure authentication
@@ -660,7 +676,7 @@ LDAP authentication are managed on a remote directory service, such as a [Micros
 
 Malcolm's authentication method is defined in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file with the `NGINX_BASIC_AUTH` environment variable: `true` for local TLS-encrypted HTTP basic authentication, `false` for LDAP authentication.
 
-In either case, you **must** run `./scripts/auth_setup.sh` before starting Malcolm for the first time in order to:
+In either case, you **must** run `./scripts/auth_setup` before starting Malcolm for the first time in order to:
 
 * define the local Malcolm administrator account username and password (although these credentials will only be used for basic authentication, not LDAP authentication)
 * specify whether or not to (re)generate the self-signed certificates used for HTTPS access
@@ -673,7 +689,7 @@ In either case, you **must** run `./scripts/auth_setup.sh` before starting Malco
 
 ##### <a name="AuthBasicAccountManagement"></a>Local account management
 
-[`auth_setup.sh`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
+[`auth_setup`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page served over HTTPS on port 488 (e.g., [https://localhost:488](https://localhost:488) if you are connecting locally).
 
 Malcolm user accounts can be used to access the [interfaces](#UserInterfaceURLs) of all of its [components](#Components), including Moloch. Moloch uses its own internal database of user accounts, so when a Malcolm user account logs in to Moloch for the first time Malcolm creates a corresponding Moloch user account automatically. This being the case, it is *not* recommended to use the Moloch **Users** settings page or change the password via the **Password** form under the Moloch **Settings** page, as those settings would not be consistently used across Malcolm.
 
@@ -681,7 +697,7 @@ Users may change their passwords via the **Malcolm User Management** page by cli
 
 #### <a name="AuthLDAP"></a>Lightweight Directory Access Protocol (LDAP) authentication
 
-The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup.sh`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
+The [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) module serves as the interface between Malcolm's [Nginx](https://nginx.org/) web server and a remote LDAP server. When you run [`auth_setup`](#AuthSetup) for the first time, a sample LDAP configuration file is created at `nginx/nginx_ldap.conf`. 
 
 ```
 # This is a sample configuration for the ldap_server section of nginx.conf.
@@ -716,7 +732,7 @@ The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is 
 * **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
 * **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
 
-Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs.sh` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
+Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
 
 The **Malcolm User Management** page described above is not available when using LDAP authentication.
 
@@ -745,23 +761,23 @@ In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` 
 
 [Docker compose](https://docs.docker.com/compose/) is used to coordinate running the Docker containers. To start Malcolm, navigate to the directory containing `docker-compose.yml` and run:
 ```
-$ ./scripts/start.sh
+$ ./scripts/start
 ```
 This will create the containers' virtual network and instantiate them, then leave them running in the background. The Malcolm containers may take a several minutes to start up completely. To follow the debug output for an already-running Malcolm instance, run:
 ```
-$ ./scripts/logs.sh
+$ ./scripts/logs
 ```
 You can also use `docker stats` to monitor the resource utilization of running containers.
 
 ### <a name="StopAndRestart"></a>Stopping and restarting Malcolm
 
-You can run `./scripts/stop.sh` to stop the docker containers and remove their virtual network. Alternately, `./scripts/restart.sh` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
+You can run `./scripts/stop` to stop the docker containers and remove their virtual network. Alternatively, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
 
 Malcolm can be configured to be automatically restarted when the Docker system daemon restart (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
 
 ### <a name="Wipe"></a>Clearing Malcolm’s data
 
-Run `./scripts/wipe.sh` to stop the Malcolm instance and wipe its Elasticsearch database (including [index snapshots](#Curator)).
+Run `./scripts/wipe` to stop the Malcolm instance and wipe its Elasticsearch database (including [index snapshots](#Curator)).
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
@@ -845,23 +861,6 @@ output.logstash:
   ssl.supported_protocols: "TLSv1.2"
   ssl.verification_mode: "none"
 ```
-
-### <a name="LiveZeek"></a>Monitoring a local Zeek instance
-
-Another option for analyzing live network data is to run an external local copy of Zeek (ie., not within Malcolm) so that the log files it creates are seen by Malcolm and automatically processed as they are written to a local directory on the same host.
-
-To do this, you'll need to configure Malcolm's local Filebeat log forwarder so that it will continue to look for changes to Zeek logs that are actively being written to even once it reaches the end of the file. You can do this by replacing `docker-compose.yml` with `docker-compose-standalone-zeek-live.yml` before starting Malcolm:
-
-```
-$ mv -f ./docker-compose-standalone-zeek-live.yml ./docker-compose.yml
-```
-
-Alternately, you can run the `start.sh` script (and the other control scripts) like this, without modifying your original `docker-compose.yml` file:
-```
-$ ./scripts/start.sh ./docker-compose-standalone-zeek-live.yml
-```
-
-Once Malcolm has been [started](#Starting), `cd` into `./zeek-logs/current/` and run `bro` from inside that directory.
 
 ## <a name="Moloch"></a>Moloch
 
@@ -1301,8 +1300,29 @@ If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if t
 
 ![Cross-segment traffic in Connections](./docs/images/screenshots/moloch_connections_segments.png)
 
+#### <a name="NameMapUI"></a>Defining hostname and CIDR subnet names interface
+
+As an alternative to manually editing `cidr-map.txt` and `host-map.txt`, a **Host and Subnet Name Mapping** editor is available at [https://localhost/name-map-ui/](https://localhost/name-map-ui/) if you are connecting locally. Upon loading, the editor is populated from `cidr-map.txt`, `host-map.txt` and `net-map.json`. 
+
+This editor provides the following controls:
+
+* 🔎 **Search mappings** - narrow the list of visible items using a search filter
+* **Type**, **Address**, **Name** and **Tag** *(column headings)* - sort the list of items by clicking a column header
+* 📝 *(per item)* - modify the selected item
+* 🚫 *(per item)* - remove the selected item
+* 🖳 **host** / 🖧 **segment**, **Address**, **Name**, **Tag (optional)** and 💾 - save the item with these values (either adding a new item or updating the item being modified)
+* 📥 **Import** - clear the list and replace it with the contents of an uploaded `net-map.json` file
+* 📤 **Export** - format and download the list as a `net-map.json` file
+* 💾 **Save Mappings** - format and store `net-map.json` in the Malcolm directory (replacing the existing `net-map.json` file)
+* 🔁 **Restart Logstash** - restart log ingestion, parsing and enrichment
+
+![Host and Subnet Name Mapping Editor](./docs/images/screenshots/malcolm_name_map_ui.png)
+
 #### <a name="ApplyMapping"></a>Applying mapping changes
-When changes are made to either `cidr-map.txt` or `host-map.txt`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart.sh` (see [Stopping and restarting Malcolm](#StopAndRestart)).
+
+When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`, Malcolm's Logstash container must be restarted. The easiest way to do this is to restart malcolm via `restart` (see [Stopping and restarting Malcolm](#StopAndRestart)) or by clicking the 🔁 **Restart Logstash** button in the [name mapping interface](#NameMapUI) interface.
+
+Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
 ## <a name="Curator"></a>Elasticsearch index curation
 
@@ -1353,7 +1373,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-1.8.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.0.0.iso"
 …
 ```
 
@@ -1392,7 +1412,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup.sh`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
@@ -1639,7 +1659,7 @@ Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/M
 Malcolm runtime files extracted to /home/user/Malcolm
 ```
 
-Alternately, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
+Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
 user@host:~/Malcolm$ python3 scripts/install.py --configure
 ```
@@ -1715,7 +1735,7 @@ At this point you should **reboot your computer** so that the new system setting
 
 Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
-user@host:~/Malcolm$ ./scripts/auth_setup.sh
+user@host:~/Malcolm$ ./scripts/auth_setup
 Username: analyst
 analyst password:
 analyst password (again):
@@ -1735,6 +1755,8 @@ Pulling elastalert    ... done
 Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
+Pulling freq          ... done
+Pulling name-map-ui   ... done
 Pulling htadmin       ... done
 Pulling kibana        ... done
 Pulling logstash      ... done
@@ -1747,34 +1769,38 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                1.8.1               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  1.8.1               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               1.8.1               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           1.8.1               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           1.8.1               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          1.8.1               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          1.8.1               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          1.8.1               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          1.8.1               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               1.8.1               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            1.8.1               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          1.8.1               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            1.8.1               xxxxxxxxxxxx        11 days ago         276MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.5.1               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/moloch                                2.0.0               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  2.0.0               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               2.0.0               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           2.0.0               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           2.0.0               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          2.0.0               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.0.0               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          2.0.0               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          2.0.0               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               2.0.0               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            2.0.0               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          2.0.0               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            2.0.0               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/freq                                  2.0.0               xxxxxxxxxxxx        11 days ago         188MB
+malcolmnetsec/name-map-ui                           2.0.0               xxxxxxxxxxxx        35 minutes ago      20MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
 ```
-user@host:~/Malcolm$ ./scripts/start.sh
+user@host:~/Malcolm$ ./scripts/start
 Creating network "malcolm_default" with the default driver
 Creating malcolm_curator_1       ... done
 Creating malcolm_elastalert_1    ... done
 Creating malcolm_elasticsearch_1 ... done
 Creating malcolm_file-monitor_1  ... done
 Creating malcolm_filebeat_1      ... done
+Creating malcolm_freq_1          ... done
 Creating malcolm_htadmin_1       ... done
 Creating malcolm_kibana_1        ... done
 Creating malcolm_logstash_1      ... done
+Creating malcolm_name-map-ui_1   ... done
 Creating malcolm_moloch_1        ... done
 Creating malcolm_nginx-proxy_1   ... done
 Creating malcolm_pcap-capture_1  ... done
@@ -1788,11 +1814,12 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - Kibana: https://localhost/kibana/
   - PCAP Upload (web): https://localhost/upload/
   - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_moloch_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
 …
 ```
 
@@ -1808,7 +1835,7 @@ You can now open a web browser and navigate to one of the [Malcolm user interfac
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](./License.txt) for the terms of its release.
 

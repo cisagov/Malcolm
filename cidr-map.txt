@@ -10,3 +10,5 @@
 #   required tag (optional): only check match and apply segment name if the event
 #                            contains this tag
 #
+#  Alternatively, as of Malcolm v2.0 there is a web UI editor for defining subnet
+#  to segment name maps, located at https://<Malcolm IP>/name-map-ui.

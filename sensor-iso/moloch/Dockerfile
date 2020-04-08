@@ -1,12 +1,12 @@
 FROM debian:buster-slim
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.1.2"
+ENV MOLOCH_VERSION "2.2.3"
 ENV MOLOCHDIR "/opt/moloch"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \

@@ -18,7 +18,7 @@ Hedgehog Linux is a trimmed-down Debian Linux with several common tools preinsta
     - [Compiling Zeek from source](#ZeekCompile)
     - [Third party plugins](#ZeekThirdParty)
         + [bash script to install third party plugins for Zeek](#ZeekThirdPartyBash)
-        + [Bro::AF_Packet configuration](#BroAfPacket)
+        + [Zeek::AF_Packet configuration](#ZeekAfPacket)
     - [`local.zeek`](#ZeekLocalPolicy)
     - [File carving](#ZeekFileCarving)
 * [Forwarding](#Forwarding)
@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.1.2](https://github.com/aol/moloch/releases/tag/v2.1.2). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.2.3](https://github.com/aol/moloch/releases/tag/v2.2.3). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.1.2"
+MOLOCH_VERSION="2.2.3"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
@@ -137,10 +137,6 @@ if [[ -n $VERBOSE ]]; then
 fi
 
 apt-get -q update
-apt-get install -q -y --no-install-recommends \
-    curl iproute2 git python python-dev sudo ruby ruby-dev rubygems build-essential 
-
-gem install --no-ri --no-rdoc fpm
 
 mkdir -p /opt
 curl -L -o /tmp/moloch.tar.gz "https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz"
@@ -163,19 +159,17 @@ cp -r ./capture/plugins/lua/samples "$MOLOCHDIR"/lua
 
 npm install license-checker; release/notice.txt.pl $MOLOCHDIR NOTICE release/CAPTURENOTICE > $MOLOCHDIR/NOTICE.txt
 
-curl -L -o "$MOLOCHDIR"/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-curl -L -o "$MOLOCHDIR"/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
-curl -L -o /tmp/GeoLite2-Country.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-Country"
-curl -L -o /tmp/GeoLite2-ASN.mmdb.gz "https://updates.maxmind.com/app/update_secure?edition_id=GeoLite2-ASN"
-zcat /tmp/GeoLite2-Country.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-Country.mmdb
-zcat /tmp/GeoLite2-ASN.mmdb.gz > "$MOLOCHDIR"/etc/GeoLite2-ASN.mmdb
+ETC_FILES=$(shopt -s nullglob dotglob; echo /moloch-etc/*)
+if (( ${#ETC_FILES} )) ; then
+  mkdir -p $MOLOCHDIR/etc
+  cp -r /moloch-etc/* $MOLOCHDIR/etc/
+fi
 
 fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $MOLOCH_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Moloch Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$MOLOCHDIR"
 
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 
 cd /tmp
-rm -rf /tmp/moloch-$MOLOCH_VER.tar.gz /tmp/moloch-$MOLOCH_VER /tmp/GeoLite2-Country.mmdb.gz /tmp/GeoLite2-ASN.mmdb.gz
 
 if [[ -n $VERBOSE ]]; then
   set +x
@@ -327,7 +321,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.1](https://github.com/zeek/zeek/releases/tag/v3.0.1). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.3](https://github.com/zeek/zeek/releases/tag/v3.0.3). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
@@ -336,7 +330,7 @@ The following bash script was used to download, [build and install](https://docs
 ```bash
 #!/bin/bash
 
-ZEEK_VER="3.0.1"
+ZEEK_VER="3.0.3"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
@@ -375,7 +369,7 @@ Hedgehog Linux utilizest he following third party Zeek packages:
 * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
 * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
 * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
-* J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin
+* J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
 * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
 * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
 * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
@@ -503,7 +497,7 @@ if [[ -d "$SRC_DIR" ]]; then
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/bro-af_packet-plugin")"
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
@@ -524,9 +518,9 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 ```
 
-### <a name="BroAfPacket"></a>Bro::AF_Packet configuration
+### <a name="ZeekAfPacket"></a>Zeek::AF_Packet configuration
 
-Of particular mention is J-Gras' [Bro::AF_Packet](https://github.com/J-Gras/bro-af_packet-plugin) plugin to allow Zeek to use the Linux kernel's AF_PACKET capabilities natively for packet capture. To determine if your Linux distribution's kernel supports AF_PACKET:
+Of particular mention is J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin to allow Zeek to use the Linux kernel's AF_PACKET capabilities natively for packet capture. To determine if your Linux distribution's kernel supports AF_PACKET:
 
 ```bash
 $ grep -x 'CONFIG_PACKET=[ym]' "/boot/config-$(uname -r)"
@@ -1769,7 +1763,7 @@ The Elastic Stack's [Beats](https://www.elastic.co/products/beats) platform is a
 
 set -e
 
-BEATS_VER="7.5.1"
+BEATS_VER="7.6.2"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
@@ -2181,7 +2175,7 @@ Hedgehog Linux targets the following guidelines for establishing a secure config
 
 # <a name="Footer"></a>Copyright
 
-Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2019 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
 

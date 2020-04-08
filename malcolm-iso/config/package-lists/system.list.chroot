@@ -26,6 +26,7 @@ cryptsetup-bin
 curl
 debsums
 dialog
+dmidecode
 dosfstools
 ebtables
 efibootmgr

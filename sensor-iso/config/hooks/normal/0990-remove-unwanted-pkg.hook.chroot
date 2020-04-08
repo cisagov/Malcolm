@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # remove development packages
 apt-get -y --purge remove checkinstall cmake gdb git libc6-dbg ninja-build \
-                    $(dpkg --get-selections | grep -Pv "(^libyaml-dev|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+                    $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \
@@ -13,7 +13,6 @@ apt-get -y --purge remove bluez-firmware \
                           enchant \
                           ffmpeg \
                           gnome-accessibility-themes \
-                          gnome-user-guide \
                           gucharmap \
                           libasound2-plugins \
                           libcupsfilters1 \

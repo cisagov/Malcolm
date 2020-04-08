@@ -50,6 +50,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
+  rsync -a "$SCRIPT_PATH/../shared/vbox-guest-build" .
 
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
@@ -80,6 +81,17 @@ if [ -d "$WORKDIR" ]; then
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
 
+  # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
+  mkdir -p ./config/packages.chroot/
+  bash ./vbox-guest-build/build-docker-image.sh
+  docker run --rm -v "$(pwd)"/vbox-guest-build:/build vboxguest-build:latest -o /build
+  rm -f ./vbox-guest-build/*-source*.deb \
+        ./vbox-guest-build/*-dbgsym*.deb \
+        ./vbox-guest-build/virtualbox_*.deb \
+        ./vbox-guest-build/virtualbox-dkms_*.deb \
+        ./vbox-guest-build/virtualbox-qt_*.deb
+  mv ./vbox-guest-build/*.deb ./config/packages.chroot/
+
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
@@ -104,19 +116,23 @@ if [ -d "$WORKDIR" ]; then
   YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" ./docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
   cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
-  cp ./docker-compose-standalone-zeek-live.yml "$MALCOLM_DEST_DIR/docker-compose-zeek-live.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
-  cp ./scripts/auth_setup.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/start.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/stop.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/restart.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/wipe.sh "$MALCOLM_DEST_DIR/scripts/"
-  cp ./scripts/logs.sh "$MALCOLM_DEST_DIR/scripts/"
+  cp ./net-map.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
+  pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
+  ln -s ./control.py start
+  ln -s ./control.py stop
+  ln -s ./control.py restart
+  ln -s ./control.py wipe
+  ln -s ./control.py logs
+  ln -s ./control.py auth_setup
+  sed -i 's@#!/usr/bin/env[[:space:]]*python$@#!/usr/bin/env python3@g' *.py
+  popd >/dev/null 2>&1
+  cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"
-  cp ./nginx/certs/*.sh "$MALCOLM_DEST_DIR/nginx/certs/"
-  cp ./logstash/certs/Makefile ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
+  cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./elastalert/config/* "$MALCOLM_DEST_DIR/elastalert/config/"
   cp ./elastalert/rules/* "$MALCOLM_DEST_DIR/elastalert/rules/" 2>/dev/null || true
   cp ./elastalert/sample-rules/* "$MALCOLM_DEST_DIR/elastalert/sample-rules/" 2>/dev/null || true
@@ -156,7 +172,7 @@ if [ -d "$WORKDIR" ]; then
     --bootloaders "syslinux,grub-efi" \
     --memtest none \
     --chroot-filesystem squashfs \
-    --backports false \
+    --backports true \
     --security true \
     --updates true \
     --source false \

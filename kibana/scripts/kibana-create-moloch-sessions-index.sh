@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
 set -euo pipefail
@@ -48,6 +48,9 @@ if [[ "$CREATE_ES_MOLOCH_SESSION_INDEX" = "true" ]] ; then
 
       # turn off telemetry
       curl -XPOST "$KIBANA_URL/api/telemetry/v2/optIn" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"enabled":false}'
+
+      # pin filters by default
+      curl -XPOST "$KIBANA_URL/api/kibana/settings/filters:pinnedByDefault" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
     fi
   fi
 fi

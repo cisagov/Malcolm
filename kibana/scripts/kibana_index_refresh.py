@@ -10,7 +10,7 @@ import os
 import sys
 
 GET_STATUS_API = 'api/status'
-GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/index-pattern'
+GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
 GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
 PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
 
@@ -78,42 +78,54 @@ def main():
   if debug:
     eprint('Kibana version is {}'.format(kibanaVersion))
 
-  # get the ID of the index name (probably will be the same as the name)
-  getIndexInfoResponse = requests.get('{}/{}/{}'.format(args.url, GET_INDEX_PATTERN_INFO_URI, args.index))
+  # find the ID of the index name (probably will be the same as the name)
+  getIndexInfoResponse = requests.get(
+    '{}/{}'.format(args.url, GET_INDEX_PATTERN_INFO_URI),
+    params={
+      'type': 'index-pattern',
+      'fields': 'id',
+      'search': '"{}"'.format(args.index)
+    }
+  )
   getIndexInfoResponse.raise_for_status()
   getIndexInfo = getIndexInfoResponse.json()
-  indexId = getIndexInfo['id']
+  indexId = getIndexInfo['saved_objects'][0]['id'] if (len(getIndexInfo['saved_objects']) > 0) else None
   if debug:
     eprint('Index ID for {} is {}'.format(args.index, indexId))
 
-  # get the fields list
-  getFieldsResponse = requests.get('{}/{}'.format(args.url, GET_FIELDS_URI),
-                                   params={ 'pattern': args.index,
-                                            'meta_fields': ["_source","_id","_type","_index","_score"] })
-  getFieldsResponse.raise_for_status()
-  getFieldsList = getFieldsResponse.json()['fields']
-  if debug:
-    eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
+  if indexId is not None:
 
-  # set the index pattern with our complete list of fields
-  if not args.dryrun:
-    putIndexInfo = {}
-    putIndexInfo['attributes'] = {}
-    putIndexInfo['attributes']['title'] = args.index
-    putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
+    # get the fields list
+    getFieldsResponse = requests.get('{}/{}'.format(args.url, GET_FIELDS_URI),
+                                     params={ 'pattern': args.index,
+                                              'meta_fields': ["_source","_id","_type","_index","_score"] })
+    getFieldsResponse.raise_for_status()
+    getFieldsList = getFieldsResponse.json()['fields']
+    if debug:
+      eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
-    putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),
-                               headers={ 'Content-Type': 'application/json',
-                                         'kbn-xsrf': 'true',
-                                         'kbn-version': kibanaVersion, },
-                               data=json.dumps(putIndexInfo))
-    putResponse.raise_for_status()
+    # set the index pattern with our complete list of fields
+    if not args.dryrun:
+      putIndexInfo = {}
+      putIndexInfo['attributes'] = {}
+      putIndexInfo['attributes']['title'] = args.index
+      putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
 
-  # if we got this far, it probably worked!
-  if args.dryrun:
-    print("success (dry run only, no write performed)")
+      putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),
+                                 headers={ 'Content-Type': 'application/json',
+                                           'kbn-xsrf': 'true',
+                                           'kbn-version': kibanaVersion, },
+                                 data=json.dumps(putIndexInfo))
+      putResponse.raise_for_status()
+
+    # if we got this far, it probably worked!
+    if args.dryrun:
+      print("success (dry run only, no write performed)")
+    else:
+      print("success")
+
   else:
-    print("success")
+    print("failure (could not find Index ID for {})".format(args.index))
 
 if __name__ == '__main__':
   main()

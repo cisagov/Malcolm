@@ -1,10 +1,12 @@
 arandr
 dconf-cli
-fonts-noto-color-emoji
+fonts-symbola
+libnotify-bin
 lightdm
 lxde
 lxpanel
 lxsession
+open-vm-tools-desktop
 x11-apps
 x11-session-utils
 x11-xfs-utils
@@ -13,5 +15,6 @@ xinit
 xorg
 xscreensaver
 xserver-xorg
+xserver-xorg-core
 xserver-xorg-video-qxl
 xserver-xorg-video-vmware

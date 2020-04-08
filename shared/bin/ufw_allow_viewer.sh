@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # manage a UFW rule for allowing a remote Moloch viewer instance (on the same host
 # to which moloch-capture is forwarding session logs) to connect to and

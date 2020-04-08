@@ -63,6 +63,9 @@ Plugin {
       id=malcolm-upload.desktop
     }
     Button {
+      id=malcolm-mapping.desktop
+    }
+    Button {
       id=malcolm-users.desktop
     }
     Button {

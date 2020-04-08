@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ####################################################################################
 # thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
@@ -10,7 +10,7 @@
 # build a patched APK of stunnel supporting ldap StartTLS (patched protocols.c)
 # (based on https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html)
 
-FROM alpine:3.10 as stunnel_build
+FROM alpine:3.11 as stunnel_build
 
 ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
 ADD nginx/src/*.patch /usr/src/patches/
@@ -18,7 +18,7 @@ ADD nginx/src/*.patch /usr/src/patches/
 USER root
 
 RUN set -x ; \
-    apk add --no-cache alpine-sdk patchutils sudo ; \
+    apk add --no-cache alpine-sdk patchutils sudo openssl-dev linux-headers; \
     sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers ; \
     adduser -D -u 1000 -h /apkbuild -G abuild builder ; \
     addgroup builder wheel ; \
@@ -39,7 +39,7 @@ RUN set -x ; \
 
 ####################################################################################
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
@@ -67,12 +67,10 @@ ENV NGINX_LDAP_TLS_STUNNEL_PROTOCOL $NGINX_LDAP_TLS_STUNNEL_PROTOCOL
 
 
 # build latest nginx with nginx-auth-ldap
-ENV NGINX_VERSION=1.17.6
-ENV DOCKER_GEN_VERSION=0.7.4
+ENV NGINX_VERSION=1.17.9
 ENV NGINX_AUTH_LDAP_BRANCH=master
 ENV NGINX_AUTH_PAM_BRANCH=master
 
-ADD https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 ADD https://codeload.github.com/kvspb/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
 ADD https://codeload.github.com/sto/ngx_http_auth_pam_module/tar.gz/$NGINX_AUTH_PAM_BRANCH /ngx_http_auth_pam_module.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
@@ -201,14 +199,11 @@ RUN set -x ; \
   apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd supervisor tzdata; \
   update-ca-certificates; \
   apk add --no-cache --allow-untrusted /tmp/stunnel-*.apk; \
-  tar -C /usr/local/bin -xzf /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
   mkdir -p /var/log/supervisor ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz /docker-gen-alpine-linux-amd64-$DOCKER_GEN_VERSION.tar.gz; \
-  ln -sf /dev/stdout /var/log/nginx/access.log; \
-  ln -sf /dev/stderr /var/log/nginx/error.log; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
@@ -221,8 +216,6 @@ ADD nginx/supervisord.conf /etc/
 ADD docs/images/icon/favicon.ico /etc/nginx/favicon.ico
 
 EXPOSE 80
-
-ENV DOCKER_HOST unix:///tmp/docker.sock
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

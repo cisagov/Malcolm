@@ -1,10 +1,10 @@
 FROM debian:buster-slim AS build
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.1.2"
+ENV MOLOCH_VERSION "2.2.3"
 ENV MOLOCHDIR "/data/moloch"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -12,7 +12,10 @@ ADD moloch/patch/* /data/patches/
 ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
-ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
+
+# TODO: temporarily using my github fork branch until issue https://github.com/aol/moloch/issues/1162 and
+# https://github.com/idaholab/Malcolm/issues/2 are merged in
+# ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -62,14 +65,16 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     sed -i "s@docs/images@images@g" README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $MOLOCHDIR/doc/doc.css -o $MOLOCHDIR/doc/README.html $MOLOCHDIR/doc/README.md && \
   cd /data && \
-  tar -xvf "moloch.tar.gz" && \
+  # TODO: see comment above about aol/moloch vs. mmguero-dev/moloch
+  # tar -xvf "moloch.tar.gz" && \
+  git clone --recursive --depth=1 --single-branch -b "topic/netdiff_2.2.3" "https://github.com/mmguero-dev/moloch.git" "./moloch-"$MOLOCH_VERSION && \
     cd "./moloch-"$MOLOCH_VERSION && \
+    rm -rf ./.git && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_77.png ./viewer/public/moloch_77.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./parliament/vueapp/src/assets/header_logo.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/public/header_logo.png && \
-    cp -v $MOLOCHDIR/doc/images/moloch/header_logo.png ./viewer/vueapp/src/assets/logo.png && \
     find $MOLOCHDIR/doc/images/screenshots -name "*.png" -delete && \
     export PATH="$MOLOCHDIR/bin:${PATH}" && \
     ln -sfr $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
@@ -77,6 +82,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
+    rm -rf ./viewer/vueapp/src/components/upload && \
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
     bash -c "file ${MOLOCHDIR}/bin/* ${MOLOCHDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"

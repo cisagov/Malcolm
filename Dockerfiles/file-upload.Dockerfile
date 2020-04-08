@@ -1,6 +1,6 @@
 FROM debian:buster-slim AS build
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -52,14 +52,15 @@ RUN apt-get update && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
 
-ADD file-upload/supervisord.conf /supervisord.conf
-ADD file-upload/jquery-file-upload/index.html /var/www/upload/index.html
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
-ADD file-upload/jquery-file-upload/index.php /var/www/upload/server/php/index.php
-ADD file-upload/php/php.ini /etc/php/7.3/fpm/php.ini
-ADD file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
-ADD file-upload/sshd_config /tmp/sshd_config
 ADD file-upload/docker-entrypoint.sh /docker-entrypoint.sh
+ADD file-upload/jquery-file-upload/bootstrap.min.css /var/www/upload/bower_components/bootstrap/dist/css/bootstrap.min.css
+ADD file-upload/jquery-file-upload/index.html /var/www/upload/index.html
+ADD file-upload/jquery-file-upload/index.php /var/www/upload/server/php/index.php
+ADD file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
+ADD file-upload/php/php.ini /etc/php/7.3/fpm/php.ini
+ADD file-upload/sshd_config /tmp/sshd_config
+ADD file-upload/supervisord.conf /supervisord.conf
 
 RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
   mv /var/www/upload/server/php/files /var/www/upload/server/php/chroot && \

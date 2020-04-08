@@ -1,6 +1,6 @@
 FROM centos:7 AS build
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -9,21 +9,6 @@ LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/logstash-oss'
 LABEL org.opencontainers.image.description='Malcolm container providing Logstash (the Apache-licensed variant)'
-
-
-ARG LOGSTASH_JAVA_EXECUTION_ENGINE=true
-ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
-ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse
-ARG LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-es
-ARG LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-es
-ARG LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-es,external-es
-
-ENV LOGSTASH_JAVA_EXECUTION_ENGINE $LOGSTASH_JAVA_EXECUTION_ENGINE
-ENV LOGSTASH_ENRICHMENT_PIPELINE $LOGSTASH_ENRICHMENT_PIPELINE
-ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
-ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL
-ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL
-ENV LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES
 
 RUN yum install -y epel-release && \
     yum update -y && \
@@ -42,7 +27,20 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     git clone --depth 1 https://github.com/mmguero/logstash-filter-ieee_oui.git /opt/logstash-filter-ieee_oui && \
     /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
-FROM docker.elastic.co/logstash/logstash-oss:7.5.1
+FROM docker.elastic.co/logstash/logstash-oss:7.6.2
+
+ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
+ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse
+ARG LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-es
+ARG LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-es
+ARG LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-es,external-es
+
+ENV LOGSTASH_ENRICHMENT_PIPELINE $LOGSTASH_ENRICHMENT_PIPELINE
+ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
+ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL
+ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL
+ENV LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES
+
 USER root
 
 COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
@@ -51,9 +49,9 @@ RUN yum install -y epel-release && \
     yum update -y && \
     yum install -y gettext python-setuptools python-pip python-requests python-yaml && \
     yum clean all && \
-    pip install py2-ipaddress && \
+    pip install py2-ipaddress supervisor && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
-                            logstash-filter-json logstash-filter-prune \
+                            logstash-filter-json logstash-filter-prune logstash-filter-http \
                             logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                             logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                             logstash-input-beats logstash-output-elasticsearch && \
@@ -65,9 +63,11 @@ ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
+ADD logstash/supervisord.conf /etc/supervisord.conf
 ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf /usr/share/logstash/config/oui.txt
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
+    mkdir -p /var/log/supervisor && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
@@ -83,10 +83,11 @@ ENV LOGSTASH_KEYSTORE_PASS "a410a267b1404c949284dee25518a917"
 
 VOLUME ["/logstash-persistent-queue"]
 
-USER logstash
+EXPOSE 5044
+EXPOSE 9001
+EXPOSE 9600
 
-ENTRYPOINT ["/usr/local/bin/logstash-start.sh"]
-
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

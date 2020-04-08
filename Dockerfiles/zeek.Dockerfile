@@ -1,11 +1,11 @@
 FROM debian:buster-slim AS build
 
-# Copyright (c) 2019 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV SRC_BASE_DIR "/usr/local/src"
-ENV ZEEK_VERSION "3.0.1"
+ENV ZEEK_VERSION "3.0.3"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
