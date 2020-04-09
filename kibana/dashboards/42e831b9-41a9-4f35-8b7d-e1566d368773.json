@@ -458,6 +458,7 @@
         "columns": [
           "zeek_notice.category",
           "zeek_notice.sub_category",
+          "zeek_notice.msg",
           "srcIp",
           "dstIp",
           "zeek.uid"
@@ -470,7 +471,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"zeek.logType:notice\",\"default_field\":\"*\",\"time_zone\":\"America/Denver\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"zeek.logType:notice\",\"default_field\":\"*\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
