@@ -145,6 +145,7 @@ NAVIGATION_LINKS = {
         ("/documentation/#Protocols", "Supported Protocols"),
         ("/documentation/", "Documentation"),
         ("/hedgehog/", "Hedgehog Linux"),
+        ("/download/", "Downloads"),
         ("https://github.com/idaholab/Malcolm", "↪ GitHub")
     ),
 }

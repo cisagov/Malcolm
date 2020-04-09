@@ -61,6 +61,12 @@ curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/se
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/@g" \
   >> $OUTPUT_FILE
 
+# downloads page
+OUTPUT_FILE="$OUTPUT_DIR"/download.md
+> $OUTPUT_FILE
+GenerateMarkdownHeader "Downloads" "download" >> $OUTPUT_FILE
+cat ./download.md >> $OUTPUT_FILE
+
 # build site
 nikola clean -a
 nikola build
