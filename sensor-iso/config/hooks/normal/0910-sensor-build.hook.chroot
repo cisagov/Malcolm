@@ -112,6 +112,7 @@ redef SOCKS::default_capture_password = T;
 @load policy/protocols/modbus/track-memmap
 @load policy/protocols/modbus/known-masters-slaves
 @load policy/protocols/mqtt
+@load telnet.zeek
 # @load frameworks/files/detect-MHR
 
 # custom packages installed manually
@@ -123,6 +124,41 @@ redef SOCKS::default_capture_password = T;
 
 redef SNIFFPASS::log_password_plaintext = T;
 redef SNIFFPASS::notice_log_enable = F;
+EOF
+
+cat << 'EOF' > /opt/zeek/share/zeek/site/telnet.zeek
+global telnet_ports: set[port] = { 23/tcp } &redef;
+
+event zeek_init()
+{
+  Analyzer::register_for_ports(Analyzer::ANALYZER_TELNET, telnet_ports);
+  Analyzer::register_for_ports(Analyzer::ANALYZER_RSH, telnet_ports);
+  Analyzer::register_for_ports(Analyzer::ANALYZER_RLOGIN, telnet_ports);
+}
+
+event login_confused(c: connection, msg: string, line: string)
+{
+  # print "login_confused", msg, line;
+  if (|c$service| == 0) add c$service["telnet"];
+}
+
+event login_failure(c: connection, user: string, client_user: string, password: string, line: string)
+{
+  # print "login_failure", user, client_user, password, line;
+  if (|c$service| == 0) add c$service["telnet"];
+}
+
+event login_prompt(c: connection, prompt: string)
+{
+  # print "login_prompt", prompt;
+  if (|c$service| == 0) add c$service["telnet"];
+}
+
+event login_success(c: connection, user: string, client_user: string, password: string, line: string)
+{
+  # print "login_success", user, client_user, password, line;
+  if (|c$service| == 0) add c$service["telnet"];
+}
 EOF
 
 # cleanup
