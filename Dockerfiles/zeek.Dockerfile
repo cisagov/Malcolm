@@ -5,7 +5,7 @@ FROM debian:buster-slim AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV SRC_BASE_DIR "/usr/local/src"
-ENV ZEEK_VERSION "3.0.4"
+ENV ZEEK_VERSION "3.0.5"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"

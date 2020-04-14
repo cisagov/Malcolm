@@ -321,7 +321,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.4](https://github.com/zeek/zeek/releases/tag/v3.0.4). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.5](https://github.com/zeek/zeek/releases/tag/v3.0.5). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
