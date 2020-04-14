@@ -73,8 +73,8 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-profinet
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
-  https://github.com/corelight/bro-community-id
   https://github.com/corelight/bro-xor-exe-plugin
+  https://github.com/corelight/zeek-community-id
   https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/mitre-attack/bzar
   https://github.com/salesforce/hassh
