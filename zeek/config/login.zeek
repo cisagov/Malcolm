@@ -1,12 +1,12 @@
-module Telnet;
+module Login;
 
-# log telnet, rlogin, and rsh events to telnet.log
+# log telnet, rlogin, and rsh events to login.log
 
 export {
 
   redef enum Log::ID += {
-    ## The telnet protocol logging stream identifier
-    Log_TELNET
+    ## The logging stream identifier
+    Log_LOGIN
   };
 
   type Info : record {
@@ -17,6 +17,8 @@ export {
     ## The connection's 4-tuple of endpoint addresses/port
     id              : conn_id &log;
 
+    ## proto (telnet, rlogin, or rsh)
+    proto           : string &log &optional;
     ## login_success event was seen (successful login)
     success         : bool &log &default = F;
     ## login_confused event was seen (successful login)
@@ -28,18 +30,18 @@ export {
     ## password given for login attempt
     password        : string &log &optional;
 
-    ## whether or not a line has been written to telnet.log
+    ## whether or not a line has been written to login.log
     logged          : bool &default = F;
   };
 
-  ## Event that can be handled to access the :zeek:type:`Telnet::Info`
+  ## Event that can be handled to access the :zeek:type:`Login::Info`
   ## record as it is sent on to the logging framework.
-  global log_telnet : event(rec : Info);
+  global log_login : event(rec : Info);
 }
 
 # Add the state tracking information variable to the connection record
 redef record connection += {
-  telnet : Info &optional;
+  login : Info &optional;
 };
 
 ###############################################
@@ -117,23 +119,39 @@ redef login_timeouts = {
 ###############################################
 
 # telnet, rlogin, rsh
-const telnet_port = { 23/tcp };
-const rlogin_port = { 513/tcp };
-const rsh_port = { 514/tcp };
-redef likely_server_ports += { telnet_port, rlogin_port, rsh_port };
+const telnet_port = 23/tcp;
+const telnet_ports = { telnet_port };
+const rlogin_port = 513/tcp;
+const rlogin_ports = { rlogin_port };
+const rsh_port = 514/tcp;
+const rsh_ports = { rsh_port };
+redef likely_server_ports += { telnet_ports, rlogin_ports, rsh_ports };
 
-# set_telnet_session - if has not yet been registered in the connection, instantiate
-# the Info record and assign in c$telnet
-function set_telnet_session(c : connection) {
-  if ( ! c?$telnet ) {
+# set_login_session - if has not yet been registered in the connection, instantiate
+# the Info record and assign in c$login
+function set_login_session(c : connection) {
+  if ( ! c?$login ) {
     local s : Info = [$ts = network_time(), $uid = c$uid, $id = c$id];
-    c$telnet = s;
-    add c$service["telnet"];
+    switch c$id$resp_p {
+      case telnet_port:
+        s$proto = "telnet";
+        add c$service["telnet"];
+        break;
+      case rlogin_port:
+        s$proto = "rlogin";
+        add c$service["rlogin"];
+        break;
+      case rsh_port:
+        s$proto = "rsh";
+        add c$service["rsh"];
+        break;
+    }
+    c$login = s;
   }
 }
 
-# telnet_message - log to telnet.log
-function telnet_message(s : Info) {
+# login_message - log to login.log
+function login_message(s : Info) {
 
   # strip some values that can happen in a "confused" state that aren't really valid values
   if (( s?$user ) && (( s$user == "" ) || ( s$user == "<none>" ) || ( s$user == "<timeout>" )))
@@ -142,18 +160,20 @@ function telnet_message(s : Info) {
     delete s$client_user;
   if (( s?$password ) && (( s$password == "" ) || ( s$password == "<none>" ) || ( s$password == "<timeout>" )))
     delete s$password;
+  if (( s?$proto ) && ( s$proto == "" ))
+    delete s$proto;
 
   s$ts = network_time();
-  Log::write(Telnet::Log_TELNET, s);
+  Log::write(Login::Log_LOGIN, s);
   s$logged = T;
 }
 
-# create log stream for telnet.log and register telnet, rlogin, and rsh analyzers
+# create log stream for login.log and register telnet, rlogin, and rsh analyzers
 event zeek_init() &priority = 5 {
-  Log::create_stream(Telnet::Log_TELNET, [$columns = Info, $ev = log_telnet, $path = "telnet"]);
-  Analyzer::register_for_ports(Analyzer::ANALYZER_TELNET, telnet_port);
-  Analyzer::register_for_ports(Analyzer::ANALYZER_RLOGIN, rlogin_port);
-  Analyzer::register_for_ports(Analyzer::ANALYZER_RSH, rsh_port);
+  Log::create_stream(Login::Log_LOGIN, [$columns = Info, $ev = log_login, $path = "login"]);
+  Analyzer::register_for_ports(Analyzer::ANALYZER_TELNET, telnet_ports);
+  Analyzer::register_for_ports(Analyzer::ANALYZER_RLOGIN, rlogin_ports);
+  Analyzer::register_for_ports(Analyzer::ANALYZER_RSH, rsh_ports);
 }
 
 # login_confused - Generated when tracking of Telnet/Rlogin authentication failed
@@ -161,9 +181,9 @@ event zeek_init() &priority = 5 {
 event login_confused(c : connection, msg : string, line : string) &priority = 5 {
   # print "login_confused", msg, line;
 
-  set_telnet_session(c);
+  set_login_session(c);
 
-  c$telnet$confused = T;
+  c$login$confused = T;
 }
 
 # login_failure - Generated when tracking of Telnet/Rlogin authentication failed
@@ -171,16 +191,16 @@ event login_confused(c : connection, msg : string, line : string) &priority = 5 
 event login_failure(c : connection, user : string, client_user : string, password : string, line : string) &priority = 5 {
   # print "login_failure", user, client_user, password, line;
 
-  set_telnet_session(c);
+  set_login_session(c);
 
-  if (c$telnet$user == "")
-    c$telnet$user = user;
-  if (c$telnet$client_user == "")
-    c$telnet$client_user = client_user;
-  if (c$telnet$password == "")
-    c$telnet$password = password;
+  if ((!c$login?$user) || (c$login$user == ""))
+    c$login$user = user;
+  if ((!c$login?$client_user) || (c$login$client_user == ""))
+    c$login$client_user = client_user;
+  if ((!c$login?$password) || (c$login$password == ""))
+    c$login$password = password;
 
-  telnet_message(c$telnet);
+  login_message(c$login);
 }
 
 # login_success - Generated for successful Telnet/Rlogin logins
@@ -188,24 +208,28 @@ event login_failure(c : connection, user : string, client_user : string, passwor
 event login_success(c : connection, user : string, client_user : string, password : string, line : string) &priority = 5 {
   # print "login_success", user, client_user, password, line;
 
-  set_telnet_session(c);
+  set_login_session(c);
 
-  c$telnet$success = T;
-  c$telnet$user = user;
-  c$telnet$client_user = client_user;
-  c$telnet$password = password;
+  c$login$success = T;
+  c$login$user = user;
+  c$login$client_user = client_user;
 
-  telnet_message(c$telnet);
+  # it appears for a successful login with rsh where client_user was checked, what we're getting in
+  # the "password" field is actually not the password, but the first line of data
+  if ((c$login$proto != "rsh") || (c$login$client_user == ""))
+    c$login$password = password;
+
+  login_message(c$login);
 }
 
 event connection_state_remove(c : connection) &priority = -5 {
-  if (c?$telnet) {
+  if (c?$login) {
 
-    if ( c$telnet$logged == F) {
-      telnet_message(c$telnet);
+    if ( c$login$logged == F) {
+      login_message(c$login);
     }
 
-    delete c$telnet;
+    delete c$login;
   }
 }
 
