@@ -97,8 +97,21 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
 # add configuration and scripts
 ADD shared/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
+ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek $ZEEK_DIR/share/zeek/site/
+
+# sanity check to make sure the plugins installed and copied over correctly
+# these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 17
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main)\.(zeek|bro)"
+
+RUN mkdir -p /tmp/logs && \
+    cd /tmp/logs && \
+      $ZEEK_DIR/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_GREP_STRING" loaded_scripts.log) == $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && exit 1)" && \
+      cd /tmp && \
+      rm -rf /tmp/logs /tmp/pcaps
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
