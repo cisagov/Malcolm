@@ -1,0 +1,35 @@
+From 42bf41aca1347d20af526aba0133e83d5fa94da8 Mon Sep 17 00:00:00 2001
+From: SG <13872653+mmguero@users.noreply.github.com>
+Date: Thu, 16 Apr 2020 10:19:59 -0600
+Subject: [PATCH] check for the existance of f?$conns in file_sniff event in
+ policy/protocols/ssl/log-hostcerts-only.zeek
+
+In using the corelight/bro-xor-exe-plugin (https://github.com/corelight/bro-xor-exe-plugin) I noticed this error when running the PCAP trace file in its tests directory:
+
+1428602842.525435 expression error in /opt/zeek/share/zeek/policy/protocols/ssl/log-hostcerts-only.zeek, line 44: field value missing (X509::f$conns)
+
+Examining log-hostcerts-only.zeek, I saw that although f$conns is being checked for length, it's not being checked to see if it exists first.
+
+This commit changes "if ( |f$conns| != 1 )" to "if (( ! f?$conns ) || ( |f$conns| != 1 ))" so that the script returns if there is no f$conns field.
+
+In my local testing, this seems to fix the error. My testing was being done with v3.0.5, but I think this patch can be applied to both the 3.0.x and 3.1.x branches.
+---
+ scripts/policy/protocols/ssl/log-hostcerts-only.zeek | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/policy/protocols/ssl/log-hostcerts-only.zeek b/scripts/policy/protocols/ssl/log-hostcerts-only.zeek
+index 3aefac088..bd5be7d8b 100644
+--- a/scripts/policy/protocols/ssl/log-hostcerts-only.zeek
++++ b/scripts/policy/protocols/ssl/log-hostcerts-only.zeek
+@@ -41,7 +41,7 @@ event zeek_init() &priority=2
+
+ event file_sniff(f: fa_file, meta: fa_metadata) &priority=4
+ 	{
+-	if ( |f$conns| != 1 )
++	if (( ! f?$conns ) || ( |f$conns| != 1 ))
+ 		return;
+
+ 	if ( ! f?$info || ! f$info?$mime_type )
+--
+2.20.1
+

@@ -115,6 +115,7 @@ redef SOCKS::default_capture_password = T;
 # @load frameworks/files/detect-MHR
 
 # custom packages installed manually
+@load Corelight/PE_XOR
 @load Salesforce/GQUIC
 @load ./bzar
 # custom packages managed by zkg via packages/packages.zeek
