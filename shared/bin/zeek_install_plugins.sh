@@ -73,7 +73,6 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-profinet
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
-  https://github.com/corelight/bro-xor-exe-plugin
   https://github.com/corelight/zeek-community-id
   https://github.com/cybera/zeek-sniffpass
   https://github.com/lexibrent/zeek-EternalSafety
@@ -113,12 +112,18 @@ if [[ -d "$SRC_DIR" ]]; then
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/SoftwareConsultingEmporium/ldap-analyzer")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  cd "$SRC_DIR" && \
-    ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-    make && \
-    make install
-  cd "$CWD"
-fi
+MANUAL_BRO_GITHUB_URLS=(
+  https://github.com/SoftwareConsultingEmporium/ldap-analyzer
+  https://github.com/corelight/bro-xor-exe-plugin
+)
+for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
+  SRC_DIR="$(clone_github_repo "$i")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+      make && \
+      make install
+    cd "$CWD"
+  fi
+done

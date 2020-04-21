@@ -71,7 +71,7 @@ ENV NGINX_VERSION=1.17.9
 ENV NGINX_AUTH_LDAP_BRANCH=master
 ENV NGINX_AUTH_PAM_BRANCH=master
 
-ADD https://codeload.github.com/kvspb/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
+ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
 ADD https://codeload.github.com/sto/ngx_http_auth_pam_module/tar.gz/$NGINX_AUTH_PAM_BRANCH /ngx_http_auth_pam_module.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
 

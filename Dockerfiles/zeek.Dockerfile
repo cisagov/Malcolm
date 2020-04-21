@@ -13,6 +13,7 @@ ENV PATH="${ZEEK_DIR}/bin:${PATH}"
 
 ADD https://old.zeek.org/downloads/zeek-$ZEEK_VERSION.tar.gz $SRC_BASE_DIR/zeek.tar.gz
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
+ADD zeek/patches ${ZEEK_PATCH_DIR}
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
