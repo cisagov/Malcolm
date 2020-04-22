@@ -18,11 +18,12 @@ ENV FREQ_USER   $FREQ_USER
 ENV FREQ_PORT   $FREQ_PORT
 ENV FREQ_LOOKUP $FREQ_LOOKUP
 
+ADD https://codeload.github.com/markbaggett/freq/tar.gz/master /opt/freq.tar.gz
+
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
     apt-get  -y -q install \
       curl \
-      git \
       procps \
       psmisc \
       python3 \
@@ -30,8 +31,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-pip && \
     pip3 install supervisor && \
       mkdir -p /var/log/supervisor && \
-    git clone --depth=1 --single-branch -b master https://github.com/markbaggett/freq /opt/freq_server && \
-      rm -rf /opt/freq_server/systemd /opt/freq_server/upstart /opt/freq_server/*.md /opt/freq_server/*.exe && \
+    cd /opt && \
+    mkdir -p ./freq_server && \
+      tar xvf ./freq.tar.gz -C ./freq_server --strip-components 1 && \
+      rm -rf /opt/freq.tar.gz /opt/freq_server/systemd /opt/freq_server/upstart /opt/freq_server/*.md /opt/freq_server/*.exe && \
       mv -v "$(ls /opt/freq_server/*.freq | tail -n 1)" /opt/freq_server/freq_table.freq && \
     groupadd --gid 1000 $FREQ_USER && \
       useradd -M --uid 1000 --gid 1000 --home /nonexistant $FREQ_USER && \

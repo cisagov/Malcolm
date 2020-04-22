@@ -16,6 +16,7 @@ ADD docs/images $MOLOCHDIR/doc/images/
 # TODO: temporarily using my github fork branch until issue https://github.com/aol/moloch/issues/1162 and
 # https://github.com/idaholab/Malcolm/issues/2 are merged in
 # ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
+ADD https://codeload.github.com/mmguero-dev/moloch/tar.gz/topic/netdiff_2.2.3 /data/moloch.tar.gz
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -65,11 +66,9 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     sed -i "s@docs/images@images@g" README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $MOLOCHDIR/doc/doc.css -o $MOLOCHDIR/doc/README.html $MOLOCHDIR/doc/README.md && \
   cd /data && \
-  # TODO: see comment above about aol/moloch vs. mmguero-dev/moloch
-  # tar -xvf "moloch.tar.gz" && \
-  git clone --recursive --depth=1 --single-branch -b "topic/netdiff_2.2.3" "https://github.com/mmguero-dev/moloch.git" "./moloch-"$MOLOCH_VERSION && \
+    mkdir -p "./moloch-"$MOLOCH_VERSION && \
+    tar xvf ./moloch.tar.gz -C "./moloch-"$MOLOCH_VERSION --strip-components 1 && \
     cd "./moloch-"$MOLOCH_VERSION && \
-    rm -rf ./.git && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_77.png ./viewer/public/moloch_77.png && \
