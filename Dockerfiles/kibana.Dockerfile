@@ -54,22 +54,6 @@ ADD https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev /tmp/kibana-netwo
 ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-server-routes.js
 ADD kibana/plugin-patches /tmp/plugin-patches
 
-# todo: these extra plugins are kind of gutted right now with 7.5.x, need to fix
-
-# see https://github.com/walterra/kibana-milestones-vis/issues/9
-# ADD https://github.com/walterra/kibana-milestones-vis/releases/download/v7.1.1/kibana-milestones-vis-7.1.1.zip /tmp/kibana-milestones.zip
-
-# TODO: commented out because it's not optimizing in 6.6+ correctly
-# put these back in here and below in the build section:
-
-# ADD https://github.com/aaronoah/kibana_calendar_vis/releases/download/v6.4.0/kibana_calendar_vis-6.4.0.zip /tmp/kibana-calendar.zip
-#    echo "Installing Calendar visualization..." && \
-#    unzip kibana-calendar.zip kibana/kibana_calendar_vis/package.json && \
-#    sed -i "s/6\.4\.0/6\.6\.0/g" kibana/kibana_calendar_vis/package.json && \
-#    zip kibana-calendar.zip kibana/kibana_calendar_vis/package.json && \
-#    /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-calendar.zip --allow-root && \
-#    rm -rf /tmp/kibana-calendar.zip /tmp/kibana && \
-
 RUN chmod 755 /data/*.sh /data/*.py && \
     chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
     chmod 400 /opt/maps/* && \
@@ -117,14 +101,6 @@ RUN chmod 755 /data/*.sh /data/*.py && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
       bash -c "find /usr/share/kibana/plugins/prelert_swimlane_vis/ -type f -exec chmod 644 '{}' \;" && \
       rm -rf /tmp/kibana-swimlane.zip /tmp/kibana && \
-    # cd /tmp && \
-    # echo "Installing Milestones visualization..." && \
-      # unzip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
-      # sed -i "s/7\.1\.1/7\.6\.2/g" kibana/kibana-milestones-vis/package.json && \
-      # zip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
-      # cd /usr/share/kibana/plugins && \
-      # /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-milestones.zip --allow-root && \
-      # rm -rf /tmp/kibana-milestones.zip /tmp/kibana
     rm -rf /tmp/plugin-patches /tmp/elastalert-server-routes.js
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
