@@ -72,6 +72,7 @@ def main():
     sys.tracebacklimit = 0
 
   ja3Map = defaultdict(list)
+  fingerprint = None
 
   urls = ['https://ja3er.com/getAllUasJson']
   for url in urls:
