@@ -6,6 +6,14 @@
 set -euo pipefail
 shopt -s nocasematch
 
+if [[ -n $ELASTICSEARCH_URL ]]; then
+  ES_URL="$ELASTICSEARCH_URL"
+elif [[ -n $ES_HOST ]] && [[ -n $ES_PORT ]]; then
+  ES_URL="http://$ES_HOST:$ES_PORT"
+else
+  ES_URL="http://elasticsearch:9200"
+fi
+
 KIBANA_URL="http://localhost:5601/kibana"
 INDEX_PATTERN=${MOLOCH_INDEX_PATTERN:-"sessions2-*"}
 INDEX_PATTERN_ID=${MOLOCH_INDEX_PATTERN_ID:-"sessions2-*"}
@@ -22,6 +30,11 @@ if [[ "$CREATE_ES_MOLOCH_SESSION_INDEX" = "true" ]] ; then
 
     # have we not not already created the index pattern?
     if ! curl -f -XGET "$KIBANA_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
+
+      echo "Importing Kibana saved objects..."
+
+      # load zeek_template containing zeek field type mappings
+      curl -XPOST -H "Content-Type: application/json" "$ES_URL/_template/zeek_template?include_type_name=true" -d "@/data/zeek_template.json"
 
       # From https://github.com/elastic/kibana/issues/3709
       # Create index pattern

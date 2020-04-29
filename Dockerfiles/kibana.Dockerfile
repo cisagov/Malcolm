@@ -32,31 +32,19 @@ ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
 
 USER root
 
+ADD kibana/plugin-patches /tmp/plugin-patches
+ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-server-routes.js
+ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
+ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip /tmp/kibana-swimlane.zip
+ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
+ADD https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev /tmp/kibana-network.zip
+
 RUN yum install -y epel-release && \
     yum update -y && \
     yum install -y curl cronie inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
     yum clean all && \
     easy_install supervisor && \
-    npm install -g http-server
-
-ADD kibana/scripts /data/
-ADD shared/bin/elastic_search_status.sh /data/
-ADD shared/bin/cron_env_centos.sh /data/
-ADD kibana/kibana-standard.yml /opt/kibana/config/kibana-standard.yml
-ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
-ADD kibana/supervisord.conf /etc/supervisord.conf
-ADD kibana/dashboards /opt/kibana/dashboards
-ADD kibana/maps /opt/maps
-ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
-ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip /tmp/kibana-swimlane.zip
-ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
-ADD https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev /tmp/kibana-network.zip
-ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-server-routes.js
-ADD kibana/plugin-patches /tmp/plugin-patches
-
-RUN chmod 755 /data/*.sh /data/*.py && \
-    chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
-    chmod 400 /opt/maps/* && \
+    npm install -g http-server && \
     mkdir -p /var/log/supervisor && \
     (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 * * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -) && \
     cd /tmp && \
@@ -103,8 +91,21 @@ RUN chmod 755 /data/*.sh /data/*.py && \
       rm -rf /tmp/kibana-swimlane.zip /tmp/kibana && \
     rm -rf /tmp/plugin-patches /tmp/elastalert-server-routes.js
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+ADD kibana/dashboards /opt/kibana/dashboards
+ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
+ADD kibana/kibana-standard.yml /opt/kibana/config/kibana-standard.yml
+ADD kibana/maps /opt/maps
+ADD kibana/scripts /data/
+ADD kibana/supervisord.conf /etc/supervisord.conf
+ADD kibana/zeek_template.json /data/zeek_template.json
+ADD shared/bin/cron_env_centos.sh /data/
+ADD shared/bin/elastic_search_status.sh /data/
 
+RUN chmod 755 /data/*.sh /data/*.py && \
+    chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
+    chmod 400 /opt/maps/*
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

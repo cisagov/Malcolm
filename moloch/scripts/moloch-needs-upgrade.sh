@@ -15,6 +15,7 @@ set -e
   [fields_v]=fields_v3
   [files_v]=files_v6
   [hunts_v]=hunts_v2
+  [lookups_v]=lookups_v1
   [queries_v]=queries_v3
   [sequence_v]=sequence_v3
   [stats_v]=stats_v4

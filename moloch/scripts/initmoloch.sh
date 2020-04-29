@@ -29,8 +29,9 @@ if [[ "$WISE" = "on" ]] ; then
   echo
 fi
 
-# initialize the contents of the Elasticearch database if it has never been initialized (ie., if zeek_template has not been loaded)
-if ! curl -fs --output /dev/null -H'Content-Type: application/json' -XGET http://$ES_HOST:$ES_PORT/_template/zeek_template?include_type_name=true ; then
+# initialize the contents of the Elasticearch database if it has never been initialized (ie., the users_v# table hasn't been created)
+if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_PORT/_cat/indices/users_v*" | wc -l) < 1 ]]; then
+
   echo "Initializing Elasticsearch database..."
 
 	$MOLOCHDIR/db/db.pl http://$ES_HOST:$ES_PORT initnoprompt
@@ -45,9 +46,6 @@ if ! curl -fs --output /dev/null -H'Content-Type: application/json' -XGET http:/
 
   #set some default settings I want for moloch
   curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$MOLOCHDIR/etc/user_settings.json"
-
-  # load zeek_template containing a few special-typed fields (the rest are done by Moloch WISE for now)
-  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/_template/zeek_template?include_type_name=true -d "@$MOLOCHDIR/etc/zeek_template.json"
 
   echo -e "\nElasticsearch database initialized!\n"
 
