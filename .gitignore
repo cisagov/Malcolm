@@ -10,6 +10,7 @@
 /logstash/certs
 /filebeat/certs
 /nginx/certs
+/nginx/ca-trust
 /nginx/htpasswd
 /nginx/nginx_ldap.conf
 /htadmin/config.ini

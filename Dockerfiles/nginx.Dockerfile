@@ -61,10 +61,22 @@ ARG NGINX_LDAP_TLS_STUNNEL=false
 # when initiating the "extendedReq(1) LDAP_START_TLS_OID" command, which protocol to use: winldap or openldap
 ARG NGINX_LDAP_TLS_STUNNEL_PROTOCOL=winldap
 
+# stunnel will require and verify certificates for StartTLS when one or more
+# trusted CA certificate files are placed in the ./nginx/ca-trust directory.
+# For additional security, hostname or IP address checking of the associated
+# CA certificate(s) can be enabled by providing these values.
+# see https://www.stunnel.org/howto.html
+#     https://www.openssl.org/docs/man1.1.1/man3/X509_check_host.html
+ARG NGINX_LDAP_TLS_STUNNEL_CHECK_HOST=
+ARG NGINX_LDAP_TLS_STUNNEL_CHECK_IP=
+ARG NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=2
+
 ENV NGINX_BASIC_AUTH $NGINX_BASIC_AUTH
 ENV NGINX_LDAP_TLS_STUNNEL $NGINX_LDAP_TLS_STUNNEL
 ENV NGINX_LDAP_TLS_STUNNEL_PROTOCOL $NGINX_LDAP_TLS_STUNNEL_PROTOCOL
-
+ENV NGINX_LDAP_TLS_STUNNEL_CHECK_HOST $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
+ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP $NGINX_LDAP_TLS_STUNNEL_CHECK_IP
+ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
 # build latest nginx with nginx-auth-ldap
 ENV NGINX_VERSION=1.17.9
