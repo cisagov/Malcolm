@@ -62,6 +62,7 @@ if mkdir "$DESTDIR"; then
   trap "cleanup" EXIT
 
   mkdir $VERBOSE -p "$DESTDIR/nginx/certs/"
+  mkdir $VERBOSE -p "$DESTDIR/nginx/ca-trust/"
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"

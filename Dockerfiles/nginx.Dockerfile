@@ -61,18 +61,28 @@ ARG NGINX_LDAP_TLS_STUNNEL=false
 # when initiating the "extendedReq(1) LDAP_START_TLS_OID" command, which protocol to use: winldap or openldap
 ARG NGINX_LDAP_TLS_STUNNEL_PROTOCOL=winldap
 
+# stunnel will require and verify certificates for StartTLS when one or more
+# trusted CA certificate files are placed in the ./nginx/ca-trust directory.
+# For additional security, hostname or IP address checking of the associated
+# CA certificate(s) can be enabled by providing these values.
+# see https://www.stunnel.org/howto.html
+#     https://www.openssl.org/docs/man1.1.1/man3/X509_check_host.html
+ARG NGINX_LDAP_TLS_STUNNEL_CHECK_HOST=
+ARG NGINX_LDAP_TLS_STUNNEL_CHECK_IP=
+ARG NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=2
+
 ENV NGINX_BASIC_AUTH $NGINX_BASIC_AUTH
 ENV NGINX_LDAP_TLS_STUNNEL $NGINX_LDAP_TLS_STUNNEL
 ENV NGINX_LDAP_TLS_STUNNEL_PROTOCOL $NGINX_LDAP_TLS_STUNNEL_PROTOCOL
-
+ENV NGINX_LDAP_TLS_STUNNEL_CHECK_HOST $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
+ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP $NGINX_LDAP_TLS_STUNNEL_CHECK_IP
+ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
 # build latest nginx with nginx-auth-ldap
 ENV NGINX_VERSION=1.17.9
 ENV NGINX_AUTH_LDAP_BRANCH=master
-ENV NGINX_AUTH_PAM_BRANCH=master
 
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
-ADD https://codeload.github.com/sto/ngx_http_auth_pam_module/tar.gz/$NGINX_AUTH_PAM_BRANCH /ngx_http_auth_pam_module.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
 
 COPY --from=stunnel_build /apkbuild/packages/community/x86_64/stunnel-*.apk /tmp/
@@ -124,7 +134,6 @@ RUN set -x ; \
     --with-file-aio \
     --with-http_v2_module \
     --add-module=/usr/src/nginx-auth-ldap \
-    --add-module=/usr/src/ngx_http_auth_pam_module \
   " ; \
   addgroup -g 101 -S nginx ; \
   adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx ; \
@@ -143,17 +152,15 @@ RUN set -x ; \
     linux-headers \
     make \
     openldap-dev \
-    linux-pam-dev \
     pcre-dev \
     perl-dev \
     tar \
     zlib-dev \
     ; \
     \
-  mkdir -p /usr/src/nginx-auth-ldap /usr/src/ngx_http_auth_pam_module /www /www/logs/nginx ; \
+  mkdir -p /usr/src/nginx-auth-ldap /www /www/logs/nginx ; \
   tar -zxC /usr/src -f /nginx.tar.gz ; \
   tar -zxC /usr/src/nginx-auth-ldap --strip=1 -f /nginx-auth-ldap.tar.gz ; \
-  tar -zxC /usr/src/ngx_http_auth_pam_module --strip=1 -f /ngx_http_auth_pam_module.tar.gz ; \
   cd /usr/src/nginx-$NGINX_VERSION ; \
   ./configure $CONFIG --with-debug ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
@@ -196,14 +203,14 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap linux-pam nss-pam-ldapd supervisor tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap supervisor tzdata; \
   update-ca-certificates; \
   apk add --no-cache --allow-untrusted /tmp/stunnel-*.apk; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
   mkdir -p /var/log/supervisor ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_auth_pam_module.tar.gz; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
