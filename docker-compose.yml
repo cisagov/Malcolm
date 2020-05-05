@@ -15,6 +15,13 @@ x-auth-variables: &auth-variables
   # When NGINX_LDAP_TLS_STUNNEL=true, which protocol to use when initiating the
   # "extendedReq(1) LDAP_START_TLS_OID" command: winldap or openldap
   NGINX_LDAP_TLS_STUNNEL_PROTOCOL : 'winldap'
+  # stunnel will require and verify certificates for StartTLS when one or more
+  # trusted CA certificate files are placed in the ./nginx/ca-trust directory.
+  # For additional security, hostname or IP address checking of the associated
+  # CA certificate(s) can be enabled by providing these values.
+  NGINX_LDAP_TLS_STUNNEL_CHECK_HOST : ''
+  NGINX_LDAP_TLS_STUNNEL_CHECK_IP : ''
+  NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL : 2
 
 x-nginx-variables: &nginx-variables
   # Whether or not to write nginx's access.log and error.log to Elasticsearch
@@ -528,6 +535,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx/ca-trust:/etc/nginx/ca-trust:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
     healthcheck:
