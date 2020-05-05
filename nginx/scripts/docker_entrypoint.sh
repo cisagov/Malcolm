@@ -65,13 +65,18 @@ if (( ${#CA_FILES} )) ; then
   rm -f "$CA_TRUST_RUN_DIR"/*
   pushd "$CA_TRUST_RUN_DIR" >/dev/null 2>&1
   if cp "$CA_TRUST_HOST_DIR"/* ./ ; then
+    # create hash symlinks
     c_rehash -compat .
+
+    # variables for stunnel config
     STUNNEL_CA_PATH_LINE="CApath = $CA_TRUST_RUN_DIR"
     [[ -n $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL ]] && STUNNEL_VERIFY_LINE="verify = $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL" || STUNNEL_VERIFY_LINE="verify = 2"
     [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] && STUNNEL_CHECK_HOST_LINE="checkHost = $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST"
     [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] && STUNNEL_CHECK_IP_LINE="checkIP = $NGINX_LDAP_TLS_STUNNEL_CHECK_IP"
+
+    # variables for nginx config
     NGINX_LDAP_CA_PATH_LINE="  ssl_ca_dir $CA_TRUST_RUN_DIR;"
-    NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;"
+    ( [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] || [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] ) && NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;" || NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert chain;"
   fi
   popd >/dev/null 2>&1
 fi
