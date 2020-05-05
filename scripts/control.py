@@ -145,7 +145,7 @@ def start():
   # make sure the auth files exist. if we are in an interactive shell and we're
   # missing any of the auth files, prompt to create them now
   if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist()):
-    check_call(['bash', os.path.join(ScriptPath, 'auth_setup')])
+    authSetup()
 
   # still missing? sorry charlie
   if (not MalcolmAuthFilesExist()):
@@ -173,6 +173,7 @@ def start():
   # make sure some directories exist before we start
   for path in [os.path.join(MalcolmPath, 'elasticsearch'),
                os.path.join(MalcolmPath, 'elasticsearch-backup'),
+               os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
                os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
                os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
                os.path.join(MalcolmPath, os.path.join('zeek-logs', 'current')),
