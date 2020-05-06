@@ -321,7 +321,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.5](https://github.com/zeek/zeek/releases/tag/v3.0.5). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.6](https://github.com/zeek/zeek/releases/tag/v3.0.6). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
@@ -330,7 +330,7 @@ The following bash script was used to download, [build and install](https://docs
 ```bash
 #!/bin/bash
 
-ZEEK_VER="3.0.5"
+ZEEK_VER="3.0.6"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
