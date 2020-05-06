@@ -64,7 +64,7 @@ The following bash script was used to download, build and install [netsniff-ng](
 ```bash
 #!/bin/bash
 
-NETSNIFF_VER="0.6.6"
+NETSNIFF_VER="0.6.7"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
 # Install netsniff-ng
