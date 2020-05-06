@@ -731,8 +731,8 @@ The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is 
 
 * **`url`** - the `ldap://` or `ldaps://` connection URL for the remote LDAP server, which has the [following syntax](https://www.ietf.org/rfc/rfc2255.txt): `ldap[s]://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>`
 * **`binddn`** and **`binddn_password`** - the account credentials used to query the LDAP directory
-* **`group_attribute`** - the group attribute name which contains the member object
-* **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
+* **`group_attribute`** - the group attribute name which contains the member object (e.g., `member` or `memberUid`)
+* **`group_attribute_is_dn`** - whether or not to search for the user's full distinguished name as the value in the group's member attribute
 * **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
 
 Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
