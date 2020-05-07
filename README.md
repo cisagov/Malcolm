@@ -430,7 +430,7 @@ Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#ha
 
 If you already have Docker and Docker Compose installed, the `install.py` script can still help you tune system configuration and `docker-compose.yml` parameters for Malcolm. To run it in "configuration only" mode, bypassing the steps to install Docker and Docker Compose, run it like this:
 ```
-sudo ./scripts/install.py --configure
+python3 ./scripts/install.py --configure
 ```
 
 Although `install.py` will attempt to automate many of the following configuration and tuning parameters, they are nonetheless listed in the following sections for reference:
@@ -1420,7 +1420,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `python3 scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
@@ -1854,46 +1854,46 @@ You may wish to get the official updates for the underlying system's software pa
 If you checked out a working copy of the Malcolm repository from GitHub with a `git clone` command, here are the basic steps to performing an upgrade:
 
 1. stop Malcolm
-  * `./scripts/stop`
+    * `./scripts/stop`
 2. stash changes to `docker-compose.yml` and other files
-  * `git stash save "pre-upgrade Malcolm configuration changes"`
+    * `git stash save "pre-upgrade Malcolm configuration changes"`
 3. pull changes from GitHub repository
-  * `git pull --rebase`
+    * `git pull --rebase`
 4. pull new Docker images (this will take a while)
-  * `docker-compose pull`
+    * `docker-compose pull`
 5. apply saved configuration change stashed earlier
-  * `git stash pop`
+    * `git stash pop`
 6. if you see `Merge conflict` messages, resolve the [conflicts](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts) with your favorite text editor
 7. you may wish to re-run `install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning) in case there are any new `docker-compose.yml` parameters for Malcolm that need to be set up
 8. start Malcolm
-  * `./scripts/start`
+    * `./scripts/start`
 9. you may be prompted to [configure authentication](#AuthSetup) if there are new authentication-related files that need to be generated
-  * you probably do not need to re-generate self-signed certificates
+    * you probably do not need to re-generate self-signed certificates
 
 ### Scenario 2: Malcolm was installed from a packaged tarball
 
 If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/malcolm#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
-  * `./scripts/stop`
+    * `./scripts/stop`
 2. uncompress the new pre-packaged installation files (using `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` as an example, the file and/or directory names will be different depending on the release)
-  * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
+    * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
 3. backup current Malcolm scripts, configuration files and certificates
-  * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
-  * `cp -r elastalert/ filebeat/ htadmin/ logstash/ nginx/ auth.env cidr-map.txt docker-compose.yml host-map.txt net-map.json ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
+    * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
+    * `cp -r elastalert/ filebeat/ htadmin/ logstash/ nginx/ auth.env cidr-map.txt docker-compose.yml host-map.txt net-map.json ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
 3. replace scripts and local documentation in your existing installation with the new ones
-  * `rm -rf ./scripts ./README.md`
-  * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
+    * `rm -rf ./scripts ./README.md`
+    * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
 4. replace (overwrite) `docker-compose.yml` file with new version
-  * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
-5. re-run `sudo python3 ./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
+    * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
+5. re-run `python3 ./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
 6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](#DockerComposeYml) you may have edited by hand in `docker-compose.yml` that's not prompted for in `install.py --configure`)
 7. pull the new docker images (this will take a while)
-  * `docker-compose pull` to pull them from Docker Hub or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
+    * `docker-compose pull` to pull them from Docker Hub or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
 8. start Malcolm
-  * `./scripts/start`
+    * `./scripts/start`
 9. you may be prompted to [configure authentication](#AuthSetup) if there are new authentication-related files that need to be generated
-  * you probably do not need to re-generate self-signed certificates
+    * you probably do not need to re-generate self-signed certificates
 
 ### Post-upgrade
 
