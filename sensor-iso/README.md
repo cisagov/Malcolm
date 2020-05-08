@@ -588,7 +588,9 @@ Acquire::https {
   Verify-Host "false";
 }
 ```
+        
         + modify `/etc/apt/source.list` to point to your apt-mirror:
+
 ```
 deb https://XXXXXX:443/debian buster main contrib non-free
 deb https://XXXXXX:443/debian-security buster/updates main contrib non-free
@@ -809,7 +811,9 @@ ln -s -f /opt/moloch/bin/npm /usr/local/bin
 ln -s -f /opt/moloch/bin/node /usr/local/bin
 ln -s -f /opt/moloch/bin/npx /usr/local/bin
 ```
+
     * example:
+
 ```
 root@hedgehog:/tmp# chown root:netdev /usr/sbin/netsniff-ng && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
@@ -881,12 +885,15 @@ sensor@hedgehog:opt$ diff sensor_upgrade_backup_2020-05-08/sensor_ctl/control_va
 4c4
 [...]
 ```
+
     * Examine the differences
         * If there aren't any new `export` variables, then you're probably safe to just replace the default version of `control_vars.conf` with the backed-up version:
+
 ```
 sensor@hedgehog:opt$ cp sensor_upgrade_backup_2020-05-08/sensor_ctl/control_vars.conf sensor/sensor_ctl/control_vars.conf 
 cp: overwrite 'sensor/sensor_ctl/control_vars.conf'? y
 ```
+
         * If there are major differences or new variables, continue on to the next step
 
 24. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
