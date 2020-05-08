@@ -620,6 +620,8 @@ $ apt-get install $(cat *.list.chroot)
 
 10. Navigate to the `/live/` directory, and mount the `filesystem.squashfs` file
     - `sudo mount filesystem.squashfs /media/squash -t squashfs -o loop`
+    - **OR**
+    - `squashfuse filesystem.squashfs /home/user/media/squash`
 
 11. Very recent builds of Hedgehog Linux keep some build artifacts in `/opt/hedgehog_install_artifacts/`. You're going to want to grab those files and throw them in a temporary directory on the system you're upgrading, via SSH or whatever means you devise.
 ```
