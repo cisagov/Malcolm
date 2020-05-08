@@ -784,7 +784,7 @@ root@hedgehog:/tmp# chmod 400 /etc/sudoers.d/*
 ```
 
 19. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
-    * commands:
+commands:
 ```
 chown root:netdev /usr/sbin/netsniff-ng && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
@@ -812,7 +812,7 @@ ln -s -f /opt/moloch/bin/node /usr/local/bin
 ln -s -f /opt/moloch/bin/npx /usr/local/bin
 ```
 
-    * example:
+example:
 
 ```
 root@hedgehog:/tmp# chown root:netdev /usr/sbin/netsniff-ng && \
@@ -886,15 +886,14 @@ sensor@hedgehog:opt$ diff sensor_upgrade_backup_2020-05-08/sensor_ctl/control_va
 [...]
 ```
 
-    * Examine the differences
-        * If there aren't any new `export` variables, then you're probably safe to just replace the default version of `control_vars.conf` with the backed-up version:
+Examine the differences. If there aren't any new `export` variables, then you're probably safe to just replace the default version of `control_vars.conf` with the backed-up version:
 
 ```
 sensor@hedgehog:opt$ cp sensor_upgrade_backup_2020-05-08/sensor_ctl/control_vars.conf sensor/sensor_ctl/control_vars.conf 
 cp: overwrite 'sensor/sensor_ctl/control_vars.conf'? y
 ```
 
-        * If there are major differences or new variables, continue on to the next step
+If there are major differences or new variables, continue on to the next step, in a minute you'll need to run `capture-config` to configure from scratch anyway.
 
 24. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
 ```
