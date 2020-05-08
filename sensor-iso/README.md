@@ -784,7 +784,9 @@ root@hedgehog:/tmp# chmod 400 /etc/sudoers.d/*
 ```
 
 19. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
+
 commands:
+
 ```
 chown root:netdev /usr/sbin/netsniff-ng && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
@@ -902,7 +904,7 @@ sensor@hedgehog:opt$ for BEAT in auditbeat filebeat filebeat-syslog heatbeat met
 sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/filebeat/
 ```
 
-25. Despite what we just did, you may cosnider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
+25. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
 
 26. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
 
