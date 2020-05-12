@@ -60,11 +60,17 @@ STUNNEL_CHECK_IP_LINE=""
 NGINX_LDAP_CA_PATH_LINE=""
 NGINX_LDAP_CHECK_REMOTE_CERT_LINE=""
 mkdir -p "$CA_TRUST_RUN_DIR"
+# attempt to make sure trusted CA certs dir is readable by unprivileged nginx worker
+chmod 755 "$CA_TRUST_RUN_DIR" || true
 CA_FILES=$(shopt -s nullglob dotglob; echo "$CA_TRUST_HOST_DIR"/*)
 if (( ${#CA_FILES} )) ; then
   rm -f "$CA_TRUST_RUN_DIR"/*
   pushd "$CA_TRUST_RUN_DIR" >/dev/null 2>&1
   if cp "$CA_TRUST_HOST_DIR"/* ./ ; then
+
+    # attempt to make sure trusted CA certs are readable by unprivileged nginx worker
+    chmod 644 * || true
+
     # create hash symlinks
     c_rehash -compat .
 
