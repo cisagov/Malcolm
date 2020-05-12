@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.2.3"
+ENV MOLOCH_VERSION "2.3.0"
 ENV MOLOCHDIR "/data/moloch"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -13,10 +13,7 @@ ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
 
-# TODO: temporarily using my github fork branch until issue https://github.com/aol/moloch/issues/1162 and
-# https://github.com/idaholab/Malcolm/issues/2 are merged in
-# ADD https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz /data/moloch.tar.gz
-ADD https://codeload.github.com/mmguero-dev/moloch/tar.gz/topic/netdiff_2.2.3 /data/moloch.tar.gz
+ADD https://codeload.github.com/aol/moloch/tar.gz/v2.3.0 /data/moloch.tar.gz
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
