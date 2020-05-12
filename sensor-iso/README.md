@@ -588,7 +588,9 @@ Acquire::https {
   Verify-Host "false";
 }
 ```
+        
         + modify `/etc/apt/source.list` to point to your apt-mirror:
+
 ```
 deb https://XXXXXX:443/debian buster main contrib non-free
 deb https://XXXXXX:443/debian-security buster/updates main contrib non-free
@@ -782,7 +784,9 @@ root@hedgehog:/tmp# chmod 400 /etc/sudoers.d/*
 ```
 
 19. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
-    * commands:
+
+commands:
+
 ```
 chown root:netdev /usr/sbin/netsniff-ng && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
@@ -809,7 +813,9 @@ ln -s -f /opt/moloch/bin/npm /usr/local/bin
 ln -s -f /opt/moloch/bin/node /usr/local/bin
 ln -s -f /opt/moloch/bin/npx /usr/local/bin
 ```
-    * example:
+
+example:
+
 ```
 root@hedgehog:/tmp# chown root:netdev /usr/sbin/netsniff-ng && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
@@ -881,13 +887,15 @@ sensor@hedgehog:opt$ diff sensor_upgrade_backup_2020-05-08/sensor_ctl/control_va
 4c4
 [...]
 ```
-    * Examine the differences
-        * If there aren't any new `export` variables, then you're probably safe to just replace the default version of `control_vars.conf` with the backed-up version:
+
+Examine the differences. If there aren't any new `export` variables, then you're probably safe to just replace the default version of `control_vars.conf` with the backed-up version:
+
 ```
 sensor@hedgehog:opt$ cp sensor_upgrade_backup_2020-05-08/sensor_ctl/control_vars.conf sensor/sensor_ctl/control_vars.conf 
 cp: overwrite 'sensor/sensor_ctl/control_vars.conf'? y
 ```
-        * If there are major differences or new variables, continue on to the next step
+
+If there are major differences or new variables, continue on to the next step, in a minute you'll need to run `capture-config` to configure from scratch anyway.
 
 24. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
 ```
@@ -896,7 +904,7 @@ sensor@hedgehog:opt$ for BEAT in auditbeat filebeat filebeat-syslog heatbeat met
 sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/filebeat/
 ```
 
-25. Despite what we just did, you may cosnider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
+25. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
 
 26. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
 
