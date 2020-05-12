@@ -1059,11 +1059,11 @@ class MacInstaller(Installer):
         else:
           eprint('"brew install cask" failed with {}, {}'.format(err, out))
 
-      err, out = self.run_process(['brew', 'tap', 'caskroom/versions'])
+      err, out = self.run_process(['brew', 'tap', 'homebrew/cask-versions'])
       if (err == 0):
-        if self.debug: eprint('"brew tap caskroom/versions" succeeded')
+        if self.debug: eprint('"brew tap homebrew/cask-versions" succeeded')
       else:
-        eprint('"brew tap caskroom/versions" failed with {}, {}'.format(err, out))
+        eprint('"brew tap homebrew/cask-versions" failed with {}, {}'.format(err, out))
 
       self.checkPackageCmds.append(['brew', 'cask', 'ls', '--versions'])
       self.installPackageCmds.append(['brew', 'cask', 'install'])
