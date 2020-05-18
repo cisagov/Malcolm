@@ -30,7 +30,7 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     tar xvf ./logstash-filter-ieee_oui.tar.gz -C ./logstash-filter-ieee_oui --strip-components 1 && \
     /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
-FROM docker.elastic.co/logstash/logstash-oss:7.6.2
+FROM docker.elastic.co/logstash/logstash-oss:7.7.0
 
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
 ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse

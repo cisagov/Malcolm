@@ -146,7 +146,7 @@ malcolmnetsec/elastalert                            2.1.0               xxxxxxxx
 malcolmnetsec/htadmin                               2.1.0               xxxxxxxxxxxx        31 minutes ago      256MB
 malcolmnetsec/freq                                  2.1.0               xxxxxxxxxxxx        32 minutes ago      188MB
 malcolmnetsec/name-map-ui                           2.1.0               xxxxxxxxxxxx        35 minutes ago      20MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         825MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.7.0               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
 You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -1792,7 +1792,7 @@ malcolmnetsec/filebeat-oss                          2.1.0               xxxxxxxx
 malcolmnetsec/elastalert                            2.1.0               xxxxxxxxxxxx        11 days ago         276MB
 malcolmnetsec/freq                                  2.1.0               xxxxxxxxxxxx        11 days ago         188MB
 malcolmnetsec/name-map-ui                           2.1.0               xxxxxxxxxxxx        35 minutes ago      20MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         769MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.7.0               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

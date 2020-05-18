@@ -1,4 +1,4 @@
-FROM docker.elastic.co/kibana/kibana-oss:7.6.2
+FROM docker.elastic.co/kibana/kibana-oss:7.7.0
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -37,7 +37,7 @@ ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-
 ADD https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip /tmp/kibana-comments.zip
 ADD https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip /tmp/kibana-swimlane.zip
 ADD https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip /tmp/elastalert-kibana-plugin.zip
-ADD https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev /tmp/kibana-network.zip
+# ADD https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev /tmp/kibana-network.zip
 
 RUN yum install -y epel-release && \
     yum update -y && \
@@ -50,7 +50,7 @@ RUN yum install -y epel-release && \
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
       unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json kibana/elastalert-kibana-plugin/public/components/main/main.js && \
-      sed -i "s/7\.5\.0/7\.6\.2/g" kibana/elastalert-kibana-plugin/package.json && \
+      sed -i "s/7\.5\.0/7\.7\.0/g" kibana/elastalert-kibana-plugin/package.json && \
       sed -i "s/^import.*eui_theme_light.css.*$//" kibana/elastalert-kibana-plugin/public/components/main/main.js && \
       mkdir -p kibana/elastalert-kibana-plugin/server/routes/ && \
       cp /tmp/elastalert-server-routes.js kibana/elastalert-kibana-plugin/server/routes/elastalert.js && \
@@ -62,20 +62,20 @@ RUN yum install -y epel-release && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip --allow-root && \
       rm -rf /tmp/elastalert-kibana-plugin.zip /tmp/elastalert.js /tmp/kibana && \
     cd /tmp && \
-    echo "Installing Network visualization..." && \
-      cd /usr/share/kibana/plugins && \
-      unzip /tmp/kibana-network.zip && \
-      mv ./kbn_network-* ./network_vis && \
-      cd ./network_vis && \
-      sed -i "s/7\.5\.2/7\.6\.2/g" ./package.json && \
-      rm -rf ./images && \
-      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
-      npm install && \
-      rm -rf /tmp/kibana-network.zip && \
-    cd /tmp && \
+#    echo "Installing Network visualization..." && \
+#      cd /usr/share/kibana/plugins && \
+#      unzip /tmp/kibana-network.zip && \
+#      mv ./kbn_network-* ./network_vis && \
+#      cd ./network_vis && \
+#      sed -i "s/7\.5\.2/7\.7\.0/g" ./package.json && \
+#      rm -rf ./images && \
+#      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
+#      npm install && \
+#      rm -rf /tmp/kibana-network.zip && \
+#    cd /tmp && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
-      sed -i "s/7\.4\.0/7\.6\.2/g" kibana/kibana-comments-app-plugin/package.json && \
+      sed -i "s/7\.4\.0/7\.7\.0/g" kibana/kibana-comments-app-plugin/package.json && \
       zip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-comments.zip --allow-root && \
@@ -83,7 +83,7 @@ RUN yum install -y epel-release && \
     cd /tmp && \
     echo "Installing Swimlanes visualization..." && \
       unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
-      sed -i "s/7\.6\.2/7\.6\.2/g" kibana/prelert_swimlane_vis/package.json && \
+      sed -i "s/7\.6\.2/7\.7\.0/g" kibana/prelert_swimlane_vis/package.json && \
       zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
