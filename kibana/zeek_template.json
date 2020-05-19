@@ -50,6 +50,9 @@
         "file.path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "file.size": { "type": "long" },
         "file.type": { "type": "keyword" },
+        "host.name": { "type": "keyword" },
+        "log.file.path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "network.type": { "type": "keyword" },
         "server.address": { "type": "keyword" },
         "server.bytes": { "type": "long" },
         "server.domain": { "type": "keyword" },
@@ -58,6 +61,7 @@
         "server.packets": { "type": "integer" },
         "server.port": { "type": "integer" },
 
+        "zeekLogDocId": { "type": "keyword" },
         "zeek.action": { "type": "keyword" },
         "zeek.community_id": { "type": "keyword" },
         "zeek.destination_geo.city_name": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text" } } },
