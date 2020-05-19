@@ -128,21 +128,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                2.0.4               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          2.0.4               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  2.0.4               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           2.0.4               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          2.0.4               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          2.0.4               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          2.0.4               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            2.0.4               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          2.0.4               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               2.0.4               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           2.0.4               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            2.0.4               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               2.0.4               xxxxxxxxxxxx        31 minutes ago      256MB
-malcolmnetsec/freq                                  2.0.4               xxxxxxxxxxxx        32 minutes ago      188MB
-malcolmnetsec/name-map-ui                           2.0.4               xxxxxxxxxxxx        35 minutes ago      20MB
+malcolmnetsec/moloch                                2.0.5               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          2.0.5               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  2.0.5               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           2.0.5               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          2.0.5               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          2.0.5               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          2.0.5               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            2.0.5               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          2.0.5               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               2.0.5               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           2.0.5               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            2.0.5               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               2.0.5               xxxxxxxxxxxx        31 minutes ago      256MB
+malcolmnetsec/freq                                  2.0.5               xxxxxxxxxxxx        32 minutes ago      188MB
+malcolmnetsec/name-map-ui                           2.0.5               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
@@ -1375,7 +1375,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.0.4.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.0.5.iso"
 …
 ```
 
@@ -1771,21 +1771,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                2.0.4               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  2.0.4               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               2.0.4               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           2.0.4               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           2.0.4               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          2.0.4               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.0.4               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          2.0.4               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          2.0.4               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               2.0.4               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            2.0.4               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          2.0.4               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            2.0.4               xxxxxxxxxxxx        11 days ago         276MB
-malcolmnetsec/freq                                  2.0.4               xxxxxxxxxxxx        11 days ago         188MB
-malcolmnetsec/name-map-ui                           2.0.4               xxxxxxxxxxxx        35 minutes ago      20MB
+malcolmnetsec/moloch                                2.0.5               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  2.0.5               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               2.0.5               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           2.0.5               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           2.0.5               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          2.0.5               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.0.5               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          2.0.5               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          2.0.5               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               2.0.5               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            2.0.5               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          2.0.5               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            2.0.5               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/freq                                  2.0.5               xxxxxxxxxxxx        11 days ago         188MB
+malcolmnetsec/name-map-ui                           2.0.5               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 
