@@ -189,7 +189,7 @@ RUN groupadd --gid 1000 ${ZEEKUSER} && \
     ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Update Path
-ENV PATH "${ZEEK_DIR}/bin:${CMAKE_DIR}/bin:${PATH}"
+ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
