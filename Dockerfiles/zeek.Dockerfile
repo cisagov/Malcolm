@@ -83,10 +83,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     cd build && \
     ninja && \
     ninja install && \
-    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded" && \
     zkg autoconfig && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
-    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true"
+    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true" && \
+    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 FROM debian:buster-slim
 
@@ -118,14 +118,16 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
       file \
-      google-perftools \
       libatomic1 \
-      libclang1-${LLVM_VERSION} \
       libclang-cpp9 \
+      libclang1-${LLVM_VERSION} \
+      libgoogle-perftools4 \
       libkrb5-3 \
       libmaxminddb0 \
       libpcap0.8 \
       libssl1.0 \
+      libtcmalloc-minimal4 \
+      libunwind8 \
       libzmq5 \
       llvm-${LLVM_VERSION} \
       procps \
