@@ -54,3 +54,7 @@ redef SOCKS::default_capture_password = T;
 # custom packages managed by zkg via packages/packages.zeek
 @load ./packages/packages.zeek
 # and apparently some installed packages (BRO::LDAP) are loaded automatically
+
+redef SNIFFPASS::log_password_plaintext = T;
+redef SNIFFPASS::notice_log_enable = F;
+

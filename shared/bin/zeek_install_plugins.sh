@@ -2,11 +2,6 @@
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# using clang now instead of gcc because Spicy depends on it
-export CC=clang-9
-export CXX=clang++-9
-export ASM=clang-9
-
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
   exit 1
@@ -89,8 +84,10 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
   https://github.com/corelight/zeek-community-id
+  https://github.com/cybera/zeek-sniffpass
   https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/mitre-attack/bzar
+  https://github.com/precurse/zeek-httpattacks
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
 )

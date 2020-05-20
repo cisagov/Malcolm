@@ -18,6 +18,12 @@ ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_VERSION "3.0.6"
 
+# using clang now instead of gcc because Spicy depends on it
+ENV LLVM_VERSION "9"
+ENV CC "clang-${LLVM_VERSION}"
+ENV CXX "clang++-${LLVM_VERSION}"
+ENV ASM "clang-${LLVM_VERSION}"
+
 ENV PATH "${ZEEK_DIR}/bin:${CMAKE_DIR}/bin:${PATH}"
 
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
@@ -29,26 +35,26 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get -q update && \
       apt-get install -q -y --no-install-recommends gnupg2 curl ca-certificates && \
       bash -c "curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -" && \
-      echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main" >> /etc/apt/sources.list && \
-      echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main" >> /etc/apt/sources.list && \
+      echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
+      echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
         binutils \
         ccache \
-        clang-9 \
+        clang-${LLVM_VERSION} \
         file \
         flex \
         git \
         google-perftools \
         jq \
-        libclang-9-dev \
+        libclang-${LLVM_VERSION}-dev \
         libfl-dev \
         libgoogle-perftools-dev \
         libkrb5-dev \
         libmaxminddb-dev \
         libpcap0.8-dev \
         libssl-dev \
-        llvm-9-dev \
+        llvm-${LLVM_VERSION}-dev \
         locales-all \
         make \
         ninja-build \
@@ -66,14 +72,14 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   cd "${SRC_BASE_DIR}" && \
     curl -sSL "https://ftp.gnu.org/gnu/bison/bison-${BISON_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
     cd "./bison-${BISON_VERSION}" && \
-    CC=clang-9 CXX=clang++-9 ./configure --prefix=/usr && \
+    ./configure --prefix=/usr && \
     make && \
     make install && \
   cd "${SRC_BASE_DIR}" && \
     curl -sSL "https://old.zeek.org/downloads/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
     cd "./zeek-${ZEEK_VERSION}" && \
     bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
-    CC=clang-9 CXX=clang++-9 ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools && \
+    ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools && \
     cd build && \
     ninja && \
     ninja install && \
@@ -95,6 +101,7 @@ LABEL org.opencontainers.image.description='Malcolm container providing Zeek'
 
 ENV DEBIAN_FRONTEND noninteractive
 
+ENV LLVM_VERSION "9"
 ENV ZEEK_DIR "/opt/zeek"
 ENV SPICY_DIR "/opt/spicy"
 
@@ -106,21 +113,21 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get -q update && \
       apt-get install -q -y --no-install-recommends gnupg2 curl ca-certificates && \
       bash -c "curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -" && \
-      echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main" >> /etc/apt/sources.list && \
-      echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main" >> /etc/apt/sources.list && \
+      echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
+      echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
       file \
       google-perftools \
       libatomic1 \
-      libclang1-9 \
+      libclang1-${LLVM_VERSION} \
       libclang-cpp9 \
       libkrb5-3 \
       libmaxminddb0 \
       libpcap0.8 \
       libssl1.0 \
       libzmq5 \
-      llvm-9 \
+      llvm-${LLVM_VERSION} \
       procps \
       psmisc \
       python \
@@ -145,8 +152,8 @@ ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 16
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|spicy/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 18
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|spicy/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
