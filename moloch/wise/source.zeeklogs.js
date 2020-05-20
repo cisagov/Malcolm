@@ -438,7 +438,7 @@ function ZeekLogs (api, section) {
   // profinet_dce_rpc.log
   // https://github.com/amzn/zeek-plugin-profinet/blob/master/scripts/main.zeek
   this.profinet_dce_rpc_versionField = this.api.addField("field:zeek_profinet_dce_rpc.version;db:zeek_profinet_dce_rpc.version;kind:integer;friendly:Version;help:Version");
-  this.profinet_block_versionField = this.api.addField("field:zeek_profinet.block_version;db:zeek_profinet.block_version;kind:termfield;friendly:Block Version;help:Block Version");
+  this.profinet_dce_rpc_packet_typeField = this.api.addField("field:zeek_profinet_dce_rpc.packet_type;db:zeek_profinet_dce_rpc.packet_type;kind:termfield;friendly:Packet Type;help:Packet Type");
   this.profinet_dce_rpc_object_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.object_uuid;db:zeek_profinet_dce_rpc.object_uuid;kind:termfield;friendly:Object UUID;help:Object UUID");
   this.profinet_dce_rpc_interface_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.interface_uuid;db:zeek_profinet_dce_rpc.interface_uuid;kind:termfield;friendly:Interface UUID;help:Interface UUID");
   this.profinet_dce_rpc_activity_uuidField = this.api.addField("field:zeek_profinet_dce_rpc.activity_uuid;db:zeek_profinet_dce_rpc.activity_uuid;kind:termfield;friendly:Activity UUID;help:Activity UUID");
