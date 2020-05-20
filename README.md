@@ -18,6 +18,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 ## <a name="TableOfContents"></a>Table of Contents
 
 * [Quick start](#QuickStart)
+    * [Getting Malcolm](#GetMalcolm)
 * [Overview](#Overview)
 * [Components](#Components)
 * [Supported Protocols](#Protocols)
@@ -89,7 +90,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 ## <a name="QuickStart"></a>Quick start
 
-### Getting Malcolm
+### <a name="GetMalcolm"></a>Getting Malcolm
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 18.04 LTS](#InstallationExample).
 
@@ -202,8 +203,10 @@ Malcolm leverages the following excellent open source tools, among others.
 * [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * These third party Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+    * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
-    * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
+    * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+    * Cybera's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
@@ -424,7 +427,7 @@ Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#ha
 
 If you already have Docker and Docker Compose installed, the `install.py` script can still help you tune system configuration and `docker-compose.yml` parameters for Malcolm. To run it in "configuration only" mode, bypassing the steps to install Docker and Docker Compose, run it like this:
 ```
-sudo ./scripts/install.py --configure
+python3 ./scripts/install.py --configure
 ```
 
 Although `install.py` will attempt to automate many of the following configuration and tuning parameters, they are nonetheless listed in the following sections for reference:
@@ -728,8 +731,8 @@ The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is 
 
 * **`url`** - the `ldap://` or `ldaps://` connection URL for the remote LDAP server, which has the [following syntax](https://www.ietf.org/rfc/rfc2255.txt): `ldap[s]://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>`
 * **`binddn`** and **`binddn_password`** - the account credentials used to query the LDAP directory
-* **`group_attribute`** - the group attribute name which contains the member object
-* **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
+* **`group_attribute`** - the group attribute name which contains the member object (e.g., `member` or `memberUid`)
+* **`group_attribute_is_dn`** - whether or not to search for the user's full distinguished name as the value in the group's member attribute
 * **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
 
 Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
@@ -890,7 +893,7 @@ The Moloch interface displays both Zeek logs and Moloch sessions alongside each 
 
 A few fields of particular mention that help limit returned results to those Zeek logs and Moloch session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`communityId` and `zeek.community_id` in Moloch and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Moloch's `rootId` field.
 
-Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Moloch sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
+Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Moloch sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
 The `rootId` field is used by Moloch to link session records together when a particular session has too many packets to be represented by a single session. When normalizing Zeek logs to Moloch's schema, Malcolm piggybacks on `rootId` to store Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) to crossreference entries across Zeek log types. The connection UID is also stored in `zeek.uid`.
 
@@ -1414,7 +1417,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `python3 scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
