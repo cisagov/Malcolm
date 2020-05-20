@@ -115,6 +115,7 @@ services:
       # cluster.initial_master_nodes : 'elasticsearch'
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
+      indices.query.bool.max_clause_count : 2048
       path.repo : '/opt/elasticsearch/backup'
     expose:
       - 9200
