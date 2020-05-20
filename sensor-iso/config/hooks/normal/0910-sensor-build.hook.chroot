@@ -2,7 +2,7 @@
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
-NETSNIFF_VER="0.6.6"
+NETSNIFF_VER="0.6.7"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
 ZEEK_VER="3.0.6"
@@ -16,6 +16,8 @@ BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
+mkdir -p /opt/hedgehog_install_artifacts/
+
 # a moloch .deb is built and installed in a different context
 
 # Install netsniff-ng
@@ -27,6 +29,7 @@ cd netsniff-ng-$NETSNIFF_VER
 make netsniff-ng
 # make netsniff-ng_install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="netsniff-ng" --pkgversion="$NETSNIFF_VER" --pkgarch="amd64" --pkgsource="$NETSNIFF_URL" make netsniff-ng_install
+cp *.deb /opt/hedgehog_install_artifacts/
 
 cd ..
 rm -Rf netsniff-$NETSNIFF_VER.tar.gz netsniff-ng-$NETSNIFF_VER
@@ -50,6 +53,7 @@ cd build
 ninja
 # ninja install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
+cp *.deb /opt/hedgehog_install_artifacts/
 
 # install 3rd party Zeek plugins and scripts
 export PATH=/opt/zeek/bin:$PATH
@@ -151,6 +155,7 @@ for BEAT in filebeat metricbeat auditbeat packetbeat; do
     dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
     rm -rf "$BEATS_TMP_DIR" && \
     dpkg -i "$BEATS_NEW_DEB" && \
+    cp "$BEATS_NEW_DEB" /opt/hedgehog_install_artifacts/ && \
     rm -rf "$BEATS_TMP_DIR" "$BEATS_DEB" "$BEATS_NEW_DEB" && \
     popd
 done

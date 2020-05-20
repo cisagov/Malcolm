@@ -21,6 +21,7 @@ import sys
 import time
 import zmq
 
+from contextlib import nullcontext
 from datetime import datetime
 from zeek_carve_utils import *
 

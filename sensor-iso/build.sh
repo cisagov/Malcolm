@@ -84,8 +84,10 @@ if [ -d "$WORKDIR" ]; then
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
 
+  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
+
   # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
-  mkdir -p ./config/packages.chroot/
+  mkdir -p ./config/packages.chroot
   bash ./vbox-guest-build/build-docker-image.sh
   docker run --rm -v "$(pwd)"/vbox-guest-build:/build vboxguest-build:latest -o /build
   rm -f ./vbox-guest-build/*-source*.deb \
@@ -93,6 +95,7 @@ if [ -d "$WORKDIR" ]; then
         ./vbox-guest-build/virtualbox_*.deb \
         ./vbox-guest-build/virtualbox-dkms_*.deb \
         ./vbox-guest-build/virtualbox-qt_*.deb
+  cp ./vbox-guest-build/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv ./vbox-guest-build/*.deb ./config/packages.chroot/
 
   # copy the interface code into place for the resultant image
@@ -135,12 +138,14 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./config/packages.chroot/
   bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/moloch:/build moloch-build:latest -o /build
+  cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
 
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/
   bash "$SCRIPT_PATH/beats/build-docker-image.sh"
   bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero/protologbeat" -t "master"
+  cp github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # format and copy documentation

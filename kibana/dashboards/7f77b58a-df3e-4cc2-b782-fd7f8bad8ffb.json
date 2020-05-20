@@ -650,6 +650,7 @@
         "columns": [
           "zeek_notice.category",
           "zeek_notice.sub_category",
+          "zeek_notice.msg",
           "srcIp",
           "dstIp",
           "zeek.uid"

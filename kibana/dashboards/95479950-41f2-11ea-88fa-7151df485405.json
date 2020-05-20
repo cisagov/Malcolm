@@ -374,11 +374,12 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "zeek_notice.note",
+          "zeek_notice.category",
+          "zeek_notice.sub_category",
+          "zeek_notice.msg",
           "srcIp",
           "dstIp",
-          "zeek.uid",
-          "_id"
+          "zeek.uid"
         ],
         "sort": [
           [
