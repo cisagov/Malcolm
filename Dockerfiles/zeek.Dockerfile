@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # build zeek and plugins (spicy, additional protocol parsers, etc.)
 
-ENV BISON_VERSION "3.4.1"
+ENV BISON_VERSION "3.6.2"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV CMAKE_DIR "/opt/cmake"
