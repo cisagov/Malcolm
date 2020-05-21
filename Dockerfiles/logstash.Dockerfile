@@ -12,9 +12,11 @@ LABEL org.opencontainers.image.description='Malcolm container providing Logstash
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y java-1.8.0-openjdk-devel git curl wget tar which \
+    yum install -y java-1.8.0-openjdk-devel curl wget tar which \
                 patch libyaml-devel libffi-devel glibc-headers autoconf gcc-c++ glibc-devel \
                 readline-devel zlib-devel openssl-d evel bzip2 automake libtool bison make
+
+ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
 
 RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -" && \
     /bin/bash -lc "command curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -" && \
@@ -23,9 +25,10 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     /bin/bash -lc "rvm install jruby-9.2.5.0" && \
     /bin/bash -lc "rvm use jruby-9.2.5.0 --default" && \
     /bin/bash -lc "gem install bundler --no-ri --no-rdoc" && \
-    mkdir -p /opt && \
-    git clone --depth 1 https://github.com/mmguero/logstash-filter-ieee_oui.git /opt/logstash-filter-ieee_oui && \
-    /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
+    cd /opt && \
+      mkdir -p ./logstash-filter-ieee_oui && \
+      curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
+      /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
 FROM docker.elastic.co/logstash/logstash-oss:7.6.2
 

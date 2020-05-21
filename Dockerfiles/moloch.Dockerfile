@@ -6,14 +6,13 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV MOLOCH_VERSION "2.3.0"
 ENV MOLOCHDIR "/data/moloch"
+ENV MOLOCH_URL "https://codeload.github.com/aol/moloch/tar.gz/v${MOLOCH_VERSION}"
 
 ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
 ADD README.md $MOLOCHDIR/doc/
 ADD doc.css $MOLOCHDIR/doc/
 ADD docs/images $MOLOCHDIR/doc/images/
-
-ADD https://codeload.github.com/aol/moloch/tar.gz/v2.3.0 /data/moloch.tar.gz
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -64,7 +63,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     pandoc -s --self-contained --metadata title="Malcolm README" --css $MOLOCHDIR/doc/doc.css -o $MOLOCHDIR/doc/README.html $MOLOCHDIR/doc/README.md && \
   cd /data && \
     mkdir -p "./moloch-"$MOLOCH_VERSION && \
-    tar xvf ./moloch.tar.gz -C "./moloch-"$MOLOCH_VERSION --strip-components 1 && \
+    curl -sSL "$MOLOCH_URL" | tar xzvf - -C "./moloch-"$MOLOCH_VERSION --strip-components 1 && \
     cd "./moloch-"$MOLOCH_VERSION && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     cp -v $MOLOCHDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
