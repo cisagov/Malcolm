@@ -2,10 +2,12 @@
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
-NETSNIFF_VER="0.6.6"
+NETSNIFF_VER="0.6.7"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-ZEEK_VER="3.0.5"
+SPICY_DIR="/opt/spicy"
+ZEEK_DIR="/opt/zeek"
+ZEEK_VER="3.0.6"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
@@ -15,6 +17,39 @@ BEATS_VER="7.6.2"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
+
+CMAKE_DIR="/opt/cmake"
+CMAKE_VER="3.17.2"
+CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
+
+BISON_VER="3.6.2"
+BISON_URL="https://ftp.gnu.org/gnu/bison/bison-${BISON_VER}.tar.gz"
+
+mkdir -p /opt/hedgehog_install_artifacts/
+
+# some environment variables needed for build using clang
+export CC="clang-9"
+export CXX="clang++-9"
+export ASM="clang-9"
+export CCACHE_DIR="/var/spool/ccache"
+export CCACHE_COMPRESS=1
+export PATH="${ZEEK_DIR}"/bin:"${CMAKE_DIR}"/bin:$PATH
+
+# download and install cmake (required for Spicy build)
+mkdir -p "${CMAKE_DIR}"
+curl -sSL "${CMAKE_URL}" | \
+  tar xzf - -C "${CMAKE_DIR}" --strip-components 1
+
+# download and install newer Bison (required for Spicy build)
+cd /tmp
+curl -sSL "${BISON_URL}" | tar xzf - -C /tmp
+mv "./bison-${BISON_VER}" ./bison
+cd ./bison
+./configure --prefix=/usr
+make
+# make install
+checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="bison" --pkgversion="$BISON_VER" --pkgarch="amd64" --pkgsource="$BISON_URL"
+rm -rf /tmp/bison*
 
 # a moloch .deb is built and installed in a different context
 
@@ -27,6 +62,7 @@ cd netsniff-ng-$NETSNIFF_VER
 make netsniff-ng
 # make netsniff-ng_install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="netsniff-ng" --pkgversion="$NETSNIFF_VER" --pkgarch="amd64" --pkgsource="$NETSNIFF_URL" make netsniff-ng_install
+cp *.deb /opt/hedgehog_install_artifacts/
 
 cd ..
 rm -Rf netsniff-$NETSNIFF_VER.tar.gz netsniff-ng-$NETSNIFF_VER
@@ -45,26 +81,35 @@ cd zeek-$ZEEK_VER
 for i in /usr/local/src/zeek-patches/*; do
   patch -p 1 -r - --no-backup-if-mismatch < "$i" || true
 done
-./configure --prefix=/opt/zeek --generator=Ninja
+./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
 cd build
 ninja
-# ninja install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
+# TODO: we were using checkinstall and I would prefer to, but it has some issues with clang++-9 not finding
+# stdlib include files so for now i'm just back to ninja install. honestly that's probably fine
+# because we weren't getting the third party plugins in the .deb anyway...
+# checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
+ninja install
 
 # install 3rd party Zeek plugins and scripts
-export PATH=/opt/zeek/bin:$PATH
 zkg autoconfig
 bash /usr/local/bin/zeek_install_plugins.sh
 rm -Rf /root/.zkg /usr/local/src/*/.git
 
-cat << 'EOF' >> /opt/zeek/etc/zeekctl.cfg
+# strip for file size
+file "${ZEEK_DIR}"/{lib,bin}/* \
+     "${ZEEK_DIR}"/lib/zeek/plugins/packages/*/lib/* \
+     "${ZEEK_DIR}"/lib/zeek/plugins/*/lib/* \
+     "${SPICY_DIR}"/{lib,bin}/* \
+     "${SPICY_DIR}"/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded
+
+cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
 # all interfaces using lb_method=custom should use AF_PACKET
 lb_custom.InterfacePrefix=af_packet::
 
 EOF
 
 # set up default zeek local policy
-cat << 'EOF' > /opt/zeek/share/zeek/site/local.zeek
+cat << 'EOF' > "${ZEEK_DIR}"/share/zeek/site/local.zeek
 ##! Zeek local site policy. Customize as appropriate.
 ##!
 ##! See https://github.com/zeek/zeekctl
@@ -122,10 +167,15 @@ redef SOCKS::default_capture_password = T;
 @load ./packages/packages.zeek
 # and apparently some installed packages (BRO::LDAP) are loaded automatically
 
+redef SNIFFPASS::log_password_plaintext = T;
+redef SNIFFPASS::notice_log_enable = F;
+
 EOF
 
 # cleanup
 cd /tmp
+tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
+mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
@@ -148,6 +198,7 @@ for BEAT in filebeat metricbeat auditbeat packetbeat; do
     dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
     rm -rf "$BEATS_TMP_DIR" && \
     dpkg -i "$BEATS_NEW_DEB" && \
+    cp "$BEATS_NEW_DEB" /opt/hedgehog_install_artifacts/ && \
     rm -rf "$BEATS_TMP_DIR" "$BEATS_DEB" "$BEATS_NEW_DEB" && \
     popd
 done
@@ -175,12 +226,12 @@ fi
 # set up capabilities for network-related tools
 chown root:netdev /usr/sbin/netsniff-ng && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
-chown root:netdev /opt/zeek/bin/zeek && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/zeek/bin/zeek
+chown root:netdev "${ZEEK_DIR}"/bin/zeek && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/zeek
 chown root:netdev /sbin/ethtool && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
-chown root:netdev /opt/zeek/bin/capstats && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/capstats
+chown root:netdev "${ZEEK_DIR}"/bin/capstats && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats
 chown root:netdev /usr/sbin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump
 chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
@@ -190,7 +241,7 @@ chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
 chown root:netdev /opt/moloch/bin/moloch-capture && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/moloch/bin/moloch-capture
 
-ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
+ln -s -f "${ZEEK_DIR}"/bin/zeek /usr/local/bin/
 ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
 ln -s -f /usr/sbin/tcpdump /usr/local/bin/
 ln -s -f /opt/moloch/bin/moloch-capture /usr/local/bin/
@@ -203,7 +254,7 @@ ln -s -f /opt/moloch/bin/npx /usr/local/bin
 # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
 # regenerated when we are about to deploy zeek itself.
 # so, now make a complete backup of /opt/zeek as it's going to have its ownership changed during runtime
-rsync -a /opt/zeek/ /opt/zeek.orig
+rsync -a "${ZEEK_DIR}"/ "${ZEEK_DIR}".orig
 
 # enable sensor init scripts
 

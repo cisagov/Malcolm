@@ -25,6 +25,7 @@ else
 fi
 
 OUTPUT_DIR=./pages
+FINAL_DIR=./output
 
 # main page
 OUTPUT_FILE="$OUTPUT_DIR"/index.md
@@ -61,6 +62,17 @@ curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/se
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/@g" \
   >> $OUTPUT_FILE
 
+# downloads page
+OUTPUT_FILE="$OUTPUT_DIR"/download.md
+> $OUTPUT_FILE
+GenerateMarkdownHeader "Downloads" "download" >> $OUTPUT_FILE
+cat ./download.md >> $OUTPUT_FILE
+
 # build site
 nikola clean -a
 nikola build
+
+# clean up some stuff we don't use
+rm -rf $FINAL_DIR/archive* $FINAL_DIR/blog* $FINAL_DIR/categories* $FINAL_DIR/tags* $FINAL_DIR/rss*
+sed -i -re '/<sitemap>/{:a;N;/<\/sitemap>/!ba};/rss\.xml/d' $FINAL_DIR/sitemapindex.xml
+sed -i -re '/<url>/{:a;N;/<\/url>/!ba};/(archive\.html|blog|categories)/d' $FINAL_DIR/sitemap.xml

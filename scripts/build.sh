@@ -35,7 +35,7 @@ fi
 function filesize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
-  $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\""
+  $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
 }
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
@@ -81,9 +81,15 @@ fi
 
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
+  "/usr/local/bin/curator;curator"
+  "/opt/elastalert-server/src/elastalert_server.js;elastalert"
+  "/usr/share/filebeat/filebeat.yml;filebeat-oss"
   "/var/lib/clamav/main.cvd;file-monitor"
   "/var/lib/clamav/daily.cvd;file-monitor"
   "/var/lib/clamav/bytecode.cvd;file-monitor"
+  "/var/www/upload/js/jquery.fileupload.js;file-upload"
+  "/opt/freq_server/freq_server.py;freq"
+  "/var/www/htadmin/index.php;htadmin"
   "/usr/share/logstash/config/oui-logstash.txt;logstash"
   "/etc/ip_protocol_numbers.yaml;logstash"
   "/etc/ja3.yaml;logstash"
@@ -92,7 +98,10 @@ FILES_IN_IMAGES=(
   "/data/moloch/etc/ipv4-address-space.csv;moloch"
   "/data/moloch/etc/oui.txt;moloch"
   "/data/moloch/bin/moloch-capture;moloch"
+  "/var/www/html/list.min.js;name-map-ui"
+  "/var/www/html/jquery.min.js;name-map-ui"
   "/opt/zeek/bin/zeek;zeek"
+  "/opt/spicy/lib/spicy/Zeek_Spicy/lib/Zeek-Spicy.linux-x86_64.so;zeek"
 )
 for i in ${FILES_IN_IMAGES[@]}; do
   FILE="$(echo "$i" | cut -d';' -f1)"
