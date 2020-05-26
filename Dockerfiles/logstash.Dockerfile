@@ -50,7 +50,7 @@ COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y gettext python-setuptools python-pip python-requests python-yaml && \
+    yum install -y curl gettext python-setuptools python-pip python-requests python-yaml && \
     yum clean all && \
     pip install py2-ipaddress supervisor && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
@@ -67,7 +67,6 @@ ADD logstash/config/logstash.yml /usr/share/logstash/config/
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/scripts /usr/local/bin/
 ADD logstash/supervisord.conf /etc/supervisord.conf
-ADD https://raw.githubusercontent.com/wireshark/wireshark/master/manuf /usr/share/logstash/config/oui.txt
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
     mkdir -p /var/log/supervisor && \
@@ -75,8 +74,9 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
     bash -c "chown --silent -R logstash:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue" && \
-    ( awk -F '\t' '{gsub(":", "", $1); if (length($1) == 6) {if ($3) {print $1"\t"$3} else if ($2) {print $1"\t"$2}}}' /usr/share/logstash/config/oui.txt > /usr/share/logstash/config/oui-logstash.txt) && \
-    python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
+    curl -sSL -o /usr/share/logstash/config/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf" && \
+      ( awk -F '\t' '{gsub(":", "", $1); if (length($1) == 6) {if ($3) {print $1"\t"$3} else if ($2) {print $1"\t"$2}}}' /usr/share/logstash/config/oui.txt > /usr/share/logstash/config/oui-logstash.txt) && \
+      python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
 
 # As the keystore is encapsulated in logstash, this isn't really necessary. It's included
 # here just to suppress the prompt when creating the keystore. If you're concerned about it
