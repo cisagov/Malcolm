@@ -15,13 +15,13 @@ ARG SITE_NAME="Capture File and Log Archive Upload"
 
 ENV SITE_NAME $SITE_NAME
 ENV JQUERY_FILE_UPLOAD_VERSION v9.19.1
-ADD https://github.com/blueimp/jQuery-File-Upload/archive/${JQUERY_FILE_UPLOAD_VERSION}.tar.gz /jQuery-File-Upload.tar.gz
+ENV JQUERY_FILE_UPLOAD_URL "https://github.com/blueimp/jQuery-File-Upload/archive/${JQUERY_FILE_UPLOAD_VERSION}.tar.gz"
 
 RUN apt-get update && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends npm node-encoding git ca-certificates wget && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends npm node-encoding git ca-certificates curl wget && \
     npm install -g bower && \
-    mkdir /jQuery-File-Upload && \
-    tar --strip-components=1 -C /jQuery-File-Upload -xzf /jQuery-File-Upload.tar.gz && \
+    mkdir -p /jQuery-File-Upload && \
+      curl -sSL "$JQUERY_FILE_UPLOAD_URL" | tar xzvf - -C /jQuery-File-Upload --strip-components 1 && \
     cd /jQuery-File-Upload && \
     bower --allow-root install bootstrap && \
     bower --allow-root install jquery && \

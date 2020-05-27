@@ -18,7 +18,7 @@ ENV FREQ_USER   $FREQ_USER
 ENV FREQ_PORT   $FREQ_PORT
 ENV FREQ_LOOKUP $FREQ_LOOKUP
 
-ADD https://codeload.github.com/markbaggett/freq/tar.gz/master /opt/freq.tar.gz
+ENV FREQ_URL "https://codeload.github.com/markbaggett/freq/tar.gz/master"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
@@ -33,8 +33,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       mkdir -p /var/log/supervisor && \
     cd /opt && \
     mkdir -p ./freq_server && \
-      tar xvf ./freq.tar.gz -C ./freq_server --strip-components 1 && \
-      rm -rf /opt/freq.tar.gz /opt/freq_server/systemd /opt/freq_server/upstart /opt/freq_server/*.md /opt/freq_server/*.exe && \
+      curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \
+      rm -rf /opt/freq_server/systemd /opt/freq_server/upstart /opt/freq_server/*.md /opt/freq_server/*.exe && \
       mv -v "$(ls /opt/freq_server/*.freq | tail -n 1)" /opt/freq_server/freq_table.freq && \
     groupadd --gid 1000 $FREQ_USER && \
       useradd -M --uid 1000 --gid 1000 --home /nonexistant $FREQ_USER && \

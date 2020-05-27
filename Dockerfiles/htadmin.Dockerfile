@@ -22,7 +22,7 @@ ENV PHP_VERSION $PHP_VERSION
 ENV MCRYPT_VERSION $MCRYPT_VERSION
 ENV BOOTSTRAP_VERSION $BOOTSTRAP_VERSION
 
-ADD https://codeload.github.com/mmguero-dev/htadmin/tar.gz/master /tmp/htadmin.tar.gz
+ENV HTADMIN_URL "https://codeload.github.com/mmguero-dev/htadmin/tar.gz/master"
 
 RUN apt-get update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
@@ -49,7 +49,7 @@ RUN apt-get update && \
     mkdir -p /run/php && \
   cd /tmp && \
     mkdir -p ./htadmin && \
-    tar xvf ./htadmin.tar.gz -C ./htadmin --strip-components 1 && \
+    curl -sSL "$HTADMIN_URL" | tar xzvf - -C ./htadmin --strip-components 1 && \
     mv /tmp/htadmin/sites/html/htadmin /var/www/htadmin && \
     cd /var/www/htadmin && \
     ( grep -rhoPi "(src|href)=['\"]https?://.+?['\"]" ./includes/* | sed "s/^[a-zA-Z]*=['\"]*//" | sed "s/['\"]$//" | xargs -r -l curl -s -S -L -J -O ) && \
