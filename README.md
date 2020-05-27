@@ -604,9 +604,9 @@ The `install.py` script will attempt to guide you through the installation of Do
 The easiest way to install and maintain docker on Mac is using the [Homebrew cask](https://brew.sh). Execute the following in a terminal.
 
 ```
-$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 $ brew install cask
-$ brew tap caskroom/versions
+$ brew tap homebrew/cask-versions
 ```
 
 ##### Install docker-edge
