@@ -32,7 +32,7 @@ RUN yum install -y epel-release && \
     yum install -y cronie inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python-setuptools python-pip && \
     yum clean all && \
     easy_install supervisor && \
-    pip install patool entrypoint2 pyunpack python-magic ordered-set && \
+    pip install patool entrypoint2 pyunpack python-magic ordered-set==3.1.1 && \
     ln -sr /usr/sbin/fuser /bin/fuser
 
 ADD shared/bin/cron_env_centos.sh /data/
