@@ -1,4 +1,4 @@
-FROM mmguero/elastalert:2.0.2
+FROM mmguero/elastalert:2.0.5
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
