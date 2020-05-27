@@ -57,13 +57,23 @@ function clone_github_repo() {
     SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
     rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
-      git -c core.askpass=true clone --branch "$REPO_LATEST_RELEASE" --depth 1 "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --branch "$REPO_LATEST_RELEASE" --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     else
-      git -c core.askpass=true clone --depth 1 "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     fi
     [ $? -eq 0 ] && echo "$SRC_DIR" || echo "cloning \"$REPO_URL\" failed" >&2
   fi
 }
+
+# install Spicy
+SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$SRC_DIR" && \
+    ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
+    ninja -C build install
+  cd "$CWD"
+fi
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
@@ -74,8 +84,10 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
   https://github.com/corelight/zeek-community-id
+  https://github.com/cybera/zeek-sniffpass
   https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/mitre-attack/bzar
+  https://github.com/precurse/zeek-httpattacks
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
 )

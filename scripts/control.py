@@ -67,7 +67,7 @@ def logs():
       | reaped\s+unknown\s+pid
       | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
       | GET\s+/(_cat/health|api/status|sessions2-).+HTTP/[\d\.].+\b200\b
-      | POST\s+/(d?stats/d?stat|_bulk|fields/field/_search).+HTTP/[\d\.].+\b20[01]\b
+      | POST\s+/(d?stats/(d?stat|_doc|_search)|_bulk|fields/(field/)?_search).+HTTP/[\d\.].+\b20[01]\b
       | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
       | curl.+localhost.+GET\s+/api/status\s+200
@@ -287,7 +287,7 @@ def authSetup(wipe=False):
         for line in f:
           try:
             k, v = line.rstrip().split("=")
-            ldapDefaults[k] = v.strip('"')
+            ldapDefaults[k] = v.strip('"').strip("'")
           except:
             pass
     ldapProto = ldapDefaults.get("LDAP_PROTO", "ldap://")
@@ -296,10 +296,12 @@ def authSetup(wipe=False):
     ldapType = ldapDefaults.get("LDAP_SERVER_TYPE", "winldap")
     if (ldapType == "openldap"):
       ldapUri = 'DC=example,DC=com?uid?sub?(objectClass=posixAccount)'
-      ldapGroupAttr = "memberuid"
+      ldapGroupAttr = "memberUid"
+      ldapGroupAttrIsDN = "off"
     else:
       ldapUri = 'DC=example,DC=com?sAMAccountName?sub?(objectClass=person)'
       ldapGroupAttr = "member"
+      ldapGroupAttrIsDN = "on"
     with open(ldapConfFile, 'w') as f:
       f.write('# This is a sample configuration for the ldap_server section of nginx.conf.\n')
       f.write('# Yours will vary depending on how your Active Directory/LDAP server is configured.\n')
@@ -309,7 +311,7 @@ def authSetup(wipe=False):
       f.write('  binddn "bind_dn";\n')
       f.write('  binddn_passwd "bind_dn_password";\n\n')
       f.write('  group_attribute {};\n'.format(ldapGroupAttr))
-      f.write('  group_attribute_is_dn on;\n')
+      f.write('  group_attribute_is_dn {};\n'.format(ldapGroupAttrIsDN))
       f.write('  require group "CN=malcolm,OU=groups,DC=example,DC=com";\n')
       f.write('  require valid_user;\n')
       f.write('  satisfy all;\n')

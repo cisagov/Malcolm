@@ -3,8 +3,9 @@
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # remove development packages
-apt-get -y --purge remove checkinstall cmake gdb git libc6-dbg ninja-build \
+apt-get -y --purge remove checkinstall bison google-perftools gdb git libc6-dbg ninja-build \
                     $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+rm -rf /opt/cmake /var/spool/ccache
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \
@@ -17,13 +18,19 @@ apt-get -y --purge remove bluez-firmware \
                           libasound2-plugins \
                           libcupsfilters1 \
                           libcupsimage2 \
+                          libgphoto2-6 \
+                          libgphoto2-port12 \
+                          lintian \
                           lxmusic \
+                          mailutils \
                           mpv \
                           pavucontrol \
+                          poppler-data \
                           prelink \
                           pulseaudio \
                           python-wicd \
                           smplayer \
+                          strace \
                           wamerican \
                           wicd \
                           wicd-daemon \

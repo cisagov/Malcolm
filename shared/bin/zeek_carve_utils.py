@@ -162,19 +162,32 @@ def sha256sum(filename):
   return h.hexdigest()
 
 ###################################################################################################
-# filespec to various fields as per the extractor zeek script
+# filespec to various fields as per the extractor zeek script (/opt/zeek/share/zeek/site/extractor.zeek)
 #   source-fuid-uid-time.ext
 #   eg.
 #       SSL-FTnzwn4hEPJi7BfzRk-CsRaviydrGyYROuX3-20190402105425.crt
 #
+# there are other extracted files that come from the mitre-attack/bzar scripts, they are formatted like this:
+#   local fname = fmt("%s_%s%s", c$uid, f$id, subst_string(smb_name, "\\", "_"));
+#
+#   CR7X4q2hmcXKqP0vVj_F3jZ2VjYttqhKaGfh__172.16.1.8_C$_WINDOWS_sny4u_un1zbd94ytwj99hcymmsad7j54gr4wdskwnqs0ki252jdsrf763zsm531b.exe
+#   └----------------┘ └---------------┘└------------------------------------------------------------------------------------------┘
+#           UID              FID          subst_string(smb_name, "\\", "_"))
+#
+#   (see https://github.com/mitre-attack/bzar/blob/master/scripts/bzar_files.bro#L50)
 def extracted_filespec_to_fields(filespec):
-  match = re.search(r'^(?P<source>.*)-(?P<fid>.*)-(?P<uid>.*)-(?P<time>\d+)\.(?P<ext>.*)$', filespec)
+  baseFileSpec = os.path.basename(filespec)
+  match = re.search(r'^(?P<source>.*)-(?P<fid>.*)-(?P<uid>.*)-(?P<time>\d+)\.(?P<ext>.*?)$', baseFileSpec)
   if match is not None:
     result = ExtractedFileNameParts(match.group('source'), match.group('fid'), match.group('uid'),
                                     time.mktime(datetime.strptime(match.group('time'), "%Y%m%d%H%M%S").timetuple()),
                                     match.group('ext'))
   else:
-    result = ExtractedFileNameParts(None, None, None, time.time(), None)
+    match = re.search(r'^(?P<uid>[0-9a-zA-Z]+)_(?P<fid>[0-9a-zA-Z]+).+\.(?P<ext>.*?)$', baseFileSpec)
+    if match is not None:
+      result = ExtractedFileNameParts('MITRE', match.group('fid'), match.group('uid'), time.time(), match.group('ext'))
+    else:
+      result = ExtractedFileNameParts(None, None, None, time.time(), None)
 
   return result
 

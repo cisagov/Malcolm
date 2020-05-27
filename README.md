@@ -18,6 +18,8 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 ## <a name="TableOfContents"></a>Table of Contents
 
 * [Quick start](#QuickStart)
+    * [Getting Malcolm](#GetMalcolm)
+    * [User interface](#UserInterfaceURLs)
 * [Overview](#Overview)
 * [Components](#Components)
 * [Supported Protocols](#Protocols)
@@ -89,7 +91,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 ## <a name="QuickStart"></a>Quick start
 
-### Getting Malcolm
+### <a name="GetMalcolm"></a>Getting Malcolm
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 18.04 LTS](#InstallationExample).
 
@@ -128,21 +130,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                2.0.4               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          2.0.4               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  2.0.4               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           2.0.4               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          2.0.4               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          2.0.4               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          2.0.4               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            2.0.4               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          2.0.4               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               2.0.4               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           2.0.4               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            2.0.4               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               2.0.4               xxxxxxxxxxxx        31 minutes ago      256MB
-malcolmnetsec/freq                                  2.0.4               xxxxxxxxxxxx        32 minutes ago      188MB
-malcolmnetsec/name-map-ui                           2.0.4               xxxxxxxxxxxx        35 minutes ago      20MB
+malcolmnetsec/moloch                                2.0.5               xxxxxxxxxxxx        10 minutes ago      491MB
+malcolmnetsec/logstash-oss                          2.0.5               xxxxxxxxxxxx        17 minutes ago      1.4GB
+malcolmnetsec/zeek                                  2.0.5               xxxxxxxxxxxx        17 minutes ago      232MB
+malcolmnetsec/file-upload                           2.0.5               xxxxxxxxxxxx        23 minutes ago      199MB
+malcolmnetsec/pcap-capture                          2.0.5               xxxxxxxxxxxx        23 minutes ago      112MB
+malcolmnetsec/file-monitor                          2.0.5               xxxxxxxxxxxx        25 minutes ago      369MB
+malcolmnetsec/filebeat-oss                          2.0.5               xxxxxxxxxxxx        28 minutes ago      501MB
+malcolmnetsec/kibana-oss                            2.0.5               xxxxxxxxxxxx        28 minutes ago      964MB
+malcolmnetsec/pcap-monitor                          2.0.5               xxxxxxxxxxxx        28 minutes ago      156MB
+malcolmnetsec/curator                               2.0.5               xxxxxxxxxxxx        29 minutes ago      240MB
+malcolmnetsec/nginx-proxy                           2.0.5               xxxxxxxxxxxx        29 minutes ago      54.5MB
+malcolmnetsec/elastalert                            2.0.5               xxxxxxxxxxxx        30 minutes ago      276MB
+malcolmnetsec/htadmin                               2.0.5               xxxxxxxxxxxx        31 minutes ago      256MB
+malcolmnetsec/freq                                  2.0.5               xxxxxxxxxxxx        32 minutes ago      188MB
+malcolmnetsec/name-map-ui                           2.0.5               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         825MB
 ```
 
@@ -202,8 +204,10 @@ Malcolm leverages the following excellent open source tools, among others.
 * [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * These third party Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+    * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
-    * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
+    * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+    * Cybera's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
@@ -424,7 +428,7 @@ Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#ha
 
 If you already have Docker and Docker Compose installed, the `install.py` script can still help you tune system configuration and `docker-compose.yml` parameters for Malcolm. To run it in "configuration only" mode, bypassing the steps to install Docker and Docker Compose, run it like this:
 ```
-sudo ./scripts/install.py --configure
+python3 ./scripts/install.py --configure
 ```
 
 Although `install.py` will attempt to automate many of the following configuration and tuning parameters, they are nonetheless listed in the following sections for reference:
@@ -728,8 +732,8 @@ The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is 
 
 * **`url`** - the `ldap://` or `ldaps://` connection URL for the remote LDAP server, which has the [following syntax](https://www.ietf.org/rfc/rfc2255.txt): `ldap[s]://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>`
 * **`binddn`** and **`binddn_password`** - the account credentials used to query the LDAP directory
-* **`group_attribute`** - the group attribute name which contains the member object
-* **`group_attribute_is_dn`** - whether or not to search for the full distinguished name in the member object
+* **`group_attribute`** - the group attribute name which contains the member object (e.g., `member` or `memberUid`)
+* **`group_attribute_is_dn`** - whether or not to search for the user's full distinguished name as the value in the group's member attribute
 * **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
 
 Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
@@ -890,7 +894,7 @@ The Moloch interface displays both Zeek logs and Moloch sessions alongside each 
 
 A few fields of particular mention that help limit returned results to those Zeek logs and Moloch session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`communityId` and `zeek.community_id` in Moloch and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Moloch's `rootId` field.
 
-Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Moloch sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/bro-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
+Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Moloch sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Moloch and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
 The `rootId` field is used by Moloch to link session records together when a particular session has too many packets to be represented by a single session. When normalizing Zeek logs to Moloch's schema, Malcolm piggybacks on `rootId` to store Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) to crossreference entries across Zeek log types. The connection UID is also stored in `zeek.uid`.
 
@@ -1375,7 +1379,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.0.4.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.0.5.iso"
 …
 ```
 
@@ -1414,7 +1418,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `sudo python3 scripts/install.py -c` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `python3 scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
@@ -1771,21 +1775,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                2.0.4               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  2.0.4               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               2.0.4               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           2.0.4               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           2.0.4               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          2.0.4               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.0.4               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          2.0.4               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          2.0.4               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               2.0.4               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            2.0.4               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          2.0.4               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            2.0.4               xxxxxxxxxxxx        11 days ago         276MB
-malcolmnetsec/freq                                  2.0.4               xxxxxxxxxxxx        11 days ago         188MB
-malcolmnetsec/name-map-ui                           2.0.4               xxxxxxxxxxxx        35 minutes ago      20MB
+malcolmnetsec/moloch                                2.0.5               xxxxxxxxxxxx        27 minutes ago      517MB
+malcolmnetsec/zeek                                  2.0.5               xxxxxxxxxxxx        27 minutes ago      489MB
+malcolmnetsec/htadmin                               2.0.5               xxxxxxxxxxxx        2 hours ago         180MB
+malcolmnetsec/nginx-proxy                           2.0.5               xxxxxxxxxxxx        4 hours ago         53MB
+malcolmnetsec/file-upload                           2.0.5               xxxxxxxxxxxx        24 hours ago        198MB
+malcolmnetsec/pcap-capture                          2.0.5               xxxxxxxxxxxx        24 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.0.5               xxxxxxxxxxxx        24 hours ago        156MB
+malcolmnetsec/file-monitor                          2.0.5               xxxxxxxxxxxx        24 hours ago        355MB
+malcolmnetsec/logstash-oss                          2.0.5               xxxxxxxxxxxx        25 hours ago        1.24GB
+malcolmnetsec/curator                               2.0.5               xxxxxxxxxxxx        25 hours ago        303MB
+malcolmnetsec/kibana-oss                            2.0.5               xxxxxxxxxxxx        33 hours ago        944MB
+malcolmnetsec/filebeat-oss                          2.0.5               xxxxxxxxxxxx        11 days ago         459MB
+malcolmnetsec/elastalert                            2.0.5               xxxxxxxxxxxx        11 days ago         276MB
+malcolmnetsec/freq                                  2.0.5               xxxxxxxxxxxx        11 days ago         188MB
+malcolmnetsec/name-map-ui                           2.0.5               xxxxxxxxxxxx        35 minutes ago      20MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         769MB
 ```
 

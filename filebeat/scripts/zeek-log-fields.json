@@ -120,7 +120,12 @@
             "orig_mime_types",
             "resp_fuids",
             "resp_filenames",
-            "resp_mime_types"
+            "resp_mime_types",
+            "post_username",
+            "post_password_plain",
+            "post_password_md5",
+            "post_password_sha1",
+            "post_password_sha256"
         ]
     ],
     "ntlm": [
