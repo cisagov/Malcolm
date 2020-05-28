@@ -91,7 +91,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./elastalert/config/* "$DESTDIR/elastalert/config/"
-  cp $VERBOSE ./elastalert/rules/* "$DESTDIR/elastalert/rules/" 2>/dev/null || true
+  rm -f "$DESTDIR/elastalert/config/"smtp-auth.yaml
   cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
   pushd "$DESTDIR" >/dev/null 2>&1
   pushd "./scripts" >/dev/null 2>&1

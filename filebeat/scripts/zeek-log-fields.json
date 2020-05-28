@@ -57,7 +57,9 @@
             "client_message",
             "server_message",
             "msg_types",
-            "duration"
+            "duration",
+            "client_software",
+            "server_software"
         ]
     ],
     "files": [
