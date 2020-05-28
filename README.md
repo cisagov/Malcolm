@@ -1650,11 +1650,6 @@ vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
 /etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
 /etc/security/limits.d/limits.conf does not exist, create it? (Y/n): y
-
-The "haveged" utility may help improve Malcolm startup times by providing entropy for the Linux kernel.
-Install haveged? (y/N): y
-Installing haveged packages: ['haveged']
-Installation of haveged packages apparently succeeded
 ```
 
 At this point, **if you are installing from the a release tarball** you will be asked if you would like to extract the contents of the tarball and to specify the installation directory:
