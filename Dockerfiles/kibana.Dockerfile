@@ -61,7 +61,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       curl -sSL -o /tmp/kibana-swimlane.zip "https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip" && \
       curl -sSL -o /tmp/elastalert-kibana-plugin.zip "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip" && \
       curl -sSL -o /tmp/kibana-network.zip "https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev" && \
-      curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/uniberg/kbn_sankey_vis/zip/7.6.2" && \
+      curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/mmguero-dev/kbn_sankey_vis/zip/master" && \
     yum install -y epel-release && \
       yum update -y && \
       yum install -y curl cronie inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
