@@ -24,10 +24,9 @@ COPY name-map-ui/config/supervisord.conf /etc/supervisord.conf
 COPY name-map-ui/config/supervisor_logstash_ctl.conf /etc/supervisor/logstash/supervisord.conf
 COPY name-map-ui/scripts/*.sh /usr/local/bin/
 
-ADD https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js /tmp/jquery.min.js
-ADD https://raw.githubusercontent.com/javve/list.js/${LISTJS_VERSION}/dist/list.min.js /tmp/list.min.js
-
-RUN rm -rf /etc/nginx/conf.d/default.conf /var/www/html/* && \
+RUN curl -sSL -o /tmp/jquery.min.js "https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js" && \
+      curl -sSL -o /tmp/list.min.js "https://raw.githubusercontent.com/javve/list.js/${LISTJS_VERSION}/dist/list.min.js" && \
+    rm -rf /etc/nginx/conf.d/default.conf /var/www/html/* && \
     mkdir -p /var/www/html/upload /var/www/html/maps && \
     cd /var/www/html && \
     mv /tmp/jquery.min.js /tmp/list.min.js ./ && \

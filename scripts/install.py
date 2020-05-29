@@ -1004,26 +1004,6 @@ class LinuxInstaller(Installer):
                                                                                                            "\\n".join(config.lines),
                                                                                                            config.filename)], privileged=True)
 
-    # install haveged
-    if (not self.package_is_installed('haveged') and
-        InstallerYesOrNo('The "haveged" utility may help improve Malcolm startup times by providing entropy for the Linux kernel. Install haveged?', default=False)):
-      if (self.distro == PLATFORM_LINUX_CENTOS) and (self.release is not None):
-        eprint("Installing EPEL repo")
-        self.install_package(['https://dl.fedoraproject.org/pub/epel/epel-release-latest-{}.noarch.rpm'.format(self.release.split('.')[0])])
-      havegedPackages = ['haveged']
-      eprint("Installing haveged packages: {}".format(havegedPackages))
-      if self.install_package(havegedPackages):
-        eprint("Installation of haveged packages apparently succeeded")
-        if (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
-          # centos/fedora don't automatically start/enable the daemon, so do so now
-          err, out = self.run_process(['systemctl', 'start', 'haveged'], privileged=True)
-          if (err == 0):
-            err, out = self.run_process(['systemctl', 'enable', 'haveged'], privileged=True)
-            if (err != 0):
-              eprint("Enabling haveged service failed: {}".format(out))
-      else:
-        eprint("Installation of haveged packages failed")
-
 ###################################################################################################
 class MacInstaller(Installer):
 
@@ -1059,11 +1039,11 @@ class MacInstaller(Installer):
         else:
           eprint('"brew install cask" failed with {}, {}'.format(err, out))
 
-      err, out = self.run_process(['brew', 'tap', 'caskroom/versions'])
+      err, out = self.run_process(['brew', 'tap', 'homebrew/cask-versions'])
       if (err == 0):
-        if self.debug: eprint('"brew tap caskroom/versions" succeeded')
+        if self.debug: eprint('"brew tap homebrew/cask-versions" succeeded')
       else:
-        eprint('"brew tap caskroom/versions" failed with {}, {}'.format(err, out))
+        eprint('"brew tap homebrew/cask-versions" failed with {}, {}'.format(err, out))
 
       self.checkPackageCmds.append(['brew', 'cask', 'ls', '--versions'])
       self.installPackageCmds.append(['brew', 'cask', 'install'])
