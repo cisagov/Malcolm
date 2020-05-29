@@ -61,6 +61,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       curl -sSL -o /tmp/kibana-swimlane.zip "https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip" && \
       curl -sSL -o /tmp/elastalert-kibana-plugin.zip "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip" && \
       curl -sSL -o /tmp/kibana-network.zip "https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev" && \
+      curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/uniberg/kbn_sankey_vis/zip/7.6.2" && \
     yum install -y epel-release && \
       yum update -y && \
       yum install -y curl cronie inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
@@ -94,6 +95,19 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       npm install && \
       rm -rf /tmp/kibana-network.zip && \
     cd /tmp && \
+    echo "Installing Sankey visualization..." && \
+      unzip /tmp/kibana-sankey.zip && \
+      mkdir ./kibana &&\
+      mv ./kbn_sankey_vis-* ./kibana/sankey_vis && \
+      cd ./kibana/sankey_vis && \
+      sed -i "s/7\.6\.3/7\.6\.2/g" ./package.json && \
+      npm install && \
+      cd /tmp && \
+      zip -r sankey_vis.zip kibana --exclude ./kibana/sankey_vis/.git\* && \
+      cd /usr/share/kibana/plugins && \
+      /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
+      rm -rf /tmp/kibana /tmp/*sankey* && \
+    cd /tmp && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       sed -i "s/7\.4\.0/7\.6\.2/g" kibana/kibana-comments-app-plugin/package.json && \
@@ -110,7 +124,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
       bash -c "find /usr/share/kibana/plugins/prelert_swimlane_vis/ -type f -exec chmod 644 '{}' \;" && \
       rm -rf /tmp/kibana-swimlane.zip /tmp/kibana && \
-    rm -rf /tmp/plugin-patches /tmp/elastalert-server-routes.js
+    rm -rf /tmp/plugin-patches /tmp/elastalert-server-routes.js /tmp/npm-*
 
 ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
