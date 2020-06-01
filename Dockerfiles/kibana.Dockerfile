@@ -95,7 +95,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       zip -r sankey_vis.zip kibana --exclude ./kibana/sankey_vis/.git\* && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
-      rm -rf /tmp/kibana /tmp/*sankey*
+      rm -rf /tmp/kibana /tmp/*sankey* && \
     cd /tmp && \
     echo "Installing Network visualization..." && \
       cd /usr/share/kibana/plugins && \
