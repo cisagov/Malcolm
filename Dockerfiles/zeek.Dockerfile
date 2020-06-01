@@ -100,7 +100,7 @@ LABEL org.opencontainers.image.description='Malcolm container providing Zeek'
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV LLVM_VERSION "9"
+ENV LLVM_VERSION "10"
 ENV ZEEK_DIR "/opt/zeek"
 ENV SPICY_DIR "/opt/spicy"
 
