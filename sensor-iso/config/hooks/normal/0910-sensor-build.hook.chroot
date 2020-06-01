@@ -28,9 +28,9 @@ BISON_URL="https://ftp.gnu.org/gnu/bison/bison-${BISON_VER}.tar.gz"
 mkdir -p /opt/hedgehog_install_artifacts/
 
 # some environment variables needed for build using clang
-export CC="clang-9"
-export CXX="clang++-9"
-export ASM="clang-9"
+export CC="clang-10"
+export CXX="clang++-10"
+export ASM="clang-10"
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
 export PATH="${ZEEK_DIR}"/bin:"${CMAKE_DIR}"/bin:$PATH
@@ -84,7 +84,7 @@ done
 ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
 cd build
 ninja
-# TODO: we were using checkinstall and I would prefer to, but it has some issues with clang++-9 not finding
+# TODO: we were using checkinstall and I would prefer to, but it has some issues with clang++-10 not finding
 # stdlib include files so for now i'm just back to ninja install. honestly that's probably fine
 # because we weren't getting the third party plugins in the .deb anyway...
 # checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
