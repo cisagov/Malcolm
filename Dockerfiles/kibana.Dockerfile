@@ -84,18 +84,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/elastalert-kibana-plugin.zip --allow-root && \
       rm -rf /tmp/elastalert-kibana-plugin.zip /tmp/elastalert.js /tmp/kibana && \
     cd /tmp && \
-    echo "Installing Network visualization..." && \
-      cd /usr/share/kibana/plugins && \
-      unzip /tmp/kibana-network.zip && \
-      mv ./kbn_network-* ./network_vis && \
-      cd ./network_vis && \
-      sed -i "s/7\.5\.2/7\.6\.2/g" ./package.json && \
-      rm -rf ./images && \
-      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
-      npm install && \
-      rm -rf /tmp/kibana-network.zip && \
-    cd /tmp && \
-    echo "Installing Sankey visualization..." && \
+      echo "Installing Sankey visualization..." && \
       unzip /tmp/kibana-sankey.zip && \
       mkdir ./kibana &&\
       mv ./kbn_sankey_vis-* ./kibana/sankey_vis && \
@@ -106,7 +95,18 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       zip -r sankey_vis.zip kibana --exclude ./kibana/sankey_vis/.git\* && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
-      rm -rf /tmp/kibana /tmp/*sankey* && \
+      rm -rf /tmp/kibana /tmp/*sankey*
+    cd /tmp && \
+    echo "Installing Network visualization..." && \
+      cd /usr/share/kibana/plugins && \
+      unzip /tmp/kibana-network.zip && \
+      mv ./kbn_network-* ./network_vis && \
+      cd ./network_vis && \
+      sed -i "s/7\.5\.2/7\.6\.2/g" ./package.json && \
+      rm -rf ./images && \
+      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
+      npm install && \
+      rm -rf /tmp/kibana-network.zip && \
     cd /tmp && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
