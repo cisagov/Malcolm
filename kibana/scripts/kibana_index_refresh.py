@@ -95,7 +95,7 @@ def main():
 
   if indexId is not None:
 
-    # get the fields list
+    # get the current fields list
     getFieldsResponse = requests.get('{}/{}'.format(args.url, GET_FIELDS_URI),
                                      params={ 'pattern': args.index,
                                               'meta_fields': ["_source","_id","_type","_index","_score"] })
@@ -104,13 +104,58 @@ def main():
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
-    # set the index pattern with our complete list of fields
-    if not args.dryrun:
-      putIndexInfo = {}
-      putIndexInfo['attributes'] = {}
-      putIndexInfo['attributes']['title'] = args.index
-      putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
+    # define field formatting map for Kibana -> Moloch drilldown
+    #
+    # see: https://github.com/idaholab/Malcolm/issues/133
+    #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu
+    #
+    # fieldFormatMap is
+    #    {
+    #        "zeek.orig_h": {
+    #            "id": "drilldown",
+    #            "params": {
+    #                "parsedUrl": {
+    #                    "origin": "https://malcolm.local.lan",
+    #                    "pathname": "/kibana/app/kibana",
+    #                    "basePath": "/kibana"
+    #                },
+    #                "urlTemplates": [
+    #                    null,
+    #                    {
+    #                        "url": "/idkib2mol/zeek.orig_h == {{value}}",
+    #                        "label": "Moloch: zeek.orig_h == {{value}}"
+    #                    }
+    #                ]
+    #            }
+    #        },
+    #        ...
+    #    }
+    fieldFormatMap = {}
+    for field in getFieldsList:
+      # for now just do zeek ones, the native Moloch ones won't map perfectly for the Moloch UI
+      if field['name'].startswith('zeek'):
+        drilldownInfoParamsUrlTemplateValues = {}
+        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{} == {{{{value}}}}'.format(field['name'])
+        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch: {} == {{{{value}}}}'.format(field['name'])
+        drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 
+        drilldownInfoParams = {}
+        drilldownInfoParams['urlTemplates'] = drilldownInfoParamsUrlTemplates
+
+        drilldownInfo = {}
+        drilldownInfo['id'] = 'drilldown'
+        drilldownInfo['params'] = drilldownInfoParams
+
+        fieldFormatMap[field['name']] = drilldownInfo
+
+    # set the index pattern with our complete list of fields
+    putIndexInfo = {}
+    putIndexInfo['attributes'] = {}
+    putIndexInfo['attributes']['title'] = args.index
+    putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
+    putIndexInfo['attributes']['fieldFormatMap'] = json.dumps(fieldFormatMap)
+
+    if not args.dryrun:
       putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),
                                  headers={ 'Content-Type': 'application/json',
                                            'kbn-xsrf': 'true',
