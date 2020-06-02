@@ -132,8 +132,7 @@ def main():
     #    }
     fieldFormatMap = {}
     for field in getFieldsList:
-      # for now just do zeek ones, the native Moloch ones won't map perfectly for the Moloch UI
-      if field['name'].startswith('zeek'):
+      if field['name'][:1].isalpha():
         valQuote = '"' if field['type'] == 'string' else ''
         drilldownInfoParamsUrlTemplateValues = {}
         drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
