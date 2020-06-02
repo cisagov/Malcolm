@@ -134,9 +134,10 @@ def main():
     for field in getFieldsList:
       # for now just do zeek ones, the native Moloch ones won't map perfectly for the Moloch UI
       if field['name'].startswith('zeek'):
+        valQuote = '"' if field['type'] == 'string' else ''
         drilldownInfoParamsUrlTemplateValues = {}
-        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{} == {{{{value}}}}'.format(field['name'])
-        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch: {} == {{{{value}}}}'.format(field['name'])
+        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch: {} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 
         drilldownInfoParams = {}
