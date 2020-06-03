@@ -95,7 +95,7 @@ def main():
 
   if indexId is not None:
 
-    # get the fields list
+    # get the current fields list
     getFieldsResponse = requests.get('{}/{}'.format(args.url, GET_FIELDS_URI),
                                      params={ 'pattern': args.index,
                                               'meta_fields': ["_source","_id","_type","_index","_score"] })
@@ -105,12 +105,12 @@ def main():
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
     # set the index pattern with our complete list of fields
-    if not args.dryrun:
-      putIndexInfo = {}
-      putIndexInfo['attributes'] = {}
-      putIndexInfo['attributes']['title'] = args.index
-      putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
+    putIndexInfo = {}
+    putIndexInfo['attributes'] = {}
+    putIndexInfo['attributes']['title'] = args.index
+    putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
 
+    if not args.dryrun:
       putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),
                                  headers={ 'Content-Type': 'application/json',
                                            'kbn-xsrf': 'true',
