@@ -104,56 +104,11 @@ def main():
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
-    # define field formatting map for Kibana -> Moloch drilldown
-    #
-    # see: https://github.com/idaholab/Malcolm/issues/133
-    #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu
-    #
-    # fieldFormatMap is
-    #    {
-    #        "zeek.orig_h": {
-    #            "id": "drilldown",
-    #            "params": {
-    #                "parsedUrl": {
-    #                    "origin": "https://malcolm.local.lan",
-    #                    "pathname": "/kibana/app/kibana",
-    #                    "basePath": "/kibana"
-    #                },
-    #                "urlTemplates": [
-    #                    null,
-    #                    {
-    #                        "url": "/idkib2mol/zeek.orig_h == {{value}}",
-    #                        "label": "Moloch: zeek.orig_h == {{value}}"
-    #                    }
-    #                ]
-    #            }
-    #        },
-    #        ...
-    #    }
-    fieldFormatMap = {}
-    for field in getFieldsList:
-      if field['name'][:1].isalpha():
-        valQuote = '"' if field['type'] == 'string' else ''
-        drilldownInfoParamsUrlTemplateValues = {}
-        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
-        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch: {} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
-        drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
-
-        drilldownInfoParams = {}
-        drilldownInfoParams['urlTemplates'] = drilldownInfoParamsUrlTemplates
-
-        drilldownInfo = {}
-        drilldownInfo['id'] = 'drilldown'
-        drilldownInfo['params'] = drilldownInfoParams
-
-        fieldFormatMap[field['name']] = drilldownInfo
-
     # set the index pattern with our complete list of fields
     putIndexInfo = {}
     putIndexInfo['attributes'] = {}
     putIndexInfo['attributes']['title'] = args.index
     putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
-    putIndexInfo['attributes']['fieldFormatMap'] = json.dumps(fieldFormatMap)
 
     if not args.dryrun:
       putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),
