@@ -134,8 +134,10 @@ def main():
     for field in getFieldsList:
       if field['name'][:1].isalpha():
         valQuote = '"' if field['type'] == 'string' else ''
+        # for Moloch to query by database field name, see moloch issue/PR 1461/1463
+        valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}
-        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch: {} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 
