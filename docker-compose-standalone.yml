@@ -135,7 +135,7 @@ services:
       retries: 3
       start_period: 180s
   kibana:
-    image: malcolmnetsec/kibana-oss:2.0.5
+    image: malcolmnetsec/kibana-oss:2.0.6
     restart: "no"
     hostname: kibana
     environment:
@@ -158,7 +158,7 @@ services:
       retries: 3
       start_period: 210s
   elastalert:
-    image: malcolmnetsec/elastalert:2.0.5
+    image: malcolmnetsec/elastalert:2.0.6
     restart: "no"
     hostname: elastalert
     environment:
@@ -183,7 +183,7 @@ services:
       retries: 3
       start_period: 210s
   curator:
-    image: malcolmnetsec/curator:2.0.5
+    image: malcolmnetsec/curator:2.0.6
     restart: "no"
     hostname: curator
     environment:
@@ -199,7 +199,7 @@ services:
       retries: 3
       start_period: 30s
   logstash:
-    image: malcolmnetsec/logstash-oss:2.0.5
+    image: malcolmnetsec/logstash-oss:2.0.6
     restart: "no"
     hostname: logstash
     environment:
@@ -229,7 +229,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:2.0.5
+    image: malcolmnetsec/filebeat-oss:2.0.6
     restart: "no"
     hostname: filebeat
     environment:
@@ -263,7 +263,7 @@ services:
       retries: 3
       start_period: 60s
   moloch:
-    image: malcolmnetsec/moloch:2.0.5
+    image: malcolmnetsec/moloch:2.0.6
     restart: "no"
     hostname: moloch
     env_file:
@@ -299,7 +299,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:2.0.5
+    image: malcolmnetsec/zeek:2.0.6
     restart: "no"
     hostname: zeek
     environment:
@@ -322,7 +322,7 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:2.0.5
+    image: malcolmnetsec/file-monitor:2.0.6
     restart: "no"
     hostname: filemon
     environment:
@@ -339,7 +339,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:2.0.5
+    image: malcolmnetsec/pcap-capture:2.0.6
     restart: "no"
     network_mode: host
     ulimits:
@@ -362,7 +362,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:2.0.5
+    image: malcolmnetsec/pcap-monitor:2.0.6
     restart: "no"
     hostname: pcapmon
     environment:
@@ -382,7 +382,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:2.0.5
+    image: malcolmnetsec/file-upload:2.0.6
     restart: "no"
     hostname: upload
     env_file:
@@ -405,7 +405,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.0.5
+    image: malcolmnetsec/htadmin:2.0.6
     restart: "no"
     hostname: htadmin
     environment:
@@ -424,7 +424,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.0.5
+    image: malcolmnetsec/freq:2.0.6
     restart: "no"
     hostname: freq
     environment:
@@ -439,7 +439,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.0.5
+    image: malcolmnetsec/name-map-ui:2.0.6
     restart: "no"
     hostname: name-map-ui
     environment:
@@ -457,7 +457,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:2.0.5
+    image: malcolmnetsec/nginx-proxy:2.0.6
     restart: "no"
     hostname: nginx-proxy
     environment:
