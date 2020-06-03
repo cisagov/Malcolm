@@ -19,7 +19,7 @@ ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_VERSION "3.0.6"
 
 # using clang now instead of gcc because Spicy depends on it
-ENV LLVM_VERSION "9"
+ENV LLVM_VERSION "10"
 ENV CC "clang-${LLVM_VERSION}"
 ENV CXX "clang++-${LLVM_VERSION}"
 ENV ASM "clang-${LLVM_VERSION}"
@@ -100,7 +100,7 @@ LABEL org.opencontainers.image.description='Malcolm container providing Zeek'
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV LLVM_VERSION "9"
+ENV LLVM_VERSION "10"
 ENV ZEEK_DIR "/opt/zeek"
 ENV SPICY_DIR "/opt/spicy"
 
@@ -117,7 +117,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     apt-get install -q -y -t buster-backports --no-install-recommends \
       file \
       libatomic1 \
-      libclang-cpp9 \
+      libclang-cpp${LLVM_VERSION} \
       libclang1-${LLVM_VERSION} \
       libgoogle-perftools4 \
       libkrb5-3 \
