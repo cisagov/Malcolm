@@ -103,7 +103,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       mkdir ./kibana &&\
       mv ./kibana-plugin-drilldownmenu-* ./kibana/kibana-plugin-drilldownmenu && \
       cd ./kibana/kibana-plugin-drilldownmenu && \
-      sed -i "s/7\.6\.2/7\.7\.1/g" ./package.json && \
+      sed -i "s/7\.6\.2/7\.6\.2/g" ./package.json && \
       npm install && \
       cd /tmp && \
       zip -r drilldown.zip kibana --exclude ./kibana/kibana-plugin-drilldownmenu/.git\* && \
