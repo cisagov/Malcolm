@@ -146,7 +146,7 @@ malcolmnetsec/nginx-proxy                           2.1.0               xxxxxxxx
 malcolmnetsec/pcap-capture                          2.1.0               xxxxxxxxxxxx        20 hours ago        111MB
 malcolmnetsec/pcap-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        156MB
 malcolmnetsec/zeek                                  2.1.0               xxxxxxxxxxxx        20 hours ago        442MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.7.1               xxxxxxxxxxxx        20 hours ago        693MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
 You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -1548,7 +1548,7 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **6.19 Configure Network Time Protocol (NTP)** - While [time synchronization](#ConfigTime) is supported on the Malcolm aggregator base operating system, an exception is claimed for this rule as the network sensor device may be configured to sync to servers in a different way than specified in the benchmark.
 
-**7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - The Malcolm aggregator base operating system **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
+**7.4.4 Create /etc/hosts.deny**, **7.6.2 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - The Malcolm aggregator base operating system **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
 
 **8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass intergrity checks.
 
@@ -1787,7 +1787,7 @@ malcolmnetsec/nginx-proxy                           2.1.0               xxxxxxxx
 malcolmnetsec/pcap-capture                          2.1.0               xxxxxxxxxxxx        20 hours ago        111MB
 malcolmnetsec/pcap-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        156MB
 malcolmnetsec/zeek                                  2.1.0               xxxxxxxxxxxx        20 hours ago        442MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.7.1               xxxxxxxxxxxx        20 hours ago        693MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
