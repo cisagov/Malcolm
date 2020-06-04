@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.3.0](https://github.com/aol/moloch/releases/tag/v2.3.0). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.3.1](https://github.com/aol/moloch/releases/tag/v2.3.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.3.0"
+MOLOCH_VERSION="2.3.1"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
@@ -1763,7 +1763,7 @@ The Elastic Stack's [Beats](https://www.elastic.co/products/beats) platform is a
 
 set -e
 
-BEATS_VER="7.6.2"
+BEATS_VER="7.7.1"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"

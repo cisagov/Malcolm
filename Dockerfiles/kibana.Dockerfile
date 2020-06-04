@@ -1,4 +1,4 @@
-FROM docker.elastic.co/kibana/kibana-oss:7.6.2
+FROM docker.elastic.co/kibana/kibana-oss:7.7.1
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -42,7 +42,7 @@ ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-
 #    cd /tmp && \
 #    echo "Installing Milestones visualization..." && \
 #      unzip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
-#      sed -i "s/7\.1\.1/7\.6\.2/g" kibana/kibana-milestones-vis/package.json && \
+#      sed -i "s/7\.1\.1/7\.7\.1/g" kibana/kibana-milestones-vis/package.json && \
 #      zip kibana-milestones.zip kibana/kibana-milestones-vis/package.json && \
 #      cd /usr/share/kibana/plugins && \
 #      /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-milestones.zip --allow-root && \
@@ -64,7 +64,7 @@ ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-
 #      unzip /tmp/kibana-network.zip && \
 #      mv ./kbn_network-* ./network_vis && \
 #      cd ./network_vis && \
-#      sed -i "s/7\.5\.2/7\.6\.2/g" ./package.json && \
+#      sed -i "s/7\.5\.2/7\.7\.1/g" ./package.json && \
 #      rm -rf ./images && \
 #      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
 #      npm install && \
@@ -84,7 +84,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
       unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json kibana/elastalert-kibana-plugin/public/components/main/main.js && \
-      sed -i "s/7\.5\.0/7\.6\.2/g" kibana/elastalert-kibana-plugin/package.json && \
+      sed -i "s/7\.5\.0/7\.7\.1/g" kibana/elastalert-kibana-plugin/package.json && \
       sed -i "s/^import.*eui_theme_light.css.*$//" kibana/elastalert-kibana-plugin/public/components/main/main.js && \
       mkdir -p kibana/elastalert-kibana-plugin/server/routes/ && \
       cp /tmp/elastalert-server-routes.js kibana/elastalert-kibana-plugin/server/routes/elastalert.js && \
@@ -101,7 +101,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       mkdir ./kibana &&\
       mv ./kbn_sankey_vis-* ./kibana/sankey_vis && \
       cd ./kibana/sankey_vis && \
-      sed -i "s/7\.6\.3/7\.6\.2/g" ./package.json && \
+      sed -i "s/7\.6\.3/7\.7\.1/g" ./package.json && \
       npm install && \
       cd /tmp && \
       zip -r sankey_vis.zip kibana --exclude ./kibana/sankey_vis/.git\* && \
@@ -111,7 +111,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
     cd /tmp && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
-      sed -i "s/7\.4\.0/7\.6\.2/g" kibana/kibana-comments-app-plugin/package.json && \
+      sed -i "s/7\.4\.0/7\.7\.1/g" kibana/kibana-comments-app-plugin/package.json && \
       zip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-comments.zip --allow-root && \
@@ -119,7 +119,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
     cd /tmp && \
     echo "Installing Swimlanes visualization..." && \
       unzip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
-      sed -i "s/7\.6\.2/7\.6\.2/g" kibana/prelert_swimlane_vis/package.json && \
+      sed -i "s/7\.6\.2/7\.7\.1/g" kibana/prelert_swimlane_vis/package.json && \
       zip kibana-swimlane.zip kibana/prelert_swimlane_vis/package.json && \
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-swimlane.zip --allow-root && \
