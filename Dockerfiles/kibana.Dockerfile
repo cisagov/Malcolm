@@ -57,10 +57,22 @@ ADD kibana/elastalert-kibana-plugin/server/routes/elastalert.js /tmp/elastalert-
 #    /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-calendar.zip --allow-root && \
 #    rm -rf /tmp/kibana-calendar.zip /tmp/kibana && \
 
+#curl -sSL -o /tmp/kibana-network.zip "https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev" && \
+#    cd /tmp && \
+#    echo "Installing Network visualization..." && \
+#      cd /usr/share/kibana/plugins && \
+#      unzip /tmp/kibana-network.zip && \
+#      mv ./kbn_network-* ./network_vis && \
+#      cd ./network_vis && \
+#      sed -i "s/7\.5\.2/7\.6\.2/g" ./package.json && \
+#      rm -rf ./images && \
+#      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
+#      npm install && \
+#      rm -rf /tmp/kibana-network.zip && \
+
 RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-comments-app-plugin/releases/download/7.4.0/kibana-comments-app-plugin-7.4.0-latest.zip" && \
       curl -sSL -o /tmp/kibana-swimlane.zip "https://github.com/prelert/kibana-swimlane-vis/releases/download/v7.6.2/prelert_swimlane_vis-7.6.2.zip" && \
       curl -sSL -o /tmp/elastalert-kibana-plugin.zip "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip" && \
-      curl -sSL -o /tmp/kibana-network.zip "https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev" && \
       curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/mmguero-dev/kbn_sankey_vis/zip/master" && \
     yum install -y epel-release && \
       yum update -y && \
@@ -96,17 +108,6 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       cd /usr/share/kibana/plugins && \
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
       rm -rf /tmp/kibana /tmp/*sankey* && \
-    cd /tmp && \
-    echo "Installing Network visualization..." && \
-      cd /usr/share/kibana/plugins && \
-      unzip /tmp/kibana-network.zip && \
-      mv ./kbn_network-* ./network_vis && \
-      cd ./network_vis && \
-      sed -i "s/7\.5\.2/7\.6\.2/g" ./package.json && \
-      rm -rf ./images && \
-      patch -p 1 < /tmp/plugin-patches/kbn_network_7.6.x.patch && \
-      npm install && \
-      rm -rf /tmp/kibana-network.zip && \
     cd /tmp && \
     echo "Installing Comments visualization..." && \
       unzip kibana-comments.zip kibana/kibana-comments-app-plugin/package.json && \
