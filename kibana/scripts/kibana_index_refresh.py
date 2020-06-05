@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import argparse
 import json
+import re
 import requests
 import os
 import sys
@@ -138,8 +139,23 @@ def main():
         valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}
         drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
-        drilldownInfoParamsUrlTemplateValues['label'] = '🦉: {} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['label'] = '🦉 {} == {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
+        if field['type'] == 'ip':
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.virustotal.com/en/ip-address/{{value}}/information/'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal IP {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+        if re.search(r'\b(md5|sha(1|256|384|512))\b', field['name'], re.IGNORECASE) is not None:
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.virustotal.com/gui/file/{{value}}/detection'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal Hash {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+        if re.search(r'\bsignature(_?id)?\b', field['name'], re.IGNORECASE) is not None:
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://duckduckgo.com/?q="{{value}}"'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Web Search {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         drilldownInfoParams = {}
         drilldownInfoParams['urlTemplates'] = drilldownInfoParamsUrlTemplates
