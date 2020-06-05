@@ -188,6 +188,7 @@ def main():
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
         elif re.search(r'(^zeek\.filetype$|mime[_\.-]?type)', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching mime/media/content types
+          # TODO: URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/media-types/{{value}}'
           drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry {{value}}'
