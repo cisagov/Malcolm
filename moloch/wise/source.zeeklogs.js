@@ -825,7 +825,7 @@ function ZeekLogs (api, section) {
   // todo: look at expressions for things that have parents (tunnelling, parent files, etc.)
   // todo: look at IP types and use ipPrint?
 
-  // add right-clicks for pivoting into Kibana from Moloch (see nginx.conf)
+  // add right-clicks
   var allFields = [
     "communityId",
     "host.name",
@@ -1473,6 +1473,45 @@ function ZeekLogs (api, section) {
   ];
   var allFieldsStr = allFields.join(',');
 
+  // add URL link for assigned transport protocol numbers
+  // TODO: not working in Moloch, seems to be working in kibana?
+  var protoFieldsStr = allFields.filter(value => /^(network\.transport|zeek.proto|ip\.protocol)$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_proto",  {name:"Protocol Registry", url:'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields:protoFieldsStr});
+
+  // add right-click for searching IANA for services
+  // TODO: not working in Moloch, seems to be working in kibana?
+  var serviceFieldsStr = allFields.filter(value => /^(zeek\.service|protocols?|network\.protocol)$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_service",  {name:"Service Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:serviceFieldsStr});
+
+  // add right-click for searching VirusTotal for other IP addresses
+  var ipFieldsStr = allFields.filter(value => /[_\.-](h|ip)$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_ip",  {name:"VirusTotal IP", url:"https://www.virustotal.com/en/ip-address/%TEXT%/information", fields:ipFieldsStr});
+
+  // add right-click for searching IANA for ports
+  // TODO: not working in Moloch, seems to be working in kibana?
+  var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_port",            {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:portFieldsStr});
+  this.api.addRightClick("malcolm_websearch_port_moloch",     {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category:"port"});
+
+  // add right-click for searching VirusTotal for hash signatures
+  var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_vt_fields_hash",         {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", fields:hashFieldsStr});
+  this.api.addRightClick("malcolm_vt_fields_hash_moloch",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", category:"md5"});
+
+  // add right-click for searching the web for signature IDs
+  // TODO: zeek_signatures.hits.XXXXX
+  var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_sig",  {name:"Web Search", url:'https://duckduckgo.com/?q="%TEXT%"', fields:sigFieldsStr});
+
+  // add right-click for searching ARIN for ASN
+  var asnFieldsStr = allFields.filter(value => /(as\.number|(src|dst)ASN|asn\.(src|dst))$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_asn",  {name:"ARIN ASN", url:'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields:asnFieldsStr});
+
+  // add right-click for searching mime/media/content types
+  var mimeFieldsStr = allFields.filter(value => /(^zeek\.filetype$|mime[_\.-]?type)/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
+
+  // add right-clicks for pivoting into Kibana from Moloch (see nginx.conf)
   var filterLabel = "Filter %DBFIELD% in Kibana";
   var filterUrl = "idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
@@ -1483,42 +1522,6 @@ function ZeekLogs (api, section) {
   this.api.addRightClick("malcolm_kibana_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
   this.api.addRightClick("malcolm_kibana_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
   this.api.addRightClick("malcolm_kibana_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
-
-  // add right-click for searching VirusTotal for hash signatures
-  // TODO: zeek_signatures.hits.XXXXX
-  var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_vt_fields_hash",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", fields:hashFieldsStr});
-
-  // add right-click for searching the web for signature IDs
-  var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])signature(_?id)?s?\b/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_sig",  {name:"Web Search", url:'https://duckduckgo.com/?q="%TEXT%"', fields:sigFieldsStr});
-
-  // add right-click for searching IANA for other IP addresses
-  var ipFieldsStr = allFields.filter(value => /[_\.-](h|ip)$/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_ip",  {name:"VirusTotal IP", url:"https://www.virustotal.com/en/ip-address/%TEXT%/information", fields:ipFieldsStr});
-
-  // add right-click for searching IANA for ports
-  // TODO: not working in Moloch, seems to be working in kibana?
-  var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_port",  {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:portFieldsStr});
-
-  // add right-click for searching IANA for services
-  // TODO: not working in Moloch, seems to be working in kibana?
-  var serviceFieldsStr = allFields.filter(value => /^(zeek\.service|protocol|network\.protocol)$/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_service",  {name:"Service Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:serviceFieldsStr});
-
-  // add URL link for assigned transport protocol numbers
-  // TODO: not working in Moloch, seems to be working in kibana?
-  var protoFieldsStr = allFields.filter(value => /^(network\.transport|zeek.proto|ipProtocol)$/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_proto",  {name:"Protocol Registry", url:'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields:protoFieldsStr});
-
-  // add right-click for searching ARIN for ASN
-  var asnFieldsStr = allFields.filter(value => /(as\.number|dstASN|srcASN)$/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_asn",  {name:"ARIN ASN", url:'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields:asnFieldsStr});
-
-  // add right-click for searching mime/media/content types
-  var mimeFieldsStr = allFields.filter(value => /(^zeek\.filetype$|mime[_\.-]?type)/i.test(value)).join(',');
-  this.api.addRightClick("malcolm_websearch_port",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
 
   // add right-click for viewing original JSON document
   this.api.addRightClick("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});
