@@ -159,7 +159,6 @@ def main():
 
         elif re.search(r'(^|[\b_\.-])(hit|signature(_?id))?s?$', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching the web for signature IDs
-          # TODO: zeek_signatures.hits.XXXXX
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://duckduckgo.com/?q="{{value}}"'
           drilldownInfoParamsUrlTemplateValues['label'] = 'Web Search: {{value}}'
@@ -195,7 +194,7 @@ def main():
 
         elif re.search(r'(^zeek\.filetype$|mime[_\.-]?type)', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching mime/media/content types
-          # TODO: URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
+          # TODO: '/' in URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/media-types/{{value}}'
           drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'

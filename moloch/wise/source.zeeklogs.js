@@ -1474,12 +1474,10 @@ function ZeekLogs (api, section) {
   var allFieldsStr = allFields.join(',');
 
   // add URL link for assigned transport protocol numbers
-  // TODO: not working in Moloch, seems to be working in kibana?
   var protoFieldsStr = allFields.filter(value => /^(network\.transport|zeek.proto|ip\.protocol)$/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_proto",  {name:"Protocol Registry", url:'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields:protoFieldsStr});
 
   // add right-click for searching IANA for services
-  // TODO: not working in Moloch, seems to be working in kibana?
   var serviceFieldsStr = allFields.filter(value => /^(zeek\.service|protocols?|network\.protocol)$/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_service",  {name:"Service Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:serviceFieldsStr});
 
@@ -1488,7 +1486,6 @@ function ZeekLogs (api, section) {
   this.api.addRightClick("malcolm_websearch_ip",  {name:"VirusTotal IP", url:"https://www.virustotal.com/en/ip-address/%TEXT%/information", fields:ipFieldsStr});
 
   // add right-click for searching IANA for ports
-  // TODO: not working in Moloch, seems to be working in kibana?
   var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_port",            {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:portFieldsStr});
   this.api.addRightClick("malcolm_websearch_port_moloch",     {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category:"port"});
@@ -1499,7 +1496,6 @@ function ZeekLogs (api, section) {
   this.api.addRightClick("malcolm_vt_fields_hash_moloch",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", category:"md5"});
 
   // add right-click for searching the web for signature IDs
-  // TODO: zeek_signatures.hits.XXXXX
   var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_sig",  {name:"Web Search", url:'https://duckduckgo.com/?q="%TEXT%"', fields:sigFieldsStr});
 
