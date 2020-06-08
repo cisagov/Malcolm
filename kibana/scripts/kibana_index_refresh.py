@@ -147,14 +147,14 @@ def main():
           # add drilldown for searching IANA for IP addresses
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.virustotal.com/en/ip-address/{{value}}/information/'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal IP {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal IP: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         elif re.search(r'(^|[\b_\.-])(md5|sha(1|256|384|512))\b', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching VirusTotal for hash signatures
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.virustotal.com/gui/file/{{value}}/detection'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal Hash {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal Hash: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         elif re.search(r'(^|[\b_\.-])(hit|signature(_?id))?s?$', field['name'], re.IGNORECASE) is not None:
@@ -162,21 +162,21 @@ def main():
           # TODO: zeek_signatures.hits.XXXXX
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://duckduckgo.com/?q="{{value}}"'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'Web Search {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Web Search: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         elif re.search(r'(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching IANA for ports
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'Port Registry {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Port Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         elif re.search(r'^(zeek\.service|protocol?|network\.protocol)$', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching IANA for services
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'Service Registry {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Service Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         elif re.search(r'^(network\.transport|zeek\.proto|ipProtocol)$', field['name'], re.IGNORECASE) is not None:
@@ -190,7 +190,7 @@ def main():
           # add drilldown for searching ARIN for ASN
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://search.arin.net/rdap/?query={{value}}&searchFilter=asn'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'ARIN ASN {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'ARIN ASN: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         elif re.search(r'(^zeek\.filetype$|mime[_\.-]?type)', field['name'], re.IGNORECASE) is not None:
@@ -198,7 +198,7 @@ def main():
           # TODO: URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/media-types/{{value}}'
-          drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry {{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
         drilldownInfoParams = {}
