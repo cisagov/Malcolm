@@ -1512,7 +1512,7 @@ function ZeekLogs (api, section) {
   this.api.addRightClick("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
 
   // add right-clicks for pivoting into Kibana from Moloch (see nginx.conf)
-  var filterLabel = "Filter %DBFIELD% in Kibana";
+  var filterLabel = "Kibana %DBFIELD%";
   var filterUrl = "idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
   this.api.addRightClick("malcolm_kibana_cat_ip",       {name:filterLabel, url:"idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});

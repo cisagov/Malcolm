@@ -140,7 +140,7 @@ def main():
         valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}
         drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
-        drilldownInfoParamsUrlTemplateValues['label'] = 'Filter {} in Moloch: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch {}: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 
         if (field['type'] == 'ip') or (re.search(r'[_\.-](h|ip)$', field['name'], re.IGNORECASE) is not None):
