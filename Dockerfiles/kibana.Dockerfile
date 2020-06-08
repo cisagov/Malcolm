@@ -62,6 +62,7 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       curl -sSL -o /tmp/elastalert-kibana-plugin.zip "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.1.0/elastalert-kibana-plugin-1.1.0-7.5.0.zip" && \
       curl -sSL -o /tmp/kibana-network.zip "https://codeload.github.com/dlumbrer/kbn_network/zip/7-dev" && \
       curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/mmguero-dev/kbn_sankey_vis/zip/master" && \
+      curl -sSL -o /tmp/kibana-drilldown.zip "https://codeload.github.com/mmguero-dev/kibana-plugin-drilldownmenu/zip/master" && \
     yum install -y epel-release && \
       yum update -y && \
       yum install -y curl cronie inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
@@ -97,7 +98,20 @@ RUN curl -sSL -o /tmp/kibana-comments.zip "https://github.com/gwintzer/kibana-co
       /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
       rm -rf /tmp/kibana /tmp/*sankey* && \
     cd /tmp && \
-    echo "Installing Network visualization..." && \
+      echo "Installing Drilldown menu plugin..." && \
+      unzip /tmp/kibana-drilldown.zip && \
+      mkdir ./kibana &&\
+      mv ./kibana-plugin-drilldownmenu-* ./kibana/kibana-plugin-drilldownmenu && \
+      cd ./kibana/kibana-plugin-drilldownmenu && \
+      sed -i "s/7\.6\.2/7\.6\.2/g" ./package.json && \
+      npm install && \
+      cd /tmp && \
+      zip -r drilldown.zip kibana --exclude ./kibana/kibana-plugin-drilldownmenu/.git\* && \
+      cd /usr/share/kibana/plugins && \
+      /usr/share/kibana/bin/kibana-plugin install file:///tmp/drilldown.zip --allow-root && \
+      rm -rf /tmp/kibana /tmp/*drilldown* && \
+    cd /tmp && \
+      echo "Installing Network visualization..." && \
       cd /usr/share/kibana/plugins && \
       unzip /tmp/kibana-network.zip && \
       mv ./kbn_network-* ./network_vis && \
@@ -139,7 +153,7 @@ ADD shared/bin/elastic_search_status.sh /data/
 RUN chmod 755 /data/*.sh /data/*.py && \
     chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 * * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -)
+    (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 10 * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -)
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

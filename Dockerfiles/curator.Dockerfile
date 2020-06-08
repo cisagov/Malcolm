@@ -69,7 +69,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    bash -c 'echo -e "${CRON} su -c \"/usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE}\" ${CURATOR_USER} >/proc/1/fd/1 2>/proc/1/fd/2\n@reboot su -c \"/usr/local/bin/elastic_search_status.sh && /usr/local/bin/register-elasticsearch-snapshot-repo.sh\" ${CURATOR_USER} >/proc/1/fd/1 2>/proc/1/fd/2" | crontab -'
+    bash -c 'echo -e "${CRON} su -c \"/usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE}\" ${CURATOR_USER} >/proc/1/fd/1 2>/proc/1/fd/2\n@reboot su -c \"/usr/local/bin/elastic_search_status.sh -w && /usr/local/bin/register-elasticsearch-snapshot-repo.sh\" ${CURATOR_USER} >/proc/1/fd/1 2>/proc/1/fd/2" | crontab -'
 
 ADD shared/bin/cron_env_deb.sh /usr/local/bin/
 ADD shared/bin/elastic_search_status.sh /usr/local/bin/
