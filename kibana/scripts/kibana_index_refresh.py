@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import argparse
 import json
+import re
 import requests
 import os
 import sys
@@ -104,11 +105,116 @@ def main():
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
+    # define field formatting map for Kibana -> Moloch drilldown and other URL drilldowns
+    #
+    # see: https://github.com/idaholab/Malcolm/issues/133
+    #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu
+    #
+    # fieldFormatMap is
+    #    {
+    #        "zeek.orig_h": {
+    #            "id": "drilldown",
+    #            "params": {
+    #                "parsedUrl": {
+    #                    "origin": "https://malcolm.local.lan",
+    #                    "pathname": "/kibana/app/kibana",
+    #                    "basePath": "/kibana"
+    #                },
+    #                "urlTemplates": [
+    #                    null,
+    #                    {
+    #                        "url": "/idkib2mol/zeek.orig_h == {{value}}",
+    #                        "label": "Moloch: zeek.orig_h == {{value}}"
+    #                    }
+    #                ]
+    #            }
+    #        },
+    #        ...
+    #    }
+    fieldFormatMap = {}
+    for field in getFieldsList:
+      if field['name'][:1].isalpha():
+
+        # for Moloch to query by database field name, see moloch issue/PR 1461/1463
+        valQuote = '"' if field['type'] == 'string' else ''
+        valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
+        drilldownInfoParamsUrlTemplateValues = {}
+        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch {}: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
+
+        if (field['type'] == 'ip') or (re.search(r'[_\.-](h|ip)$', field['name'], re.IGNORECASE) is not None):
+          # add drilldown for searching IANA for IP addresses
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.virustotal.com/en/ip-address/{{value}}/information/'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal IP: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'(^|[\b_\.-])(md5|sha(1|256|384|512))\b', field['name'], re.IGNORECASE) is not None:
+          # add drilldown for searching VirusTotal for hash signatures
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.virustotal.com/gui/file/{{value}}/detection'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal Hash: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'(^|[\b_\.-])(hit|signature(_?id))?s?$', field['name'], re.IGNORECASE) is not None:
+          # add drilldown for searching the web for signature IDs
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://duckduckgo.com/?q="{{value}}"'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Web Search: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$', field['name'], re.IGNORECASE) is not None:
+          # add drilldown for searching IANA for ports
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Port Registry: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'^(zeek\.service|protocol?|network\.protocol)$', field['name'], re.IGNORECASE) is not None:
+          # add drilldown for searching IANA for services
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Service Registry: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'^(network\.transport|zeek\.proto|ipProtocol)$', field['name'], re.IGNORECASE) is not None:
+          # add URL link for assigned transport protocol numbers
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Protocol Registry'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'(as\.number|(src|dst)ASN|asn\.(src|dst))$', field['name'], re.IGNORECASE) is not None:
+          # add drilldown for searching ARIN for ASN
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://search.arin.net/rdap/?query={{value}}&searchFilter=asn'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'ARIN ASN: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        elif re.search(r'(^zeek\.filetype$|mime[_\.-]?type)', field['name'], re.IGNORECASE) is not None:
+          # add drilldown for searching mime/media/content types
+          # TODO: '/' in URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/media-types/{{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
+        drilldownInfoParams = {}
+        drilldownInfoParams['urlTemplates'] = drilldownInfoParamsUrlTemplates
+
+        drilldownInfo = {}
+        drilldownInfo['id'] = 'drilldown'
+        drilldownInfo['params'] = drilldownInfoParams
+
+        fieldFormatMap[field['name']] = drilldownInfo
+
     # set the index pattern with our complete list of fields
     putIndexInfo = {}
     putIndexInfo['attributes'] = {}
     putIndexInfo['attributes']['title'] = args.index
     putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
+    putIndexInfo['attributes']['fieldFormatMap'] = json.dumps(fieldFormatMap)
 
     if not args.dryrun:
       putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),

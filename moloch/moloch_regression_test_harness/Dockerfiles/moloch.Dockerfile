@@ -61,9 +61,10 @@ RUN git clone --recursive --depth=1 --single-branch -b "$GITHUB_BRANCH" "$GITHUB
     sudo ln -sfr $MOLOCHDIR/bin/node /usr/local/bin/node && \
     sudo ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     ./easybutton-build.sh && \
-    (make check || true)
+    (make check || true) && \
+    sudo npm -g install jison
 
-ENV PATH="/data:$MOLOCHDIR/bin:${PATH}"
+ENV PATH="/data:$MOLOCHDIR/bin:$MOLOCHDIR/node-v10.21.0-linux-x64/bin:${PATH}"
 
 EXPOSE 8000 8005 8081
 
