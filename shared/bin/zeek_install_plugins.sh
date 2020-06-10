@@ -78,6 +78,7 @@ fi
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
   https://github.com/0xxon/cve-2020-0601
+  https://github.com/0xxon/cve-2020-13777
   https://github.com/amzn/zeek-plugin-bacnet
   https://github.com/amzn/zeek-plugin-enip
   https://github.com/amzn/zeek-plugin-profinet
