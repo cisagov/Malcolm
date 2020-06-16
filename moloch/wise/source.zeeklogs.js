@@ -48,6 +48,7 @@ function ZeekLogs (api, section) {
   this.serviceField = this.api.addField("field:zeek.service;db:zeek.service;kind:termfield;friendly:Service;help:Service");
   this.service_versionField = this.api.addField("field:zeek.service_version;db:zeek.service_version;kind:termfield;friendly:Service Version;help:Service Version");
   this.actionField = this.api.addField("field:zeek.action;db:zeek.action;kind:termfield;friendly:Action;help:Action");
+  this.resultField = this.api.addField("field:zeek.result;db:zeek.result;kind:termfield;friendly:Result;help:Result");
   this.userField = this.api.addField("field:zeek.user;db:zeek.user;kind:termfield;friendly:User;help:User");
   this.passwordField = this.api.addField("field:zeek.password;db:zeek.password;kind:termfield;friendly:Password;help:Password");
   this.freq_score_v1 = this.api.addField("field:zeek.freq_score_v1;db:zeek_dns.freq_score_v1;kind:termfield;friendly:Freq Score v1;help:Freq Score v1");
@@ -863,6 +864,7 @@ function ZeekLogs (api, section) {
     "zeek.resp_l2_oui",
     "zeek.resp_p",
     "zeek.resp_segment",
+    "zeek.result",
     "zeek.service",
     "zeek.service_version",
     "zeek.source_geo.city_name",
@@ -1537,7 +1539,7 @@ function ZeekLogs (api, section) {
     "  if (session.zeek.orig_h || session.zeek.orig_p || session.zeek.orig_l2_addr || session.zeek.resp_h || " +
     "      session.zeek.resp_p || session.zeek.resp_l2_addr || session.zeek.proto || session.zeek.service || " +
     "      session.zeek.service_version || session.zeek.user || session.zeek.password || " +
-    "      session.zeek.action || session.zeek.freq_score_v1 || session.zeek.freq_score_v2 )\n" +
+    "      session.zeek.action || session.zeek.result || session.zeek.freq_score_v1 || session.zeek.freq_score_v2 )\n" +
     "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
     "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
     "      +arrayList(session.zeek, 'orig_l2_addr', 'Originating MAC', 'zeek.orig_l2_addr')\n" +
@@ -1561,6 +1563,7 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek, 'service', 'Service', 'zeek.service')\n" +
     "      +arrayList(session.zeek, 'service_version', 'Service Version', 'zeek.service_version')\n" +
     "      +arrayList(session.zeek, 'action', 'Action', 'zeek.action')\n" +
+    "      +arrayList(session.zeek, 'action', 'Result', 'zeek.result')\n" +
     "      +arrayList(session.zeek, 'user', 'User', 'zeek.user')\n" +
     "      +arrayList(session.zeek, 'password', 'Password', 'zeek.password')\n" +
     "      +arrayList(session.zeek, 'freq_score_v1', 'Freq Score v1', 'zeek.freq_score_v1')\n" +
