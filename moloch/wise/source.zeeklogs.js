@@ -131,6 +131,7 @@ function ZeekLogs (api, section) {
   this.dnp3_fc_requestField = this.api.addField("field:zeek_dnp3.fc_request;db:zeek_dnp3.fc_request;kind:termfield;friendly:Request Function Message;help:Request Function Message");
   this.dnp3_fc_replyField = this.api.addField("field:zeek_dnp3.fc_reply;db:zeek_dnp3.fc_reply;kind:termfield;friendly:Reply Function Message;help:Reply Function Message");
   this.dnp3_iinField = this.api.addField("field:zeek_dnp3.iin;db:zeek_dnp3.iin;kind:termfield;friendly:Internal Indication Number;help:Internal Indication Number");
+  this.dnp3_iin_flagsField = this.api.addField("field:zeek_dnp3.iin_flags;db:zeek_dnp3.iin_flags;kind:termfield;friendly:Internal Indicators;help:Internal Indicators");
 
   // dns.log
   // https://docs.zeek.org/en/stable/scripts/base/protocols/dns/main.zeek.html#type-DNS::Info
@@ -594,6 +595,8 @@ function ZeekLogs (api, section) {
   this.smtp_first_receivedField = this.api.addField("field:zeek_smtp.first_received;db:zeek_smtp.first_received;kind:termfield;friendly:First Received;help:First Received");
   this.smtp_second_receivedField = this.api.addField("field:zeek_smtp.second_received;db:zeek_smtp.second_received;kind:termfield;friendly:Second Received;help:Second Received");
   this.smtp_last_replyField = this.api.addField("field:zeek_smtp.last_reply;db:zeek_smtp.last_reply;kind:termfield;friendly:Last Reply;help:Last Reply");
+  this.smtp_last_reply_codeField = this.api.addField("field:zeek_smtp.last_reply_code;db:zeek_smtp.last_reply_code;kind:termfield;friendly:Last Reply Code;help:Last Reply Code");
+  this.smtp_last_reply_msgField = this.api.addField("field:zeek_smtp.last_reply_msg;db:zeek_smtp.last_reply_msg;kind:termfield;friendly:Last Reply Message;help:Last Reply Message");
   this.smtp_pathField = this.api.addField("field:zeek_smtp.path;db:zeek_smtp.path;kind:termfield;friendly:Tranmission Path;help:Tranmission Path");
   this.smtp_user_agentField = this.api.addField("field:zeek_smtp.user_agent;db:zeek_smtp.user_agent;kind:termfield;friendly:User Agent;help:User Agent");
   this.smtp_tlsField = this.api.addField("field:zeek_smtp.tls;db:zeek_smtp.tls;kind:termfield;friendly:TLS;help:TLS");
@@ -928,6 +931,7 @@ function ZeekLogs (api, section) {
     "zeek_dnp3.fc_reply",
     "zeek_dnp3.fc_request",
     "zeek_dnp3.iin",
+    "zeek_dnp3.iin_flags",
     "zeek_dns.AA",
     "zeek_dns.answers",
     "zeek_dns.qclass",
@@ -1272,6 +1276,8 @@ function ZeekLogs (api, section) {
     "zeek_smtp.in_reply_to",
     "zeek_smtp.is_webmail",
     "zeek_smtp.last_reply",
+    "zeek_smtp.last_reply_code",
+    "zeek_smtp.last_reply_msg",
     "zeek_smtp.mailfrom",
     "zeek_smtp.msg_id",
     "zeek_smtp.path",
@@ -1584,7 +1590,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_conn", "require:zeek_conn;title:Zeek conn.log;fields:zeek_conn.duration,zeek_conn.orig_bytes,zeek_conn.resp_bytes,zeek_conn.conn_state,zeek_conn.conn_state_description,zeek_conn.local_orig,zeek_conn.local_resp,zeek_conn.missed_bytes,zeek_conn.history,zeek_conn.orig_pkts,zeek_conn.orig_ip_bytes,zeek_conn.resp_pkts,zeek_conn.resp_ip_bytes,zeek_conn.tunnel_parents,zeek_conn.vlan,zeek_conn.inner_vlan");
   this.api.addView("zeek_dce_rpc", "require:zeek_dce_rpc;title:Zeek dce_rpc.log;fields:zeek_dce_rpc.rtt,zeek_dce_rpc.named_pipe,zeek_dce_rpc.endpoint,zeek_dce_rpc.operation");
   this.api.addView("zeek_dhcp", "require:zeek_dhcp;title:Zeek dhcp.log;fields:zeek_dhcp.mac,zeek_dhcp.assigned_ip,zeek_dhcp.lease_time,zeek_dhcp.trans_id,zeek_dhcp.client_fqdn,zeek_dhcp.client_message,zeek_dhcp.domain,zeek_dhcp.duration,zeek_dhcp.host_name,zeek_dhcp.msg_types,zeek_dhcp.requested_ip,zeek_dhcp.server_message,zeek_dhcp.client_software,zeek_dhcp.server_software");
-  this.api.addView("zeek_dnp3", "require:zeek_dnp3;title:Zeek dnp3.log;fields:zeek_dnp3.fc_request,zeek_dnp3.fc_reply,zeek_dnp3.iin");
+  this.api.addView("zeek_dnp3", "require:zeek_dnp3;title:Zeek dnp3.log;fields:zeek_dnp3.fc_request,zeek_dnp3.fc_reply,zeek_dnp3.iin,zeek_dnp3.iin_flags");
   this.api.addView("zeek_dns", "require:zeek_dns;title:Zeek dns.log;fields:zeek_dns.trans_id,zeek_dns.rtt,zeek_dns.query,zeek_dns.qclass,zeek_dns.qclass_name,zeek_dns.qtype,zeek_dns.qtype_name,zeek_dns.rcode,zeek_dns.rcode_name,zeek_dns.AA,zeek_dns.TC,zeek_dns.RD,zeek_dns.RA,zeek_dns.Z,zeek_dns.answers,zeek_dns.TTLs,zeek_dns.rejected");
   this.api.addView("zeek_dpd", "require:zeek_dpd;title:Zeek dpd.log;fields:zeek_dpd.service,zeek_dpd.failure_reason");
   this.api.addView("zeek_enip", "require:zeek_enip;title:Zeek enip.log;fields:zeek_enip.command,zeek_enip.length,zeek_enip.session_handle,zeek_enip.status,zeek_enip.sender_context,zeek_enip.options");
@@ -1622,7 +1628,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_smb_cmd", "require:zeek_smb_cmd;title:Zeek smb_cmd.log;fields:zeek_smb_cmd.command,zeek_smb_cmd.sub_command,zeek_smb_cmd.argument,zeek_smb_cmd.status,zeek_smb_cmd.rtt,zeek_smb_cmd.version,zeek_smb_cmd.user,zeek_smb_cmd.tree,zeek_smb_cmd.tree_service");
   this.api.addView("zeek_smb_files", "require:zeek_smb_files;title:Zeek smb_files.log;fields:zeek_smb_files.action,zeek_smb_files.path,zeek_smb_files.name,zeek_smb_files.size,zeek_smb_files.prev_name,zeek_smb_files.times_modified,zeek_smb_files.times_accessed,zeek_smb_files.times_created,zeek_smb_files.times_changed,zeek_smb_files.data_offset_req,zeek_smb_files.data_len_req,zeek_smb_files.data_len_rsp");
   this.api.addView("zeek_smb_mapping", "require:zeek_smb_mapping;title:Zeek smb_mapping.log;fields:zeek_smb_mapping.path,zeek_smb_mapping.resource_type,zeek_smb_mapping.native_file_system,zeek_smb_mapping.share_type");
-  this.api.addView("zeek_smtp", "require:zeek_smtp;title:Zeek smtp.log;fields:zeek_smtp.trans_depth,zeek_smtp.helo,zeek_smtp.mailfrom,zeek_smtp.rcptto,zeek_smtp.date,zeek_smtp.from,zeek_smtp.to,zeek_smtp.cc,zeek_smtp.reply_to,zeek_smtp.msg_id,zeek_smtp.in_reply_to,zeek_smtp.subject,zeek_smtp.x_originating_ip,zeek_smtp.first_received,zeek_smtp.second_received,zeek_smtp.last_reply,zeek_smtp.path,zeek_smtp.user_agent,zeek_smtp.tls,zeek_smtp.is_webmail");
+  this.api.addView("zeek_smtp", "require:zeek_smtp;title:Zeek smtp.log;fields:zeek_smtp.trans_depth,zeek_smtp.helo,zeek_smtp.mailfrom,zeek_smtp.rcptto,zeek_smtp.date,zeek_smtp.from,zeek_smtp.to,zeek_smtp.cc,zeek_smtp.reply_to,zeek_smtp.msg_id,zeek_smtp.in_reply_to,zeek_smtp.subject,zeek_smtp.x_originating_ip,zeek_smtp.first_received,zeek_smtp.second_received,zeek_smtp.last_reply,zeek_smtp.last_reply_code,zeek_smtp.last_reply_msg,zeek_smtp.path,zeek_smtp.user_agent,zeek_smtp.tls,zeek_smtp.is_webmail");
   this.api.addView("zeek_snmp", "require:zeek_snmp;title:Zeek snmp.log;fields:zeek_snmp.duration,zeek_snmp.version,zeek_snmp.community,zeek_snmp.get_requests,zeek_snmp.get_bulk_requests,zeek_snmp.get_responses,zeek_snmp.set_requests,zeek_snmp.display_string,zeek_snmp.up_since");
   this.api.addView("zeek_socks", "require:zeek_socks;title:Zeek socks.log;fields:zeek_socks.version,zeek_socks.server_status,zeek_socks.request_host,zeek_socks.request_name,zeek_socks.request_port,zeek_socks.bound_host,zeek_socks.bound_name,zeek_socks.bound_port");
   this.api.addView("zeek_software", "require:zeek_software;title:Zeek software.log;fields:zeek_software.software_type,zeek_software.name,zeek_software.version_major,zeek_software.version_minor,zeek_software.version_minor2,zeek_software.version_minor3,zeek_software.version_addl,zeek_software.unparsed_version");

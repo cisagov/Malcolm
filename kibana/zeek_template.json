@@ -123,6 +123,7 @@
         "zeek_dnp3.fc_reply": { "type": "keyword" },
         "zeek_dnp3.fc_request": { "type": "keyword" },
         "zeek_dnp3.iin": { "type": "keyword" },
+        "zeek_dnp3.iin_flags": { "type": "keyword" },
         "zeek_dns.AA": { "type": "keyword" },
         "zeek_dns.answers": { "type": "keyword" },
         "zeek_dns.qclass": { "type": "keyword" },
