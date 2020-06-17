@@ -63,7 +63,7 @@ echo "$VM_NAME is running!" >&2
 
 # make sure we can connect via SSH
 echo "Checking SSH availability..." >&2
-until [ "$(vm_execute 'sudo whoami')" == "root" ] ; do
+until vm_execute 'sudo whoami' | grep -q "root" ; do
   echo "Waiting for SSH availability..." >&2
   sleep 1
 done
