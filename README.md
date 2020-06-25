@@ -131,21 +131,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.1.0               xxxxxxxxxxxx        20 hours ago        246MB
-malcolmnetsec/elastalert                            2.1.0               xxxxxxxxxxxx        20 hours ago        408MB
-malcolmnetsec/filebeat-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        474MB
-malcolmnetsec/file-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        386MB
-malcolmnetsec/file-upload                           2.1.0               xxxxxxxxxxxx        20 hours ago        199MB
-malcolmnetsec/freq                                  2.1.0               xxxxxxxxxxxx        20 hours ago        390MB
-malcolmnetsec/htadmin                               2.1.0               xxxxxxxxxxxx        20 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.1.0               xxxxxxxxxxxx        20 hours ago        1.07GB
-malcolmnetsec/logstash-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        1.05GB
-malcolmnetsec/moloch                                2.1.0               xxxxxxxxxxxx        20 hours ago        667MB
-malcolmnetsec/name-map-ui                           2.1.0               xxxxxxxxxxxx        20 hours ago        134MB
-malcolmnetsec/nginx-proxy                           2.1.0               xxxxxxxxxxxx        20 hours ago        118MB
-malcolmnetsec/pcap-capture                          2.1.0               xxxxxxxxxxxx        20 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        156MB
-malcolmnetsec/zeek                                  2.1.0               xxxxxxxxxxxx        20 hours ago        442MB
+malcolmnetsec/curator                               2.1.1               xxxxxxxxxxxx        20 hours ago        246MB
+malcolmnetsec/elastalert                            2.1.1               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/filebeat-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        474MB
+malcolmnetsec/file-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        386MB
+malcolmnetsec/file-upload                           2.1.1               xxxxxxxxxxxx        20 hours ago        199MB
+malcolmnetsec/freq                                  2.1.1               xxxxxxxxxxxx        20 hours ago        390MB
+malcolmnetsec/htadmin                               2.1.1               xxxxxxxxxxxx        20 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.1.1               xxxxxxxxxxxx        20 hours ago        1.07GB
+malcolmnetsec/logstash-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        1.05GB
+malcolmnetsec/moloch                                2.1.1               xxxxxxxxxxxx        20 hours ago        667MB
+malcolmnetsec/name-map-ui                           2.1.1               xxxxxxxxxxxx        20 hours ago        134MB
+malcolmnetsec/nginx-proxy                           2.1.1               xxxxxxxxxxxx        20 hours ago        118MB
+malcolmnetsec/pcap-capture                          2.1.1               xxxxxxxxxxxx        20 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        156MB
+malcolmnetsec/zeek                                  2.1.1               xxxxxxxxxxxx        20 hours ago        442MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
@@ -646,7 +646,7 @@ Installing and configuring Docker to run under Windows must be done manually, ra
     + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All`
     + `Enable-WindowsOptionalFeature -Online -FeatureName Containers –All`
 1. If you have not yet done so after enabling the Windows features, reboot.
-1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows) either by downloading the installer from the official Docker site or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop/2.1.0.2).
+1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows) either by downloading the installer from the official Docker site or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop/2.1.1.2).
 1. Run **Docker Desktop**, click the **Settings** option in the Docker system tray menu and make the following adjustments:
     + **General**
         * Ensure *Start Docker Desktop when you log in* is checked.
@@ -1381,7 +1381,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.1.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.1.1.iso"
 …
 ```
 
@@ -1772,21 +1772,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.1.0               xxxxxxxxxxxx        20 hours ago        246MB
-malcolmnetsec/elastalert                            2.1.0               xxxxxxxxxxxx        20 hours ago        408MB
-malcolmnetsec/filebeat-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        474MB
-malcolmnetsec/file-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        386MB
-malcolmnetsec/file-upload                           2.1.0               xxxxxxxxxxxx        20 hours ago        199MB
-malcolmnetsec/freq                                  2.1.0               xxxxxxxxxxxx        20 hours ago        390MB
-malcolmnetsec/htadmin                               2.1.0               xxxxxxxxxxxx        20 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.1.0               xxxxxxxxxxxx        20 hours ago        1.07GB
-malcolmnetsec/logstash-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        1.05GB
-malcolmnetsec/moloch                                2.1.0               xxxxxxxxxxxx        20 hours ago        667MB
-malcolmnetsec/name-map-ui                           2.1.0               xxxxxxxxxxxx        20 hours ago        134MB
-malcolmnetsec/nginx-proxy                           2.1.0               xxxxxxxxxxxx        20 hours ago        118MB
-malcolmnetsec/pcap-capture                          2.1.0               xxxxxxxxxxxx        20 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        156MB
-malcolmnetsec/zeek                                  2.1.0               xxxxxxxxxxxx        20 hours ago        442MB
+malcolmnetsec/curator                               2.1.1               xxxxxxxxxxxx        20 hours ago        246MB
+malcolmnetsec/elastalert                            2.1.1               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/filebeat-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        474MB
+malcolmnetsec/file-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        386MB
+malcolmnetsec/file-upload                           2.1.1               xxxxxxxxxxxx        20 hours ago        199MB
+malcolmnetsec/freq                                  2.1.1               xxxxxxxxxxxx        20 hours ago        390MB
+malcolmnetsec/htadmin                               2.1.1               xxxxxxxxxxxx        20 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.1.1               xxxxxxxxxxxx        20 hours ago        1.07GB
+malcolmnetsec/logstash-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        1.05GB
+malcolmnetsec/moloch                                2.1.1               xxxxxxxxxxxx        20 hours ago        667MB
+malcolmnetsec/name-map-ui                           2.1.1               xxxxxxxxxxxx        20 hours ago        134MB
+malcolmnetsec/nginx-proxy                           2.1.1               xxxxxxxxxxxx        20 hours ago        118MB
+malcolmnetsec/pcap-capture                          2.1.1               xxxxxxxxxxxx        20 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        156MB
+malcolmnetsec/zeek                                  2.1.1               xxxxxxxxxxxx        20 hours ago        442MB
 docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
