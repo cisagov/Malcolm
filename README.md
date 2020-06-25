@@ -87,6 +87,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         * [CIS benchmark compliance exceptions](#CISExceptions)
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 18.04 LTS](#InstallationExample)
+* [Upgrading Malcolm](#UpgradePlan)
 * [Copyright](#Footer)
 
 ## <a name="QuickStart"></a>Quick start
@@ -130,22 +131,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                2.0.6               xxxxxxxxxxxx        10 minutes ago      491MB
-malcolmnetsec/logstash-oss                          2.0.6               xxxxxxxxxxxx        17 minutes ago      1.4GB
-malcolmnetsec/zeek                                  2.0.6               xxxxxxxxxxxx        17 minutes ago      232MB
-malcolmnetsec/file-upload                           2.0.6               xxxxxxxxxxxx        23 minutes ago      199MB
-malcolmnetsec/pcap-capture                          2.0.6               xxxxxxxxxxxx        23 minutes ago      112MB
-malcolmnetsec/file-monitor                          2.0.6               xxxxxxxxxxxx        25 minutes ago      369MB
-malcolmnetsec/filebeat-oss                          2.0.6               xxxxxxxxxxxx        28 minutes ago      501MB
-malcolmnetsec/kibana-oss                            2.0.6               xxxxxxxxxxxx        28 minutes ago      964MB
-malcolmnetsec/pcap-monitor                          2.0.6               xxxxxxxxxxxx        28 minutes ago      156MB
-malcolmnetsec/curator                               2.0.6               xxxxxxxxxxxx        29 minutes ago      240MB
-malcolmnetsec/nginx-proxy                           2.0.6               xxxxxxxxxxxx        29 minutes ago      54.5MB
-malcolmnetsec/elastalert                            2.0.6               xxxxxxxxxxxx        30 minutes ago      276MB
-malcolmnetsec/htadmin                               2.0.6               xxxxxxxxxxxx        31 minutes ago      256MB
-malcolmnetsec/freq                                  2.0.6               xxxxxxxxxxxx        32 minutes ago      188MB
-malcolmnetsec/name-map-ui                           2.0.6               xxxxxxxxxxxx        35 minutes ago      20MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         825MB
+malcolmnetsec/curator                               2.1.0               xxxxxxxxxxxx        20 hours ago        246MB
+malcolmnetsec/elastalert                            2.1.0               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/filebeat-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        474MB
+malcolmnetsec/file-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        386MB
+malcolmnetsec/file-upload                           2.1.0               xxxxxxxxxxxx        20 hours ago        199MB
+malcolmnetsec/freq                                  2.1.0               xxxxxxxxxxxx        20 hours ago        390MB
+malcolmnetsec/htadmin                               2.1.0               xxxxxxxxxxxx        20 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.1.0               xxxxxxxxxxxx        20 hours ago        1.07GB
+malcolmnetsec/logstash-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        1.05GB
+malcolmnetsec/moloch                                2.1.0               xxxxxxxxxxxx        20 hours ago        667MB
+malcolmnetsec/name-map-ui                           2.1.0               xxxxxxxxxxxx        20 hours ago        134MB
+malcolmnetsec/nginx-proxy                           2.1.0               xxxxxxxxxxxx        20 hours ago        118MB
+malcolmnetsec/pcap-capture                          2.1.0               xxxxxxxxxxxx        20 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        156MB
+malcolmnetsec/zeek                                  2.1.0               xxxxxxxxxxxx        20 hours ago        442MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
 You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -215,7 +216,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
-    * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin
+    * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
 ## <a name="Protocols"></a>Supported Protocols
@@ -259,6 +260,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
+|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/aol/moloch/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
 
 Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).
@@ -1379,7 +1381,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.0.6.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.1.0.iso"
 …
 ```
 
@@ -1770,22 +1772,22 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/moloch                                2.0.6               xxxxxxxxxxxx        27 minutes ago      517MB
-malcolmnetsec/zeek                                  2.0.6               xxxxxxxxxxxx        27 minutes ago      489MB
-malcolmnetsec/htadmin                               2.0.6               xxxxxxxxxxxx        2 hours ago         180MB
-malcolmnetsec/nginx-proxy                           2.0.6               xxxxxxxxxxxx        4 hours ago         53MB
-malcolmnetsec/file-upload                           2.0.6               xxxxxxxxxxxx        24 hours ago        198MB
-malcolmnetsec/pcap-capture                          2.0.6               xxxxxxxxxxxx        24 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.0.6               xxxxxxxxxxxx        24 hours ago        156MB
-malcolmnetsec/file-monitor                          2.0.6               xxxxxxxxxxxx        24 hours ago        355MB
-malcolmnetsec/logstash-oss                          2.0.6               xxxxxxxxxxxx        25 hours ago        1.24GB
-malcolmnetsec/curator                               2.0.6               xxxxxxxxxxxx        25 hours ago        303MB
-malcolmnetsec/kibana-oss                            2.0.6               xxxxxxxxxxxx        33 hours ago        944MB
-malcolmnetsec/filebeat-oss                          2.0.6               xxxxxxxxxxxx        11 days ago         459MB
-malcolmnetsec/elastalert                            2.0.6               xxxxxxxxxxxx        11 days ago         276MB
-malcolmnetsec/freq                                  2.0.6               xxxxxxxxxxxx        11 days ago         188MB
-malcolmnetsec/name-map-ui                           2.0.6               xxxxxxxxxxxx        35 minutes ago      20MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        5 weeks ago         769MB
+malcolmnetsec/curator                               2.1.0               xxxxxxxxxxxx        20 hours ago        246MB
+malcolmnetsec/elastalert                            2.1.0               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/filebeat-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        474MB
+malcolmnetsec/file-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        386MB
+malcolmnetsec/file-upload                           2.1.0               xxxxxxxxxxxx        20 hours ago        199MB
+malcolmnetsec/freq                                  2.1.0               xxxxxxxxxxxx        20 hours ago        390MB
+malcolmnetsec/htadmin                               2.1.0               xxxxxxxxxxxx        20 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.1.0               xxxxxxxxxxxx        20 hours ago        1.07GB
+malcolmnetsec/logstash-oss                          2.1.0               xxxxxxxxxxxx        20 hours ago        1.05GB
+malcolmnetsec/moloch                                2.1.0               xxxxxxxxxxxx        20 hours ago        667MB
+malcolmnetsec/name-map-ui                           2.1.0               xxxxxxxxxxxx        20 hours ago        134MB
+malcolmnetsec/nginx-proxy                           2.1.0               xxxxxxxxxxxx        20 hours ago        118MB
+malcolmnetsec/pcap-capture                          2.1.0               xxxxxxxxxxxx        20 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.1.0               xxxxxxxxxxxx        20 hours ago        156MB
+malcolmnetsec/zeek                                  2.1.0               xxxxxxxxxxxx        20 hours ago        442MB
+docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1833,6 +1835,74 @@ logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully 
 ```
 
 You can now open a web browser and navigate to one of the [Malcolm user interfaces](#UserInterfaceURLs).
+
+## <a name="UpgradePlan"></a>Upgrading Malcolm
+
+At this time there is not an "official" upgrade procedure to get from one version of Malcolm to the next, as it may vary from platform to platform. However, the process is fairly simple can be done by following these steps:
+
+### Update the underlying system
+
+You may wish to get the official updates for the underlying system's software packages before you proceed. Consult the documentation of your operating system for how to do this.
+
+### Scenario 1: Malcolm is a GitHub clone
+
+If you checked out a working copy of the Malcolm repository from GitHub with a `git clone` command, here are the basic steps to performing an upgrade:
+
+1. stop Malcolm
+    * `./scripts/stop`
+2. stash changes to `docker-compose.yml` and other files
+    * `git stash save "pre-upgrade Malcolm configuration changes"`
+3. pull changes from GitHub repository
+    * `git pull --rebase`
+4. pull new Docker images (this will take a while)
+    * `docker-compose pull`
+5. apply saved configuration change stashed earlier
+    * `git stash pop`
+6. if you see `Merge conflict` messages, resolve the [conflicts](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts) with your favorite text editor
+7. you may wish to re-run `install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning) in case there are any new `docker-compose.yml` parameters for Malcolm that need to be set up
+8. start Malcolm
+    * `./scripts/start`
+9. you may be prompted to [configure authentication](#AuthSetup) if there are new authentication-related files that need to be generated
+    * you probably do not need to re-generate self-signed certificates
+
+### Scenario 2: Malcolm was installed from a packaged tarball
+
+If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/malcolm#Packager), here are the basic steps to perform an upgrade:
+
+1. stop Malcolm
+    * `./scripts/stop`
+2. uncompress the new pre-packaged installation files (using `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` as an example, the file and/or directory names will be different depending on the release)
+    * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
+3. backup current Malcolm scripts, configuration files and certificates
+    * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
+    * `cp -r elastalert/ filebeat/ htadmin/ logstash/ nginx/ auth.env cidr-map.txt docker-compose.yml host-map.txt net-map.json ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
+3. replace scripts and local documentation in your existing installation with the new ones
+    * `rm -rf ./scripts ./README.md`
+    * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
+4. replace (overwrite) `docker-compose.yml` file with new version
+    * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
+5. re-run `python3 ./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
+6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](#DockerComposeYml) you may have edited by hand in `docker-compose.yml` that's not prompted for in `install.py --configure`)
+7. pull the new docker images (this will take a while)
+    * `docker-compose pull` to pull them from Docker Hub or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
+8. start Malcolm
+    * `./scripts/start`
+9. you may be prompted to [configure authentication](#AuthSetup) if there are new authentication-related files that need to be generated
+    * you probably do not need to re-generate self-signed certificates
+
+### Post-upgrade
+
+#### Monitoring Malcolm
+
+If you are technically-minded, you may wish to follow the debug output provided by `./scripts/start` (or `./scripts/logs` if you need to re-open the log stream after you've closed it), although there is a lot there and it may be hard to distinguish whether or not something is okay.
+
+Running `docker-compose ps -a` should give you a good idea if all of Malcolm's Docker containers started up and, in some cases, may be able to indicate if the containers are "healthy" or not.
+
+After upgrading following one of the previous outlines, give Malcolm several minutes to get started. Once things are up and running, open one of Malcolm's [web interfaces](#UserInterfaceURLs) to verify that things are working.
+
+#### Loading new Kibana dashboards and visualizations
+
+Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
 
 ## <a name="Footer"></a>Copyright
 

@@ -3,7 +3,7 @@ FROM debian:buster-slim AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV GITHUB_URL "https://github.com/aol/moloch/"
-ENV GITHUB_BRANCH "v2.3.0"
+ENV GITHUB_BRANCH "master"
 ENV MOLOCHDIR "/data/moloch"
 ENV MOLOCHUSER "moloch"
 
@@ -56,14 +56,15 @@ USER $MOLOCHUSER
 RUN git clone --recursive --depth=1 --single-branch -b "$GITHUB_BRANCH" "$GITHUB_URL" "$MOLOCHDIR" && \
     cd "$MOLOCHDIR" && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    export PATH="$MOLOCHDIR/bin:${PATH}" && \
+    export PATH="$MOLOCHDIR/bin:$MOLOCHDIR/node-v10.21.0-linux-x64/bin:${PATH}" && \
     sudo ln -sfr $MOLOCHDIR/bin/npm /usr/local/bin/npm && \
     sudo ln -sfr $MOLOCHDIR/bin/node /usr/local/bin/node && \
     sudo ln -sfr $MOLOCHDIR/bin/npx /usr/local/bin/npx && \
     ./easybutton-build.sh && \
-    (make check || true)
+    (make check || true) && \
+    sudo npm -g install jison
 
-ENV PATH="/data:$MOLOCHDIR/bin:${PATH}"
+ENV PATH="/data:$MOLOCHDIR/bin:$MOLOCHDIR/node-v10.21.0-linux-x64/bin:${PATH}"
 
 EXPOSE 8000 8005 8081
 

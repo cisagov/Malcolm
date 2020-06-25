@@ -64,7 +64,7 @@ The following bash script was used to download, build and install [netsniff-ng](
 ```bash
 #!/bin/bash
 
-NETSNIFF_VER="0.6.6"
+NETSNIFF_VER="0.6.7"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
 # Install netsniff-ng
@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Moloch from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.2.3](https://github.com/aol/moloch/releases/tag/v2.2.3). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.3.1](https://github.com/aol/moloch/releases/tag/v2.3.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.2.3"
+MOLOCH_VERSION="2.3.1"
 MOLOCHDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
@@ -321,7 +321,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.5](https://github.com/zeek/zeek/releases/tag/v3.0.5). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.7](https://github.com/zeek/zeek/releases/tag/v3.0.7). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
@@ -330,7 +330,7 @@ The following bash script was used to download, [build and install](https://docs
 ```bash
 #!/bin/bash
 
-ZEEK_VER="3.0.5"
+ZEEK_VER="3.0.7"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
