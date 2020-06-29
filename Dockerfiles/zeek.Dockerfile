@@ -98,7 +98,13 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/zeek'
 LABEL org.opencontainers.image.description='Malcolm container providing Zeek'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV PUSER "zeek"
+ENV PGROUP "zeek"
+
 ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
 
 ENV LLVM_VERSION "10"
 ENV ZEEK_DIR "/opt/zeek"
@@ -144,6 +150,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
@@ -165,7 +172,6 @@ RUN mkdir -p /tmp/logs && \
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
 #Whether or not to run "zeek -r XXXXX.pcap local" on each pcap file
-ARG ZEEKUSER=zeek
 ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
 ARG ZEEK_EXTRACTOR_MODE=none
@@ -175,7 +181,6 @@ ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
 
 ENV AUTO_TAG $AUTO_TAG
-ENV ZEEKUSER $ZEEKUSER
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
@@ -184,12 +189,14 @@ ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
-RUN groupadd --gid 1000 ${ZEEKUSER} && \
-    useradd -M --uid 1000 --gid 1000 --home /nonexistant ${ZEEKUSER} && \
+RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
+    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Update Path
 ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

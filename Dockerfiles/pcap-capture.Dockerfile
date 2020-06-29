@@ -10,8 +10,13 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/pcap-capture'
 LABEL org.opencontainers.image.description='Malcolm container providing network traffic capture capabilities via netsniff-ng and tcpdump'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV PUSER "pcap"
+ENV PGROUP "pcap"
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
 
 ARG PCAP_ENABLE_TCPDUMP=false
 ARG PCAP_ENABLE_NETSNIFF=false
@@ -24,7 +29,6 @@ ARG PCAP_ROTATE_MEGABYTES=500
 ARG PCAP_PATH=/pcap
 ARG PCAP_FILTER=
 ARG PCAP_SNAPLEN=0
-ARG PCAP_USER=pcap
 
 ENV PCAP_ENABLE_TCPDUMP $PCAP_ENABLE_TCPDUMP
 ENV PCAP_ENABLE_NETSNIFF $PCAP_ENABLE_NETSNIFF
@@ -36,8 +40,8 @@ ENV PCAP_ROTATE_MEGABYTES $PCAP_ROTATE_MEGABYTES
 ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_FILTER $PCAP_FILTER
 ENV PCAP_SNAPLEN $PCAP_SNAPLEN
-ENV PCAP_USER $PCAP_USER
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD pcap-capture/supervisord.conf /etc/supervisord.conf
 ADD pcap-capture/scripts/*.sh /usr/local/bin/
 ADD pcap-capture/templates/*.template /etc/supervisor.d/
@@ -55,17 +59,19 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /var/log/supervisor /etc/supervisor.d && \
-    groupadd --gid 1000 $PCAP_USER && \
-      useradd -M --uid 1000 --gid 1000 $PCAP_USER && \
-    chown root:$PCAP_USER /sbin/ethtool && \
+    groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+    chown root:${PGROUP} /sbin/ethtool && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
-    chown root:$PCAP_USER /usr/sbin/tcpdump && \
+    chown root:${PGROUP} /usr/sbin/tcpdump && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump && \
-    chown root:$PCAP_USER /usr/sbin/netsniff-ng && \
+    chown root:${PGROUP} /usr/sbin/netsniff-ng && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng && \
     chmod 755 /usr/local/bin/*.sh
 
 WORKDIR "$PCAP_PATH"
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/local/bin/supervisor.sh"]
 

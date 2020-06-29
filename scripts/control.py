@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import argparse
 import errno
+import getpass
 import glob
 import os
 import platform
@@ -540,6 +541,10 @@ def main():
     sys.tracebacklimit = 0
 
   os.chdir(MalcolmPath)
+
+  # don't run this as root
+  if (pyPlatform != PLATFORM_WINDOWS) and (('SUDO_UID' in os.environ.keys()) or (getpass.getuser() == 'root')):
+    raise Exception('{} should not be run as root'.format(ScriptName))
 
   # make sure docker/docker-compose is available
   dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker.exe')) else 'docker'

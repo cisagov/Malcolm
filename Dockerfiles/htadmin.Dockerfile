@@ -10,6 +10,10 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/htadmin'
 LABEL org.opencontainers.image.description='Malcolm container providing htadmin for managing login accounts in an htpasswd file'
 
+ARG DEFAULT_UID=33
+ARG DEFAULT_GID=33
+ENV PUSER "www-data"
+ENV PGROUP "www-data"
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -58,15 +62,14 @@ RUN apt-get update && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.ttf" && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff" && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff2" && \
-  usermod --non-unique --uid 1000 www-data && \
-    groupmod --non-unique --gid 1000 www-data && \
-    chown -R www-data:www-data /var/www && \
+  chown -R ${PUSER}:${PGROUP} /var/www && \
   apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
     make libmcrypt-dev php-pear php-dev && \
   apt-get autoremove -y -q && \
   apt-get clean -y -q && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/html
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD docs/images/favicon/favicon.ico /var/www/htadmin/
 ADD htadmin/supervisord.conf /supervisord.conf
 ADD htadmin/src /var/www/htadmin/
@@ -74,6 +77,8 @@ ADD htadmin/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
 ADD htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
 
 EXPOSE 80
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

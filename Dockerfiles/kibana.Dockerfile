@@ -10,6 +10,12 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/kibana-oss'
 LABEL org.opencontainers.image.description='Malcolm container providing Kibana (the Apache-licensed variant)'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV PUSER "kibana"
+ENV PGROUP "kibana"
+
+ENV TERM xterm
 
 ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
 ARG CREATE_ES_MOLOCH_SESSION_INDEX="true"
@@ -141,6 +147,7 @@ RUN sed -i "s/d\.name\.split/d\.name\.toString()\.split/" /usr/share/kibana/src/
       rm -rf /tmp/kibana-swimlane.zip /tmp/kibana && \
     rm -rf /tmp/plugin-patches /tmp/elastalert-server-routes.js /tmp/npm-*
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
 ADD kibana/kibana-standard.yml /opt/kibana/config/kibana-standard.yml
@@ -152,11 +159,14 @@ ADD shared/bin/cron_env_centos.sh /data/
 ADD shared/bin/elastic_search_status.sh /data/
 
 RUN chmod 755 /data/*.sh /data/*.py && \
-    chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
+    chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 10 * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -)
+    (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh ${PUSER} >/dev/null 2>&1\n0 10 * * * su -c /data/kibana_index_refresh.py ${PUSER} >/dev/null 2>&1\n" | crontab -)
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+
 
 # to be populated at build-time:
 ARG BUILD_DATE

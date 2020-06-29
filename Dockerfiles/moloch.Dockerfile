@@ -84,7 +84,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
 
 FROM debian:buster-slim
 
-
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -94,8 +93,13 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/moloch'
 LABEL org.opencontainers.image.description='Malcolm container providing Moloch'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV PUSER "moloch"
+ENV PGROUP "moloch"
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
 
 ARG ES_HOST=elasticsearch
 ARG ES_PORT=9200
@@ -124,7 +128,6 @@ ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
 ENV MOLOCH_PASSWORD "ignored"
 ENV MOLOCHDIR "/data/moloch"
-ENV MOLOCHUSER "moloch"
 ENV MOLOCH_ANALYZE_PCAP_THREADS $MOLOCH_ANALYZE_PCAP_THREADS
 ENV WISE $WISE
 ENV VIEWER $VIEWER
@@ -176,6 +179,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD moloch/scripts /data/
 ADD shared/bin/pcap_moloch_and_zeek_processor.py /data/
 ADD shared/bin/pcap_utils.py /data/
@@ -200,15 +204,15 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
   curl -s -S -L -o $MOLOCHDIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
   curl -s -S -L -o $MOLOCHDIR/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
 
-RUN groupadd --gid 1000 $MOLOCHUSER && \
-    useradd -M --uid 1000 --gid 1000 --home $MOLOCHDIR $MOLOCHUSER && \
+RUN groupadd --gid $DEFAULT_GID $PGROUP && \
+    useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $MOLOCHDIR $PUSER && \
     chmod 755 /data/*.sh && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
     sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" $MOLOCHDIR/bin/Configure && \
     sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" $MOLOCHDIR/bin/Configure && \
     chmod u+s $MOLOCHDIR/bin/moloch-capture && \
-    chown -R 1000:1000 $MOLOCHDIR/logs
+    chown -R $PUSER:$PGROUP $MOLOCHDIR/logs
 
 #Update Path
 ENV PATH="/data:$MOLOCHDIR/bin:${PATH}"
@@ -216,7 +220,8 @@ ENV PATH="/data:$MOLOCHDIR/bin:${PATH}"
 EXPOSE 8000 8005 8081
 WORKDIR $MOLOCHDIR
 
-# ENTRYPOINT ["/data/startmoloch.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 

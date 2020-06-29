@@ -10,12 +10,19 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/name-map-ui'
 LABEL org.opencontainers.image.description='Malcolm container providing a user interface for mapping names to network hosts and subnets'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV PUSER "nginxsrv"
+ENV PGROUP "nginxsrv"
+
+ENV TERM xterm
+
 ENV JQUERY_VERSION 1.6.4
 ENV LISTJS_VERSION v1.5.0
 
 RUN apk --no-cache add bash php7 php7-fpm php7-mysqli php7-json php7-openssl php7-curl php7-fileinfo \
     php7-zlib php7-xml php7-phar php7-intl php7-dom php7-xmlreader php7-ctype php7-session \
-    php7-mbstring php7-gd nginx supervisor curl inotify-tools file psmisc
+    php7-mbstring php7-gd nginx supervisor curl inotify-tools file psmisc shadow
 
 COPY name-map-ui/config/nginx.conf /etc/nginx/nginx.conf
 COPY name-map-ui/config/fpm-pool.conf /etc/php7/php-fpm.d/www.conf
@@ -32,29 +39,37 @@ RUN curl -sSL -o /tmp/jquery.min.js "https://code.jquery.com/jquery-${JQUERY_VER
     mv /tmp/jquery.min.js /tmp/list.min.js ./ && \
     chmod 644 ./jquery.min.js ./list.min.js && \
     ln -s . name-map-ui && \
-    addgroup -g 1000 nginxsrv ; \
-    adduser -D -H -u 1000 -h /var/www/html -s /sbin/nologin -G nginxsrv -g nginxsrv nginxsrv ; \
-    addgroup nginxsrv nginx ; \
-    addgroup nginxsrv shadow ; \
-    chown -R nginxsrv.nginxsrv /var/www/html && \
-    chown -R nginxsrv.nginxsrv /run && \
-    chown -R nginxsrv.nginxsrv /var/lib/nginx && \
-    chown -R nginxsrv.nginxsrv /var/log/nginx && \
+    addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
+    adduser -D -H -u ${DEFAULT_UID} -h /var/www/html -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
+    addgroup ${PUSER} nginx ; \
+    addgroup ${PUSER} shadow ; \
+    chown -R ${PUSER}.${PGROUP} /var/www/html && \
+    chown -R ${PUSER}.${PGROUP} /run && \
+    chown -R ${PUSER}.${PGROUP} /var/lib/nginx && \
+    chown -R ${PUSER}.${PGROUP} /var/log/nginx && \
     chmod 755 /usr/local/bin/*.sh
 
 VOLUME /var/www/html
 
-USER nginxsrv
+USER ${PUSER}
 
 WORKDIR /var/www/html
 
-COPY --chown=1000 name-map-ui/site/ /var/www/html/
-COPY --chown=1000 docs/images/logo/Malcolm_banner.png /var/www/html/
-COPY --chown=1000 docs/images/favicon/favicon.ico /var/www/html/
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chown=${DEFAULT_UID} name-map-ui/site/ /var/www/html/
+COPY --chown=${DEFAULT_UID} docs/images/logo/Malcolm_banner.png /var/www/html/
+COPY --chown=${DEFAULT_UID} docs/images/favicon/favicon.ico /var/www/html/
 
 EXPOSE 8080
 
+USER root
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "chown", "-R", "${PUSER}.${PGROUP}", "/var/www/html/" ]
+
+USER ${PUSER}
+
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+
 
 # to be populated at build-time:
 ARG BUILD_DATE

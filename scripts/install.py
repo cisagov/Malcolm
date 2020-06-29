@@ -31,7 +31,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION="1.25.1"
+DOCKER_COMPOSE_INSTALL_VERSION="1.26.0"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88' # used to verify GPG key for Docker Debian repository
 

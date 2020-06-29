@@ -5,6 +5,11 @@ version: '3.7'
 ################################################################################
 # Commonly tweaked configuration options
 #-------------------------------------------------------------------------------
+x-process-variables: &process-variables
+  # docker containers will run processes as unprivileged users with UID:GID
+  PUID : 1000
+  PGID : 1000
+
 x-auth-variables: &auth-variables
   # authentication method: encrypted HTTP basic authentication ('true') vs LDAP ('false')
   NGINX_BASIC_AUTH : 'true'
@@ -107,6 +112,7 @@ services:
     restart: "no"
     hostname: elasticsearch
     environment:
+      << : *process-variables
       logger.level : 'WARN'
       bootstrap.memory_lock : 'true'
       ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
@@ -139,6 +145,7 @@ services:
     restart: "no"
     hostname: kibana
     environment:
+      << : *process-variables
       << : *kibana-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
@@ -162,6 +169,7 @@ services:
     restart: "no"
     hostname: elastalert
     environment:
+      << : *process-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
@@ -187,6 +195,7 @@ services:
     restart: "no"
     hostname: curator
     environment:
+      << : *process-variables
       << : *curator-variables
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
@@ -203,6 +212,7 @@ services:
     restart: "no"
     hostname: logstash
     environment:
+      << : *process-variables
       << : *logstash-variables
       << : *common-beats-variables
       << : *common-lookup-variables
@@ -233,6 +243,7 @@ services:
     restart: "no"
     hostname: filebeat
     environment:
+      << : *process-variables
       << : *nginx-variables
       << : *common-upload-variables
       << : *common-beats-variables
@@ -269,6 +280,7 @@ services:
     env_file:
       - ./auth.env
     environment:
+      << : *process-variables
       << : *common-upload-variables
       << : *moloch-variables
       MOLOCH_VERSION : '2.3.1'
@@ -303,6 +315,7 @@ services:
     restart: "no"
     hostname: zeek
     environment:
+      << : *process-variables
       << : *common-upload-variables
       << : *zeek-variables
     ulimits:
@@ -326,6 +339,7 @@ services:
     restart: "no"
     hostname: filemon
     environment:
+      << : *process-variables
       << : *zeek-variables
     expose:
       - 3310
@@ -352,6 +366,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
+      << : *process-variables
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
@@ -366,6 +381,7 @@ services:
     restart: "no"
     hostname: pcapmon
     environment:
+      << : *process-variables
       << : *common-upload-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
     depends_on:
@@ -388,6 +404,7 @@ services:
     env_file:
       - ./auth.env
     environment:
+      << : *process-variables
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
@@ -409,6 +426,7 @@ services:
     restart: "no"
     hostname: htadmin
     environment:
+      << : *process-variables
       << : *auth-variables
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     expose:
@@ -428,6 +446,7 @@ services:
     restart: "no"
     hostname: freq
     environment:
+      << : *process-variables
       << : *common-lookup-variables
       VIRTUAL_HOST : 'freq.malcolm.local'
     expose:
@@ -443,6 +462,7 @@ services:
     restart: "no"
     hostname: name-map-ui
     environment:
+      << : *process-variables
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     expose:
       - 8080
@@ -461,6 +481,7 @@ services:
     restart: "no"
     hostname: nginx-proxy
     environment:
+      << : *process-variables
       << : *auth-variables
       << : *nginx-variables
     depends_on:
