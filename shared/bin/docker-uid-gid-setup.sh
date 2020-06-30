@@ -1,23 +1,17 @@
 #!/bin/sh
 
-# todo: in case I need to add distro detection
-#
-# detect_linux_distro() {
-#   if [ $(command -v lsb_release) ]; then
-#     DISTRO=$(lsb_release -is)
-#   elif [ -f /etc/os-release ]; then
-#     DISTRO=$(sed -n -e 's/^NAME="\(.*\)\"/\1/p' /etc/os-release)
-#   else
-#     DISTRO=''
-#   fi
-#   echo $DISTRO
-# }
-
 set -e
 
-usermod --non-unique --uid ${PUID:-${DEFAULT_UID}} ${PUSER}
-groupmod --non-unique --gid ${PGID:-${DEFAULT_GID}} ${PGROUP}
+ENTRYPOINT_ARGS=("$@")
+USER_HOME="$(getent passwd ${PUSER} | cut -d: -f6)"
 
-su - ${PUSER}
+usermod --non-unique --uid ${PUID:-${DEFAULT_UID}} ${PUSER} 2>&1
+groupmod --non-unique --gid ${PGID:-${DEFAULT_GID}} ${PGROUP} 2>&1
 
-exec "$@"
+su --shell $(readlink /proc/$$/exe) --preserve-environment ${PUSER} << EOF
+export USER="${PUSER}"
+export HOME="${USER_HOME}"
+whoami
+id
+"${ENTRYPOINT_ARGS[@]}"
+EOF

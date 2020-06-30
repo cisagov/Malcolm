@@ -133,6 +133,7 @@ $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/curator                               2.1.1               xxxxxxxxxxxx        20 hours ago        246MB
 malcolmnetsec/elastalert                            2.1.1               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/elasticsearch-oss                     2.1.1               xxxxxxxxxxxx        20 hours ago        693MB
 malcolmnetsec/filebeat-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        474MB
 malcolmnetsec/file-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        386MB
 malcolmnetsec/file-upload                           2.1.1               xxxxxxxxxxxx        20 hours ago        199MB
@@ -146,7 +147,6 @@ malcolmnetsec/nginx-proxy                           2.1.1               xxxxxxxx
 malcolmnetsec/pcap-capture                          2.1.1               xxxxxxxxxxxx        20 hours ago        111MB
 malcolmnetsec/pcap-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        156MB
 malcolmnetsec/zeek                                  2.1.1               xxxxxxxxxxxx        20 hours ago        442MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
 You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
@@ -327,6 +327,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 
 * `malcolmnetsec/curator` (based on `debian:buster-slim`)
 * `malcolmnetsec/elastalert` (based on `bitsensor/elastalert`)
+* `malcolmnetsec/elasticsearch-oss` (based on `docker.elastic.co/elasticsearch/elasticsearch-oss`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
@@ -340,10 +341,6 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
-
-Additionally, the command will pull from Docker Hub:
-
-* `docker.elastic.co/elasticsearch/elasticsearch-oss`
 
 ## <a name="Packager"></a>Pre-Packaged installation files
 
@@ -1774,6 +1771,7 @@ user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/curator                               2.1.1               xxxxxxxxxxxx        20 hours ago        246MB
 malcolmnetsec/elastalert                            2.1.1               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/elasticsearch-oss                     2.1.1               xxxxxxxxxxxx        20 hours ago        693MB
 malcolmnetsec/filebeat-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        474MB
 malcolmnetsec/file-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        386MB
 malcolmnetsec/file-upload                           2.1.1               xxxxxxxxxxxx        20 hours ago        199MB
@@ -1787,7 +1785,6 @@ malcolmnetsec/nginx-proxy                           2.1.1               xxxxxxxx
 malcolmnetsec/pcap-capture                          2.1.1               xxxxxxxxxxxx        20 hours ago        111MB
 malcolmnetsec/pcap-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        156MB
 malcolmnetsec/zeek                                  2.1.1               xxxxxxxxxxxx        20 hours ago        442MB
-docker.elastic.co/elasticsearch/elasticsearch-oss   7.6.2               xxxxxxxxxxxx        20 hours ago        693MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

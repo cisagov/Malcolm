@@ -12,6 +12,8 @@ LABEL org.opencontainers.image.description='Malcolm container providing htadmin 
 
 ARG DEFAULT_UID=33
 ARG DEFAULT_GID=33
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "www-data"
 ENV PGROUP "www-data"
 

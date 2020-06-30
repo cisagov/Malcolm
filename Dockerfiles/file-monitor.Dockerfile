@@ -12,6 +12,8 @@ LABEL org.opencontainers.image.description='Malcolm container for scanning files
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "monitor"
 ENV PGROUP "monitor"
 

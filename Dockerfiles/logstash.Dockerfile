@@ -35,6 +35,8 @@ LABEL org.opencontainers.image.description='Malcolm container providing Logstash
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "logstash"
 ENV PGROUP "logstash"
 

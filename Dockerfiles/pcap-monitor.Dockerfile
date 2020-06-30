@@ -12,6 +12,8 @@ LABEL org.opencontainers.image.description='Malcolm container watching for captu
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "watcher"
 ENV PGROUP "watcher"
 

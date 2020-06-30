@@ -12,6 +12,8 @@ LABEL org.opencontainers.image.description='Malcolm container providing an inter
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "freq"
 ENV PGROUP "freq"
 

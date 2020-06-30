@@ -14,6 +14,8 @@ FROM alpine:3.11 as stunnel_build
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=300
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "builder"
 ENV PGROUP "abuild"
 
@@ -57,6 +59,8 @@ LABEL org.opencontainers.image.description='Malcolm container providing an NGINX
 
 ARG DEFAULT_UID=101
 ARG DEFAULT_GID=101
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginx"
 ENV PGROUP "nginx"
 
