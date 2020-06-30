@@ -1,4 +1,4 @@
-FROM mmguero/elastalert:2.0.5
+FROM docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.2
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -7,38 +7,22 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/elastalert'
-LABEL org.opencontainers.image.description='Malcolm container providing an alerting framework for Elasticsearch'
+LABEL org.opencontainers.image.title='malcolmnetsec/elasticsearch-oss'
+LABEL org.opencontainers.image.description='Malcolm container providing Elasticsearch (the Apache-licensed variant)'
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
 ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "node"
-ENV PGROUP "node"
-ENV PUSER_PRIV_DROP true
+ENV PUSER "elasticsearch"
+ENV PGROUP "elasticsearch"
 
 ENV TERM xterm
 
-USER root
-
-RUN apk update && \
-    apk add bash curl shadow && \
-    rm -rf /var/cache/apk/*
-
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD elastalert/elastalert-start.sh /usr/local/bin/
-ADD shared/bin/elastic_search_status.sh /usr/bin/
 
-RUN chmod +x /usr/local/bin/elastalert-start.sh && \
-    mkdir -p /opt/elastalert/server_data/tests && \
-    chown -R ${PUSER}:${PGROUP} /opt
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
 
-VOLUME ["/opt/elastalert/server_data"]
-
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
-
-CMD ["/usr/local/bin/elastalert-start.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

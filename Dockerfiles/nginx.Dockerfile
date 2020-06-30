@@ -66,6 +66,8 @@ ENV PGROUP "nginx"
 
 ENV TERM xterm
 
+USER root
+
 # authentication method: encrypted HTTP basic authentication ('true') vs nginx-auth-ldap ('false')
 ARG NGINX_BASIC_AUTH=true
 

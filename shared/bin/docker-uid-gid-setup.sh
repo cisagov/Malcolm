@@ -5,13 +5,20 @@ set -e
 unset ENTRYPOINT_CMD
 unset ENTRYPOINT_ARGS
 [ "$#" -ge 1 ] && ENTRYPOINT_CMD="$1" && [ "$#" -gt 1 ] && shift 1 && ENTRYPOINT_ARGS=( "$@" )
-USER_HOME="$(getent passwd ${PUSER} | cut -d: -f6)"
 
 usermod --non-unique --uid ${PUID:-${DEFAULT_UID}} ${PUSER} 2>&1
 groupmod --non-unique --gid ${PGID:-${DEFAULT_GID}} ${PGROUP} 2>&1
 
-su --shell /bin/bash --preserve-environment ${PUSER} << EOF
-export USER="${PUSER}"
+if [[ "$PUSER_PRIV_DROP" == "true" ]]; then
+  EXEC_USER="${PUSER}"
+  USER_HOME="$(getent passwd ${PUSER} | cut -d: -f6)"
+else
+  EXEC_USER="${USER:-root}"
+  USER_HOME="${HOME:-/root}"
+fi
+
+su --shell /bin/bash --preserve-environment ${EXEC_USER} << EOF
+export USER="${EXEC_USER}"
 export HOME="${USER_HOME}"
 whoami
 id

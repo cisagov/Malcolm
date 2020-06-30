@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginxsrv"
 ENV PGROUP "nginxsrv"
+ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
@@ -45,15 +46,13 @@ RUN curl -sSL -o /tmp/jquery.min.js "https://code.jquery.com/jquery-${JQUERY_VER
     adduser -D -H -u ${DEFAULT_UID} -h /var/www/html -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
     addgroup ${PUSER} nginx ; \
     addgroup ${PUSER} shadow ; \
-    chown -R ${PUSER}.${PGROUP} /var/www/html && \
-    chown -R ${PUSER}.${PGROUP} /run && \
-    chown -R ${PUSER}.${PGROUP} /var/lib/nginx && \
-    chown -R ${PUSER}.${PGROUP} /var/log/nginx && \
+    chown -R ${PUSER}:${PGROUP} /var/www/html && \
+    chown -R ${PUSER}:${PGROUP} /run && \
+    chown -R ${PUSER}:${PGROUP} /var/lib/nginx && \
+    chown -R ${PUSER}:${PGROUP} /var/log/nginx && \
     chmod 755 /usr/local/bin/*.sh
 
 VOLUME /var/www/html
-
-USER ${PUSER}
 
 WORKDIR /var/www/html
 
@@ -64,11 +63,8 @@ COPY --chown=${DEFAULT_UID} docs/images/favicon/favicon.ico /var/www/html/
 
 EXPOSE 8080
 
-USER root
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "chown", "-R", "${PUSER}.${PGROUP}", "/var/www/html/" ]
-
-USER ${PUSER}
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
 
