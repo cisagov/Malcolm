@@ -16,7 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginxsrv"
 ENV PGROUP "nginxsrv"
-ENV PUSER_PRIV_DROP true
+ENV PUSER_CHOWN "/var/www/html;/var/lib/nginx;/var/log/nginx"
 
 ENV TERM xterm
 
@@ -46,8 +46,9 @@ RUN curl -sSL -o /tmp/jquery.min.js "https://code.jquery.com/jquery-${JQUERY_VER
     adduser -D -H -u ${DEFAULT_UID} -h /var/www/html -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
     addgroup ${PUSER} nginx ; \
     addgroup ${PUSER} shadow ; \
+    addgroup ${PUSER} tty ; \
+    addgroup nginx tty ; \
     chown -R ${PUSER}:${PGROUP} /var/www/html && \
-    chown -R ${PUSER}:${PGROUP} /run && \
     chown -R ${PUSER}:${PGROUP} /var/lib/nginx && \
     chown -R ${PUSER}:${PGROUP} /var/log/nginx && \
     chmod 755 /usr/local/bin/*.sh
@@ -57,16 +58,16 @@ VOLUME /var/www/html
 WORKDIR /var/www/html
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chown=${DEFAULT_UID} name-map-ui/site/ /var/www/html/
-COPY --chown=${DEFAULT_UID} docs/images/logo/Malcolm_banner.png /var/www/html/
-COPY --chown=${DEFAULT_UID} docs/images/favicon/favicon.ico /var/www/html/
+COPY name-map-ui/site/ /var/www/html/
+COPY docs/images/logo/Malcolm_banner.png /var/www/html/
+COPY docs/images/favicon/favicon.ico /var/www/html/
 
 EXPOSE 8080
 
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:
