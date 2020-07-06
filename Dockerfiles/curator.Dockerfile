@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "curator"
 ENV PGROUP "curator"
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -54,6 +55,11 @@ ENV CURATOR_SNAPSHOT_REPO $CURATOR_SNAPSHOT_REPO
 ENV CURATOR_SNAPSHOT_COMPRESSED $CURATOR_SNAPSHOT_COMPRESSED
 ENV CURATOR_SNAPSHOT_DISABLED $CURATOR_SNAPSHOT_DISABLED
 
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
 ENV CURATOR_VERSION "5.8.1"
 ENV CRON "5 0 * * *"
 ENV CONFIG_FILE "/config/config_file.yml"
@@ -63,7 +69,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     apt-get update && \
     apt-get  -y -q install \
       build-essential \
-      cron \
       curl \
       procps \
       psmisc \
@@ -77,17 +82,21 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    bash -c 'echo -e "${CRON} su -c \"/usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE}\" ${PUSER} >/proc/1/fd/1 2>/proc/1/fd/2\n@reboot su -c \"/usr/local/bin/elastic_search_status.sh -w && /usr/local/bin/register-elasticsearch-snapshot-repo.sh\" ${PUSER} >/proc/1/fd/1 2>/proc/1/fd/2" | crontab -'
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+      chmod +x "$SUPERCRONIC" && \
+      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    bash -c 'echo -e "${CRON} /usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE} >/proc/1/fd/1 2>/proc/1/fd/2" > ${SUPERCRONIC_CRONTAB}'
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/cron_env_deb.sh /usr/local/bin/
 ADD shared/bin/elastic_search_status.sh /usr/local/bin/
 ADD curator/scripts /usr/local/bin/
 ADD curator/config /config/
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/local/bin/cron_env_deb.sh"]
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
 
 
 # to be populated at build-time:
