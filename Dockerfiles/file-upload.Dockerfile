@@ -41,7 +41,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "www-data"
 ENV PGROUP "www-data"
 # not dropping privileges globally in this container as required to run SFTP server. this can
-# be handled by supervisord instead on an as-needed basis (e.g., for php-fpm). nginx itself
+# be handled by supervisord instead on an as-needed basis, and/or php-fpm/nginx itself
 # will drop privileges to www-data as well.
 ENV PUSER_PRIV_DROP false
 
@@ -76,7 +76,7 @@ ADD file-upload/php/php.ini /etc/php/7.3/fpm/php.ini
 ADD file-upload/sshd_config /tmp/sshd_config
 ADD file-upload/supervisord.conf /supervisord.conf
 
-RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php /var/log && \
+RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
   mv /var/www/upload/server/php/files /var/www/upload/server/php/chroot && \
   ln -s /var/www/upload/server/php/chroot/files /var/www/upload/server/php/files && \
   ln -sr /var/www/upload /var/www/upload/upload && \
@@ -84,9 +84,7 @@ RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php /var/log &
        -e 's/^#?(\s*PasswordAuthentication\s+)\w+$/$1no/i' /etc/ssh/sshd_config && \
   chmod a+x /docker-entrypoint.sh && \
   cat /tmp/sshd_config >>/etc/ssh/sshd_config && \
-  usermod -a -G tty ${PUSER} && \
-  chown -R ${PUSER}:root /var/log /run/php && \
-  chmod 775 /var/www/upload/server/php/chroot/files /var/log /run/php && \
+  chmod 775 /var/www/upload/server/php/chroot/files && \
   chmod 755 /var /var/www /var/www/upload /var/www/upload/server /var/www/upload/server/php \
             /var/www/upload/server/php/chroot && \
   echo "Put your files into /files. Don't use subdirectories.\nThey cannot be accessed via the web user interface!" \

@@ -56,10 +56,7 @@ RUN apt-get update && \
     pip3 install --no-cache-dir elasticsearch elasticsearch_dsl pyzmq pyinotify python-magic && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
-      usermod -a -G tty ${PUSER} && \
-    mkdir -p /var/log/supervisor && \
-      chown -R ${PUSER}:${PGROUP} /var/log/supervisor && \
-      chmod -R 750 /var/log/supervisor
+    mkdir -p /var/log/supervisor
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
