@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "pcap"
 ENV PGROUP "pcap"
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -60,9 +61,12 @@ RUN apt-get update && \
       tcpdump && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /var/log/supervisor /etc/supervisor.d && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+      usermod -a -G tty ${PUSER} && \
+    mkdir -p /var/log/supervisor /etc/supervisor.d && \
+      chown -R ${PUSER}:${PGROUP} /var/log/supervisor /etc/supervisor.d && \
+      chmod -R 750 /var/log/supervisor /etc/supervisor.d && \
     chown root:${PGROUP} /sbin/ethtool && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
     chown root:${PGROUP} /usr/sbin/tcpdump && \

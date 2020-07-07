@@ -16,6 +16,10 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "filebeat"
 ENV PGROUP "filebeat"
+# supervisord is going to take care of dropping privileges for this container
+# this is necessary because one of the scripts (filebeat-watch-zeeklogs-uploads-folder.sh)
+# needs to be able to chown the uploaded files
+ENV PUSER_PRIV_DROP false
 
 ENV TERM xterm
 

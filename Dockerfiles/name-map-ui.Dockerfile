@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginxsrv"
 ENV PGROUP "nginxsrv"
+ENV PUSER_PRIV_DROP false
 ENV PUSER_CHOWN "/var/www/html;/var/lib/nginx;/var/log/nginx"
 
 ENV TERM xterm

@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "freq"
 ENV PGROUP "freq"
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -38,7 +39,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-dev \
       python3-pip && \
     pip3 install supervisor && \
-      mkdir -p /var/log/supervisor && \
     cd /opt && \
     mkdir -p ./freq_server && \
       curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \
@@ -47,6 +47,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       chown -R ${PUSER}:${PGROUP} /opt/freq_server && \
+      usermod -a -G tty ${PUSER} && \
+    mkdir -p /var/log/supervisor && \
+      chown -R ${PUSER}:${PGROUP} /var/log/supervisor && \
+      chmod -R 750 /var/log/supervisor && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git python3-dev && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
@@ -61,7 +65,7 @@ EXPOSE $FREQ_PORT
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

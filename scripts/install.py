@@ -333,9 +333,9 @@ class Installer(object):
     autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
     reverseDns = InstallerYesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
     autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
-    autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=False)
+    autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
     logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
-    logstashSsl = logstashOpen and InstallerYesOrNo('Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)', default=False)
+    logstashSsl = logstashOpen and InstallerYesOrNo('Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)', default=True)
     externalEsForward = InstallerYesOrNo('Forward Logstash logs to external Elasticstack instance?', default=False)
     if externalEsForward:
       externalEsHost = InstallerAskForString('Enter external Elasticstack host:port (e.g., 10.0.0.123:9200)')

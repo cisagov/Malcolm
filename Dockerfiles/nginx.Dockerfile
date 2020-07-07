@@ -18,6 +18,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "builder"
 ENV PGROUP "abuild"
+ENV PUSER_PRIV_DROP false
 
 ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
 ADD nginx/src/*.patch /usr/src/patches/

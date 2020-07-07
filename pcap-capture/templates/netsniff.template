@@ -6,4 +6,3 @@ stopasgroup=true
 killasgroup=true
 autostart=%(ENV_PCAP_ENABLE_NETSNIFF)s
 directory=%(ENV_PCAP_PATH)s
-user=%(ENV_PUSER)s

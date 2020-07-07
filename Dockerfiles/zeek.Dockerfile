@@ -104,6 +104,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "zeek"
 ENV PGROUP "zeek"
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -193,14 +194,18 @@ ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
-    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
+    usermod -a -G tty ${PUSER} && \
+    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py && \
+    mkdir -p /var/log/supervisor && \
+      chown -R ${PUSER}:${PGROUP} /var/log/supervisor && \
+      chmod -R 750 /var/log/supervisor
 
 #Update Path
 ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

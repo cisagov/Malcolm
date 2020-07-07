@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "monitor"
 ENV PGROUP "monitor"
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -81,7 +82,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-requests \
       python3-zmq && \
     pip3 install clamd supervisor && \
-    mkdir -p /var/log/supervisor && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove python3-dev build-essential && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
@@ -91,9 +91,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       wget -O /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
-    mkdir -p /var/log/clamav /var/lib/clamav && \
-      chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav && \
-      chmod -R 750 /var/log/clamav  /var/lib/clamav && \
+      usermod -a -G tty ${PUSER} && \
+    mkdir -p /var/log/clamav /var/lib/clamav /var/log/supervisor && \
+      chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav /var/log/supervisor && \
+      chmod -R 750 /var/log/clamav  /var/lib/clamav /var/log/supervisor && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
@@ -119,7 +120,7 @@ EXPOSE 3310
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

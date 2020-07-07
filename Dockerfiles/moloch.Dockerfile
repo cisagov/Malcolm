@@ -4,9 +4,11 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.3.1"
+ENV MOLOCH_VERSION "2.3.2"
 ENV MOLOCHDIR "/data/moloch"
 ENV MOLOCH_URL "https://codeload.github.com/aol/moloch/tar.gz/v${MOLOCH_VERSION}"
+ENV MOLOCH_LOCALELASTICSEARCH no
+ENV MOLOCH_INET yes
 
 ADD moloch/scripts/bs4_remove_div.py /data/
 ADD moloch/patch/* /data/patches/
@@ -78,6 +80,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     python3 /data/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     rm -rf ./viewer/vueapp/src/components/upload && \
+    sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" ./release/Configure && \
+    sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" ./release/Configure && \
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
     bash -c "file ${MOLOCHDIR}/bin/* ${MOLOCHDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
@@ -99,6 +103,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "moloch"
 ENV PGROUP "moloch"
+ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -122,8 +127,6 @@ ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 # Declare envs vars for each arg
 ENV ES_HOST $ES_HOST
 ENV ES_PORT $ES_PORT
-ENV MOLOCH_LOCALELASTICSEARCH no
-ENV MOLOCH_INET yes
 ENV MOLOCH_ELASTICSEARCH "http://"$ES_HOST":"$ES_PORT
 ENV MOLOCH_INTERFACE $MOLOCH_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
@@ -199,7 +202,7 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
       cd /tmp && \
       curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
       tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mkdir -p $MOLOCHDIR/etc/ && \
+      mkdir -p $MOLOCHDIR/etc/ $MOLOCHDIR/logs/ && \
       mv -v "GeoLite2-$DB.mmdb" $MOLOCHDIR/etc/; \
       rm -f "GeoLite2-$DB*"; \
     done; \
@@ -211,8 +214,6 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     chmod 755 /data/*.sh && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
-    sed -i "s/^\(MOLOCH_LOCALELASTICSEARCH=\).*/\1"$MOLOCH_LOCALELASTICSEARCH"/" $MOLOCHDIR/bin/Configure && \
-    sed -i "s/^\(MOLOCH_INET=\).*/\1"$MOLOCH_INET"/" $MOLOCHDIR/bin/Configure && \
     chmod u+s $MOLOCHDIR/bin/moloch-capture && \
     chown -R $PUSER:$PGROUP $MOLOCHDIR/logs
 

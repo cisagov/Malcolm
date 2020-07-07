@@ -16,6 +16,10 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "watcher"
 ENV PGROUP "watcher"
+# supervisord is going to take care of dropping privileges for this container
+# this is necessary because one of the scripts (watch-pcap-uploads-folder.sh)
+# needs to be able to chown the uploaded files
+ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -50,9 +54,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip3 install --no-cache-dir elasticsearch elasticsearch_dsl pyzmq pyinotify python-magic && \
-    mkdir -p /var/log/supervisor && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
-      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+      usermod -a -G tty ${PUSER} && \
+    mkdir -p /var/log/supervisor && \
+      chown -R ${PUSER}:${PGROUP} /var/log/supervisor && \
+      chmod -R 750 /var/log/supervisor
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
