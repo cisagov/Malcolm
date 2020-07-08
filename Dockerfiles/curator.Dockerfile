@@ -87,7 +87,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       chmod +x "$SUPERCRONIC" && \
       mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
       ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
-    bash -c 'echo -e "${CRON} /usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE} >/proc/1/fd/1 2>/proc/1/fd/2" > ${SUPERCRONIC_CRONTAB}'
+    bash -c 'echo -e "${CRON} /usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE}" > ${SUPERCRONIC_CRONTAB}'
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/elastic_search_status.sh /usr/local/bin/

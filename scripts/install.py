@@ -97,7 +97,7 @@ class Installer(object):
     if privileged and (len(self.sudoCmd) > 0):
       command = self.sudoCmd + command
 
-    return run_process(command, stdout, stderr, stdin, retry, retrySleepSec, self.debug)
+    return run_process(command, stdout=stdout, stderr=stderr, stdin=stdin, retry=retry, retrySleepSec=retrySleepSec, debug=self.debug)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def package_is_installed(self, package):
@@ -214,10 +214,28 @@ class Installer(object):
       composeFiles = [os.path.realpath(args.configFile)]
       malcolm_install_path = os.path.dirname(composeFiles[0])
 
+    # figure out what UID/GID to run non-rood processes under docker as
+    puid = '1000'
+    pgid = '1000'
+    try:
+      if (self.platform == PLATFORM_LINUX):
+        puid = str(os.getuid())
+        pgid = str(os.getgid())
+        if (puid == '0') or (pgid == '0'):
+          raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
+    except:
+      puid = '1000'
+      pgid = '1000'
+
+    while (not puid.isdigit()) or (not pgid.isdigit()) or (not InstallerYesOrNo('Malcolm processes will run as UID {} and GID {}. Is this OK?'.format(puid, pgid), default=True)):
+      puid = InstallerAskForString('Enter user ID (UID) for running non-root Malcolm processes')
+      pgid = InstallerAskForString('Enter group ID (GID) for running non-root Malcolm processes')
+
+    # guestimate how much memory we should use based on total system memory
+
     if self.debug:
       eprint("{} contains {}, system memory is {} GiB".format(malcolm_install_path, composeFiles, self.totalMemoryGigs))
 
-    # guestimate how much memory we should use based on total system memory
     if self.totalMemoryGigs >= 63.0:
       esMemory = '30g'
       lsMemory = '6g'
@@ -425,6 +443,12 @@ class Installer(object):
           if (currentService is not None) and (restartMode is not None) and re.match(r'^\s*restart\s*:.*$', line):
             # elasticsearch backup directory
             line = "{}restart: {}".format(serviceIndent * 2, restartMode)
+          elif 'PUID' in line:
+            # process UID
+            line = re.sub(r'(PUID\s*:\s*)(\S+)', r"\g<1>{}".format(puid), line)
+          elif 'PGID' in line:
+            # process GID
+            line = re.sub(r'(PGID\s*:\s*)(\S+)', r"\g<1>{}".format(pgid), line)
           elif 'NGINX_BASIC_AUTH' in line:
             # basic (useBasicAuth=true) vs ldap (useBasicAuth=false)
             line = re.sub(r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if useBasicAuth else "'false'"), line)
