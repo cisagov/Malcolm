@@ -173,7 +173,7 @@ ADD shared/bin/elastic_search_status.sh /data/
 RUN chmod 755 /data/*.sh /data/*.py && \
     chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh >/dev/null 2>&1\n0 10 * * * /data/kibana_index_refresh.py >/dev/null 2>&1" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py" > ${SUPERCRONIC_CRONTAB})
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

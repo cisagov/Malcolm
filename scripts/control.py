@@ -9,6 +9,7 @@ import argparse
 import errno
 import getpass
 import glob
+import json
 import os
 import platform
 import re
@@ -76,6 +77,8 @@ def logs():
     )
   """, re.VERBOSE | re.IGNORECASE)
 
+  serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
+
   err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], debug=args.debug)
   print("\n".join(out))
 
@@ -91,11 +94,45 @@ def logs():
     if output:
       outputStr = output.decode().strip()
       outputStrEscaped = EscapeAnsi(outputStr)
-      if not ignoreRegEx.match(outputStrEscaped):
-        print(outputStr if coloramaImported else outputStrEscaped)
-      else:
+      if ignoreRegEx.match(outputStrEscaped):
         pass
         # print('!!!!!!!: {}'.format(outputStr))
+      else:
+        serviceMatch = serviceRegEx.search(outputStrEscaped)
+        serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
+        serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
+        messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
+        outputJson = LoadStrIfJson(messageStr)
+        if (outputJson is not None):
+          timeKey = None
+          if 'time' in outputJson:
+            timeKey = 'time'
+          elif 'timestamp' in outputJson:
+            timeKey = 'timestamp'
+          elif '@timestamp' in outputJson:
+            timeKey = '@timestamp'
+          timeStr = ''
+          if timeKey is not None:
+            timeStr = outputJson[timeKey] + ' '
+            outputJson.pop(timeKey, None)
+
+          if ('job.schedule' in outputJson) and ('job.command' in outputJson) and ('job.command' in outputJson):
+            # this is an output line from supercronic, let's format it so it fits in better with the rest of the logs
+            # TODO
+            print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+
+          elif ('kibana' in serviceStr):
+            # this is an output line from kibana, let's clean it up a bit
+            for noisyKey in ['type', 'tags', 'pid', 'method']:
+              outputJson.pop(noisyKey, None)
+            print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+
+          else:
+            print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+
+        else:
+          print(outputStr if coloramaImported else outputStrEscaped)
+
     else:
       time.sleep(0.5)
   process.poll()

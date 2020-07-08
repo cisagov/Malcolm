@@ -6,6 +6,7 @@
 from __future__ import print_function
 
 import getpass
+import json
 import os
 import platform
 import re
@@ -150,6 +151,14 @@ def SizeHumanFormat(num, suffix='B'):
       return "%3.1f%s%s" % (num, unit, suffix)
     num /= 1024.0
   return "%.1f%s%s" % (num, 'Yi', suffix)
+
+###################################################################################################
+# is this string valid json? if so, load and return it
+def LoadStrIfJson(jsonStr):
+  try:
+    return json.loads(jsonStr)
+  except ValueError as e:
+    return None
 
 ###################################################################################################
 # run command with arguments and return its exit code, stdout, and stderr
