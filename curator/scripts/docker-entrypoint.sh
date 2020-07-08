@@ -4,4 +4,4 @@
 
 /usr/local/bin/elastic_search_status.sh -w && /usr/local/bin/register-elasticsearch-snapshot-repo.sh
 
-/usr/local/bin/supercronic -split-logs "${SUPERCRONIC_CRONTAB:-/etc/crontab}" >/dev/null
+/usr/local/bin/supercronic "${SUPERCRONIC_CRONTAB:-/etc/crontab}"
