@@ -79,7 +79,11 @@ def logs():
   err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], debug=args.debug)
   print("\n".join(out))
 
-  process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], stdout=PIPE)
+  # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
+  osEnv = os.environ.copy()
+  osEnv['COMPOSE_HTTP_TIMEOUT'] = '999999999'
+
+  process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], env=osEnv, stdout=PIPE)
   while True:
     output = process.stdout.readline()
     if (len(output) == 0) and (process.poll() is not None):
@@ -189,8 +193,12 @@ def start():
       else:
         raise
 
+  # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
+  osEnv = os.environ.copy()
+  osEnv['COMPOSE_HTTP_TIMEOUT'] = '999999999'
+
   # start docker
-  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], debug=args.debug)
+  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
   if (err == 0):
     eprint("Started Malcolm\n\n")
     eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")

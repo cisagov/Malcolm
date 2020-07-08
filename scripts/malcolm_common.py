@@ -182,14 +182,16 @@ def check_output_input(*popenargs, **kwargs):
 
   return retcode, output, errput
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def run_process(command, stdout=True, stderr=True, stdin=None, retry=0, retrySleepSec=5, debug=False):
+###################################################################################################
+# run command with arguments and return its exit code, stdout, and stderr
+def run_process(command, stdout=True, stderr=True, stdin=None, retry=0, retrySleepSec=5, cwd=None, env=None, debug=False):
+
   retcode = -1
   output = []
 
   try:
     # run the command
-    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if (PY3 and stdin) else stdin)
+    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if (PY3 and stdin) else stdin, cwd=cwd, env=env)
 
     # split the output on newlines to return a list
     if PY3:
@@ -209,7 +211,7 @@ def run_process(command, stdout=True, stderr=True, stdin=None, retry=0, retrySle
   if (retcode != 0) and retry and (retry > 0):
     # sleep then retry
     time.sleep(retrySleepSec)
-    return run_process(command, stdout, stderr, stdin, retry-1, retrySleepSec, debug)
+    return run_process(command, stdout, stderr, stdin, retry-1, retrySleepSec, cwd, env, debug)
   else:
     return retcode, output
 
