@@ -92,9 +92,9 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    mkdir -p /var/log/clamav /var/lib/clamav /var/log/supervisor && \
-      chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav /var/log/supervisor && \
-      chmod -R 750 /var/log/clamav  /var/lib/clamav /var/log/supervisor && \
+    mkdir -p /var/log/clamav /var/lib/clamav && \
+      chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav && \
+      chmod -R 750 /var/log/clamav  /var/lib/clamav && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \

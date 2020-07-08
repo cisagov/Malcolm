@@ -48,9 +48,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       chown -R ${PUSER}:${PGROUP} /opt/freq_server && \
       usermod -a -G tty ${PUSER} && \
-    mkdir -p /var/log/supervisor && \
-      chown -R ${PUSER}:${PGROUP} /var/log/supervisor && \
-      chmod -R 750 /var/log/supervisor && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git python3-dev && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \

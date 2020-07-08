@@ -64,9 +64,9 @@ RUN apt-get update && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    mkdir -p /var/log/supervisor /etc/supervisor.d && \
-      chown -R ${PUSER}:${PGROUP} /var/log/supervisor /etc/supervisor.d && \
-      chmod -R 750 /var/log/supervisor /etc/supervisor.d && \
+    mkdir -p /etc/supervisor.d && \
+      chown -R ${PUSER}:${PGROUP} /etc/supervisor.d && \
+      chmod -R 750 /etc/supervisor.d && \
     chown root:${PGROUP} /sbin/ethtool && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
     chown root:${PGROUP} /usr/sbin/tcpdump && \

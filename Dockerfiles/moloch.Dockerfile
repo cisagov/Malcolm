@@ -103,7 +103,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "moloch"
 ENV PGROUP "moloch"
-ENV PUSER_PRIV_DROP false
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -211,6 +211,7 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
 
 RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $MOLOCHDIR $PUSER && \
+      usermod -a -G tty $PUSER && \
     chmod 755 /data/*.sh && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
     cp -f /data/moloch_update_geo.sh $MOLOCHDIR/bin/moloch_update_geo.sh && \
@@ -225,7 +226,7 @@ WORKDIR $MOLOCHDIR
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

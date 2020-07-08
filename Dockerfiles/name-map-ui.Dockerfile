@@ -16,7 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginxsrv"
 ENV PGROUP "nginxsrv"
-ENV PUSER_PRIV_DROP false
+ENV PUSER_PRIV_DROP true
 ENV PUSER_CHOWN "/var/www/html;/var/lib/nginx;/var/log/nginx"
 
 ENV TERM xterm
@@ -68,7 +68,7 @@ EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

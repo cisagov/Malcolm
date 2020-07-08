@@ -16,9 +16,9 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "filebeat"
 ENV PGROUP "filebeat"
-# supervisord is going to take care of dropping privileges for this container
-# this is necessary because one of the scripts (filebeat-watch-zeeklogs-uploads-folder.sh)
-# needs to be able to chown the uploaded files
+# not dropping privileges globally: supervisord will take care of it
+# on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.sh)
+# can chown uploaded files
 ENV PUSER_PRIV_DROP false
 
 ENV TERM xterm
@@ -55,7 +55,7 @@ ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/scripts /data/
 ADD shared/bin/elastic_search_status.sh /data/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
-RUN mkdir -p /var/log/supervisor /usr/share/filebeat-nginx/data && \
+RUN mkdir -p /usr/share/filebeat-nginx/data && \
     chown -R root:${PGROUP} /usr/share/filebeat-nginx && \
     cp -a /usr/share/filebeat/module /usr/share/filebeat-nginx/module && \
     chmod 750 /usr/share/filebeat-nginx && \

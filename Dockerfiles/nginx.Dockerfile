@@ -18,7 +18,6 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "builder"
 ENV PGROUP "abuild"
-ENV PUSER_PRIV_DROP false
 
 ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
 ADD nginx/src/*.patch /usr/src/patches/
@@ -64,6 +63,9 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginx"
 ENV PGROUP "nginx"
+# not dropping privileges globally so nginx and stunnel can bind privileged ports internally.
+# nginx itself will drop privileges to "nginx" user for worker processes
+ENV PUSER_PRIV_DROP false
 
 ENV TERM xterm
 
@@ -228,7 +230,6 @@ RUN set -x ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  mkdir -p /var/log/supervisor ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 

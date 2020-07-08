@@ -110,6 +110,8 @@ services:
   elasticsearch:
     image: malcolmnetsec/elasticsearch-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: elasticsearch
     environment:
       << : *process-variables
@@ -143,6 +145,8 @@ services:
   kibana:
     image: malcolmnetsec/kibana-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: kibana
     environment:
       << : *process-variables
@@ -167,6 +171,8 @@ services:
   elastalert:
     image: malcolmnetsec/elastalert:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: elastalert
     environment:
       << : *process-variables
@@ -193,6 +199,8 @@ services:
   curator:
     image: malcolmnetsec/curator:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: curator
     environment:
       << : *process-variables
@@ -202,7 +210,7 @@ services:
     depends_on:
       - elasticsearch
     healthcheck:
-      test: ["CMD", "pidof", "cron"]
+      test: ["CMD", "pidof", "supercronic"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -210,6 +218,8 @@ services:
   logstash:
     image: malcolmnetsec/logstash-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: logstash
     environment:
       << : *process-variables
@@ -241,6 +251,8 @@ services:
   filebeat:
     image: malcolmnetsec/filebeat-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: filebeat
     environment:
       << : *process-variables
@@ -276,6 +288,8 @@ services:
   moloch:
     image: malcolmnetsec/moloch:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: moloch
     env_file:
       - ./auth.env
@@ -313,6 +327,8 @@ services:
   zeek:
     image: malcolmnetsec/zeek:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: zeek
     environment:
       << : *process-variables
@@ -337,6 +353,8 @@ services:
   file-monitor:
     image: malcolmnetsec/file-monitor:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: filemon
     environment:
       << : *process-variables
@@ -355,6 +373,8 @@ services:
   pcap-capture:
     image: malcolmnetsec/pcap-capture:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     network_mode: host
     ulimits:
       memlock:
@@ -379,6 +399,8 @@ services:
   pcap-monitor:
     image: malcolmnetsec/pcap-monitor:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: pcapmon
     environment:
       << : *process-variables
@@ -400,6 +422,8 @@ services:
   upload:
     image: malcolmnetsec/file-upload:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: upload
     env_file:
       - ./auth.env
@@ -424,6 +448,8 @@ services:
   htadmin:
     image: malcolmnetsec/htadmin:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: htadmin
     environment:
       << : *process-variables
@@ -444,6 +470,8 @@ services:
   freq:
     image: malcolmnetsec/freq:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: freq
     environment:
       << : *process-variables
@@ -460,6 +488,8 @@ services:
   name-map-ui:
     image: malcolmnetsec/name-map-ui:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: name-map-ui
     environment:
       << : *process-variables
@@ -479,6 +509,8 @@ services:
   nginx-proxy:
     image: malcolmnetsec/nginx-proxy:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: nginx-proxy
     environment:
       << : *process-variables

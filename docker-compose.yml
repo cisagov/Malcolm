@@ -113,6 +113,8 @@ services:
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
     image: malcolmnetsec/elasticsearch-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: elasticsearch
     environment:
       << : *process-variables
@@ -149,6 +151,8 @@ services:
       dockerfile: Dockerfiles/kibana.Dockerfile
     image: malcolmnetsec/kibana-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: kibana
     environment:
       << : *process-variables
@@ -176,6 +180,8 @@ services:
       dockerfile: Dockerfiles/elastalert.Dockerfile
     image: malcolmnetsec/elastalert:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: elastalert
     environment:
       << : *process-variables
@@ -205,6 +211,8 @@ services:
       dockerfile: Dockerfiles/curator.Dockerfile
     image: malcolmnetsec/curator:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: curator
     environment:
       << : *process-variables
@@ -216,7 +224,7 @@ services:
     volumes:
       - ./curator/config/action_file.yml:/config/action_file.yml
     healthcheck:
-      test: ["CMD", "pidof", "cron"]
+      test: ["CMD", "pidof", "supercronic"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -227,6 +235,8 @@ services:
       dockerfile: Dockerfiles/logstash.Dockerfile
     image: malcolmnetsec/logstash-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: logstash
     environment:
       << : *process-variables
@@ -263,6 +273,8 @@ services:
       dockerfile: Dockerfiles/filebeat.Dockerfile
     image: malcolmnetsec/filebeat-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: filebeat
     environment:
       << : *process-variables
@@ -302,6 +314,8 @@ services:
       dockerfile: Dockerfiles/moloch.Dockerfile
     image: malcolmnetsec/moloch:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: moloch
     env_file:
       - ./auth.env
@@ -345,6 +359,8 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: malcolmnetsec/zeek:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: zeek
     environment:
       << : *process-variables
@@ -373,6 +389,8 @@ services:
       dockerfile: Dockerfiles/file-monitor.Dockerfile
     image: malcolmnetsec/file-monitor:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: filemon
     environment:
       << : *process-variables
@@ -394,6 +412,8 @@ services:
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
     image: malcolmnetsec/pcap-capture:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     network_mode: host
     ulimits:
       memlock:
@@ -421,6 +441,8 @@ services:
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
     image: malcolmnetsec/pcap-monitor:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: pcapmon
     environment:
       << : *process-variables
@@ -445,6 +467,8 @@ services:
       dockerfile: Dockerfiles/file-upload.Dockerfile
     image: malcolmnetsec/file-upload:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: upload
     env_file:
       - ./auth.env
@@ -472,6 +496,8 @@ services:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: htadmin
     environment:
       << : *process-variables
@@ -495,6 +521,8 @@ services:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: freq
     environment:
       << : *process-variables
@@ -514,6 +542,8 @@ services:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: name-map-ui
     environment:
       << : *process-variables
@@ -536,6 +566,8 @@ services:
       dockerfile: Dockerfiles/nginx.Dockerfile
     image: malcolmnetsec/nginx-proxy:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: nginx-proxy
     environment:
       << : *process-variables

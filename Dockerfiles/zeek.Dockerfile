@@ -195,10 +195,7 @@ ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
-    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py && \
-    mkdir -p /var/log/supervisor && \
-      chown -R ${PUSER}:${PGROUP} /var/log/supervisor && \
-      chmod -R 750 /var/log/supervisor
+    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Update Path
 ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
