@@ -16,7 +16,13 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "pcap"
 ENV PGROUP "pcap"
-ENV PUSER_PRIV_DROP true
+# not dropping privileges globally: supervisord will take care of it
+# for all processes, but first we need root to sure capabilities for
+# traffic capturing tools are in-place before they are started.
+# despite doing setcap here in the Dockerfile, the chown in
+# docker-uid-gid-setup.sh will cause them to be lost, so we need
+# a final check in supervisor.sh before startup
+ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -63,7 +69,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
-      usermod -a -G tty ${PUSER} && \
     mkdir -p /etc/supervisor.d && \
       chown -R ${PUSER}:${PGROUP} /etc/supervisor.d && \
       chmod -R 750 /etc/supervisor.d && \
