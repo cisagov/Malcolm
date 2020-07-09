@@ -87,7 +87,7 @@ RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
   chmod 775 /var/www/upload/server/php/chroot/files && \
   chmod 755 /var /var/www /var/www/upload /var/www/upload/server /var/www/upload/server/php \
             /var/www/upload/server/php/chroot && \
-  echo "Put your files into /files. Don't use subdirectories.\nThey cannot be accessed via the web user interface!" \
+  echo "Put your files into /files. Don't use subdirectories." \
       >/var/www/upload/server/php/chroot/README.txt && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/upload/server/php/chroot/files/.gitignore /tmp/sshd_config
 

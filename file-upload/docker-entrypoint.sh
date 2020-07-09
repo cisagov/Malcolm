@@ -20,7 +20,7 @@ then
 
   useradd -g $PGROUP -d /var/www/upload/server/php/chroot -s /sbin/nologin "$MALCOLM_USERNAME"
   usermod --password "$MALCOLM_PASSWORD" "$MALCOLM_USERNAME"
-  chown "$MALCOLM_USERNAME:$PGROUP" /var/www/upload/server/php/chroot/files
+  chown :$PGROUP /var/www/upload/server/php/chroot/files
   chmod 775 /var/www/upload/server/php/chroot/files
 
   # This will break if $SITE_NAME contains a slash...
