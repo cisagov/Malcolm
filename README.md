@@ -438,6 +438,8 @@ Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
+* `PUID` and `PGID` - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
+
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 
 * `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to Elasticsearch (default `false`)
@@ -1666,6 +1668,8 @@ user@host:~/Malcolm$ python3 scripts/install.py --configure
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
+Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): 
+
 Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
 
 Restart Malcolm upon system or Docker daemon restart? (y/N): y

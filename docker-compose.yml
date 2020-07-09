@@ -6,7 +6,7 @@ version: '3.7'
 # Commonly tweaked configuration options
 #-------------------------------------------------------------------------------
 x-process-variables: &process-variables
-  # docker containers will run processes as unprivileged users with UID:GID
+  # docker containers will run processes as unprivileged user with UID:GID
   PUID : 1000
   PGID : 1000
 
