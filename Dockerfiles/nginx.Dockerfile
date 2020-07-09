@@ -12,6 +12,13 @@
 
 FROM alpine:3.11 as stunnel_build
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=300
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "builder"
+ENV PGROUP "abuild"
+
 ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
 ADD nginx/src/*.patch /usr/src/patches/
 
@@ -20,11 +27,11 @@ USER root
 RUN set -x ; \
     apk add --no-cache alpine-sdk patchutils sudo openssl-dev linux-headers; \
     sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers ; \
-    adduser -D -u 1000 -h /apkbuild -G abuild builder ; \
-    addgroup builder wheel ; \
+    adduser -D -u ${DEFAULT_UID} -h /apkbuild -G ${PGROUP} ${PUSER} ; \
+    addgroup ${PUSER} wheel ; \
     chmod 644 /aports-master.tar.gz
 
-USER builder
+USER ${PUSER}
 
 RUN set -x ; \
     cd /apkbuild ; \
@@ -49,6 +56,20 @@ LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/nginx-proxy'
 LABEL org.opencontainers.image.description='Malcolm container providing an NGINX reverse proxy for the other services'
+
+ARG DEFAULT_UID=101
+ARG DEFAULT_GID=101
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "nginx"
+ENV PGROUP "nginx"
+# not dropping privileges globally so nginx and stunnel can bind privileged ports internally.
+# nginx itself will drop privileges to "nginx" user for worker processes
+ENV PUSER_PRIV_DROP false
+
+ENV TERM xterm
+
+USER root
 
 # authentication method: encrypted HTTP basic authentication ('true') vs nginx-auth-ldap ('false')
 ARG NGINX_BASIC_AUTH=true
@@ -102,8 +123,8 @@ RUN set -x ; \
     --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
     --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
     --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
-    --user=nginx \
-    --group=nginx \
+    --user=${PUSER} \
+    --group=${PGROUP} \
     --with-http_ssl_module \
     --with-http_realip_module \
     --with-http_addition_module \
@@ -135,12 +156,12 @@ RUN set -x ; \
     --with-http_v2_module \
     --add-module=/usr/src/nginx-auth-ldap \
   " ; \
-  addgroup -g 101 -S nginx ; \
-  adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx ; \
-  addgroup nginx shadow ; \
+  apk add --no-cache curl shadow; \
+  addgroup -g ${DEFAULT_GID} -S ${PGROUP} ; \
+  adduser -S -D -H -u ${DEFAULT_UID} -h /var/cache/nginx -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
+  addgroup ${PUSER} shadow ; \
   mkdir -p /var/cache/nginx ; \
-  chown nginx:nginx /var/cache/nginx ; \
-  apk add --no-cache curl; \
+  chown ${PUSER}:${PGROUP} /var/cache/nginx ; \
   apk add --no-cache --virtual .nginx-build-deps \
     gcc \
     gd-dev \
@@ -209,7 +230,6 @@ RUN set -x ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  mkdir -p /var/log/supervisor ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
@@ -217,6 +237,7 @@ COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
@@ -226,9 +247,10 @@ EXPOSE 80
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 
-ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+
 
 # to be populated at build-time:
 ARG BUILD_DATE

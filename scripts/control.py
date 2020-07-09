@@ -7,7 +7,9 @@ from __future__ import print_function
 
 import argparse
 import errno
+import getpass
 import glob
+import json
 import os
 import platform
 import re
@@ -75,10 +77,16 @@ def logs():
     )
   """, re.VERBOSE | re.IGNORECASE)
 
+  serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
+
   err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], debug=args.debug)
   print("\n".join(out))
 
-  process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], stdout=PIPE)
+  # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
+  osEnv = os.environ.copy()
+  osEnv['COMPOSE_HTTP_TIMEOUT'] = '999999999'
+
+  process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], env=osEnv, stdout=PIPE)
   while True:
     output = process.stdout.readline()
     if (len(output) == 0) and (process.poll() is not None):
@@ -86,11 +94,67 @@ def logs():
     if output:
       outputStr = output.decode().strip()
       outputStrEscaped = EscapeAnsi(outputStr)
-      if not ignoreRegEx.match(outputStrEscaped):
-        print(outputStr if coloramaImported else outputStrEscaped)
+      if ignoreRegEx.match(outputStrEscaped):
+        pass  ### print('!!!!!!!: {}'.format(outputStr))
       else:
-        pass
-        # print('!!!!!!!: {}'.format(outputStr))
+        serviceMatch = serviceRegEx.search(outputStrEscaped)
+        serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
+        serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
+        messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
+        outputJson = LoadStrIfJson(messageStr)
+        if (outputJson is not None):
+
+          # if there's a timestamp in the JSON, move it outside of the JSON to the beginning of the log string
+          timeKey = None
+          if 'time' in outputJson:
+            timeKey = 'time'
+          elif 'timestamp' in outputJson:
+            timeKey = 'timestamp'
+          elif '@timestamp' in outputJson:
+            timeKey = '@timestamp'
+          timeStr = ''
+          if timeKey is not None:
+            timeStr = outputJson[timeKey] + ' '
+            outputJson.pop(timeKey, None)
+
+          if ('job.schedule' in outputJson) and ('job.position' in outputJson) and ('job.command' in outputJson):
+
+            # this is a status output line from supercronic, let's format and cleant it up so it fits in better with the rest of the logs
+
+            # remove some clutter for the display
+            for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
+              outputJson.pop(noisyKey, None)
+
+            # if it's just command and message, format those NOT as JSON
+            jobCmd = outputJson['job.command']
+            jobStatus = outputJson['msg']
+            if (len(outputJson.keys()) == 2) and ('job.command' in outputJson) and ('msg' in outputJson):
+              # if it's the most common status (starting or job succeeded) then don't print unless debug mode
+              if args.debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
+                print('{}{} {} {}: {}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, jobCmd, jobStatus))
+              else:
+                pass
+
+            else:
+              # standardize and print the JSON output
+              print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+
+          elif ('kibana' in serviceStr):
+            # this is an output line from kibana, let's clean it up a bit: remove some clutter for the display
+            for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
+              outputJson.pop(noisyKey, None)
+
+            # standardize and print the JSON output
+            print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+
+          else:
+            # standardize and print the JSON output
+            print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+
+        else:
+          # just a regular non-JSON string, print as-is
+          print(outputStr if coloramaImported else outputStrEscaped)
+
     else:
       time.sleep(0.5)
   process.poll()
@@ -188,8 +252,12 @@ def start():
       else:
         raise
 
+  # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
+  osEnv = os.environ.copy()
+  osEnv['COMPOSE_HTTP_TIMEOUT'] = '999999999'
+
   # start docker
-  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], debug=args.debug)
+  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
   if (err == 0):
     eprint("Started Malcolm\n\n")
     eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")
@@ -540,6 +608,10 @@ def main():
     sys.tracebacklimit = 0
 
   os.chdir(MalcolmPath)
+
+  # don't run this as root
+  if (pyPlatform != PLATFORM_WINDOWS) and (('SUDO_UID' in os.environ.keys()) or (getpass.getuser() == 'root')):
+    raise Exception('{} should not be run as root'.format(ScriptName))
 
   # make sure docker/docker-compose is available
   dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker.exe')) else 'docker'

@@ -1,15 +1,8 @@
 FROM debian:buster-slim AS build
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
-LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
-LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/file-upload'
-LABEL org.opencontainers.image.description='Malcolm container providing an interface for uploading PCAP files and Zeek logs for processing'
 
+ENV DEBIAN_FRONTEND noninteractive
 
 ARG SITE_NAME="Capture File and Log Archive Upload"
 
@@ -32,10 +25,30 @@ RUN apt-get update && \
 
 FROM debian:buster-slim AS runtime
 
-COPY --from=build /jQuery-File-Upload/ /var/www/upload/
+LABEL maintainer="malcolm.netsec@gmail.com"
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/file-upload'
+LABEL org.opencontainers.image.description='Malcolm container providing an interface for uploading PCAP files and Zeek logs for processing'
+
+ARG DEFAULT_UID=33
+ARG DEFAULT_GID=33
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "www-data"
+ENV PGROUP "www-data"
+# not dropping privileges globally in this container as required to run SFTP server. this can
+# be handled by supervisord instead on an as-needed basis, and/or php-fpm/nginx itself
+# will drop privileges to www-data as well.
+ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
+
+COPY --from=build /jQuery-File-Upload/ /var/www/upload/
 
 RUN apt-get update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
@@ -52,6 +65,7 @@ RUN apt-get update && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
 ADD file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD file-upload/jquery-file-upload/bootstrap.min.css /var/www/upload/bower_components/bootstrap/dist/css/bootstrap.min.css
@@ -73,14 +87,15 @@ RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
   chmod 775 /var/www/upload/server/php/chroot/files && \
   chmod 755 /var /var/www /var/www/upload /var/www/upload/server /var/www/upload/server/php \
             /var/www/upload/server/php/chroot && \
-  echo "Put your files into /files. Don't use subdirectories.\nThey cannot be accessed via the web user interface!" \
+  echo "Put your files into /files. Don't use subdirectories." \
       >/var/www/upload/server/php/chroot/README.txt && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/upload/server/php/chroot/files/.gitignore /tmp/sshd_config
 
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]
 EXPOSE 22 80
 
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
+
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 
 
