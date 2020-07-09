@@ -95,8 +95,7 @@ def logs():
       outputStr = output.decode().strip()
       outputStrEscaped = EscapeAnsi(outputStr)
       if ignoreRegEx.match(outputStrEscaped):
-        pass
-        # print('!!!!!!!: {}'.format(outputStr))
+        pass  ### print('!!!!!!!: {}'.format(outputStr))
       else:
         serviceMatch = serviceRegEx.search(outputStrEscaped)
         serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
@@ -104,6 +103,8 @@ def logs():
         messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
         outputJson = LoadStrIfJson(messageStr)
         if (outputJson is not None):
+
+          # if there's a timestamp in the JSON, move it outside of the JSON to the beginning of the log string
           timeKey = None
           if 'time' in outputJson:
             timeKey = 'time'
@@ -116,21 +117,42 @@ def logs():
             timeStr = outputJson[timeKey] + ' '
             outputJson.pop(timeKey, None)
 
-          if ('job.schedule' in outputJson) and ('job.command' in outputJson) and ('job.command' in outputJson):
-            # this is an output line from supercronic, let's format it so it fits in better with the rest of the logs
-            # TODO
-            print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
+          if ('job.schedule' in outputJson) and ('job.position' in outputJson) and ('job.command' in outputJson):
+
+            # this is a status output line from supercronic, let's format and cleant it up so it fits in better with the rest of the logs
+
+            # remove some clutter for the display
+            for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
+              outputJson.pop(noisyKey, None)
+
+            # if it's just command and message, format those NOT as JSON
+            jobCmd = outputJson['job.command']
+            jobStatus = outputJson['msg']
+            if (len(outputJson.keys()) == 2) and ('job.command' in outputJson) and ('msg' in outputJson):
+              # if it's the most common status (starting or job succeeded) then don't print unless debug mode
+              if args.debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
+                print('{}{} {} {}: {}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, jobCmd, jobStatus))
+              else:
+                pass
+
+            else:
+              # standardize and print the JSON output
+              print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
 
           elif ('kibana' in serviceStr):
-            # this is an output line from kibana, let's clean it up a bit
-            for noisyKey in ['type', 'tags', 'pid', 'method']:
+            # this is an output line from kibana, let's clean it up a bit: remove some clutter for the display
+            for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
               outputJson.pop(noisyKey, None)
+
+            # standardize and print the JSON output
             print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
 
           else:
+            # standardize and print the JSON output
             print('{}{} {}{}'.format(serviceStr, Style.RESET_ALL if coloramaImported else '', timeStr, json.dumps(outputJson)))
 
         else:
+          # just a regular non-JSON string, print as-is
           print(outputStr if coloramaImported else outputStrEscaped)
 
     else:
