@@ -645,7 +645,7 @@ Installing and configuring Docker to run under Windows must be done manually, ra
     + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All`
     + `Enable-WindowsOptionalFeature -Online -FeatureName Containers –All`
 1. If you have not yet done so after enabling the Windows features, reboot.
-1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows) either by downloading the installer from the official Docker site or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop/2.1.1.2).
+1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows) either by downloading the installer from the official Docker site or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop).
 1. Run **Docker Desktop**, click the **Settings** option in the Docker system tray menu and make the following adjustments:
     + **General**
         * Ensure *Start Docker Desktop when you log in* is checked.
