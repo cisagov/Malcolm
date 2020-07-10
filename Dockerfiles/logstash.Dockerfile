@@ -1,14 +1,6 @@
 FROM centos:7 AS build
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
-LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
-LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/logstash-oss'
-LABEL org.opencontainers.image.description='Malcolm container providing Logstash (the Apache-licensed variant)'
 
 RUN yum install -y epel-release && \
     yum update -y && \
@@ -31,6 +23,25 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
       /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
 FROM docker.elastic.co/logstash/logstash-oss:7.6.2
+
+LABEL maintainer="malcolm.netsec@gmail.com"
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='malcolmnetsec/logstash-oss'
+LABEL org.opencontainers.image.description='Malcolm container providing Logstash (the Apache-licensed variant)'
+
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "logstash"
+ENV PGROUP "logstash"
+ENV PUSER_PRIV_DROP true
+
+ENV TERM xterm
 
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
 ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse
@@ -61,6 +72,7 @@ RUN yum install -y epel-release && \
     logstash-plugin install /opt/logstash-filter-ieee_oui/logstash-filter-ieee_oui-1.0.6.gem && \
     rm -rf /opt/logstash-filter-ieee_oui /root/.cache /root/.gem /root/.bundle
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
@@ -69,11 +81,11 @@ ADD logstash/scripts /usr/local/bin/
 ADD logstash/supervisord.conf /etc/supervisord.conf
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
-    mkdir -p /var/log/supervisor && \
+    usermod -a -G tty ${PUSER} && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
-    bash -c "chown --silent -R logstash:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue" && \
+    chown --silent -R ${PUSER}:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue && \
     curl -sSL -o /usr/share/logstash/config/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf" && \
       ( awk -F '\t' '{gsub(":", "", $1); if (length($1) == 6) {if ($3) {print $1"\t"$3} else if ($2) {print $1"\t"$2}}}' /usr/share/logstash/config/oui.txt > /usr/share/logstash/config/oui-logstash.txt) && \
       python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
@@ -90,7 +102,10 @@ EXPOSE 5044
 EXPOSE 9001
 EXPOSE 9600
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+
 
 # to be populated at build-time:
 ARG BUILD_DATE

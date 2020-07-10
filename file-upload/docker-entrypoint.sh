@@ -18,9 +18,9 @@ then
   rm -f /etc/ssh/ssh_host_*
   dpkg-reconfigure openssh-server
 
-  useradd -g www-data -d /var/www/upload/server/php/chroot -s /sbin/nologin "$MALCOLM_USERNAME"
+  useradd -g $PGROUP -d /var/www/upload/server/php/chroot -s /sbin/nologin "$MALCOLM_USERNAME"
   usermod --password "$MALCOLM_PASSWORD" "$MALCOLM_USERNAME"
-  chown "$MALCOLM_USERNAME:www-data" /var/www/upload/server/php/chroot/files
+  chown :$PGROUP /var/www/upload/server/php/chroot/files
   chmod 775 /var/www/upload/server/php/chroot/files
 
   # This will break if $SITE_NAME contains a slash...

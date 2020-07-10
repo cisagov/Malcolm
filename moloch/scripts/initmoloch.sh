@@ -2,14 +2,14 @@
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
-rm -f $MOLOCHDIR/initialized $MOLOCHDIR/runwise
+rm -f /var/run/moloch/initialized /var/run/moloch/runwise
 
 echo "Giving Elasticsearch time to start..."
 /data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
 #Configure Moloch to Run
-if [ ! -f $MOLOCHDIR/configured ]; then
-	touch $MOLOCHDIR/configured
+if [ ! -f /var/run/moloch/configured ]; then
+	touch /var/run/moloch/configured
   if [[ "$WISE" = "on" ]] ; then
     $MOLOCHDIR/bin/Configure --wise
   fi
@@ -17,7 +17,7 @@ if [ ! -f $MOLOCHDIR/configured ]; then
 fi
 
 if [[ "$WISE" = "on" ]] ; then
-  touch $MOLOCHDIR/runwise
+  touch /var/run/moloch/runwise
   echo "Giving WISE time to start..."
   sleep 5
   until curl -sS --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
@@ -72,6 +72,6 @@ if [[ -n $ES_MAX_SHARDS_PER_NODE ]]; then
   curl -sS -H'Content-Type: application/json' -XPUT http://$ES_HOST:$ES_PORT/_cluster/settings -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$ES_MAX_SHARDS_PER_NODE\" } }"
 fi
 
-touch $MOLOCHDIR/initialized
+touch /var/run/moloch/initialized
 
 # the (viewer|wise)_service.sh scripts will start/restart those processes

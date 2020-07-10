@@ -4,6 +4,8 @@
 
 set -e
 
+export PATH="/usr/local/bin:$PATH"
+
 echo "Giving Elasticsearch at $ELASTICSEARCH_URL time to start..."
 
 elastic_search_status.sh -w

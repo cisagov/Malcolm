@@ -10,8 +10,16 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/file-monitor'
 LABEL org.opencontainers.image.description='Malcolm container for scanning files extracted by Zeek'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "monitor"
+ENV PGROUP "monitor"
+ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
 
 ARG ZEEK_EXTRACTOR_PATH=/data/zeek/extract_files
 ARG ZEEK_LOG_DIRECTORY=/data/zeek/logs
@@ -74,7 +82,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-requests \
       python3-zmq && \
     pip3 install clamd supervisor && \
-    mkdir -p /var/log/supervisor && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove python3-dev build-essential && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
@@ -82,23 +89,25 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     wget -O /var/lib/clamav/main.cvd http://database.clamav.net/main.cvd && \
       wget -O /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
       wget -O /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
-    groupadd --gid 1000 monitor && \
-      useradd -M --uid 1000 --gid 1000 monitor && \
+    groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+      usermod -a -G tty ${PUSER} && \
     mkdir -p /var/log/clamav /var/lib/clamav && \
-      chown -R monitor:monitor /var/log/clamav  /var/lib/clamav && \
+      chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav && \
       chmod -R 750 /var/log/clamav  /var/lib/clamav && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
-      sed -i 's/^User .*$/User monitor/g' /etc/clamav/clamd.conf && \
+      sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
-      sed -i 's/^LocalSocketGroup .*$/LocalSocketGroup monitor/g' /etc/clamav/clamd.conf && \
+      sed -i "s/^LocalSocketGroup .*$/LocalSocketGroup ${PGROUP}/g" /etc/clamav/clamd.conf && \
       sed -i "s/^MaxFileSize .*$/MaxFileSize $EXTRACTED_FILE_MAX_BYTES/g" /etc/clamav/clamd.conf && \
       sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf && \
       echo "TCPSocket 3310" >> /etc/clamav/clamd.conf && \
     if ! [ -z $HTTPProxyServer ]; then echo "HTTPProxyServer $HTTPProxyServer" >> /etc/clamav/freshclam.conf; fi && \
       if ! [ -z $HTTPProxyPort   ]; then echo "HTTPProxyPort $HTTPProxyPort" >> /etc/clamav/freshclam.conf; fi && \
       sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
-      sed -i 's/^DatabaseOwner .*$/DatabaseOwner monitor/g' /etc/clamav/freshclam.conf
+      sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/zeek_carve_*.py /usr/local/bin/
 ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
@@ -109,7 +118,9 @@ VOLUME ["/var/lib/clamav"]
 
 EXPOSE 3310
 
-CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

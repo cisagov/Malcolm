@@ -10,6 +10,19 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/filebeat-oss'
 LABEL org.opencontainers.image.description='Malcolm container providing Filebeat (the Apache-licensed variant)'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "filebeat"
+ENV PGROUP "filebeat"
+# not dropping privileges globally: supervisord will take care of it
+# on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.sh)
+# can chown uploaded files
+ENV PUSER_PRIV_DROP false
+
+ENV TERM xterm
+
 ARG FILEBEAT_LOG_CLEANUP_MINUTES=0
 ARG FILEBEAT_ZIP_CLEANUP_MINUTES=0
 ARG FILEBEAT_SCAN_FREQUENCY=10s
@@ -25,29 +38,39 @@ ARG FILEBEAT_NGINX_LOG_PATH="/data/nginx"
 ARG NGINX_LOG_ACCESS_AND_ERRORS=false
 ARG AUTO_TAG=true
 
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
 USER root
 
 RUN yum install -y epel-release && \
-    yum update -y && \
-    yum install -y cronie inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python-setuptools python-pip && \
-    yum clean all && \
+        yum update -y && \
+        yum install -y curl inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python-setuptools python-pip && \
+        yum clean all && \
+    ln -sr /usr/sbin/fuser /bin/fuser && \
     easy_install supervisor && \
     pip install patool entrypoint2 pyunpack python-magic ordered-set==3.1.1 && \
-    ln -sr /usr/sbin/fuser /bin/fuser
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+      chmod +x "$SUPERCRONIC" && \
+      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
-ADD shared/bin/cron_env_centos.sh /data/
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/scripts /data/
 ADD shared/bin/elastic_search_status.sh /data/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
-RUN mkdir -p /var/log/supervisor /usr/share/filebeat-nginx/data && \
-    chown -R root:filebeat /usr/share/filebeat-nginx && \
+RUN mkdir -p /usr/share/filebeat-nginx/data && \
+    chown -R root:${PGROUP} /usr/share/filebeat-nginx && \
     cp -a /usr/share/filebeat/module /usr/share/filebeat-nginx/module && \
     chmod 750 /usr/share/filebeat-nginx && \
     chmod 770 /usr/share/filebeat-nginx/data && \
     chmod 755 /data/*.sh /data/*.py && \
-    (echo -e "* * * * * su -c /data/filebeat-process-zeek-folder.sh filebeat >/dev/null 2>&1\n*/5 * * * * su -c /data/filebeat-clean-zeeklogs-processed-folder.py filebeat >/dev/null 2>&1" | crontab -)
+    (echo -e "* * * * * /data/filebeat-process-zeek-folder.sh\n*/5 * * * * /data/filebeat-clean-zeeklogs-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
 
 ENV FILEBEAT_LOG_CLEANUP_MINUTES $FILEBEAT_LOG_CLEANUP_MINUTES
 ENV FILEBEAT_ZIP_CLEANUP_MINUTES $FILEBEAT_ZIP_CLEANUP_MINUTES
@@ -69,6 +92,8 @@ ENV FILEBEAT_ZEEK_DIR "/data/zeek/"
 ENV PATH="/data:${PATH}"
 
 VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data"]
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
