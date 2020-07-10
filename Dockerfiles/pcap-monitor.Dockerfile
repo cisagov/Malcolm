@@ -10,11 +10,21 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/pcap-monitor'
 LABEL org.opencontainers.image.description='Malcolm container watching for captured or uploaded artifacts to be processed'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "watcher"
+ENV PGROUP "watcher"
+# not dropping privileges globally: supervisord will take care of it
+# on a case-by-case basis so that one script (watch-pcap-uploads-folder.sh)
+# can chown uploaded files
+ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
 
 ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
-ARG MONITOR_USER=watcher
 ARG PCAP_PATH=/pcap
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
@@ -22,7 +32,6 @@ ARG PCAP_PIPELINE_IGNORE_PREEXISTING=false
 ARG ZEEK_PATH=/zeek
 
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
-ENV MONITOR_USER $MONITOR_USER
 ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
@@ -45,10 +54,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip3 install --no-cache-dir elasticsearch elasticsearch_dsl pyzmq pyinotify python-magic && \
-    mkdir -p /var/log/supervisor && \
-    groupadd --gid 1000 $MONITOR_USER && \
-      useradd -M --uid 1000 --gid 1000 $MONITOR_USER
+    groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD pcap-monitor/scripts/ /usr/local/bin/
 ADD shared/bin/pcap_watcher.py /usr/local/bin/
@@ -56,7 +65,10 @@ ADD shared/bin/pcap_utils.py /usr/local/bin/
 
 EXPOSE 30441
 
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+
 
 # to be populated at build-time:
 ARG BUILD_DATE

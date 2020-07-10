@@ -4,7 +4,7 @@
 
 
 while true; do
-  if [[ ("$WISE" == "on") && (-f $MOLOCHDIR/runwise) && (-f $MOLOCHDIR/etc/wise.ini) ]]; then
+  if [[ ("$WISE" == "on") && (-f /var/run/moloch/runwise) && (-f $MOLOCHDIR/etc/wise.ini) ]]; then
     echo "Launch wise..."
     pushd $MOLOCHDIR/wiseService >/dev/null 2>&1
     $MOLOCHDIR/bin/node wiseService.js -c $MOLOCHDIR/etc/wise.ini

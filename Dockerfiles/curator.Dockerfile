@@ -10,6 +10,17 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/elastalert'
 LABEL org.opencontainers.image.description='Malcolm container providing curation for Elasticsearch indices'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "curator"
+ENV PGROUP "curator"
+ENV PUSER_PRIV_DROP true
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
+
 ARG ES_HOST=elasticsearch
 ARG ES_PORT=9200
 ARG CURATOR_TIMEOUT=120
@@ -44,18 +55,20 @@ ENV CURATOR_SNAPSHOT_REPO $CURATOR_SNAPSHOT_REPO
 ENV CURATOR_SNAPSHOT_COMPRESSED $CURATOR_SNAPSHOT_COMPRESSED
 ENV CURATOR_SNAPSHOT_DISABLED $CURATOR_SNAPSHOT_DISABLED
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
 ENV CURATOR_VERSION "5.8.1"
 ENV CRON "5 0 * * *"
 ENV CONFIG_FILE "/config/config_file.yml"
 ENV ACTION_FILE "/config/action_file.yml"
-ENV CURATOR_USER "curator"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
     apt-get  -y -q install \
       build-essential \
-      cron \
       curl \
       procps \
       psmisc \
@@ -63,20 +76,27 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-dev \
       python3-pip && \
     pip3 install elasticsearch-curator==${CURATOR_VERSION} && \
-    groupadd --gid 1000 ${CURATOR_USER} && \
-      useradd -M --uid 1000 --gid 1000 ${CURATOR_USER} && \
+    groupadd --gid ${DEFAULT_GID} ${PUSER} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
     apt-get -q -y --purge remove guile-2.2-libs python3-dev build-essential && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    bash -c 'echo -e "${CRON} su -c \"/usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE}\" ${CURATOR_USER} >/proc/1/fd/1 2>/proc/1/fd/2\n@reboot su -c \"/usr/local/bin/elastic_search_status.sh -w && /usr/local/bin/register-elasticsearch-snapshot-repo.sh\" ${CURATOR_USER} >/proc/1/fd/1 2>/proc/1/fd/2" | crontab -'
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+      chmod +x "$SUPERCRONIC" && \
+      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    bash -c 'echo -e "${CRON} /usr/local/bin/curator --config ${CONFIG_FILE} ${ACTION_FILE}" > ${SUPERCRONIC_CRONTAB}'
 
-ADD shared/bin/cron_env_deb.sh /usr/local/bin/
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/elastic_search_status.sh /usr/local/bin/
 ADD curator/scripts /usr/local/bin/
 ADD curator/config /config/
 
-CMD ["/usr/local/bin/cron_env_deb.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
 
 
 # to be populated at build-time:

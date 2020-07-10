@@ -788,7 +788,7 @@ def main():
             # optionally, filebeat can use SSL if Logstash is configured for it
             logstash_ssl = "false"
             logstash_ssl_verify = "none"
-            if (d.yesno("Forward Zeek logs over SSL? (Note: This requires the destination to be similarly configured and a corresponding copy of the client SSL files.)", yes_label="Unencrypted", no_label="SSL") != Dialog.OK):
+            if (d.yesno("Forward Zeek logs over SSL? (Note: This requires the destination to be similarly configured and a corresponding copy of the client SSL files.)", yes_label="SSL", no_label="Unencrypted") == Dialog.OK):
               logstash_ssl = "true"
               if (d.yesno("Logstash SSL verification", yes_label="None", no_label="Force Peer") != Dialog.OK):
                 logstash_ssl_verify = "force_peer"

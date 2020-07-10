@@ -5,6 +5,11 @@ version: '3.7'
 ################################################################################
 # Commonly tweaked configuration options
 #-------------------------------------------------------------------------------
+x-process-variables: &process-variables
+  # docker containers will run processes as unprivileged user with UID:GID
+  PUID : 1000
+  PGID : 1000
+
 x-auth-variables: &auth-variables
   # authentication method: encrypted HTTP basic authentication ('true') vs LDAP ('false')
   NGINX_BASIC_AUTH : 'true'
@@ -103,10 +108,13 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.2
+    image: malcolmnetsec/elasticsearch-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: elasticsearch
     environment:
+      << : *process-variables
       logger.level : 'WARN'
       bootstrap.memory_lock : 'true'
       ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
@@ -135,10 +143,13 @@ services:
       retries: 3
       start_period: 180s
   kibana:
-    image: malcolmnetsec/kibana-oss:2.1.0
+    image: malcolmnetsec/kibana-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: kibana
     environment:
+      << : *process-variables
       << : *kibana-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
@@ -158,10 +169,13 @@ services:
       retries: 3
       start_period: 210s
   elastalert:
-    image: malcolmnetsec/elastalert:2.1.0
+    image: malcolmnetsec/elastalert:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: elastalert
     environment:
+      << : *process-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
@@ -183,26 +197,32 @@ services:
       retries: 3
       start_period: 210s
   curator:
-    image: malcolmnetsec/curator:2.1.0
+    image: malcolmnetsec/curator:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: curator
     environment:
+      << : *process-variables
       << : *curator-variables
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
     depends_on:
       - elasticsearch
     healthcheck:
-      test: ["CMD", "pidof", "cron"]
+      test: ["CMD", "pidof", "supercronic"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 30s
   logstash:
-    image: malcolmnetsec/logstash-oss:2.1.0
+    image: malcolmnetsec/logstash-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: logstash
     environment:
+      << : *process-variables
       << : *logstash-variables
       << : *common-beats-variables
       << : *common-lookup-variables
@@ -229,10 +249,13 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:2.1.0
+    image: malcolmnetsec/filebeat-oss:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: filebeat
     environment:
+      << : *process-variables
       << : *nginx-variables
       << : *common-upload-variables
       << : *common-beats-variables
@@ -263,15 +286,18 @@ services:
       retries: 3
       start_period: 60s
   moloch:
-    image: malcolmnetsec/moloch:2.1.0
+    image: malcolmnetsec/moloch:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: moloch
     env_file:
       - ./auth.env
     environment:
+      << : *process-variables
       << : *common-upload-variables
       << : *moloch-variables
-      MOLOCH_VERSION : '2.3.1'
+      MOLOCH_VERSION : '2.3.2'
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
@@ -299,10 +325,13 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:2.1.0
+    image: malcolmnetsec/zeek:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: zeek
     environment:
+      << : *process-variables
       << : *common-upload-variables
       << : *zeek-variables
     ulimits:
@@ -322,10 +351,13 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:2.1.0
+    image: malcolmnetsec/file-monitor:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: filemon
     environment:
+      << : *process-variables
       << : *zeek-variables
     expose:
       - 3310
@@ -339,8 +371,10 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:2.1.0
+    image: malcolmnetsec/pcap-capture:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     network_mode: host
     ulimits:
       memlock:
@@ -352,6 +386,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
+      << : *process-variables
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
@@ -362,10 +397,13 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:2.1.0
+    image: malcolmnetsec/pcap-monitor:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: pcapmon
     environment:
+      << : *process-variables
       << : *common-upload-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
     depends_on:
@@ -382,12 +420,15 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:2.1.0
+    image: malcolmnetsec/file-upload:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: upload
     env_file:
       - ./auth.env
     environment:
+      << : *process-variables
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
@@ -405,10 +446,13 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.1.0
+    image: malcolmnetsec/htadmin:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: htadmin
     environment:
+      << : *process-variables
       << : *auth-variables
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     expose:
@@ -424,10 +468,13 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.1.0
+    image: malcolmnetsec/freq:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: freq
     environment:
+      << : *process-variables
       << : *common-lookup-variables
       VIRTUAL_HOST : 'freq.malcolm.local'
     expose:
@@ -439,10 +486,13 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.1.0
+    image: malcolmnetsec/name-map-ui:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: name-map-ui
     environment:
+      << : *process-variables
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     expose:
       - 8080
@@ -457,10 +507,13 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:2.1.0
+    image: malcolmnetsec/nginx-proxy:2.1.1
     restart: "no"
+    stdin_open: false
+    tty: true
     hostname: nginx-proxy
     environment:
+      << : *process-variables
       << : *auth-variables
       << : *nginx-variables
     depends_on:

@@ -16,7 +16,7 @@ do
     (>/dev/null tee "$DEST_MAP" < "$NEWFILE") && echo "\"$NEWFILE\" -> \"$DEST_MAP\""
     rm -f "$NEWFILE"
   else
-    # invalud or unhandled file type uploaded, delete it
+    # invalid or unhandled file type uploaded, delete it
     (>&2 rm -f "$NEWFILE") && echo "Removed \"$NEWFILE\" (\"$FILEMIME\"): invalid file type or format"
   fi
 done

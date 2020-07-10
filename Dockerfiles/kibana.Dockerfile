@@ -10,6 +10,15 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/kibana-oss'
 LABEL org.opencontainers.image.description='Malcolm container providing Kibana (the Apache-licensed variant)'
 
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "kibana"
+ENV PGROUP "kibana"
+ENV PUSER_PRIV_DROP true
+
+ENV TERM xterm
 
 ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
 ARG CREATE_ES_MOLOCH_SESSION_INDEX="true"
@@ -29,6 +38,11 @@ ENV KIBANA_OFFLINE_REGION_MAPS $KIBANA_OFFLINE_REGION_MAPS
 ENV KIBANA_OFFLINE_REGION_MAPS_PORT $KIBANA_OFFLINE_REGION_MAPS_PORT
 ENV PATH="/data:${PATH}"
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
+
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 USER root
 
@@ -66,11 +80,16 @@ RUN sed -i "s/d\.name\.split/d\.name\.toString()\.split/" /usr/share/kibana/src/
       curl -sSL -o /tmp/kibana-drilldown.zip "https://codeload.github.com/mmguero-dev/kibana-plugin-drilldownmenu/zip/master" && \
     yum install -y epel-release && \
       yum update -y && \
-      yum install -y curl cronie inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
+      yum install -y curl inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
       yum clean all && \
       easy_install supervisor && \
       npm install -g http-server && \
-      mkdir -p /var/log/supervisor && \
+      usermod -a -G tty ${PUSER} && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+      chmod +x "$SUPERCRONIC" && \
+      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
     cd /tmp && \
     echo "Installing ElastAlert plugin..." && \
       unzip elastalert-kibana-plugin.zip kibana/elastalert-kibana-plugin/package.json kibana/elastalert-kibana-plugin/public/components/main/main.js && \
@@ -141,6 +160,7 @@ RUN sed -i "s/d\.name\.split/d\.name\.toString()\.split/" /usr/share/kibana/src/
       rm -rf /tmp/kibana-swimlane.zip /tmp/kibana && \
     rm -rf /tmp/plugin-patches /tmp/elastalert-server-routes.js /tmp/npm-*
 
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD kibana/dashboards /opt/kibana/dashboards
 ADD kibana/kibana-offline-maps.yml /opt/kibana/config/kibana-offline-maps.yml
 ADD kibana/kibana-standard.yml /opt/kibana/config/kibana-standard.yml
@@ -148,15 +168,17 @@ ADD kibana/maps /opt/maps
 ADD kibana/scripts /data/
 ADD kibana/supervisord.conf /etc/supervisord.conf
 ADD kibana/zeek_template.json /data/zeek_template.json
-ADD shared/bin/cron_env_centos.sh /data/
 ADD shared/bin/elastic_search_status.sh /data/
 
 RUN chmod 755 /data/*.sh /data/*.py && \
-    chown -R kibana:kibana /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
+    chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /opt/kibana/config/kibana*.yml && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * su -c /data/kibana-create-moloch-sessions-index.sh kibana >/dev/null 2>&1\n0 10 * * * su -c /data/kibana_index_refresh.py kibana >/dev/null 2>&1\n" | crontab -)
+    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py" > ${SUPERCRONIC_CRONTAB})
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+
 
 # to be populated at build-time:
 ARG BUILD_DATE

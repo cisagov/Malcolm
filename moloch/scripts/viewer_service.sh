@@ -4,7 +4,7 @@
 
 
 while true; do
-  if [[ -e $MOLOCHDIR/configured && -f $MOLOCHDIR/initialized && "$VIEWER" == "on" ]]; then
+  if [[ -e /var/run/moloch/configured && -f /var/run/moloch/initialized && "$VIEWER" == "on" ]]; then
     echo "Launch viewer..."
     cd $MOLOCHDIR/viewer
     $MOLOCHDIR/bin/node viewer.js -c $MOLOCHDIR/etc/config.ini | tee -a $MOLOCHDIR/logs/viewer.log 2>&1

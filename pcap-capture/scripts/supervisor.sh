@@ -58,10 +58,17 @@ function CreateCaptureConfigs() {
   fi # config dir exists
 }
 
+function SetCaptureCapabilities() {
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump || true
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng || true
+}
+
 CreateCaptureConfigs
+SetCaptureCapabilities
 
 if [[ -z $PCAP_ROTATE_SECONDS ]] && [[ -n $PCAP_ROTATE_MINUTES ]]; then
   export PCAP_ROTATE_SECONDS=$(echo "$PCAP_ROTATE_MINUTES * 60" | bc)
 fi
 
-supervisord -c "$CONFIG_FILE"
+supervisord -c "$CONFIG_FILE" -n
