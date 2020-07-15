@@ -79,7 +79,7 @@ def main():
     try:
       for fingerprint in requests.get(url).json():
         if ('md5' in fingerprint) and fingerprint['md5'] and ('User-Agent' in fingerprint) and fingerprint['User-Agent']:
-          ja3Map[fingerprint['md5']].append(fingerprint['User-Agent'])
+          ja3Map[fingerprint['md5']].append(fingerprint['User-Agent'].strip('"').strip("'"))
     except Exception as e:
       eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
 
@@ -94,9 +94,9 @@ def main():
         for key in keys:
           values.append('-'.join([str(int(x, 0)) for x in tmpMap[key].split()]))
         if PY3:
-          ja3Map[hashlib.md5(','.join(values).encode()).hexdigest()].append(' '.join(tmpMap['desc'].strip('"').strip("'").split()))
+          ja3Map[hashlib.md5(','.join(values).encode()).hexdigest()].extend(tmpMap['desc'].strip('"').strip("'").split(' / '))
         else:
-          ja3Map[hashlib.md5(','.join(values)).hexdigest()].append(' '.join(tmpMap['desc'].strip('"').strip("'").split()))
+          ja3Map[hashlib.md5(','.join(values)).hexdigest()].extend(tmpMap['desc'].strip('"').strip("'").split(' / '))
       except Exception as e:
         eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
   except Exception as e:
@@ -110,7 +110,7 @@ def main():
           values = list()
           tmpMap = defaultdict(str)
           tmpMap.update(json.loads(fingerprint))
-          ja3Map[tmpMap['ja3_hash'].strip()].append(' '.join(tmpMap['desc'].strip('"').strip("'").split()))
+          ja3Map[tmpMap['ja3_hash'].strip()].append(tmpMap['desc'].strip('"').strip("'"))
         except Exception as e:
           eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
     except Exception as e:
@@ -125,13 +125,13 @@ def main():
           values = list()
           tmpMap = defaultdict(str)
           tmpMap.update(json.loads(fingerprint))
-          ja3Map[tmpMap['desc'].strip()].append(' '.join(tmpMap['ja3_hash'].strip('"').strip("'").split()))
+          ja3Map[tmpMap['desc'].strip()].append(tmpMap['ja3_hash'].strip('"').strip("'"))
         except Exception as e:
           eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
     except Exception as e:
       eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
 
-  # this one is csv
+  # this one is csv (and overlaps the previous one a lot)
   try:
     url = 'https://raw.githubusercontent.com/salesforce/ja3/master/lists/osx-nix-ja3.csv'
     for fingerprint in [x for x in requests.get(url).text.splitlines() if (len(x) > 0) and (not x.startswith('#'))]:
@@ -144,7 +144,7 @@ def main():
   finalMap = dict()
   for k, v in ja3Map.items():
     if (len(k) == 32) and all(c in string.hexdigits for c in k):
-      finalMap[k] = list(set([element.strip('"').strip("'").strip() for item in v for element in item.split(',')]))
+      finalMap[k] = list(set([element.strip('"').strip("'").strip() for element in v]))
 
   with open(args.output, 'w+') as outfile:
     if PY3:
