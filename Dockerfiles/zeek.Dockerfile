@@ -147,6 +147,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       supervisor \
       vim-tiny && \
     pip3 install --no-cache-dir pyzmq && \
+    bash -c "( find /opt/zeek/ -type l ! -exec test -r {} \; -print | xargs -r -l rm -vf ) || true" && \
     apt-get -q -y --purge remove libssl-dev && \
       apt-get -q -y autoremove && \
       apt-get clean && \
