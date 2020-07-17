@@ -610,7 +610,7 @@ def main():
   os.chdir(MalcolmPath)
 
   # don't run this as root
-  if (pyPlatform != PLATFORM_WINDOWS) and (('SUDO_UID' in os.environ.keys()) or (getpass.getuser() == 'root')):
+  if (pyPlatform != PLATFORM_WINDOWS) and ((os.getuid() == 0) or (os.geteuid() == 0) or (getpass.getuser() == 'root')):
     raise Exception('{} should not be run as root'.format(ScriptName))
 
   # make sure docker/docker-compose is available
