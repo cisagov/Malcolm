@@ -244,7 +244,7 @@ services:
       << : *common-beats-variables
       << : *common-lookup-variables
       ES_HOSTS : 'elasticsearch:9200'
-      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Djava.security.egd=file:/dev/./urandom'
+      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss2m -Djava.security.egd=file:/dev/./urandom'
     depends_on:
       - elasticsearch
     expose:
