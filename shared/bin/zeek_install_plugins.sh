@@ -84,6 +84,9 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-profinet
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
+  https://github.com/corelight/callstranger-detector
+  https://github.com/corelight/ripple20
+  https://github.com/corelight/SIGRed
   https://github.com/corelight/zeek-community-id
   https://github.com/cybera/zeek-sniffpass
   https://github.com/lexibrent/zeek-EternalSafety

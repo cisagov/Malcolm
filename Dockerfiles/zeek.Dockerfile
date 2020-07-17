@@ -147,6 +147,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       supervisor \
       vim-tiny && \
     pip3 install --no-cache-dir pyzmq && \
+    bash -c "( find /opt/zeek/ -type l ! -exec test -r {} \; -print | xargs -r -l rm -vf ) || true" && \
     apt-get -q -y --purge remove libssl-dev && \
       apt-get -q -y autoremove && \
       apt-get clean && \
@@ -162,8 +163,8 @@ ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 19
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|spicy/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 22
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(spicy/main|Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|CVE-2020-1350|ripple20|callstranger)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
