@@ -100,9 +100,33 @@ For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linu
 
 The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
+#### Cross-platform considerations when running Python scripts
+
+There are two Python scripts used to configure and run Malcolm that are referenced several times in this document: `install.py` and `control.py` (`control.py` is actually what is executed under the hood for the `logs`, `restart`, `start`, `stop` and `wipe` commands).
+
+To maximize compatibility across the various platforms capable of running Malcolm, for the time being these Python scripts are compatible with both the current major release of Python (Python 3.x) and the "sunsetted" Python 2.x.
+
+The line `#!/usr/bin/env python` line at the beginning of these Python scripts (known as the "hashbang" or "shebang") should ensure that the `python` interpreter that is executed is the one defined by the operating system as the default Python implementation for that system. In most cases this is handled correctly and automatically.
+
+However, this behavior is not consistent across all platforms.  On some platforms (for example, Ubuntu 20.04), `python2` and `python3` targets are provided, but not `python`. When this is the case, running Malcolm's Python scripts will result in an error like `/usr/bin/env: 'python': No such file or directory`.
+
+There are various workarounds for this scenario, including (but not limited to):
+
+1. Explicitly specifying the Python interpreter when running the scripts (e.g., `python3 ./scripts/install.py` or `python2 ./scripts/start`): this is the "safest" solution
+2. Defining a symlink called `python` in your `PATH` pointing to the desired interpreter (e.g., `sudo ln -r -s /usr/bin/python3 /usr/local/bin/python` or `ln -s /usr/bin/python3 ~/bin/python`, depending on your `PATH`); in Ubuntu 20.04 and up installing either the package [python-is-python3](https://packages.ubuntu.com/focal/python-is-python3) or [python-is-python2](https://packages.ubuntu.com/focal/python-is-python2) will take care of this for you
+3. Using `update-alternatives` to specify a target for calls to `python`
+
+This document will just use the `./scripts/install.py`-style pattern to execute the scripts. Just be aware that you may have to adjust your usage as necessitated by your system.
+
+For more information on this topic, see [PEP 394 -- The "python" Command on Unix-Like Systems](https://legacy.python.org/dev/peps/pep-0394/).
+
 #### Building Malcolm from scratch
 
 The `build.sh` script can build Malcolm's Docker images from scratch. See [Building from source](#Build) for more information.
+
+#### Initial configuration
+
+You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Pull Malcolm's Docker images
 
@@ -148,8 +172,6 @@ malcolmnetsec/pcap-capture                          2.2.0               xxxxxxxx
 malcolmnetsec/pcap-monitor                          2.2.0               xxxxxxxxxxxx        20 hours ago        156MB
 malcolmnetsec/zeek                                  2.2.0               xxxxxxxxxxxx        20 hours ago        442MB
 ```
-
-You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Import from pre-packaged tarballs
 
@@ -427,7 +449,7 @@ Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#ha
 
 If you already have Docker and Docker Compose installed, the `install.py` script can still help you tune system configuration and `docker-compose.yml` parameters for Malcolm. To run it in "configuration only" mode, bypassing the steps to install Docker and Docker Compose, run it like this:
 ```
-python3 ./scripts/install.py --configure
+./scripts/install.py --configure
 ```
 
 Although `install.py` will attempt to automate many of the following configuration and tuning parameters, they are nonetheless listed in the following sections for reference:
@@ -665,9 +687,9 @@ Installing and configuring Docker to run under Windows must be done manually, ra
 
 #### <a name="HostSystemConfigWindowsMalcolm"></a>Finish Malcolm's configuration
 
-Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo python3 ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
+Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
 
-The control scripts outlined in the [Running Malcolm](#Running) section may not be symlinked correctly under Windows. Rather than running `./scripts/start`, `./scripts/stop`, etc., you can run `python3 ./scripts/control.py --start`, `python3 ./scripts/control.py --stop`, etc. to the same effect.
+The control scripts outlined in the [Running Malcolm](#Running) section may not be symlinked correctly under Windows. Rather than running `./scripts/start`, `./scripts/stop`, etc., you can run `./scripts/control.py --start`, `./scripts/control.py --stop`, etc. to the same effect.
 
 ## <a name="Running"></a>Running Malcolm
 
@@ -1419,7 +1441,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `python3 scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
@@ -1569,6 +1591,8 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
+The commands in this example should be executed as a non-root user.
+
 You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/idaholab/Malcolm/releases).
 
 To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/idaholab/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
@@ -1592,9 +1616,23 @@ Resolving deltas: 100% (81/81), done.
 user@host:~$ cd Malcolm/
 ```
 
+Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
+```
+user@host:~/Malcolm$ ./scripts/auth_setup
+Username: analyst
+analyst password:
+analyst password (again):
+
+(Re)generate self-signed certificates for HTTPS access [Y/n]? y
+
+(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
+```
+
 Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
-user@host:~/Downloads$ sudo python3 install.py
+user@host:~/Downloads$ sudo ./install.py
 Installing required packages: ['apache2-utils', 'make', 'openssl']
 
 "docker info" failed, attempt to install Docker? (Y/n): y
@@ -1663,7 +1701,7 @@ Malcolm runtime files extracted to /home/user/Malcolm
 
 Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
-user@host:~/Malcolm$ python3 scripts/install.py --configure
+user@host:~/Malcolm$ scripts/install.py --configure
 ```
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
@@ -1736,20 +1774,6 @@ in /home/user/Malcolm/scripts.
 ```
 
 At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
-
-Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
-```
-user@host:~/Malcolm$ ./scripts/auth_setup
-Username: analyst
-analyst password:
-analyst password (again):
-
-(Re)generate self-signed certificates for HTTPS access [Y/n]? y
-
-(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
-
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
-```
 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
@@ -1882,7 +1906,7 @@ If you installed Malcolm from [pre-packaged installation files](https://github.c
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
 4. replace (overwrite) `docker-compose.yml` file with new version
     * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
-5. re-run `python3 ./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
+5. re-run `./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
 6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](#DockerComposeYml) you may have edited by hand in `docker-compose.yml` that's not prompted for in `install.py --configure`)
 7. pull the new docker images (this will take a while)
     * `docker-compose pull` to pull them from Docker Hub or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
