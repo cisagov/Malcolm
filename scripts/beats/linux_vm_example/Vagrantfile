@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.network "private_network", type: "dhcp"
 
-  config.vm.synced_folder "../shared", "/vagrant", disabled: false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   if Vagrant.has_plugin?("vagrant-vbguest")
     config.vbguest.auto_update = false
@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     vb.customize ["modifyvm", :id, "--memory", 2048]
     vb.customize ["modifyvm", :id, "--cpus", 2]
-    vb.customize ["modifyvm", :id, "--vram", 64]
+    vb.customize ["modifyvm", :id, "--vram", 32]
     vb.customize ["modifyvm", :id, "--ioapic", "on"]
     vb.customize ["modifyvm", :id, "--nestedpaging", "on"]
     vb.customize ["modifyvm", :id, "--pae", "on"]
@@ -41,29 +41,47 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-STEP1
     export DEBIAN_FRONTEND=noninteractive
+    export BEAT_VERSION=7.6.2
     apt-get update
-    apt-get install -y gnupg2 curl ca-certificates libcap2-bin python3-minimal python-is-python3
+    apt-get install -y auditd gnupg2 curl ca-certificates libcap2-bin libpcap0.8 python3-minimal python-is-python3
     curl -sSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
     echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" >> /etc/apt/sources.list
     apt-get update
-    apt-get install -y filebeat=7.6.2
+    for BEAT in auditbeat filebeat packetbeat metricbeat; do
+      apt-get install -y $BEAT=$BEAT_VERSION
+    done;
   STEP1
 
-  config.vm.provision "file", source: "./filebeat.yml", destination: "/tmp/filebeat.yml"
-  config.vm.provision "file", source: "../beat_run.py", destination: "/tmp/beat_run.py"
-  config.vm.provision "file", source: "../beat_config.py", destination: "/tmp/beat_config.py"
-  config.vm.provision "file", source: "../beat_common.py", destination: "/tmp/beat_common.py"
+  config.vm.provision "file", source: "./audit.rules", destination: "/tmp/audit.rules"
+
+  config.vm.provision "file", source: "../common/beat_run.py", destination: "/tmp/beat_run.py"
+  config.vm.provision "file", source: "../common/beat_config.py", destination: "/tmp/beat_config.py"
+  config.vm.provision "file", source: "../common/beat_common.py", destination: "/tmp/beat_common.py"
+  ["auditbeat","filebeat","packetbeat","metricbeat"].to_enum.with_index(1).each do |beat, i|
+    config.vm.provision "file", source: "./#{beat}.yml", destination: "/tmp/#{beat}.yml"
+  end
 
   config.vm.provision "shell", inline: <<-STEP2
     export DEBIAN_FRONTEND=noninteractive
+
+    mv /tmp/beat*.py /usr/local/bin/
+    chown root:root /usr/local/bin/beat*.py
+    chmod 755 /usr/local/bin/beat_config.py /usr/local/bin/beat_run.py
+    chmod 644 /usr/local/bin/beat_common.py
+
     filebeat modules enable system
-    mkdir -p /opt/filebeat
-    mv /tmp/filebeat.yml /opt/filebeat
-    mv /tmp/beat*.py /opt/filebeat
-    chown -R root:root /opt/filebeat
-    chmod 700 /opt/filebeat
-    chmod 600 /opt/filebeat/*
-    chmod 700 /opt/filebeat/*.py
+
+    mv /tmp/audit.rules /etc/audit/rules.d/audit.rules
+    find /etc/audit -type d -exec chmod 750 "{}" \\;
+    find /etc/audit -type f -exec chmod 640 "{}" \\;
+
+    for BEAT in auditbeat filebeat packetbeat metricbeat; do
+      mkdir -p /opt/$BEAT
+      mv /tmp/$BEAT.yml /opt/$BEAT/
+      chown -R root:root /opt/$BEAT
+      chmod 700 /opt/$BEAT
+      chmod 600 /opt/$BEAT/*
+    done;
   STEP2
 
   config.vm.provision :reload

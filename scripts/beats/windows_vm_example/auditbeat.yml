@@ -1,6 +1,10 @@
-#==========================  Modules configuration =============================
+# See https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-reference-yml.html
+
+# ==============================================================================
+
 auditbeat.modules:
 
+#------------------------------- file_integrity Module -----------------------
 
 - module: file_integrity
   paths:
@@ -19,7 +23,7 @@ auditbeat.modules:
   - '(?i)\.swp$'
   - '(?i)\.tmp$'
   - '(?i)beat\.(lock|yml(\.new)?|db)$'
-  - '(?i)\\(assembly|CatRoot|CbsTemp|databases?|diagnostics?|Log(File)?s?|Notifications?|Packages?|Prefetch|schemas?|servicing|Sessions?|SoftwareDistribution|Tasks?|tracing|wbem|WinMetadata|WinSxS)\\?'
+  - '(?i)\\(assembly|CatRoot|CbsTemp|databases?|Deleted|diagnostics?|Log(File)?s?|Notifications?|Packages?|Prefetch|schemas?|servicing|Sessions?|SleepStudy|SoftwareDistribution|Tasks?|Temp|tracing|wbem|WinMetadata|WinSAT|WinSxS)\\?'
   - '(?i)cache'
 
 - module: system

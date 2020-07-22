@@ -1,4 +1,9 @@
-# ======================== Winlogbeat specific options =========================
+# see https://www.elastic.co/guide/en/beats/winlogbeat/master/winlogbeat-reference-yml.html
+
+# ==============================================================================
+
+#------------------------------- event logs ----------------------------------
+
 winlogbeat.event_logs:
   - name: AMSI/Operational
   - name: Application

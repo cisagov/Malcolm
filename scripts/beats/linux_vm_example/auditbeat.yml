@@ -1,5 +1,10 @@
-#==========================  Modules configuration =============================
+# See https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-reference-yml.html
+
+# ==============================================================================
+
 auditbeat.modules:
+
+#------------------------------- auditd Module -------------------------------
 
 - module: auditd
   socket_type: multicast
