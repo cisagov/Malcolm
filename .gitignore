@@ -22,3 +22,9 @@
 malcolm_*images.tar.gz
 *.iso
 *-build.log
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+__pypackages__/
+*.py[cod]
+*$py.class
