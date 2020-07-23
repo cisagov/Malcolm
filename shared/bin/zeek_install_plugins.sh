@@ -65,16 +65,6 @@ function clone_github_repo() {
   fi
 }
 
-# install Spicy
-SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  cd "$SRC_DIR" && \
-    ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
-    ninja -C build install
-  cd "$CWD"
-fi
-
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
   https://github.com/0xxon/cve-2020-0601
@@ -141,3 +131,27 @@ for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
     cd "$CWD"
   fi
 done
+
+# install Spicy
+SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$SRC_DIR" && \
+    ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
+    ninja -C build install
+  cd "$CWD"
+fi
+
+if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
+  SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      /opt/spicy/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
+      cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
+      chmod 644 ./zeek/spicy-noise.hlto && \
+      echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.bro && \
+      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise && \
+    cd "$CWD"
+  fi
+fi

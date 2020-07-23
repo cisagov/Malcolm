@@ -124,14 +124,19 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
+      binutils \
       file \
+      git \
       libatomic1 \
+      libclang-${LLVM_VERSION}-dev \
       libclang-cpp${LLVM_VERSION} \
+      libclang-cpp${LLVM_VERSION}-dev \
       libclang1-${LLVM_VERSION} \
       libgoogle-perftools4 \
       libkrb5-3 \
       libmaxminddb0 \
       libpcap0.8 \
+      libpcap0.8-dev \
       libssl1.0 \
       libtcmalloc-minimal4 \
       libunwind8 \
@@ -160,6 +165,9 @@ ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
+
+#Update Path
+ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
@@ -197,9 +205,6 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
-
-#Update Path
-ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

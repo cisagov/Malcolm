@@ -45,10 +45,11 @@ redef SOCKS::default_capture_password = T;
 @load policy/protocols/modbus/track-memmap
 @load policy/protocols/modbus/known-masters-slaves
 @load policy/protocols/mqtt
-@load login.zeek
 # @load frameworks/files/detect-MHR
 
 # custom packages installed manually
+@load ./login.zeek
+@load ./spicy-noise
 @load Corelight/PE_XOR
 @load Salesforce/GQUIC
 @load ./bzar
