@@ -64,6 +64,7 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_TELNET : ''
   ZEEK_DISABLE_TRACK_ALL_ASSETS : ''
   ZEEK_DISABLE_WIREGUARD : ''
+  ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS : 'true'
 
 x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP  : 'true'

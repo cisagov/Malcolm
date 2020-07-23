@@ -15,6 +15,7 @@ global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") =
 global disable_telnet = (getenv("ZEEK_DISABLE_TELNET") == "") ? F : T;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
 global disable_wireguard = (getenv("ZEEK_DISABLE_WIREGUARD") == "") ? F : T;
+global disable_wireguard_transport_packets = (getenv("ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS") == "") ? F : T;
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
@@ -74,25 +75,42 @@ redef ignore_checksums = T;
 # @load frameworks/files/detect-MHR
 
 # custom packages installed manually
+
 @if (!disable_telnet)
   @load ./login.zeek
 @endif
+
 @if (!disable_wireguard)
   @load ./spicy-noise
+  event zeek_init() {
+    if (disable_wireguard_transport_packets) {
+      Log::remove_default_filter(WireGuard::WGLOG);
+      Log::add_filter(WireGuard::WGLOG,
+        [$name = "wireguard-verbose",
+         $pred(rec: WireGuard::Info) = { return (rec$msg_type != "TRANSPORT"); }]);
+    }
+  }
 @endif
+
 @if (!disable_pe_xor)
   @load Corelight/PE_XOR
 @endif
+
 @if (!disable_quic)
   @load Salesforce/GQUIC
 @endif
+
 @if (!disable_bzar)
   @load ./bzar
 @endif
+
 # custom packages managed by zkg via packages/packages.zeek
 @load ./packages/packages.zeek
-# and apparently some installed packages (BRO::LDAP) are loaded automatically
 
+# and apparently some installed packages (BRO::LDAP) are loaded automatically
+#
+
+# these redefs need to happen after the packages are loaded
 @if (!disable_log_passwords)
   redef SNIFFPASS::log_password_plaintext = T;
 @endif
