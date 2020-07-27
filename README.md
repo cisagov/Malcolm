@@ -77,6 +77,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index curation](#Curator)
+* [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
     * [Generating the ISO](#ISOBuild)
@@ -1381,6 +1382,10 @@ Other custom [filters](https://www.elastic.co/guide/en/elasticsearch/client/cura
 The settings governing index curation can affect Malcolm's performance in both log ingestion and queries, and there are caveats that should be taken into consideration when configuring this feature. Please read the Elasticsearch documentation linked in this section with regards to index curation.
 
 Index curation only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Moloch to prune old PCAP files based on available disk space.
+
+## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
+
+Because Malcolm uses components of the open source data analysis platform [Elastic Stack](https://www.elastic.co/elastic-stack), it can accept various host logs sent from [Beats](https://www.elastic.co/beats/#the-beats-family), Elastic Stack's lightweight data shippers. See [./scripts/beats](./scripts/beats) for more information.
 
 ## <a name="ISO"></a>Malcolm installer ISO
 
