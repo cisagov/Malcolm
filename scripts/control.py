@@ -57,6 +57,7 @@ def logs():
         deprecated
       | elastalert-server:\s+Routes:
       | eshealth
+      | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | update_mapping
       | throttling\s+index
       | but\s+there\s+are\s+no\s+living\s+connections
