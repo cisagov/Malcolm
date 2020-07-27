@@ -54,9 +54,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "file", source: "./audit.rules", destination: "/tmp/audit.rules"
 
-  config.vm.provision "file", source: "../common/beat_run.py", destination: "/tmp/beat_run.py"
-  config.vm.provision "file", source: "../common/beat_config.py", destination: "/tmp/beat_config.py"
-  config.vm.provision "file", source: "../common/beat_common.py", destination: "/tmp/beat_common.py"
+  config.vm.provision "file", source: "../beat_run.py", destination: "/tmp/beat_run.py"
+  config.vm.provision "file", source: "../beat_config.py", destination: "/tmp/beat_config.py"
+  config.vm.provision "file", source: "../beat_common.py", destination: "/tmp/beat_common.py"
   ["auditbeat","filebeat","packetbeat","metricbeat"].to_enum.with_index(1).each do |beat, i|
     config.vm.provision "file", source: "./#{beat}.yml", destination: "/tmp/#{beat}.yml"
   end

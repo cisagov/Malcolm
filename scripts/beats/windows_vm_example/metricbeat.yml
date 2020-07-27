@@ -17,7 +17,6 @@ metricbeat.modules:
   period: 30s
   metricsets:
     - cpu             # CPU usage
-    - load            # CPU load averages
     - memory          # Memory usage
     - network         # Network IO
     - process         # Per process metrics

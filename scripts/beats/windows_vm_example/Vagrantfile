@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.network "private_network", type: "dhcp"
 
-  config.vm.synced_folder "../shared", "c:/vagrant_shared", disabled: false
+  config.vm.synced_folder ".", "c:/vagrant_shared", disabled: true
 
   if Vagrant.has_plugin?("vagrant-vbguest")
     config.vbguest.auto_update = false
@@ -86,9 +86,9 @@ Vagrant.configure("2") do |config|
 
   ["auditbeat","winlogbeat","packetbeat","metricbeat"].to_enum.with_index(1).each do |beat, i|
     config.vm.provision "file", source: "./#{beat}.yml", destination: "C:\\Program Files\\#{beat}\\#{beat}.yml"
-    config.vm.provision "file", source: "../common/beat_run.py", destination: "C:\\Program Files\\#{beat}\\beat_run.py"
-    config.vm.provision "file", source: "../common/beat_config.py", destination: "C:\\Program Files\\#{beat}\\beat_config.py"
-    config.vm.provision "file", source: "../common/beat_common.py", destination: "C:\\Program Files\\#{beat}\\beat_common.py"
+    config.vm.provision "file", source: "../beat_run.py", destination: "C:\\Program Files\\#{beat}\\beat_run.py"
+    config.vm.provision "file", source: "../beat_config.py", destination: "C:\\Program Files\\#{beat}\\beat_config.py"
+    config.vm.provision "file", source: "../beat_common.py", destination: "C:\\Program Files\\#{beat}\\beat_common.py"
   end
 end
 
