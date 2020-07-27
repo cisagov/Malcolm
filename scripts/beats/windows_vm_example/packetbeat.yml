@@ -2,9 +2,12 @@
 
 # ==============================================================================
 
+# packetbeat.exe requires Npcap (https://nmap.org/npcap/#download) to be installed
+
+
 #------------------------------- network device ------------------------------
 
-packetbeat.interfaces.device: any
+packetbeat.interfaces.device: 0
 packetbeat.interfaces.type: pcap
 packetbeat.interfaces.snaplen: 65535
 
