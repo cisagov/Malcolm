@@ -38,3 +38,28 @@ metricbeat.modules:
   metricsets:
     - filesystem     # File system usage for each mountpoint
     - fsstat         # File system summary metrics
+  enabled: true
+
+- module: windows
+  metricsets: ["perfmon"]
+  enabled: true
+  period: 10s
+  perfmon.ignore_non_existent_counters: false
+  perfmon.group_measurements_by_instance: true
+  perfmon.queries:
+  - object: "Process"
+    instance: ["svchost*", "conhost*"]
+    counters:
+    - name: "% Processor Time"
+      field: time.processor.pct
+      format: "float"
+  perfmon.counters:
+    - instance_label: processor.name
+      instance_name: total
+      measurement_label: processor.time.total.pct
+      query: '\Processor Information(_Total)\% Processor Time'
+
+- module: windows
+  metricsets: ["service"]
+  enabled: true
+  period: 60s
