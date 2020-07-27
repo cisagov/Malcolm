@@ -1,5 +1,8 @@
 # see https://www.elastic.co/guide/en/beats/winlogbeat/master/winlogbeat-reference-yml.html
 
+# also see some of these excellent cheat sheets for Windows logging:
+#   https://www.malwarearchaeology.com/cheat-sheets
+
 # ==============================================================================
 
 #------------------------------- event logs ----------------------------------
