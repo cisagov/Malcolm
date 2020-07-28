@@ -68,7 +68,7 @@ auditbeat.modules:
   - /usr/sbin
   recursive: true
 
-# TODO: system module is apparently only available in the non-OSS basic lisence :-(
+# TODO: system module is apparently only available in the non-OSS basic license :-(
 
 # - module: system
 #   datasets:

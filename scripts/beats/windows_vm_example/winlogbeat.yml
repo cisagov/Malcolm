@@ -24,17 +24,20 @@ winlogbeat.event_logs:
   - name: Microsoft-Windows-WMI-Activity/Operational
   - name: OpenSSH/Admin
   - name: OpenSSH/Operational
-  - name: Security
-    processors:
-      - script:
-          lang: javascript
-          id: security
-          file: ${path.home}/module/security/config/winlogbeat-security.js
-  - name: System
-  - name: Windows PowerShell
-  - name: Microsoft-Windows-Sysmon/Operational
-    processors:
-      - script:
-          lang: javascript
-          id: sysmon
-          file: ${path.home}/module/sysmon/config/winlogbeat-sysmon.js
+
+  # TODO: the Security and Sysmon modules are apparently only available in the non-OSS basic license :-(
+
+  # - name: Security
+  #   processors:
+  #     - script:
+  #         lang: javascript
+  #         id: security
+  #         file: ${path.home}/module/security/config/winlogbeat-security.js
+  # - name: System
+  # - name: Windows PowerShell
+  # - name: Microsoft-Windows-Sysmon/Operational
+  #   processors:
+  #     - script:
+  #         lang: javascript
+  #         id: sysmon
+  #         file: ${path.home}/module/sysmon/config/winlogbeat-sysmon.js
