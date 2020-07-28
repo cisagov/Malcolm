@@ -75,7 +75,7 @@ Vagrant.configure("2") do |config|
 
     $beats = @("auditbeat","winlogbeat","packetbeat","metricbeat")
     foreach ($beat in $beats) {
-      Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/$beat/$beat-7.6.2-windows-x86_64.zip -OutFile $beat-7.6.2-windows-x86_64.zip -UseBasicParsing
+      Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/$beat/$beat-oss-7.6.2-windows-x86_64.zip -OutFile $beat-7.6.2-windows-x86_64.zip -UseBasicParsing
       Expand-Archive -LiteralPath $beat-7.6.2-windows-x86_64.zip -DestinationPath 'C:\\Program Files'
       Remove-Item $beat-7.6.2-windows-x86_64.zip
       Rename-Item "C:\\Program Files\\$beat-7.6.2-windows-x86_64" "C:\\Program Files\\$beat"

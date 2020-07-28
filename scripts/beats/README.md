@@ -9,7 +9,7 @@ Some examples include:
 * [Auditbeat](https://www.elastic.co/beats/auditbeat)
     - [`auditd` logs](https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-auditd.html) on Linux hosts
     - [file integrity monitoring](https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-file_integrity.html) on Linux, macOS (Darwin) and Windows hosts
-    - [system state](https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-system.html) including host, process, login, package, socket and user information on Linux, with some data sets supported on macOS and Windows hosts
+    - [system state](https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-system.html) including host, process, login, package, socket and user information on Linux, with some data sets supported on macOS and Windows hosts (apparently not available with the [Open Source Elastic license](https://www.elastic.co/subscriptions))
 * [Filebeat](https://www.elastic.co/beats/filebeat)
     - [system logs](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-system.html) (syslog and authentication logs) on Linux hosts
     - log output from [many products](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-modules.html) across Beats-supported platforms 
