@@ -28,8 +28,7 @@ function Uninstall-Beat {
 function Download-Beat {
   param( [string]$beat )
 
-  # Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/$beat/$beat-7.6.2-windows-x86_64.zip -OutFile $beat-7.6.2-windows-x86_64.zip -UseBasicParsing
-  Invoke-WebRequest -Uri http://172.15.0.41:8000/$beat-7.6.2-windows-x86_64.zip -OutFile $beat-7.6.2-windows-x86_64.zip -UseBasicParsing
+  Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/$beat/$beat-7.6.2-windows-x86_64.zip -OutFile $beat-7.6.2-windows-x86_64.zip -UseBasicParsing
   Expand-Archive -LiteralPath $beat-7.6.2-windows-x86_64.zip -DestinationPath 'C:\\Program Files'
   Remove-Item $beat-7.6.2-windows-x86_64.zip
   Rename-Item "C:\\Program Files\\$beat-7.6.2-windows-x86_64" "C:\\Program Files\\$beat"
