@@ -65,13 +65,15 @@ auditbeat.modules:
   # - '(?i)\\(assembly|CatRoot|CbsTemp|databases?|Deleted|diagnostics?|Log(File)?s?|Notifications?|Packages?|Prefetch|schemas?|servicing|Sessions?|SleepStudy|SoftwareDistribution|Tasks?|Temp|tracing|wbem|WinMetadata|WinSAT|WinSxS)\\?'
   # - '(?i)cache'
 
-- module: system
-  datasets:
-    - host # General host information, e.g. uptime, IPs
-  period: 1m
-  state.period: 1h
+# TODO: system module is apparently only available in the non-OSS basic lisence :-(
 
-- module: system
-  datasets:
-    - process # Started and stopped processes
-  period: 1s
+# - module: system
+#   datasets:
+#     - host # General host information, e.g. uptime, IPs
+#   period: 1m
+#   state.period: 1h
+
+# - module: system
+#   datasets:
+#     - process # Started and stopped processes
+#   period: 1s

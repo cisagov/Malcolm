@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
     echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" >> /etc/apt/sources.list
     apt-get update
     for BEAT in auditbeat filebeat packetbeat metricbeat; do
-      apt-get install -y $BEAT=$BEAT_VERSION
+      apt-get install -y $BEAT-oss=$BEAT_VERSION
     done;
   STEP1
 

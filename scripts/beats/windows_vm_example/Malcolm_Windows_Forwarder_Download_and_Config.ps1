@@ -1,6 +1,8 @@
 # configure a windows host to forward auditbeat and winlogbeat logs
 # to Malcolm (see https://github.com/idaholab/Malcolm/tree/development/scripts/beats)
 
+$beatversion = "7.6.2"
+
 ################################################################################
 # Uninstall-Beat
 #
@@ -21,17 +23,17 @@ function Uninstall-Beat {
 ################################################################################
 # Download-Beat
 #
-# - Download $beat-7.6.2-windows-x86_64.zip from artifacts.elastic.co
+# - Download $beat-$beatversion-windows-x86_64.zip from artifacts.elastic.co
 # - Unzip to C:\Program Files\beat
 # - Download sample config for $beat from idaholab/Malcolm to C:\Program Files\beat
 #
 function Download-Beat {
   param( [string]$beat )
 
-  Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/$beat/$beat-7.6.2-windows-x86_64.zip -OutFile $beat-7.6.2-windows-x86_64.zip -UseBasicParsing
-  Expand-Archive -LiteralPath $beat-7.6.2-windows-x86_64.zip -DestinationPath 'C:\\Program Files'
-  Remove-Item $beat-7.6.2-windows-x86_64.zip
-  Rename-Item "C:\\Program Files\\$beat-7.6.2-windows-x86_64" "C:\\Program Files\\$beat"
+  Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/$beat/$beat-oss-$beatversion-windows-x86_64.zip -OutFile $beat-$beatversion-windows-x86_64.zip -UseBasicParsing
+  Expand-Archive -LiteralPath $beat-$beatversion-windows-x86_64.zip -DestinationPath 'C:\\Program Files'
+  Remove-Item $beat-$beatversion-windows-x86_64.zip
+  Rename-Item "C:\\Program Files\\$beat-$beatversion-windows-x86_64" "C:\\Program Files\\$beat"
   ((Get-Content -path "C:\\Program Files\\$beat\\install-service-$beat.ps1" -Raw) -replace 'ProgramData','Program Files') | Set-Content -Path "C:\\Program Files\\$beat\\install-service-$beat.ps1"
   ((Get-Content -path "C:\\Program Files\\$beat\\install-service-$beat.ps1" -Raw) -replace ' -path','  --path') | Set-Content -Path "C:\\Program Files\\$beat\\install-service-$beat.ps1"
 
