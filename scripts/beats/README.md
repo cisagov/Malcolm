@@ -69,9 +69,7 @@ Enter Elasticsearch connection protocol (http or https) [https]: https
 
 Enter Elasticsearch SSL verification (none (for self-signed certificates) or full) [none]: none
 
-Enter Elasticsearch connection host: 172.15.0.41
-
-Enter Elasticsearch connection port [9200]: 9200
+Enter Elasticsearch connection host: 172.15.0.41:9200
 
 Configure winlogbeat Kibana connectivity? (Y/n): y
 
@@ -79,9 +77,7 @@ Enter Kibana connection protocol (http or https) [https]: https
 
 Enter Kibana SSL verification (none (for self-signed certificates) or full) [none]: none
 
-Enter Kibana connection host: 172.15.0.41
-
-Enter Kibana connection port [5601]: 5601
+Enter Kibana connection host: 172.15.0.41:5601
 
 Configure winlogbeat Kibana dashboards? (Y/n): y
 
@@ -94,11 +90,9 @@ Enter password for sensor (again):
 Generated keystore for winlogbeat
 BEAT_KIBANA_SSL_VERIFY
 BEAT_ES_HOST
-BEAT_ES_PORT
 BEAT_ES_PROTOCOL
 BEAT_ES_SSL_VERIFY
 BEAT_KIBANA_HOST
-BEAT_KIBANA_PORT
 BEAT_HTTP_PASSWORD
 BEAT_HTTP_USERNAME
 BEAT_KIBANA_DASHBOARDS_ENABLED
@@ -136,9 +130,7 @@ Enter Elasticsearch connection protocol (http or https) [https]: https
 
 Enter Elasticsearch SSL verification (none (for self-signed certificates) or full) [none]: none
 
-Enter Elasticsearch connection host: 172.15.0.41
-
-Enter Elasticsearch connection port [9200]: 9200
+Enter Elasticsearch connection host: 172.15.0.41:9200
 
 Configure filebeat Kibana connectivity? (Y/n): y
 
@@ -146,9 +138,7 @@ Enter Kibana connection protocol (http or https) [https]: https
 
 Enter Kibana SSL verification (none (for self-signed certificates) or full) [none]: none
 
-Enter Kibana connection host: 172.15.0.41
-
-Enter Kibana connection port [5601]: 5601
+Enter Kibana connection host: 172.15.0.41:5601
 
 Configure filebeat Kibana dashboards? (Y/n): y
 
@@ -165,9 +155,7 @@ BEAT_ES_PROTOCOL
 BEAT_ES_SSL_VERIFY
 BEAT_KIBANA_DASHBOARDS_ENABLED
 BEAT_KIBANA_DASHBOARDS_PATH
-BEAT_KIBANA_PORT
 BEAT_ES_HOST
-BEAT_ES_PORT
 BEAT_HTTP_PASSWORD
 BEAT_HTTP_USERNAME
 BEAT_KIBANA_HOST

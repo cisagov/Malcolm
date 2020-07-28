@@ -105,8 +105,6 @@ auditbeat.modules:
                   event.dataset: 'socket'
               - equals:
                   destination.ip: "${BEAT_ES_HOST}"
-              - equals:
-                  destination.port: "${BEAT_ES_PORT}"
           - and:
               - equals:
                   event.module: 'system'
@@ -114,8 +112,6 @@ auditbeat.modules:
                   event.dataset: 'socket'
               - equals:
                   destination.ip: "${BEAT_KIBANA_HOST}"
-              - equals:
-                  destination.port: "${BEAT_KIBANA_PORT}"
           - and:
               - equals:
                   event.module: 'system'
