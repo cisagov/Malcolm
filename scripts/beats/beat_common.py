@@ -48,7 +48,6 @@ OPERATION_RUN = 'run'
 OPERATION_CONFIGURE = 'config'
 
 BEAT_ES_HOST = "BEAT_ES_HOST"
-BEAT_ES_PORT = "BEAT_ES_PORT"
 BEAT_ES_PROTOCOL = "BEAT_ES_PROTOCOL"
 BEAT_ES_SSL_VERIFY = "BEAT_ES_SSL_VERIFY"
 BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
@@ -56,7 +55,6 @@ BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
 BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
 BEAT_KIBANA_DASHBOARDS_PATH = "BEAT_KIBANA_DASHBOARDS_PATH"
 BEAT_KIBANA_HOST = "BEAT_KIBANA_HOST"
-BEAT_KIBANA_PORT = "BEAT_KIBANA_PORT"
 BEAT_KIBANA_PROTOCOL = "BEAT_KIBANA_PROTOCOL"
 BEAT_KIBANA_SSL_VERIFY = "BEAT_KIBANA_SSL_VERIFY"
 
@@ -69,7 +67,7 @@ fields_under_root: true
 #-------------------------- Elasticsearch output -------------------------------
 output.elasticsearch:
   enabled: true
-  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
+  hosts: ["${BEAT_ES_HOST}"]
   protocol: "${BEAT_ES_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
@@ -87,7 +85,7 @@ setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
-  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  host: "${BEAT_KIBANA_HOST}"
   protocol: "${BEAT_KIBANA_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
@@ -248,7 +246,6 @@ class Beatbox(object):
     self.defaultKibanaDashboardDir = None
     self.keystoreItems = defaultdict(str)
     for initItem in [BEAT_ES_HOST,
-                     BEAT_ES_PORT,
                      BEAT_ES_PROTOCOL,
                      BEAT_ES_SSL_VERIFY,
                      BEAT_HTTP_PASSWORD,
@@ -256,7 +253,6 @@ class Beatbox(object):
                      BEAT_KIBANA_DASHBOARDS_ENABLED,
                      BEAT_KIBANA_DASHBOARDS_PATH,
                      BEAT_KIBANA_HOST,
-                     BEAT_KIBANA_PORT,
                      BEAT_KIBANA_PROTOCOL,
                      BEAT_KIBANA_SSL_VERIFY]:
       self.keystoreItems[initItem] = ''
@@ -352,13 +348,6 @@ class Beatbox(object):
         while (len(tmpVal) == 0):
           tmpVal = AskForString("Enter {} connection host".format(destination), default=tmpDefault, acceptDefault=self.acceptDefaults)
         self.keystoreItems[BEAT_ES_HOST.replace('_ES_', '_KIBANA_' if (destination == 'Kibana') else '_ES_')] = tmpVal
-
-        # port
-        tmpVal, tmpDefault = '', '5601' if (destination == 'Kibana') else '9200'
-        while not tmpVal.isdigit():
-          tmpVal = AskForString("Enter {} connection port [{}]".format(destination, tmpDefault), default=tmpDefault, acceptDefault=self.acceptDefaults)
-          if (len(tmpVal) == 0): tmpVal = tmpDefault
-        self.keystoreItems[BEAT_ES_PORT.replace('_ES_', '_KIBANA_' if (destination == 'Kibana') else '_ES_')] = tmpVal
 
     if (BEAT_KIBANA_HOST in self.keystoreItems):
 
