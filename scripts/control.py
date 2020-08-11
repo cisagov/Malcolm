@@ -46,6 +46,19 @@ except:
   coloramaImported = False
 
 ###################################################################################################
+def status():
+  global args
+  global dockerComposeBin
+
+  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps', '--all'][:5 if args.debug else -1], debug=args.debug)
+  if (err == 0):
+    print("\n".join(out))
+  else:
+    eprint("Failed to display Malcolm status\n")
+    eprint("\n".join(out))
+    exit(err)
+
+###################################################################################################
 def logs():
   global args
   global dockerBin
@@ -592,6 +605,7 @@ def main():
   parser.add_argument('--stop', dest='cmdStop', type=str2bool, nargs='?', const=True, default=False, help="Stop Malcolm")
   parser.add_argument('--wipe', dest='cmdWipe', type=str2bool, nargs='?', const=True, default=False, help="Stop Malcolm and delete all data")
   parser.add_argument('--auth', dest='cmdAuthSetup', type=str2bool, nargs='?', const=True, default=False, help="Configure Malcolm authentication")
+  parser.add_argument('--status', dest='cmdStatus', type=str2bool, nargs='?', const=True, default=False, help="Display status of Malcolm components")
 
   try:
     parser.error = parser.exit
@@ -631,6 +645,8 @@ def main():
   if os.path.islink(os.path.join(ScriptPath, ScriptName)):
     if (ScriptName == "logs"):
       args.cmdLogs = True
+    elif (ScriptName == "status"):
+      args.cmdStatus = True
     elif (ScriptName == "start"):
       args.cmdStart = True
     elif (ScriptName == "restart"):
@@ -657,6 +673,10 @@ def main():
   # tail Malcolm logs
   if args.cmdStart or args.cmdRestart or args.cmdLogs:
     logs()
+
+  # display Malcolm status
+  if args.cmdStatus:
+    status()
 
 if __name__ == '__main__':
   main()
