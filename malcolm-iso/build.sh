@@ -110,12 +110,13 @@ if [ -d "$WORKDIR" ]; then
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
-  ln -s ./control.py start
-  ln -s ./control.py stop
-  ln -s ./control.py restart
-  ln -s ./control.py wipe
-  ln -s ./control.py logs
   ln -s ./control.py auth_setup
+  ln -s ./control.py logs
+  ln -s ./control.py restart
+  ln -s ./control.py start
+  ln -s ./control.py status
+  ln -s ./control.py stop
+  ln -s ./control.py wipe
   sed -i 's@#!/usr/bin/env[[:space:]]*python$@#!/usr/bin/env python3@g' *.py
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
