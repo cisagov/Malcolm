@@ -16,7 +16,7 @@ ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
-ENV ZEEK_VERSION "3.0.7"
+ENV ZEEK_VERSION "3.0.8"
 
 # using clang now instead of gcc because Spicy depends on it
 ENV LLVM_VERSION "10"
@@ -124,14 +124,19 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
+      binutils \
       file \
+      git \
       libatomic1 \
+      libclang-${LLVM_VERSION}-dev \
       libclang-cpp${LLVM_VERSION} \
+      libclang-cpp${LLVM_VERSION}-dev \
       libclang1-${LLVM_VERSION} \
       libgoogle-perftools4 \
       libkrb5-3 \
       libmaxminddb0 \
       libpcap0.8 \
+      libpcap0.8-dev \
       libssl1.0 \
       libtcmalloc-minimal4 \
       libunwind8 \
@@ -147,6 +152,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       supervisor \
       vim-tiny && \
     pip3 install --no-cache-dir pyzmq && \
+    bash -c "( find /opt/zeek/ -type l ! -exec test -r {} \; -print | xargs -r -l rm -vf ) || true" && \
     apt-get -q -y --purge remove libssl-dev && \
       apt-get -q -y autoremove && \
       apt-get clean && \
@@ -160,10 +166,13 @@ ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 
+#Update Path
+ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
+
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 19
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|spicy/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 22
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(spicy/main|Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|CVE-2020-1350|ripple20|callstranger)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
@@ -192,13 +201,37 @@ ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
+# environment variables for zeek runtime tweaks (used in local.zeek)
+ARG ZEEK_DISABLE_MITRE_BZAR=
+ARG ZEEK_DISABLE_HASH_ALL_FILES=
+ARG ZEEK_DISABLE_LOG_PASSWORDS=
+ARG ZEEK_DISABLE_MODBUS_TRACKING=
+ARG ZEEK_DISABLE_MQTT=
+ARG ZEEK_DISABLE_PE_XOR=
+ARG ZEEK_DISABLE_QUIC=
+ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
+ARG ZEEK_DISABLE_TELNET=
+ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
+ARG ZEEK_DISABLE_WIREGUARD=
+ARG ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS=
+
+ENV ZEEK_DISABLE_MITRE_BZAR $ZEEK_DISABLE_MITRE_BZAR
+ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
+ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
+ENV ZEEK_DISABLE_MODBUS_TRACKING $ZEEK_DISABLE_MODBUS_TRACKING
+ENV ZEEK_DISABLE_MQTT $ZEEK_DISABLE_MQTT
+ENV ZEEK_DISABLE_PE_XOR $ZEEK_DISABLE_PE_XOR
+ENV ZEEK_DISABLE_QUIC $ZEEK_DISABLE_QUIC
+ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS
+ENV ZEEK_DISABLE_TELNET $ZEEK_DISABLE_TELNET
+ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
+ENV ZEEK_DISABLE_WIREGUARD $ZEEK_DISABLE_WIREGUARD
+ENV ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS $ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS
+
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
-
-#Update Path
-ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

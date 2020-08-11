@@ -51,6 +51,20 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
+  # environment variables for tweaking Zeek at runtime (see local.zeek)
+  # set to a non-blank value to disable the corresponding feature
+  ZEEK_DISABLE_MITRE_BZAR : ''
+  ZEEK_DISABLE_HASH_ALL_FILES : ''
+  ZEEK_DISABLE_LOG_PASSWORDS : ''
+  ZEEK_DISABLE_MODBUS_TRACKING : ''
+  ZEEK_DISABLE_MQTT : ''
+  ZEEK_DISABLE_PE_XOR : ''
+  ZEEK_DISABLE_QUIC : ''
+  ZEEK_DISABLE_SSL_VALIDATE_CERTS : ''
+  ZEEK_DISABLE_TELNET : ''
+  ZEEK_DISABLE_TRACK_ALL_ASSETS : ''
+  ZEEK_DISABLE_WIREGUARD : ''
+  ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS : 'true'
 
 x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP  : 'true'
@@ -111,7 +125,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-oss:2.1.1
+    image: malcolmnetsec/elasticsearch-oss:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -149,7 +163,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:2.1.1
+    image: malcolmnetsec/kibana-oss:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -178,7 +192,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:2.1.1
+    image: malcolmnetsec/elastalert:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -209,7 +223,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:2.1.1
+    image: malcolmnetsec/curator:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -233,7 +247,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:2.1.1
+    image: malcolmnetsec/logstash-oss:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -244,7 +258,7 @@ services:
       << : *common-beats-variables
       << : *common-lookup-variables
       ES_HOSTS : 'elasticsearch:9200'
-      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Djava.security.egd=file:/dev/./urandom'
+      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss2m -Djava.security.egd=file:/dev/./urandom'
     depends_on:
       - elasticsearch
     expose:
@@ -271,7 +285,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:2.1.1
+    image: malcolmnetsec/filebeat-oss:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -312,7 +326,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:2.1.1
+    image: malcolmnetsec/moloch:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -357,7 +371,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:2.1.1
+    image: malcolmnetsec/zeek:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -387,7 +401,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:2.1.1
+    image: malcolmnetsec/file-monitor:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -410,7 +424,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:2.1.1
+    image: malcolmnetsec/pcap-capture:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -439,7 +453,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:2.1.1
+    image: malcolmnetsec/pcap-monitor:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -465,7 +479,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:2.1.1
+    image: malcolmnetsec/file-upload:2.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -491,7 +505,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.1.1
+    image: malcolmnetsec/htadmin:2.2.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -516,7 +530,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.1.1
+    image: malcolmnetsec/freq:2.2.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -537,7 +551,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.1.1
+    image: malcolmnetsec/name-map-ui:2.2.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -564,7 +578,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:2.1.1
+    image: malcolmnetsec/nginx-proxy:2.2.0
     restart: "no"
     stdin_open: false
     tty: true

@@ -50,7 +50,6 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
-  rsync -a "$SCRIPT_PATH/../shared/vbox-guest-build" .
 
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
@@ -75,22 +74,11 @@ if [ -d "$WORKDIR" ]; then
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
   echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-4.19=$(dpkg -s linux-kbuild-4.19 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-kbuild-5.6=$(dpkg -s linux-kbuild-5.6 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-
-  # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
-  mkdir -p ./config/packages.chroot/
-  bash ./vbox-guest-build/build-docker-image.sh
-  docker run --rm -v "$(pwd)"/vbox-guest-build:/build vboxguest-build:latest -o /build
-  rm -f ./vbox-guest-build/*-source*.deb \
-        ./vbox-guest-build/*-dbgsym*.deb \
-        ./vbox-guest-build/virtualbox_*.deb \
-        ./vbox-guest-build/virtualbox-dkms_*.deb \
-        ./vbox-guest-build/virtualbox-qt_*.deb
-  mv ./vbox-guest-build/*.deb ./config/packages.chroot/
 
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
@@ -122,12 +110,13 @@ if [ -d "$WORKDIR" ]; then
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
-  ln -s ./control.py start
-  ln -s ./control.py stop
-  ln -s ./control.py restart
-  ln -s ./control.py wipe
-  ln -s ./control.py logs
   ln -s ./control.py auth_setup
+  ln -s ./control.py logs
+  ln -s ./control.py restart
+  ln -s ./control.py start
+  ln -s ./control.py status
+  ln -s ./control.py stop
+  ln -s ./control.py wipe
   sed -i 's@#!/usr/bin/env[[:space:]]*python$@#!/usr/bin/env python3@g' *.py
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"

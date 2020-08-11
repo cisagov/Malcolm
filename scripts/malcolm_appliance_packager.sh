@@ -95,12 +95,13 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
   pushd "$DESTDIR" >/dev/null 2>&1
   pushd "./scripts" >/dev/null 2>&1
-  ln -s ./control.py start
-  ln -s ./control.py stop
-  ln -s ./control.py restart
-  ln -s ./control.py wipe
-  ln -s ./control.py logs
   ln -s ./control.py auth_setup
+  ln -s ./control.py logs
+  ln -s ./control.py restart
+  ln -s ./control.py start
+  ln -s ./control.py status
+  ln -s ./control.py stop
+  ln -s ./control.py wipe
   popd  >/dev/null 2>&1
   echo "You must set an administrator username and password for Malcolm, and self-signed X.509 certificates will be generated"
   ./scripts/auth_setup

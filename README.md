@@ -77,6 +77,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index curation](#Curator)
+* [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
     * [Generating the ISO](#ISOBuild)
@@ -100,9 +101,33 @@ For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linu
 
 The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
+#### Cross-platform considerations when running Python scripts
+
+There are two Python scripts used to configure and run Malcolm that are referenced several times in this document: `install.py` and `control.py` (`control.py` is actually what is executed under the hood for the `logs`, `restart`, `start`, `stop` and `wipe` commands).
+
+To maximize compatibility across the various platforms capable of running Malcolm, for the time being these Python scripts are compatible with both the current major release of Python (Python 3.x) and the "sunsetted" Python 2.x.
+
+The line `#!/usr/bin/env python` line at the beginning of these Python scripts (known as the "hashbang" or "shebang") should ensure that the `python` interpreter that is executed is the one defined by the operating system as the default Python implementation for that system. In most cases this is handled correctly and automatically.
+
+However, this behavior is not consistent across all platforms.  On some platforms (for example, Ubuntu 20.04), `python2` and `python3` targets are provided, but not `python`. When this is the case, running Malcolm's Python scripts will result in an error like `/usr/bin/env: 'python': No such file or directory`.
+
+There are various workarounds for this scenario, including (but not limited to):
+
+1. Explicitly specifying the Python interpreter when running the scripts (e.g., `python3 ./scripts/install.py` or `python2 ./scripts/start`): this is the "safest" solution
+2. Defining a symlink called `python` in your `PATH` pointing to the desired interpreter (e.g., `sudo ln -r -s /usr/bin/python3 /usr/local/bin/python` or `ln -s /usr/bin/python3 ~/bin/python`, depending on your `PATH`); in Ubuntu 20.04 and up installing either the package [python-is-python3](https://packages.ubuntu.com/focal/python-is-python3) or [python-is-python2](https://packages.ubuntu.com/focal/python-is-python2) will take care of this for you
+3. Using `update-alternatives` to specify a target for calls to `python`
+
+This document will just use the `./scripts/install.py`-style pattern to execute the scripts. Just be aware that you may have to adjust your usage as necessitated by your system.
+
+For more information on this topic, see [PEP 394 -- The "python" Command on Unix-Like Systems](https://legacy.python.org/dev/peps/pep-0394/).
+
 #### Building Malcolm from scratch
 
 The `build.sh` script can build Malcolm's Docker images from scratch. See [Building from source](#Build) for more information.
+
+#### Initial configuration
+
+You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Pull Malcolm's Docker images
 
@@ -131,25 +156,23 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.1.1               xxxxxxxxxxxx        20 hours ago        246MB
-malcolmnetsec/elastalert                            2.1.1               xxxxxxxxxxxx        20 hours ago        408MB
-malcolmnetsec/elasticsearch-oss                     2.1.1               xxxxxxxxxxxx        20 hours ago        693MB
-malcolmnetsec/filebeat-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        474MB
-malcolmnetsec/file-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        386MB
-malcolmnetsec/file-upload                           2.1.1               xxxxxxxxxxxx        20 hours ago        199MB
-malcolmnetsec/freq                                  2.1.1               xxxxxxxxxxxx        20 hours ago        390MB
-malcolmnetsec/htadmin                               2.1.1               xxxxxxxxxxxx        20 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.1.1               xxxxxxxxxxxx        20 hours ago        1.07GB
-malcolmnetsec/logstash-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        1.05GB
-malcolmnetsec/moloch                                2.1.1               xxxxxxxxxxxx        20 hours ago        667MB
-malcolmnetsec/name-map-ui                           2.1.1               xxxxxxxxxxxx        20 hours ago        134MB
-malcolmnetsec/nginx-proxy                           2.1.1               xxxxxxxxxxxx        20 hours ago        118MB
-malcolmnetsec/pcap-capture                          2.1.1               xxxxxxxxxxxx        20 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        156MB
-malcolmnetsec/zeek                                  2.1.1               xxxxxxxxxxxx        20 hours ago        442MB
+malcolmnetsec/curator                               2.2.0               xxxxxxxxxxxx        20 hours ago        246MB
+malcolmnetsec/elastalert                            2.2.0               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/elasticsearch-oss                     2.2.0               xxxxxxxxxxxx        20 hours ago        693MB
+malcolmnetsec/filebeat-oss                          2.2.0               xxxxxxxxxxxx        20 hours ago        474MB
+malcolmnetsec/file-monitor                          2.2.0               xxxxxxxxxxxx        20 hours ago        386MB
+malcolmnetsec/file-upload                           2.2.0               xxxxxxxxxxxx        20 hours ago        199MB
+malcolmnetsec/freq                                  2.2.0               xxxxxxxxxxxx        20 hours ago        390MB
+malcolmnetsec/htadmin                               2.2.0               xxxxxxxxxxxx        20 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.2.0               xxxxxxxxxxxx        20 hours ago        1.07GB
+malcolmnetsec/logstash-oss                          2.2.0               xxxxxxxxxxxx        20 hours ago        1.05GB
+malcolmnetsec/moloch                                2.2.0               xxxxxxxxxxxx        20 hours ago        667MB
+malcolmnetsec/name-map-ui                           2.2.0               xxxxxxxxxxxx        20 hours ago        134MB
+malcolmnetsec/nginx-proxy                           2.2.0               xxxxxxxxxxxx        20 hours ago        118MB
+malcolmnetsec/pcap-capture                          2.2.0               xxxxxxxxxxxx        20 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.2.0               xxxxxxxxxxxx        20 hours ago        156MB
+malcolmnetsec/zeek                                  2.2.0               xxxxxxxxxxxx        20 hours ago        442MB
 ```
-
-You must run [`auth_setup`](#AuthSetup) prior to running `docker-compose pull`. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
 
 #### Import from pre-packaged tarballs
 
@@ -203,20 +226,25 @@ Malcolm leverages the following excellent open source tools, among others.
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
 * [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
-* These third party Zeek plugins:
+* These Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+    * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
+    * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
-    * Cybera's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
+    * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
+    * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
+    * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
-    * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
+    * Verizon Media's [spicy-noise](https://github.com/theparanoids/spicy-noise) WireGuard analyzer plugin
+    * Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
 ## <a name="Protocols"></a>Supported Protocols
@@ -253,14 +281,15 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |S7comm / Connection Oriented Transport Protocol (COTP)|[🔗](https://wiki.wireshark.org/S7comm) [🔗](https://wiki.wireshark.org/COTP)|[🔗](https://support.industry.siemens.com/cs/document/26483647/what-properties-advantages-and-special-features-does-the-s7-protocol-offer-?dti=0&lc=en-WW) [🔗](https://www.ietf.org/rfc/rfc0905.txt)||[✓](https://github.com/amzn/zeek-plugin-s7comm/blob/master/scripts/main.zeek)|
 |Session Initiation Protocol (SIP)|[🔗](https://en.wikipedia.org/wiki/Session_Initiation_Protocol)|[🔗](https://tools.ietf.org/html/rfc3261)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/sip/main.zeek.html#type-SIP::Info)|
 |Server Message Block (SMB) / Common Internet File System (CIFS)|[🔗](https://en.wikipedia.org/wiki/Server_Message_Block)|[🔗](https://docs.microsoft.com/en-us/windows/win32/fileio/microsoft-smb-protocol-and-cifs-protocol-overview)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/smb.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smb/main.zeek.html)|
-|Simple Mail Transfer Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc5321)|[✓]()|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info)|
+|Simple Mail Transfer Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc5321)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info)|
 |Simple Network Management Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)|[🔗](https://tools.ietf.org/html/rfc2578)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/snmp/main.zeek.html#type-SNMP::Info)|
 |SOCKS|[🔗](https://en.wikipedia.org/wiki/SOCKS)|[🔗](https://tools.ietf.org/html/rfc1928)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/socks/main.zeek.html#type-SOCKS::Info)|
-|Secure Shell (SSH)|[🔗](https://en.wikipedia.org/wiki/Secure_Shell)|[🔗](https://tools.ietf.org/html/rfc4253)|[✓]()|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssh/main.zeek.html#type-SSH::Info)|
+|Secure Shell (SSH)|[🔗](https://en.wikipedia.org/wiki/Secure_Shell)|[🔗](https://tools.ietf.org/html/rfc4253)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/ssh.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssh/main.zeek.html#type-SSH::Info)|
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
 |Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/aol/moloch/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)|
+|WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/theparanoids/spicy-noise/blob/master/zeek/spicy-noise.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/aol/moloch/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
 
 Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).
@@ -427,7 +456,7 @@ Moloch's wiki has a couple of documents ([here](https://github.com/aol/moloch#ha
 
 If you already have Docker and Docker Compose installed, the `install.py` script can still help you tune system configuration and `docker-compose.yml` parameters for Malcolm. To run it in "configuration only" mode, bypassing the steps to install Docker and Docker Compose, run it like this:
 ```
-python3 ./scripts/install.py --configure
+./scripts/install.py --configure
 ```
 
 Although `install.py` will attempt to automate many of the following configuration and tuning parameters, they are nonetheless listed in the following sections for reference:
@@ -447,6 +476,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Moloch if available storage space becomes too low (default `false`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
+
+* `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
 
 * `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 
@@ -665,9 +696,9 @@ Installing and configuring Docker to run under Windows must be done manually, ra
 
 #### <a name="HostSystemConfigWindowsMalcolm"></a>Finish Malcolm's configuration
 
-Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo python3 ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
+Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
 
-The control scripts outlined in the [Running Malcolm](#Running) section may not be symlinked correctly under Windows. Rather than running `./scripts/start`, `./scripts/stop`, etc., you can run `python3 ./scripts/control.py --start`, `python3 ./scripts/control.py --stop`, etc. to the same effect.
+The control scripts outlined in the [Running Malcolm](#Running) section may not be symlinked correctly under Windows. Rather than running `./scripts/start`, `./scripts/stop`, etc., you can run `./scripts/control.py --start`, `./scripts/control.py --stop`, etc. to the same effect.
 
 ## <a name="Running"></a>Running Malcolm
 
@@ -1356,6 +1387,10 @@ The settings governing index curation can affect Malcolm's performance in both l
 
 Index curation only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Moloch to prune old PCAP files based on available disk space.
 
+## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
+
+Because Malcolm uses components of the open source data analysis platform [Elastic Stack](https://www.elastic.co/elastic-stack), it can accept various host logs sent from [Beats](https://www.elastic.co/beats/#the-beats-family), Elastic Stack's lightweight data shippers. See [./scripts/beats](./scripts/beats) for more information.
+
 ## <a name="ISO"></a>Malcolm installer ISO
 
 Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
@@ -1380,7 +1415,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.1.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.2.0.iso"
 …
 ```
 
@@ -1419,7 +1454,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `python3 scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](#AuthSetup) to configure authentication. If the ISO didn't have pre-packaged Malcolm images, or if you'd like to retrieve the latest updates, run `docker-compose pull`. Finalize your configuration by running `scripts/install.py --configure` and follow the prompts as illustrated in the [installation example](#InstallationExample).
 
 Once Malcolm is configured, you can [start Malcolm](#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
 
@@ -1569,6 +1604,8 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
+The commands in this example should be executed as a non-root user.
+
 You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/idaholab/Malcolm/releases).
 
 To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/idaholab/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
@@ -1592,9 +1629,23 @@ Resolving deltas: 100% (81/81), done.
 user@host:~$ cd Malcolm/
 ```
 
+Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
+```
+user@host:~/Malcolm$ ./scripts/auth_setup
+Username: analyst
+analyst password:
+analyst password (again):
+
+(Re)generate self-signed certificates for HTTPS access [Y/n]? y
+
+(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
+```
+
 Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
-user@host:~/Downloads$ sudo python3 install.py
+user@host:~/Downloads$ sudo ./install.py
 Installing required packages: ['apache2-utils', 'make', 'openssl']
 
 "docker info" failed, attempt to install Docker? (Y/n): y
@@ -1663,7 +1714,7 @@ Malcolm runtime files extracted to /home/user/Malcolm
 
 Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
-user@host:~/Malcolm$ python3 scripts/install.py --configure
+user@host:~/Malcolm$ scripts/install.py --configure
 ```
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
@@ -1737,20 +1788,6 @@ in /home/user/Malcolm/scripts.
 
 At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
 
-Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
-```
-user@host:~/Malcolm$ ./scripts/auth_setup
-Username: analyst
-analyst password:
-analyst password (again):
-
-(Re)generate self-signed certificates for HTTPS access [Y/n]? y
-
-(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
-
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
-```
-
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
@@ -1773,22 +1810,22 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.1.1               xxxxxxxxxxxx        20 hours ago        246MB
-malcolmnetsec/elastalert                            2.1.1               xxxxxxxxxxxx        20 hours ago        408MB
-malcolmnetsec/elasticsearch-oss                     2.1.1               xxxxxxxxxxxx        20 hours ago        693MB
-malcolmnetsec/filebeat-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        474MB
-malcolmnetsec/file-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        386MB
-malcolmnetsec/file-upload                           2.1.1               xxxxxxxxxxxx        20 hours ago        199MB
-malcolmnetsec/freq                                  2.1.1               xxxxxxxxxxxx        20 hours ago        390MB
-malcolmnetsec/htadmin                               2.1.1               xxxxxxxxxxxx        20 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.1.1               xxxxxxxxxxxx        20 hours ago        1.07GB
-malcolmnetsec/logstash-oss                          2.1.1               xxxxxxxxxxxx        20 hours ago        1.05GB
-malcolmnetsec/moloch                                2.1.1               xxxxxxxxxxxx        20 hours ago        667MB
-malcolmnetsec/name-map-ui                           2.1.1               xxxxxxxxxxxx        20 hours ago        134MB
-malcolmnetsec/nginx-proxy                           2.1.1               xxxxxxxxxxxx        20 hours ago        118MB
-malcolmnetsec/pcap-capture                          2.1.1               xxxxxxxxxxxx        20 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.1.1               xxxxxxxxxxxx        20 hours ago        156MB
-malcolmnetsec/zeek                                  2.1.1               xxxxxxxxxxxx        20 hours ago        442MB
+malcolmnetsec/curator                               2.2.0               xxxxxxxxxxxx        20 hours ago        246MB
+malcolmnetsec/elastalert                            2.2.0               xxxxxxxxxxxx        20 hours ago        408MB
+malcolmnetsec/elasticsearch-oss                     2.2.0               xxxxxxxxxxxx        20 hours ago        693MB
+malcolmnetsec/filebeat-oss                          2.2.0               xxxxxxxxxxxx        20 hours ago        474MB
+malcolmnetsec/file-monitor                          2.2.0               xxxxxxxxxxxx        20 hours ago        386MB
+malcolmnetsec/file-upload                           2.2.0               xxxxxxxxxxxx        20 hours ago        199MB
+malcolmnetsec/freq                                  2.2.0               xxxxxxxxxxxx        20 hours ago        390MB
+malcolmnetsec/htadmin                               2.2.0               xxxxxxxxxxxx        20 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.2.0               xxxxxxxxxxxx        20 hours ago        1.07GB
+malcolmnetsec/logstash-oss                          2.2.0               xxxxxxxxxxxx        20 hours ago        1.05GB
+malcolmnetsec/moloch                                2.2.0               xxxxxxxxxxxx        20 hours ago        667MB
+malcolmnetsec/name-map-ui                           2.2.0               xxxxxxxxxxxx        20 hours ago        134MB
+malcolmnetsec/nginx-proxy                           2.2.0               xxxxxxxxxxxx        20 hours ago        118MB
+malcolmnetsec/pcap-capture                          2.2.0               xxxxxxxxxxxx        20 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.2.0               xxxxxxxxxxxx        20 hours ago        156MB
+malcolmnetsec/zeek                                  2.2.0               xxxxxxxxxxxx        20 hours ago        442MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1882,7 +1919,7 @@ If you installed Malcolm from [pre-packaged installation files](https://github.c
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
 4. replace (overwrite) `docker-compose.yml` file with new version
     * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
-5. re-run `python3 ./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
+5. re-run `./scripts/install.py --configure` as described in [System configuration and tuning](#ConfigAndTuning)
 6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](#DockerComposeYml) you may have edited by hand in `docker-compose.yml` that's not prompted for in `install.py --configure`)
 7. pull the new docker images (this will take a while)
     * `docker-compose pull` to pull them from Docker Hub or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
