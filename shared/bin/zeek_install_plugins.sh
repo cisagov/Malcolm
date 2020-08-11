@@ -150,7 +150,7 @@ if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
       /opt/spicy/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
       cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
       chmod 644 ./zeek/spicy-noise.hlto && \
-      echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.bro && \
+      echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.zeek && \
       cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise && \
     cd "$CWD"
   fi

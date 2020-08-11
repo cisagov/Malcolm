@@ -1598,7 +1598,7 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek, 'service', 'Service', 'zeek.service')\n" +
     "      +arrayList(session.zeek, 'service_version', 'Service Version', 'zeek.service_version')\n" +
     "      +arrayList(session.zeek, 'action', 'Action', 'zeek.action')\n" +
-    "      +arrayList(session.zeek, 'action', 'Result', 'zeek.result')\n" +
+    "      +arrayList(session.zeek, 'result', 'Result', 'zeek.result')\n" +
     "      +arrayList(session.zeek, 'user', 'User', 'zeek.user')\n" +
     "      +arrayList(session.zeek, 'password', 'Password', 'zeek.password')\n" +
     "      +arrayList(session.zeek, 'freq_score_v1', 'Freq Score v1', 'zeek.freq_score_v1')\n" +
