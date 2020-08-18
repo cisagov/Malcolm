@@ -105,12 +105,16 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     if ! [ -z $HTTPProxyServer ]; then echo "HTTPProxyServer $HTTPProxyServer" >> /etc/clamav/freshclam.conf; fi && \
       if ! [ -z $HTTPProxyPort   ]; then echo "HTTPProxyPort $HTTPProxyPort" >> /etc/clamav/freshclam.conf; fi && \
       sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
-      sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf
+      sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/vtot_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/zeek_carve_*.py /usr/local/bin/
 ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
+ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 
 WORKDIR /data/zeek/extract_files
 
@@ -118,7 +122,7 @@ VOLUME ["/var/lib/clamav"]
 
 EXPOSE 3310
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
