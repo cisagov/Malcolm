@@ -47,6 +47,8 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_MAX_BYTES : 134217728
   VTOT_API2_KEY : '0'
   VTOT_REQUESTS_PER_MINUTE : 4
+  EXTRACTED_FILE_ENABLE_YARA : 'false'
+  EXTRACTED_FILE_YARA_CUSTOM_ONLY : 'false'
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
   EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
@@ -378,6 +380,7 @@ services:
     volumes:
       - ./zeek-logs/extract_files:/data/zeek/extract_files
       - ./zeek-logs/current:/data/zeek/logs
+      - ./yara/rules:/yara-rules/custom:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "watcher", "scanner", "logger"]
       interval: 30s

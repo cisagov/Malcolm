@@ -217,6 +217,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Moloch understands and is able to understand in the same way it natively understands PCAP data
 * [Kibana](https://www.elastic.co/products/kibana) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
+* [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
@@ -225,7 +226,8 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
-* [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
+* [Mark Baggett](https://github.com/MarkBaggett)'s [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
+* [Florian Roth](https://github.com/Neo23x0)'s [Signature-Base](https://github.com/Neo23x0/signature-base) Yara ruleset
 * These Zeek plugins:
     * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
@@ -517,7 +519,11 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
 
-* `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true` (and `VTOT_API2_KEY` is unspecified), [Zeek-extracted files](#ZeekFileExtraction) will be scanned with ClamAV
+* `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with Yara
+
+* `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default [Yara ruleset](https://github.com/Neo23x0/signature-base) and use only user-defined rules in `./yara/rules`
+
+* `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with ClamAV
 
 * `EXTRACTED_FILE_ENABLE_FRESHCLAM` – if set to `true`, ClamAV will periodically update virus databases
 
@@ -1260,10 +1266,11 @@ To specify which files should be extracted, the following values are acceptable 
 * `known`: extraction of files for which any mime type can be determined
 * `all`: extract all files
 
-Extracted files can be examined through either (but not both) of two methods:
+Extracted files can be examined through any of the following methods:
 
 * submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, specify the `VTOT_API2_KEY` [environment variable in `docker-compose.yml`](#DockerComposeYml)
-* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, set the `EXTRACTED_FILE_ENABLE_CLAMAV` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true` and leave `VTOT_API2_KEY` blank
+* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, set the `EXTRACTED_FILE_ENABLE_CLAMAV` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
+* scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, set the `EXTRACTED_FILE_ENABLE_YARA` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
 
 Files which are flagged as potentially malicious via either of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in Kibana.
 
@@ -1772,6 +1779,10 @@ Select file preservation behavior ('quarantined', 'all', 'none'): quarantined
 Scan extracted files with ClamAV? (y/N): y
 
 Download updated ClamAV virus signatures periodically? (Y/n): y
+
+Scan extracted files with Yara? (y/N): y
+
+Lookup extracted file hashes with VirusTotal? (y/N): n
 
 Should Malcolm capture network traffic to PCAP files? (y/N): y
 

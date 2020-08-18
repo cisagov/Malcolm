@@ -11,6 +11,7 @@ import re
 import requests
 import sys
 import time
+import yara
 
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
@@ -70,6 +71,15 @@ CLAM_SUBMIT_TIMEOUT_SEC = 10
 CLAM_CHECK_INTERVAL = 0.1
 CLAM_ENGINE_ID = 'ClamAV'
 CLAM_FOUND_KEY = 'FOUND'
+
+###################################################################################################
+# Yara Interface
+YARA_RULES_DIR = os.path.join(os.getenv('YARA_RULES_DIR', "/yara-rules"), '')
+YARA_CUSTOM_RULES_DIR = os.path.join(YARA_RULES_DIR, "custom")
+YARA_SUBMIT_TIMEOUT_SEC = 60
+YARA_ENGINE_ID = 'Yara'
+YARA_MAX_REQS = 8 # maximum scanning threads concurrently
+YARA_CHECK_INTERVAL = 0.1
 
 ###################################################################################################
 
@@ -274,7 +284,7 @@ class VirusTotalSearch(FileScanProvider):
   # VirusTotalSearch does the request and gets the response immediately;
   # the subsequent call to check_result (using submit's response as input)
   # will always return "True" since the work has already been done
-  def submit(self, fileName=None, block=False, timeout=None):
+  def submit(self, fileName=None, block=False, timeout=0):
     if timeout is None:
       timeout = self.reqLimitSec+5
 
@@ -576,7 +586,7 @@ class ClamAVScan(FileScanProvider):
     return CLAM_CHECK_INTERVAL
 
   # ---------------------------------------------------------------------------------
-  # upload a file to scan with ClamAV, respecting rate limiting. return submitted transaction ID
+  # submit a file to scan with ClamAV, respecting rate limiting. return scan result
   def submit(self, fileName=None, block=False, timeout=CLAM_SUBMIT_TIMEOUT_SEC):
     clamavResult = AnalyzerResult()
     allowed = False
@@ -669,5 +679,122 @@ class ClamAVScan(FileScanProvider):
         result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp['error']}"
       else:
         result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
+
+    return result
+
+###################################################################################################
+# class for scanning a file with Yara
+class YaraScan(FileScanProvider):
+
+  # ---------------------------------------------------------------------------------
+  # constructor
+  def __init__(self, debug=False, verboseDebug=False, rulesDirs=[]):
+    self.scanningFilesCount = AtomicInt(value=0)
+    self.debug = debug
+    self.verboseDebug = verboseDebug
+    self.ruleFilespecs = {}
+    for yaraDir in rulesDirs:
+      for root, dirs, files in os.walk(yaraDir):
+        for file in files:
+          # skip hidden, backup or system related files
+          if file.startswith(".") or file.startswith("~") or file.startswith("_"):
+            continue
+          filename = os.path.join(root, file)
+          extension = os.path.splitext(file)[1].lower()
+          try:
+            testCompile = yara.compile(filename)
+            self.ruleFilespecs[filename] = filename
+          except yara.SyntaxError as e:
+            if self.debug: eprint(f'{get_ident()} Ignored Yara compile error in {filename}: {e}')
+    if self.verboseDebug:
+      eprint(f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files: {self.ruleFilespecs}")
+    elif self.debug:
+      eprint(f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files")
+    self.compiledRules = yara.compile(filepaths = self.ruleFilespecs)
+
+  @staticmethod
+  def max_requests():
+    return YARA_MAX_REQS
+
+  @staticmethod
+  def check_interval():
+    return YARA_CHECK_INTERVAL
+
+  # ---------------------------------------------------------------------------------
+  # submit a file to scan with Yara, respecting rate limiting. return scan result
+  def submit(self, fileName=None, block=False, timeout=YARA_SUBMIT_TIMEOUT_SEC):
+    yaraResult = AnalyzerResult()
+    allowed = False
+    matches = []
+
+    # timeout only applies if block=True
+    timeoutTime = int(time.time()) + timeout
+
+    # while limit only repeats if block=True
+    while (not allowed) and (not yaraResult.finished):
+
+      # first make sure we haven't exceeded rate limits
+      if (self.scanningFilesCount.increment() <= YARA_MAX_REQS):
+        # we've got fewer than the allowed requests open, so we're good to go!
+        allowed = True
+      else:
+        self.scanningFilesCount.decrement()
+
+      if allowed:
+        try:
+          if self.verboseDebug: eprint(f'{get_ident()} Yara scanning: {fileName}')
+          yaraResult.result = self.compiledRules.match(fileName)
+          if self.verboseDebug: eprint(f'{get_ident()} Yara scan result: {yaraResult.result}')
+          yaraResult.success = (yaraResult.result is not None)
+          yaraResult.finished = True
+        except Exception as e:
+          if yaraResult.result is None:
+            yaraResult.result = str(e)
+          if self.debug: eprint(f'{get_ident()} Yara scan error: {yaraResult.result}')
+        finally:
+          self.scanningFilesCount.decrement()
+
+      elif block and (nowTime < timeoutTime):
+        # rate limited, wait for a bit and come around and try again
+        time.sleep(1)
+
+      else:
+        break
+
+    return yaraResult
+
+  # ---------------------------------------------------------------------------------
+  # return the result of the previously scanned file
+  def check_result(self, yaraResult):
+    return yaraResult if isinstance(yaraResult, AnalyzerResult) else AnalyzerResult(finished=True, success=False, result=None)
+
+  # ---------------------------------------------------------------------------------
+  # static method for formatting the response summaryDict (from check_result)
+  @staticmethod
+  def format(fileName, response):
+    result = {FILE_SCAN_RESULT_FILE : fileName,
+              FILE_SCAN_RESULT_ENGINES : 1,
+              FILE_SCAN_RESULT_HITS : 0,
+              FILE_SCAN_RESULT_MESSAGE : None,
+              FILE_SCAN_RESULT_DESCRIPTION : None}
+
+    if isinstance(response, AnalyzerResult):
+      resp = response.result
+    else:
+      resp = response
+
+    if isinstance(resp, list):
+      hits = [match.rule for match in resp if isinstance(match, yara.Match)]
+      result[FILE_SCAN_RESULT_HITS] = len(hits)
+      if (len(hits) > 0):
+        cnt = Counter(hits)
+        # short message is most common signature name (todo: they won't have duplicate names, so I guess this is just going to take the first...)
+        result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]
+        # long description is list of the signature names and the engines which generated them
+        result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{x}<{YARA_ENGINE_ID}>" for x in hits])
+
+    else:
+      result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
+      result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result

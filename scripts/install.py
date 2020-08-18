@@ -372,6 +372,7 @@ class Installer(object):
     fileCarveMode = None
     filePreserveMode = None
     vtotApiKey = '0'
+    yaraScan = False
     clamAvScan = False
     clamAvUpdate = False
 
@@ -384,7 +385,9 @@ class Installer(object):
         if InstallerYesOrNo('Scan extracted files with ClamAV?', default=False):
           clamAvScan = True
           clamAvUpdate = InstallerYesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
-        elif InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
+        if InstallerYesOrNo('Scan extracted files with Yara?', default=False):
+          yaraScan = True
+        if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
           while (len(vtotApiKey) <= 1):
             vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
 
@@ -467,6 +470,9 @@ class Installer(object):
           elif 'VTOT_API2_KEY' in line:
             # virustotal API key
             line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', r"\g<1>'{}'".format(vtotApiKey), line)
+          elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
+            # file scanning via yara
+            line = re.sub(r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if yaraScan else "'false'"), line)
           elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
             # file scanning via clamav
             line = re.sub(r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if clamAvScan else "'false'"), line)

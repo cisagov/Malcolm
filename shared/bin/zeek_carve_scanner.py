@@ -192,8 +192,10 @@ def main():
   parser.add_argument('--malass-limit', dest='malassLimit', help="Malass maximum concurrent scans", metavar='<limit>', type=int, default=MAL_MAX_REQS, required=False)
   parser.add_argument('--vtot-api', dest='vtotApi', help="VirusTotal API key", metavar='<API key>', type=str, required=False)
   parser.add_argument('--vtot-req-limit', dest='vtotReqLimit', help="VirusTotal requests per minute limit", metavar='<requests>', type=int, default=VTOT_MAX_REQS, required=False)
-  parser.add_argument('--clamav', dest='enableClamAv', metavar='true|false', help="Enable ClamAV (if VirusTotal and Malass are unavailable)", type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--clamav', dest='enableClamAv', metavar='true|false', help="Enable ClamAV", type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--clamav-socket', dest='clamAvSocket', help="ClamAV socket filename", metavar='<filespec>', type=str, required=False, default=None)
+  parser.add_argument('--yara', dest='enableYara', metavar='true|false', help="Enable Yara", type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--yara-custom-only', dest='yaraCustomOnly', metavar='true|false', help="Ignore default Yara rules", type=str2bool, nargs='?', const=True, default=False, required=False)
 
   try:
     parser.error = parser.exit
@@ -228,6 +230,12 @@ def main():
     checkConnInfo = MalassScan(args.malassHost, args.malassPort, reqLimit=args.malassLimit)
   elif (isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.vtotReqLimit > 0)):
     checkConnInfo = VirusTotalSearch(args.vtotApi, reqLimit=args.vtotReqLimit)
+  elif args.enableYara:
+    yaraDirs = []
+    if (not args.yaraCustomOnly):
+      yaraDirs.append(YARA_RULES_DIR)
+    yaraDirs.append(YARA_CUSTOM_RULES_DIR)
+    checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs)
   else:
     if not args.enableClamAv:
       eprint('No scanner specified, defaulting to ClamAV')
