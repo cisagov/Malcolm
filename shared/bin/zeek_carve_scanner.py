@@ -71,6 +71,8 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
     # initialize ZeroMQ context and socket(s) to send scan results
     context = zmq.Context()
 
+    # TODO: register scanner with logger
+
     # Socket to send messages to
     scanned_files_socket = context.socket(zmq.PUSH)
     scanned_files_socket.connect(f"tcp://localhost:{SINK_PORT}")

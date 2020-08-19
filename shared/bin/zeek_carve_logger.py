@@ -21,6 +21,7 @@ import sys
 import time
 import zmq
 
+from collections import defaultdict
 from contextlib import nullcontext
 from datetime import datetime
 from zeek_carve_utils import *
@@ -142,6 +143,9 @@ def main():
 
   if debug: eprint(f"{scriptName}: bound sink port {SINK_PORT}")
 
+  scanners = set()
+  fileScanCounts = defaultdict(AtomicInt)
+
   # open and write out header for our super legit zeek signature.log file
   with open(broSigLogSpec, 'w+', 1) if (broSigLogSpec is not None) else nullcontext() as broSigFile:
     if (broSigFile is not None):
@@ -170,7 +174,8 @@ def main():
         scanResult = None
         if verboseDebug: eprint(f"{scriptName}:\t🕑\t(recv)")
 
-      if isinstance(scanResult, dict) and all (k in scanResult for k in (FILE_SCAN_RESULT_FILE,
+      if isinstance(scanResult, dict) and all (k in scanResult for k in (FILE_SCAN_RESULT_SCANNER,
+                                                                         FILE_SCAN_RESULT_FILE,
                                                                          FILE_SCAN_RESULT_ENGINES,
                                                                          FILE_SCAN_RESULT_HITS,
                                                                          FILE_SCAN_RESULT_MESSAGE,
@@ -178,6 +183,10 @@ def main():
 
         triggered = (scanResult[FILE_SCAN_RESULT_HITS] > 0)
         fileName = scanResult[FILE_SCAN_RESULT_FILE]
+        scanners.add(scanResult[FILE_SCAN_RESULT_SCANNER].lower())
+
+        # we may quarantine the file if fileScanCount < len(scanners), but we won't delete it so the rest of the scanners can find it
+        fileScanCount = fileScanCounts[fileName].increment()
 
         if triggered:
           # this file had a "hit" in one of the virus engines, log it!
@@ -207,27 +216,27 @@ def main():
             # move triggering file to quarantine
             try:
               shutil.move(fileName, quarantineDir)
-              if debug: eprint(f"{scriptName}:\t⏩\t{fileName}")
+              if debug: eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
             except Exception as e:
               eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
               # hm move failed, delete it i guess?
               os.remove(fileName)
 
+          elif (fileScanCount >= len(scanners)):
+            if (args.preserveMode == PRESERVE_ALL):
+              # move non-triggering file to preserved directory
+              try:
+                shutil.move(fileName, preserveDir)
+                if verboseDebug: eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
+              except Exception as e:
+                eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+                # hm move failed, delete it i guess?
+                os.remove(fileName)
 
-          elif (args.preserveMode == PRESERVE_ALL):
-            # move non-triggering file to preserved directory
-            try:
-              shutil.move(fileName, preserveDir)
-              if verboseDebug: eprint(f"{scriptName}:\t⏩\t{fileName}")
-            except Exception as e:
-              eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
-              # hm move failed, delete it i guess?
+            elif (fileScanCount >= len(scanners)):
+              # delete the file
               os.remove(fileName)
-
-          else:
-            # delete the file
-            os.remove(fileName)
-            if verboseDebug: eprint(f"{scriptName}:\t🚫\t{fileName}")
+              if verboseDebug: eprint(f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})")
 
   # graceful shutdown
   if debug:

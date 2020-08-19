@@ -37,6 +37,7 @@ PRESERVE_ALL         = "all"
 PRESERVE_NONE        = "none"
 
 ###################################################################################################
+FILE_SCAN_RESULT_SCANNER = "scanner"
 FILE_SCAN_RESULT_FILE = "file"
 FILE_SCAN_RESULT_ENGINES = "engines"
 FILE_SCAN_RESULT_HITS = "hits"
@@ -391,7 +392,8 @@ class VirusTotalSearch(FileScanProvider):
   # static method for formatting the response JSON (from requests.get) as a dict
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_FILE : fileName,
+    result = {FILE_SCAN_RESULT_SCANNER : 'virustotal',
+              FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 0,
               FILE_SCAN_RESULT_HITS : 0,
               FILE_SCAN_RESULT_MESSAGE : None,
@@ -573,7 +575,8 @@ class MalassScan(FileScanProvider):
   # static method for formatting the response summaryDict (from check_result)
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_FILE : fileName,
+    result = {FILE_SCAN_RESULT_SCANNER : 'malass',
+              FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 0,
               FILE_SCAN_RESULT_HITS : 0,
               FILE_SCAN_RESULT_MESSAGE : None,
@@ -690,7 +693,8 @@ class ClamAVScan(FileScanProvider):
   # static method for formatting the response summaryDict (from check_result)
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_FILE : fileName,
+    result = {FILE_SCAN_RESULT_SCANNER : 'clamav',
+              FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 1,
               FILE_SCAN_RESULT_HITS : 0,
               FILE_SCAN_RESULT_MESSAGE : None,
@@ -813,7 +817,8 @@ class YaraScan(FileScanProvider):
   # static method for formatting the response summaryDict (from check_result)
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_FILE : fileName,
+    result = {FILE_SCAN_RESULT_SCANNER : 'yara',
+              FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 1,
               FILE_SCAN_RESULT_HITS : 0,
               FILE_SCAN_RESULT_MESSAGE : None,
