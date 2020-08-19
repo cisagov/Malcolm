@@ -56,7 +56,7 @@ def debug_toggle_handler(signum, frame):
   debugToggled = True
 
 ###################################################################################################
-def scanFileWorker(checkConnInfo):
+def scanFileWorker(checkConnInfo, carvedFileSub):
   global debug
   global verboseDebug
   global shuttingDown
@@ -68,14 +68,8 @@ def scanFileWorker(checkConnInfo):
 
   if isinstance(checkConnInfo, FileScanProvider):
 
-    # initialize ZeroMQ context and socket(s) to receive filenames and send scan results
+    # initialize ZeroMQ context and socket(s) to send scan results
     context = zmq.Context()
-
-    # Socket to receive messages on
-    new_files_socket = context.socket(zmq.PULL)
-    new_files_socket.connect(f"tcp://localhost:{VENTILATOR_PORT}")
-    new_files_socket.RCVTIMEO = 5000
-    if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tbound to ventilator at {VENTILATOR_PORT}")
 
     # Socket to send messages to
     scanned_files_socket = context.socket(zmq.PUSH)
@@ -92,18 +86,13 @@ def scanFileWorker(checkConnInfo):
 
       if retrySubmitFile and (fileName is not None) and os.path.isfile(fileName):
         # we were unable to submit the file for processing, so try again
+        time.sleep(1)
         if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{fileName}")
 
       else:
         retrySubmitFile = False
-
-        # accept a filename from new_files_socket
-        try:
-          fileName = new_files_socket.recv_string()
-        except zmq.Again as timeout:
-          # no file received due to timeout, we'll go around and try again
-          if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t(recv)")
-          fileName = None
+        # read a filename from the subscription
+        fileName = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
 
       if (fileName is not None) and os.path.isfile(fileName):
 
@@ -241,8 +230,12 @@ def main():
       eprint('No scanner specified, defaulting to ClamAV')
     checkConnInfo = ClamAVScan(debug=debug, verboseDebug=verboseDebug, socketFileName=args.clamAvSocket)
 
+  carvedFileSub = CarvedFileSubscriberThreaded(debug=debug, verboseDebug=verboseDebug,
+                                               host='localhost', port=VENTILATOR_PORT,
+                                               scriptName=scriptName)
+
   # start scanner threads which will pull filenames to be scanned and send the results to the logger
-  scannerThreads = ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo]))
+  scannerThreads = ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
   while (not shuttingDown):
     if pdbFlagged:
       pdbFlagged = False

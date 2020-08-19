@@ -5,6 +5,7 @@
 
 import clamd
 import hashlib
+import json
 import malass_client
 import os
 import re
@@ -12,6 +13,7 @@ import requests
 import sys
 import time
 import yara
+import zmq
 
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
@@ -26,6 +28,7 @@ from threading import Lock
 ###################################################################################################
 VENTILATOR_PORT = 5987
 SINK_PORT       = 5988
+TOPIC_FILE_SCAN = "file"
 
 ###################################################################################################
 # modes for file preservation settings
@@ -226,6 +229,44 @@ class AtomicInt:
   def value(self):
     with self.lock:
       return self.val.value
+
+###################################################################################################
+class CarvedFileSubscriberThreaded:
+
+  # ---------------------------------------------------------------------------------
+  # constructor
+  def __init__(self, debug=False, verboseDebug=False, host="localhost", port=VENTILATOR_PORT, context=None, topic='', rcvTimeout=5000, scriptName=''):
+    self.debug = debug
+    self.verboseDebug = verboseDebug
+    self.scriptName = scriptName
+
+    self.lock = Lock()
+
+    # initialize ZeroMQ context and socket(s) to receive filenames and send scan results
+    self.context = context if (context is not None) else zmq.Context()
+
+    # Socket to receive messages on
+    self.newFilesSocket = self.context.socket(zmq.SUB)
+    self.newFilesSocket.connect(f"tcp://{host}:{port}")
+    self.newFilesSocket.setsockopt(zmq.SUBSCRIBE, bytes(topic, encoding='ascii'))
+    self.newFilesSocket.RCVTIMEO = rcvTimeout
+    if self.debug: eprint(f"{self.scriptName}:\tbound to ventilator at {port}")
+
+  # ---------------------------------------------------------------------------------
+  def Pull(self, scanWorkerId=0):
+
+    with self.lock:
+      # accept a filename from newFilesSocket
+      try:
+        filename = self.newFilesSocket.recv_string()
+      except zmq.Again as timeout:
+        # no file received due to timeout, return "None" which means no file available
+        filename = None
+
+    if self.verboseDebug:
+      eprint(f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (filename is not None) else '🕑'}\t{filename if (filename is not None) else '(recv)'}")
+
+    return filename
 
 ###################################################################################################
 class FileScanProvider(ABC):
