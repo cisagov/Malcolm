@@ -56,6 +56,26 @@ def debug_toggle_handler(signum, frame):
   debugToggled = True
 
 ###################################################################################################
+# look for a file to scan (probably in its original directory, but possibly already moved to quarantine)
+def locate_file(fileName):
+  global verboseDebug
+
+  if fileName is not None:
+
+    if os.path.isfile(fileName):
+      return fileName
+
+    else:
+      for testPath in [PRESERVE_QUARANTINED_DIR_NAME, PRESERVE_PRESERVED_DIR_NAME]:
+        testFileName = os.path.join(os.path.join(os.path.dirname(os.path.realpath(fileName)), testPath), os.path.basename(fileName))
+        if os.path.isfile(testFileName):
+          if verboseDebug: eprint(f"{scriptName}:\t⏩\t{testFileName}")
+          return testFileName
+
+  return None
+
+
+###################################################################################################
 def scanFileWorker(checkConnInfo, carvedFileSub):
   global debug
   global verboseDebug
@@ -63,104 +83,130 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
   global scanWorkersCount
 
   scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
+  scannerRegistered = False
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
-  if isinstance(checkConnInfo, FileScanProvider):
+  try:
+    if isinstance(checkConnInfo, FileScanProvider):
 
-    # initialize ZeroMQ context and socket(s) to send scan results
-    context = zmq.Context()
+      # initialize ZeroMQ context and socket(s) to send scan results
+      context = zmq.Context()
 
-    # TODO: register scanner with logger
+      # Socket to send messages to
+      scanned_files_socket = context.socket(zmq.PUSH)
+      scanned_files_socket.connect(f"tcp://localhost:{SINK_PORT}")
+      # todo: do I want to set this? probably not, since what else would we do if we can't send? just block
+      # scanned_files_socket.SNDTIMEO = 5000
+      if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
 
-    # Socket to send messages to
-    scanned_files_socket = context.socket(zmq.PUSH)
-    scanned_files_socket.connect(f"tcp://localhost:{SINK_PORT}")
-    # todo: do I want to set this? probably not, since what else would we do if we can't send? just block
-    # scanned_files_socket.SNDTIMEO = 5000
-    if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
+      fileName = None
+      retrySubmitFile = False # todo: maximum file retry count?
 
-    fileName = None
-    retrySubmitFile = False # todo: maximum file retry count?
+      # loop forever, or until we're told to shut down
+      while not shuttingDown:
 
-    # loop forever, or until we're told to shut down
-    while not shuttingDown:
-
-      if retrySubmitFile and (fileName is not None) and os.path.isfile(fileName):
-        # we were unable to submit the file for processing, so try again
-        time.sleep(1)
-        if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{fileName}")
-
-      else:
-        retrySubmitFile = False
-        # read a filename from the subscription
-        fileName = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
-
-      if (fileName is not None) and os.path.isfile(fileName):
-
-        # file exists, submit for scanning
-        if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileName}")
-        requestComplete = False
-        scanResult = None
-        scan = AnalyzerScan(provider=checkConnInfo, name=fileName,
-                            submissionResponse=checkConnInfo.submit(fileName=fileName, block=False))
-
-        if scan.submissionResponse is not None:
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
-
-          # file was successfully submitted and is now being scanned
-          retrySubmitFile = False
-          requestComplete = False
-
-          # todo: maximum time we wait for a single file to be scanned?
-          while (not requestComplete) and (not shuttingDown):
-
-            # wait a moment then check to see if the scan is complete
-            time.sleep(scan.provider.check_interval())
-            response = scan.provider.check_result(scan.submissionResponse)
-
-            if isinstance(response, AnalyzerResult):
-
-              # whether the scan has completed
-              requestComplete = response.finished
-
-              if response.success:
-                # successful scan, report the scan results
-                scanResult = response.result
-
-              elif isinstance(response.result, dict) and ("error" in response.result):
-                # scan errored out, report the error
-                scanResult = response.result["error"]
-                eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
-
-              else:
-                # result is unrecognizable
-                scanResult = "Invalid scan result format"
-                eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
-
-            else:
-              # impossibru! abandon ship for this file?
-              # todo? what else? touch it?
-              requestComplete = True
-              scanResult = "Error checking results"
-              eprint(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
-
-        else:
-          # we were denied (rate limiting, probably), so we'll need wait for a slot to clear up
-          retrySubmitFile = True
-
-        if requestComplete and (scanResult is not None):
+        # "register" this scanner with the logger
+        while (not scannerRegistered) and (not shuttingDown):
           try:
-            # Send results to sink
-            scanned_files_socket.send_string(json.dumps(scan.provider.format(fileName, scanResult)))
-            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
+            scanned_files_socket.send_string(json.dumps({FILE_SCAN_RESULT_SCANNER : checkConnInfo.scanner_name()}))
+            scannerRegistered = True
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🇷\t{checkConnInfo.scanner_name()}")
 
           except zmq.Again as timeout:
             # todo: what to do here?
-            if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
+            if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🇷")
 
-  else:
-    eprint(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
+        if shuttingDown:
+          break
+
+        if retrySubmitFile and (fileName is not None) and (locate_file(fileName) is not None):
+          # we were unable to submit the file for processing, so try again
+          time.sleep(1)
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{fileName}")
+
+        else:
+          retrySubmitFile = False
+          # read a filename from the subscription
+          fileName = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
+
+        fileName = locate_file(fileName)
+        if (fileName is not None) and os.path.isfile(fileName):
+
+          # file exists, submit for scanning
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileName}")
+          requestComplete = False
+          scanResult = None
+          scan = AnalyzerScan(provider=checkConnInfo, name=fileName,
+                              submissionResponse=checkConnInfo.submit(fileName=fileName, block=False))
+
+          if scan.submissionResponse is not None:
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
+
+            # file was successfully submitted and is now being scanned
+            retrySubmitFile = False
+            requestComplete = False
+
+            # todo: maximum time we wait for a single file to be scanned?
+            while (not requestComplete) and (not shuttingDown):
+
+              # wait a moment then check to see if the scan is complete
+              time.sleep(scan.provider.check_interval())
+              response = scan.provider.check_result(scan.submissionResponse)
+
+              if isinstance(response, AnalyzerResult):
+
+                # whether the scan has completed
+                requestComplete = response.finished
+
+                if response.success:
+                  # successful scan, report the scan results
+                  scanResult = response.result
+
+                elif isinstance(response.result, dict) and ("error" in response.result):
+                  # scan errored out, report the error
+                  scanResult = response.result["error"]
+                  eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+
+                else:
+                  # result is unrecognizable
+                  scanResult = "Invalid scan result format"
+                  eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+
+              else:
+                # impossibru! abandon ship for this file?
+                # todo? what else? touch it?
+                requestComplete = True
+                scanResult = "Error checking results"
+                eprint(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
+
+          else:
+            # we were denied (rate limiting, probably), so we'll need wait for a slot to clear up
+            retrySubmitFile = True
+
+          if requestComplete and (scanResult is not None):
+            try:
+              # Send results to sink
+              scanned_files_socket.send_string(json.dumps(scan.provider.format(fileName, scanResult)))
+              if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
+
+            except zmq.Again as timeout:
+              # todo: what to do here?
+              if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
+
+    else:
+      eprint(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
+
+  finally:
+    # "unregister" this scanner with the logger
+    if scannerRegistered:
+      try:
+        scanned_files_socket.send_string(json.dumps({FILE_SCAN_RESULT_SCANNER : f"-{checkConnInfo.scanner_name()}"}))
+        scannerRegistered = False
+        if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🙃\t{checkConnInfo.scanner_name()}")
+      except zmq.Again as timeout:
+        # todo: what to do here?
+        if verboseDebug: eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🙃")
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
 

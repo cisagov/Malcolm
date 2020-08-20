@@ -36,6 +36,9 @@ PRESERVE_QUARANTINED = "quarantined"
 PRESERVE_ALL         = "all"
 PRESERVE_NONE        = "none"
 
+PRESERVE_QUARANTINED_DIR_NAME = "quarantine"
+PRESERVE_PRESERVED_DIR_NAME = "preserved"
+
 ###################################################################################################
 FILE_SCAN_RESULT_SCANNER = "scanner"
 FILE_SCAN_RESULT_FILE = "file"
@@ -274,6 +277,12 @@ class FileScanProvider(ABC):
 
   @staticmethod
   @abstractmethod
+  def scanner_name(cls):
+    # returns this scanner name
+    pass
+
+  @staticmethod
+  @abstractmethod
   def max_requests(cls):
     # returns the maximum number of concurrently open requests this type of provider can handle
     pass
@@ -312,6 +321,10 @@ class VirusTotalSearch(FileScanProvider):
     self.history = deque()
     self.reqLimit = reqLimit
     self.reqLimitSec = reqLimitSec
+
+  @staticmethod
+  def scanner_name():
+    return 'virustotal'
 
   @staticmethod
   def max_requests():
@@ -392,7 +405,7 @@ class VirusTotalSearch(FileScanProvider):
   # static method for formatting the response JSON (from requests.get) as a dict
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_SCANNER : 'virustotal',
+    result = {FILE_SCAN_RESULT_SCANNER : VirusTotalSearch.scanner_name(),
               FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 0,
               FILE_SCAN_RESULT_HITS : 0,
@@ -451,6 +464,10 @@ class MalassScan(FileScanProvider):
     self.reqLimit = reqLimit
     self.transactionIdToFilenameDict = defaultdict(str)
     self.scanningFilesCount = AtomicInt(value=0)
+
+  @staticmethod
+  def scanner_name():
+    return 'malass'
 
   @staticmethod
   def max_requests():
@@ -575,7 +592,7 @@ class MalassScan(FileScanProvider):
   # static method for formatting the response summaryDict (from check_result)
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_SCANNER : 'malass',
+    result = {FILE_SCAN_RESULT_SCANNER : MalassScan.scanner_name(),
               FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 0,
               FILE_SCAN_RESULT_HITS : 0,
@@ -620,6 +637,10 @@ class ClamAVScan(FileScanProvider):
     self.debug = debug
     self.verboseDebug = verboseDebug
     self.socketFileName = socketFileName
+
+  @staticmethod
+  def scanner_name():
+    return 'clamav'
 
   @staticmethod
   def max_requests():
@@ -693,7 +714,7 @@ class ClamAVScan(FileScanProvider):
   # static method for formatting the response summaryDict (from check_result)
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_SCANNER : 'clamav',
+    result = {FILE_SCAN_RESULT_SCANNER : ClamAVScan.scanner_name(),
               FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 1,
               FILE_SCAN_RESULT_HITS : 0,
@@ -758,6 +779,10 @@ class YaraScan(FileScanProvider):
     self.compiledRules = yara.compile(filepaths = self.ruleFilespecs)
 
   @staticmethod
+  def scanner_name():
+    return 'yara'
+
+  @staticmethod
   def max_requests():
     return YARA_MAX_REQS
 
@@ -817,7 +842,7 @@ class YaraScan(FileScanProvider):
   # static method for formatting the response summaryDict (from check_result)
   @staticmethod
   def format(fileName, response):
-    result = {FILE_SCAN_RESULT_SCANNER : 'yara',
+    result = {FILE_SCAN_RESULT_SCANNER : YaraScan.scanner_name(),
               FILE_SCAN_RESULT_FILE : fileName,
               FILE_SCAN_RESULT_ENGINES : 1,
               FILE_SCAN_RESULT_HITS : 0,
