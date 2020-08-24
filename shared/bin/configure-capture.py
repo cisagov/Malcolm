@@ -608,12 +608,11 @@ def main():
           if (code == Dialog.CANCEL or code == Dialog.ESC):
             raise CancelledError
 
-          capture_config_dict["ZEEK_FILE_WATCH"] = "false"
           for tag in [x[0] for x in scanner_choices]:
             capture_config_dict[tag] = "false"
           for tag in scanner_tags:
             capture_config_dict[tag] = "true"
-            capture_config_dict["ZEEK_FILE_WATCH"] = "true"
+          capture_config_dict["ZEEK_FILE_WATCH"] = "true" if (len(scanner_tags) > 0) else "false"
 
           # specify what to do with files that triggered the scanner engine(s)
           code, zeek_carved_file_preservation = d.radiolist(Constants.MSG_CONFIG_CARVED_FILE_PRESERVATION,
