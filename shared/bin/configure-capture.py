@@ -510,7 +510,7 @@ def main():
         zeek_carve_re = re.compile(r"(\bZEEK_EXTRACTOR_MODE)\s*=\s*.+?$")
         zeek_file_preservation_re = re.compile(r"(\bEXTRACTED_FILE_PRESERVATION)\s*=\s*.+?$")
         zeek_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
-        zeek_file_watch_re = re.compile(r"(\bZEEK_FILE_WATCH\w+)\s*=\s*.+?$")
+        zeek_file_watch_re = re.compile(r"(\bZEEK_FILE_WATCH)\s*=\s*.+?$")
         zeek_file_scanner_re = re.compile(r"(\bZEEK_FILE_SCAN_\w+)\s*=\s*.+?$")
 
         # get paths for captured PCAP and Zeek files
