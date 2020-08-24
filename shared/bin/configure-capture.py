@@ -665,7 +665,7 @@ def main():
               elif zeek_path_re.search(line) is not None:
                 print(zeek_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
               elif zeek_file_watch_re.search(line) is not None:
-                print(zeek_file_watch_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_FILE_WATCH"], line))
+                print(zeek_file_watch_re.sub(r"\1=%s" % capture_config_dict["ZEEK_FILE_WATCH"], line))
               else:
                 zeek_file_scanner_match = zeek_file_scanner_re.search(line)
                 if zeek_file_scanner_match is not None:
