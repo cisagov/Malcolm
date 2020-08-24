@@ -21,4 +21,5 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   pyzmq \
   requests \
   scapy \
+  yara-python \
   zkg

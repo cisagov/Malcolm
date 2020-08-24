@@ -132,6 +132,7 @@ class Constants:
   MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
   MSG_BACKGROUND_TITLE = 'Sensor Configuration'
   MSG_CONFIG_AUTOSTARTS = 'Specify autostart processes'
+  MSG_CONFIG_ZEEK_CARVED_SCANNERS = 'Specify scanners for Zeek-carved files'
   MSG_CONFIG_ZEEK_CARVING = 'Specify Zeek file carving mode'
   MSG_CONFIG_ZEEK_CARVING_MIMES = 'Specify file types to carve'
   MSG_CONFIG_CARVED_FILE_PRESERVATION = 'Specify which carved files to preserve'
@@ -414,7 +415,7 @@ def main():
         ##### sensor autostart services configuration #######################################################################################
 
         while True:
-          # select processes for autostart
+          # select processes for autostart (except for the file scan ones, handle those with the file scanning stuff)
           autostart_choices = []
           for k, v in sorted(capture_config_dict.items()):
             if k.startswith("AUTOSTART_"):
@@ -509,6 +510,8 @@ def main():
         zeek_carve_re = re.compile(r"(\bZEEK_EXTRACTOR_MODE)\s*=\s*.+?$")
         zeek_file_preservation_re = re.compile(r"(\bEXTRACTED_FILE_PRESERVATION)\s*=\s*.+?$")
         zeek_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
+        zeek_file_watch_re = re.compile(r"(\bZEEK_FILE_WATCH\w+)\s*=\s*.+?$")
+        zeek_file_scanner_re = re.compile(r"(\bZEEK_FILE_SCAN_\w+)\s*=\s*.+?$")
 
         # get paths for captured PCAP and Zeek files
         while True:
@@ -592,8 +595,27 @@ def main():
           zeek_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
           capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE
 
+
+        # what to do with carved files
         if (zeek_carve_mode != Constants.ZEEK_FILE_CARVING_NONE):
-          # what to do with carved files
+
+          # select engines for file scanning
+          scanner_choices = []
+          for k, v in sorted(capture_config_dict.items()):
+            if k.startswith("ZEEK_FILE_SCAN_"):
+              scanner_choices.append((k, '', v.lower() == "true"))
+          code, scanner_tags = d.checklist(Constants.MSG_CONFIG_ZEEK_CARVED_SCANNERS, choices=scanner_choices)
+          if (code == Dialog.CANCEL or code == Dialog.ESC):
+            raise CancelledError
+
+          capture_config_dict["ZEEK_FILE_WATCH"] = "false"
+          for tag in [x[0] for x in scanner_choices]:
+            capture_config_dict[tag] = "false"
+          for tag in scanner_tags:
+            capture_config_dict[tag] = "true"
+            capture_config_dict["ZEEK_FILE_WATCH"] = "true"
+
+          # specify what to do with files that triggered the scanner engine(s)
           code, zeek_carved_file_preservation = d.radiolist(Constants.MSG_CONFIG_CARVED_FILE_PRESERVATION,
                                                            choices=[(PRESERVE_QUARANTINED,
                                                                      'Preserve only quarantined files',
@@ -604,9 +626,13 @@ def main():
                                                                     (PRESERVE_NONE,
                                                                      'Preserve no files',
                                                                      (capture_config_dict["EXTRACTED_FILE_PRESERVATION"] == PRESERVE_NONE))])
-
           if (code == Dialog.CANCEL or code == Dialog.ESC):
             raise CancelledError
+
+        else:
+          # file carving disabled, so disable file scanning as well
+          for key in ["ZEEK_FILE_WATCH", "ZEEK_FILE_SCAN_CLAMAV", "ZEEK_FILE_SCAN_VTOT", "ZEEK_FILE_SCAN_MALASS", "ZEEK_FILE_SCAN_YARA"]:
+            capture_config_dict[key] = "false"
 
         # reconstitute dictionary with user-specified values
         capture_config_dict["CAPTURE_INTERFACE"] = ",".join(selected_ifaces)
@@ -639,8 +665,14 @@ def main():
                 print(pcap_path_re.sub(r'\1="%s"' % capture_config_dict["PCAP_PATH"], line))
               elif zeek_path_re.search(line) is not None:
                 print(zeek_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
+              elif zeek_file_watch_re.search(line) is not None:
+                print(zeek_file_watch_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_FILE_WATCH"], line))
               else:
-                print(line)
+                zeek_file_scanner_match = zeek_file_scanner_re.search(line)
+                if zeek_file_scanner_match is not None:
+                  print(zeek_file_scanner_re.sub(r"\1=%s" % capture_config_dict[zeek_file_scanner_match.group(1)], line))
+                else:
+                  print(line)
 
           # write out file carving overrides if specified
           if (len(mime_tags) > 0) and (len(capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"]) > 0):
