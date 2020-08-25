@@ -28,7 +28,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         g++ \
         gcc \
         gettext \
-        git \
+        git-core \
         groff \
         groff-base \
         imagemagick \
@@ -42,9 +42,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         libwww-perl \
         libyaml-dev \
         make \
+        meson \
+        ninja-build \
         pandoc \
         patch \
-        python-dev \
         python3-dev \
         python3-pip \
         python3-setuptools \
