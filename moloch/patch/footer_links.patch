@@ -1,0 +1,14 @@
+diff --git a/viewer/vueapp/src/components/utils/Footer.vue b/viewer/vueapp/src/components/utils/Footer.vue
+index 55b2dbdb..8e6338da 100644
+--- a/viewer/vueapp/src/components/utils/Footer.vue
++++ b/viewer/vueapp/src/components/utils/Footer.vue
+@@ -4,7 +4,8 @@
+     <p>
+       <small>
+         Moloch v{{molochVersion}} |
+-        <a href="https://molo.ch">molo.ch</a>
++        <a href="https://molo.ch">molo.ch</a> |
++        <a href="https://github.com/idaholab/Malcolm">Malcolm</a> <a href="/">README</a> |
+         <span v-if="responseTime && !loadingData">
+           | {{ responseTime | commaString }}ms
+         </span>
