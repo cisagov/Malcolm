@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.3.2"
+ENV MOLOCH_VERSION "2.4.0"
 ENV MOLOCHDIR "/data/moloch"
 ENV MOLOCH_URL "https://codeload.github.com/aol/moloch/tar.gz/v${MOLOCH_VERSION}"
 ENV MOLOCH_LOCALELASTICSEARCH no
