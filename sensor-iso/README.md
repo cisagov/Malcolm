@@ -343,7 +343,6 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_SYSLOGBEAT** – filebeat [system log forwarder](#syslogbeat)
 * *AUTOSTART_TCPDUMP* – [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_ZEEK** – [Zeek](https://www.zeek.org/) traffic analysis engine
-* **AUTOSTART_ZEEK_FILE_WATCH** – monitor for [files carved from traffic streams by Zeek](#ZeekFileExtraction)
 
 Note that only one packet capture engine ([moloch-capture](https://molo.ch/), [netsniff-ng](http://netsniff-ng.org/), or [tcpdump](https://www.tcpdump.org/)) can be used.
 
