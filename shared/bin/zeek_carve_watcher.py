@@ -53,7 +53,7 @@ class EventWatcher(pyinotify.ProcessEvent):
 
     # Socket to send messages on
     if debug: eprint(f"{scriptName}:\tbinding ventilator port {VENTILATOR_PORT}")
-    self.ventilator_socket = self.context.socket(zmq.PUSH)
+    self.ventilator_socket = self.context.socket(zmq.PUB)
     self.ventilator_socket.bind(f"tcp://*:{VENTILATOR_PORT}")
 
     # todo: do I want to set this? probably not since this guy's whole job is to send

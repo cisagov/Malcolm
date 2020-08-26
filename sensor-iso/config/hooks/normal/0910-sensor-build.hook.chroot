@@ -25,6 +25,11 @@ CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmak
 BISON_VER="3.6.2"
 BISON_URL="https://ftp.gnu.org/gnu/bison/bison-${BISON_VER}.tar.gz"
 
+YARA_VERSION="4.0.2"
+YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
+YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
+YARA_RULES_DIR="/opt/yara-rules"
+
 mkdir -p /opt/hedgehog_install_artifacts/
 
 # some environment variables needed for build using clang
@@ -116,6 +121,37 @@ cd /tmp
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
 mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
+###
+
+# yara
+mkdir -p usr/local/src
+cd /usr/local/src
+
+curl -sSL "${YARA_URL}" | tar xzf - -C /usr/local/src/
+cd "./yara-${YARA_VERSION}"
+./bootstrap.sh
+./configure --prefix=/usr
+  --with-crypto
+  --enable-magic
+  --enable-cuckoo
+  --enable-dotnet
+make
+#make install
+checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VERSION" --pkgarch="amd64" --pkgsource="$YARA_URL"
+cp *.deb /opt/hedgehog_install_artifacts/
+cd /tmp
+rm -rf /usr/local/src/yara*
+
+mkdir -p ./Neo23x0
+curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1
+mkdir -p "${YARA_RULES_DIR}"/custom
+cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/
+cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE
+rm -rf /tmp/Neo23x0
+
+cd "${YARA_RULES_DIR}"/..
+tar czf yara-rules-hedgehog.tar.gz "$(basename "${YARA_RULES_DIR}")"
+mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # update clamav signatures

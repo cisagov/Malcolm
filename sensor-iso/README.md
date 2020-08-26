@@ -200,14 +200,17 @@ To specify which files should be extracted, specify the Zeek file carving mode:
 
 If you're not sure what to choose, either of **mapped (except common plain text files)** (if you want to carve and scan almost all files) or **interesting** (if you only want to carve and scan files with [mime types of common attack vectors](./interface/sensor_ctl/extractor_override.interesting.zeek)) is probably a good choice.
 
-Extracted files can be examined through either (but not both) of two methods:
-
-* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, enable **AUTOSTART_CLAMAV_SERVICE** when configuring [autostart services](#ConfigAutostart) and leave `VTOT_API2_KEY` value (described below) blank
-* submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method manually edit `/opt/sensor/sensor_ctl/control_vars.conf` and specify your [VirusTotal API key](https://developers.virustotal.com/reference) in `VTOT_API2_KEY`
-
-Files which are flagged as potentially malicious via either of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
-
 Next, specify which carved files to preserve (saved on the sensor under `/capture/bro/capture/extract_files/quarantine` by default). In order to not consume all of the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#ConfigAutostart) section.
+
+You'll be prompted to specify which engine(s) to use to analyze extracted files. Extracted files can be examined through any of three methods:
+
+![File scanners](./docs/images/zeek_file_carve_scanners.png)
+
+* scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, select **ZEEK_FILE_SCAN_CLAMAV** when specifying scanners for Zeek-carved files
+* submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, select **ZEEK_FILE_SCAN_VTOT** when specifying scanners for Zeek-carved files, then manually edit `/opt/sensor/sensor_ctl/control_vars.conf` and specify your [VirusTotal API key](https://developers.virustotal.com/reference) in `VTOT_API2_KEY`
+* scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
+
+Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
 
 ![File quarantine](./docs/images/file_quarantine.png)
 
@@ -328,7 +331,6 @@ Once the forwarders have been configured, the final step is to **Configure Autos
 Despite configuring capture and/or forwarder services as described in previous sections, only services enabled in the autostart configuration will run when the sensor starts up. The available autostart processes are as follows (recommended services are in **bold text**):
 
 * **AUTOSTART_AUDITBEAT** – [auditbeat](#auditbeat) audit log forwarder
-* **AUTOSTART_CLAMAV_SERVICE** – ClamAV service for scanning [files carved from traffic streams by Zeek](#ZeekFileExtraction) for trojans, viruses, malware and other malicious threats
 * **AUTOSTART_CLAMAV_UPDATES** – Virus database update service for ClamAV (requires sensor to be connected to the internet)
 * **AUTOSTART_FILEBEAT** – [filebeat](#filebeat) Zeek log forwarder 
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
@@ -376,7 +378,9 @@ prune:prune-pcap                 RUNNING   pid 14446, uptime 8 days, 20:22:32
 prune:prune-zeek                 RUNNING   pid 14442, uptime 8 days, 20:22:32
 tcpdump:tcpdump-enp8s0           STOPPED   Not started
 zeek:logger                      RUNNING   pid 14434, uptime 8 days, 20:22:32
-zeek:scanner                     RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:virustotal                  RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:yara                        RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:clamav                      RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
 zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 ```
@@ -399,7 +403,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-2.2.1.iso"
+Finished, created "/sensor-build/hedgehog-2.3.0.iso"
 …
 ```
 
