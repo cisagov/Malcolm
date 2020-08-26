@@ -134,44 +134,44 @@ You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
-Pulling curator         ... done
-Pulling elastalert      ... done
-Pulling elasticsearch   ... done
-Pulling file-monitor    ... done
-Pulling filebeat        ... done
-Pulling freq            ... done
-Pulling htadmin         ... done
-Pulling kibana          ... done
-Pulling logstash        ... done
-Pulling moloch          ... done
-Pulling name-map-ui     ... done
-Pulling nginx-proxy     ... done
-Pulling pcap-capture    ... done
-Pulling pcap-monitor    ... done
-Pulling upload          ... done
-Pulling zeek            ... done
+Pulling curator       ... done
+Pulling elastalert    ... done
+Pulling elasticsearch ... done
+Pulling file-monitor  ... done
+Pulling filebeat      ... done
+Pulling freq          ... done
+Pulling htadmin       ... done
+Pulling kibana        ... done
+Pulling logstash      ... done
+Pulling moloch        ... done
+Pulling name-map-ui   ... done
+Pulling nginx-proxy   ... done
+Pulling pcap-capture  ... done
+Pulling pcap-monitor  ... done
+Pulling upload        ... done
+Pulling zeek          ... done
 ```
 
 You can then observe that the images have been retrieved by running `docker images`:
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.3.0               xxxxxxxxxxxx        20 hours ago        246MB
-malcolmnetsec/elastalert                            2.3.0               xxxxxxxxxxxx        20 hours ago        408MB
-malcolmnetsec/elasticsearch-oss                     2.3.0               xxxxxxxxxxxx        20 hours ago        693MB
-malcolmnetsec/filebeat-oss                          2.3.0               xxxxxxxxxxxx        20 hours ago        474MB
-malcolmnetsec/file-monitor                          2.3.0               xxxxxxxxxxxx        20 hours ago        386MB
-malcolmnetsec/file-upload                           2.3.0               xxxxxxxxxxxx        20 hours ago        199MB
-malcolmnetsec/freq                                  2.3.0               xxxxxxxxxxxx        20 hours ago        390MB
-malcolmnetsec/htadmin                               2.3.0               xxxxxxxxxxxx        20 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.3.0               xxxxxxxxxxxx        20 hours ago        1.07GB
-malcolmnetsec/logstash-oss                          2.3.0               xxxxxxxxxxxx        20 hours ago        1.05GB
-malcolmnetsec/moloch                                2.3.0               xxxxxxxxxxxx        20 hours ago        667MB
-malcolmnetsec/name-map-ui                           2.3.0               xxxxxxxxxxxx        20 hours ago        134MB
-malcolmnetsec/nginx-proxy                           2.3.0               xxxxxxxxxxxx        20 hours ago        118MB
-malcolmnetsec/pcap-capture                          2.3.0               xxxxxxxxxxxx        20 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.3.0               xxxxxxxxxxxx        20 hours ago        156MB
-malcolmnetsec/zeek                                  2.3.0               xxxxxxxxxxxx        20 hours ago        442MB
+malcolmnetsec/curator                               2.3.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.3.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.3.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.3.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.3.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.3.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.3.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/moloch                                2.3.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.3.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.3.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.3.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.3.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1808,11 +1808,11 @@ Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
 Pulling freq          ... done
-Pulling name-map-ui   ... done
 Pulling htadmin       ... done
 Pulling kibana        ... done
 Pulling logstash      ... done
 Pulling moloch        ... done
+Pulling name-map-ui   ... done
 Pulling nginx-proxy   ... done
 Pulling pcap-capture  ... done
 Pulling pcap-monitor  ... done
@@ -1821,22 +1821,22 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.3.0               xxxxxxxxxxxx        20 hours ago        246MB
-malcolmnetsec/elastalert                            2.3.0               xxxxxxxxxxxx        20 hours ago        408MB
-malcolmnetsec/elasticsearch-oss                     2.3.0               xxxxxxxxxxxx        20 hours ago        693MB
-malcolmnetsec/filebeat-oss                          2.3.0               xxxxxxxxxxxx        20 hours ago        474MB
-malcolmnetsec/file-monitor                          2.3.0               xxxxxxxxxxxx        20 hours ago        386MB
-malcolmnetsec/file-upload                           2.3.0               xxxxxxxxxxxx        20 hours ago        199MB
-malcolmnetsec/freq                                  2.3.0               xxxxxxxxxxxx        20 hours ago        390MB
-malcolmnetsec/htadmin                               2.3.0               xxxxxxxxxxxx        20 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.3.0               xxxxxxxxxxxx        20 hours ago        1.07GB
-malcolmnetsec/logstash-oss                          2.3.0               xxxxxxxxxxxx        20 hours ago        1.05GB
-malcolmnetsec/moloch                                2.3.0               xxxxxxxxxxxx        20 hours ago        667MB
-malcolmnetsec/name-map-ui                           2.3.0               xxxxxxxxxxxx        20 hours ago        134MB
-malcolmnetsec/nginx-proxy                           2.3.0               xxxxxxxxxxxx        20 hours ago        118MB
-malcolmnetsec/pcap-capture                          2.3.0               xxxxxxxxxxxx        20 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.3.0               xxxxxxxxxxxx        20 hours ago        156MB
-malcolmnetsec/zeek                                  2.3.0               xxxxxxxxxxxx        20 hours ago        442MB
+malcolmnetsec/curator                               2.3.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.3.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.3.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.3.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.3.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.3.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.3.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/moloch                                2.3.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.3.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.3.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.3.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.3.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
