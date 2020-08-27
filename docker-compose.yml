@@ -418,7 +418,7 @@ services:
       - ./zeek-logs/current:/data/zeek/logs
       - ./yara/rules:/yara-rules/custom:ro
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "watcher", "scanner", "logger"]
+      test: ["CMD", "supervisorctl", "status", "watcher", "logger"]
       interval: 30s
       timeout: 15s
       retries: 3
