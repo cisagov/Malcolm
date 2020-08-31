@@ -40,6 +40,8 @@ ARG EXTRACTED_FILE_ENABLE_FRESHCLAM=false
 ARG EXTRACTED_FILE_PIPELINE_DEBUG=false
 ARG EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA=false
 ARG CLAMD_SOCKET_FILE=/tmp/clamd.ctl
+ARG EXTRACTED_FILE_ENABLE_YARA=false
+ARG EXTRACTED_FILE_YARA_CUSTOM_ONLY=false
 
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
@@ -60,16 +62,34 @@ ENV EXTRACTED_FILE_ENABLE_FRESHCLAM $EXTRACTED_FILE_ENABLE_FRESHCLAM
 ENV EXTRACTED_FILE_PIPELINE_DEBUG $EXTRACTED_FILE_PIPELINE_DEBUG
 ENV EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA $EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA
 ENV CLAMD_SOCKET_FILE $CLAMD_SOCKET_FILE
+ENV EXTRACTED_FILE_ENABLE_YARA $EXTRACTED_FILE_ENABLE_YARA
+ENV EXTRACTED_FILE_YARA_CUSTOM_ONLY $EXTRACTED_FILE_YARA_CUSTOM_ONLY
+ENV YARA_VERSION "4.0.2"
+ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
+ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
+ENV YARA_RULES_DIR "/yara-rules"
+ENV SRC_BASE_DIR "/usr/local/src"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
     apt-get install --no-install-recommends -y -q \
+      automake \
       bc \
       clamav \
       clamav-daemon \
       clamav-freshclam \
+      curl \
+      gcc \
       libclamunrar9 \
-      wget && \
+      libjansson-dev \
+      libjansson4 \
+      libmagic-dev \
+      libmagic1 \
+      libssl-dev \
+      libssl1.1 \
+      libtool \
+      make \
+      pkg-config && \
     apt-get  -y -q install \
       inotify-tools \
       libzmq5 \
@@ -81,14 +101,46 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-pyinotify \
       python3-requests \
       python3-zmq && \
-    pip3 install clamd supervisor && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove python3-dev build-essential && \
+    pip3 install clamd supervisor yara-python && \
+    mkdir -p "${SRC_BASE_DIR}" && \
+    cd "${SRC_BASE_DIR}" && \
+      curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
+      cd "./yara-${YARA_VERSION}" && \
+      ./bootstrap.sh && \
+      ./configure --prefix=/usr \
+        --with-crypto \
+        --enable-magic \
+        --enable-cuckoo \
+        --enable-dotnet && \
+      make && \
+      make install && \
+    cd /tmp && \
+    rm -rf "${SRC_BASE_DIR}"/yara* && \
+    mkdir -p ./Neo23x0 && \
+      curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1 && \
+      mkdir -p "${YARA_RULES_DIR}" && \
+      cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/ && \
+      cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE && \
+      rm -rf /tmp/Neo23x0 && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
+        automake \
+        build-essential \
+        gcc \
+        gcc-8 \
+        libc6-dev \
+        libgcc-8-dev \
+        libjansson-dev \
+        libmagic-dev \
+        libssl-dev \
+        libtool \
+        make \
+        python3-dev && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && \
-    wget -O /var/lib/clamav/main.cvd http://database.clamav.net/main.cvd && \
-      wget -O /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
-      wget -O /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
+    curl -s -S -L -o /var/lib/clamav/main.cvd http://database.clamav.net/main.cvd && \
+      curl -s -S -L -o /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
+      curl -s -S -L -o /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
@@ -105,12 +157,17 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     if ! [ -z $HTTPProxyServer ]; then echo "HTTPProxyServer $HTTPProxyServer" >> /etc/clamav/freshclam.conf; fi && \
       if ! [ -z $HTTPProxyPort   ]; then echo "HTTPProxyPort $HTTPProxyPort" >> /etc/clamav/freshclam.conf; fi && \
       sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf && \
-      sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf
+      sed -i "s/^DatabaseOwner .*$/DatabaseOwner ${PUSER}/g" /etc/clamav/freshclam.conf && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/vtot_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/zeek_carve_*.py /usr/local/bin/
 ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
+ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 
 WORKDIR /data/zeek/extract_files
 
@@ -118,7 +175,7 @@ VOLUME ["/var/lib/clamav"]
 
 EXPOSE 3310
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

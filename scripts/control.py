@@ -98,7 +98,7 @@ def logs():
 
   # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
   osEnv = os.environ.copy()
-  osEnv['COMPOSE_HTTP_TIMEOUT'] = '999999999'
+  osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
 
   process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], env=osEnv, stdout=PIPE)
   while True:
@@ -268,7 +268,7 @@ def start():
 
   # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
   osEnv = os.environ.copy()
-  osEnv['COMPOSE_HTTP_TIMEOUT'] = '999999999'
+  osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
 
   # start docker
   err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
