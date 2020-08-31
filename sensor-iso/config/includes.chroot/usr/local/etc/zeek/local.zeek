@@ -82,7 +82,7 @@ redef ignore_checksums = T;
 
 @if (!disable_wireguard)
   @load ./spicy-noise
-  event zeek_init() {
+  event zeek_init() &priority=-5 {
     if (disable_wireguard_transport_packets) {
       Log::remove_default_filter(WireGuard::WGLOG);
       Log::add_filter(WireGuard::WGLOG,

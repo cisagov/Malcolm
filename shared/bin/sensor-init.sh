@@ -53,6 +53,11 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chown -R 1000:1000 /opt/zeek/*
     [[ -f /opt/zeek/bin/zeek ]] && setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
   fi
+  if [[ -d /opt/yara-rules ]]; then
+    mkdir -p /opt/yara-rules/custom
+    chown -R 1000:1000 /opt/yara-rules/custom
+    chmod -R 750 /opt/yara-rules/custom
+  fi
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
   if dpkg -s clamav >/dev/null 2>&1 ; then

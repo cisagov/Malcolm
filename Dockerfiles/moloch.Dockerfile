@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.3.2"
+ENV MOLOCH_VERSION "2.4.0"
 ENV MOLOCHDIR "/data/moloch"
 ENV MOLOCH_URL "https://codeload.github.com/aol/moloch/tar.gz/v${MOLOCH_VERSION}"
 ENV MOLOCH_LOCALELASTICSEARCH no
@@ -28,7 +28,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         g++ \
         gcc \
         gettext \
-        git \
+        git-core \
         groff \
         groff-base \
         imagemagick \
@@ -42,9 +42,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         libwww-perl \
         libyaml-dev \
         make \
+        meson \
+        ninja-build \
         pandoc \
         patch \
-        python-dev \
         python3-dev \
         python3-pip \
         python3-setuptools \
