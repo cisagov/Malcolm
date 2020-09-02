@@ -57,8 +57,15 @@ def debug_toggle_handler(signum, frame):
 
 ###################################################################################################
 # look for a file to scan (probably in its original directory, but possibly already moved to quarantine)
-def locate_file(fileName):
+def locate_file(fileInfo):
   global verboseDebug
+
+  if isinstance(fileInfo, dict) and (FILE_SCAN_RESULT_FILE in fileInfo):
+    fileName = fileInfo[FILE_SCAN_RESULT_FILE]
+  elif isinstance(fileInfo, str):
+    fileName = fileInfo
+  else:
+    fileName = None
 
   if fileName is not None:
 
@@ -100,6 +107,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
       # scanned_files_socket.SNDTIMEO = 5000
       if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
 
+      fileInfo = None
       fileName = None
       retrySubmitFile = False # todo: maximum file retry count?
 
@@ -120,26 +128,27 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
         if shuttingDown:
           break
 
-        if retrySubmitFile and (fileName is not None) and (locate_file(fileName) is not None):
+        if retrySubmitFile and (fileInfo is not None) and (locate_file(fileInfo) is not None):
           # we were unable to submit the file for processing, so try again
           time.sleep(1)
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{fileName}")
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{json.dumps(fileInfo)}")
 
         else:
           retrySubmitFile = False
-          # read a filename from the subscription
-          fileName = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
+          # read watched file information from the subscription
+          fileInfo = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
 
-        fileName = locate_file(fileName)
+        fileName = locate_file(fileInfo)
         if (fileName is not None) and os.path.isfile(fileName):
 
           # file exists, submit for scanning
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileName}")
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
           requestComplete = False
           scanResult = None
           scan = AnalyzerScan(provider=checkConnInfo, name=fileName,
+                              size=int(fileInfo[FILE_SCAN_RESULT_FILE_SIZE]) if isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], int) or (isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], str) and fileInfo[FILE_SCAN_RESULT_FILE_SIZE].isdecimal()) else None,
+                              fileType=fileInfo[FILE_SCAN_RESULT_FILE_TYPE],
                               submissionResponse=checkConnInfo.submit(fileName=fileName, block=False))
-
           if scan.submissionResponse is not None:
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
 

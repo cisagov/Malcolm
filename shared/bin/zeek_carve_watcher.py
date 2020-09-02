@@ -12,6 +12,8 @@
 import argparse
 import copy
 import glob
+import json
+import magic
 import os
 import pathlib
 import pyinotify
@@ -76,12 +78,16 @@ def event_process_generator(cls, method):
     if debug: eprint(f"{scriptName}:\t👓\t{event.pathname}")
 
     if (not event.dir) and os.path.isfile(event.pathname):
-      if (args.minBytes <= os.path.getsize(event.pathname) <= args.maxBytes):
+      fileSize = os.path.getsize(event.pathname)
+      if (args.minBytes <= fileSize <= args.maxBytes):
         # the entity is a right-sized file, and it exists, so send it to get scanned
 
-        if debug: eprint(f"{scriptName}:\t📩\t{event.pathname}")
+        fileInfo = json.dumps({ FILE_SCAN_RESULT_FILE : event.pathname,
+                                FILE_SCAN_RESULT_FILE_SIZE : fileSize,
+                                FILE_SCAN_RESULT_FILE_TYPE : magic.from_file(event.pathname, mime=True) })
+        if debug: eprint(f"{scriptName}:\t📩\t{fileInfo}")
         try:
-          self.ventilator_socket.send_string(event.pathname)
+          self.ventilator_socket.send_string(fileInfo)
           if debug: eprint(f"{scriptName}:\t📫\t{event.pathname}")
         except zmq.Again as timeout:
           if verboseDebug: eprint(f"{scriptName}:\t🕑\t{event.pathname}")

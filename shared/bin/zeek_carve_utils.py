@@ -42,6 +42,8 @@ PRESERVE_PRESERVED_DIR_NAME = "preserved"
 ###################################################################################################
 FILE_SCAN_RESULT_SCANNER = "scanner"
 FILE_SCAN_RESULT_FILE = "file"
+FILE_SCAN_RESULT_FILE_SIZE = "size"
+FILE_SCAN_RESULT_FILE_TYPE = "type"
 FILE_SCAN_RESULT_ENGINES = "engines"
 FILE_SCAN_RESULT_HITS = "hits"
 FILE_SCAN_RESULT_MESSAGE = "message"
@@ -122,12 +124,16 @@ class BroSignatureLine:
 # AnalyzerScan
 # .provider - a FileScanProvider subclass doing the scan/lookup
 # .name - the filename to be scanned
+# .size - the size (in bytes) of the file
+# .fileType - the file's mime type
 # .submissionResponse - a unique identifier to be returned by the provider with which to check status
 class AnalyzerScan:
-  __slots__ = ('provider', 'name', 'submissionResponse')
-  def __init__(self, provider=None, name=None, submissionResponse=None):
+  __slots__ = ('provider', 'name', 'size', 'fileType', 'submissionResponse')
+  def __init__(self, provider=None, name=None, size=None, fileType=None, submissionResponse=None):
     self.provider = provider
     self.name = name
+    self.size = size
+    self.fileType = fileType
     self.submissionResponse = submissionResponse
 
 # AnalyzerResult
@@ -259,18 +265,20 @@ class CarvedFileSubscriberThreaded:
   # ---------------------------------------------------------------------------------
   def Pull(self, scanWorkerId=0):
 
+    fileinfo = defaultdict(str)
+
     with self.lock:
-      # accept a filename from newFilesSocket
+      # accept a fileinfo dict from newFilesSocket
       try:
-        filename = self.newFilesSocket.recv_string()
+        fileinfo.update(json.loads(self.newFilesSocket.recv_string()))
       except zmq.Again as timeout:
-        # no file received due to timeout, return "None" which means no file available
-        filename = None
+        # no file received due to timeout, return empty dict. which means no file available
+        pass
 
     if self.verboseDebug:
-      eprint(f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (filename is not None) else '🕑'}\t{filename if (filename is not None) else '(recv)'}")
+      eprint(f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}")
 
-    return filename
+    return fileinfo
 
 ###################################################################################################
 class FileScanProvider(ABC):
