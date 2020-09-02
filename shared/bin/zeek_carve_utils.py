@@ -86,7 +86,7 @@ CLAM_FOUND_KEY = 'FOUND'
 # Yara Interface
 YARA_RULES_DIR = os.path.join(os.getenv('YARA_RULES_DIR', "/yara-rules"), '')
 YARA_CUSTOM_RULES_DIR = os.path.join(YARA_RULES_DIR, "custom")
-YARA_SUBMIT_TIMEOUT_SEC = 120
+YARA_SUBMIT_TIMEOUT_SEC = 60
 YARA_ENGINE_ID = 'Yara'
 YARA_MAX_REQS = 8 # maximum scanning threads concurrently
 YARA_CHECK_INTERVAL = 0.1
@@ -95,7 +95,7 @@ YARA_RUN_TIMEOUT_SEC = 180
 ###################################################################################################
 # Capa
 CAPA_MAX_REQS = 2 # maximum scanning threads concurrently
-CAPA_SUBMIT_TIMEOUT_SEC = 120
+CAPA_SUBMIT_TIMEOUT_SEC = 60
 CAPA_ENGINE_ID = 'Capa'
 CAPA_CHECK_INTERVAL = 0.1
 CAPA_MIME_PREFIX = 'application/'
@@ -260,6 +260,11 @@ def check_output_input(*popenargs, **kwargs):
   process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
   try:
     output, errput = process.communicate(input=inputdata, timeout=timeoutSec)
+  except TimeoutExpired:
+    # see https://docs.python.org/3.8/library/subprocess.html#subprocess.Popen.communicate
+    # todo: leaves orphaned subprocesses?
+    process.kill()
+    output, errput = process.communicate()
   except:
     process.kill()
     process.wait()
@@ -1005,7 +1010,7 @@ class CapaScan(FileScanProvider):
             vivFile = fileName + '.viv'
 
             if self.verboseDebug: eprint(f'{get_ident()} Capa scanning: {fileName}')
-            capaErr, capaOut = run_process(['capa', '--quiet', '--json', '--color', 'never', fileName], timeout=CAPA_RUN_TIMEOUT_SEC, stderr=False, debug=self.debug)
+            capaErr, capaOut = run_process(['timeout', '-k', str(CAPA_SUBMIT_TIMEOUT_SEC), str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '--json', '--color', 'never', fileName], stderr=False, debug=self.debug)
             if (capaErr == 0) and (len(capaOut) > 0) and (len(capaOut[0]) > 0):
               # load the JSON output from capa into the .result
               try:
