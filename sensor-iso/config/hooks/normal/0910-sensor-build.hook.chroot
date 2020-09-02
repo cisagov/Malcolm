@@ -30,6 +30,9 @@ YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
+CAPA_VERSION="1.2.0"
+CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
+
 mkdir -p /opt/hedgehog_install_artifacts/
 
 # some environment variables needed for build using clang
@@ -153,6 +156,15 @@ cd "${YARA_RULES_DIR}"/..
 tar czf yara-rules-hedgehog.tar.gz "$(basename "${YARA_RULES_DIR}")"
 mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
+
+# capa
+cd /tmp
+curl -sSL -o ./capa.zip "${CAPA_URL}"
+unzip ./capa.zip
+mv /tmp/capa /usr/bin/
+chmod +x /usr/bin/capa
+rm -f ./capa.zip
+cp /usr/bin/capa /opt/hedgehog_install_artifacts/
 
 # update clamav signatures
 freshclam --stdout --quiet --no-warnings

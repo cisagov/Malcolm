@@ -42,6 +42,7 @@ ARG EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA=false
 ARG CLAMD_SOCKET_FILE=/tmp/clamd.ctl
 ARG EXTRACTED_FILE_ENABLE_YARA=false
 ARG EXTRACTED_FILE_YARA_CUSTOM_ONLY=false
+ARG EXTRACTED_FILE_ENABLE_CAPA=false
 
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
@@ -64,6 +65,7 @@ ENV EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA $EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA
 ENV CLAMD_SOCKET_FILE $CLAMD_SOCKET_FILE
 ENV EXTRACTED_FILE_ENABLE_YARA $EXTRACTED_FILE_ENABLE_YARA
 ENV EXTRACTED_FILE_YARA_CUSTOM_ONLY $EXTRACTED_FILE_YARA_CUSTOM_ONLY
+ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV YARA_VERSION "4.0.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
@@ -171,6 +173,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/vtot_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

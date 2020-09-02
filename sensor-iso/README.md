@@ -209,6 +209,7 @@ You'll be prompted to specify which engine(s) to use to analyze extracted files.
 * scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, select **ZEEK_FILE_SCAN_CLAMAV** when specifying scanners for Zeek-carved files
 * submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, select **ZEEK_FILE_SCAN_VTOT** when specifying scanners for Zeek-carved files, then manually edit `/opt/sensor/sensor_ctl/control_vars.conf` and specify your [VirusTotal API key](https://developers.virustotal.com/reference) in `VTOT_API2_KEY`
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
+* scanning portable executable (PE) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, select **ZEEK_FILE_SCAN_CAPA** when specifying scanners for Zeek-carved files
 
 Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
 
@@ -379,6 +380,7 @@ tcpdump:tcpdump-enp8s0           STOPPED   Not started
 zeek:logger                      RUNNING   pid 14434, uptime 8 days, 20:22:32
 zeek:virustotal                  RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:yara                        RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:capa                        RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:clamav                      RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
 zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32

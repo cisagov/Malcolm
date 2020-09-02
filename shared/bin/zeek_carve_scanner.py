@@ -145,10 +145,11 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
           if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
           requestComplete = False
           scanResult = None
+          fileSize = int(fileInfo[FILE_SCAN_RESULT_FILE_SIZE]) if isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], int) or (isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], str) and fileInfo[FILE_SCAN_RESULT_FILE_SIZE].isdecimal()) else None
           scan = AnalyzerScan(provider=checkConnInfo, name=fileName,
-                              size=int(fileInfo[FILE_SCAN_RESULT_FILE_SIZE]) if isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], int) or (isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], str) and fileInfo[FILE_SCAN_RESULT_FILE_SIZE].isdecimal()) else None,
+                              size=fileSize,
                               fileType=fileInfo[FILE_SCAN_RESULT_FILE_TYPE],
-                              submissionResponse=checkConnInfo.submit(fileName=fileName, block=False))
+                              submissionResponse=checkConnInfo.submit(fileName=fileName, fileSize=fileSize, fileType=fileInfo[FILE_SCAN_RESULT_FILE_TYPE], block=False))
           if scan.submissionResponse is not None:
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
 
@@ -242,6 +243,7 @@ def main():
   parser.add_argument('--clamav-socket', dest='clamAvSocket', help="ClamAV socket filename", metavar='<filespec>', type=str, required=False, default=None)
   parser.add_argument('--yara', dest='enableYara', metavar='true|false', help="Enable Yara", type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--yara-custom-only', dest='yaraCustomOnly', metavar='true|false', help="Ignore default Yara rules", type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--capa', dest='enableCapa', metavar='true|false', help="Enable Capa", type=str2bool, nargs='?', const=True, default=False, required=False)
 
   try:
     parser.error = parser.exit
@@ -282,6 +284,8 @@ def main():
       yaraDirs.append(YARA_RULES_DIR)
     yaraDirs.append(YARA_CUSTOM_RULES_DIR)
     checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs)
+  elif args.enableCapa:
+    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug)
   else:
     if not args.enableClamAv:
       eprint('No scanner specified, defaulting to ClamAV')
