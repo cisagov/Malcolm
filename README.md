@@ -218,6 +218,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Kibana](https://www.elastic.co/products/kibana) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
 * [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
+* [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files (in development)
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing

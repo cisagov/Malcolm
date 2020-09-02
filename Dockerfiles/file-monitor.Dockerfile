@@ -69,6 +69,8 @@ ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz
 ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 ENV YARA_RULES_DIR "/yara-rules"
 ENV SRC_BASE_DIR "/usr/local/src"
+ENV CAPA_VERSION="1.2.0"
+ENV CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
@@ -89,7 +91,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       libssl1.1 \
       libtool \
       make \
-      pkg-config && \
+      pkg-config \
+      unzip && \
     apt-get  -y -q install \
       inotify-tools \
       libzmq5 \
@@ -122,6 +125,12 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/ && \
       cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE && \
       rm -rf /tmp/Neo23x0 && \
+    cd /tmp && \
+      curl -sSL -o ./capa.zip "${CAPA_URL}" && \
+      unzip ./capa.zip && \
+      mv /tmp/capa /usr/bin/ && \
+      chmod +x /usr/bin/capa && \
+      rm -f ./capa.zip && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
@@ -134,7 +143,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         libssl-dev \
         libtool \
         make \
-        python3-dev && \
+        python3-dev \
+        unzip && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && \
@@ -142,7 +152,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       curl -s -S -L -o /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
       curl -s -S -L -o /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
-      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+      useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /var/log/clamav /var/lib/clamav && \
       chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav && \
