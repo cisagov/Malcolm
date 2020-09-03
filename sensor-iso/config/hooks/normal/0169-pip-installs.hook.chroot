@@ -16,6 +16,7 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   debinterface \
   ipaddress \
   netifaces \
+  psutil \
   pyinotify \
   python-magic \
   pythondialog \

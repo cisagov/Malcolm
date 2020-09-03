@@ -106,7 +106,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-pyinotify \
       python3-requests \
       python3-zmq && \
-    pip3 install clamd supervisor yara-python python-magic && \
+    pip3 install clamd supervisor yara-python python-magic psutil && \
     mkdir -p "${SRC_BASE_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \

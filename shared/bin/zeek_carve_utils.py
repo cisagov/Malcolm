@@ -22,7 +22,7 @@ from collections import deque
 from collections import defaultdict
 from datetime import datetime
 from multiprocessing import RawValue
-from subprocess import (PIPE, Popen, TimeoutExpired)
+from subprocess import (PIPE, Popen)
 from threading import get_ident
 from threading import Lock
 
@@ -94,11 +94,11 @@ YARA_RUN_TIMEOUT_SEC = 180
 
 ###################################################################################################
 # Capa
-CAPA_MAX_REQS = 2 # maximum scanning threads concurrently
+CAPA_MAX_REQS = 4 # maximum scanning threads concurrently
 CAPA_SUBMIT_TIMEOUT_SEC = 60
 CAPA_ENGINE_ID = 'Capa'
 CAPA_CHECK_INTERVAL = 0.1
-CAPA_MIME_PREFIX = 'application/'
+CAPA_MIMES_TO_SCAN = ('application/bat', 'application/ecmascript', 'application/javascript', 'application/PowerShell', 'application/vnd.microsoft.portable-executable', 'application/x-bat', 'application/x-dosexec', 'application/x-executable', 'application/x-msdos-program', 'application/x-msdownload', 'application/x-pe-app-32bit-i386', 'application/x-sh', 'text/jscript', 'text/vbscript', 'text/x-python', 'text/x-shellscript')
 CAPA_VIV_SUFFIX = '.viv'
 CAPA_VIV_MIME = 'data'
 CAPA_RUN_TIMEOUT_SEC = 180
@@ -252,19 +252,9 @@ def check_output_input(*popenargs, **kwargs):
     inputdata = None
   kwargs.pop('input', None)
 
-  timeoutSec = None
-  if 'timeout' in kwargs:
-    timeoutSec = kwargs['timeout']
-  kwargs.pop('timeout', None)
-
   process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
   try:
-    output, errput = process.communicate(input=inputdata, timeout=timeoutSec)
-  except TimeoutExpired:
-    # see https://docs.python.org/3.8/library/subprocess.html#subprocess.Popen.communicate
-    # todo: leaves orphaned subprocesses?
-    process.kill()
-    output, errput = process.communicate()
+    output, errput = process.communicate(input=inputdata)
   except:
     process.kill()
     process.wait()
@@ -276,14 +266,14 @@ def check_output_input(*popenargs, **kwargs):
 
 ###################################################################################################
 # run command with arguments and return its exit code and output
-def run_process(command, stdout=True, stderr=True, stdin=None, timeout=None, cwd=None, env=None, debug=False):
+def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None, debug=False):
 
   retcode = -1
   output = []
 
   try:
     # run the command
-    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, timeout=timeout, cwd=cwd, env=env)
+    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
 
     # split the output on newlines to return a list
     if stderr and (len(cmderr) > 0): output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
@@ -292,9 +282,6 @@ def run_process(command, stdout=True, stderr=True, stdin=None, timeout=None, cwd
   except (FileNotFoundError, OSError, IOError) as e:
     if stderr:
       output.append("Command {} not found or unable to execute".format(command))
-  except (TimeoutExpired) as et:
-    if stderr:
-      output.append("Command {} timed out".format(command))
 
   if debug:
     eprint("{}{} returned {}: {}".format(command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output))
@@ -989,7 +976,7 @@ class CapaScan(FileScanProvider):
   def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=CAPA_SUBMIT_TIMEOUT_SEC):
     capaResult = AnalyzerResult()
 
-    if (fileType is not None) and (fileType.startswith(CAPA_MIME_PREFIX)):
+    if (fileType is not None) and (fileType in CAPA_MIMES_TO_SCAN):
       allowed = False
 
       # timeout only applies if block=True
@@ -1010,7 +997,7 @@ class CapaScan(FileScanProvider):
             vivFile = fileName + '.viv'
 
             if self.verboseDebug: eprint(f'{get_ident()} Capa scanning: {fileName}')
-            capaErr, capaOut = run_process(['timeout', '-k', str(CAPA_SUBMIT_TIMEOUT_SEC), str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '--json', '--color', 'never', fileName], stderr=False, debug=self.debug)
+            capaErr, capaOut = run_process(['timeout', '-k', '10', '-s', 'TERM', str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '--json', '--color', 'never', fileName], stderr=False, debug=self.debug)
             if (capaErr == 0) and (len(capaOut) > 0) and (len(capaOut[0]) > 0):
               # load the JSON output from capa into the .result
               try:
