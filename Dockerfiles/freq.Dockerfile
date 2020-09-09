@@ -2,11 +2,11 @@ FROM debian:buster-slim
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
-LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
-LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+
+LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
+LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
 LABEL org.opencontainers.image.title='malcolmnetsec/freq'
 LABEL org.opencontainers.image.description='Malcolm container providing an interface to Mark Baggett''s freq_server.py'
 

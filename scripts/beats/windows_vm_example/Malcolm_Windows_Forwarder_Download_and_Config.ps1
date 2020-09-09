@@ -1,5 +1,5 @@
 # configure a windows host to forward auditbeat and winlogbeat logs
-# to Malcolm (see https://github.com/idaholab/Malcolm/tree/development/scripts/beats)
+# to Malcolm (see https://github.com/cisagov/Malcolm/tree/development/scripts/beats)
 
 $beatversion = "7.6.2"
 
@@ -25,7 +25,7 @@ function Uninstall-Beat {
 #
 # - Download $beat-$beatversion-windows-x86_64.zip from artifacts.elastic.co
 # - Unzip to C:\Program Files\beat
-# - Download sample config for $beat from idaholab/Malcolm to C:\Program Files\beat
+# - Download sample config for $beat from cisagov/Malcolm to C:\Program Files\beat
 #
 function Download-Beat {
   param( [string]$beat )
@@ -37,13 +37,13 @@ function Download-Beat {
   ((Get-Content -path "C:\\Program Files\\$beat\\install-service-$beat.ps1" -Raw) -replace 'ProgramData','Program Files') | Set-Content -Path "C:\\Program Files\\$beat\\install-service-$beat.ps1"
   ((Get-Content -path "C:\\Program Files\\$beat\\install-service-$beat.ps1" -Raw) -replace ' -path','  --path') | Set-Content -Path "C:\\Program Files\\$beat\\install-service-$beat.ps1"
 
-  Invoke-WebRequest -UseBasicParsing -OutFile "C:\\Program Files\\$beat\\$beat.yml" -Uri https://raw.githubusercontent.com/idaholab/Malcolm/development/scripts/beats/windows_vm_example/$beat.yml
+  Invoke-WebRequest -UseBasicParsing -OutFile "C:\\Program Files\\$beat\\$beat.yml" -Uri https://raw.githubusercontent.com/cisagov/Malcolm/development/scripts/beats/windows_vm_example/$beat.yml
   (Get-Content "C:\\Program Files\\$beat\\$beat.yml") | Set-Content "C:\\Program Files\\$beat\\$beat.yml"
 }
 
 ################################################################################
 # Connectivity boilerplate to add to the sample .yml files downloaded from
-# idaholab/Malcolm
+# cisagov/Malcolm
 #
 $beat_boilerplate = @'
 
