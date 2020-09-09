@@ -101,6 +101,7 @@ CAPA_CHECK_INTERVAL = 0.1
 CAPA_MIMES_TO_SCAN = ('application/bat', 'application/ecmascript', 'application/javascript', 'application/PowerShell', 'application/vnd.microsoft.portable-executable', 'application/x-bat', 'application/x-dosexec', 'application/x-executable', 'application/x-msdos-program', 'application/x-msdownload', 'application/x-pe-app-32bit-i386', 'application/x-sh', 'text/jscript', 'text/vbscript', 'text/x-python', 'text/x-shellscript')
 CAPA_VIV_SUFFIX = '.viv'
 CAPA_VIV_MIME = 'data'
+CAPA_ATTACK_KEY = 'att&ck'
 CAPA_RUN_TIMEOUT_SEC = 180
 
 ###################################################################################################
@@ -196,6 +197,12 @@ def sha256sum(filename):
     for n in iter(lambda : f.readinto(mv), 0):
       h.update(mv[:n])
   return h.hexdigest()
+
+###################################################################################################
+# recursive dictionary key search
+def dictsearch(d, target):
+  val = filter(None, [[b] if a == target else dictsearch(b, target) if isinstance(b, dict) else None for a, b in d.items()])
+  return [i for b in val for i in b]
 
 ###################################################################################################
 # filespec to various fields as per the extractor zeek script (/opt/zeek/share/zeek/site/extractor.zeek)
@@ -954,10 +961,11 @@ class CapaScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False, verboseDebug=False, socketFileName=None):
+  def __init__(self, debug=False, verboseDebug=False, verboseHits=False):
     self.scanningFilesCount = AtomicInt(value=0)
     self.debug = debug
     self.verboseDebug = verboseDebug
+    self.verboseHits = verboseHits
 
   @staticmethod
   def scanner_name():
@@ -1063,12 +1071,15 @@ class CapaScan(FileScanProvider):
       resp = response
 
     if isinstance(resp, dict):
-      # TODO: maybe instead of "rules" being hits, we use the ATT&CK stuff?
       hits = []
       if 'rules' in resp and isinstance(resp['rules'], dict):
-        hits = list(resp['rules'].keys())
+        hits.extend([item.replace('[', '[ATT&CK ') for sublist in dictsearch(resp['rules'], CAPA_ATTACK_KEY) for item in sublist])
+        if self.verboseHits:
+          hits.extend(list(resp['rules'].keys()))
+
       result[FILE_SCAN_RESULT_HITS] = len(hits)
       if (len(hits) > 0):
+        hits = list(set(hits))
         cnt = Counter(hits)
         # short message is most common signature name (todo: they won't have duplicate names, so I guess this is just going to take the first...)
         result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]

@@ -244,6 +244,7 @@ def main():
   parser.add_argument('--yara', dest='enableYara', metavar='true|false', help="Enable Yara", type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--yara-custom-only', dest='yaraCustomOnly', metavar='true|false', help="Ignore default Yara rules", type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--capa', dest='enableCapa', metavar='true|false', help="Enable Capa", type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--capa-verbose', dest='capaVerbose', metavar='true|false', help="Log all capa rules, not just MITRE ATT&CK technique classifications", type=str2bool, nargs='?', const=True, default=False, required=False)
 
   try:
     parser.error = parser.exit
@@ -285,7 +286,7 @@ def main():
     yaraDirs.append(YARA_CUSTOM_RULES_DIR)
     checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs)
   elif args.enableCapa:
-    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug)
+    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug, verboseHits=args.capaVerbose)
   else:
     if not args.enableClamAv:
       eprint('No scanner specified, defaulting to ClamAV')
