@@ -156,9 +156,10 @@ class AnalyzerScan:
 # .result - the "result" of the scan/lookup, in whatever format is native to the provider
 class AnalyzerResult:
   __slots__ = ('finished', 'success', 'result')
-  def __init__(self, finished=False, success=False, result=None):
+  def __init__(self, finished=False, success=False, verbose=False, result=None):
     self.finished = finished
     self.success = success
+    self.verbose = verbose
     self.result = result
 
 # the filename parts used by our Zeek instance for extracted files:
@@ -982,7 +983,7 @@ class CapaScan(FileScanProvider):
   # ---------------------------------------------------------------------------------
   # submit a file to scan with Capa, respecting rate limiting. return scan result
   def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=CAPA_SUBMIT_TIMEOUT_SEC):
-    capaResult = AnalyzerResult()
+    capaResult = AnalyzerResult(verbose=self.verboseHits)
 
     if (fileType is not None) and (fileType in CAPA_MIMES_TO_SCAN):
       allowed = False
@@ -1067,14 +1068,16 @@ class CapaScan(FileScanProvider):
 
     if isinstance(response, AnalyzerResult):
       resp = response.result
+      verboseHits = response.verbose
     else:
       resp = response
+      verboseHits = False
 
     if isinstance(resp, dict):
       hits = []
       if 'rules' in resp and isinstance(resp['rules'], dict):
         hits.extend([item.replace('[', '[ATT&CK ') for sublist in dictsearch(resp['rules'], CAPA_ATTACK_KEY) for item in sublist])
-        if self.verboseHits:
+        if verboseHits:
           hits.extend(list(resp['rules'].keys()))
 
       result[FILE_SCAN_RESULT_HITS] = len(hits)
