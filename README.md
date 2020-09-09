@@ -89,6 +89,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 18.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
+* [Forks](#Forks)
 * [Copyright](#Footer)
 
 ## <a name="QuickStart"></a>Quick start
@@ -1958,6 +1959,10 @@ After upgrading following one of the previous outlines, give Malcolm several min
 #### Loading new Kibana dashboards and visualizations
 
 Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
+
+## <a name="Forks"></a>Forks
+
+[CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
 
 ## <a name="Footer"></a>Copyright
 
