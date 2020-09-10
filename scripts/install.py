@@ -571,7 +571,7 @@ class Installer(object):
 
     # if the Malcolm dir is owned by root, see if they want to reassign ownership to a non-root user
     if (((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and
-        (self.scriptUser == "root") and (getpwuid(os.stat(malcolm_install_path).st_uid).pw_uid == self.scriptUser) and
+        (self.scriptUser == "root") and (getpwuid(os.stat(malcolm_install_path).st_uid).pw_name == self.scriptUser) and
         InstallerYesOrNo('Set ownership of {} to an account other than {}?'.format(malcolm_install_path, self.scriptUser), default=True, forceInteraction=True)):
       tmpUser = ''
       while (len(tmpUser) == 0):
