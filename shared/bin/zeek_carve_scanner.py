@@ -171,7 +171,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                 if response.success:
                   # successful scan, report the scan results
-                  scanResult = response.result
+                  scanResult = response
 
                 elif isinstance(response.result, dict) and ("error" in response.result):
                   # scan errored out, report the error

@@ -155,7 +155,7 @@ class AnalyzerScan:
 # .success - requesting the status was done successfully (whether or not it was finished)
 # .result - the "result" of the scan/lookup, in whatever format is native to the provider
 class AnalyzerResult:
-  __slots__ = ('finished', 'success', 'result')
+  __slots__ = ('finished', 'success', 'verbose', 'result')
   def __init__(self, finished=False, success=False, verbose=False, result=None):
     self.finished = finished
     self.success = success
@@ -825,10 +825,7 @@ class ClamAVScan(FileScanProvider):
 
     else:
       result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
-      if isinstance(resp, dict) and ('error' in resp):
-        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp['error']}"
-      else:
-        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
+      result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result
 
@@ -1091,9 +1088,6 @@ class CapaScan(FileScanProvider):
 
     else:
       result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
-      if isinstance(resp, dict) and ('error' in resp):
-        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp['error']}"
-      else:
-        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
+      result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result
