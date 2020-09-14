@@ -73,7 +73,7 @@ ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz
 ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 ENV YARA_RULES_DIR "/yara-rules"
 ENV SRC_BASE_DIR "/usr/local/src"
-ENV CAPA_VERSION="1.2.0"
+ENV CAPA_VERSION="1.3.0"
 ENV CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
