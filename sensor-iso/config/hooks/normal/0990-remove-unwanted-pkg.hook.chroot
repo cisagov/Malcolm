@@ -4,7 +4,7 @@
 
 # remove development packages
 apt-get -y --purge remove checkinstall bison google-perftools gdb git libc6-dbg ninja-build \
-                    $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+                    $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc|llvm|clang)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /opt/cmake /var/spool/ccache
 
 # remove unwanted packages
