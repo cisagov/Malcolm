@@ -239,6 +239,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
+    * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin

@@ -78,6 +78,7 @@ ZKG_GITHUB_URLS=(
   https://github.com/corelight/ripple20
   https://github.com/corelight/SIGRed
   https://github.com/corelight/zeek-community-id
+  https://github.com/corelight/zerologon
   https://github.com/cybera/zeek-sniffpass
   https://github.com/lexibrent/zeek-EternalSafety
   https://github.com/mitre-attack/bzar
