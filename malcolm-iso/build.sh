@@ -160,6 +160,10 @@ if [ -d "$WORKDIR" ]; then
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon16.png ./config/includes.chroot/usr/share/icons/hicolor/16x16/malcolm.png
   chown -R root:root ./config/includes.chroot/usr/share/images ./config/includes.chroot/usr/share/icons
 
+  mkdir -p ./config/includes.installer
+  cp -v ./config/includes.binary/install/* ./config/includes.installer/
+  cp -v ./config/includes.chroot/usr/local/bin/preseed_partman_determine_disk.sh ./config/includes.installer/
+
   lb config \
     --image-name "$IMAGE_NAME" \
     --debian-installer live \
