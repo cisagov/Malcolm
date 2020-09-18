@@ -959,8 +959,9 @@ class CapaScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False, verboseDebug=False, verboseHits=False):
+  def __init__(self, debug=False, verboseDebug=False, rulesDir=None, verboseHits=False):
     self.scanningFilesCount = AtomicInt(value=0)
+    self.rulesDir = rulesDir
     self.debug = debug
     self.verboseDebug = verboseDebug
     self.verboseHits = verboseHits
@@ -1003,7 +1004,12 @@ class CapaScan(FileScanProvider):
             vivFile = fileName + '.viv'
 
             if self.verboseDebug: eprint(f'{get_ident()} Capa scanning: {fileName}')
-            capaErr, capaOut = run_process(['timeout', '-k', '10', '-s', 'TERM', str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '--json', '--color', 'never', fileName], stderr=False, debug=self.debug)
+
+            if (self.rulesDir is not None):
+              cmd = ['timeout', '-k', '10', '-s', 'TERM', str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '-r', self.rulesDir, '--json', '--color', 'never', fileName]
+            else:
+              cmd = ['timeout', '-k', '10', '-s', 'TERM', str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '--json', '--color', 'never', fileName]
+            capaErr, capaOut = run_process(cmd, stderr=False, debug=self.debug)
             if (capaErr == 0) and (len(capaOut) > 0) and (len(capaOut[0]) > 0):
               # load the JSON output from capa into the .result
               try:

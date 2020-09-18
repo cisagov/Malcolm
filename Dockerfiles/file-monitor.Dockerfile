@@ -72,9 +72,9 @@ ENV YARA_VERSION "4.0.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 ENV YARA_RULES_DIR "/yara-rules"
+ENV CAPA_RULES_URL "https://codeload.github.com/fireeye/capa-rules/tar.gz/master"
+ENV CAPA_RULES_DIR "/opt/capa-rules"
 ENV SRC_BASE_DIR "/usr/local/src"
-ENV CAPA_VERSION="1.3.0"
-ENV CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
@@ -101,6 +101,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       inotify-tools \
       libzmq5 \
       psmisc \
+      python \
+      python-dev \
+      python-pip \
+      python-backports-shutil-get-terminal-size \
       python3 \
       python3-bs4 \
       python3-dev \
@@ -109,6 +113,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-requests \
       python3-zmq && \
     pip3 install clamd supervisor yara-python python-magic psutil && \
+    pip2 install flare-capa && \
     mkdir -p "${SRC_BASE_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
@@ -130,11 +135,9 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE && \
       rm -rf /tmp/Neo23x0 && \
     cd /tmp && \
-      curl -sSL -o ./capa.zip "${CAPA_URL}" && \
-      unzip ./capa.zip && \
-      mv /tmp/capa /usr/bin/ && \
-      chmod +x /usr/bin/capa && \
-      rm -f ./capa.zip && \
+      mkdir -p "${CAPA_RULES_DIR}" && \
+      cd "$(dirname "${CAPA_RULES_DIR}")" && \
+      curl -sSL "$CAPA_RULES_URL" | tar xzvf - -C ./"$(basename "${CAPA_RULES_DIR}")" --strip-components 1 && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
@@ -147,6 +150,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         libssl-dev \
         libtool \
         make \
+        python-dev \
         python3-dev \
         unzip && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
