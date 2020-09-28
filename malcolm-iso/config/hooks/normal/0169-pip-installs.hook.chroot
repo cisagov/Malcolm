@@ -10,5 +10,6 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   debinterface \
   docker-compose \
   netifaces \
+  psutil \
   pythondialog \
   requests[security]

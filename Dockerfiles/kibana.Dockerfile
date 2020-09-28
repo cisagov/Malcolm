@@ -2,7 +2,7 @@ FROM docker.elastic.co/kibana/kibana-oss:7.6.2
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
-
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'

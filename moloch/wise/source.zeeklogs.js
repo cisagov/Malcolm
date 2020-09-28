@@ -5,7 +5,7 @@ var wiseSource     = require('./wiseSource.js')
 //////////////////////////////////////////////////////////////////////////////////
 // Moloch WISE Data Source definition for Zeek logs.
 //
-// Part of Malcolm (https://github.com/cisagov/Malcolm)
+// Part of Malcolm (https://github.com/cisagov/malcolm)
 //
 // Data may be populated with Malcolm's Zeek Logstash filters:
 //   (particularly https://raw.githubusercontent.com/cisagov/Malcolm/master/logstash/pipeline-main/11_zeek_logs.conf)

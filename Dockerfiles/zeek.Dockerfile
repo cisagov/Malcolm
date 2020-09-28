@@ -16,7 +16,7 @@ ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
-ENV ZEEK_VERSION "3.0.8"
+ENV ZEEK_VERSION "3.0.10"
 
 # using clang now instead of gcc because Spicy depends on it
 ENV LLVM_VERSION "10"
@@ -90,7 +90,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
 FROM debian:buster-slim
 
 LABEL maintainer="malcolm.netsec@gmail.com"
-
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'

@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.4.0"
+ENV MOLOCH_VERSION "2.4.1"
 ENV MOLOCHDIR "/data/moloch"
 ENV MOLOCH_URL "https://codeload.github.com/aol/moloch/tar.gz/v${MOLOCH_VERSION}"
 ENV MOLOCH_LOCALELASTICSEARCH no
@@ -90,7 +90,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
 FROM debian:buster-slim
 
 LABEL maintainer="malcolm.netsec@gmail.com"
-
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'

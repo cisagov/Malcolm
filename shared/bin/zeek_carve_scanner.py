@@ -57,8 +57,15 @@ def debug_toggle_handler(signum, frame):
 
 ###################################################################################################
 # look for a file to scan (probably in its original directory, but possibly already moved to quarantine)
-def locate_file(fileName):
+def locate_file(fileInfo):
   global verboseDebug
+
+  if isinstance(fileInfo, dict) and (FILE_SCAN_RESULT_FILE in fileInfo):
+    fileName = fileInfo[FILE_SCAN_RESULT_FILE]
+  elif isinstance(fileInfo, str):
+    fileName = fileInfo
+  else:
+    fileName = None
 
   if fileName is not None:
 
@@ -100,6 +107,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
       # scanned_files_socket.SNDTIMEO = 5000
       if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
 
+      fileInfo = None
       fileName = None
       retrySubmitFile = False # todo: maximum file retry count?
 
@@ -120,26 +128,28 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
         if shuttingDown:
           break
 
-        if retrySubmitFile and (fileName is not None) and (locate_file(fileName) is not None):
+        if retrySubmitFile and (fileInfo is not None) and (locate_file(fileInfo) is not None):
           # we were unable to submit the file for processing, so try again
           time.sleep(1)
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{fileName}")
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{json.dumps(fileInfo)}")
 
         else:
           retrySubmitFile = False
-          # read a filename from the subscription
-          fileName = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
+          # read watched file information from the subscription
+          fileInfo = carvedFileSub.Pull(scanWorkerId=scanWorkerId)
 
-        fileName = locate_file(fileName)
+        fileName = locate_file(fileInfo)
         if (fileName is not None) and os.path.isfile(fileName):
 
           # file exists, submit for scanning
-          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileName}")
+          if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
           requestComplete = False
           scanResult = None
+          fileSize = int(fileInfo[FILE_SCAN_RESULT_FILE_SIZE]) if isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], int) or (isinstance(fileInfo[FILE_SCAN_RESULT_FILE_SIZE], str) and fileInfo[FILE_SCAN_RESULT_FILE_SIZE].isdecimal()) else None
           scan = AnalyzerScan(provider=checkConnInfo, name=fileName,
-                              submissionResponse=checkConnInfo.submit(fileName=fileName, block=False))
-
+                              size=fileSize,
+                              fileType=fileInfo[FILE_SCAN_RESULT_FILE_TYPE],
+                              submissionResponse=checkConnInfo.submit(fileName=fileName, fileSize=fileSize, fileType=fileInfo[FILE_SCAN_RESULT_FILE_TYPE], block=False))
           if scan.submissionResponse is not None:
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
 
@@ -161,7 +171,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                 if response.success:
                   # successful scan, report the scan results
-                  scanResult = response.result
+                  scanResult = response
 
                 elif isinstance(response.result, dict) and ("error" in response.result):
                   # scan errored out, report the error
@@ -233,6 +243,9 @@ def main():
   parser.add_argument('--clamav-socket', dest='clamAvSocket', help="ClamAV socket filename", metavar='<filespec>', type=str, required=False, default=None)
   parser.add_argument('--yara', dest='enableYara', metavar='true|false', help="Enable Yara", type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--yara-custom-only', dest='yaraCustomOnly', metavar='true|false', help="Ignore default Yara rules", type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--capa', dest='enableCapa', metavar='true|false', help="Enable Capa", type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--capa-rules', dest='capaRulesDir', help="Capa Rules Directory", metavar='<pathspec>', type=str, required=False)
+  parser.add_argument('--capa-verbose', dest='capaVerbose', metavar='true|false', help="Log all capa rules, not just MITRE ATT&CK technique classifications", type=str2bool, nargs='?', const=True, default=False, required=False)
 
   try:
     parser.error = parser.exit
@@ -273,6 +286,8 @@ def main():
       yaraDirs.append(YARA_RULES_DIR)
     yaraDirs.append(YARA_CUSTOM_RULES_DIR)
     checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs)
+  elif args.enableCapa:
+    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug, rulesDir=capaRulesDir, verboseHits=args.capaVerbose)
   else:
     if not args.enableClamAv:
       eprint('No scanner specified, defaulting to ClamAV')

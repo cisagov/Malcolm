@@ -2,7 +2,7 @@ FROM debian:buster-slim
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
-
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
@@ -42,6 +42,8 @@ ARG EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA=false
 ARG CLAMD_SOCKET_FILE=/tmp/clamd.ctl
 ARG EXTRACTED_FILE_ENABLE_YARA=false
 ARG EXTRACTED_FILE_YARA_CUSTOM_ONLY=false
+ARG EXTRACTED_FILE_ENABLE_CAPA=false
+ARG EXTRACTED_FILE_CAPA_VERBOSE=false
 
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
@@ -64,10 +66,14 @@ ENV EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA $EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA
 ENV CLAMD_SOCKET_FILE $CLAMD_SOCKET_FILE
 ENV EXTRACTED_FILE_ENABLE_YARA $EXTRACTED_FILE_ENABLE_YARA
 ENV EXTRACTED_FILE_YARA_CUSTOM_ONLY $EXTRACTED_FILE_YARA_CUSTOM_ONLY
+ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
+ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
 ENV YARA_VERSION "4.0.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 ENV YARA_RULES_DIR "/yara-rules"
+ENV CAPA_RULES_URL "https://codeload.github.com/fireeye/capa-rules/tar.gz/master"
+ENV CAPA_RULES_DIR "/opt/capa-rules"
 ENV SRC_BASE_DIR "/usr/local/src"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
@@ -89,11 +95,16 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       libssl1.1 \
       libtool \
       make \
-      pkg-config && \
+      pkg-config \
+      unzip && \
     apt-get  -y -q install \
       inotify-tools \
       libzmq5 \
       psmisc \
+      python \
+      python-dev \
+      python-pip \
+      python-backports-shutil-get-terminal-size \
       python3 \
       python3-bs4 \
       python3-dev \
@@ -101,7 +112,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-pyinotify \
       python3-requests \
       python3-zmq && \
-    pip3 install clamd supervisor yara-python && \
+    pip3 install clamd supervisor yara-python python-magic psutil && \
+    pip2 install flare-capa && \
     mkdir -p "${SRC_BASE_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
@@ -122,6 +134,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/ && \
       cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE && \
       rm -rf /tmp/Neo23x0 && \
+    cd /tmp && \
+      mkdir -p "${CAPA_RULES_DIR}" && \
+      cd "$(dirname "${CAPA_RULES_DIR}")" && \
+      curl -sSL "$CAPA_RULES_URL" | tar xzvf - -C ./"$(basename "${CAPA_RULES_DIR}")" --strip-components 1 && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
@@ -134,7 +150,9 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         libssl-dev \
         libtool \
         make \
-        python3-dev && \
+        python-dev \
+        python3-dev \
+        unzip && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && \
@@ -142,7 +160,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       curl -s -S -L -o /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
       curl -s -S -L -o /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
-      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+      useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /var/log/clamav /var/lib/clamav && \
       chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav && \
@@ -161,6 +179,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/vtot_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

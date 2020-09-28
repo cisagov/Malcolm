@@ -1,16 +1,42 @@
 #!/bin/bash
 
 # configure firewall
+sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
+sed -i 's/DEFAULT_FORWARD_POLICY=.*/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
+sed -i "s/#net\/ipv4\/ip_forward=1/net\/ipv4\/ip_forward=1/" /etc/ufw/sysctl.conf
+read -r -d '' MASQUERADECFG <<- EOM
+# NAT table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+-A POSTROUTING -o docker0 -s 172.17.0.0/16 -j MASQUERADE
+COMMIT
+EOM
+awk '1' <(echo "$MASQUERADECFG") /etc/ufw/before.rules > /tmp/before.rules && \
+  cat /tmp/before.rules > /etc/ufw/before.rules && \
+  rm -f /tmp/before.rules
 /usr/sbin/ufw --force enable
 /usr/sbin/ufw default deny incoming
 /usr/sbin/ufw default allow outgoing
-/usr/sbin/ufw allow ssh
-/usr/sbin/ufw allow ntp
-/usr/sbin/ufw allow 443/tcp
-/usr/sbin/ufw allow 5044
-/usr/sbin/ufw allow 5601/tcp
-/usr/sbin/ufw allow 8443/tcp
-/usr/sbin/ufw allow 9200/tcp
+UFW_ALLOW_RULES=(
+  https
+  ntp
+  ssh
+  5044
+  5601/tcp
+  8443/tcp
+  9200/tcp
+)
+for i in ${UFW_ALLOW_RULES[@]}; do
+  ufw allow "$i"
+done
+
+# docker (disallow overriding firewall)
+mkdir -p /etc/docker/
+cat << 'EOF' > /etc/docker/daemon.json
+{
+  "iptables": false
+}
+EOF
 
 # performance parameters for networking, disk, etc.
 cat << 'EOF' >> /etc/sysctl.conf

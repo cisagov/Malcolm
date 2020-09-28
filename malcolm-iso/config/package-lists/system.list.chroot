@@ -52,9 +52,6 @@ gnupg1
 gnupg2
 gpart
 gparted
-grub-efi-amd64
-grub-efi-amd64-bin
-grub-efi-ia32-bin
 gvfs
 gvfs-backends
 gvfs-daemons
@@ -80,6 +77,7 @@ libssl-dev
 libykpers-1-1
 libyubikey0
 lm-sensors
+localepurge
 lshw
 lsof
 lvm2

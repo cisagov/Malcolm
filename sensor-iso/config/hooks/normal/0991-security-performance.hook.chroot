@@ -2,12 +2,18 @@
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# enable firewall, disallow everything in except SSH
+# configure firewall
+sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
 /usr/sbin/ufw --force enable
 /usr/sbin/ufw default deny incoming
 /usr/sbin/ufw default allow outgoing
-/usr/sbin/ufw allow ssh
-/usr/sbin/ufw allow ntp
+UFW_ALLOW_RULES=(
+  ntp
+  ssh
+)
+for i in ${UFW_ALLOW_RULES[@]}; do
+  ufw allow "$i"
+done
 
 # performance parameters for networking, disk, etc.
 cat << 'EOF' >> /etc/sysctl.conf

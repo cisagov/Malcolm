@@ -163,6 +163,10 @@ if [ -d "$WORKDIR" ]; then
   ln -r -s ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
   find "$SCRIPT_PATH/docs/logo/font" -type f -name "*.ttf" -exec cp "{}" ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ \;
 
+  mkdir -p ./config/includes.installer
+  cp -v ./config/includes.binary/install/* ./config/includes.installer/
+  cp -v ./config/includes.chroot/usr/local/bin/preseed_partman_determine_disk.sh ./config/includes.installer/
+
   lb config \
     --image-name "$IMAGE_NAME" \
     --debian-installer live \

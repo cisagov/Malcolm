@@ -22,6 +22,7 @@ from collections import deque
 from collections import defaultdict
 from datetime import datetime
 from multiprocessing import RawValue
+from subprocess import (PIPE, Popen)
 from threading import get_ident
 from threading import Lock
 
@@ -42,6 +43,8 @@ PRESERVE_PRESERVED_DIR_NAME = "preserved"
 ###################################################################################################
 FILE_SCAN_RESULT_SCANNER = "scanner"
 FILE_SCAN_RESULT_FILE = "file"
+FILE_SCAN_RESULT_FILE_SIZE = "size"
+FILE_SCAN_RESULT_FILE_TYPE = "type"
 FILE_SCAN_RESULT_ENGINES = "engines"
 FILE_SCAN_RESULT_HITS = "hits"
 FILE_SCAN_RESULT_MESSAGE = "message"
@@ -87,6 +90,19 @@ YARA_SUBMIT_TIMEOUT_SEC = 60
 YARA_ENGINE_ID = 'Yara'
 YARA_MAX_REQS = 8 # maximum scanning threads concurrently
 YARA_CHECK_INTERVAL = 0.1
+YARA_RUN_TIMEOUT_SEC = 180
+
+###################################################################################################
+# Capa
+CAPA_MAX_REQS = 4 # maximum scanning threads concurrently
+CAPA_SUBMIT_TIMEOUT_SEC = 60
+CAPA_ENGINE_ID = 'Capa'
+CAPA_CHECK_INTERVAL = 0.1
+CAPA_MIMES_TO_SCAN = ('application/bat', 'application/ecmascript', 'application/javascript', 'application/PowerShell', 'application/vnd.microsoft.portable-executable', 'application/x-bat', 'application/x-dosexec', 'application/x-executable', 'application/x-msdos-program', 'application/x-msdownload', 'application/x-pe-app-32bit-i386', 'application/x-sh', 'text/jscript', 'text/vbscript', 'text/x-python', 'text/x-shellscript')
+CAPA_VIV_SUFFIX = '.viv'
+CAPA_VIV_MIME = 'data'
+CAPA_ATTACK_KEY = 'att&ck'
+CAPA_RUN_TIMEOUT_SEC = 180
 
 ###################################################################################################
 
@@ -122,12 +138,16 @@ class BroSignatureLine:
 # AnalyzerScan
 # .provider - a FileScanProvider subclass doing the scan/lookup
 # .name - the filename to be scanned
+# .size - the size (in bytes) of the file
+# .fileType - the file's mime type
 # .submissionResponse - a unique identifier to be returned by the provider with which to check status
 class AnalyzerScan:
-  __slots__ = ('provider', 'name', 'submissionResponse')
-  def __init__(self, provider=None, name=None, submissionResponse=None):
+  __slots__ = ('provider', 'name', 'size', 'fileType', 'submissionResponse')
+  def __init__(self, provider=None, name=None, size=None, fileType=None, submissionResponse=None):
     self.provider = provider
     self.name = name
+    self.size = size
+    self.fileType = fileType
     self.submissionResponse = submissionResponse
 
 # AnalyzerResult
@@ -135,10 +155,11 @@ class AnalyzerScan:
 # .success - requesting the status was done successfully (whether or not it was finished)
 # .result - the "result" of the scan/lookup, in whatever format is native to the provider
 class AnalyzerResult:
-  __slots__ = ('finished', 'success', 'result')
-  def __init__(self, finished=False, success=False, result=None):
+  __slots__ = ('finished', 'success', 'verbose', 'result')
+  def __init__(self, finished=False, success=False, verbose=False, result=None):
     self.finished = finished
     self.success = success
+    self.verbose = verbose
     self.result = result
 
 # the filename parts used by our Zeek instance for extracted files:
@@ -179,6 +200,12 @@ def sha256sum(filename):
   return h.hexdigest()
 
 ###################################################################################################
+# recursive dictionary key search
+def dictsearch(d, target):
+  val = filter(None, [[b] if a == target else dictsearch(b, target) if isinstance(b, dict) else None for a, b in d.items()])
+  return [i for b in val for i in b]
+
+###################################################################################################
 # filespec to various fields as per the extractor zeek script (/opt/zeek/share/zeek/site/extractor.zeek)
 #   source-fuid-uid-time.ext
 #   eg.
@@ -213,6 +240,61 @@ def extracted_filespec_to_fields(filespec):
 def touch(filename):
   open(filename, 'a').close()
   os.utime(filename, None)
+
+###################################################################################################
+# run command with arguments and return its exit code, stdout, and stderr
+def check_output_input(*popenargs, **kwargs):
+
+  if 'stdout' in kwargs:
+    raise ValueError('stdout argument not allowed, it will be overridden')
+
+  if 'stderr' in kwargs:
+    raise ValueError('stderr argument not allowed, it will be overridden')
+
+  if 'input' in kwargs and kwargs['input']:
+    if 'stdin' in kwargs:
+      raise ValueError('stdin and input arguments may not both be used')
+    inputdata = kwargs['input']
+    kwargs['stdin'] = PIPE
+  else:
+    inputdata = None
+  kwargs.pop('input', None)
+
+  process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
+  try:
+    output, errput = process.communicate(input=inputdata)
+  except:
+    process.kill()
+    process.wait()
+    raise
+
+  retcode = process.poll()
+
+  return retcode, output, errput
+
+###################################################################################################
+# run command with arguments and return its exit code and output
+def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None, debug=False):
+
+  retcode = -1
+  output = []
+
+  try:
+    # run the command
+    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
+
+    # split the output on newlines to return a list
+    if stderr and (len(cmderr) > 0): output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
+    if stdout and (len(cmdout) > 0): output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
+
+  except (FileNotFoundError, OSError, IOError) as e:
+    if stderr:
+      output.append("Command {} not found or unable to execute".format(command))
+
+  if debug:
+    eprint("{}{} returned {}: {}".format(command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output))
+
+  return retcode, output
 
 ###################################################################################################
 class AtomicInt:
@@ -259,18 +341,20 @@ class CarvedFileSubscriberThreaded:
   # ---------------------------------------------------------------------------------
   def Pull(self, scanWorkerId=0):
 
+    fileinfo = defaultdict(str)
+
     with self.lock:
-      # accept a filename from newFilesSocket
+      # accept a fileinfo dict from newFilesSocket
       try:
-        filename = self.newFilesSocket.recv_string()
+        fileinfo.update(json.loads(self.newFilesSocket.recv_string()))
       except zmq.Again as timeout:
-        # no file received due to timeout, return "None" which means no file available
-        filename = None
+        # no file received due to timeout, return empty dict. which means no file available
+        pass
 
     if self.verboseDebug:
-      eprint(f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (filename is not None) else '🕑'}\t{filename if (filename is not None) else '(recv)'}")
+      eprint(f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}")
 
-    return filename
+    return fileinfo
 
 ###################################################################################################
 class FileScanProvider(ABC):
@@ -294,7 +378,7 @@ class FileScanProvider(ABC):
     pass
 
   @abstractmethod
-  def submit(self, fileName=None, block=False, timeout=0):
+  def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=0):
     # returns something that can be passed into check_result for checking the scan status
     pass
 
@@ -339,7 +423,7 @@ class VirusTotalSearch(FileScanProvider):
   # VirusTotalSearch does the request and gets the response immediately;
   # the subsequent call to check_result (using submit's response as input)
   # will always return "True" since the work has already been done
-  def submit(self, fileName=None, block=False, timeout=0):
+  def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=0):
     if timeout is None:
       timeout = self.reqLimitSec+5
 
@@ -479,7 +563,7 @@ class MalassScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # upload a file to scan with Malass, respecting rate limiting. return submitted transaction ID
-  def submit(self, fileName=None, block=False, timeout=MAL_SUBMIT_TIMEOUT_SEC):
+  def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=MAL_SUBMIT_TIMEOUT_SEC):
     submittedTransactionId = None
     allowed = False
 
@@ -652,7 +736,7 @@ class ClamAVScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # submit a file to scan with ClamAV, respecting rate limiting. return scan result
-  def submit(self, fileName=None, block=False, timeout=CLAM_SUBMIT_TIMEOUT_SEC):
+  def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=CLAM_SUBMIT_TIMEOUT_SEC):
     clamavResult = AnalyzerResult()
     allowed = False
     connected = False
@@ -741,10 +825,7 @@ class ClamAVScan(FileScanProvider):
 
     else:
       result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
-      if isinstance(resp, dict) and ('error' in resp):
-        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp['error']}"
-      else:
-        result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
+      result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
 
     return result
 
@@ -792,7 +873,7 @@ class YaraScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # submit a file to scan with Yara, respecting rate limiting. return scan result
-  def submit(self, fileName=None, block=False, timeout=YARA_SUBMIT_TIMEOUT_SEC):
+  def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=YARA_SUBMIT_TIMEOUT_SEC):
     yaraResult = AnalyzerResult()
     allowed = False
     matches = []
@@ -813,13 +894,15 @@ class YaraScan(FileScanProvider):
       if allowed:
         try:
           if self.verboseDebug: eprint(f'{get_ident()} Yara scanning: {fileName}')
-          yaraResult.result = self.compiledRules.match(fileName)
+          yaraResult.result = self.compiledRules.match(fileName, timeout=YARA_RUN_TIMEOUT_SEC)
           if self.verboseDebug: eprint(f'{get_ident()} Yara scan result: {yaraResult.result}')
           yaraResult.success = (yaraResult.result is not None)
           yaraResult.finished = True
         except Exception as e:
           if yaraResult.result is None:
-            yaraResult.result = str(e)
+            yaraResult.result = {"error" : str(e)}
+          yaraResult.success = False
+          yaraResult.finished = True
           if self.debug: eprint(f'{get_ident()} Yara scan error: {yaraResult.result}')
         finally:
           self.scanningFilesCount.decrement()
@@ -863,6 +946,151 @@ class YaraScan(FileScanProvider):
         result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]
         # long description is list of the signature names and the engines which generated them
         result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{x}<{YARA_ENGINE_ID}>" for x in hits])
+
+    else:
+      result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"
+      result[FILE_SCAN_RESULT_DESCRIPTION] = f"{resp}"
+
+    return result
+
+###################################################################################################
+# class for scanning a file with Capa
+class CapaScan(FileScanProvider):
+
+  # ---------------------------------------------------------------------------------
+  # constructor
+  def __init__(self, debug=False, verboseDebug=False, rulesDir=None, verboseHits=False):
+    self.scanningFilesCount = AtomicInt(value=0)
+    self.rulesDir = rulesDir
+    self.debug = debug
+    self.verboseDebug = verboseDebug
+    self.verboseHits = verboseHits
+
+  @staticmethod
+  def scanner_name():
+    return 'capa'
+
+  @staticmethod
+  def max_requests():
+    return CAPA_MAX_REQS
+
+  @staticmethod
+  def check_interval():
+    return CAPA_CHECK_INTERVAL
+
+  # ---------------------------------------------------------------------------------
+  # submit a file to scan with Capa, respecting rate limiting. return scan result
+  def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=CAPA_SUBMIT_TIMEOUT_SEC):
+    capaResult = AnalyzerResult(verbose=self.verboseHits)
+
+    if (fileType is not None) and (fileType in CAPA_MIMES_TO_SCAN):
+      allowed = False
+
+      # timeout only applies if block=True
+      timeoutTime = int(time.time()) + timeout
+
+      # while limit only repeats if block=True
+      while (not allowed) and (not capaResult.finished):
+
+        # first make sure we haven't exceeded rate limits
+        if (self.scanningFilesCount.increment() <= CAPA_MAX_REQS):
+          # we've got fewer than the allowed requests open, so we're good to go!
+          allowed = True
+        else:
+          self.scanningFilesCount.decrement()
+
+        if allowed:
+          try:
+            vivFile = fileName + '.viv'
+
+            if self.verboseDebug: eprint(f'{get_ident()} Capa scanning: {fileName}')
+
+            if (self.rulesDir is not None):
+              cmd = ['timeout', '-k', '10', '-s', 'TERM', str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '-r', self.rulesDir, '--json', '--color', 'never', fileName]
+            else:
+              cmd = ['timeout', '-k', '10', '-s', 'TERM', str(CAPA_RUN_TIMEOUT_SEC), 'capa', '--quiet', '--json', '--color', 'never', fileName]
+            capaErr, capaOut = run_process(cmd, stderr=False, debug=self.debug)
+            if (capaErr == 0) and (len(capaOut) > 0) and (len(capaOut[0]) > 0):
+              # load the JSON output from capa into the .result
+              try:
+                capaResult.result = json.loads(capaOut[0])
+              except (ValueError, TypeError):
+                capaResult.result = {"error" : f"Invalid response: {'; '.join(capaOut)}"}
+
+            else:
+              # probably failed because it's not an executable, ignore it
+              capaResult.result = {"error" : str(capaErr)}
+
+            if self.verboseDebug: eprint(f'{get_ident()} Capa scan result: {capaResult.result}')
+            capaResult.success = (capaResult.result is not None)
+            capaResult.finished = True
+
+          except Exception as e:
+            if capaResult.result is None:
+              capaResult.result = str(e)
+            if self.debug: eprint(f'{get_ident()} Capa scan error: {capaResult.result}')
+
+          finally:
+            self.scanningFilesCount.decrement()
+            try:
+              if os.path.isfile(fileName + '.viv'):
+                os.remove(fileName + '.viv')
+            except:
+              pass
+
+        elif block and (nowTime < timeoutTime):
+          # rate limited, wait for a bit and come around and try again
+          time.sleep(1)
+
+        else:
+          break
+
+    else:
+      # not an executable, don't need to scan it
+      capaResult.result = {}
+      capaResult.success = True
+      capaResult.finished = True
+
+    return capaResult
+
+  # ---------------------------------------------------------------------------------
+  # return the result of the previously scanned file
+  def check_result(self, capaResult):
+    return capaResult if isinstance(capaResult, AnalyzerResult) else AnalyzerResult(finished=True, success=False, result=None)
+
+  # ---------------------------------------------------------------------------------
+  # static method for formatting the response summaryDict (from check_result)
+  @staticmethod
+  def format(fileName, response):
+    result = {FILE_SCAN_RESULT_SCANNER : CapaScan.scanner_name(),
+              FILE_SCAN_RESULT_FILE : fileName,
+              FILE_SCAN_RESULT_ENGINES : 1,
+              FILE_SCAN_RESULT_HITS : 0,
+              FILE_SCAN_RESULT_MESSAGE : None,
+              FILE_SCAN_RESULT_DESCRIPTION : None}
+
+    if isinstance(response, AnalyzerResult):
+      resp = response.result
+      verboseHits = response.verbose
+    else:
+      resp = response
+      verboseHits = False
+
+    if isinstance(resp, dict):
+      hits = []
+      if 'rules' in resp and isinstance(resp['rules'], dict):
+        hits.extend([item.replace('[', '[ATT&CK ') for sublist in dictsearch(resp['rules'], CAPA_ATTACK_KEY) for item in sublist])
+        if verboseHits:
+          hits.extend(list(resp['rules'].keys()))
+
+      result[FILE_SCAN_RESULT_HITS] = len(hits)
+      if (len(hits) > 0):
+        hits = list(set(hits))
+        cnt = Counter(hits)
+        # short message is most common signature name (todo: they won't have duplicate names, so I guess this is just going to take the first...)
+        result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]
+        # long description is list of the signature names and the engines which generated them
+        result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{x}<{CAPA_ENGINE_ID}>" for x in hits])
 
     else:
       result[FILE_SCAN_RESULT_MESSAGE] = "Error or invalid response"

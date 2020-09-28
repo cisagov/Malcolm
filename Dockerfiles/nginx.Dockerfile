@@ -49,7 +49,7 @@ RUN set -x ; \
 FROM alpine:3.11
 
 LABEL maintainer="malcolm.netsec@gmail.com"
-
+LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
