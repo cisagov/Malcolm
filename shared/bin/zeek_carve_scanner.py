@@ -287,7 +287,7 @@ def main():
     yaraDirs.append(YARA_CUSTOM_RULES_DIR)
     checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs)
   elif args.enableCapa:
-    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug, rulesDir=capaRulesDir, verboseHits=args.capaVerbose)
+    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug, rulesDir=args.capaRulesDir, verboseHits=args.capaVerbose)
   else:
     if not args.enableClamAv:
       eprint('No scanner specified, defaulting to ClamAV')
