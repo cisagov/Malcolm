@@ -1001,8 +1001,6 @@ class CapaScan(FileScanProvider):
 
         if allowed:
           try:
-            vivFile = fileName + '.viv'
-
             if self.verboseDebug: eprint(f'{get_ident()} Capa scanning: {fileName}')
 
             if (self.rulesDir is not None):
@@ -1033,9 +1031,9 @@ class CapaScan(FileScanProvider):
           finally:
             self.scanningFilesCount.decrement()
             try:
-              if os.path.isfile(fileName + '.viv'):
-                os.remove(fileName + '.viv')
-            except:
+              if os.path.isfile(fileName + CAPA_VIV_SUFFIX):
+                os.remove(fileName + CAPA_VIV_SUFFIX)
+            except Exception as fe:
               pass
 
         elif block and (nowTime < timeoutTime):
