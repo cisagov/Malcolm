@@ -315,7 +315,7 @@ services:
       << : *process-variables
       << : *common-upload-variables
       << : *moloch-variables
-      MOLOCH_VERSION : '2.4.0'
+      MOLOCH_VERSION : '2.4.1'
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
