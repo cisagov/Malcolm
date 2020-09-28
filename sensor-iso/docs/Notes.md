@@ -370,7 +370,7 @@ Hedgehog Linux utilizest he following third party Zeek packages:
 * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
 * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
 * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
-* Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
+* Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
 * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
 * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
 * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
@@ -456,7 +456,7 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-tds
   https://github.com/corelight/bro-community-id
   https://github.com/corelight/bro-xor-exe-plugin
-  https://github.com/lexibrent/zeek-EternalSafety
+  https://github.com/0xl3x1/zeek-EternalSafety
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
 )
