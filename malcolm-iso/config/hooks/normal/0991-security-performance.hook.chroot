@@ -8,13 +8,7 @@ read -r -d '' MASQUERADECFG <<- EOM
 # NAT table rules
 *nat
 :POSTROUTING ACCEPT [0:0]
--A POSTROUTING ! -o docker0 -s 172.17.0.0/16 -j MASQUERADE
--A POSTROUTING ! -o docker0 -s 172.18.0.0/16 -j MASQUERADE
--A POSTROUTING ! -o docker0 -s 172.19.0.0/16 -j MASQUERADE
--A POSTROUTING ! -o docker0 -s 172.20.0.0/16 -j MASQUERADE
--A POSTROUTING ! -o docker0 -s 172.21.0.0/16 -j MASQUERADE
--A POSTROUTING ! -o docker0 -s 172.22.0.0/16 -j MASQUERADE
--A POSTROUTING ! -o docker0 -s 172.23.0.0/16 -j MASQUERADE
+-A POSTROUTING ! -o docker0 -s 172.29.0.0/16 -j MASQUERADE
 COMMIT
 EOM
 awk '1' <(echo "$MASQUERADECFG") /etc/ufw/before.rules > /tmp/before.rules && \
@@ -40,7 +34,10 @@ done
 mkdir -p /etc/docker/
 cat << 'EOF' > /etc/docker/daemon.json
 {
-  "iptables": false
+  "iptables": false,
+  "default-address-pools":[
+    {"base":"172.29.0.0/16","size":24}
+  ]
 }
 EOF
 
