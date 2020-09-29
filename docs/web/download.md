@@ -32,7 +32,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 Please check any files you may have downloaded from the links on this page against the SHA256 sums provided to verify the integrity of the downloads.
 
-Read carefully the installation documentation for [Malcolm](/documentation/#ISOInstallation) and/or [Hedgehog Linux](/hedgehog/#Installation). The ISO media boot on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+Read carefully the installation documentation for [Malcolm](/documentation/#ISOInstallation) and/or [Hedgehog Linux](/hedgehog/#Installation). The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
 ## Disclaimer
 
