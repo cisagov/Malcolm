@@ -90,7 +90,7 @@ YARA_SUBMIT_TIMEOUT_SEC = 60
 YARA_ENGINE_ID = 'Yara'
 YARA_MAX_REQS = 8 # maximum scanning threads concurrently
 YARA_CHECK_INTERVAL = 0.1
-YARA_RUN_TIMEOUT_SEC = 180
+YARA_RUN_TIMEOUT_SEC = 300
 
 ###################################################################################################
 # Capa
@@ -102,7 +102,7 @@ CAPA_MIMES_TO_SCAN = ('application/bat', 'application/ecmascript', 'application/
 CAPA_VIV_SUFFIX = '.viv'
 CAPA_VIV_MIME = 'data'
 CAPA_ATTACK_KEY = 'att&ck'
-CAPA_RUN_TIMEOUT_SEC = 180
+CAPA_RUN_TIMEOUT_SEC = 300
 
 ###################################################################################################
 
