@@ -30,7 +30,7 @@ YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
-CAPA_RULES_URL="https://codeload.github.com/fireeye/capa-rules/tar.gz/master"
+CAPA_URL="https://github.com/fireeye/capa"
 CAPA_RULES_DIR="/opt/capa-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
@@ -158,9 +158,15 @@ mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # capa (installed via pip) rules
-mkdir -p "${CAPA_RULES_DIR}"
-cd "$(dirname "${CAPA_RULES_DIR}")"
-curl -sSL "$CAPA_RULES_URL" | tar xzvf - -C ./"$(basename "${CAPA_RULES_DIR}")" --strip-components 1
+cd /tmp
+git clone --depth 1 --single-branch --branch "v$(/usr/local/bin/capa --version 2>&1 | awk '{print $2}')" "${CAPA_URL}" ./capa
+cd ./capa
+git submodule init rules
+git submodule update --depth 1 rules
+cd ../
+rm -rf "${CAPA_RULES_DIR}"
+mv ./capa/rules "${CAPA_RULES_DIR}"
+rm -rf "${CAPA_RULES_DIR}"/.git* ./capa
 
 cd "${CAPA_RULES_DIR}"/..
 tar czf capa-rules-hedgehog.tar.gz "$(basename "${CAPA_RULES_DIR}")"

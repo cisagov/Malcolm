@@ -72,7 +72,7 @@ ENV YARA_VERSION "4.0.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 ENV YARA_RULES_DIR "/yara-rules"
-ENV CAPA_RULES_URL "https://codeload.github.com/fireeye/capa-rules/tar.gz/master"
+ENV CAPA_URL "https://github.com/fireeye/capa"
 ENV CAPA_RULES_DIR "/opt/capa-rules"
 ENV SRC_BASE_DIR "/usr/local/src"
 
@@ -86,6 +86,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       clamav-freshclam \
       curl \
       gcc \
+      git \
       libclamunrar9 \
       libjansson-dev \
       libjansson4 \
@@ -126,23 +127,29 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         --enable-dotnet && \
       make && \
       make install && \
-    cd /tmp && \
     rm -rf "${SRC_BASE_DIR}"/yara* && \
-    mkdir -p ./Neo23x0 && \
+    cd /tmp && \
+      mkdir -p ./Neo23x0 && \
       curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1 && \
       mkdir -p "${YARA_RULES_DIR}" && \
       cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/ && \
       cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE && \
       rm -rf /tmp/Neo23x0 && \
     cd /tmp && \
-      mkdir -p "${CAPA_RULES_DIR}" && \
-      cd "$(dirname "${CAPA_RULES_DIR}")" && \
-      curl -sSL "$CAPA_RULES_URL" | tar xzvf - -C ./"$(basename "${CAPA_RULES_DIR}")" --strip-components 1 && \
+      git clone --depth 1 --single-branch --branch "v$(/usr/local/bin/capa --version 2>&1 | awk '{print $2}')" "${CAPA_URL}" /tmp/capa && \
+      cd /tmp/capa && \
+      git submodule init rules && \
+      git submodule update --depth 1 rules && \
+      cd /tmp && \
+      rm -rf "${CAPA_RULES_DIR}" && \
+      mv /tmp/capa/rules "${CAPA_RULES_DIR}" && \
+      rm -rf "${CAPA_RULES_DIR}"/.git* /tmp/capa && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
         gcc \
         gcc-8 \
+        git \
         libc6-dev \
         libgcc-8-dev \
         libjansson-dev \
