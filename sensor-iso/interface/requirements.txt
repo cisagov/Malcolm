@@ -8,7 +8,7 @@ idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
-psutil==5.7.2
+psutil
 python-dotenv==0.14.0
 requests==2.24.0
 six==1.15.0

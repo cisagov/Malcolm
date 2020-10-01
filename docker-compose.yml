@@ -49,6 +49,8 @@ x-zeek-variables: &zeek-variables
   VTOT_REQUESTS_PER_MINUTE : 4
   EXTRACTED_FILE_ENABLE_YARA : 'false'
   EXTRACTED_FILE_YARA_CUSTOM_ONLY : 'false'
+  EXTRACTED_FILE_ENABLE_CAPA : 'false'
+  EXTRACTED_FILE_CAPA_VERBOSE : 'false'
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
   EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
@@ -127,7 +129,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-oss:2.3.0
+    image: malcolmnetsec/elasticsearch-oss:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -165,7 +167,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:2.3.0
+    image: malcolmnetsec/kibana-oss:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -194,7 +196,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:2.3.0
+    image: malcolmnetsec/elastalert:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -225,7 +227,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:2.3.0
+    image: malcolmnetsec/curator:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -249,7 +251,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:2.3.0
+    image: malcolmnetsec/logstash-oss:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -287,7 +289,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:2.3.0
+    image: malcolmnetsec/filebeat-oss:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -328,7 +330,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:2.3.0
+    image: malcolmnetsec/moloch:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -339,7 +341,7 @@ services:
       << : *process-variables
       << : *common-upload-variables
       << : *moloch-variables
-      MOLOCH_VERSION : '2.4.0'
+      MOLOCH_VERSION : '2.4.1'
       VIRTUAL_HOST : 'moloch.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
@@ -373,7 +375,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:2.3.0
+    image: malcolmnetsec/zeek:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -403,7 +405,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:2.3.0
+    image: malcolmnetsec/file-monitor:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -427,7 +429,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:2.3.0
+    image: malcolmnetsec/pcap-capture:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -456,7 +458,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:2.3.0
+    image: malcolmnetsec/pcap-monitor:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -482,7 +484,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:2.3.0
+    image: malcolmnetsec/file-upload:2.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -508,7 +510,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.3.0
+    image: malcolmnetsec/htadmin:2.4.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -533,7 +535,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.3.0
+    image: malcolmnetsec/freq:2.4.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -554,7 +556,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.3.0
+    image: malcolmnetsec/name-map-ui:2.4.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -581,7 +583,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:2.3.0
+    image: malcolmnetsec/nginx-proxy:2.4.0
     restart: "no"
     stdin_open: false
     tty: true

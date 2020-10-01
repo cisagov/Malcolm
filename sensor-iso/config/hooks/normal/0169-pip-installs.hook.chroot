@@ -11,15 +11,21 @@ export ASM="clang-10"
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   beautifulsoup4 \
-  colorama \
   clamd \
+  colorama \
   debinterface \
   ipaddress \
   netifaces \
+  psutil \
   pyinotify \
+  python-magic \
   pythondialog \
   pyzmq \
   requests \
   scapy \
   yara-python \
   zkg
+
+# python 2
+pip2 install --system --no-compile --no-cache-dir --force-reinstall --upgrade \
+  flare-capa
