@@ -373,6 +373,7 @@ class Installer(object):
     filePreserveMode = None
     vtotApiKey = '0'
     yaraScan = False
+    capaScan = False
     clamAvScan = False
     clamAvUpdate = False
 
@@ -387,6 +388,8 @@ class Installer(object):
           clamAvUpdate = InstallerYesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
         if InstallerYesOrNo('Scan extracted files with Yara?', default=False):
           yaraScan = True
+        if InstallerYesOrNo('Scan extracted PE files with Capa?', default=False):
+          capaScan = True
         if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
           while (len(vtotApiKey) <= 1):
             vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
@@ -473,6 +476,9 @@ class Installer(object):
           elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
             # file scanning via yara
             line = re.sub(r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if yaraScan else "'false'"), line)
+          elif 'EXTRACTED_FILE_ENABLE_CAPA' in line:
+            # PE file scanning via capa
+            line = re.sub(r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if capaScan else "'false'"), line)
           elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
             # file scanning via clamav
             line = re.sub(r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if clamAvScan else "'false'"), line)
@@ -565,7 +571,7 @@ class Installer(object):
 
     # if the Malcolm dir is owned by root, see if they want to reassign ownership to a non-root user
     if (((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and
-        (self.scriptUser == "root") and (getpwuid(os.stat(malcolm_install_path).st_uid).pw_uid == self.scriptUser) and
+        (self.scriptUser == "root") and (getpwuid(os.stat(malcolm_install_path).st_uid).pw_name == self.scriptUser) and
         InstallerYesOrNo('Set ownership of {} to an account other than {}?'.format(malcolm_install_path, self.scriptUser), default=True, forceInteraction=True)):
       tmpUser = ''
       while (len(tmpUser) == 0):

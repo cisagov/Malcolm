@@ -66,9 +66,9 @@ if [ -d "$WORKDIR" ]; then
 
   # put the date in the grub.cfg entries and configure installation options
   sed -i "s/\(Install Malcolm Base\)/\1 $(date +'%Y-%m-%d %H:%M:%S')/g" ./config/includes.binary/boot/grub/grub.cfg
-  cp ./config/includes.binary/install/preseed.cfg ./config/includes.binary/install/preseed_crypto.cfg
+  cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
-  sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_crypto.cfg
+  sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
 
   # make sure we install the newer kernel, firmwares, and kernel headers
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
@@ -159,6 +159,10 @@ if [ -d "$WORKDIR" ]; then
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon24.png ./config/includes.chroot/usr/share/icons/hicolor/24x24/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon16.png ./config/includes.chroot/usr/share/icons/hicolor/16x16/malcolm.png
   chown -R root:root ./config/includes.chroot/usr/share/images ./config/includes.chroot/usr/share/icons
+
+  mkdir -p ./config/includes.installer
+  cp -v ./config/includes.binary/install/* ./config/includes.installer/
+  cp -v ./config/includes.chroot/usr/local/bin/preseed_partman_determine_disk.sh ./config/includes.installer/
 
   lb config \
     --image-name "$IMAGE_NAME" \

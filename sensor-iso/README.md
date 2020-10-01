@@ -8,7 +8,7 @@ Hedgehog Linux is a Debian-based operating system built to
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/cisagov/Malcolm)
+* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -60,7 +60,7 @@ The boot menu of the sensor installer image provides several options:
 
 ## <a name="Installer"></a>Installer
 
-The ISO medium boots on systems that support EFI-mode booting. The sensor installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the sensor. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+The sensor installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the sensor. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
 The installer will ask for a few pieces of information prior to installing the sensor operating system:
 
@@ -154,7 +154,7 @@ In either case, upon selecting **OK** the network interface will be brought down
 
 ### <a name="ConfigTime"></a>Time synchronization
 
-Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/cisagov/Malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
+Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/cisagov/malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
 
 ![Time synchronization method](./docs/images/time_sync_mode.png)
 
@@ -209,8 +209,9 @@ You'll be prompted to specify which engine(s) to use to analyze extracted files.
 * scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, select **ZEEK_FILE_SCAN_CLAMAV** when specifying scanners for Zeek-carved files
 * submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, select **ZEEK_FILE_SCAN_VTOT** when specifying scanners for Zeek-carved files, then manually edit `/opt/sensor/sensor_ctl/control_vars.conf` and specify your [VirusTotal API key](https://developers.virustotal.com/reference) in `VTOT_API2_KEY`
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
+* scanning portable executable (PE) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, select **ZEEK_FILE_SCAN_CAPA** when specifying scanners for Zeek-carved files
 
-Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/cisagov/Malcolm#KibanaVisualizations) when forwarded to Malcolm.
+Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/cisagov/malcolm#KibanaVisualizations) when forwarded to Malcolm.
 
 ![File quarantine](./docs/images/file_quarantine.png)
 
@@ -220,7 +221,7 @@ Finally, you will then be presented with the list of configuration variables tha
 
 ### <a name="ConfigForwarding"></a>Forwarding
 
-Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/cisagov/Malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
+Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/cisagov/malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
 
 ![Configure forwarders](./docs/images/forwarder_config.png)
 
@@ -238,7 +239,7 @@ Next you are asked whether the connection used for Zeek log forwarding should be
 
 ![Filebeat SSL certificate verification](./docs/images/filebeat_ssl.png)
 
-If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication), choose **None**.
+If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/malcolm#configure-authentication), choose **None**.
 
 ![Unencrypted vs. SSL encryption for Zeek log forwarding](./docs/images/filebeat_ssl_verify.png)
 
@@ -254,9 +255,9 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ### <a name="moloch-capture"></a>moloch-capture: Moloch session forwarding
 
-[moloch-capture](https://github.com/aol/moloch/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Moloch viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Moloch sessions](https://github.com/cisagov/Malcolm#ZeekMolochFlowCorrelation) in the Malcolm documentation for more information.
+[moloch-capture](https://github.com/aol/moloch/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Moloch viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Moloch sessions](https://github.com/cisagov/malcolm#ZeekMolochFlowCorrelation) in the Malcolm documentation for more information.
 
-First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication)), choose **None**.
+First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/malcolm#configure-authentication)), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -284,7 +285,7 @@ Metricbeat gathers system resource metrics at an interval you specify. The defau
 
 ![Metricbeat interval](./docs/images/metricbeat_interval.png)
 
-Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication), choose **None**.
+Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/malcolm#configure-authentication), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -336,7 +337,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_MOLOCH** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Moloch](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/Malcolm) or another Moloch installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_MOLOCH** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Moloch](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/malcolm) or another Moloch installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
@@ -379,6 +380,7 @@ tcpdump:tcpdump-enp8s0           STOPPED   Not started
 zeek:logger                      RUNNING   pid 14434, uptime 8 days, 20:22:32
 zeek:virustotal                  RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:yara                        RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:capa                        RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:clamav                      RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
 zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
@@ -402,7 +404,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-2.3.0.iso"
+Finished, created "/sensor-build/hedgehog-2.4.0.iso"
 …
 ```
 
@@ -639,7 +641,7 @@ moloch_2.2.3-1_amd64.deb                                                        
 netsniff-ng_0.6.6-1_amd64.deb                                                   100%  330KB  52.1MB/s   00:00    
 packetbeat-tweaked-7.6.2-amd64.deb                                              100%   14MB  59.2MB/s   00:00    
 protologbeat                                                                    100%   56MB  38.1MB/s   00:01    
-zeek_3.0.8-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
+zeek_3.0.10-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
 ```
 
 12. Replace the old `/usr/local/bin/protologbeat` with the new one:
@@ -667,7 +669,7 @@ The following packages will be REMOVED:
 After this operation, 160 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 118490 files and directories currently installed.)
-Removing zeek (3.0.8-1) ...
+Removing zeek (3.0.10-1) ...
 dpkg: warning: while removing zeek, directory '/opt/zeek/spool' not empty so not removed
 dpkg: warning: while removing zeek, directory '/opt/zeek/share/zeek/site' not empty so not removed
 dpkg: warning: while removing zeek, directory '/opt/zeek/lib' not empty so not removed
@@ -695,8 +697,8 @@ Preparing to unpack .../netsniff-ng_0.6.6-1_amd64.deb ...
 Unpacking netsniff-ng (0.6.6-1) over (0.6.6-1) ...
 Preparing to unpack .../packetbeat-tweaked-7.6.2-amd64.deb ...
 Unpacking packetbeat (7.6.2) over (6.8.4) ...
-Preparing to unpack .../zeek_3.0.8-1_amd64.deb ...
-Unpacking zeek (3.0.8-1) over (3.0.0-1) ...
+Preparing to unpack .../zeek_3.0.10-1_amd64.deb ...
+Unpacking zeek (3.0.10-1) over (3.0.0-1) ...
 Setting up auditbeat (7.6.2) ...
 Installing new version of [...]
 [...]
@@ -712,7 +714,7 @@ Setting up netsniff-ng (0.6.6-1) ...
 Setting up packetbeat (7.6.2) ...
 Installing new version of [...]
 [...]
-Setting up zeek (3.0.8-1) ...
+Setting up zeek (3.0.10-1) ...
 Processing triggers for systemd (232-25+deb9u12) ...
 Processing triggers for man-db (2.7.6.1-2) ...
 ```
@@ -919,7 +921,7 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 * `sensorwatch` should show current writes to Zeek log files and PCAP files (depending on your configuration)
 * `tail -f /opt/sensor/sensor_ctl/log/*` should show no egregious errors
 * `zeek --version`, `zeek -N local` and `moloch-capture --version` ought to run and print out version information as expected
-* if you are forwarding to a [Malcolm](https://github.com/cisagov/Malcolm) aggregator, you should start seeing data momentarily
+* if you are forwarding to a [Malcolm](https://github.com/cisagov/malcolm) aggregator, you should start seeing data momentarily
     
 # <a name="MiscNotes"></a>Appendix F - Notes
 

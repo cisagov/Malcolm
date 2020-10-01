@@ -160,22 +160,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.3.0               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.3.0               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.3.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.3.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.3.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.3.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.3.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/moloch                                2.3.0               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.3.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.3.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.3.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.3.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/curator                               2.4.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.4.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.4.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.4.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.4.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.4.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.4.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.4.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.4.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.4.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/moloch                                2.4.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.4.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.4.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.4.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.4.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.4.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -222,6 +222,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Kibana](https://www.elastic.co/products/kibana) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Moloch Viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
 * [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
+* [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
@@ -241,9 +242,10 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
+    * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
-    * Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
+    * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
@@ -523,11 +525,15 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
 
-* `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with Yara
+* `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [Yara](https://github.com/VirusTotal/yara)
 
 * `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default [Yara ruleset](https://github.com/Neo23x0/signature-base) and use only user-defined rules in `./yara/rules`
 
-* `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with ClamAV
+* `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
+
+* `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK technique](https://attack.mitre.org/techniques) classifications will be logged
+
+* `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
 
 * `EXTRACTED_FILE_ENABLE_FRESHCLAM` – if set to `true`, ClamAV will periodically update virus databases
 
@@ -871,7 +877,7 @@ A remote network sensor appliance can be used to monitor network traffic, captur
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/cisagov/Malcolm)
+* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
 
 Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/master/sensor-iso/README.md) for more information.
 
@@ -1275,8 +1281,9 @@ Extracted files can be examined through any of the following methods:
 * submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, specify the `VTOT_API2_KEY` [environment variable in `docker-compose.yml`](#DockerComposeYml)
 * scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, set the `EXTRACTED_FILE_ENABLE_CLAMAV` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, set the `EXTRACTED_FILE_ENABLE_YARA` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
+* scanning PE (portable executable) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, set the `EXTRACTED_FILE_ENABLE_CAPA` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
 
-Files which are flagged as potentially malicious via either of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in Kibana.
+Files which are flagged via any of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in Kibana.
 
 The `EXTRACTED_FILE_PRESERVATION` [environment variable in `docker-compose.yml`](#DockerComposeYml) determines the behavior for preservation of Zeek-extracted files:
 
@@ -1426,7 +1433,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.3.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.4.0.iso"
 …
 ```
 
@@ -1441,7 +1448,7 @@ A system installed from the resulting ISO will load the Malcolm Docker images up
 
 ### <a name="ISOInstallation"></a>Installation
 
-The ISO medium boots on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
 The installer will ask for several pieces of information prior to installing the Malcolm base operating system:
 
@@ -1825,22 +1832,22 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.3.0               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.3.0               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.3.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.3.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.3.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.3.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.3.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.3.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/moloch                                2.3.0               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.3.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.3.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.3.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.3.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.3.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/curator                               2.4.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.4.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.4.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.4.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.4.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.4.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.4.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.4.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.4.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.4.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/moloch                                2.4.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.4.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.4.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.4.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.4.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.4.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1920,7 +1927,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 
 ### Scenario 2: Malcolm was installed from a packaged tarball
 
-If you installed Malcolm from [pre-packaged installation files](https://github.com/cisagov/Malcolm#Packager), here are the basic steps to perform an upgrade:
+If you installed Malcolm from [pre-packaged installation files](https://github.com/cisagov/malcolm#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
     * `./scripts/stop`
