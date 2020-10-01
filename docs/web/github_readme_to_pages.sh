@@ -27,6 +27,8 @@ fi
 OUTPUT_DIR=./pages
 FINAL_DIR=./output
 
+mkdir -p "$OUTPUT_DIR" "$FINAL_DIR"
+
 # main page
 OUTPUT_FILE="$OUTPUT_DIR"/index.md
 > $OUTPUT_FILE
