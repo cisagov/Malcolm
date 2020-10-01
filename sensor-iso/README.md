@@ -60,7 +60,7 @@ The boot menu of the sensor installer image provides several options:
 
 ## <a name="Installer"></a>Installer
 
-The ISO medium boots on systems that support EFI-mode booting. The sensor installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the sensor. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+The sensor installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the sensor. The  installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
 The installer will ask for a few pieces of information prior to installing the sensor operating system:
 
@@ -209,6 +209,7 @@ You'll be prompted to specify which engine(s) to use to analyze extracted files.
 * scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, select **ZEEK_FILE_SCAN_CLAMAV** when specifying scanners for Zeek-carved files
 * submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, select **ZEEK_FILE_SCAN_VTOT** when specifying scanners for Zeek-carved files, then manually edit `/opt/sensor/sensor_ctl/control_vars.conf` and specify your [VirusTotal API key](https://developers.virustotal.com/reference) in `VTOT_API2_KEY`
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
+* scanning portable executable (PE) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, select **ZEEK_FILE_SCAN_CAPA** when specifying scanners for Zeek-carved files
 
 Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
 
@@ -379,6 +380,7 @@ tcpdump:tcpdump-enp8s0           STOPPED   Not started
 zeek:logger                      RUNNING   pid 14434, uptime 8 days, 20:22:32
 zeek:virustotal                  RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:yara                        RUNNING   pid 14435, uptime 8 days, 20:22:32
+zeek:capa                        RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:clamav                      RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
 zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
@@ -402,7 +404,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-2.3.0.iso"
+Finished, created "/sensor-build/hedgehog-2.4.0.iso"
 …
 ```
 
@@ -639,7 +641,7 @@ moloch_2.2.3-1_amd64.deb                                                        
 netsniff-ng_0.6.6-1_amd64.deb                                                   100%  330KB  52.1MB/s   00:00    
 packetbeat-tweaked-7.6.2-amd64.deb                                              100%   14MB  59.2MB/s   00:00    
 protologbeat                                                                    100%   56MB  38.1MB/s   00:01    
-zeek_3.0.8-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
+zeek_3.0.10-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
 ```
 
 12. Replace the old `/usr/local/bin/protologbeat` with the new one:
@@ -667,7 +669,7 @@ The following packages will be REMOVED:
 After this operation, 160 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 118490 files and directories currently installed.)
-Removing zeek (3.0.8-1) ...
+Removing zeek (3.0.10-1) ...
 dpkg: warning: while removing zeek, directory '/opt/zeek/spool' not empty so not removed
 dpkg: warning: while removing zeek, directory '/opt/zeek/share/zeek/site' not empty so not removed
 dpkg: warning: while removing zeek, directory '/opt/zeek/lib' not empty so not removed
@@ -695,8 +697,8 @@ Preparing to unpack .../netsniff-ng_0.6.6-1_amd64.deb ...
 Unpacking netsniff-ng (0.6.6-1) over (0.6.6-1) ...
 Preparing to unpack .../packetbeat-tweaked-7.6.2-amd64.deb ...
 Unpacking packetbeat (7.6.2) over (6.8.4) ...
-Preparing to unpack .../zeek_3.0.8-1_amd64.deb ...
-Unpacking zeek (3.0.8-1) over (3.0.0-1) ...
+Preparing to unpack .../zeek_3.0.10-1_amd64.deb ...
+Unpacking zeek (3.0.10-1) over (3.0.0-1) ...
 Setting up auditbeat (7.6.2) ...
 Installing new version of [...]
 [...]
@@ -712,7 +714,7 @@ Setting up netsniff-ng (0.6.6-1) ...
 Setting up packetbeat (7.6.2) ...
 Installing new version of [...]
 [...]
-Setting up zeek (3.0.8-1) ...
+Setting up zeek (3.0.10-1) ...
 Processing triggers for systemd (232-25+deb9u12) ...
 Processing triggers for man-db (2.7.6.1-2) ...
 ```

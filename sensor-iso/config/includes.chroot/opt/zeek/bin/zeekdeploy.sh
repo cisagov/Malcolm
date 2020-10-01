@@ -63,8 +63,10 @@ fi
 ZEEK_LOG_PATH="$($REALPATH "$ZEEK_LOG_PATH")"
 ARCHIVE_PATH="$ZEEK_LOG_PATH/logs"
 WORK_PATH="$ZEEK_LOG_PATH/spool"
+TMP_PATH="$ZEEK_INSTALL_PATH/spool/tmp"
 EXTRACT_FILES_PATH="$ZEEK_LOG_PATH/extract_files"
-mkdir -p "$ARCHIVE_PATH" "$WORK_PATH" "$EXTRACT_FILES_PATH"
+mkdir -p "$ARCHIVE_PATH" "$WORK_PATH" "$EXTRACT_FILES_PATH" "$TMP_PATH"
+export TMP="$TMP_PATH"
 
 # if file extraction is enabled and file extraction script exists, set up the argument for zeek to use it
 [[ -z $ZEEK_RULESET ]] && ZEEK_RULESET="local"
@@ -128,7 +130,7 @@ for IFACE in ${CAPTURE_INTERFACE//,/ }; do
 type=worker
 host=localhost
 interface=$IFACE
-env_vars=ZEEK_EXTRACTOR_MODE=$ZEEK_EXTRACTOR_MODE,ZEEK_EXTRACTOR_PATH=$EXTRACT_FILES_PATH/
+env_vars=ZEEK_EXTRACTOR_MODE=$ZEEK_EXTRACTOR_MODE,ZEEK_EXTRACTOR_PATH=$EXTRACT_FILES_PATH/,TMP=$TMP_PATH
 EOF
   # if af_packet is available in the kernel, write it out as well
   if [ $AF_PACKET_SUPPORT -gt 0 ] && [ $ZEEK_LB_PROCS -gt 0 ]; then
@@ -154,6 +156,7 @@ pushd "$ZEEK_LOG_PATH" >/dev/null 2>&1
 function finish {
   echo "Stopping via \"$ZEEK_CTL\"" >&2
   "$ZEEK_CTL" stop
+  rm -f "$TMP_PATH"/*
 }
 trap finish EXIT
 

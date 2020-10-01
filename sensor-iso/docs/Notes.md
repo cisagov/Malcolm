@@ -321,7 +321,7 @@ This may require opening a firewall port to the host running Moloch viewer to al
 
 # <a name="Zeek"></a>Zeek
 
-At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.8](https://github.com/zeek/zeek/releases/tag/v3.0.8). The notes in this section apply to that version, although some may apply to others as well.
+At the time of writing, the [current stable release](https://github.com/zeek/zeek/blob/release/NEWS) of Zeek is [v3.0.10](https://github.com/zeek/zeek/releases/tag/v3.0.10). The notes in this section apply to that version, although some may apply to others as well.
 
 ## <a name="ZeekCompile"></a>Compiling Zeek from source
 
@@ -330,7 +330,7 @@ The following bash script was used to download, [build and install](https://docs
 ```bash
 #!/bin/bash
 
-ZEEK_VER="3.0.8"
+ZEEK_VER="3.0.10"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
@@ -370,7 +370,7 @@ Hedgehog Linux utilizest he following third party Zeek packages:
 * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
 * Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
 * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
-* Lexi Brent's [EternalSafety](https://github.com/lexibrent/zeek-EternalSafety) plugin
+* Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
 * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
 * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
 * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
@@ -456,7 +456,7 @@ ZKG_GITHUB_URLS=(
   https://github.com/amzn/zeek-plugin-tds
   https://github.com/corelight/bro-community-id
   https://github.com/corelight/bro-xor-exe-plugin
-  https://github.com/lexibrent/zeek-EternalSafety
+  https://github.com/0xl3x1/zeek-EternalSafety
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
 )

@@ -153,6 +153,7 @@ def main():
 
   scanners = set()
   fileScanCounts = defaultdict(AtomicInt)
+  fileScanHits = defaultdict(AtomicInt)
 
   # open and write out header for our super legit zeek signature.log file
   with open(broSigLogSpec, 'w+', 1) if (broSigLogSpec is not None) else nullcontext() as broSigFile:
@@ -209,11 +210,12 @@ def main():
           fileName = scanResult[FILE_SCAN_RESULT_FILE]
           fileNameBase = os.path.basename(fileName)
 
-          # we may quarantine the file if fileScanCount < len(scanners), but we won't delete it so the rest of the scanners can find it
+          # we won't delete or move/quarantine a file until fileScanCount < len(scanners)
           fileScanCount = fileScanCounts[fileNameBase].increment()
 
           if triggered:
             # this file had a "hit" in one of the virus engines, log it!
+            fileScanHitCount = fileScanHits[fileNameBase].increment()
 
             # format the line as it should appear in the signatures log file
             fileSpecFields = extracted_filespec_to_fields(fileName)
@@ -233,43 +235,47 @@ def main():
             else:
               print(broLineStr, file=broSigFile, flush=True)
 
+          else:
+            fileScanHitCount = fileScanHits[fileNameBase].value()
+
           # finally, what to do with the file itself
           if os.path.isfile(fileName):
 
-            if triggered and (args.preserveMode != PRESERVE_NONE):
+            # once all of the scanners have had their turn...
+            if (fileScanCount >= len(scanners)):
               fileScanCounts.pop(fileNameBase, None)
+              fileScanHits.pop(fileNameBase, None)
 
-              # move triggering file to quarantine
-              if not same_file_or_dir(fileName, os.path.join(quarantineDir, fileNameBase)): # unless it's already there
+              if (fileScanHitCount > 0) and (args.preserveMode != PRESERVE_NONE):
 
-                try:
-                  shutil.move(fileName, quarantineDir)
-                  if debug: eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
-                except Exception as e:
-                  eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
-                  # hm move failed, delete it i guess?
-                  os.remove(fileName)
+                # move triggering file to quarantine
+                if not same_file_or_dir(fileName, os.path.join(quarantineDir, fileNameBase)): # unless it's somehow already there
 
-            elif (fileScanCount >= len(scanners)):
-              fileScanCounts.pop(fileNameBase, None)
-
-              if not same_file_or_dir(quarantineDir, os.path.dirname(fileName)): # don't move or delete if it's already quarantined
-
-                if (args.preserveMode == PRESERVE_ALL):
-                  # move non-triggering file to preserved directory
                   try:
-                    shutil.move(fileName, preserveDir)
-                    if verboseDebug: eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
+                    shutil.move(fileName, quarantineDir)
+                    if debug: eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
                   except Exception as e:
                     eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
                     # hm move failed, delete it i guess?
                     os.remove(fileName)
 
-                else:
-                  # delete the file
-                  os.remove(fileName)
-                  fileScanCounts.pop(fileNameBase, None)
-                  if verboseDebug: eprint(f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})")
+              else:
+                if not same_file_or_dir(quarantineDir, os.path.dirname(fileName)): # don't move or delete if it's somehow already quarantined
+
+                  if (args.preserveMode == PRESERVE_ALL):
+                    # move non-triggering file to preserved directory
+                    try:
+                      shutil.move(fileName, preserveDir)
+                      if verboseDebug: eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
+                    except Exception as e:
+                      eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+                      # hm move failed, delete it i guess?
+                      os.remove(fileName)
+
+                  else:
+                    # delete the file
+                    os.remove(fileName)
+                    if verboseDebug: eprint(f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})")
 
   # graceful shutdown
   if debug:
