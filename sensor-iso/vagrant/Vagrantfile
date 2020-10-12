@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
     echo "deb http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
     echo "deb-src http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
     apt-get update
-    export KERNEL_VERSION=$(apt-cache search linux-image-5 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
+    export KERNEL_VERSION=$(apt-cache search linux-image-5.7 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
     apt-get -t buster-backports install -y \
       linux-image-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-common \
       dkms build-essential linux-kbuild-5.7 linux-compiler-gcc-8-x86 \
