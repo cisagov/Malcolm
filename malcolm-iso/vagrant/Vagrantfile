@@ -40,7 +40,7 @@ Vagrant.configure("2") do |config|
     export KERNEL_VERSION=$(apt-cache search linux-image-5 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
     apt-get -t buster-backports install -y \
       linux-image-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-common \
-      dkms build-essential linux-kbuild-5.8 linux-compiler-gcc-8-x86 \
+      dkms build-essential linux-kbuild-5.7 linux-compiler-gcc-8-x86 \
       firmware-linux firmware-linux-nonfree firmware-misc-nonfree firmware-amd-graphics
     ls /dev/disk/by-id/ata-* | grep -v '\\-part' | head -n 1 | xargs -r -l grub-install
   STEP1
