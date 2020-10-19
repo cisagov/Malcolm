@@ -235,6 +235,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
+    * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin    
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
