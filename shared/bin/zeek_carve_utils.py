@@ -218,7 +218,7 @@ def dictsearch(d, target):
 #   └----------------┘ └---------------┘└------------------------------------------------------------------------------------------┘
 #           UID              FID          subst_string(smb_name, "\\", "_"))
 #
-#   (see https://github.com/mitre-attack/bzar/blob/master/scripts/bzar_files.bro#L50)
+#   (see https://github.com/mitre-attack/bzar/blob/master/scripts/bzar_files.zeek#L50)
 def extracted_filespec_to_fields(filespec):
   baseFileSpec = os.path.basename(filespec)
   match = re.search(r'^(?P<source>.*)-(?P<fid>.*)-(?P<uid>.*)-(?P<time>\d+)\.(?P<ext>.*?)$', baseFileSpec)

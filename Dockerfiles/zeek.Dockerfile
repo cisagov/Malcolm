@@ -6,17 +6,17 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # build zeek and plugins (spicy, additional protocol parsers, etc.)
 
-ENV BISON_VERSION "3.6.2"
+ENV BISON_VERSION "3.7.2"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV CMAKE_DIR "/opt/cmake"
-ENV CMAKE_VERSION "3.17.2"
+ENV CMAKE_VERSION "3.18.4"
 ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
-ENV ZEEK_VERSION "3.0.10"
+ENV ZEEK_VERSION "3.0.11"
 
 # using clang now instead of gcc because Spicy depends on it
 ENV LLVM_VERSION "10"
@@ -171,8 +171,8 @@ ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 22
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(spicy/main|Bro_LDAP/scripts/main|Corelight/PE_XOR/main|Salesforce/GQUIC/main|Zeek_AF_Packet/scripts/init|bzar/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|hassh/hassh|ja3/ja3|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|CVE-2020-1350|ripple20|callstranger)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 25
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
