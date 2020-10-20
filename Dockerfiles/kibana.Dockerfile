@@ -39,9 +39,10 @@ ENV KIBANA_OFFLINE_REGION_MAPS_PORT $KIBANA_OFFLINE_REGION_MAPS_PORT
 ENV PATH="/data:${PATH}"
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
 
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64"
+ENV SUPERCRONIC_VERSION "0.1.11"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85"
+ENV SUPERCRONIC_SHA1SUM "a2e2d47078a8dafc5949491e5ea7267cc721d67c"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 USER root
