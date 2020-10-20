@@ -101,7 +101,7 @@ FILES_IN_IMAGES=(
   "/var/www/html/list.min.js;name-map-ui"
   "/var/www/html/jquery.min.js;name-map-ui"
   "/opt/zeek/bin/zeek;zeek"
-  "/opt/spicy/lib/spicy/Zeek_Spicy/lib/Zeek-Spicy.linux-x86_64.so;zeek"
+  "/opt/spicy/lib/libspicy.so;zeek"
 )
 for i in ${FILES_IN_IMAGES[@]}; do
   FILE="$(echo "$i" | cut -d';' -f1)"
