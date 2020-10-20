@@ -77,7 +77,7 @@ if [ -d "$WORKDIR" ]; then
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
   echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.7=$(dpkg -s linux-kbuild-5.7 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-kbuild-5.8=$(dpkg -s linux-kbuild-5.8 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
@@ -140,9 +140,9 @@ if [ -d "$WORKDIR" ]; then
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/
   bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero/protologbeat" -t "es_762_compat"
-  cp github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv github.com_mmguero_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
+  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_762_compat"
+  cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"
