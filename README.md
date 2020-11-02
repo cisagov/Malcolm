@@ -87,7 +87,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         * [STIG compliance exceptions](#STIGExceptions)
         * [CIS benchmark compliance exceptions](#CISExceptions)
 * [Known issues](#Issues)
-* [Installation example using Ubuntu 18.04 LTS](#InstallationExample)
+* [Installation example using Ubuntu 20.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
 * [Forks](#Forks)
 * [Copyright](#Footer)
@@ -96,13 +96,13 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 ### <a name="GetMalcolm"></a>Getting Malcolm
 
-For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 18.04 LTS](#InstallationExample).
+For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
 
 #### Source code
 
 The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
-#### Cross-platform considerations when running Python scripts
+#### <a name="XPython"></a>Cross-platform considerations when running Python scripts
 
 There are two Python scripts used to configure and run Malcolm that are referenced several times in this document: `install.py` and `control.py` (`control.py` is actually what is executed under the hood for the `logs`, `restart`, `start`, `stop` and `wipe` commands).
 
@@ -118,7 +118,7 @@ There are various workarounds for this scenario, including (but not limited to):
 2. Defining a symlink called `python` in your `PATH` pointing to the desired interpreter (e.g., `sudo ln -r -s /usr/bin/python3 /usr/local/bin/python` or `ln -s /usr/bin/python3 ~/bin/python`, depending on your `PATH`); in Ubuntu 20.04 and up installing either the package [python-is-python3](https://packages.ubuntu.com/focal/python-is-python3) or [python-is-python2](https://packages.ubuntu.com/focal/python-is-python2) will take care of this for you
 3. Using `update-alternatives` to specify a target for calls to `python`
 
-This document will just use the `./scripts/install.py`-style pattern to execute the scripts. Just be aware that you may have to adjust your usage as necessitated by your system.
+For the most part, this document will just use the `./scripts/install.py`-style pattern to execute the scripts. Just be aware that you may have to adjust your usage as necessitated by your system.
 
 For more information on this topic, see [PEP 394 -- The "python" Command on Unix-Like Systems](https://legacy.python.org/dev/peps/pep-0394/).
 
@@ -1616,7 +1616,7 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 ![Refreshing Kibana's cached index pattern](./docs/images/screenshots/kibana_refresh_index.png)
 
-## <a name="InstallationExample"></a>Installation example using Ubuntu 18.04 LTS
+## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
@@ -1628,7 +1628,7 @@ To install Malcolm from the latest Malcolm release, browse to the [Malcolm relea
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
-install.py  malcolm_20190611_095410_ce2d8de.tar.gz
+malcolm_common.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
 ```
 
 If you are obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:
@@ -1645,23 +1645,9 @@ Resolving deltas: 100% (81/81), done.
 user@host:~$ cd Malcolm/
 ```
 
-Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
+Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same. See the section on [**cross-platform considerations when running Python scripts**](#XPython) if you are adapting these instructions to another platform.
 ```
-user@host:~/Malcolm$ ./scripts/auth_setup
-Username: analyst
-analyst password:
-analyst password (again):
-
-(Re)generate self-signed certificates for HTTPS access [Y/n]? y
-
-(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
-
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
-```
-
-Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
-```
-user@host:~/Downloads$ sudo ./install.py
+user@host:~/Downloads$ sudo python3 ./install.py
 Installing required packages: ['apache2-utils', 'make', 'openssl']
 
 "docker info" failed, attempt to install Docker? (Y/n): y
@@ -1730,7 +1716,7 @@ Malcolm runtime files extracted to /home/user/Malcolm
 
 Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
-user@host:~/Malcolm$ scripts/install.py --configure
+user@host:~/Malcolm$ python3 ./scripts/install.py --configure
 ```
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
@@ -1808,6 +1794,20 @@ in /home/user/Malcolm/scripts.
 
 At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
 
+Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
+```
+user@host:~/Malcolm$ python3 ./scripts/auth_setup
+Username: analyst
+analyst password:
+analyst password (again):
+
+(Re)generate self-signed certificates for HTTPS access [Y/n]? y
+
+(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
+```
+
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
@@ -1850,7 +1850,7 @@ malcolmnetsec/zeek                                  2.4.1               xxxxxxxx
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
 ```
-user@host:~/Malcolm$ ./scripts/start
+user@host:~/Malcolm$ python3 ./scripts/start
 Creating network "malcolm_default" with the default driver
 Creating malcolm_curator_1       ... done
 Creating malcolm_elastalert_1    ... done
