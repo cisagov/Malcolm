@@ -64,6 +64,8 @@ BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 MALCOLM_VERSION="$($GREP -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
+[[ ! -f ./auth.env ]] && touch ./auth.env
+
 # MaxMind now requires a (free) license key to download the free versions of their GeoIP databases.
 if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
   # prefer a local environment variable
