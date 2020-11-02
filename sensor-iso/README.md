@@ -617,7 +617,7 @@ $ apt-get install $(cat *.list.chroot)
     * `apt-get install -y build-essential git-core pkg-config python3-dev`
     * `python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -r -n1 python3 -m pip install -U`
         - if this fails for some reason, you may need to reinstall pip first with `python3 -m pip install --force -U pip`
-        - some *very* builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip.7` (or whatever `python3.x` you have)
+        - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip.7` (or whatever `python3.x` you have)
     * If there were [new python packages](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/idaholab/Malcolm/blame/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
         - `python3 -m pip install --no-compile --no-cache-dir --force-reinstall --upgrade --index-url=https://XXXXXX:443/pypi/simple --trusted-host=XXXXXX:443 colorama`
 
@@ -771,6 +771,16 @@ lrwxrwxrwx 1 root root        18 May  8 14:34 zeek -> /opt/zeek/bin/zeek
 -rw-r--r-- 1 root staff    25756 Oct 29  2019 zeek_carve_utils.py
 -rwxr-xr-x 1 root staff     8787 Oct 29  2019 zeek_carve_watcher.py
 -rwxr-xr-x 1 root staff     4883 May  4 17:39 zeek_install_plugins.sh
+
+root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/opt/yara-rules/ /opt/yara-rules
+user@otherbox's password: 
+
+root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/opt/capa-rules/ /opt/capa-rules
+user@otherbox's password: 
+
+root@hedgehog:/tmp# ls -l /opt/ | grep '\-rules'
+drwxr-xr-x  8 root   root    4096 May  8 15:48 capa-rules
+drwxr-xr-x  8 root   root  24576  May  8 15:48 yara-rules
 
 root@hedgehog:/tmp# for BEAT in auditbeat filebeat metricbeat packetbeat protologbeat; do rsync -a user@otherbox:/media/squash/usr/share/$BEAT/kibana/ /usr/share/$BEAT/kibana; done
 user@otherbox's password: 
