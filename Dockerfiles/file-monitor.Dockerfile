@@ -106,6 +106,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python-dev \
       python-pip \
       python-backports-shutil-get-terminal-size \
+      python-backports.functools-lru-cache \
       python3 \
       python3-bs4 \
       python3-dev \
