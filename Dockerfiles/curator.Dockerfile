@@ -71,15 +71,20 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     apt-get  -y -q install \
       build-essential \
       curl \
+      libyaml-0-2 \
+      libyaml-dev \
       procps \
       psmisc \
       python3 \
       python3-dev \
+      python3-wheel \
       python3-pip && \
-    pip3 install elasticsearch-curator==${CURATOR_VERSION} && \
+      # from https://github.com/elastic/curator/issues/1496#issuecomment-715262708
+      python3 -m pip install "boto3<1.16" "botocore<1.19" && \
+      python3 -m pip install elasticsearch-curator==${CURATOR_VERSION} && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
-    apt-get -q -y --purge remove guile-2.2-libs python3-dev build-essential && \
+    apt-get -q -y --purge remove guile-2.2-libs python3-dev build-essential libyaml-dev && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
