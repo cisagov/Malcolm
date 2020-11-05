@@ -164,6 +164,7 @@ pv
 pwgen
 python
 python-backports-shutil-get-terminal-size
+python-backports.functools-lru-cache
 python-dev
 python-pip
 python3
