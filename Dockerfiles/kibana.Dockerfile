@@ -81,7 +81,7 @@ RUN sed -i "s/d\.name\.split/d\.name\.toString()\.split/" /usr/share/kibana/src/
       curl -sSL -o /tmp/kibana-drilldown.zip "https://codeload.github.com/mmguero-dev/kibana-plugin-drilldownmenu/zip/master" && \
     yum install -y epel-release && \
       yum update -y && \
-      yum install -y curl inotify-tools npm patch psmisc python-requests python-setuptools zip unzip && \
+      yum install -y curl inotify-tools git npm patch psmisc python-requests python-setuptools zip unzip && \
       yum clean all && \
       easy_install supervisor && \
       npm install -g http-server && \
