@@ -5,12 +5,12 @@ index ef1327ee..773ae80e 100644
 @@ -310,7 +310,7 @@ enum MolochRotate {
   */
 
- #define MOLOCH_FIELD_NOT_FOUND  -1
--#define MOLOCH_FIELDS_DB_MAX 512
-+#define MOLOCH_FIELDS_DB_MAX 2048
- #define MOLOCH_FIELDS_CNT_MIN MOLOCH_FIELDS_DB_MAX
- #define MOLOCH_FIELDS_CNT_MAX (MOLOCH_FIELDS_DB_MAX*2)
- #define MOLOCH_FIELD_EXSPECIAL_START            (MOLOCH_FIELDS_CNT_MAX)
+ #define ARKIME_FIELD_NOT_FOUND  -1
+-#define ARKIME_FIELDS_DB_MAX 512
++#define ARKIME_FIELDS_DB_MAX 2048
+ #define ARKIME_FIELDS_CNT_MIN ARKIME_FIELDS_DB_MAX
+ #define ARKIME_FIELDS_CNT_MAX (ARKIME_FIELDS_DB_MAX*2)
+ #define ARKIME_FIELD_EXSPECIAL_START            (ARKIME_FIELDS_CNT_MAX)
 diff --git a/capture/plugins/wise.c b/capture/plugins/wise.c
 index 34a83d6a..001b6866 100644
 --- a/capture/plugins/wise.c
@@ -20,7 +20,7 @@ index 34a83d6a..001b6866 100644
  } WiseItemHead_t;
 
 -#define WISE_MAX_REQUEST_ITEMS 512
-+#define WISE_MAX_REQUEST_ITEMS MOLOCH_FIELDS_DB_MAX
++#define WISE_MAX_REQUEST_ITEMS ARKIME_FIELDS_DB_MAX
  typedef struct wiserequest {
      BSB          bsb;
      WiseItem_t  *items[WISE_MAX_REQUEST_ITEMS];

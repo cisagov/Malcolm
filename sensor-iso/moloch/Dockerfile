@@ -6,8 +6,8 @@ LABEL maintainer="malcolm.netsec@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV MOLOCH_VERSION "2.4.1"
-ENV MOLOCHDIR "/opt/moloch"
+ENV ARKIME_VERSION "2.4.1"
+ENV ARKIMEDIR "/opt/moloch"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
   apt-get -q update && \

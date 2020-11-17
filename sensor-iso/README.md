@@ -8,7 +8,7 @@ Hedgehog Linux is a Debian-based operating system built to
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
+* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -27,7 +27,7 @@ Hedgehog Linux is a Debian-based operating system built to
             * [Automatic file extraction and scanning](#ZeekFileExtraction)
         + [Forwarding](#ConfigForwarding)
             * [filebeat](#filebeat): Zeek log forwarding
-            * [moloch-capture](#moloch-capture): Moloch session forwarding
+            * [moloch-capture](#moloch-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
             * [auditbeat](#auditbeat): audit log forwarding
             * [filebeat-syslog](#syslogbeat): syslog forwarding
@@ -253,9 +253,9 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
-### <a name="moloch-capture"></a>moloch-capture: Moloch session forwarding
+### <a name="moloch-capture"></a>moloch-capture: Arkime session forwarding
 
-[moloch-capture](https://github.com/aol/moloch/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Moloch viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Moloch sessions](https://github.com/idaholab/malcolm#ZeekMolochFlowCorrelation) in the Malcolm documentation for more information.
+[moloch-capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/idaholab/malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
 First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication)), choose **None**.
 
@@ -269,7 +269,7 @@ You will be asked to enter authentication credentials for the sensor’s connect
 
 ![Elasticsearch username](./docs/images/elasticsearch-username.png) ![Elasticsearch password](./docs/images/elasticsearch_password.png) ![Successful Elasticsearch connection](./docs/images/metricbeat_elasticsearch_success.png)
 
-Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Moloch viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
+Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
 
 ![PCAP retrieval ACL](./docs/images/malcolm_moloch_reachback_acl.png)
 
@@ -337,7 +337,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_MOLOCH** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Moloch](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/malcolm) or another Moloch installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_ARKIME** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written

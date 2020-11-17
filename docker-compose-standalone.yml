@@ -32,9 +32,9 @@ x-nginx-variables: &nginx-variables
   # Whether or not to write nginx's access.log and error.log to Elasticsearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
-x-moloch-variables: &moloch-variables
+x-arkime-variables: &arkime-variables
   MANAGE_PCAP_FILES : 'false'
-  MOLOCH_ANALYZE_PCAP_THREADS : 1
+  ARKIME_ANALYZE_PCAP_THREADS : 1
   MAXMIND_GEOIP_DB_LICENSE_KEY : '0'
 
 x-zeek-variables: &zeek-variables
@@ -171,10 +171,10 @@ services:
       << : *kibana-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
-      CREATE_ES_MOLOCH_SESSION_INDEX : 'true'
-      MOLOCH_INDEX_PATTERN : 'sessions2-*'
-      MOLOCH_INDEX_PATTERN_ID : 'sessions2-*'
-      MOLOCH_INDEX_TIME_FIELD : 'firstPacket'
+      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
+      ARKIME_INDEX_PATTERN : 'sessions2-*'
+      ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
+      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
     depends_on:
       - elasticsearch
     expose:
@@ -303,20 +303,20 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
-  moloch:
-    image: malcolmnetsec/moloch:2.4.1
+  arkime:
+    image: malcolmnetsec/arkime:2.4.1
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: moloch
+    hostname: arkime
     env_file:
       - ./auth.env
     environment:
       << : *process-variables
       << : *common-upload-variables
-      << : *moloch-variables
-      MOLOCH_VERSION : '2.4.1'
-      VIRTUAL_HOST : 'moloch.malcolm.local'
+      << : *arkime-variables
+      ARKIME_VERSION : '2.4.1'
+      VIRTUAL_HOST : 'arkime.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
       ES_MAX_SHARDS_PER_NODE : 2500
@@ -451,7 +451,7 @@ services:
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
-      - moloch
+      - arkime
     expose:
       - 80
     ports:
@@ -536,7 +536,7 @@ services:
       << : *auth-variables
       << : *nginx-variables
     depends_on:
-      - moloch
+      - arkime
       - kibana
       - upload
       - htadmin
