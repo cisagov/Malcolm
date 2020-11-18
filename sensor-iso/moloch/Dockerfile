@@ -6,7 +6,7 @@ LABEL maintainer="malcolm.netsec@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "2.4.1"
+ENV ARKIME_VERSION "2.7.0"
 ENV ARKIMEDIR "/opt/moloch"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
