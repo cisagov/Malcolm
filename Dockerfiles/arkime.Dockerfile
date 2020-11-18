@@ -69,10 +69,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     curl -sSL "$ARKIME_URL" | tar xzvf - -C "./moloch-"$ARKIME_VERSION --strip-components 1 && \
     cd "./moloch-"$ARKIME_VERSION && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    cp -v $ARKIMEDIR/doc/images/moloch/moloch_155.png ./viewer/public/moloch_155.png && \
-    cp -v $ARKIMEDIR/doc/images/moloch/moloch_77.png ./viewer/public/moloch_77.png && \
-    cp -v $ARKIMEDIR/doc/images/moloch/header_logo.png ./parliament/vueapp/src/assets/header_logo.png && \
-    cp -v $ARKIMEDIR/doc/images/moloch/header_logo.png ./viewer/public/header_logo.png && \
     find $ARKIMEDIR/doc/images/screenshots -name "*.png" -delete && \
     export PATH="$ARKIMEDIR/bin:${PATH}" && \
     ln -sfr $ARKIMEDIR/bin/npm /usr/local/bin/npm && \
