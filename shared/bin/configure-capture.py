@@ -29,7 +29,7 @@ class Constants:
 
   SENSOR_CAPTURE_CONFIG = '/opt/sensor/sensor_ctl/control_vars.conf'
 
-  PCAP_CAPTURE_AUTOSTART_ENTRIES = {'AUTOSTART_MOLOCH', 'AUTOSTART_NETSNIFF', 'AUTOSTART_TCPDUMP'}
+  PCAP_CAPTURE_AUTOSTART_ENTRIES = {'AUTOSTART_ARKIME', 'AUTOSTART_NETSNIFF', 'AUTOSTART_TCPDUMP'}
 
   ZEEK_FILE_CARVING_NONE = 'none'
   ZEEK_FILE_CARVING_ALL = 'all'
@@ -57,7 +57,7 @@ class Constants:
   AUDITBEAT='auditbeat'
   HEATBEAT='heatbeat' # protologbeat to log temperature and other misc. stuff
   SYSLOGBEAT='filebeat-syslog' # another filebeat instance for syslog
-  MOLOCHCAP='moloch-capture'
+  ARKIMECAP='moloch-capture'
 
   BEAT_DIR = {
     FILEBEAT : f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -115,14 +115,14 @@ class Constants:
   BEAT_INTERVAL = "BEAT_INTERVAL"
 
   # specific to moloch
-  MOLOCH_PACKET_ACL = "MOLOCH_PACKET_ACL"
+  ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
 
   MSG_CONFIG_MODE = 'Configuration Mode'
   MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
   MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
   MSG_CONFIG_MODE_AUTOSTART = 'Configure Autostart Services'
   MSG_CONFIG_GENERIC = 'Configure {}'
-  MSG_CONFIG_MOLOCH = (f'{MOLOCHCAP}', f'Configure Moloch session forwarding via {MOLOCHCAP}')
+  MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
   MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
   MSG_CONFIG_METRICBEAT = (f'{METRICBEAT}', f'Configure resource metrics forwarding via {METRICBEAT}')
   MSG_CONFIG_AUDITBEAT = (f'{AUDITBEAT}', f'Configure audit log forwarding via {AUDITBEAT}')
@@ -143,7 +143,7 @@ class Constants:
   MSG_CONFIG_CAPTURE_SUCCESS = 'Capture interface set to {} in {}.\n\nReboot to apply changes.'
   MSG_CONFIG_AUTOSTART_SUCCESS = 'Autostart services configured.\n\nReboot to apply changes.'
   MSG_CONFIG_FORWARDING_SUCCESS = '{} forwarding configured:\n\n{}\n\nRestart forwarding services or reboot to apply changes.'
-  MSG_CONFIG_MOLOCH_PCAP_ACL = 'Specify IP addresses for PCAP retrieval ACL (one per line)'
+  MSG_CONFIG_ARKIME_PCAP_ACL = 'Specify IP addresses for PCAP retrieval ACL (one per line)'
   MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
   MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
   MSG_ERROR_FILE_NOT_FOUND = 'One or more of the files specified does not exist'
@@ -398,8 +398,8 @@ def main():
         previous_config_values[Constants.BEAT_ES_PORT] = capture_config_dict["ES_PORT"]
       if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("ES_USERNAME" in capture_config_dict.keys()):
         previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["ES_USERNAME"]
-      if (Constants.MOLOCH_PACKET_ACL not in previous_config_values.keys()) and ("MOLOCH_PACKET_ACL" in capture_config_dict.keys()):
-        previous_config_values[Constants.MOLOCH_PACKET_ACL] = capture_config_dict[Constants.MOLOCH_PACKET_ACL]
+      if (Constants.ARKIME_PACKET_ACL not in previous_config_values.keys()) and ("ARKIME_PACKET_ACL" in capture_config_dict.keys()):
+        previous_config_values[Constants.ARKIME_PACKET_ACL] = capture_config_dict[Constants.ARKIME_PACKET_ACL]
 
       code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
       if (code == Dialog.CANCEL or code == Dialog.ESC):
@@ -690,11 +690,11 @@ def main():
       elif mode == Constants.MSG_CONFIG_MODE_FORWARD:
         ##### sensor forwarding (beats) configuration #########################################################################
 
-        code, fwd_mode = d.menu(Constants.MSG_CONFIG_MODE, choices=[Constants.MSG_CONFIG_FILEBEAT, Constants.MSG_CONFIG_MOLOCH, Constants.MSG_CONFIG_METRICBEAT, Constants.MSG_CONFIG_AUDITBEAT, Constants.MSG_CONFIG_SYSLOGBEAT, Constants.MSG_CONFIG_HEATBEAT])
+        code, fwd_mode = d.menu(Constants.MSG_CONFIG_MODE, choices=[Constants.MSG_CONFIG_FILEBEAT, Constants.MSG_CONFIG_ARKIME, Constants.MSG_CONFIG_METRICBEAT, Constants.MSG_CONFIG_AUDITBEAT, Constants.MSG_CONFIG_SYSLOGBEAT, Constants.MSG_CONFIG_HEATBEAT])
         if code != Dialog.OK:
           raise CancelledError
 
-        if (fwd_mode == Constants.MOLOCHCAP):
+        if (fwd_mode == Constants.ARKIMECAP):
           # forwarding configuration for moloch-capture
 
           # get elasticsearch/kibana connection information from user
@@ -712,12 +712,12 @@ def main():
           moloch_elastic_config_dict = { k.replace('BEAT_', ''): v for k, v in moloch_elastic_config_dict.items() }
 
           # get list of IP addresses allowed for packet payload retrieval
-          lines = previous_config_values[Constants.MOLOCH_PACKET_ACL].split(",")
+          lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
           lines.append(elastic_config_dict[Constants.BEAT_ES_HOST])
-          code, lines = d.editbox_str("\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_MOLOCH_PCAP_ACL)
+          code, lines = d.editbox_str("\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL)
           if code != Dialog.OK:
             raise CancelledError
-          moloch_elastic_config_dict[Constants.MOLOCH_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
+          moloch_elastic_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
 
           list_results = sorted([f"{k}={v}" for k, v in moloch_elastic_config_dict.items() if "PASSWORD" not in k])
 

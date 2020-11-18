@@ -105,7 +105,7 @@ def main():
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
-    # define field formatting map for Kibana -> Moloch drilldown and other URL drilldowns
+    # define field formatting map for Kibana -> Arkime drilldown and other URL drilldowns
     #
     # see: https://github.com/idaholab/Malcolm/issues/133
     #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu
@@ -124,7 +124,7 @@ def main():
     #                    null,
     #                    {
     #                        "url": "/idkib2mol/zeek.orig_h == {{value}}",
-    #                        "label": "Moloch: zeek.orig_h == {{value}}"
+    #                        "label": "Arkime: zeek.orig_h == {{value}}"
     #                    }
     #                ]
     #            }
@@ -135,12 +135,12 @@ def main():
     for field in getFieldsList:
       if field['name'][:1].isalpha():
 
-        # for Moloch to query by database field name, see moloch issue/PR 1461/1463
+        # for Arkime to query by database field name, see moloch issue/PR 1461/1463
         valQuote = '"' if field['type'] == 'string' else ''
         valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}
         drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
-        drilldownInfoParamsUrlTemplateValues['label'] = 'Moloch {}: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['label'] = 'Arkime {}: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 
         if (field['type'] == 'ip') or (re.search(r'[_\.-](h|ip)$', field['name'], re.IGNORECASE) is not None):
