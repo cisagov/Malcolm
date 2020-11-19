@@ -26,6 +26,7 @@ cd /tmp
 tar -xvf "moloch.tar.gz"
 rm -f "moloch.tar.gz"
 
+mv "./arkime-"$ARKIME_VERSION "./moloch-"$ARKIME_VERSION || true
 cd "./moloch-"$ARKIME_VERSION
 
 export PATH="$ARKIMEDIR/bin:/tmp/moloch-$ARKIME_VERSION/node_modules/.bin:${PATH}"
