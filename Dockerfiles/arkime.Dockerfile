@@ -4,7 +4,7 @@ FROM debian:buster-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "2.7.0"
+ENV ARKIME_VERSION "2.7.1"
 ENV ARKIMEDIR "/data/moloch"
 ENV ARKIME_URL "https://codeload.github.com/arkime/arkime/tar.gz/v${ARKIME_VERSION}"
 ENV ARKIME_LOCALELASTICSEARCH no
