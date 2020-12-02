@@ -52,7 +52,7 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_ENABLE_CAPA : 'false'
   EXTRACTED_FILE_CAPA_VERBOSE : 'false'
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
-  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
+  EXTRACTED_FILE_UPDATE_RULES : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
   # environment variables for tweaking Zeek at runtime (see local.zeek)

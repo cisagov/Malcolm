@@ -533,7 +533,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
 
-* `EXTRACTED_FILE_ENABLE_FRESHCLAM` – if set to `true`, ClamAV will periodically update virus databases
+* `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions
 
 * `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
 
@@ -1773,11 +1773,13 @@ Select file preservation behavior ('quarantined', 'all', 'none'): quarantined
 
 Scan extracted files with ClamAV? (y/N): y
 
-Download updated ClamAV virus signatures periodically? (Y/n): y
-
 Scan extracted files with Yara? (y/N): y
 
+Scan extracted PE files with Capa? (y/N): y
+
 Lookup extracted file hashes with VirusTotal? (y/N): n
+
+Download updated scanner signatures periodically? (Y/n): y
 
 Should Malcolm capture network traffic to PCAP files? (y/N): y
 

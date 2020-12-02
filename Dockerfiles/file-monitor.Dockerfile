@@ -36,7 +36,7 @@ ARG MALASS_HOST=0
 ARG MALASS_PORT=80
 ARG MALASS_MAX_REQUESTS=20
 ARG EXTRACTED_FILE_ENABLE_CLAMAV=false
-ARG EXTRACTED_FILE_ENABLE_FRESHCLAM=false
+ARG EXTRACTED_FILE_UPDATE_RULES=false
 ARG EXTRACTED_FILE_PIPELINE_DEBUG=false
 ARG EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA=false
 ARG CLAMD_SOCKET_FILE=/tmp/clamd.ctl
@@ -60,7 +60,7 @@ ENV MALASS_HOST $MALASS_HOST
 ENV MALASS_PORT $MALASS_PORT
 ENV MALASS_MAX_REQUESTS $MALASS_MAX_REQUESTS
 ENV EXTRACTED_FILE_ENABLE_CLAMAV $EXTRACTED_FILE_ENABLE_CLAMAV
-ENV EXTRACTED_FILE_ENABLE_FRESHCLAM $EXTRACTED_FILE_ENABLE_FRESHCLAM
+ENV EXTRACTED_FILE_UPDATE_RULES $EXTRACTED_FILE_UPDATE_RULES
 ENV EXTRACTED_FILE_PIPELINE_DEBUG $EXTRACTED_FILE_PIPELINE_DEBUG
 ENV EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA $EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA
 ENV CLAMD_SOCKET_FILE $CLAMD_SOCKET_FILE
@@ -68,13 +68,22 @@ ENV EXTRACTED_FILE_ENABLE_YARA $EXTRACTED_FILE_ENABLE_YARA
 ENV EXTRACTED_FILE_YARA_CUSTOM_ONLY $EXTRACTED_FILE_YARA_CUSTOM_ONLY
 ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
+ENV SRC_BASE_DIR "/usr/local/src"
+ENV CLAMAV_RULES_DIR "/var/lib/clamav"
 ENV YARA_VERSION "4.0.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
-ENV YARA_RULES_URL "https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
+ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
 ENV YARA_RULES_DIR "/yara-rules"
+ENV YARA_RULES_SRC_DIR "$SRC_BASE_DIR/signature-base"
 ENV CAPA_URL "https://github.com/fireeye/capa"
-ENV CAPA_RULES_DIR "/opt/capa-rules"
-ENV SRC_BASE_DIR "/usr/local/src"
+ENV CAPA_RULES_URL "https://github.com/fireeye/capa-rules"
+ENV CAPA_RULES_DIR "/capa-rules"
+
+ENV SUPERCRONIC_VERSION "0.1.12"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
     apt-get update && \
@@ -116,6 +125,11 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-zmq && \
     pip3 install clamd supervisor yara-python python-magic psutil && \
     pip2 install flare-capa && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+      chmod +x "$SUPERCRONIC" && \
+      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
     mkdir -p "${SRC_BASE_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
@@ -130,27 +144,25 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       make install && \
     rm -rf "${SRC_BASE_DIR}"/yara* && \
     cd /tmp && \
-      mkdir -p ./Neo23x0 && \
-      curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1 && \
+      git clone --depth 1 --single-branch "${YARA_RULES_URL}" "${YARA_RULES_SRC_DIR}" && \
       mkdir -p "${YARA_RULES_DIR}" && \
-      cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/ && \
-      cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE && \
-      rm -rf /tmp/Neo23x0 && \
-    cd /tmp && \
-      git clone --depth 1 --single-branch --branch "v$(/usr/local/bin/capa --version 2>&1 | awk '{print $2}')" "${CAPA_URL}" /tmp/capa && \
+      ln -f -s -r "${YARA_RULES_SRC_DIR}"/yara/* "${YARA_RULES_SRC_DIR}"/vendor/yara/* "${YARA_RULES_DIR}"/ && \
+    git clone --depth 1 --single-branch --branch "v$(/usr/local/bin/capa --version 2>&1 | awk '{print $2}')" "${CAPA_URL}" /tmp/capa && \
       cd /tmp/capa && \
       git submodule init rules && \
-      git submodule update --depth 1 rules && \
-      cd /tmp && \
-      rm -rf "${CAPA_RULES_DIR}" && \
-      mv /tmp/capa/rules "${CAPA_RULES_DIR}" && \
-      rm -rf "${CAPA_RULES_DIR}"/.git* /tmp/capa && \
+      (git rev-parse @:./rules > /tmp/capa_rules_sha.txt) && \
+    mkdir -p "${CAPA_RULES_DIR}" && \
+    cd "${CAPA_RULES_DIR}" && \
+      git init && \
+      git remote add origin "${CAPA_RULES_URL}" && \
+      git fetch --depth 1 origin "$(cat /tmp/capa_rules_sha.txt)" && \
+      git reset --hard FETCH_HEAD && \
+      rm -rf /tmp/capa* && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
         gcc \
         gcc-8 \
-        git \
         libc6-dev \
         libgcc-8-dev \
         libjansson-dev \
@@ -164,15 +176,15 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && \
-    curl -s -S -L -o /var/lib/clamav/main.cvd http://database.clamav.net/main.cvd && \
-      curl -s -S -L -o /var/lib/clamav/daily.cvd http://database.clamav.net/daily.cvd && \
-      curl -s -S -L -o /var/lib/clamav/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
+    mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
+    curl -s -S -L -o "${CLAMAV_RULES_DIR}"/main.cvd http://database.clamav.net/main.cvd && \
+      curl -s -S -L -o "${CLAMAV_RULES_DIR}"/daily.cvd http://database.clamav.net/daily.cvd && \
+      curl -s -S -L -o "${CLAMAV_RULES_DIR}"/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    mkdir -p /var/log/clamav /var/lib/clamav && \
-      chown -R ${PUSER}:${PGROUP} /var/log/clamav  /var/lib/clamav && \
-      chmod -R 750 /var/log/clamav  /var/lib/clamav && \
+    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${CAPA_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+    find /var/log/clamav "${CLAMAV_RULES_DIR}" "${CAPA_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
@@ -188,17 +200,22 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
-      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py
+      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py && \
+      echo "0 */6 * * * /usr/local/bin/capa-rules-update.sh\n0 */6 * * * /usr/local/bin/yara-rules-update.sh" > ${SUPERCRONIC_CRONTAB}
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/zeek_carve_*.py /usr/local/bin/
 ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
+ADD file-monitor/*update.sh /usr/local/bin/
 
 WORKDIR /data/zeek/extract_files
 
-VOLUME ["/var/lib/clamav"]
+VOLUME ["$CAPA_RULES_DIR"]
+VOLUME ["$CLAMAV_RULES_DIR"]
+VOLUME ["$YARA_RULES_DIR"]
+VOLUME ["$YARA_RULES_SRC_DIR"]
 
 EXPOSE 3310
 
