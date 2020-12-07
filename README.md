@@ -1415,7 +1415,7 @@ Malcolm can be packaged into an installer ISO based on the current [stable relea
 
 ### <a name="ISOBuild"></a>Generating the ISO
 
-Official downloads of the Malcolm installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/).
+Official downloads of the Malcolm installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/) (with the [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin).
 
 To perform a clean build the Malcolm installer ISO, navigate to your local Malcolm working copy and run:
 
