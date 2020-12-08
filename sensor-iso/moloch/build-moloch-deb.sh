@@ -20,33 +20,34 @@ fi
 apt-get -q update
 
 mkdir -p /opt
-curl -L -o /tmp/moloch.tar.gz "https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz"
+curl -L -o /tmp/moloch.tar.gz "https://github.com/arkime/arkime/archive/v$ARKIME_VERSION.tar.gz"
 
 cd /tmp
 tar -xvf "moloch.tar.gz"
 rm -f "moloch.tar.gz"
 
-cd "./moloch-"$MOLOCH_VERSION
+mv "./arkime-"$ARKIME_VERSION "./moloch-"$ARKIME_VERSION || true
+cd "./moloch-"$ARKIME_VERSION
 
-export PATH="$MOLOCHDIR/bin:/tmp/moloch-$MOLOCH_VERSION/node_modules/.bin:${PATH}"
+export PATH="$ARKIMEDIR/bin:/tmp/moloch-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
-./easybutton-build.sh --dir "$MOLOCHDIR"
+./easybutton-build.sh --dir "$ARKIMEDIR"
 
 npm -g config set user root
 
 make install
 
-cp -r ./capture/plugins/lua/samples "$MOLOCHDIR"/lua
+cp -r ./capture/plugins/lua/samples "$ARKIMEDIR"/lua
 
-npm install license-checker; release/notice.txt.pl $MOLOCHDIR NOTICE release/CAPTURENOTICE > $MOLOCHDIR/NOTICE.txt
+npm install license-checker; release/notice.txt.pl $ARKIMEDIR NOTICE release/CAPTURENOTICE > $ARKIMEDIR/NOTICE.txt
 
 ETC_FILES=$(shopt -s nullglob dotglob; echo /moloch-etc/*)
 if (( ${#ETC_FILES} )) ; then
-  mkdir -p $MOLOCHDIR/etc
-  cp -r /moloch-etc/* $MOLOCHDIR/etc/
+  mkdir -p $ARKIMEDIR/etc
+  cp -r /moloch-etc/* $ARKIMEDIR/etc/
 fi
 
-fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $MOLOCH_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Moloch Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$MOLOCHDIR"
+fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIMEDIR"
 
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 

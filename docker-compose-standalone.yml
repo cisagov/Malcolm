@@ -32,9 +32,9 @@ x-nginx-variables: &nginx-variables
   # Whether or not to write nginx's access.log and error.log to Elasticsearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
-x-moloch-variables: &moloch-variables
+x-arkime-variables: &arkime-variables
   MANAGE_PCAP_FILES : 'false'
-  MOLOCH_ANALYZE_PCAP_THREADS : 1
+  ARKIME_ANALYZE_PCAP_THREADS : 1
   MAXMIND_GEOIP_DB_LICENSE_KEY : '0'
 
 x-zeek-variables: &zeek-variables
@@ -52,7 +52,7 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_ENABLE_CAPA : 'false'
   EXTRACTED_FILE_CAPA_VERBOSE : 'false'
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
-  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
+  EXTRACTED_FILE_UPDATE_RULES : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
   # environment variables for tweaking Zeek at runtime (see local.zeek)
@@ -126,7 +126,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: malcolmnetsec/elasticsearch-oss:2.4.1
+    image: malcolmnetsec/elasticsearch-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -161,7 +161,7 @@ services:
       retries: 3
       start_period: 180s
   kibana:
-    image: malcolmnetsec/kibana-oss:2.4.1
+    image: malcolmnetsec/kibana-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -171,10 +171,10 @@ services:
       << : *kibana-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
-      CREATE_ES_MOLOCH_SESSION_INDEX : 'true'
-      MOLOCH_INDEX_PATTERN : 'sessions2-*'
-      MOLOCH_INDEX_PATTERN_ID : 'sessions2-*'
-      MOLOCH_INDEX_TIME_FIELD : 'firstPacket'
+      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
+      ARKIME_INDEX_PATTERN : 'sessions2-*'
+      ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
+      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
     depends_on:
       - elasticsearch
     expose:
@@ -187,7 +187,7 @@ services:
       retries: 3
       start_period: 210s
   elastalert:
-    image: malcolmnetsec/elastalert:2.4.1
+    image: malcolmnetsec/elastalert:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -215,7 +215,7 @@ services:
       retries: 3
       start_period: 210s
   curator:
-    image: malcolmnetsec/curator:2.4.1
+    image: malcolmnetsec/curator:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -234,7 +234,7 @@ services:
       retries: 3
       start_period: 30s
   logstash:
-    image: malcolmnetsec/logstash-oss:2.4.1
+    image: malcolmnetsec/logstash-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -267,7 +267,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:2.4.1
+    image: malcolmnetsec/filebeat-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -303,20 +303,20 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
-  moloch:
-    image: malcolmnetsec/moloch:2.4.1
+  arkime:
+    image: malcolmnetsec/arkime:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: moloch
+    hostname: arkime
     env_file:
       - ./auth.env
     environment:
       << : *process-variables
       << : *common-upload-variables
-      << : *moloch-variables
-      MOLOCH_VERSION : '2.4.1'
-      VIRTUAL_HOST : 'moloch.malcolm.local'
+      << : *arkime-variables
+      ARKIME_VERSION : '2.7.1'
+      VIRTUAL_HOST : 'arkime.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
       ES_MAX_SHARDS_PER_NODE : 2500
@@ -343,7 +343,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:2.4.1
+    image: malcolmnetsec/zeek:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -369,7 +369,7 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:2.4.1
+    image: malcolmnetsec/file-monitor:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -390,7 +390,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:2.4.1
+    image: malcolmnetsec/pcap-capture:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -416,7 +416,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:2.4.1
+    image: malcolmnetsec/pcap-monitor:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -439,7 +439,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:2.4.1
+    image: malcolmnetsec/file-upload:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -451,7 +451,7 @@ services:
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
-      - moloch
+      - arkime
     expose:
       - 80
     ports:
@@ -465,7 +465,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.4.1
+    image: malcolmnetsec/htadmin:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -487,7 +487,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.4.1
+    image: malcolmnetsec/freq:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -505,7 +505,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.4.1
+    image: malcolmnetsec/name-map-ui:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -526,7 +526,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:2.4.1
+    image: malcolmnetsec/nginx-proxy:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -536,7 +536,7 @@ services:
       << : *auth-variables
       << : *nginx-variables
     depends_on:
-      - moloch
+      - arkime
       - kibana
       - upload
       - htadmin

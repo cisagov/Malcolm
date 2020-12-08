@@ -111,7 +111,7 @@ if mkdir "$DESTDIR"; then
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   README_HTML="$RUN_PATH/$(basename $DESTDIR).README.html"
-  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/moloch' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /data/moloch/doc/README.html" > "$README_HTML" || true
+  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/arkime' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /data/moloch/doc/README.html" > "$README_HTML" || true
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
@@ -145,7 +145,7 @@ if mkdir "$DESTDIR"; then
   echo "   - auth_setup  (change authentication-related settings)" | tee -a "$README"
   echo "" | tee -a "$README"
   echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
-  echo "  - Moloch: https://localhost/" | tee -a "$README"
+  echo "  - Arkime: https://localhost/" | tee -a "$README"
   echo "  - Kibana: https://localhost/kibana/" | tee -a "$README"
   echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
   echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"

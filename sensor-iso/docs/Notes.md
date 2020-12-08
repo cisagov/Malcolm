@@ -8,12 +8,12 @@ Hedgehog Linux is a trimmed-down Debian Linux with several common tools preinsta
     - [netsniff-ng](#netsniff)
         + [Compiling netsniff-ng from source](#netsniffCompile)
     - [tcpdump](#tcpdump)
-    - [Moloch](#Moloch)
-        + [Compiling Moloch from source](#molochCompile)
-        + [Moloch configuration](#molochConfig)
+    - [Arkime](#Arkime)
+        + [Compiling Arkime from source](#molochCompile)
+        + [Arkime configuration](#molochConfig)
             * [`config.ini` and command-line parameters](#molochConfigIni)
             * [capture rules](#molochRules)
-            * [Moloch viewer](#molochViewer)
+            * [Arkime viewer](#molochViewer)
 * [Zeek](#Zeek)
     - [Compiling Zeek from source](#ZeekCompile)
     - [Third party plugins](#ZeekThirdParty)
@@ -105,21 +105,21 @@ $ /usr/sbin/tcpdump \
 
 `tcpdump` is generally installed via your distribution's package management system (`apt`, `yum`, etc.).
 
-## <a name="Moloch"></a>Moloch
+## <a name="Arkime"></a>Arkime
 
-[Moloch](https://molo.ch/) [moloch-capture](https://github.com/aol/moloch/tree/master/capture) is a tool for traffic capture which also performs network protocol parsing and metadata insertion into an Elasticsearch instance for review using the Moloch viewer interface.
+[Arkime](https://molo.ch/) [moloch-capture](https://github.com/arkime/arkime/tree/master/capture) is a tool for traffic capture which also performs network protocol parsing and metadata insertion into an Elasticsearch instance for review using the Arkime viewer interface.
 
-`moloch-capture` can be [downloaded](https://molo.ch/downloads) in the form of official Moloch package builds or built from source.
+`moloch-capture` can be [downloaded](https://molo.ch/downloads) in the form of official Arkime package builds or built from source.
 
-### <a name="molochCompile"></a>Compiling Moloch from source
+### <a name="molochCompile"></a>Compiling Arkime from source
 
-At the time of writing, the [current stable release](https://github.com/aol/moloch/blob/master/CHANGELOG) of Moloch is [v2.4.1](https://github.com/aol/moloch/releases/tag/v2.4.1). The following bash script was used to install Moloch's build dependencies, download Moloch, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/arkime/arkime/blob/master/CHANGELOG) of Arkime is [v2.4.2](https://github.com/arkime/arkime/releases/tag/v2.4.2). The following bash script was used to install Arkime's build dependencies, download Arkime, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-MOLOCH_VERSION="2.4.1"
-MOLOCHDIR="/opt/moloch"
+ARKIME_VERSION="2.4.2"
+ARKIMEDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
 unset VERBOSE
@@ -139,33 +139,33 @@ fi
 apt-get -q update
 
 mkdir -p /opt
-curl -L -o /tmp/moloch.tar.gz "https://github.com/aol/moloch/archive/v$MOLOCH_VERSION.tar.gz"
+curl -L -o /tmp/moloch.tar.gz "https://github.com/arkime/arkime/archive/v$ARKIME_VERSION.tar.gz"
 
 cd /tmp
 tar -xvf "moloch.tar.gz"
 rm -f "moloch.tar.gz"
 
-cd "./moloch-"$MOLOCH_VERSION
+cd "./moloch-"$ARKIME_VERSION
 
-export PATH="$MOLOCHDIR/bin:/tmp/moloch-$MOLOCH_VERSION/node_modules/.bin:${PATH}"
+export PATH="$ARKIMEDIR/bin:/tmp/moloch-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
-./easybutton-build.sh --dir "$MOLOCHDIR"
+./easybutton-build.sh --dir "$ARKIMEDIR"
 
 npm -g config set user root
 
 make install
 
-cp -r ./capture/plugins/lua/samples "$MOLOCHDIR"/lua
+cp -r ./capture/plugins/lua/samples "$ARKIMEDIR"/lua
 
-npm install license-checker; release/notice.txt.pl $MOLOCHDIR NOTICE release/CAPTURENOTICE > $MOLOCHDIR/NOTICE.txt
+npm install license-checker; release/notice.txt.pl $ARKIMEDIR NOTICE release/CAPTURENOTICE > $ARKIMEDIR/NOTICE.txt
 
 ETC_FILES=$(shopt -s nullglob dotglob; echo /moloch-etc/*)
 if (( ${#ETC_FILES} )) ; then
-  mkdir -p $MOLOCHDIR/etc
-  cp -r /moloch-etc/* $MOLOCHDIR/etc/
+  mkdir -p $ARKIMEDIR/etc
+  cp -r /moloch-etc/* $ARKIMEDIR/etc/
 fi
 
-fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $MOLOCH_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Moloch Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$MOLOCHDIR"
+fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIMEDIR"
 
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 
@@ -179,10 +179,10 @@ set +e
 ```
 
 * Notes:
-    - Moloch is installed to `/opt/moloch` in this configuration
-    - Please read the Moloch's [documentation](https://molo.ch/learn), particularly the [FAQ](https://molo.ch/faq) and [Settings](https://molo.ch/settings) pages, for more information
+    - Arkime is installed to `/opt/moloch` in this configuration
+    - Please read the Arkime's [documentation](https://molo.ch/learn), particularly the [FAQ](https://molo.ch/faq) and [Settings](https://molo.ch/settings) pages, for more information
 
-### <a name="molochConfig"></a>Moloch configuration
+### <a name="molochConfig"></a>Arkime configuration
 
 #### <a name="molochConfigIni"></a>config.ini and command-line parameters
 
@@ -198,7 +198,7 @@ Below is an example of the a `config.ini` similar to that used on Hedgehog Linux
 elasticsearch=http://192.168.0.1:9200
 rotateIndex=daily
 passwordSecret=HZyP53ddho8ASebg
-httpRealm=Moloch
+httpRealm=Arkime
 interface=enp8s0
 pcapDir=/tmp
 maxFileSizeG=2
@@ -239,7 +239,7 @@ logFileCreation=true
 logHTTPConnections=false
 
 ### High Performance settings
-# https://github.com/aol/moloch/wiki/Settings#High_Performance_Settings
+# https://github.com/arkime/arkime/wiki/Settings#High_Performance_Settings
 magicMode=basic
 pcapReadMethod=tpacketv3
 tpacketv3NumThreads=2
@@ -260,7 +260,7 @@ $ /opt/moloch/bin/moloch-capture
   -c /opt/moloch/etc/config.ini
   -o pcapDir="$PCAP_PATH"
   -o bpf="$CAPTURE_FILTER"
-  -o packetThreads=$MOLOCH_PACKET_THREADS
+  -o packetThreads=$ARKIME_PACKET_THREADS
   -o dropUser=sensor
   -o dropGroup=netdev
   -o geoLite2Country=/opt/moloch/etc/GeoLite2-Country.mmdb
@@ -270,13 +270,13 @@ $ /opt/moloch/bin/moloch-capture
   -o rulesFiles=/opt/moloch/etc/rules.yml
   -o parsersDir=/opt/moloch/parsers
   -o pluginsDir=/opt/moloch/plugins
-  --node "$MOLOCH_NODE_NAME"
-  --host "$MOLOCH_NODE_HOST"
+  --node "$ARKIME_NODE_NAME"
+  --host "$ARKIME_NODE_HOST"
 ```
 
 #### <a name="molochRules"></a>capture rules
 
-Moloch allows [defining capture rules](https://molo.ch/rulesformat) to limit what is stored in PCAP and what is logged to the Elasticsearch database. Hedgehog Linux uses some rules similar to those examples in the [High Performance Settings](https://molo.ch/settings#high-performance-settings) page in the Moloch documentation in order to maximize performance and tune PCAP storage utilization.
+Arkime allows [defining capture rules](https://molo.ch/rulesformat) to limit what is stored in PCAP and what is logged to the Elasticsearch database. Hedgehog Linux uses some rules similar to those examples in the [High Performance Settings](https://molo.ch/settings#high-performance-settings) page in the Arkime documentation in order to maximize performance and tune PCAP storage utilization.
 
 ```
 ---
@@ -306,9 +306,9 @@ rules:
       _dontSaveSPI: 1
 ```
 
-#### <a name="molochViewer"></a>Moloch viewer
+#### <a name="molochViewer"></a>Arkime viewer
 
-In order for a remote Moloch viewer instance to retrieve PCAP payloads from the host running `moloch-capture`, the capture host must also be running an instance of Moloch viewer which accepts connections (by default) on port 8005. Moloch viewer uses the same [`config.ini`](#molochConfigIni) as `moloch-capture` and can be run like this:
+In order for a remote Arkime viewer instance to retrieve PCAP payloads from the host running `moloch-capture`, the capture host must also be running an instance of Arkime viewer which accepts connections (by default) on port 8005. Arkime viewer uses the same [`config.ini`](#molochConfigIni) as `moloch-capture` and can be run like this:
 
 ```bash
 $ /opt/moloch/bin/node /opt/moloch/viewer/viewer.js
@@ -317,7 +317,7 @@ $ /opt/moloch/bin/node /opt/moloch/viewer/viewer.js
   -o viewPort=8005
 ```
 
-This may require opening a firewall port to the host running Moloch viewer to allow remote connections to this port from the main Moloch viewer instance.
+This may require opening a firewall port to the host running Arkime viewer to allow remote connections to this port from the main Arkime viewer instance.
 
 # <a name="Zeek"></a>Zeek
 
