@@ -7,13 +7,13 @@ rm -f /var/run/moloch/initialized /var/run/moloch/runwise
 echo "Giving Elasticsearch time to start..."
 /data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
-#Configure Moloch to Run
+#Configure Arkime to Run
 if [ ! -f /var/run/moloch/configured ]; then
 	touch /var/run/moloch/configured
   if [[ "$WISE" = "on" ]] ; then
-    $MOLOCHDIR/bin/Configure --wise
+    $ARKIMEDIR/bin/Configure --wise
   fi
-  $MOLOCHDIR/bin/Configure
+  $ARKIMEDIR/bin/Configure
 fi
 
 if [[ "$WISE" = "on" ]] ; then
@@ -34,18 +34,18 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
 
   echo "Initializing Elasticsearch database..."
 
-	$MOLOCHDIR/db/db.pl http://$ES_HOST:$ES_PORT initnoprompt
+	$ARKIMEDIR/db/db.pl http://$ES_HOST:$ES_PORT initnoprompt
 
-	# this password isn't going to be used by Moloch, nginx will do the auth instead
-	$MOLOCHDIR/bin/moloch_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
+	# this password isn't going to be used by Arkime, nginx will do the auth instead
+	$ARKIMEDIR/bin/moloch_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
 
-  # this is a hacky way to get all of the Moloch-parseable field definitions put into E.S.
+  # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
-  $MOLOCHDIR/bin/moloch-capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+  $ARKIMEDIR/bin/moloch-capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
 
   #set some default settings I want for moloch
-  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$MOLOCHDIR/etc/user_settings.json"
+  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$ARKIMEDIR/etc/user_settings.json"
 
   echo -e "\nElasticsearch database initialized!\n"
 
@@ -54,13 +54,13 @@ else
   echo
 
   if /data/moloch-needs-upgrade.sh 2>&1; then
-    echo "Elasticsearch database needs to be upgraded for $MOLOCH_VERSION!"
-    $MOLOCHDIR/db/db.pl http://$ES_HOST:$ES_PORT upgradenoprompt
+    echo "Elasticsearch database needs to be upgraded for $ARKIME_VERSION!"
+    $ARKIMEDIR/db/db.pl http://$ES_HOST:$ES_PORT upgradenoprompt
     echo "Elasticsearch database upgrade complete!"
     echo
 
   else
-    echo "Elasticsearch database is up-to-date for Moloch version $MOLOCH_VERSION!"
+    echo "Elasticsearch database is up-to-date for Arkime version $ARKIME_VERSION!"
     echo
 
   fi # if /data/moloch-needs-upgrade.sh

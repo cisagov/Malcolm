@@ -29,10 +29,10 @@ from itertools import chain, repeat
 ###################################################################################################
 MAX_WORKER_PROCESSES_DEFAULT = 1
 
-PCAP_PROCESSING_MODE_MOLOCH = "moloch"
+PCAP_PROCESSING_MODE_ARKIME = "moloch"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
 
-MOLOCH_CAPTURE_PATH = "/data/moloch/bin/moloch-capture"
+ARKIME_CAPTURE_PATH = "/data/moloch/bin/moloch-capture"
 
 ZEEK_PATH = "/opt/zeek/bin/zeek"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
@@ -229,15 +229,15 @@ def zeekFileWorker(zeekWorkerArgs):
 def main():
 
   processingMode = None
-  if (PCAP_PROCESSING_MODE_MOLOCH in scriptName) and ('zeek' in scriptName):
-    eprint(f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_MOLOCH}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead.")
+  if (PCAP_PROCESSING_MODE_ARKIME in scriptName) and ('zeek' in scriptName):
+    eprint(f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead.")
     exit(2)
-  elif (PCAP_PROCESSING_MODE_MOLOCH in scriptName):
-    processingMode = PCAP_PROCESSING_MODE_MOLOCH
+  elif (PCAP_PROCESSING_MODE_ARKIME in scriptName):
+    processingMode = PCAP_PROCESSING_MODE_ARKIME
   elif (PCAP_PROCESSING_MODE_ZEEK in scriptName):
     processingMode = PCAP_PROCESSING_MODE_ZEEK
   else:
-    eprint(f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_MOLOCH}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead.")
+    eprint(f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead.")
     exit(2)
 
   global args
@@ -256,9 +256,9 @@ def main():
   parser.add_argument('--autotag', dest='autotag', help="Autotag logs based on PCAP file names", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   requiredNamed = parser.add_argument_group('required arguments')
   requiredNamed.add_argument('--pcap-directory', dest='pcapBaseDir', help='Base directory for PCAP files', metavar='<directory>', type=str, required=True)
-  if (processingMode == PCAP_PROCESSING_MODE_MOLOCH):
-    parser.add_argument('--moloch', required=False, dest='executable', help="moloch-capture executable path", metavar='<STR>', type=str, default=MOLOCH_CAPTURE_PATH)
-    parser.add_argument('--managed', dest='notLocked', help="Allow Moloch to manage PCAP files", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
+  if (processingMode == PCAP_PROCESSING_MODE_ARKIME):
+    parser.add_argument('--moloch', required=False, dest='executable', help="moloch-capture executable path", metavar='<STR>', type=str, default=ARKIME_CAPTURE_PATH)
+    parser.add_argument('--managed', dest='notLocked', help="Allow Arkime to manage PCAP files", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
     parser.add_argument('--zeek', required=False, dest='executable', help="zeek executable path", metavar='<STR>', type=str, default=ZEEK_PATH)
     parser.add_argument('--autozeek', dest='autozeek', help="Autoanalyze all PCAP file with Zeek", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
@@ -307,7 +307,7 @@ def main():
   newFileQueue = deque()
 
   # start worker threads which will pull filenames/tags to be processed by moloch-capture
-  if (processingMode == PCAP_PROCESSING_MODE_MOLOCH):
+  if (processingMode == PCAP_PROCESSING_MODE_ARKIME):
     scannerThreads = ThreadPool(args.threads, molochCaptureFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autotag,args.notLocked],))
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
     scannerThreads = ThreadPool(args.threads, zeekFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autozeek,args.autotag,args.zeekUploadDir,args.zeekExtractFileMode],))
