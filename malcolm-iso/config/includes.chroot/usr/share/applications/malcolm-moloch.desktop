@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Name=Malcolm - Moloch
+Name=Malcolm - Arkime
 Exec=/usr/bin/chromium https://localhost/
 Terminal=false
 X-MultipleArgs=false

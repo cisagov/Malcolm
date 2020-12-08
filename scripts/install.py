@@ -376,7 +376,7 @@ class Installer(object):
     yaraScan = False
     capaScan = False
     clamAvScan = False
-    clamAvUpdate = False
+    ruleUpdate = False
 
     if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
       while fileCarveMode not in allowedFileCarveModes:
@@ -386,7 +386,6 @@ class Installer(object):
       if fileCarveMode is not None:
         if InstallerYesOrNo('Scan extracted files with ClamAV?', default=False):
           clamAvScan = True
-          clamAvUpdate = InstallerYesOrNo('Download updated ClamAV virus signatures periodically?', default=True)
         if InstallerYesOrNo('Scan extracted files with Yara?', default=False):
           yaraScan = True
         if InstallerYesOrNo('Scan extracted PE files with Capa?', default=False):
@@ -394,6 +393,7 @@ class Installer(object):
         if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
           while (len(vtotApiKey) <= 1):
             vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
+        ruleUpdate = InstallerYesOrNo('Download updated scanner signatures periodically?', default=True)
 
     if fileCarveMode not in allowedFileCarveModes:
       fileCarveMode = allowedFileCarveModes[0]
@@ -484,8 +484,8 @@ class Installer(object):
             # file scanning via clamav
             line = re.sub(r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if clamAvScan else "'false'"), line)
           elif 'EXTRACTED_FILE_ENABLE_FRESHCLAM' in line:
-            # clamav updates via freshclam
-            line = re.sub(r'(EXTRACTED_FILE_ENABLE_FRESHCLAM\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if clamAvUpdate else "'false'"), line)
+            # rule updates (yara/capa via git, clamav via freshclam)
+            line = re.sub(r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if ruleUpdate else "'false'"), line)
           elif 'PCAP_ENABLE_NETSNIFF' in line:
             # capture pcaps via netsniff-ng
             line = re.sub(r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if pcapNetSniff else "'false'"), line)

@@ -3,7 +3,7 @@ var wiseSource     = require('./wiseSource.js')
   ;
 
 //////////////////////////////////////////////////////////////////////////////////
-// Moloch WISE Data Source definition for Zeek logs.
+// Arkime WISE Data Source definition for Zeek logs.
 //
 // Part of Malcolm (https://github.com/cisagov/malcolm)
 //
@@ -1544,7 +1544,7 @@ function ZeekLogs (api, section) {
   var mimeFieldsStr = allFields.filter(value => /(^zeek\.filetype$|mime[_\.-]?type)/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
 
-  // add right-clicks for pivoting into Kibana from Moloch (see nginx.conf)
+  // add right-clicks for pivoting into Kibana from Arkime (see nginx.conf)
   var filterLabel = "Kibana %DBFIELD%";
   var filterUrl = "idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 

@@ -32,11 +32,11 @@ MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
 MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 32*1024*1024*1024
 
 ###################################################################################################
-# for querying the Moloch's "files" Elasticsearch index to avoid re-processing (duplicating sessions for)
+# for querying the Arkime's "files" Elasticsearch index to avoid re-processing (duplicating sessions for)
 # files that have already been processed
-MOLOCH_FILES_INDEX = "files"
-MOLOCH_FILE_TYPE = "file"
-MOLOCH_FILE_SIZE_FIELD = "filesize"
+ARKIME_FILES_INDEX = "files"
+ARKIME_FILE_TYPE = "file"
+ARKIME_FILE_SIZE_FIELD = "filesize"
 
 ###################################################################################################
 debug = False
@@ -90,7 +90,7 @@ class EventWatcher(pyinotify.ProcessEvent):
       while connected and args.elasticWaitForHealth and (not healthy) and (not shuttingDown):
         try:
           if debug: eprint(f"{scriptName}:\twaiting for Elasticsearch to be healthy")
-          elasticsearch_dsl.connections.get_connection().cluster.health(index=MOLOCH_FILES_INDEX, wait_for_status='yellow')
+          elasticsearch_dsl.connections.get_connection().cluster.health(index=ARKIME_FILES_INDEX, wait_for_status='yellow')
           if verboseDebug: eprint(f"{scriptName}:\t{elasticsearch_dsl.connections.get_connection().cluster.health()}")
           healthy = True
 
@@ -142,17 +142,17 @@ def event_process_generator(cls, method):
 
         relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
 
-        # check with Moloch's files index in Elasticsearch and make sure it's not a duplicate
+        # check with Arkime's files index in Elasticsearch and make sure it's not a duplicate
         fileIsDuplicate = False
         if self.useElastic:
-          s = elasticsearch_dsl.Search(index=MOLOCH_FILES_INDEX) \
-              .filter("term", _type=MOLOCH_FILE_TYPE) \
+          s = elasticsearch_dsl.Search(index=ARKIME_FILES_INDEX) \
+              .filter("term", _type=ARKIME_FILE_TYPE) \
               .filter("term", node=args.molochNode) \
               .query("wildcard", name=f"*{os.path.sep}{relativePath}")
           response = s.execute()
           for hit in response:
             fileInfo = hit.to_dict()
-            if (MOLOCH_FILE_SIZE_FIELD in fileInfo) and (fileInfo[MOLOCH_FILE_SIZE_FIELD] == fileSize):
+            if (ARKIME_FILE_SIZE_FIELD in fileInfo) and (fileInfo[ARKIME_FILE_SIZE_FIELD] == fileSize):
               fileIsDuplicate = True
               break
 
@@ -218,9 +218,9 @@ def main():
 
   parser.add_argument('--min-bytes', dest='minBytes', help="Minimum size for checked files", metavar='<bytes>', type=int, default=MINIMUM_CHECKED_FILE_SIZE_DEFAULT, required=False)
   parser.add_argument('--max-bytes', dest='maxBytes', help="Maximum size for checked files", metavar='<bytes>', type=int, default=MAXIMUM_CHECKED_FILE_SIZE_DEFAULT, required=False)
-  parser.add_argument('--elasticsearch', required=False, dest='elasticHost', metavar='<STR>', type=str, default=None, help='Elasticsearch connection string for querying Moloch files index to ignore duplicates')
+  parser.add_argument('--elasticsearch', required=False, dest='elasticHost', metavar='<STR>', type=str, default=None, help='Elasticsearch connection string for querying Arkime files index to ignore duplicates')
   parser.add_argument('--elasticsearch-wait', dest='elasticWaitForHealth', help="Wait for Elasticsearch to be healthy before starting", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
-  parser.add_argument('--moloch-node', required=False, dest='molochNode', metavar='<STR>', type=str, default='moloch', help='Moloch node value for querying Moloch files index to ignore duplicates')
+  parser.add_argument('--moloch-node', required=False, dest='molochNode', metavar='<STR>', type=str, default='arkime', help='Arkime node value for querying Arkime files index to ignore duplicates')
 
   parser.add_argument('--ignore-existing', dest='ignoreExisting', help="Ignore preexisting files in the monitor directory", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--absolute-path', dest='includeAbsolutePath', help="Publish absolute path for message (vs. path relative to monitored directory)", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)

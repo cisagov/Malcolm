@@ -77,7 +77,7 @@ if [ -d "$WORKDIR" ]; then
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
   echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.8=$(dpkg -s linux-kbuild-5.8 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-kbuild-5.9=$(dpkg -s linux-kbuild-5.9 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
@@ -130,10 +130,10 @@ if [ -d "$WORKDIR" ]; then
   curl -s -S -L -o oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
   popd >/dev/null 2>&1
 
-  # clone and build Moloch .deb package in its own clean environment (rather than in hooks/)
+  # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
   mkdir -p ./config/packages.chroot/
   bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/moloch:/build moloch-build:latest -o /build
+  docker run --rm -v "$SCRIPT_PATH"/moloch:/build arkime-build:latest -o /build
   cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
 

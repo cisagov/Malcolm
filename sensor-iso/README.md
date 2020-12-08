@@ -8,7 +8,7 @@ Hedgehog Linux is a Debian-based operating system built to
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Moloch sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
+* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -27,7 +27,7 @@ Hedgehog Linux is a Debian-based operating system built to
             * [Automatic file extraction and scanning](#ZeekFileExtraction)
         + [Forwarding](#ConfigForwarding)
             * [filebeat](#filebeat): Zeek log forwarding
-            * [moloch-capture](#moloch-capture): Moloch session forwarding
+            * [moloch-capture](#moloch-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
             * [auditbeat](#auditbeat): audit log forwarding
             * [filebeat-syslog](#syslogbeat): syslog forwarding
@@ -253,9 +253,9 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
-### <a name="moloch-capture"></a>moloch-capture: Moloch session forwarding
+### <a name="moloch-capture"></a>moloch-capture: Arkime session forwarding
 
-[moloch-capture](https://github.com/aol/moloch/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Moloch viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Moloch sessions](https://github.com/cisagov/malcolm#ZeekMolochFlowCorrelation) in the Malcolm documentation for more information.
+[moloch-capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/cisagov/malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
 First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/malcolm#configure-authentication)), choose **None**.
 
@@ -269,7 +269,7 @@ You will be asked to enter authentication credentials for the sensor’s connect
 
 ![Elasticsearch username](./docs/images/elasticsearch-username.png) ![Elasticsearch password](./docs/images/elasticsearch_password.png) ![Successful Elasticsearch connection](./docs/images/metricbeat_elasticsearch_success.png)
 
-Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Moloch viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
+Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
 
 ![PCAP retrieval ACL](./docs/images/malcolm_moloch_reachback_acl.png)
 
@@ -337,7 +337,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_MOLOCH** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Moloch](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/malcolm) or another Moloch installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_ARKIME** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
@@ -388,7 +388,7 @@ zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 
 # <a name="ISOBuild"></a>Appendix A - Generating the ISO
 
-Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/).
+Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/) (with the [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin).
 
 To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/cisagov/Malcolm/) working copy and run:
 
@@ -404,7 +404,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-2.4.1.iso"
+Finished, created "/sensor-build/hedgehog-2.4.2.iso"
 …
 ```
 
@@ -617,7 +617,7 @@ $ apt-get install $(cat *.list.chroot)
     * `apt-get install -y build-essential git-core pkg-config python3-dev`
     * `python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -r -n1 python3 -m pip install -U`
         - if this fails for some reason, you may need to reinstall pip first with `python3 -m pip install --force -U pip`
-        - some *very* builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip.7` (or whatever `python3.x` you have)
+        - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip.7` (or whatever `python3.x` you have)
     * If there were [new python packages](https://raw.githubusercontent.com/cisagov/Malcolm/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/blame/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
         - `python3 -m pip install --no-compile --no-cache-dir --force-reinstall --upgrade --index-url=https://XXXXXX:443/pypi/simple --trusted-host=XXXXXX:443 colorama`
 
@@ -771,6 +771,16 @@ lrwxrwxrwx 1 root root        18 May  8 14:34 zeek -> /opt/zeek/bin/zeek
 -rw-r--r-- 1 root staff    25756 Oct 29  2019 zeek_carve_utils.py
 -rwxr-xr-x 1 root staff     8787 Oct 29  2019 zeek_carve_watcher.py
 -rwxr-xr-x 1 root staff     4883 May  4 17:39 zeek_install_plugins.sh
+
+root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/opt/yara-rules/ /opt/yara-rules
+user@otherbox's password: 
+
+root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/opt/capa-rules/ /opt/capa-rules
+user@otherbox's password: 
+
+root@hedgehog:/tmp# ls -l /opt/ | grep '\-rules'
+drwxr-xr-x  8 root   root    4096 May  8 15:48 capa-rules
+drwxr-xr-x  8 root   root  24576  May  8 15:48 yara-rules
 
 root@hedgehog:/tmp# for BEAT in auditbeat filebeat metricbeat packetbeat protologbeat; do rsync -a user@otherbox:/media/squash/usr/share/$BEAT/kibana/ /usr/share/$BEAT/kibana; done
 user@otherbox's password: 
