@@ -5,9 +5,9 @@ index 55b2dbdb..8e6338da 100644
 @@ -4,7 +4,8 @@
      <p>
        <small>
-         Moloch v{{molochVersion}} |
--        <a href="https://molo.ch">molo.ch</a>
-+        <a href="https://molo.ch">molo.ch</a> |
+         Arkime v{{molochVersion}} |
+-        <a href="https://arkime.com">arkime.com</a>
++        <a href="https://arkime.com">arkime.com</a> |
 +        <a href="/readme">Malcolm</a>
          <span v-if="responseTime && !loadingData">
            | {{ responseTime | commaString }}ms

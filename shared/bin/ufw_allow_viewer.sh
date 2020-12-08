@@ -2,11 +2,11 @@
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# manage a UFW rule for allowing a remote Moloch viewer instance (on the same host
+# manage a UFW rule for allowing a remote Arkime viewer instance (on the same host
 # to which moloch-capture is forwarding session logs) to connect to and
-# retrieve PCAP segments from the local Moloch viewer instance
+# retrieve PCAP segments from the local Arkime viewer instance
 
-# works with a comma-separated list of IP addresses in $MOLOCH_PACKET_ACL, or
+# works with a comma-separated list of IP addresses in $ARKIME_PACKET_ACL, or
 # if that variable is not set, a single IP address in $ES_HOST
 
 [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
@@ -32,8 +32,8 @@ else
   fi
 fi
 
-if [[ -z $MOLOCH_VIEWER_PORT ]] || ( [[ -z $MOLOCH_PACKET_ACL ]] && [[ -z $ES_HOST ]] ); then
-  echo "Either the remote Moloch viewer host (\$MOLOCH_PACKET_ACL or \$ES_HOST) or the local Moloch viewer port (\$MOLOCH_VIEWER_PORT) is undefined"
+if [[ -z $ARKIME_VIEWER_PORT ]] || ( [[ -z $ARKIME_PACKET_ACL ]] && [[ -z $ES_HOST ]] ); then
+  echo "Either the remote Arkime viewer host (\$ARKIME_PACKET_ACL or \$ES_HOST) or the local Arkime viewer port (\$ARKIME_VIEWER_PORT) is undefined"
   exit 1
 elif [[ ! -x /usr/sbin/ufw ]]; then
   echo "/usr/sbin/ufw does not exist or is not executable"
@@ -45,18 +45,18 @@ while read LINE; do
   if [[ -n $LINE ]] && [[ "$LINE" =~ ^[0-9]+$ ]]; then
     /usr/sbin/ufw --force delete $LINE
   fi
-done <<< "$(/usr/sbin/ufw status numbered | tac | grep "${MOLOCH_VIEWER_PORT}/tcp" | sed "s/].*//" | sed "s/[^0-9]*//g")"
+done <<< "$(/usr/sbin/ufw status numbered | tac | grep "${ARKIME_VIEWER_PORT}/tcp" | sed "s/].*//" | sed "s/[^0-9]*//g")"
 
 # add new UFW rule(s)
-if [[ -n $MOLOCH_PACKET_ACL ]]; then
+if [[ -n $ARKIME_PACKET_ACL ]]; then
   IFS=","
-  for IP in $MOLOCH_PACKET_ACL; do
-    /usr/sbin/ufw allow proto tcp from $IP to any port $MOLOCH_VIEWER_PORT
+  for IP in $ARKIME_PACKET_ACL; do
+    /usr/sbin/ufw allow proto tcp from $IP to any port $ARKIME_VIEWER_PORT
   done
   unset IFS
 elif [[ -n $ES_HOST ]]; then
-  /usr/sbin/ufw allow proto tcp from $ES_HOST to any port $MOLOCH_VIEWER_PORT
+  /usr/sbin/ufw allow proto tcp from $ES_HOST to any port $ARKIME_VIEWER_PORT
 fi
 
 # output status of rule
-/usr/sbin/ufw status | grep "${MOLOCH_VIEWER_PORT}/tcp"
+/usr/sbin/ufw status | grep "${ARKIME_VIEWER_PORT}/tcp"

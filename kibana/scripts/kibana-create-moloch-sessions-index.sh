@@ -15,12 +15,12 @@ else
 fi
 
 KIBANA_URL="http://localhost:5601/kibana"
-INDEX_PATTERN=${MOLOCH_INDEX_PATTERN:-"sessions2-*"}
-INDEX_PATTERN_ID=${MOLOCH_INDEX_PATTERN_ID:-"sessions2-*"}
-INDEX_TIME_FIELD=${MOLOCH_INDEX_TIME_FIELD:-"firstPacket"}
+INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"sessions2-*"}
+INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"sessions2-*"}
+INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 
 # is the argument to automatically create this index enabled?
-if [[ "$CREATE_ES_MOLOCH_SESSION_INDEX" = "true" ]] ; then
+if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
   # give Elasticsearch time to start before configuring Kibana
   /data/elastic_search_status.sh >/dev/null 2>&1

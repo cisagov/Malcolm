@@ -181,7 +181,7 @@ def stop(wipe=False):
 
   if wipe:
     # attempt to DELETE _template/zeek_template in Elasticsearch
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'moloch', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$ES_PORT/_template/zeek_template"'], debug=args.debug)
+    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$ES_PORT/_template/zeek_template"'], debug=args.debug)
 
   # if stop.sh is being called with wipe.sh (after the docker-compose file)
   # then also remove named and anonymous volumes (not external volumes, of course)
@@ -197,7 +197,7 @@ def stop(wipe=False):
     # delete elasticsearch database
     shutil.rmtree(os.path.join(MalcolmPath, 'elasticsearch/nodes'), ignore_errors=True)
 
-    # delete data files (backups, zeek logs, moloch logs, PCAP files, captured PCAP files)
+    # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
     for dataDir in ['elasticsearch-backup', 'zeek-logs', 'moloch-logs', 'pcap', 'moloch-raw']:
       for root, dirnames, filenames in os.walk(os.path.join(MalcolmPath, dataDir), topdown=True, onerror=None):
         for file in filenames:
@@ -276,7 +276,7 @@ def start():
     eprint("Started Malcolm\n\n")
     eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")
     eprint("------------------------------------------------------------------------------")
-    eprint("  - Moloch: https://localhost/")
+    eprint("  - Arkime: https://localhost/")
     eprint("  - Kibana: https://localhost/kibana/")
     eprint("  - PCAP upload (web): https://localhost/upload/")
     eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")

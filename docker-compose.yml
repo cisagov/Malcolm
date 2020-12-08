@@ -32,9 +32,9 @@ x-nginx-variables: &nginx-variables
   # Whether or not to write nginx's access.log and error.log to Elasticsearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
-x-moloch-variables: &moloch-variables
+x-arkime-variables: &arkime-variables
   MANAGE_PCAP_FILES : 'false'
-  MOLOCH_ANALYZE_PCAP_THREADS : 1
+  ARKIME_ANALYZE_PCAP_THREADS : 1
   MAXMIND_GEOIP_DB_LICENSE_KEY : '0'
 
 x-zeek-variables: &zeek-variables
@@ -52,7 +52,7 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_ENABLE_CAPA : 'false'
   EXTRACTED_FILE_CAPA_VERBOSE : 'false'
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
-  EXTRACTED_FILE_ENABLE_FRESHCLAM : 'false'
+  EXTRACTED_FILE_UPDATE_RULES : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
   # environment variables for tweaking Zeek at runtime (see local.zeek)
@@ -129,7 +129,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-oss:2.4.1
+    image: malcolmnetsec/elasticsearch-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -167,7 +167,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-oss:2.4.1
+    image: malcolmnetsec/kibana-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -177,10 +177,10 @@ services:
       << : *kibana-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
-      CREATE_ES_MOLOCH_SESSION_INDEX : 'true'
-      MOLOCH_INDEX_PATTERN : 'sessions2-*'
-      MOLOCH_INDEX_PATTERN_ID : 'sessions2-*'
-      MOLOCH_INDEX_TIME_FIELD : 'firstPacket'
+      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
+      ARKIME_INDEX_PATTERN : 'sessions2-*'
+      ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
+      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
     depends_on:
       - elasticsearch
     expose:
@@ -196,7 +196,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elastalert.Dockerfile
-    image: malcolmnetsec/elastalert:2.4.1
+    image: malcolmnetsec/elastalert:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -227,7 +227,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/curator.Dockerfile
-    image: malcolmnetsec/curator:2.4.1
+    image: malcolmnetsec/curator:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -251,7 +251,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:2.4.1
+    image: malcolmnetsec/logstash-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -289,7 +289,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:2.4.1
+    image: malcolmnetsec/filebeat-oss:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -326,23 +326,23 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
-  moloch:
+  arkime:
     build:
       context: .
-      dockerfile: Dockerfiles/moloch.Dockerfile
-    image: malcolmnetsec/moloch:2.4.1
+      dockerfile: Dockerfiles/arkime.Dockerfile
+    image: malcolmnetsec/arkime:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: moloch
+    hostname: arkime
     env_file:
       - ./auth.env
     environment:
       << : *process-variables
       << : *common-upload-variables
-      << : *moloch-variables
-      MOLOCH_VERSION : '2.4.1'
-      VIRTUAL_HOST : 'moloch.malcolm.local'
+      << : *arkime-variables
+      ARKIME_VERSION : '2.7.1'
+      VIRTUAL_HOST : 'arkime.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
       ES_MAX_SHARDS_PER_NODE : 2500
@@ -375,7 +375,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:2.4.1
+    image: malcolmnetsec/zeek:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -405,7 +405,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:2.4.1
+    image: malcolmnetsec/file-monitor:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -429,7 +429,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:2.4.1
+    image: malcolmnetsec/pcap-capture:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -458,7 +458,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:2.4.1
+    image: malcolmnetsec/pcap-monitor:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -484,7 +484,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:2.4.1
+    image: malcolmnetsec/file-upload:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -496,7 +496,7 @@ services:
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
-      - moloch
+      - arkime
     expose:
       - 80
     ports:
@@ -510,7 +510,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.4.1
+    image: malcolmnetsec/htadmin:2.4.2
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -535,7 +535,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.4.1
+    image: malcolmnetsec/freq:2.4.2
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -556,7 +556,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.4.1
+    image: malcolmnetsec/name-map-ui:2.4.2
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -583,7 +583,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:2.4.1
+    image: malcolmnetsec/nginx-proxy:2.4.2
     restart: "no"
     stdin_open: false
     tty: true
@@ -593,7 +593,7 @@ services:
       << : *auth-variables
       << : *nginx-variables
     depends_on:
-      - moloch
+      - arkime
       - kibana
       - upload
       - htadmin
