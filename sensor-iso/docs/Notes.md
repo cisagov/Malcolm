@@ -113,12 +113,12 @@ $ /usr/sbin/tcpdump \
 
 ### <a name="molochCompile"></a>Compiling Arkime from source
 
-At the time of writing, the [current stable release](https://github.com/arkime/arkime/blob/master/CHANGELOG) of Arkime is [v2.4.2](https://github.com/arkime/arkime/releases/tag/v2.4.2). The following bash script was used to install Arkime's build dependencies, download Arkime, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
+At the time of writing, the [current stable release](https://github.com/arkime/arkime/blob/master/CHANGELOG) of Arkime is [v2.7.1](https://github.com/arkime/arkime/releases/tag/v2.7.1). The following bash script was used to install Arkime's build dependencies, download Arkime, build a Debian .deb package using [fpm](https://github.com/jordansissel/fpm) and install it. In building Hedgehog Linux, the building of this .deb is done inside a Docker container dedicated to that purpose.
 
 ```bash
 #!/bin/bash
 
-ARKIME_VERSION="2.4.2"
+ARKIME_VERSION="2.7.1"
 ARKIMEDIR="/opt/moloch"
 
 OUTPUT_DIR="/tmp"
