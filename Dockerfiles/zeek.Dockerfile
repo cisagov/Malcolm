@@ -6,20 +6,20 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # build zeek and plugins (spicy, additional protocol parsers, etc.)
 
-ENV BISON_VERSION "3.7.2"
+ENV BISON_VERSION "3.7.4"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV CMAKE_DIR "/opt/cmake"
-ENV CMAKE_VERSION "3.18.4"
+ENV CMAKE_VERSION "3.19.1"
 ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
-ENV ZEEK_VERSION "3.0.11"
+ENV ZEEK_VERSION "3.0.12"
 
 # using clang now instead of gcc because Spicy depends on it
-ENV LLVM_VERSION "10"
+ENV LLVM_VERSION "11"
 ENV CC "clang-${LLVM_VERSION}"
 ENV CXX "clang++-${LLVM_VERSION}"
 ENV ASM "clang-${LLVM_VERSION}"
@@ -109,7 +109,7 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ENV LLVM_VERSION "10"
+ENV LLVM_VERSION "11"
 ENV ZEEK_DIR "/opt/zeek"
 ENV SPICY_DIR "/opt/spicy"
 

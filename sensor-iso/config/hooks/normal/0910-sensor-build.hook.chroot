@@ -7,7 +7,7 @@ NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.
 
 SPICY_DIR="/opt/spicy"
 ZEEK_DIR="/opt/zeek"
-ZEEK_VER="3.0.11"
+ZEEK_VER="3.0.12"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
@@ -19,10 +19,10 @@ BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
 CMAKE_DIR="/opt/cmake"
-CMAKE_VER="3.18.4"
+CMAKE_VER="3.19.1"
 CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
 
-BISON_VER="3.7.2"
+BISON_VER="3.7.4"
 BISON_URL="https://ftp.gnu.org/gnu/bison/bison-${BISON_VER}.tar.gz"
 
 YARA_VERSION="4.0.2"
@@ -36,9 +36,9 @@ CAPA_RULES_DIR="/opt/capa-rules"
 mkdir -p /opt/hedgehog_install_artifacts/
 
 # some environment variables needed for build using clang
-export CC="clang-10"
-export CXX="clang++-10"
-export ASM="clang-10"
+export CC="clang-11"
+export CXX="clang++-11"
+export ASM="clang-11"
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
 export PATH="${ZEEK_DIR}"/bin:"${CMAKE_DIR}"/bin:$PATH
@@ -92,7 +92,7 @@ done
 ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
 cd build
 ninja
-# TODO: we were using checkinstall and I would prefer to, but it has some issues with clang++-10 not finding
+# TODO: we were using checkinstall and I would prefer to, but it has some issues with clang++-11 not finding
 # stdlib include files so for now i'm just back to ninja install. honestly that's probably fine
 # because we weren't getting the third party plugins in the .deb anyway...
 # checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
