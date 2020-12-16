@@ -22,7 +22,7 @@ bzip2
 ccache
 checkinstall
 cifs-utils
-clang-10
+clang-11
 coreutils
 cpio
 cpufrequtils
@@ -77,10 +77,10 @@ javascript-common
 jq
 less
 libatomic1
-libclang-10-dev
-libclang-common-10-dev
-libclang-cpp10
-libclang1-10
+libclang-11-dev
+libclang-common-11-dev
+libclang-cpp11
+libclang1-11
 libcli-dev
 libffi-dev
 libffi6
@@ -122,8 +122,8 @@ libyaml-dev
 libykpers-1-1
 libyubikey0
 libzmq5
-llvm-10
-llvm-10-dev
+llvm-11
+llvm-11-dev
 lm-sensors
 localepurge
 locales-all
