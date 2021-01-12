@@ -92,6 +92,21 @@ done
 
 # manual build processes that don't fit the other patterns
 
+# INL ICS parsers
+SRC_DIR="$(clone_github_repo "https://github.com/idaholab/ICSNPP")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  for FULL_PARSER in zeek_bacnet_parser zeek_enip_parser; do
+    cd "$SRC_DIR"/"$FULL_PARSER" && \
+      ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+      make && \
+      make install
+  done
+  cp "$SRC_DIR"/zeek_dnp3_parser/*.zeek /opt/zeek/share/zeek/base/protocols/dnp3/
+  cp "$SRC_DIR"/zeek_modbus_parser/*.zeek /opt/zeek/share/zeek/base/protocols/modbus/
+  cd "$CWD"
+fi
+
 SRC_DIR="$(clone_github_repo "https://github.com/salesforce/GQUIC_Protocol_Analyzer")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
@@ -131,20 +146,6 @@ for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
     cd "$CWD"
   fi
 done
-
-# INL ICS parsers
-SRC_DIR="$(clone_github_repo "https://github.com/idaholab/ICSNPP")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  for FULL_PARSER in zeek_bacnet_parser zeek_enip_parser; do
-    cd "$SRC_DIR"/"$FULL_PARSER" && \
-      ./configure --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-      make && \
-      make install
-  done
-  cp "$SRC_DIR"/zeek_modbus_parser/main.zeek /opt/zeek/share/zeek/base/protocols/modbus/
-  cp "$SRC_DIR"/zeek_dnp3_parser/*.zeek /opt/zeek/share/zeek/base/protocols/dnp3/
-fi
 
 # install Spicy
 SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"

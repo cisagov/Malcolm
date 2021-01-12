@@ -7,6 +7,7 @@
 global disable_bzar = (getenv("ZEEK_DISABLE_MITRE_BZAR") == "") ? F : T;
 global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == "") ? F : T;
 global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F : T;
+global disable_modbus_tracking = (getenv("ZEEK_DISABLE_MODBUS_TRACKING") == "") ? F : T;
 global disable_mqtt = (getenv("ZEEK_DISABLE_MQTT") == "") ? F : T;
 global disable_pe_xor = (getenv("ZEEK_DISABLE_PE_XOR") == "") ? F : T;
 global disable_quic = (getenv("ZEEK_DISABLE_QUIC") == "") ? F : T;
@@ -63,6 +64,10 @@ redef ignore_checksums = T;
 @endif
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
+@if (!disable_modbus_tracking)
+  @load policy/protocols/modbus/track-memmap
+  @load policy/protocols/modbus/known-masters-slaves
+@endif
 @if (!disable_mqtt)
   @load policy/protocols/mqtt
 @endif

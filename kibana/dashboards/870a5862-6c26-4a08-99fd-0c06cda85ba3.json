@@ -4,18 +4,18 @@
     {
       "id": "870a5862-6c26-4a08-99fd-0c06cda85ba3",
       "type": "dashboard",
-      "updated_at": "2020-06-16T19:12:55.775Z",
-      "version": "WzY5OCwxXQ==",
+      "updated_at": "2020-08-20T23:59:06.361Z",
+      "version": "Wzc0NSwxXQ==",
       "attributes": {
         "title": "DNP3",
         "hits": 0,
-        "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":27,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":27,\"w\":11,\"h\":19,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}},\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":11,\"y\":27,\"w\":18,\"h\":19,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}},\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":8,\"w\":11,\"h\":19,\"i\":\"13\"},\"panelIndex\":\"13\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}},\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":19,\"y\":8,\"w\":10,\"h\":19,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}},\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":29,\"y\":8,\"w\":19,\"h\":38,\"i\":\"994cf25b-7715-4b59-91f1-c75c735daddc\"},\"panelIndex\":\"994cf25b-7715-4b59-91f1-c75c735daddc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":46,\"w\":48,\"h\":37,\"i\":\"20bab908-6058-4f9a-819b-de9011dd65b0\"},\"panelIndex\":\"20bab908-6058-4f9a-819b-de9011dd65b0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
+        "description": "Dashboard for the DNP3 Protocol",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":33,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":14,\"i\":\"7\",\"w\":13,\"x\":0,\"y\":33},\"panelIndex\":\"7\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":14,\"i\":\"8\",\"w\":11,\"x\":13,\"y\":33},\"panelIndex\":\"8\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":19,\"i\":\"13\",\"w\":11,\"x\":8,\"y\":14},\"panelIndex\":\"13\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":19,\"i\":\"14\",\"w\":10,\"x\":19,\"y\":14},\"panelIndex\":\"14\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":14,\"i\":\"0d2c1a60-2ee6-46a5-8c6f-e5a95a1f5850\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"0d2c1a60-2ee6-46a5-8c6f-e5a95a1f5850\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":14,\"i\":\"6f17ed53-0ae8-4260-acd7-92115f40037c\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"6f17ed53-0ae8-4260-acd7-92115f40037c\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"dc74966e-dd3d-4277-a4c0-92a2b21d1214\",\"w\":19,\"x\":29,\"y\":14},\"panelIndex\":\"dc74966e-dd3d-4277-a4c0-92a2b21d1214\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":30,\"i\":\"0242ac86-f482-429a-bc77-89eb89eb7996\",\"w\":24,\"x\":24,\"y\":33},\"panelIndex\":\"0242ac86-f482-429a-bc77-89eb89eb7996\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"9fddb0ae-d93f-4ecb-8625-ccd87a92e175\",\"w\":24,\"x\":0,\"y\":47},\"panelIndex\":\"9fddb0ae-d93f-4ecb-8625-ccd87a92e175\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"20bab908-6058-4f9a-819b-de9011dd65b0\",\"w\":48,\"x\":0,\"y\":63},\"panelIndex\":\"20bab908-6058-4f9a-819b-de9011dd65b0\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"f4c2ba58-794b-4b5a-b65e-3cb6a924f199\",\"w\":48,\"x\":0,\"y\":86},\"panelIndex\":\"f4c2ba58-794b-4b5a-b65e-3cb6a924f199\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"842b0a10-1906-4b1f-9da3-f6b271a85dcb\",\"w\":48,\"x\":0,\"y\":104},\"panelIndex\":\"842b0a10-1906-4b1f-9da3-f6b271a85dcb\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_12\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\"}}}}"
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"}}"
         }
       },
       "references": [
@@ -27,42 +27,62 @@
         {
           "name": "panel_1",
           "type": "visualization",
-          "id": "ab886b44-653f-401f-aca3-a6edb990dff7"
+          "id": "d34dd3b3-3861-4b9b-ba39-4ca7e15b3bdd"
         },
         {
           "name": "panel_2",
           "type": "visualization",
-          "id": "d34dd3b3-3861-4b9b-ba39-4ca7e15b3bdd"
+          "id": "131198e7-afc4-40be-bedd-2a3a3a2d511e"
         },
         {
           "name": "panel_3",
           "type": "visualization",
-          "id": "131198e7-afc4-40be-bedd-2a3a3a2d511e"
+          "id": "46cd2e4c-ecfb-4fe9-ae51-28c2fecbffc0"
         },
         {
           "name": "panel_4",
           "type": "visualization",
-          "id": "AWDG9DWvxQT5EBNmq3-m"
+          "id": "9422ff81-b007-4eef-aca1-1af16509ab8c"
         },
         {
           "name": "panel_5",
           "type": "visualization",
-          "id": "46cd2e4c-ecfb-4fe9-ae51-28c2fecbffc0"
+          "id": "34700240-cb66-11ea-b8b9-778c41cae039"
         },
         {
           "name": "panel_6",
           "type": "visualization",
-          "id": "9422ff81-b007-4eef-aca1-1af16509ab8c"
+          "id": "4f7c9990-cb66-11ea-b8b9-778c41cae039"
         },
         {
           "name": "panel_7",
           "type": "visualization",
-          "id": "e0ded880-b004-11ea-835f-6bfe462ea6ed"
+          "id": "9277d050-e33c-11ea-b05f-2302f75ab2c8"
         },
         {
           "name": "panel_8",
+          "type": "visualization",
+          "id": "fd7d74c0-e339-11ea-b05f-2302f75ab2c8"
+        },
+        {
+          "name": "panel_9",
+          "type": "visualization",
+          "id": "63cebc10-e33b-11ea-b05f-2302f75ab2c8"
+        },
+        {
+          "name": "panel_10",
           "type": "search",
           "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
+        },
+        {
+          "name": "panel_11",
+          "type": "search",
+          "id": "980f33d0-cb65-11ea-b8b9-778c41cae039"
+        },
+        {
+          "name": "panel_12",
+          "type": "search",
+          "id": "cf32a680-cb65-11ea-b8b9-778c41cae039"
         }
       ],
       "migrationVersion": {
@@ -72,8 +92,8 @@
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
       "type": "visualization",
-      "updated_at": "2020-06-16T17:45:06.094Z",
-      "version": "WzY2MSwxXQ==",
+      "updated_at": "2020-08-20T20:11:10.670Z",
+      "version": "WzY2NiwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
         "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/kibana#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/kibana#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/kibana#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/kibana#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/kibana#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/kibana#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/kibana#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/kibana#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n\\n[Notices](/kibana/app/kibana#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/kibana#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/kibana#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/kibana#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/kibana#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/kibana#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/kibana#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/kibana#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b)   ●   [HTTP](/kibana/app/kibana#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/kibana#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/kibana#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/kibana#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/kibana#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/kibana#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/kibana#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/kibana#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/kibana#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/kibana#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/kibana#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/kibana#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/kibana#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/kibana#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/kibana#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/kibana#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/kibana#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/kibana#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/kibana#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/kibana#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/kibana#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/kibana#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/kibana#/dashboard/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/kibana#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/kibana#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [DNP3](/kibana/app/kibana#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/kibana#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/kibana#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/kibana#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/kibana#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/kibana#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -90,42 +110,15 @@
       }
     },
     {
-      "id": "ab886b44-653f-401f-aca3-a6edb990dff7",
-      "type": "visualization",
-      "updated_at": "2020-06-16T17:44:39.424Z",
-      "version": "WzM4NiwxXQ==",
-      "attributes": {
-        "visState": "{\"title\":\"DNP3 - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 30 minutes\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"line\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
-        "description": "",
-        "title": "DNP3 - Log Count Over Time",
-        "uiStateJSON": "{}",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
-          "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.4.2"
-      }
-    },
-    {
       "id": "d34dd3b3-3861-4b9b-ba39-4ca7e15b3bdd",
       "type": "visualization",
-      "updated_at": "2020-06-16T17:44:39.424Z",
-      "version": "WzM4NywxXQ==",
+      "updated_at": "2020-08-20T23:35:37.463Z",
+      "version": "WzczOSwxXQ==",
       "attributes": {
-        "visState": "{\"title\":\"DNP3 - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcIp\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
-        "description": "",
-        "title": "DNP3 - Source IP Address",
+        "title": "DNP3 - Source IP",
+        "visState": "{\"title\":\"DNP3 - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/db:srcIp == {{value}}\",\"label\":\"Moloch srcIp: {{value}}\"},{\"url\":\"https://www.virustotal.com/en/ip-address/{{value}}/information/\",\"label\":\"VirusTotal IP: {{value}}\"}]}},\"params\":{},\"label\":\"IP Address\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "description": "Source IP Addresses from dnp3.log",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[]}"
@@ -134,8 +127,8 @@
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
         }
       ],
@@ -146,13 +139,13 @@
     {
       "id": "131198e7-afc4-40be-bedd-2a3a3a2d511e",
       "type": "visualization",
-      "updated_at": "2020-06-16T19:10:32.074Z",
-      "version": "WzY5NiwxXQ==",
+      "updated_at": "2020-08-20T23:36:31.942Z",
+      "version": "Wzc0MSwxXQ==",
       "attributes": {
-        "title": "DNP3 - Destination IP Address",
-        "visState": "{\"title\":\"DNP3 - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"IP Address\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstPort\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"}}]}",
+        "title": "DNP3 - Destination IP",
+        "visState": "{\"title\":\"DNP3 - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/db:dstIp == {{value}}\",\"label\":\"Moloch dstIp: {{value}}\"},{\"url\":\"https://www.virustotal.com/en/ip-address/{{value}}/information/\",\"label\":\"VirusTotal IP: {{value}}\"}]}},\"params\":{},\"label\":\"IP Address\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/db:dstPort == {{value}}\",\"label\":\"Moloch dstPort: {{value}}\"},{\"url\":\"https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}\",\"label\":\"Port Registry: {{value}}\"}]}},\"params\":{},\"label\":\"Port\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
-        "description": "",
+        "description": "Destination IP Addresses from dnp3.log",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[]}"
@@ -163,33 +156,6 @@
         {
           "name": "search_0",
           "type": "search",
-          "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.4.2"
-      }
-    },
-    {
-      "id": "AWDG9DWvxQT5EBNmq3-m",
-      "type": "visualization",
-      "updated_at": "2020-06-16T17:44:39.424Z",
-      "version": "WzM5MCwxXQ==",
-      "attributes": {
-        "title": "DNP3 - Log Count",
-        "visState": "{\"title\":\"DNP3 - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
-        "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "type": "search",
-          "name": "search_0",
           "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
         }
       ],
@@ -200,13 +166,13 @@
     {
       "id": "46cd2e4c-ecfb-4fe9-ae51-28c2fecbffc0",
       "type": "visualization",
-      "updated_at": "2020-06-16T17:44:39.424Z",
-      "version": "WzM5MSwxXQ==",
+      "updated_at": "2020-08-20T22:55:22.354Z",
+      "version": "WzcxNywxXQ==",
       "attributes": {
         "title": "DNP3 - Function Request",
-        "visState": "{\"title\":\"DNP3 - Function Request\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3.fc_request\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Request\"}}]}",
+        "visState": "{\"title\":\"DNP3 - Function Request\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3.fc_request\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Request\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "",
+        "description": "DNP3 function in request packet from dnp3.log",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
@@ -215,8 +181,8 @@
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
         }
       ],
@@ -227,13 +193,13 @@
     {
       "id": "9422ff81-b007-4eef-aca1-1af16509ab8c",
       "type": "visualization",
-      "updated_at": "2020-06-16T17:44:39.424Z",
-      "version": "WzM5MiwxXQ==",
+      "updated_at": "2020-08-20T22:56:27.069Z",
+      "version": "WzcxOCwxXQ==",
       "attributes": {
         "title": "DNP3 - Function Reply",
-        "visState": "{\"title\":\"DNP3 - Function Reply\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3.fc_reply\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Reply\"}}]}",
+        "visState": "{\"title\":\"DNP3 - Function Reply\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3.fc_reply\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Reply\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "",
+        "description": "DNP3 function in reply packet from dnp3.log",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
@@ -242,8 +208,8 @@
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a"
         }
       ],
@@ -252,15 +218,67 @@
       }
     },
     {
-      "id": "e0ded880-b004-11ea-835f-6bfe462ea6ed",
+      "id": "34700240-cb66-11ea-b8b9-778c41cae039",
       "type": "visualization",
-      "updated_at": "2020-06-16T19:09:18.713Z",
-      "version": "WzY5NCwxXQ==",
+      "updated_at": "2020-08-20T22:53:09.978Z",
+      "version": "WzcxMCwxXQ==",
       "attributes": {
-        "title": "DNP3 - Internal Indicators",
-        "visState": "{\"title\":\"DNP3 - Internal Indicators\",\"type\":\"horizontal_bar\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":true},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Internal Indicators\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_dnp3.iin_flags\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":16,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Internal Indicators\"}}]}",
+        "title": "DNP3 - Log Count",
+        "visState": "{\"title\":\"DNP3 - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Log Count\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"zeek.logType\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
+        "uiStateJSON": "{}",
+        "description": "Count of DNP3 logs including DNP3 Control and Objects logs",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.logType:(dnp3 OR dnp3_control OR dnp3_objects)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "sessions2-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.4.2"
+      }
+    },
+    {
+      "id": "4f7c9990-cb66-11ea-b8b9-778c41cae039",
+      "type": "visualization",
+      "updated_at": "2020-08-20T22:53:41.439Z",
+      "version": "WzcxMiwxXQ==",
+      "attributes": {
+        "title": "DNP3 - Logs Over Time",
+        "visState": "{\"title\":\"DNP3 - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-25y\",\"to\":\"now\",\"mode\":\"relative\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"zeek.logType\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
-        "description": "",
+        "description": "DNP3 logs over time",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.logType:(dnp3 OR dnp3_control OR dnp3_objects)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "sessions2-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.4.2"
+      }
+    },
+    {
+      "id": "9277d050-e33c-11ea-b05f-2302f75ab2c8",
+      "type": "visualization",
+      "updated_at": "2020-08-20T23:26:28.309Z",
+      "version": "WzczNiwxXQ==",
+      "attributes": {
+        "title": "DNP3 - Internal Indicators Overview",
+        "visState": "{\"title\":\"DNP3 - Internal Indicators Overview\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3.iin_flags == \\\"{{value}}\\\"\",\"label\":\"Moloch zeek_dnp3.iin_flags: \\\"{{value}}\\\"\"}]}},\"params\":{},\"label\":\"Internal Indicators\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_dnp3.iin_flags\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Internal Indicators\"}}]}",
+        "uiStateJSON": "{}",
+        "description": "DNP3 Internal Indicators from dnp3.iin in dnp3.log",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{}"
@@ -279,10 +297,64 @@
       }
     },
     {
+      "id": "fd7d74c0-e339-11ea-b05f-2302f75ab2c8",
+      "type": "visualization",
+      "updated_at": "2020-08-20T23:58:55.353Z",
+      "version": "Wzc0NCwxXQ==",
+      "attributes": {
+        "title": "DNP3 - Objects Overview",
+        "visState": "{\"title\":\"DNP3 - Objects Overview\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":3,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":4,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_objects.object_type == \\\"{{value}}\\\"\",\"label\":\"Moloch zeek_dnp3_objects.object_type: \\\"{{value}}\\\"\"}]}},\"params\":{},\"label\":\"Object Type\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"-\",\"missingBucketLabel\":\"-\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_objects.range_low == {{value}}\",\"label\":\"Moloch zeek_dnp3_objects.range_low: {{value}}\"}]}},\"params\":{},\"label\":\"Range Start\",\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"-\",\"missingBucketLabel\":\"-\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_objects.range_high == {{value}}\",\"label\":\"Moloch zeek_dnp3_objects.range_high: {{value}}\"}]}},\"params\":{},\"label\":\"Range End\",\"aggType\":\"terms\"}],\"splitRow\":[{\"accessor\":3,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/db:dstIp == {{value}}\",\"label\":\"Moloch dstIp: {{value}}\"},{\"url\":\"https://www.virustotal.com/en/ip-address/{{value}}/information/\",\"label\":\"VirusTotal IP: {{value}}\"}]}},\"params\":{},\"label\":\"IP Address\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_objects.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"8\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_objects.object_count\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Count\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_objects.range_low\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"-\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Range Start\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_objects.range_high\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"-\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Range End\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\",\"params\":{\"field\":\"dstIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP Address\",\"row\":true}}]}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":null}}}}",
+        "description": "Overview of DNP3 objects from READ-RESPONSE messages in dnp3_objects.log",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "cf32a680-cb65-11ea-b8b9-778c41cae039"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.4.2"
+      }
+    },
+    {
+      "id": "63cebc10-e33b-11ea-b05f-2302f75ab2c8",
+      "type": "visualization",
+      "updated_at": "2020-08-20T23:18:00.529Z",
+      "version": "WzcyOCwxXQ==",
+      "attributes": {
+        "title": "DNP3 - Control Overview",
+        "visState": "{\"title\":\"DNP3 - Control Overview\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":5,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/db:dstIp == {{value}}\",\"label\":\"Moloch dstIp: {{value}}\"},{\"url\":\"https://www.virustotal.com/en/ip-address/{{value}}/information/\",\"label\":\"VirusTotal IP: {{value}}\"}]}},\"params\":{},\"label\":\"IP\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_control.index_number == {{value}}\",\"label\":\"Moloch zeek_dnp3_control.index_number: {{value}}\"}]}},\"params\":{},\"label\":\"Index Number\",\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_control.function_code == \\\"{{value}}\\\"\",\"label\":\"Moloch zeek_dnp3_control.function_code: \\\"{{value}}\\\"\"}]}},\"params\":{},\"label\":\"Function\",\"aggType\":\"terms\"},{\"accessor\":3,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_control.operation_type == \\\"{{value}}\\\"\",\"label\":\"Moloch zeek_dnp3_control.operation_type: \\\"{{value}}\\\"\"}]}},\"params\":{},\"label\":\"Operation Type\",\"aggType\":\"terms\"},{\"accessor\":4,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\",\"parsedUrl\":{\"origin\":\"https://10.4.0.226\",\"pathname\":\"/kibana/app/kibana\",\"basePath\":\"/kibana\"},\"urlTemplates\":[null,{\"url\":\"/idkib2mol/zeek_dnp3_control.trip_control_code == \\\"{{value}}\\\"\",\"label\":\"Moloch zeek_dnp3_control.trip_control_code: \\\"{{value}}\\\"\"}]}},\"params\":{},\"label\":\"Control Code\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_control.index_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Index Number\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_control.function_code\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_control.block_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Block Type\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_control.operation_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Operation Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dnp3_control.trip_control_code\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Control Code\"}}]}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":null}}}}",
+        "description": "Overview of DNP3 control functions from dnp3_control.log",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "980f33d0-cb65-11ea-b8b9-778c41cae039"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.4.2"
+      }
+    },
+    {
       "id": "cc135a63-3e30-4703-bc31-f7ac09c1d21a",
       "type": "search",
-      "updated_at": "2020-06-16T17:44:39.424Z",
-      "version": "WzM5MywxXQ==",
+      "updated_at": "2020-08-20T20:10:42.378Z",
+      "version": "WzM5NiwxXQ==",
       "attributes": {
         "title": "DNP3 - Logs",
         "description": "",
@@ -304,6 +376,92 @@
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"zeek.logType:dnp3\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "sessions2-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.4.0"
+      }
+    },
+    {
+      "id": "980f33d0-cb65-11ea-b8b9-778c41cae039",
+      "type": "search",
+      "updated_at": "2020-08-20T20:10:42.378Z",
+      "version": "WzM5NywxXQ==",
+      "attributes": {
+        "title": "DNP3 - Control Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "dstPort",
+          "zeek_dnp3_control.block_type",
+          "zeek_dnp3_control.index_number",
+          "zeek_dnp3_control.function_code",
+          "zeek_dnp3_control.trip_control_code",
+          "zeek_dnp3_control.operation_type",
+          "zeek_dnp3_control.status_code",
+          "zeek_dnp3_control.execute_count",
+          "zeek_dnp3_control.on_time",
+          "zeek_dnp3_control.off_time"
+        ],
+        "sort": [
+          [
+            "firstPacket",
+            "desc"
+          ]
+        ],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"zeek.logType==\\\"dnp3_control\\\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "sessions2-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.4.0"
+      }
+    },
+    {
+      "id": "cf32a680-cb65-11ea-b8b9-778c41cae039",
+      "type": "search",
+      "updated_at": "2020-08-20T20:10:42.378Z",
+      "version": "WzM5OCwxXQ==",
+      "attributes": {
+        "title": "DNP3 - Objects Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "srcIp",
+          "dstIp",
+          "dstPort",
+          "zeek_dnp3_objects.function_code",
+          "zeek_dnp3_objects.object_type",
+          "zeek_dnp3_objects.object_count",
+          "zeek_dnp3_objects.range_high",
+          "zeek_dnp3_objects.range_low"
+        ],
+        "sort": [
+          [
+            "firstPacket",
+            "desc"
+          ]
+        ],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"zeek.logType==\\\"dnp3_objects\\\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

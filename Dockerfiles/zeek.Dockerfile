@@ -172,7 +172,7 @@ ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
 ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 25
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|Zeek_Bacnet/scripts/main|Zeek_Enip/scripts/main.zeek|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|Zeek_Bacnet/scripts/main|Zeek_Enip/scripts/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
