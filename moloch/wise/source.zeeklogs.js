@@ -175,21 +175,21 @@ function ZeekLogs (api, section) {
   // https://github.com/cisagov/ICSNPP
   this.dnp3_control_block_typeField = this.api.addField("field:zeek_dnp3_control.block_type;db:zeek_dnp3_control.block_type;kind:termfield;friendly:Control Block Type;help:Control Block Type");
   this.dnp3_control_function_codeField = this.api.addField("field:zeek_dnp3_control.function_code;db:zeek_dnp3_control.function_code;kind:termfield;friendly:DNP3 Function Code;help:DNP3 Function Code");
-  this.dnp3_control_index_numberField = this.api.addField("field:zeek_dnp3_control.index_number;db:zeek_dnp3_control.index_number;kind:termfield;friendly:Object Index Number;help:Object Index Number");
+  this.dnp3_control_index_numberField = this.api.addField("field:zeek_dnp3_control.index_number;db:zeek_dnp3_control.index_number;kind:integer;friendly:Object Index Number;help:Object Index Number");
   this.dnp3_control_trip_control_codeField = this.api.addField("field:zeek_dnp3_control.trip_control_code;db:zeek_dnp3_control.trip_control_code;kind:termfield;friendly:Trip Control Code;help:Trip Control Code");
   this.dnp3_control_operation_typeField = this.api.addField("field:zeek_dnp3_control.operation_type;db:zeek_dnp3_control.operation_type;kind:termfield;friendly:Operation Type;help:Operation Type");
-  this.dnp3_control_execute_countField = this.api.addField("field:zeek_dnp3_control.execute_count;db:zeek_dnp3_control.execute_count;kind:termfield;friendly:Execute Count;help:Execute Count");
-  this.dnp3_control_on_timeField = this.api.addField("field:zeek_dnp3_control.on_time;db:zeek_dnp3_control.on_time;kind:termfield;friendly:On Time;help:On Time");
-  this.dnp3_control_off_timeField = this.api.addField("field:zeek_dnp3_control.off_time;db:zeek_dnp3_control.off_time;kind:termfield;friendly:Off Time;help:Off Time");
+  this.dnp3_control_execute_countField = this.api.addField("field:zeek_dnp3_control.execute_count;db:zeek_dnp3_control.execute_count;kind:integer;friendly:Execute Count;help:Execute Count");
+  this.dnp3_control_on_timeField = this.api.addField("field:zeek_dnp3_control.on_time;db:zeek_dnp3_control.on_time;kind:integer;friendly:On Time;help:On Time");
+  this.dnp3_control_off_timeField = this.api.addField("field:zeek_dnp3_control.off_time;db:zeek_dnp3_control.off_time;kind:integer;friendly:Off Time;help:Off Time");
   this.dnp3_control_status_codeField = this.api.addField("field:zeek_dnp3_control.status_code;db:zeek_dnp3_control.status_code;kind:termfield;friendly:Status Code;help:Status Code");
 
   // dnp3_objects.log
   // https://github.com/cisagov/ICSNPP
   this.dnp3_objects_function_codeField = this.api.addField("field:zeek_dnp3_objects.function_code;db:zeek_dnp3_objects.function_code;kind:termfield;friendly:Function Code;help:Function Code");
   this.dnp3_objects_object_typeField = this.api.addField("field:zeek_dnp3_objects.object_type;db:zeek_dnp3_objects.object_type;kind:termfield;friendly:Object Type;help:Object Type");
-  this.dnp3_objects_object_countField = this.api.addField("field:zeek_dnp3_objects.object_count;db:zeek_dnp3_objects.object_count;kind:termfield;friendly:Object Count;help:Object Count");
-  this.dnp3_objects_range_lowField = this.api.addField("field:zeek_dnp3_objects.range_low;db:zeek_dnp3_objects.range_low;kind:termfield;friendly:Range Low;help:Range Low");
-  this.dnp3_objects_range_highField = this.api.addField("field:zeek_dnp3_objects.range_high;db:zeek_dnp3_objects.range_high;kind:termfield;friendly:Range High;help:Range High");
+  this.dnp3_objects_object_countField = this.api.addField("field:zeek_dnp3_objects.object_count;db:zeek_dnp3_objects.object_count;kind:integer;friendly:Object Count;help:Object Count");
+  this.dnp3_objects_range_lowField = this.api.addField("field:zeek_dnp3_objects.range_low;db:zeek_dnp3_objects.range_low;kind:integer;friendly:Range Low;help:Range Low");
+  this.dnp3_objects_range_highField = this.api.addField("field:zeek_dnp3_objects.range_high;db:zeek_dnp3_objects.range_high;kind:integer;friendly:Range High;help:Range High");
 
   // dns.log
   // https://docs.zeek.org/en/stable/scripts/base/protocols/dns/main.zeek.html#type-DNS::Info
