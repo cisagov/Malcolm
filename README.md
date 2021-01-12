@@ -157,22 +157,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.5.0               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.5.0               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.5.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.5.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.5.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.5.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.5.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/arkime                                2.5.0               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.5.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.5.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.5.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.5.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/curator                               2.6.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.6.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.6.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.6.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.6.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.6.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.6.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/arkime                                2.6.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.6.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.6.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.6.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.6.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1431,7 +1431,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.5.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.6.0.iso"
 …
 ```
 
@@ -1832,22 +1832,22 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.5.0               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.5.0               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.5.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.5.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.5.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.5.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.5.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/arkime                                2.5.0               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.5.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.5.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.5.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.5.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/curator                               2.6.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.6.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.6.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.6.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.6.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.6.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.6.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/arkime                                2.6.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.6.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.6.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.6.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.6.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
