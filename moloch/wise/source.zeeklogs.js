@@ -106,7 +106,7 @@ function ZeekLogs (api, section) {
 
   // cip.log
   // https://github.com/cisagov/ICSNPP
-  this.cip_cip_sequence_countField = this.api.addField("field:zeek_cip.cip_sequence_count;db:zeek_cip.cip_sequence_count;kind:termfield;friendly:CIP Sequence Number;help:CIP Sequence Number");
+  this.cip_cip_sequence_countField = this.api.addField("field:zeek_cip.cip_sequence_count;db:zeek_cip.cip_sequence_count;kind:integer;friendly:CIP Sequence Number;help:CIP Sequence Number");
   this.cip_directionField = this.api.addField("field:zeek_cip.direction;db:zeek_cip.direction;kind:termfield;friendly:Direction;help:Direction");
   this.cip_cip_serviceField = this.api.addField("field:zeek_cip.cip_service;db:zeek_cip.cip_service;kind:termfield;friendly:CIP Service;help:CIP Service");
   this.cip_cip_statusField = this.api.addField("field:zeek_cip.cip_status;db:zeek_cip.cip_status;kind:termfield;friendly:CIP Status;help:CIP Status");
@@ -119,14 +119,14 @@ function ZeekLogs (api, section) {
 
   // cip_identity.log
   // https://github.com/cisagov/ICSNPP
-  this.cip_identity_encapsulation_versionField = this.api.addField("field:zeek_cip_identity.encapsulation_version;db:zeek_cip_identity.encapsulation_version;kind:termfield;friendly:Encapsulation Version;help:Encapsulation Version");
+  this.cip_identity_encapsulation_versionField = this.api.addField("field:zeek_cip_identity.encapsulation_version;db:zeek_cip_identity.encapsulation_version;kind:integer;friendly:Encapsulation Version;help:Encapsulation Version");
   this.cip_identity_socket_addressField = this.api.addField("field:zeek_cip_identity.socket_address;db:zeek_cip_identity.socket_address;kind:termfield;friendly:Socket Address;help:Socket Address");
-  this.cip_identity_socket_portField = this.api.addField("field:zeek_cip_identity.socket_port;db:zeek_cip_identity.socket_port;kind:termfield;friendly:Socket Port;help:Socket Port");
-  this.cip_identity_vendor_idField = this.api.addField("field:zeek_cip_identity.vendor_id;db:zeek_cip_identity.vendor_id;kind:termfield;friendly:Vendor ID;help:Vendor ID");
+  this.cip_identity_socket_portField = this.api.addField("field:zeek_cip_identity.socket_port;db:zeek_cip_identity.socket_port;kind:integer;friendly:Socket Port;help:Socket Port");
+  this.cip_identity_vendor_idField = this.api.addField("field:zeek_cip_identity.vendor_id;db:zeek_cip_identity.vendor_id;kind:integer;friendly:Vendor ID;help:Vendor ID");
   this.cip_identity_vendor_nameField = this.api.addField("field:zeek_cip_identity.vendor_name;db:zeek_cip_identity.vendor_name;kind:termfield;friendly:Vendor Name;help:Vendor Name");
-  this.cip_identity_device_type_idField = this.api.addField("field:zeek_cip_identity.device_type_id;db:zeek_cip_identity.device_type_id;kind:termfield;friendly:Device Type ID;help:Device Type ID");
+  this.cip_identity_device_type_idField = this.api.addField("field:zeek_cip_identity.device_type_id;db:zeek_cip_identity.device_type_id;kind:integer;friendly:Device Type ID;help:Device Type ID");
   this.cip_identity_device_type_nameField = this.api.addField("field:zeek_cip_identity.device_type_name;db:zeek_cip_identity.device_type_name;kind:termfield;friendly:Device Type Name;help:Device Type Name");
-  this.cip_identity_product_codeField = this.api.addField("field:zeek_cip_identity.product_code;db:zeek_cip_identity.product_code;kind:termfield;friendly:Product Code;help:Product Code");
+  this.cip_identity_product_codeField = this.api.addField("field:zeek_cip_identity.product_code;db:zeek_cip_identity.product_code;kind:integer;friendly:Product Code;help:Product Code");
   this.cip_identity_revisionField = this.api.addField("field:zeek_cip_identity.revision;db:zeek_cip_identity.revision;kind:termfield;friendly:Device Revision;help:Device Revision");
   this.cip_identity_device_statusField = this.api.addField("field:zeek_cip_identity.device_status;db:zeek_cip_identity.device_status;kind:termfield;friendly:Device Status;help:Device Status");
   this.cip_identity_serial_numberField = this.api.addField("field:zeek_cip_identity.serial_number;db:zeek_cip_identity.serial_number;kind:termfield;friendly:Serial Number;help:Serial Number");
@@ -136,8 +136,8 @@ function ZeekLogs (api, section) {
   // cip_io.log
   // https://github.com/cisagov/ICSNPP
   this.cip_io_connection_idField = this.api.addField("field:zeek_cip_io.connection_id;db:zeek_cip_io.connection_id;kind:termfield;friendly:Connection ID;help:Connection ID");
-  this.cip_io_sequence_numberField = this.api.addField("field:zeek_cip_io.sequence_number;db:zeek_cip_io.sequence_number;kind:termfield;friendly:Sequence Number;help:Sequence Number");
-  this.cip_io_data_lengthField = this.api.addField("field:zeek_cip_io.data_length;db:zeek_cip_io.data_length;kind:termfield;friendly:Data Length;help:Data Length");
+  this.cip_io_sequence_numberField = this.api.addField("field:zeek_cip_io.sequence_number;db:zeek_cip_io.sequence_number;kind:integer;friendly:Sequence Number;help:Sequence Number");
+  this.cip_io_data_lengthField = this.api.addField("field:zeek_cip_io.data_length;db:zeek_cip_io.data_length;kind:integer;friendly:Data Length;help:Data Length");
   this.cip_io_io_dataField = this.api.addField("field:zeek_cip_io.io_data;db:zeek_cip_io.io_data;kind:termfield;friendly:Transport Data;help:Transport Data");
 
   // dce_rpc.log
@@ -374,31 +374,31 @@ function ZeekLogs (api, section) {
 
   // modbus_detailed.log
   // https://github.com/cisagov/ICSNPP
-  this.modbus_detailed_unit_idField = this.api.addField("field:zeek_modbus_detailed.unit_id;db:modbus_detailed.unit_id;kind:termfield;friendly:Unit/Slave ID;help:Unit/Slave ID");
+  this.modbus_detailed_unit_idField = this.api.addField("field:zeek_modbus_detailed.unit_id;db:modbus_detailed.unit_id;kind:integer;friendly:Unit/Slave ID;help:Unit/Slave ID");
   this.modbus_detailed_funcField = this.api.addField("field:zeek_modbus_detailed.func;db:modbus_detailed.func;kind:termfield;friendly:Modbus Function Code;help:Modbus Function Code");
   this.modbus_detailed_network_directionField = this.api.addField("field:zeek_modbus_detailed.network_direction;db:modbus_detailed.network_direction;kind:termfield;friendly:Request or Response;help:Request or Response");
-  this.modbus_detailed_addressField = this.api.addField("field:zeek_modbus_detailed.address;db:modbus_detailed.address;kind:termfield;friendly:Starting Memory Address;help:Starting Memory Address");
-  this.modbus_detailed_quantityField = this.api.addField("field:zeek_modbus_detailed.quantity;db:modbus_detailed.quantity;kind:termfield;friendly:Number of Values;help:Number of Values");
+  this.modbus_detailed_addressField = this.api.addField("field:zeek_modbus_detailed.address;db:modbus_detailed.address;kind:integer;friendly:Starting Memory Address;help:Starting Memory Address");
+  this.modbus_detailed_quantityField = this.api.addField("field:zeek_modbus_detailed.quantity;db:modbus_detailed.quantity;kind:integer;friendly:Number of Values;help:Number of Values");
   this.modbus_detailed_valuesField = this.api.addField("field:zeek_modbus_detailed.values;db:modbus_detailed.values;kind:termfield;friendly:Values;help:Values");
 
   // modbus_mask_write_register.log
   // https://github.com/cisagov/ICSNPP
-  this.modbus_mask_write_register_unit_idField = this.api.addField("field:zeek_modbus_mask_write_register.unit_id;db:modbus_mask_write_register.unit_id;kind:termfield;friendly:Unit/Slave ID;help:Unit/Slave ID");
+  this.modbus_mask_write_register_unit_idField = this.api.addField("field:zeek_modbus_mask_write_register.unit_id;db:modbus_mask_write_register.unit_id;kind:integer;friendly:Unit/Slave ID;help:Unit/Slave ID");
   this.modbus_mask_write_register_funcField = this.api.addField("field:zeek_modbus_mask_write_register.func;db:modbus_mask_write_register.func;kind:termfield;friendly:Modbus Function Code;help:Modbus Function Code");
   this.modbus_mask_write_register_network_directionField = this.api.addField("field:zeek_modbus_mask_write_register.network_direction;db:modbus_mask_write_register.network_direction;kind:termfield;friendly:Request or Response;help:Request or Response");
-  this.modbus_mask_write_register_addressField = this.api.addField("field:zeek_modbus_mask_write_register.address;db:modbus_mask_write_register.address;kind:termfield;friendly:Starting Memory Address;help:Starting Memory Address");
-  this.modbus_mask_write_register_and_maskField = this.api.addField("field:zeek_modbus_mask_write_register.and_mask;db:modbus_mask_write_register.and_mask;kind:termfield;friendly:Boolean AND mask to apply to target register;help:Boolean AND mask to apply to target register");
-  this.modbus_mask_write_register_or_maskField = this.api.addField("field:zeek_modbus_mask_write_register.or_mask;db:modbus_mask_write_register.or_mask;kind:termfield;friendly:Boolean OR mask to apply to target register;help:Boolean OR mask to apply to target register");
+  this.modbus_mask_write_register_addressField = this.api.addField("field:zeek_modbus_mask_write_register.address;db:modbus_mask_write_register.address;kind:integer;friendly:Starting Memory Address;help:Starting Memory Address");
+  this.modbus_mask_write_register_and_maskField = this.api.addField("field:zeek_modbus_mask_write_register.and_mask;db:modbus_mask_write_register.and_mask;kind:integer;friendly:Boolean AND mask to apply to target register;help:Boolean AND mask to apply to target register");
+  this.modbus_mask_write_register_or_maskField = this.api.addField("field:zeek_modbus_mask_write_register.or_mask;db:modbus_mask_write_register.or_mask;kind:integer;friendly:Boolean OR mask to apply to target register;help:Boolean OR mask to apply to target register");
 
   // modbus_read_write_multiple_registers.log
   // https://github.com/cisagov/ICSNPP
-  this.modbus_read_write_multiple_registers_unit_idField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.unit_id;db:modbus_read_write_multiple_registers.unit_id;kind:termfield;friendly:Unit/Slave ID;help:Unit/Slave ID");
+  this.modbus_read_write_multiple_registers_unit_idField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.unit_id;db:modbus_read_write_multiple_registers.unit_id;kind:integer;friendly:Unit/Slave ID;help:Unit/Slave ID");
   this.modbus_read_write_multiple_registers_funcField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.func;db:modbus_read_write_multiple_registers.func;kind:termfield;friendly:Modbus Function Code;help:Modbus Function Code");
   this.modbus_read_write_multiple_registers_network_directionField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.network_direction;db:modbus_read_write_multiple_registers.network_direction;kind:termfield;friendly:Request or Response;help:Request or Response");
-  this.modbus_read_write_multiple_registers_write_start_addressField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.write_start_address;db:modbus_read_write_multiple_registers.write_start_address;kind:termfield;friendly:Starting address of the registers to write to;help:Starting address of the registers to write to");
+  this.modbus_read_write_multiple_registers_write_start_addressField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.write_start_address;db:modbus_read_write_multiple_registers.write_start_address;kind:integer;friendly:Starting address of the registers to write to;help:Starting address of the registers to write to");
   this.modbus_read_write_multiple_registers_write_registersField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.write_registers;db:modbus_read_write_multiple_registers.write_registers;kind:termfield;friendly:Register values written;help:Register values written");
-  this.modbus_read_write_multiple_registers_read_start_addressField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.read_start_address;db:modbus_read_write_multiple_registers.read_start_address;kind:termfield;friendly:Starting address of the registers to read;help:Starting address of the registers to read");
-  this.modbus_read_write_multiple_registers_read_quantityField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.read_quantity;db:modbus_read_write_multiple_registers.read_quantity;kind:termfield;friendly:Number of registers to read;help:Number of registers to read");
+  this.modbus_read_write_multiple_registers_read_start_addressField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.read_start_address;db:modbus_read_write_multiple_registers.read_start_address;kind:integer;friendly:Starting address of the registers to read;help:Starting address of the registers to read");
+  this.modbus_read_write_multiple_registers_read_quantityField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.read_quantity;db:modbus_read_write_multiple_registers.read_quantity;kind:integer;friendly:Number of registers to read;help:Number of registers to read");
   this.modbus_read_write_multiple_registers_read_registersField = this.api.addField("field:zeek_modbus_read_write_multiple_registers.read_registers;db:modbus_read_write_multiple_registers.read_registers;kind:termfield;friendly:Register values read;help:Register values read");
 
   // modbus_register_change.log
