@@ -92,8 +92,8 @@ done
 
 # manual build processes that don't fit the other patterns
 
-# INL ICS parsers
-SRC_DIR="$(clone_github_repo "https://github.com/idaholab/ICSNPP")"
+# DHS/INL ICS parsers
+SRC_DIR="$(clone_github_repo "https://github.com/cisagov/ICSNPP")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   for FULL_PARSER in zeek_bacnet_parser zeek_enip_parser; do
