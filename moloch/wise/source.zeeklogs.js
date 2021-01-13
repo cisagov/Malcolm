@@ -93,6 +93,8 @@ function ZeekLogs (api, section) {
   this.bacnet_dicovery_instance_numberField = this.api.addField("field:zeek_bacnet_discovery.instance_number;db:zeek_bacnet_discovery.instance_number;kind:integer;friendly:Instance Number;help:Instance Number");
   this.bacnet_dicovery_vendorField = this.api.addField("field:zeek_bacnet_discovery.vendor;db:zeek_bacnet_discovery.vendor;kind:termfield;friendly:Vendor Name;help:Vendor Name");
   this.bacnet_dicovery_rangeField = this.api.addField("field:zeek_bacnet_discovery.range;db:zeek_bacnet_discovery.range;kind:termfield;friendly:Range;help:Range");
+  this.bacnet_dicovery_rangeLowField = this.api.addField("field:zeek_bacnet_discovery.range_low;db:zeek_bacnet_discovery.range_low;kind:integer;friendly:Range Low;help:Range Low");
+  this.bacnet_dicovery_rangeHighField = this.api.addField("field:zeek_bacnet_discovery.range_high;db:zeek_bacnet_discovery.range_high;kind:integer;friendly:Range High;help:Range High");
   this.bacnet_dicovery_object_nameField = this.api.addField("field:zeek_bacnet_discovery.object_name;db:zeek_bacnet_discovery.object_name;kind:termfield;friendly:Object Name;help:Object Name");
 
   // bacnet_property.log
@@ -121,6 +123,9 @@ function ZeekLogs (api, section) {
   // https://github.com/cisagov/ICSNPP
   this.cip_identity_encapsulation_versionField = this.api.addField("field:zeek_cip_identity.encapsulation_version;db:zeek_cip_identity.encapsulation_version;kind:integer;friendly:Encapsulation Version;help:Encapsulation Version");
   this.cip_identity_socket_addressField = this.api.addField("field:zeek_cip_identity.socket_address;db:zeek_cip_identity.socket_address;kind:termfield;friendly:Socket Address;help:Socket Address");
+  this.cip_identity_socket_address_geo_cityField = this.api.addField("field:zeek_cip_identity.socket_address_geo.city_name;db:zeek_cip_identity.socket_address_geo.city_name;kind:termfield;friendly:Socket Address GeoIP City;help:Socket Address GeoIP City");
+  this.cip_identity_socket_address_geo_countryField = this.api.addField("field:zeek_cip_identity.socket_address_geo.country_name;db:zeek_cip_identity.socket_address_geo.country_name;kind:termfield;friendly:Socket Address GeoIP Country;help:Socket Address GeoIP Country");
+  this.cip_identity_socket_address_ASNField = this.api.addField("field:zeek_cip_identity.socket_address_asn;db:zeek_cip_identity.socket_address_asn;kind:termfield;friendly:Socket Address ASN;help:Socket Address ASN");
   this.cip_identity_socket_portField = this.api.addField("field:zeek_cip_identity.socket_port;db:zeek_cip_identity.socket_port;kind:integer;friendly:Socket Port;help:Socket Port");
   this.cip_identity_vendor_idField = this.api.addField("field:zeek_cip_identity.vendor_id;db:zeek_cip_identity.vendor_id;kind:integer;friendly:Vendor ID;help:Vendor ID");
   this.cip_identity_vendor_nameField = this.api.addField("field:zeek_cip_identity.vendor_name;db:zeek_cip_identity.vendor_name;kind:termfield;friendly:Vendor Name;help:Vendor Name");
@@ -977,6 +982,8 @@ function ZeekLogs (api, section) {
     "zeek_bacnet_discovery.object_name",
     "zeek_bacnet_discovery.pdu_service",
     "zeek_bacnet_discovery.range",
+    "zeek_bacnet_discovery.range_low",
+    "zeek_bacnet_discovery.range_high",
     "zeek_bacnet_discovery.vendor",
     "zeek_bacnet_property.array_index",
     "zeek_bacnet_property.instance_number",
@@ -1004,6 +1011,9 @@ function ZeekLogs (api, section) {
     "zeek_cip_identity.revision",
     "zeek_cip_identity.serial_number",
     "zeek_cip_identity.socket_address",
+    "zeek_cip_identity.socket_address_geo.city_name",
+    "zeek_cip_identity.socket_address_geo.country_name",
+    "zeek_cip_identity.socket_address_asn",
     "zeek_cip_identity.socket_port",
     "zeek_cip_identity.vendor_id",
     "zeek_cip_identity.vendor_name",
@@ -1741,10 +1751,10 @@ function ZeekLogs (api, section) {
     "  br\n");
 
   this.api.addView("zeek_bacnet", "require:zeek_bacnet;title:Zeek bacnet.log;fields:zeek_bacnet.bvlc_function,zeek_bacnet.pdu_type,zeek_bacnet.pdu_service,zeek_bacnet.invoke_id,zeek_bacnet.result_code");
-  this.api.addView("zeek_bacnet_discovery", "require:zeek_bacnet_discovery;title:Zeek bacnet_discovery.log;fields:zeek_bacnet_discovery.pdu_service,zeek_bacnet_discovery.object_type,zeek_bacnet_discovery.instance_number,zeek_bacnet_discovery.vendor,zeek_bacnet_discovery.range,zeek_bacnet_discovery.object_name");
+  this.api.addView("zeek_bacnet_discovery", "require:zeek_bacnet_discovery;title:Zeek bacnet_discovery.log;fields:zeek_bacnet_discovery.pdu_service,zeek_bacnet_discovery.object_type,zeek_bacnet_discovery.instance_number,zeek_bacnet_discovery.vendor,zeek_bacnet_discovery.range,zeek_bacnet_discovery.range_low,zeek_bacnet_discovery.range_high,zeek_bacnet_discovery.object_name");
   this.api.addView("zeek_bacnet_property", "require:zeek_bacnet_property;title:Zeek bacnet_property.log;fields:zeek_bacnet_property.pdu_service,zeek_bacnet_property.object_type,zeek_bacnet_property.instance_number,zeek_bacnet_property.property,zeek_bacnet_property.array_index,zeek_bacnet_property.value");
   this.api.addView("zeek_cip", "require:zeek_cip;title:Zeek cip.log;fields:zeek_cip.cip_sequence_count,zeek_cip.direction,zeek_cip.cip_service,zeek_cip.cip_status,zeek_cip.class_id,zeek_cip.class_name,zeek_cip.instance_id,zeek_cip.attribute_id,zeek_cip.data_id,zeek_cip.other_id");
-  this.api.addView("zeek_cip_identity", "require:zeek_cip_identity;title:Zeek cip_identity.log;fields:zeek_cip_identity.encapsulation_version,zeek_cip_identity.socket_address,zeek_cip_identity.socket_port,zeek_cip_identity.vendor_id,zeek_cip_identity.vendor_name,zeek_cip_identity.device_type_id,zeek_cip_identity.device_type_name,zeek_cip_identity.product_code,zeek_cip_identity.revision,zeek_cip_identity.device_status,zeek_cip_identity.serial_number,zeek_cip_identity.product_name,zeek_cip_identity.device_state");
+  this.api.addView("zeek_cip_identity", "require:zeek_cip_identity;title:Zeek cip_identity.log;fields:zeek_cip_identity.encapsulation_version,zeek_cip_identity.socket_address,zeek_cip_identity.socket_address_geo.city_name,zeek_cip_identity.socket_address_geo.country_name,zeek_cip_identity.socket_address_asn,zeek_cip_identity.socket_port,zeek_cip_identity.vendor_id,zeek_cip_identity.vendor_name,zeek_cip_identity.device_type_id,zeek_cip_identity.device_type_name,zeek_cip_identity.product_code,zeek_cip_identity.revision,zeek_cip_identity.device_status,zeek_cip_identity.serial_number,zeek_cip_identity.product_name,zeek_cip_identity.device_state");
   this.api.addView("zeek_cip_io", "require:zeek_cip_io;title:Zeek cip_io.log;fields:zeek_cip_io.connection_id,zeek_cip_io.sequence_number,zeek_cip_io.data_length,zeek_cip_io.io_data");
   this.api.addView("zeek_conn", "require:zeek_conn;title:Zeek conn.log;fields:zeek_conn.duration,zeek_conn.orig_bytes,zeek_conn.resp_bytes,zeek_conn.conn_state,zeek_conn.conn_state_description,zeek_conn.local_orig,zeek_conn.local_resp,zeek_conn.missed_bytes,zeek_conn.history,zeek_conn.orig_pkts,zeek_conn.orig_ip_bytes,zeek_conn.resp_pkts,zeek_conn.resp_ip_bytes,zeek_conn.tunnel_parents,zeek_conn.vlan,zeek_conn.inner_vlan");
   this.api.addView("zeek_dce_rpc", "require:zeek_dce_rpc;title:Zeek dce_rpc.log;fields:zeek_dce_rpc.rtt,zeek_dce_rpc.named_pipe,zeek_dce_rpc.endpoint,zeek_dce_rpc.operation");
