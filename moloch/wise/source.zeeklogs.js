@@ -223,7 +223,7 @@ function ZeekLogs (api, section) {
 
   // enip.log
   // https://github.com/cisagov/ICSNPP
-  this.enip_enip_commandField = this.api.addField("field:zeek_enip.enip_;db:zeek_enip.enip_;kind:termfield;friendly:EthernetIP Command;help:EthernetIP Command");
+  this.enip_enip_commandField = this.api.addField("field:zeek_enip.enip_command;db:zeek_enip.enip_command;kind:termfield;friendly:EthernetIP Command;help:EthernetIP Command");
   this.enip_lengthField = this.api.addField("field:zeek_enip.length;db:zeek_enip.length;kind:integer;friendly:Packet Length;help:Packet Length");
   this.enip_session_handleField = this.api.addField("field:zeek_enip.session_handle;db:zeek_enip.session_handle;kind:termfield;friendly:Session Number;help:Session Number");
   this.enip_enip_statusField = this.api.addField("field:zeek_enip.enip_status;db:zeek_enip.enipstatus;kind:termfield;friendly:EthernetIP Status;help:EthernetIP Status");
