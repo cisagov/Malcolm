@@ -93,10 +93,16 @@ done
 # manual build processes that don't fit the other patterns
 
 # DHS/INL ICS parsers
+ICSNPP_FULL_PARSERS=(
+  zeek_bacnet_parser
+  zeek_bsap_ip_parser
+  zeek_bsap_serial_parser
+  zeek_enip_parser
+)
 SRC_DIR="$(clone_github_repo "https://github.com/cisagov/ICSNPP")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
-  for FULL_PARSER in zeek_bacnet_parser zeek_enip_parser; do
+  for FULL_PARSER in ${ICSNPP_FULL_PARSERS[@]}; do
     cd "$SRC_DIR"/"$FULL_PARSER" && \
       ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
       make && \
