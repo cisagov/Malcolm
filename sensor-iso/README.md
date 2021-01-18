@@ -8,7 +8,7 @@ Hedgehog Linux is a Debian-based operating system built to
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
+* generate and forward Zeek logs, Arkime sessions and other information to [Malcolm](https://github.com/cisagov/malcolm)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -404,7 +404,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-2.5.0.iso"
+Finished, created "/sensor-build/hedgehog-2.6.0.iso"
 …
 ```
 

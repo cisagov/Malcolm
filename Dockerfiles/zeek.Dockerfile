@@ -10,7 +10,7 @@ ENV BISON_VERSION "3.7.4"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV CMAKE_DIR "/opt/cmake"
-ENV CMAKE_VERSION "3.19.1"
+ENV CMAKE_VERSION "3.19.3"
 ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
@@ -171,8 +171,8 @@ ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 # sanity check to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 25
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-bacnet/main|zeek-plugin-enip/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 27
+ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|Zeek_Bacnet/scripts/main|Zeek_Bsap_ip/scripts/main|Zeek_Bsap_serial/scripts/main|Zeek_Enip/scripts/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
@@ -205,7 +205,6 @@ ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ARG ZEEK_DISABLE_MITRE_BZAR=
 ARG ZEEK_DISABLE_HASH_ALL_FILES=
 ARG ZEEK_DISABLE_LOG_PASSWORDS=
-ARG ZEEK_DISABLE_MODBUS_TRACKING=
 ARG ZEEK_DISABLE_MQTT=
 ARG ZEEK_DISABLE_PE_XOR=
 ARG ZEEK_DISABLE_QUIC=
@@ -218,7 +217,6 @@ ARG ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS=
 ENV ZEEK_DISABLE_MITRE_BZAR $ZEEK_DISABLE_MITRE_BZAR
 ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
 ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
-ENV ZEEK_DISABLE_MODBUS_TRACKING $ZEEK_DISABLE_MODBUS_TRACKING
 ENV ZEEK_DISABLE_MQTT $ZEEK_DISABLE_MQTT
 ENV ZEEK_DISABLE_PE_XOR $ZEEK_DISABLE_PE_XOR
 ENV ZEEK_DISABLE_QUIC $ZEEK_DISABLE_QUIC

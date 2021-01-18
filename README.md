@@ -160,22 +160,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.5.0               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.5.0               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.5.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.5.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.5.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.5.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.5.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/arkime                                2.5.0               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.5.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.5.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.5.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.5.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/curator                               2.6.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.6.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.6.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.6.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.6.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.6.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.6.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/arkime                                2.6.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.6.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.6.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.6.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.6.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -234,9 +234,10 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Mark Baggett](https://github.com/MarkBaggett)'s [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * [Florian Roth](https://github.com/Neo23x0)'s [Signature-Base](https://github.com/Neo23x0/signature-base) Yara ruleset
 * These Zeek plugins:
-    * Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+    * some of Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
+    * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin    
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
@@ -264,19 +265,20 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |---|:---:|:---:|:---:|:---:|
 |Internet layer|[🔗](https://en.wikipedia.org/wiki/Internet_layer)|[🔗](https://tools.ietf.org/html/rfc791)|[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/conn/main.zeek.html#type-Conn::Info)|
 |Border Gateway Protocol (BGP)|[🔗](https://en.wikipedia.org/wiki/Border_Gateway_Protocol)|[🔗](https://tools.ietf.org/html/rfc2283)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/bgp.c)||
-|Building Automation and Control (BACnet)|[🔗](https://en.wikipedia.org/wiki/BACnet)|[🔗](http://www.bacnet.org/)||[✓](https://github.com/amzn/zeek-plugin-bacnet/blob/master/scripts/main.zeek)|
+|Building Automation and Control (BACnet)|[🔗](https://en.wikipedia.org/wiki/BACnet)|[🔗](http://www.bacnet.org/)||[✓](https://github.com/cisagov/ICSNPP/tree/master/zeek_bacnet_parser)|
+|Bristol Standard Asynchronous Protocol (BSAP)|[🔗](https://en.wikipedia.org/wiki/Bristol_Standard_Asynchronous_Protocol)|[🔗](http://www.documentation.emersonprocess.com/groups/public/documents/specification_sheets/d301321x012.pdf)[🔗](http://www.documentation.emersonprocess.com/groups/public/documents/instruction_manuals/d301401x012.pdf)||[✓](https://github.com/cisagov/ICSNPP/tree/master/zeek_bsap_ip_parser)[✓](https://github.com/cisagov/ICSNPP/tree/master/zeek_bsap_serial_parser)|
 |Distributed Computing Environment / Remote Procedure Calls (DCE/RPC)|[🔗](https://en.wikipedia.org/wiki/DCE/RPC)|[🔗](https://pubs.opengroup.org/onlinepubs/009629399/toc.pdf)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dce-rpc/main.zeek.html#type-DCE_RPC::Info)|
 |Dynamic Host Configuration Protocol (DHCP)|[🔗](https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol)|[🔗](https://tools.ietf.org/html/rfc2131)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/dhcp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dhcp/main.zeek.html#type-DHCP::Info)|
-|Distributed Network Protocol 3 (DNP3)|[🔗](https://en.wikipedia.org/wiki/DNP3)|[🔗](https://www.dnp.org)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dnp3/main.zeek.html#type-DNP3::Info)|
+|Distributed Network Protocol 3 (DNP3)|[🔗](https://en.wikipedia.org/wiki/DNP3)|[🔗](https://www.dnp.org)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dnp3/main.zeek.html#type-DNP3::Info)[✓](https://github.com/cisagov/ICSNPP/tree/master/zeek_dnp3_parser)|
 |Domain Name System (DNS)|[🔗](https://en.wikipedia.org/wiki/Domain_Name_System)|[🔗](https://tools.ietf.org/html/rfc1035)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/dns.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/dns/main.zeek.html#type-DNS::Info)|
-|EtherNet/IP / Common Industrial Protocol (CIP)|[🔗](https://en.wikipedia.org/wiki/EtherNet/IP) [🔗](https://en.wikipedia.org/wiki/Common_Industrial_Protocol)|[🔗](https://www.odva.org/Technology-Standards/EtherNet-IP/Overview)||[✓](https://github.com/amzn/zeek-plugin-enip/blob/master/scripts/main.zeek)|
+|EtherNet/IP / Common Industrial Protocol (CIP)|[🔗](https://en.wikipedia.org/wiki/EtherNet/IP) [🔗](https://en.wikipedia.org/wiki/Common_Industrial_Protocol)|[🔗](https://www.odva.org/Technology-Standards/EtherNet-IP/Overview)||[✓](https://github.com/cisagov/ICSNPP/tree/master/zeek_enip_parser)|
 |FTP (File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc959)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ftp/info.zeek.html#type-FTP::Info)|
 |Google Quick UDP Internet Connections (gQUIC)|[🔗](https://en.wikipedia.org/wiki/QUIC#Google_QUIC_(gQUIC))|[🔗](https://www.chromium.org/quic)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/quic.c)|[✓](https://github.com/salesforce/GQUIC_Protocol_Analyzer/blob/master/scripts/Salesforce/GQUIC/main.bro)|
 |Hypertext Transfer Protocol (HTTP)|[🔗](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc7230)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/http.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/http/main.zeek.html#type-HTTP::Info)|
 |Internet Relay Chat (IRC)|[🔗](https://en.wikipedia.org/wiki/Internet_Relay_Chat)|[🔗](https://tools.ietf.org/html/rfc1459)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/irc.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/irc/main.zeek.html#type-IRC::Info)|
 |Kerberos|[🔗](https://en.wikipedia.org/wiki/Kerberos_(protocol))|[🔗](https://tools.ietf.org/html/rfc4120)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/krb5.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/krb/main.zeek.html#type-KRB::Info)|
 |Lightweight Directory Access Protocol (LDAP)|[🔗](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol)|[🔗](https://tools.ietf.org/html/rfc4511)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/ldap.c)|[✓](https://github.com/SoftwareConsultingEmporium/ldap-analyzer/blob/master/scripts/main.bro)|
-|Modbus|[🔗](https://en.wikipedia.org/wiki/Modbus)|[🔗](http://www.modbus.org/)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/modbus/main.zeek.html#type-Modbus::Info)|
+|Modbus|[🔗](https://en.wikipedia.org/wiki/Modbus)|[🔗](http://www.modbus.org/)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/modbus/main.zeek.html#type-Modbus::Info)[✓](https://github.com/cisagov/ICSNPP/tree/master/zeek_modbus_parser)|
 |MQ Telemetry Transport (MQTT)|[🔗](https://en.wikipedia.org/wiki/MQTT)|[🔗](https://mqtt.org/)||[✓](https://docs.zeek.org/en/stable/scripts/policy/protocols/mqtt/main.zeek.html)|
 |MySQL|[🔗](https://en.wikipedia.org/wiki/MySQL)|[🔗](https://dev.mysql.com/doc/internals/en/client-server-protocol.html)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/mysql.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/mysql/main.zeek.html#type-MySQL::Info)|
 |NT Lan Manager (NTLM)|[🔗](https://en.wikipedia.org/wiki/NT_LAN_Manager)|[🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b38c36ed-2804-4868-a9ff-8dd3182128e4?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ntlm/main.zeek.html#type-NTLM::Info)|
@@ -297,7 +299,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
-|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)|
+|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/master/zeek/config/login.zeek)|
 |WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/theparanoids/spicy-noise/blob/master/zeek/spicy-noise.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
 
@@ -878,7 +880,7 @@ A remote network sensor appliance can be used to monitor network traffic, captur
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
+* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/Malcolm)
 
 Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/master/sensor-iso/README.md) for more information.
 
@@ -1434,7 +1436,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.5.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-2.6.0.iso"
 …
 ```
 
@@ -1835,22 +1837,22 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.5.0               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.5.0               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.5.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.5.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.5.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.5.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.5.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.5.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/arkime                                2.5.0               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.5.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.5.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.5.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.5.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.5.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/curator                               2.6.0               xxxxxxxxxxxx        40 hours ago        256MB
+malcolmnetsec/elastalert                            2.6.0               xxxxxxxxxxxx        40 hours ago        410MB
+malcolmnetsec/elasticsearch-oss                     2.6.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           2.6.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  2.6.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               2.6.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-oss                            2.6.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          2.6.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/arkime                                2.6.0               xxxxxxxxxxxx        17 hours ago        683MB
+malcolmnetsec/name-map-ui                           2.6.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           2.6.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          2.6.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          2.6.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  2.6.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1932,7 +1934,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 
 ### Scenario 2: Malcolm was installed from a packaged tarball
 
-If you installed Malcolm from [pre-packaged installation files](https://github.com/cisagov/malcolm#Packager), here are the basic steps to perform an upgrade:
+If you installed Malcolm from [pre-packaged installation files](https://github.com/cisagov/Malcolm#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
     * `./scripts/stop`
