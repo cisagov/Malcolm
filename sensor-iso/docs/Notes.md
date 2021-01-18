@@ -366,16 +366,27 @@ Where possible, [`zkg`](https://docs.zeek.org/projects/package-manager/en/stable
 
 Hedgehog Linux utilizest he following third party Zeek packages:
 
-* Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+* some of Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
+* Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
+* Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
+* ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
 * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
-* Corelight's [community ID](https://github.com/corelight/bro-community-id) flow hashing plugin
+* Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin    
+* Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
+* Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+* Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
+* Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
+* Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
 * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
+* Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
 * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
 * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
 * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
 * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
 * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
 * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
+* Verizon Media's [spicy-noise](https://github.com/theparanoids/spicy-noise) WireGuard analyzer plugin
+* Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 
 ### <a name="ZeekThirdPartyBash"></a>bash script to install third party plugins for Zeek
 
@@ -383,6 +394,8 @@ While not all of the aforementioned plugins install correctly with zkg, this bas
 
 ```bash
 #!/bin/bash
+
+# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
@@ -439,9 +452,9 @@ function clone_github_repo() {
     SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
     rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
-      git -c core.askpass=true clone --branch "$REPO_LATEST_RELEASE" --depth 1 "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --branch "$REPO_LATEST_RELEASE" --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     else
-      git -c core.askpass=true clone --depth 1 "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     fi
     [ $? -eq 0 ] && echo "$SRC_DIR" || echo "cloning \"$REPO_URL\" failed" >&2
   fi
@@ -449,14 +462,21 @@ function clone_github_repo() {
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
-  https://github.com/amzn/zeek-plugin-bacnet
-  https://github.com/amzn/zeek-plugin-enip
+  https://github.com/0xxon/cve-2020-0601
+  https://github.com/0xxon/cve-2020-13777
   https://github.com/amzn/zeek-plugin-profinet
   https://github.com/amzn/zeek-plugin-s7comm
   https://github.com/amzn/zeek-plugin-tds
-  https://github.com/corelight/bro-community-id
-  https://github.com/corelight/bro-xor-exe-plugin
+  https://github.com/corelight/callstranger-detector
+  https://github.com/corelight/CVE-2020-16898
+  https://github.com/corelight/ripple20
+  https://github.com/corelight/SIGRed
+  https://github.com/corelight/zeek-community-id
+  https://github.com/corelight/zerologon
+  https://github.com/cybera/zeek-sniffpass
   https://github.com/0xl3x1/zeek-EternalSafety
+  https://github.com/mitre-attack/bzar
+  https://github.com/precurse/zeek-httpattacks
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
 )
@@ -465,23 +485,22 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
   [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
 
-# install Zeek packages that need to be copied manually
-MANUAL_COPY_GITHUB_URLS_AND_SCRIPT_PATHS=(
-  "https://github.com/mitre-attack/car|implementations/bzar/scripts|bzar"
-)
-for i in ${MANUAL_COPY_GITHUB_URLS_AND_SCRIPT_PATHS[@]}; do
-  URL="$(echo "$i" | cut -d'|' -f1)"
-  SCRIPT_SRC_SUBDIR="$(echo "$i" | cut -d'|' -f2)"
-  SCRIPT_DST_SUBDIR="$(echo "$i" | cut -d'|' -f3)"
-  SRC_DIR="$(clone_github_repo "$URL")"
-  if [[ -d "$SRC_DIR" ]] && [[ -d "$SRC_DIR"/"$SCRIPT_SRC_SUBDIR" ]]; then
-    PLUGIN_DIR="$ZEEK_SCRIPTS_DIR"/"$SCRIPT_DST_SUBDIR"
-    mkdir -p "$PLUGIN_DIR"
-    cp -v "$SRC_DIR"/"$SCRIPT_SRC_SUBDIR"/* "$PLUGIN_DIR"/
-  fi
-done
-
 # manual build processes that don't fit the other patterns
+
+# DHS/INL ICS parsers
+SRC_DIR="$(clone_github_repo "https://github.com/cisagov/ICSNPP")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  for FULL_PARSER in zeek_bacnet_parser zeek_enip_parser; do
+    cd "$SRC_DIR"/"$FULL_PARSER" && \
+      ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+      make && \
+      make install
+  done
+  cp "$SRC_DIR"/zeek_dnp3_parser/*.zeek /opt/zeek/share/zeek/base/protocols/dnp3/
+  cp "$SRC_DIR"/zeek_modbus_parser/*.zeek /opt/zeek/share/zeek/base/protocols/modbus/
+  cd "$CWD"
+fi
 
 SRC_DIR="$(clone_github_repo "https://github.com/salesforce/GQUIC_Protocol_Analyzer")"
 if [[ -d "$SRC_DIR" ]]; then
@@ -501,20 +520,50 @@ SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
-    ./configure --with-kernel=/usr --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+    ./configure --with-kernel=/usr --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
     make && \
     make install
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/SoftwareConsultingEmporium/ldap-analyzer")"
+MANUAL_BRO_GITHUB_URLS=(
+  https://github.com/SoftwareConsultingEmporium/ldap-analyzer
+  https://github.com/corelight/bro-xor-exe-plugin
+)
+for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
+  SRC_DIR="$(clone_github_repo "$i")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+      make && \
+      make install
+    cd "$CWD"
+  fi
+done
+
+# install Spicy
+SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
-    ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-    make && \
-    make install
+    ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
+    ninja -C build install
   cd "$CWD"
+fi
+
+if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
+  SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      /opt/spicy/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
+      cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
+      chmod 644 ./zeek/spicy-noise.hlto && \
+      echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.zeek && \
+      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise && \
+    cd "$CWD"
+  fi
 fi
 ```
 
