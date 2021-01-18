@@ -10,7 +10,7 @@ ENV BISON_VERSION "3.7.4"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV CMAKE_DIR "/opt/cmake"
-ENV CMAKE_VERSION "3.19.1"
+ENV CMAKE_VERSION "3.19.3"
 ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
