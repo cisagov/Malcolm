@@ -1,9 +1,12 @@
 on: [workflow_dispatch]
 
 jobs:
+  # This workflow contains a single job called "traffic"
   traffic:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
@@ -12,7 +15,7 @@ jobs:
 
     # Calculates traffic and clones and stores in CSV file
     - name: GitHub traffic
-      uses: mmguero-dev/repository-traffic-action@v1
+      uses: sangonzal/repository-traffic-action@v0.1.4
       env:
         TRAFFIC_ACTION_TOKEN: ${{ secrets.TRAFFIC_ACTION_TOKEN }}
 
@@ -23,4 +26,4 @@ jobs:
         author_name: Malcolm Workflow
         message: "GitHub traffic"
         add: "./traffic/*"
-        ref: "workflow/repository-traffic"  # commits to branch "workflow/repository-traffic"
+        ref: "workflow/repository-traffic"  # commits to branch "traffic"
