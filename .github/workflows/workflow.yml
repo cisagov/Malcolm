@@ -1,4 +1,7 @@
-on: [workflow_dispatch]
+on:
+  schedule:
+    # runs once a week on sunday
+    - cron: "55 23 * * 0"
 
 jobs:
   # This workflow contains a single job called "traffic"
@@ -26,4 +29,4 @@ jobs:
         author_name: Malcolm Workflow
         message: "GitHub traffic"
         add: "./traffic/*"
-        ref: "workflow/repository-traffic"  # commits to branch "traffic"
+        ref: "workflow/repository-traffic"  # commits to branch "workflow/repository-traffic"
