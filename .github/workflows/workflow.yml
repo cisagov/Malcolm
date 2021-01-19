@@ -1,6 +1,4 @@
-on:
-  schedule:
-    - cron: "55 23 * * 0"
+on: [workflow_dispatch]
 
 jobs:
   traffic:
