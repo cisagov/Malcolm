@@ -537,6 +537,12 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions
 
+* `EXTRACTED_FILE_HTTP_SERVER_ENABLE` – if set to `true`, the directory containing [Zeek-extracted files](#ZeekFileExtraction) will be served over HTTP at `./extracted-files/` (e.g., [https://localhost/extracted-files/](https://localhost/extracted-files/) if you are connecting locally)
+
+* `EXTRACTED_FILE_HTTP_SERVER_ENCRYPT` – if set to `true`, those Zeek-extracted files will be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`)
+
+* `EXTRACTED_FILE_HTTP_SERVER_KEY` – specifies the AES-256-CBC decryption password for encrypted Zeek-extracted files; used in conjunction with `EXTRACTED_FILE_HTTP_SERVER_ENCRYPT`
+
 * `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
 
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
@@ -1290,6 +1296,8 @@ The `EXTRACTED_FILE_PRESERVATION` [environment variable in `docker-compose.yml`]
 * `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
 * `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
 * `none`: preserve no extracted files
+
+The `EXTRACTED_FILE_HTTP_SERVER_...` [environment variables in `docker-compose.yml`](#DockerComposeYml) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server. Beware that Zeek-extracted files may contain malware. As such, the files may be optionally encrypted upon download. 
 
 ### <a name="HostAndSubnetNaming"></a>Automatic host and subnet name assignment
 
