@@ -117,7 +117,7 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 MANUAL_BRO_GITHUB_URLS=(
-  https://github.com/SoftwareConsultingEmporium/ldap-analyzer
+  https://github.com/mmguero-dev/ldap-analyzer
   https://github.com/corelight/bro-xor-exe-plugin
 )
 for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
