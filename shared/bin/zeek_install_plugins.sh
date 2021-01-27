@@ -170,6 +170,8 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
+
+  # spicy-noise
   SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
@@ -178,7 +180,19 @@ if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
       cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
       chmod 644 ./zeek/spicy-noise.hlto && \
       echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.zeek && \
-      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise && \
+      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise
     cd "$CWD"
   fi
+
+  # spicy-tftp
+  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy-tftp")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --with-spicy=/opt/spicy --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR"
+      make && \
+      make install
+    cd "$CWD"
+  fi
+
 fi

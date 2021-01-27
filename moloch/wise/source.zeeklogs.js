@@ -909,6 +909,18 @@ function ZeekLogs (api, section) {
   this.tds_sql_batch_header_typeField = this.api.addField("field:zeek_tds_sql_batch.header_type;db:zeek_tds_sql_batch.header_type;kind:termfield;friendly:Header Type;help:Header Type");
   this.tds_sql_batch_queryField = this.api.addField("field:zeek_tds_sql_batch.query;db:zeek_tds_sql_batch.query;kind:termfield;friendly:Query;help:Query");
 
+  // tftp.log
+  // https://github.com/zeek/spicy-tftp
+  this.tftp_block_ackedField = this.api.addField("field:zeek_tftp.block_acked;db:zeek_tftp.block_acked;kind:integer;friendly:Highest Block ACKed;help:Highest Block ACKed");
+  this.tftp_block_sentField = this.api.addField("field:zeek_tftp.block_sent;db:zeek_tftp.block_sent;kind:integer;friendly:Highest Block Sent;help:Highest Block Sent");
+  this.tftp_error_codeField = this.api.addField("field:zeek_tftp.error_code;db:zeek_tftp.error_code;kind:integer;friendly:Error Code;help:Error Code");
+  this.tftp_error_msgField = this.api.addField("field:zeek_tftp.error_msg;db:zeek_tftp.error_msg;kind:integer;friendly:Error Message;help:Error Message");
+  this.tftp_fnameField = this.api.addField("field:zeek_tftp.fname;db:zeek_tftp.fname;kind:termfield;friendly:File Name;help:File Name");
+  this.tftp_modeField = this.api.addField("field:zeek_tftp.mode;db:zeek_tftp.mode;kind:termfield;friendly:Transfer Mode;help:Transfer Mode");
+  this.tftp_sizeField = this.api.addField("field:zeek_tftp.size;db:zeek_tftp.size;kind:termfield;friendly:Transfer Size;help:Transfer Size");
+  this.tftp_uid_dataField = this.api.addField("field:zeek_tftp.uid_data;db:zeek_tftp.uid_data;kind:termfield;friendly:Data Connection ID;help:Data Connection ID");
+  this.tftp_wrqField = this.api.addField("field:zeek_tftp.wrq;db:zeek_tftp.wrq;kind:termfield;friendly:Write Request;help:Write Request");
+
   // tunnel.log
   // https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info
   this.tunnel_tunnel_typeField = this.api.addField("field:zeek_tunnel.tunnel_type;db:zeek_tunnel.tunnel_type;kind:termfield;friendly:Tunnel Type;help:Tunnel Type");
@@ -1669,6 +1681,15 @@ function ZeekLogs (api, section) {
     "zeek_tds_rpc.procedure_name",
     "zeek_tds_sql_batch.header_type",
     "zeek_tds_sql_batch.query",
+    "zeek_tftp.block_acked",
+    "zeek_tftp.block_sent",
+    "zeek_tftp.error_code",
+    "zeek_tftp.error_msg",
+    "zeek_tftp.fname",
+    "zeek_tftp.mode",
+    "zeek_tftp.size",
+    "zeek_tftp.uid_data",
+    "zeek_tftp.wrq",
     "zeek_tunnel.action",
     "zeek_tunnel.tunnel_type",
     "zeek_weird.addl",
@@ -1900,6 +1921,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_tds", "require:zeek_tds;title:Zeek tds.log;fields:zeek_tds.command");
   this.api.addView("zeek_tds_rpc", "require:zeek_tds_rpc;title:Zeek tds_rpc.log;fields:zeek_tds_rpc.procedure_name,zeek_tds_rpc.parameters");
   this.api.addView("zeek_tds_sql_batch", "require:zeek_tds_sql_batch;title:Zeek tds_sql_batch.log;fields:zeek_tds_sql_batch.header_type,zeek_tds_sql_batch.query");
+  this.api.addView("zeek_tftp", "require:zeek_tftp;title:Zeek tftp.log;fields:zeek_tftp.block_acked,zeek_tftp.block_sent,zeek_tftp.error_code,zeek_tftp.error_msg,zeek_tftp.fname,zeek_tftp.mode,zeek_tftp.size,zeek_tftp.uid_data,zeek_tftp.wrq");
   this.api.addView("zeek_tunnel", "require:zeek_tunnel;title:Zeek tunnel.log;fields:zeek_tunnel.tunnel_type,zeek_tunnel.action");
   this.api.addView("zeek_weird", "require:zeek_weird;title:Zeek weird.log;fields:zeek_weird.name,zeek_weird.addl,zeek_weird.notice,zeek_weird.peer");
   this.api.addView("zeek_x509", "require:zeek_x509;title:Zeek x509.log;fields:zeek_x509.certificate_version,zeek_x509.certificate_serial,zeek_x509.certificate_subject.CN,zeek_x509.certificate_subject.C,zeek_x509.certificate_subject.O,zeek_x509.certificate_subject.OU,zeek_x509.certificate_subject.ST,zeek_x509.certificate_subject.SN,zeek_x509.certificate_subject.L,zeek_x509.certificate_subject.DC,zeek_x509.certificate_subject.GN,zeek_x509.certificate_subject.pseudonym,zeek_x509.certificate_subject.serialNumber,zeek_x509.certificate_subject.title,zeek_x509.certificate_subject.initials,zeek_x509.certificate_subject.emailAddress,zeek_x509.certificate_subject.description,zeek_x509.certificate_subject.postalCode,zeek_x509.certificate_subject.street,zeek_x509.certificate_issuer.CN,zeek_x509.certificate_issuer.DC,zeek_x509.certificate_issuer.C,zeek_x509.certificate_issuer.O,zeek_x509.certificate_issuer.OU,zeek_x509.certificate_issuer.ST,zeek_x509.certificate_issuer.SN,zeek_x509.certificate_issuer.L,zeek_x509.certificate_issuer.GN,zeek_x509.certificate_issuer.pseudonym,zeek_x509.certificate_issuer.serialNumber,zeek_x509.certificate_issuer.title,zeek_x509.certificate_issuer.initials,zeek_x509.certificate_issuer.emailAddress,zeek_x509.certificate_not_valid_before,zeek_x509.certificate_not_valid_after,zeek_x509.certificate_key_alg,zeek_x509.certificate_sig_alg,zeek_x509.certificate_key_type,zeek_x509.certificate_key_length,zeek_x509.certificate_exponent,zeek_x509.certificate_curve,zeek_x509.san_dns,zeek_x509.san_uri,zeek_x509.san_email,zeek_x509.san_ip,zeek_x509.basic_constraints_ca,zeek_x509.basic_constraints_path_len");

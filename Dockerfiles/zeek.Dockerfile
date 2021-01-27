@@ -6,11 +6,8 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # build zeek and plugins (spicy, additional protocol parsers, etc.)
 
-ENV BISON_VERSION "3.7.4"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
-ENV CMAKE_DIR "/opt/cmake"
-ENV CMAKE_VERSION "3.19.3"
 ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
@@ -18,62 +15,49 @@ ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
 ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_VERSION "3.0.12"
 
-# using clang now instead of gcc because Spicy depends on it
-ENV LLVM_VERSION "11"
-ENV CC "clang-${LLVM_VERSION}"
-ENV CXX "clang++-${LLVM_VERSION}"
-ENV ASM "clang-${LLVM_VERSION}"
-
-ENV PATH "${ZEEK_DIR}/bin:${CMAKE_DIR}/bin:${PATH}"
+ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # empty for now...
 # ADD zeek/patches ${ZEEK_PATCH_DIR}
 
-RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
-      echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
+RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.list && \
+    echo "Package: bison,build-essential,cmake,python3,python3-dev,python3-pip,python3-setuptools,python3-wheel\\nPin: release a=testing\\nPin-Priority: 800\\n\\nPackage: *\\nPin: release a=stable\\nPin-Priority: 700\\n\\nPackage: *\\nPin: release a=buster-backports\\nPin-Priority: 650\\n\\n\\nPackage: *\\nPin: release a=testing\\nPin-Priority: 600\\n" > /etc/apt/preferences.d/pin && \
+    echo 'APT::Default-Release "buster";' >> /etc/apt/apt.conf && \
       apt-get -q update && \
       apt-get install -q -y --no-install-recommends gnupg2 curl ca-certificates && \
-      bash -c "curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -" && \
-      echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
         binutils \
         ccache \
-        clang-${LLVM_VERSION} \
         file \
         flex \
         git \
         google-perftools \
         jq \
-        libclang-${LLVM_VERSION}-dev \
         libfl-dev \
         libgoogle-perftools-dev \
         libkrb5-dev \
         libmaxminddb-dev \
         libpcap0.8-dev \
         libssl-dev \
-        llvm-${LLVM_VERSION}-dev \
         locales-all \
         make \
         ninja-build \
         patch \
-        python3 \
-        python3-dev \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel \
         swig \
         zlib1g-dev && \
+  apt-get install -q -y -t testing --no-install-recommends \
+    bison \
+    build-essential \
+    cmake \
+    python3 \
+    python3-dev \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel && \
   pip3 install --no-cache-dir zkg btest pre-commit && \
-  mkdir -p "${CMAKE_DIR}" && \
-    curl -sSL "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz" | tar xzf - -C "${CMAKE_DIR}" --strip-components 1 && \
-  cd "${SRC_BASE_DIR}" && \
-    curl -sSL "https://ftp.gnu.org/gnu/bison/bison-${BISON_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
-    cd "./bison-${BISON_VERSION}" && \
-    ./configure --prefix=/usr && \
-    make && \
-    make install && \
   cd "${SRC_BASE_DIR}" && \
     curl -sSL "https://old.zeek.org/downloads/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
     cd "./zeek-${ZEEK_VERSION}" && \
@@ -109,29 +93,24 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ENV LLVM_VERSION "11"
 ENV ZEEK_DIR "/opt/zeek"
 ENV SPICY_DIR "/opt/spicy"
 
 COPY --from=build ${ZEEK_DIR} ${ZEEK_DIR}
 COPY --from=build ${SPICY_DIR} ${SPICY_DIR}
 
-RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
-      echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
+RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.list && \
+    echo "Package: bison,build-essential,cmake,python3,python3-dev,python3-pip,python3-setuptools,python3-wheel\\nPin: release a=testing\\nPin-Priority: 800\\n\\nPackage: *\\nPin: release a=stable\\nPin-Priority: 700\\n\\nPackage: *\\nPin: release a=buster-backports\\nPin-Priority: 650\\n\\n\\nPackage: *\\nPin: release a=testing\\nPin-Priority: 600\\n" > /etc/apt/preferences.d/pin && \
+    echo 'APT::Default-Release "buster";' >> /etc/apt/apt.conf && \
       apt-get -q update && \
       apt-get install -q -y --no-install-recommends gnupg2 curl ca-certificates && \
-      bash -c "curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -" && \
-      echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y -t buster-backports --no-install-recommends \
       binutils \
       file \
       git \
       libatomic1 \
-      libclang-${LLVM_VERSION}-dev \
-      libclang-cpp${LLVM_VERSION} \
-      libclang-cpp${LLVM_VERSION}-dev \
-      libclang1-${LLVM_VERSION} \
       libgoogle-perftools4 \
       libkrb5-3 \
       libmaxminddb0 \
@@ -141,16 +120,19 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       libtcmalloc-minimal4 \
       libunwind8 \
       libzmq5 \
-      llvm-${LLVM_VERSION} \
       procps \
       psmisc \
       python \
+      supervisor \
+      vim-tiny && \
+    apt-get install -q -y -t testing --no-install-recommends \
+      bison \
+      build-essential \
+      cmake \
       python3 \
       python3-pip \
       python3-setuptools \
-      python3-wheel \
-      supervisor \
-      vim-tiny && \
+      python3-wheel && \
     pip3 install --no-cache-dir pyzmq && \
     bash -c "( find /opt/zeek/ -type l ! -exec test -r {} \; -print | xargs -r -l rm -vf ) || true" && \
     apt-get -q -y --purge remove libssl-dev && \

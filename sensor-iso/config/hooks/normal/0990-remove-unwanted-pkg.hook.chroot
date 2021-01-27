@@ -3,9 +3,9 @@
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # remove development packages
-apt-get -y --purge remove checkinstall bison google-perftools gdb git libc6-dbg ninja-build \
-                    $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc|libpcap|libclang)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
-rm -rf /opt/cmake /var/spool/ccache
+apt-get -y --purge remove checkinstall google-perftools gdb libc6-dbg ninja-build \
+                    $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc|libpcap)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+rm -rf /var/spool/ccache
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \

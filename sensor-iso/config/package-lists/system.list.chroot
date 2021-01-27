@@ -17,12 +17,12 @@ binpac
 binutils
 bridge-utils
 btrfs-progs
+build-essential
 busybox
 bzip2
 ccache
 checkinstall
 cifs-utils
-clang-11
 coreutils
 cpio
 cpufrequtils
@@ -77,10 +77,6 @@ javascript-common
 jq
 less
 libatomic1
-libclang-11-dev
-libclang-common-11-dev
-libclang-cpp11
-libclang1-11
 libcli-dev
 libffi-dev
 libffi6
@@ -122,8 +118,6 @@ libyaml-dev
 libykpers-1-1
 libyubikey0
 libzmq5
-llvm-11
-llvm-11-dev
 lm-sensors
 localepurge
 locales-all
