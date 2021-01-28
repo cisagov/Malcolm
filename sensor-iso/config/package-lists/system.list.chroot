@@ -15,6 +15,7 @@ bc
 bcrypt
 binpac
 binutils
+bison
 bridge-utils
 btrfs-progs
 build-essential
@@ -23,6 +24,7 @@ bzip2
 ccache
 checkinstall
 cifs-utils
+cmake
 coreutils
 cpio
 cpufrequtils
