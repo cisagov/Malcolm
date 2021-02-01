@@ -51,51 +51,51 @@ rm -Rf netsniff-$NETSNIFF_VER.tar.gz netsniff-ng-$NETSNIFF_VER
 ##
 
 # Build and install zeek
-mkdir -p /usr/local/src/zeek-patches
-cd /usr/local/src/zeek-patches
-for i in ${ZEEK_PATCH_URLS[@]}; do
-  curl -L -J -O "$i"
-done
-cd /tmp
-curl -L -o zeek-$ZEEK_VER.tar.gz "$ZEEK_URL"
-tar -xvzf zeek-$ZEEK_VER.tar.gz
-cd zeek-$ZEEK_VER
-for i in /usr/local/src/zeek-patches/*; do
-  patch -p 1 -r - --no-backup-if-mismatch < "$i" || true
-done
-./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
-cd build
-ninja
-ninja install
-# checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
+# mkdir -p /usr/local/src/zeek-patches
+# cd /usr/local/src/zeek-patches
+# for i in ${ZEEK_PATCH_URLS[@]}; do
+#   curl -L -J -O "$i"
+# done
+# cd /tmp
+# curl -L -o zeek-$ZEEK_VER.tar.gz "$ZEEK_URL"
+# tar -xvzf zeek-$ZEEK_VER.tar.gz
+# cd zeek-$ZEEK_VER
+# for i in /usr/local/src/zeek-patches/*; do
+#   patch -p 1 -r - --no-backup-if-mismatch < "$i" || true
+# done
+# ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
+# cd build
+# ninja
+# ninja install
+# # checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
 
-# install 3rd party Zeek plugins and scripts
-zkg autoconfig
-bash /usr/local/bin/zeek_install_plugins.sh
-rm -Rf /root/.zkg /usr/local/src/*/.git
+# # install 3rd party Zeek plugins and scripts
+# zkg autoconfig
+# bash /usr/local/bin/zeek_install_plugins.sh
+# rm -Rf /root/.zkg /usr/local/src/*/.git
 
-# strip for file size
-file "${ZEEK_DIR}"/{lib,bin}/* \
-     "${ZEEK_DIR}"/lib/zeek/plugins/packages/*/lib/* \
-     "${ZEEK_DIR}"/lib/zeek/plugins/*/lib/* \
-     "${SPICY_DIR}"/{lib,bin}/* \
-     "${SPICY_DIR}"/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded
+# # strip for file size
+# file "${ZEEK_DIR}"/{lib,bin}/* \
+#      "${ZEEK_DIR}"/lib/zeek/plugins/packages/*/lib/* \
+#      "${ZEEK_DIR}"/lib/zeek/plugins/*/lib/* \
+#      "${SPICY_DIR}"/{lib,bin}/* \
+#      "${SPICY_DIR}"/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded
 
-cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
-# all interfaces using lb_method=custom should use AF_PACKET
-lb_custom.InterfacePrefix=af_packet::
+# cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
+# # all interfaces using lb_method=custom should use AF_PACKET
+# lb_custom.InterfacePrefix=af_packet::
 
-EOF
+# EOF
 
-# set up default zeek local policy
-cp -f /usr/local/etc/zeek/*.zeek /opt/zeek/share/zeek/site/
+# # set up default zeek local policy
+# cp -f /usr/local/etc/zeek/*.zeek /opt/zeek/share/zeek/site/
 
-# cleanup
-cd /tmp
-tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
-mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
-rm -Rf zeek-$ZEEK_VER*
-###
+# # cleanup
+# cd /tmp
+# tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
+# mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+# rm -Rf zeek-$ZEEK_VER*
+# ###
 
 # yara
 mkdir -p usr/local/src
