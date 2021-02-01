@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:buster-slim
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV ARKIME_VERSION "2.7.1"
 ENV ARKIMEDIR "/opt/moloch"
 
-RUN sed -i "s/stable main/stable main contrib non-free/g" /etc/apt/sources.list && \
+RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
   apt-get -q update && \
   apt-get install -q -y --no-install-recommends \
     build-essential \

@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:buster-slim
 
 # Copyright (c) 2018 Battelle Energy Alliance, LLC.  All rights reserved.
 

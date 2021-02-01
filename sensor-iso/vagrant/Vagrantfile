@@ -13,7 +13,7 @@ end
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "bento/debian-11"
+  config.vm.box = "bento/debian-10"
 
   config.vm.network "private_network", type: "dhcp"
 
@@ -34,11 +34,13 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get dist-upgrade -y
     sed -i "s/main/main contrib non-free/g" /etc/apt/sources.list
+    echo "deb http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
+    echo "deb-src http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
     apt-get update
-    export KERNEL_VERSION=$(apt-cache search linux-image-5.10 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
-    apt-get install -y \
+    export KERNEL_VERSION=$(apt-cache search linux-image-5.9 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
+    apt-get -t buster-backports install -y \
       linux-image-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-common \
-      dkms build-essential linux-kbuild-5.10 linux-compiler-gcc-10-x86 \
+      dkms build-essential linux-kbuild-5.9 linux-compiler-gcc-8-x86 \
       firmware-linux firmware-linux-nonfree firmware-misc-nonfree firmware-amd-graphics
     ls /dev/disk/by-id/ata-* | grep -v '\\-part' | head -n 1 | xargs -r -l grub-install
   STEP1
@@ -47,11 +49,11 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-STEP2
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y \
+    apt-get -t buster-backports install -y \
       rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick \
       apt-transport-https ca-certificates curl gnupg2 software-properties-common
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     apt-get update
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io
     usermod -a -G docker vagrant

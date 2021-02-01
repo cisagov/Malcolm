@@ -165,7 +165,7 @@ if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
     ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
-    ninja -j 2 -C build install
+    ninja -C build install
   cd "$CWD"
 fi
 

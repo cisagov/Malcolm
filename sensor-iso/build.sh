@@ -2,7 +2,7 @@
 
 IMAGE_NAME=hedgehog
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=testing
+IMAGE_DISTRIBUTION=buster
 
 BUILD_ERROR_CODE=1
 
@@ -38,7 +38,6 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
-  rsync -a "$SCRIPT_PATH/shared/vbox-guest-build" .
 
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
@@ -77,23 +76,12 @@ if [ -d "$WORKDIR" ]; then
   # make sure we install the newer kernel, firmwares, and kernel headers
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-compiler-gcc-10-x86=$(dpkg -s linux-compiler-gcc-10-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.10=$(dpkg -s linux-kbuild-5.10 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-kbuild-5.9=$(dpkg -s linux-kbuild-5.9 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-
-  # virtualbox-guest .deb package(s) in its own clean environment (rather than in hooks/)
-  # mkdir -p ./config/packages.chroot/
-  # bash ./vbox-guest-build/build-docker-image.sh
-  # docker run --rm -v "$(pwd)"/vbox-guest-build:/build vboxguest-build:latest -o /build
-  # rm -f ./vbox-guest-build/*-source*.deb \
-  #       ./vbox-guest-build/*-dbgsym*.deb \
-  #       ./vbox-guest-build/virtualbox_*.deb \
-  #       ./vbox-guest-build/virtualbox-dkms_*.deb \
-  #       ./vbox-guest-build/virtualbox-qt_*.deb
-  # mv ./vbox-guest-build/*.deb ./config/packages.chroot/
 
   # and make sure we remove the old stuff when it's all over
   echo "#!/bin/sh" > ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
@@ -142,25 +130,19 @@ if [ -d "$WORKDIR" ]; then
   curl -s -S -L -o oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
   popd >/dev/null 2>&1
 
+  # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
   mkdir -p ./config/packages.chroot/
+  bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/moloch:/build arkime-build:latest -o /build
+  cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
 
-  # # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  # bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
-  # docker run --rm -v "$SCRIPT_PATH"/moloch:/build arkime-build:latest -o /build
-  # cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  # mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
-
-  # # clone and build custom protologbeat from github for logging temperature, etc.
-  # mkdir -p ./config/includes.chroot/usr/local/bin/
-  # bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  # bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_762_compat"
-  # cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  # mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
-
-  # currently chromium isn't packaged for bullseye, grab from Mint
-  pushd ./config/packages.chroot/ >/dev/null 2>&1
-  curl -J -O -sSL http://packages.linuxmint.com/"$(curl -sSL http://packages.linuxmint.com/list.php?release=Ulyana | grep chromium_ | sed 's/.*href="//' | sed 's/">.*//')"
-  popd >/dev/null 2>&1
+  # clone and build custom protologbeat from github for logging temperature, etc.
+  mkdir -p ./config/includes.chroot/usr/local/bin/
+  bash "$SCRIPT_PATH/beats/build-docker-image.sh"
+  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_762_compat"
+  cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"
@@ -197,15 +179,15 @@ if [ -d "$WORKDIR" ]; then
     --bootloaders "syslinux,grub-efi" \
     --memtest none \
     --chroot-filesystem squashfs \
-    --backports false \
-    --security false \
-    --updates false \
+    --backports true \
+    --security true \
+    --updates true \
     --source false \
     --apt-indices none \
     --apt-source-archives false \
     --archive-areas 'main contrib non-free' \
     --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
-    --apt-options " --yes --allow-downgrades --allow-remove-essential --allow-change-held-packages -oAPT::Default-Release=testing"
+    --apt-options "--allow-downgrades --allow-remove-essential --allow-change-held-packages --yes"
 
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
   if [ -f "$IMAGE_NAME-amd64.hybrid.iso" ]; then

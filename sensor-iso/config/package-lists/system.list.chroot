@@ -12,6 +12,7 @@ automake
 autopoint
 bash-completion
 bc
+bcrypt
 binpac
 binutils
 bison
@@ -24,7 +25,6 @@ ccache
 checkinstall
 cifs-utils
 cmake
-cmake-data
 coreutils
 cpio
 cpufrequtils
@@ -45,7 +45,7 @@ fatresize
 file
 flex
 fonts-dejavu
-fuse3
+fuse
 fuseext2
 fusefat
 fuseiso
@@ -81,7 +81,7 @@ less
 libatomic1
 libcli-dev
 libffi-dev
-libffi7
+libffi6
 libfl-dev
 libgoogle-perftools-dev
 libgoogle-perftools4
@@ -107,7 +107,7 @@ libnl-route-3-200
 libnl-route-3-dev
 libpam-pwquality
 libpcap0.8-dev
-librocksdb6.11
+librocksdb5.17
 libsodium-dev
 libssl-dev
 libssl1.1
@@ -158,6 +158,11 @@ procps
 psmisc
 pv
 pwgen
+python
+python-backports-shutil-get-terminal-size
+python-backports.functools-lru-cache
+python-dev
+python-pip
 python3
 python3-dev
 python3-pip

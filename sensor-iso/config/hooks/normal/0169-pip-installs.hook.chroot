@@ -11,7 +11,6 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   clamd \
   colorama \
   debinterface \
-  flare-capa \
   ipaddress \
   netifaces \
   psutil \
@@ -24,3 +23,7 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   scapy \
   yara-python \
   zkg
+
+# python 2
+pip2 install --system --no-compile --no-cache-dir --force-reinstall --upgrade \
+  flare-capa

@@ -597,9 +597,9 @@ Acquire::https {
         + modify `/etc/apt/source.list` to point to your apt-mirror:
 
 ```
-deb https://XXXXXX:443/debian stable main contrib non-free
-deb https://XXXXXX:443/debian-security stable/updates main contrib non-free
-deb https://XXXXXX:443/debian stable-updates main contrib non-free
+deb https://XXXXXX:443/debian buster main contrib non-free
+deb https://XXXXXX:443/debian-security buster/updates main contrib non-free
+deb https://XXXXXX:443/debian buster-updates main contrib non-free
 deb https://XXXXXX:443/debian buster-backports main contrib non-free
 ```
 

@@ -1,5 +1,4 @@
-# currently not in bullseye:
-# chromium
+chromium
 curl
 ethtool
 htpdate
