@@ -15,7 +15,7 @@ auditbeat.modules:
   # see https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-auditd.html
 
   # don't forward some things that are always going to be happening
-  # (/proc/ accesses by beats and chromium for the kiosk) to cut down on noise
+  # (/proc/ accesses by beats and browser for the kiosk) to cut down on noise
   # and some other approved common stuff that would clutter the logs
   processors:
   - drop_event:
@@ -55,7 +55,9 @@ auditbeat.modules:
                         - equals:
                             auditd.summary.how: '/usr/share/metricbeat/bin/metricbeat'
                         - equals:
-                            auditd.summary.how: '/usr/lib/chromium/chromium'
+                            auditd.summary.how: '/opt/firefox/firefox-bin'
+                        - equals:
+                            auditd.summary.how: '/opt/firefox/firefox'
                         - equals:
                             auditd.summary.how: '/usr/sbin/tcpdump'
                         - equals:
@@ -89,8 +91,8 @@ auditbeat.modules:
                         auditd.data.syscall: 'open'
                     - regexp:
                         auditd.summary.object.primary: '^/.+/__pycache__/$'
-                    - equals:
-                        auditd.summary.how: 'python3.7'
+                    - regexp:
+                        auditd.summary.how: '^python3'
                 - and:
                     - equals:
                         auditd.summary.how: '/bin/bash'
@@ -119,11 +121,6 @@ auditbeat.modules:
                             auditd.summary.how: 'zeekctl'
                         - equals:
                             auditd.summary.how: 'supervisorctl'
-                - and:
-                    - regexp:
-                        auditd.summary.object.primary: '^/dev/shm/\.org\.chromium'
-                    - equals:
-                        auditd.summary.how: '/usr/lib/chromium/chromium'
                 - and:
                     - equals:
                         auditd.summary.object.primary: '/opt/sensor/sensor_ctl/filebeat/data/registry/filebeat/data.json'

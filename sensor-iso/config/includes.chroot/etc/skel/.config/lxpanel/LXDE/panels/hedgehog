@@ -48,7 +48,7 @@ Plugin {
       id=terminator.desktop
     }
     Button {
-      id=chromium.desktop
+      id=firefox.desktop
     }
     Button {
       id=hedgehog-kiosk.desktop

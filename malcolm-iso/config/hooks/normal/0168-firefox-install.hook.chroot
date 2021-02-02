@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
+curl -o /tmp/firefox.tar.bz2 -L "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
+if [ $(file -b --mime-type /tmp/firefox.tar.bz2) = 'application/x-bzip2' ]; then
+  mkdir -p /opt
+  rm -rvf /opt/firefox
+  tar -xvf /tmp/firefox.tar.bz2 -C /opt/
+  rm -vf /tmp/firefox.tar.bz2
+  if [[ -f /opt/firefox/firefox ]]; then
+    rm -vf /usr/local/bin/firefox
+    ln -vrs /opt/firefox/firefox /usr/local/bin/firefox
+    dpkg -s firefox-esr >/dev/null 2>&1 && apt-get -y --purge remove firefox-esr || true
+    cat << 'EOF' > /usr/share/applications/firefox.desktop
+[Desktop Entry]
+Name=Firefox
+Comment=Web Browser
+GenericName=Web Browser
+X-GNOME-FullName=Firefox Web Browser
+Exec=/opt/firefox/firefox %u
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=/opt/firefox/browser/chrome/icons/default/default128.png
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/vnd.mozilla.xul+xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;
+StartupWMClass=Firefox
+StartupNotify=true
+EOF
+  fi
+fi # /tmp/firefox.tar.bz2 check
+
+rm -f /tmp/firefox.tar.bz2

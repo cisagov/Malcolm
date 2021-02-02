@@ -95,26 +95,33 @@ sed -r -i "s@(LogDir)\s*=\s*.*@\1 = $ARCHIVE_PATH@" ./zeekctl.cfg
 sed -r -i "s@(SpoolDir)\s*=\s*.*@\1 = $WORK_PATH@" ./zeekctl.cfg
 
 # completely rewrite node.cfg for one worker per interface
+# see idaholab/Malcolm#36 for details on fine-tuning
+
 rm -f ./node.cfg
-cat << 'EOF' > ./node.cfg
-[logger]
-type=logger
-host=localhost
 
-[manager]
-type=manager
-host=localhost
+echo "[logger]"                           > ./node.cfg
+echo "type=logger"                       >> ./node.cfg
+echo "host=localhost"                    >> ./node.cfg
+[[ -n $ZEEK_PIN_CPUS_LOGGER ]] && \
+  echo "pin_cpus=$ZEEK_PIN_CPUS_LOGGER"  >> ./node.cfg
+echo ""                                  >> ./node.cfg
 
-[proxy]
-type=proxy
-host=localhost
-EOF
+echo "[manager]"                         >> ./node.cfg
+echo "type=manager"                      >> ./node.cfg
+echo "host=localhost"                    >> ./node.cfg
+[[ -n $ZEEK_PIN_CPUS_MANAGER ]] && \
+  echo "pin_cpus=$ZEEK_PIN_CPUS_MANAGER" >> ./node.cfg
+echo ""                                  >> ./node.cfg
+
+echo "[proxy]"                           >> ./node.cfg
+echo "type=proxy"                        >> ./node.cfg
+echo "host=localhost"                    >> ./node.cfg
+[[ -n $ZEEK_PIN_CPUS_PROXY ]] && \
+  echo "pin_cpus=$ZEEK_PIN_CPUS_PROXY"   >> ./node.cfg
+echo ""                                  >> ./node.cfg
 
 # number of zeek processes so far (logger, manager, proxy)
 ZEEK_PROCS=3
-
-# let zeek processes run on whichever processors
-CPU_PINS="$(seq -s, 0 $(($(grep -c ^processor /proc/cpuinfo)-1)))"
 
 # incrementing ID of current worker for config file
 WORKER_ID=1
@@ -123,7 +130,23 @@ WORKER_ID=1
 FANOUT_ID=1
 
 # create a worker for each interface
+# see idaholab/Malcolm#36 for details on fine-tuning
 for IFACE in ${CAPTURE_INTERFACE//,/ }; do
+
+  WORKER_CPU_PINS_VAR=ZEEK_PIN_CPUS_WORKER_${WORKER_ID}
+  WORKER_LB_PROCS_VAR=ZEEK_LB_PROCS_WORKER_${WORKER_ID}
+  # priority for worker's lb_procs:
+  if [[ -n "${!WORKER_LB_PROCS_VAR}" ]]; then
+    # 1. ZEEK_LB_PROCS_WORKER_n is explicitly specified
+    WORKER_LB_PROCS="${!WORKER_LB_PROCS_VAR}"
+  elif [[ -n "${!WORKER_CPU_PINS_VAR}" ]]; then
+    # 2. ZEEK_PIN_CPUS_WORKER_n is specified, count the values
+    WORKER_LB_PROCS="$(echo "${!WORKER_CPU_PINS_VAR}" | awk -F',' '{print NF}')"
+  else
+    # default to $ZEEK_LB_PROCS
+    WORKER_LB_PROCS="$ZEEK_LB_PROCS"
+  fi
+
   cat << EOF >> ./node.cfg
 
 [worker-$WORKER_ID]
@@ -133,10 +156,11 @@ interface=$IFACE
 env_vars=ZEEK_EXTRACTOR_MODE=$ZEEK_EXTRACTOR_MODE,ZEEK_EXTRACTOR_PATH=$EXTRACT_FILES_PATH/,TMP=$TMP_PATH
 EOF
   # if af_packet is available in the kernel, write it out as well
-  if [ $AF_PACKET_SUPPORT -gt 0 ] && [ $ZEEK_LB_PROCS -gt 0 ]; then
-    echo "lb_procs=$ZEEK_LB_PROCS" >> ./node.cfg
+  if [ $AF_PACKET_SUPPORT -gt 0 ] && [ $WORKER_LB_PROCS -gt 0 ]; then
+    echo "lb_procs=$WORKER_LB_PROCS" >> ./node.cfg
     echo "lb_method=$ZEEK_LB_METHOD" >> ./node.cfg
-    echo "# pin_cpus=$CPU_PINS" >> ./node.cfg
+    [[ -n "${!WORKER_CPU_PINS_VAR}" ]] && \
+      echo "pin_cpus=${!WORKER_CPU_PINS_VAR}" >> ./node.cfg
     echo "af_packet_fanout_id=$FANOUT_ID" >> ./node.cfg
     echo "af_packet_fanout_mode=AF_Packet::FANOUT_HASH" >> ./node.cfg
     echo "af_packet_buffer_size=$ZEEK_AF_PACKET_BUFFER_SIZE" >> ./node.cfg

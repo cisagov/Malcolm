@@ -617,7 +617,7 @@ $ apt-get install $(cat *.list.chroot)
     * `apt-get install -y build-essential git-core pkg-config python3-dev`
     * `python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -r -n1 python3 -m pip install -U`
         - if this fails for some reason, you may need to reinstall pip first with `python3 -m pip install --force -U pip`
-        - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip.7` (or whatever `python3.x` you have)
+        - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip` (or whatever `python3.x` you have)
     * If there were [new python packages](https://raw.githubusercontent.com/idaholab/Malcolm/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/idaholab/Malcolm/blame/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
         - `python3 -m pip install --no-compile --no-cache-dir --force-reinstall --upgrade --index-url=https://XXXXXX:443/pypi/simple --trusted-host=XXXXXX:443 colorama`
 
