@@ -104,11 +104,7 @@ cd /usr/local/src
 curl -sSL "${YARA_URL}" | tar xzf - -C /usr/local/src/
 cd "./yara-${YARA_VERSION}"
 ./bootstrap.sh
-./configure --prefix=/usr
-  --with-crypto
-  --enable-magic
-  --enable-cuckoo
-  --enable-dotnet
+./configure --prefix=/usr --with-crypto --enable-magic --enable-cuckoo --enable-dotnet
 make
 #make install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VERSION" --pkgarch="amd64" --pkgsource="$YARA_URL"
