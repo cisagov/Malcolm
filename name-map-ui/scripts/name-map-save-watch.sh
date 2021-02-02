@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 PROCESS_DIR=${NAME_MAP_SAVE_DIR:-/var/www/html/upload/}
 DEST_MAP=${NAME_MAP_JSON:-/var/www/html/maps/net-map.json}
