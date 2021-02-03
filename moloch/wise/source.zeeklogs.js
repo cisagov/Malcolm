@@ -303,7 +303,7 @@ function ZeekLogs (api, section) {
   this.files_md5Field = this.api.addField("field:zeek_files.md5;db:zeek_files.md5;kind:termfield;friendly:MD5 Digest;help:MD5 Digest");
   this.files_sha1Field = this.api.addField("field:zeek_files.sha1;db:zeek_files.sha1;kind:termfield;friendly:SHA1 Digest;help:SHA1 Digest");
   this.files_sha256Field = this.api.addField("field:zeek_files.sha256;db:zeek_files.sha256;kind:termfield;friendly:SHA256 Digest;help:SHA256 Digest");
-  this.files_extractedField = this.api.addField("field:zeek_files.extracted;db:zeek_files.extracted;kind:termfield;friendly:Locale Filename;help:Locale Filename");
+  this.files_extractedField = this.api.addField("field:zeek_files.extracted;db:zeek_files.extracted;kind:termfield;friendly:Extracted Filename;help:Extracted Filename");
   this.files_extracted_cutoffField = this.api.addField("field:zeek_files.extracted_cutoff;db:zeek_files.extracted_cutoff;kind:termfield;friendly:Truncated;help:Truncated");
   this.files_extracted_sizeField = this.api.addField("field:zeek_files.extracted_size;db:zeek_files.extracted_size;kind:integer;friendly:Extracted Bytes;help:Extracted Bytes");
 
@@ -1781,6 +1781,11 @@ function ZeekLogs (api, section) {
   // add right-click for searching mime/media/content types
   var mimeFieldsStr = allFields.filter(value => /(^zeek\.filetype$|mime[_\.-]?type)/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
+
+  // add right-click for extracted/quarantined files from zeek
+  var carvedFieldsStr = allFields.filter(value => /^zeek_files\.extracted$/i.test(value)).join(',');
+  this.api.addRightClick("malcolm_carved_file_quarantined",         {name:"Download (if quarantined)", url:"/dl-extracted-files/quarantine/%TEXT%", fields:carvedFieldsStr});
+  this.api.addRightClick("malcolm_carved_file_preserved",           {name:"Download (if preserved)", url:"/dl-extracted-files/preserved/%TEXT%", fields:carvedFieldsStr});
 
   // add right-clicks for pivoting into Kibana from Arkime (see nginx.conf)
   var filterLabel = "Kibana %DBFIELD%";
