@@ -107,7 +107,7 @@ def main():
 
     # define field formatting map for Kibana -> Arkime drilldown and other URL drilldowns
     #
-    # see: https://github.com/cisagov/Malcolm/issues/133
+    # see: https://github.com/idaholab/Malcolm/issues/133
     #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu
     #
     # fieldFormatMap is
