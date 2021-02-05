@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 sed -i 's/^exit 0//' /etc/rc.local 2>/dev/null
 
@@ -17,7 +17,7 @@ fi
 if [ -f "$CAPTURE_STORAGE_FORMAT_FILE" ]; then
   logger "Initializing disk(s) to store captured artifacts"
   date >>/var/log/sensor-capture-disk-config.log 2>&1
-  python3.7 /usr/local/bin/sensor-capture-disk-config.py -u $CAPTURE_STORAGE_FORMAT_FLAG >>/var/log/sensor-capture-disk-config.log 2>&1
+  python3 /usr/local/bin/sensor-capture-disk-config.py -u $CAPTURE_STORAGE_FORMAT_FLAG >>/var/log/sensor-capture-disk-config.log 2>&1
   rm -f "$CAPTURE_STORAGE_FORMAT_FILE"
 fi
 

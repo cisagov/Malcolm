@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 SCRIPT_PATH="$(dirname $(realpath -e "${BASH_SOURCE[0]}"))"
 
@@ -22,7 +22,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     MAIN_USER_HOME="$(getent passwd "$MAIN_USER" | cut -d: -f6)"
     if [[ -f "$MAIN_USER_HOME"/Malcolm/firstrun ]]; then
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
-        /usr/bin/env python3.7 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --logstash-expose --restart-malcolm
+        /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --logstash-expose --restart-malcolm
       fi
       rm -f "$MAIN_USER_HOME"/Malcolm/firstrun
     fi
@@ -34,8 +34,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
   InitializeAggregatorNetworking
 
-  # chromium tries to call home despite my best efforts
-  BadGoogle
+  # block some call-homes
+  BadTelemetry
 
   # if we need to import prebuilt Malcolm docker images, do so now (but not if we're in a live-usb boot)
   DOCKER_DRIVER="$(docker info 2>/dev/null | grep 'Storage Driver' | cut -d' ' -f3)"

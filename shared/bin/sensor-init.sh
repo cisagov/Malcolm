@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 SCRIPT_PATH="$(dirname $(realpath -e "${BASH_SOURCE[0]}"))"
 
@@ -94,8 +94,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # fix some permisions to make sure things belong to the right person
   [[ -n $MAIN_USER ]] && FixPermissions "$MAIN_USER"
 
-  # chromium tries to call home despite my best efforts
-  BadGoogle
+  # block some call-homes
+  BadTelemetry
 
   exit 0
 else

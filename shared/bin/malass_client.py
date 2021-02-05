@@ -1,6 +1,6 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 """This script (malass_client.py) simulates the Malass 'file upload' HTML web form.
    The 'file upload' HTML form is used to 'upload a file', and several HTML form fields,

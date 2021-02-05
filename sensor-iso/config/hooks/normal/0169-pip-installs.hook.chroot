@@ -1,12 +1,9 @@
 #!/bin/sh
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
-export CC="clang-11"
-export CXX="clang++-11"
-export ASM="clang-11"
 
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
@@ -14,9 +11,11 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   clamd \
   colorama \
   debinterface \
+  flare-capa \
   ipaddress \
   netifaces \
   psutil \
+  pycryptodome \
   pyinotify \
   python-magic \
   pythondialog \
@@ -25,7 +24,3 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   scapy \
   yara-python \
   zkg
-
-# python 2
-pip2 install --system --no-compile --no-cache-dir --force-reinstall --upgrade \
-  flare-capa

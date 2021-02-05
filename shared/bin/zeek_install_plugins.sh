@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
@@ -67,6 +67,7 @@ function clone_github_repo() {
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
+  https://github.com/0xl3x1/zeek-EternalSafety
   https://github.com/0xxon/cve-2020-0601
   https://github.com/0xxon/cve-2020-13777
   https://github.com/amzn/zeek-plugin-profinet
@@ -76,11 +77,10 @@ ZKG_GITHUB_URLS=(
   https://github.com/corelight/CVE-2020-16898
   https://github.com/corelight/ripple20
   https://github.com/corelight/SIGRed
-  https://github.com/corelight/zeek-community-id
   https://github.com/corelight/zerologon
   https://github.com/cybera/zeek-sniffpass
-  https://github.com/0xl3x1/zeek-EternalSafety
   https://github.com/mitre-attack/bzar
+  https://github.com/mmguero-dev/zeek-community-id
   https://github.com/precurse/zeek-httpattacks
   https://github.com/salesforce/hassh
   https://github.com/salesforce/ja3
@@ -117,7 +117,6 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 MANUAL_BRO_GITHUB_URLS=(
-  https://github.com/SoftwareConsultingEmporium/ldap-analyzer
   https://github.com/corelight/bro-xor-exe-plugin
 )
 for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
@@ -132,13 +131,14 @@ for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
   fi
 done
 
-ICSNPP_PACKAGES_GITHUB_URLS=(
+MANUAL_ZEEK_GITHUB_URLS=(
   https://github.com/cisagov/icsnpp-bacnet
   https://github.com/cisagov/icsnpp-bsap-ip
   https://github.com/cisagov/icsnpp-bsap-serial
   https://github.com/cisagov/icsnpp-enip
+  https://github.com/mmguero-dev/ldap-analyzer
 )
-for i in ${ICSNPP_PACKAGES_GITHUB_URLS[@]}; do
+for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
@@ -165,11 +165,13 @@ if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
     ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
-    ninja -C build install
+    ninja -j 2 -C build install
   cd "$CWD"
 fi
 
 if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
+
+  # spicy-noise
   SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
@@ -178,7 +180,19 @@ if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
       cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
       chmod 644 ./zeek/spicy-noise.hlto && \
       echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.zeek && \
-      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise && \
+      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise
     cd "$CWD"
   fi
+
+  # spicy-tftp
+  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy-tftp")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --with-spicy=/opt/spicy --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR"
+      make && \
+      make install
+    cd "$CWD"
+  fi
+
 fi

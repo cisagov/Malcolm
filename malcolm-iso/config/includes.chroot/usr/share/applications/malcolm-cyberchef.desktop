@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - CyberChef
-Exec=/usr/bin/chromium https://localhost/cyberchef/
+Exec=/opt/firefox/firefox https://localhost/cyberchef/
 Terminal=false
 X-MultipleArgs=false
 Type=Application
 Icon=applications-science.png
 Categories=Network;
-StartupWMClass=chromium
+StartupWMClass=Firefox
 StartupNotify=true

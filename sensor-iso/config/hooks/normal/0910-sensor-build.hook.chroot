@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
@@ -18,14 +18,7 @@ BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
-CMAKE_DIR="/opt/cmake"
-CMAKE_VER="3.19.3"
-CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VER}/cmake-${CMAKE_VER}-Linux-x86_64.tar.gz"
-
-BISON_VER="3.7.4"
-BISON_URL="https://ftp.gnu.org/gnu/bison/bison-${BISON_VER}.tar.gz"
-
-YARA_VERSION="4.0.2"
+YARA_VERSION="4.0.4"
 YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
@@ -35,29 +28,10 @@ CAPA_RULES_DIR="/opt/capa-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
-# some environment variables needed for build using clang
-export CC="clang-11"
-export CXX="clang++-11"
-export ASM="clang-11"
+# some environment variables needed for build
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
-export PATH="${ZEEK_DIR}"/bin:"${CMAKE_DIR}"/bin:$PATH
-
-# download and install cmake (required for Spicy build)
-mkdir -p "${CMAKE_DIR}"
-curl -sSL "${CMAKE_URL}" | \
-  tar xzf - -C "${CMAKE_DIR}" --strip-components 1
-
-# download and install newer Bison (required for Spicy build)
-cd /tmp
-curl -sSL "${BISON_URL}" | tar xzf - -C /tmp
-mv "./bison-${BISON_VER}" ./bison
-cd ./bison
-./configure --prefix=/usr
-make
-# make install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="bison" --pkgversion="$BISON_VER" --pkgarch="amd64" --pkgsource="$BISON_URL"
-rm -rf /tmp/bison*
+export PATH="${ZEEK_DIR}"/bin:$PATH
 
 # a moloch .deb is built and installed in a different context
 
@@ -92,11 +66,8 @@ done
 ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
 cd build
 ninja
-# TODO: we were using checkinstall and I would prefer to, but it has some issues with clang++-11 not finding
-# stdlib include files so for now i'm just back to ninja install. honestly that's probably fine
-# because we weren't getting the third party plugins in the .deb anyway...
-# checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
 ninja install
+# checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
 
 # install 3rd party Zeek plugins and scripts
 zkg autoconfig
@@ -133,11 +104,7 @@ cd /usr/local/src
 curl -sSL "${YARA_URL}" | tar xzf - -C /usr/local/src/
 cd "./yara-${YARA_VERSION}"
 ./bootstrap.sh
-./configure --prefix=/usr
-  --with-crypto
-  --enable-magic
-  --enable-cuckoo
-  --enable-dotnet
+./configure --prefix=/usr --with-crypto --enable-magic --enable-cuckoo --enable-dotnet
 make
 #make install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VERSION" --pkgarch="amd64" --pkgsource="$YARA_URL"

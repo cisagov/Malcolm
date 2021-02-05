@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - Upload
-Exec=/usr/bin/chromium https://localhost/upload/
+Exec=/opt/firefox/firefox https://localhost/upload/
 Terminal=false
 X-MultipleArgs=false
 Type=Application
 Icon=up.png
 Categories=Network;
-StartupWMClass=chromium
+StartupWMClass=Firefox
 StartupNotify=true

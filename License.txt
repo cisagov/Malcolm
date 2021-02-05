@@ -2,7 +2,7 @@ Software License Agreement
 
 For more information, please see DHS_TOU.pdf.
 
-Malcolm is Copyright (c) 2020 Battelle Energy Alliance, LLC, and is developed
+Malcolm is Copyright (c) 2021 Battelle Energy Alliance, LLC, and is developed
 and released through the cooperation of the Cybersecurity and Infrastructure
 Security Agency of the U.S. Department of Homeland Security. All rights reserved.
 
@@ -22,7 +22,7 @@ means, and for any purpose whatsoever.
 https://github.com/cisagov/Malcolm
 
 
-Copyright 2020 Battelle Energy Alliance, LLC
+Copyright 2021 Battelle Energy Alliance, LLC
 
 
 ALL RIGHTS RESERVED
