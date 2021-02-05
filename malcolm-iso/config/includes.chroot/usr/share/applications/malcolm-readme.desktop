@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - README
-Exec=/usr/bin/chromium https://localhost/readme
+Exec=/opt/firefox/firefox https://localhost/readme
 Terminal=false
 X-MultipleArgs=false
 Type=Application
 Icon=help-browser
 Categories=Network;
-StartupWMClass=chromium
+StartupWMClass=Firefox
 StartupNotify=true

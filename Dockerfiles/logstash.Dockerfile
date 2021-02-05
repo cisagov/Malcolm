@@ -1,6 +1,6 @@
 FROM centos:7 AS build
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 RUN yum install -y epel-release && \
     yum update -y && \

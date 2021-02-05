@@ -172,7 +172,7 @@ KeyboardInterrupt
 
 # <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2020 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/master/License.txt) for the terms of its release.
 

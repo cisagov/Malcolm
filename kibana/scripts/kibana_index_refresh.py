@@ -200,6 +200,17 @@ def main():
           drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
+        elif re.search(r'(^zeek_files\.extracted$)', field['name'], re.IGNORECASE) is not None:
+          # add download for extracted/quarantined zeek files
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/quarantine/{{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Download (if quarantined)'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+          drilldownInfoParamsUrlTemplateValues = {}
+          drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/preserved/{{value}}'
+          drilldownInfoParamsUrlTemplateValues['label'] = 'Download (if preserved)'
+          drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+
         drilldownInfoParams = {}
         drilldownInfoParams['urlTemplates'] = drilldownInfoParamsUrlTemplates
 

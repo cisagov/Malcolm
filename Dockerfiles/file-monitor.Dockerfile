@@ -1,6 +1,6 @@
 FROM debian:buster-slim
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -44,6 +44,11 @@ ARG EXTRACTED_FILE_ENABLE_YARA=false
 ARG EXTRACTED_FILE_YARA_CUSTOM_ONLY=false
 ARG EXTRACTED_FILE_ENABLE_CAPA=false
 ARG EXTRACTED_FILE_CAPA_VERBOSE=false
+ARG EXTRACTED_FILE_HTTP_SERVER_DEBUG=false
+ARG EXTRACTED_FILE_HTTP_SERVER_ENABLE=false
+ARG EXTRACTED_FILE_HTTP_SERVER_ENCRYPT=false
+ARG EXTRACTED_FILE_HTTP_SERVER_KEY=quarantined
+ARG EXTRACTED_FILE_HTTP_SERVER_PORT=8440
 
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
@@ -70,7 +75,7 @@ ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
-ENV YARA_VERSION "4.0.2"
+ENV YARA_VERSION "4.0.4"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
 ENV YARA_RULES_DIR "/yara-rules"
@@ -78,6 +83,11 @@ ENV YARA_RULES_SRC_DIR "$SRC_BASE_DIR/signature-base"
 ENV CAPA_URL "https://github.com/fireeye/capa"
 ENV CAPA_RULES_URL "https://github.com/fireeye/capa-rules"
 ENV CAPA_RULES_DIR "/capa-rules"
+ENV EXTRACTED_FILE_HTTP_SERVER_DEBUG $EXTRACTED_FILE_HTTP_SERVER_DEBUG
+ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
+ENV EXTRACTED_FILE_HTTP_SERVER_ENCRYPT $EXTRACTED_FILE_HTTP_SERVER_ENCRYPT
+ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
+ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ENV SUPERCRONIC_VERSION "0.1.12"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
@@ -123,7 +133,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       python3-pyinotify \
       python3-requests \
       python3-zmq && \
-    pip3 install clamd supervisor yara-python python-magic psutil && \
+    pip3 install clamd supervisor yara-python python-magic psutil pycryptodome && \
     pip2 install flare-capa && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
@@ -204,7 +214,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       echo "0 */6 * * * /bin/bash /usr/local/bin/capa-rules-update.sh\n0 */6 * * * /bin/bash /usr/local/bin/yara-rules-update.sh" > ${SUPERCRONIC_CRONTAB}
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/zeek_carve_*.py /usr/local/bin/
+ADD shared/bin/zeek_carve*.py /usr/local/bin/
 ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh

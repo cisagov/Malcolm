@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 declare -A IFACES
 
@@ -108,8 +108,8 @@ function FixPermissions() {
   fi
 }
 
-# chromium tries to call home despite my best efforts
-function BadGoogle() {
+# block some call-homes
+function BadTelemetry() {
   if ! grep -q google /etc/hosts; then
     echo >> /etc/hosts
     echo '127.0.0.1 _googlecast._tcp.local' >> /etc/hosts
@@ -121,5 +121,10 @@ function BadGoogle() {
     echo '127.0.0.1 update.googleapis.com' >> /etc/hosts
     echo '127.0.0.1 www.google-analytics.com' >> /etc/hosts
     echo '127.0.0.1 www.gstatic.com' >> /etc/hosts
+    echo '127.0.0.1 connectivitycheck.gstatic.com' >> /etc/hosts
+    echo '127.0.0.1 incoming.telemetry.mozilla.org' >> /etc/hosts
+    echo '127.0.0.1 detectportal.firefox.com' >> /etc/hosts
+    echo '127.0.0.1 prod.detectportal.prod.cloudops.mozgcp.net' >> /etc/hosts
+    echo '127.0.0.1 detectportal.prod.mozaws.net' >> /etc/hosts
   fi
 }

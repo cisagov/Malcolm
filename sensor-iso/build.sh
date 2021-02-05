@@ -39,6 +39,8 @@ if [ -d "$WORKDIR" ]; then
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
 
+  mkdir -p ./config/packages.chroot/
+
   mkdir -p ./config/hooks/live
   pushd ./config/hooks/live
   ln -v -s -f /usr/share/live/build/hooks/live/* ./
@@ -131,7 +133,6 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  mkdir -p ./config/packages.chroot/
   bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/moloch:/build arkime-build:latest -o /build
   cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
@@ -187,7 +188,7 @@ if [ -d "$WORKDIR" ]; then
     --apt-source-archives false \
     --archive-areas 'main contrib non-free' \
     --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
-    --apt-options "--allow-downgrades --allow-remove-essential --allow-change-held-packages --yes"
+    --apt-options "--yes --allow-downgrades --allow-remove-essential --allow-change-held-packages -oAPT::Default-Release=buster"
 
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
   if [ -f "$IMAGE_NAME-amd64.hybrid.iso" ]; then

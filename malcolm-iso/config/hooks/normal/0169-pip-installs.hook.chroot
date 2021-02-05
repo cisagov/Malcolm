@@ -11,5 +11,6 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   docker-compose \
   netifaces \
   psutil \
+  pycryptodome \
   pythondialog \
   requests[security]

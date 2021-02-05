@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
+mkdir -p /etc/apt/sources.list.d
+echo 'deb http://deb.debian.org/debian testing main contrib non-free' > /etc/apt/sources.list.d/testing.list
+
+apt-get -y update
+
+apt-get -y --purge remove \
+  cpp-8 \
+  g++-8 \
+  gcc-8 \
+  gcc-8-base \
+  libgcc-8-dev \
+  libstdc++-8-dev
+
+apt-get install -y --no-install-recommends -t testing \
+  autoconf \
+  automake \
+  binutils \
+  bison \
+  build-essential \
+  cmake \
+  fusesmb \
+  libatomic1 \
+  libcli-dev \
+  libffi-dev \
+  libfl-dev \
+  libgomp1 \
+  libitm1 \
+  libquadmath0 \
+  make \
+  ninja-build \
+  python3-dev \
+  python3-pip \
+  python3-setuptools \
+  python3-wheel \
+  samba-libs \
+  smbclient \
+  libgoogle-perftools-dev \
+  libgtk2.0-dev \
+  libjansson-dev \
+  libkrb5-dev \
+  libmagic-dev \
+  libmaxminddb-dev \
+  libnacl-dev \
+  libncurses5-dev \
+  libnet1-dev \
+  libnetfilter-conntrack-dev \
+  libnl-3-dev \
+  libnl-genl-3-dev \
+  libnl-route-3-dev \
+  libpcap0.8-dev \
+  libsodium-dev \
+  libssl-dev \
+  libtool \
+  liburcu-dev \
+  libyaml-dev \
+  manpages-dev \
+  zlib1g-dev
