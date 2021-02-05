@@ -65,7 +65,6 @@ COPY docs/images/favicon/favicon.ico /var/www/html/
 
 EXPOSE 8080
 
-
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]

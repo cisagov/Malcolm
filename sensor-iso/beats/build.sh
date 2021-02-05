@@ -42,6 +42,7 @@ do
       git clone --depth=1 --single-branch --branch "$BRANCH" "$BEAT"
       BEAT_EXE_NAME="$(basename "$BEAT" | sed "s/\.git$//")"
       cd "$BEAT_EXE_NAME"
+      go get
       go install
       if [[ -f "$GOBIN/$BEAT_EXE_NAME" ]] ; then
         cp "$GOBIN/$BEAT_EXE_NAME" /build

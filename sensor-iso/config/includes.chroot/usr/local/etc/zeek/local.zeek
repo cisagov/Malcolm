@@ -100,13 +100,6 @@ redef ignore_checksums = T;
   @load ./bzar
 @endif
 
-@load icsnpp-dnp3
-@load icsnpp-modbus
-@load icsnpp/bacnet
-@load icsnpp/bsap-ip
-@load icsnpp/bsap-serial
-@load icsnpp/enip
-
 # custom packages managed by zkg via packages/packages.zeek
 @load ./packages/packages.zeek
 

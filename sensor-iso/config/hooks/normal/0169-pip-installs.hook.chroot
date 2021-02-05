@@ -13,6 +13,7 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   debinterface \
   flare-capa \
   ipaddress \
+  magic-wormhole \
   netifaces \
   psutil \
   pycryptodome \
