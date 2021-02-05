@@ -642,7 +642,7 @@ def main():
         capture_config_dict["EXTRACTED_FILE_PRESERVATION"] = zeek_carved_file_preservation
 
         # get confirmation from user that we really want to do this
-        code = d.yesno(Constants.MSG_CONFIG_CAP_CONFIRM.format("\n".join(sorted([f"{k}={v}" for k, v in capture_config_dict.items() if ("AUTOSTART" not in k) and ("PASSWORD" not in k)]))),
+        code = d.yesno(Constants.MSG_CONFIG_CAP_CONFIRM.format("\n".join(sorted([f"{k}={v}" for k, v in capture_config_dict.items() if (not k.startswith("#")) and ("AUTOSTART" not in k) and ("PASSWORD" not in k)]))),
                        yes_label="OK", no_label="Cancel")
         if code == Dialog.OK:
 
@@ -719,7 +719,7 @@ def main():
             raise CancelledError
           moloch_elastic_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
 
-          list_results = sorted([f"{k}={v}" for k, v in moloch_elastic_config_dict.items() if "PASSWORD" not in k])
+          list_results = sorted([f"{k}={v}" for k, v in moloch_elastic_config_dict.items() if ("PASSWORD" not in k) and (not k.startswith("#"))])
 
           code = d.yesno(Constants.MSG_CONFIG_FORWARDING_CONFIRM.format(fwd_mode, "\n".join(list_results)),
                          yes_label="OK", no_label="Cancel")
