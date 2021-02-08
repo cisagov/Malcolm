@@ -49,11 +49,25 @@ function get_latest_github_tagged_release() {
 # clone_github_repo
 #
 # clone the latest GitHub release tag if available (else, master/HEAD) under $SRC_BASE_DIR
+# release tag/branch can be overriden by specifying the branch name with after the URL delimited by a |
 #
 function clone_github_repo() {
-  REPO_URL="$1"
+  URL_PARAM="$1"
+  URL_BRANCH_DELIM='|'
+  URL_BRANCH_DELIM_COUNT="$(awk -F"${URL_BRANCH_DELIM}" '{print NF-1}' <<< "${URL_PARAM}")"
+  if (( $URL_BRANCH_DELIM_COUNT > 0 )); then
+    REPO_URL="$(echo "$URL_PARAM" | cut -d'|' -f1)"
+    BRANCH_OVERRIDE="$(echo "$URL_PARAM" | cut -d'|' -f2)"
+  else
+    REPO_URL="$URL_PARAM"
+    BRANCH_OVERRIDE=""
+  fi
   if [[ -n $REPO_URL ]]; then
-    REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
+    if [[ -n $BRANCH_OVERRIDE ]]; then
+      REPO_LATEST_RELEASE="$BRANCH_OVERRIDE"
+    else
+      REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
+    fi
     SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
     rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
@@ -117,7 +131,7 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 MANUAL_BRO_GITHUB_URLS=(
-  https://github.com/corelight/bro-xor-exe-plugin
+  https://github.com/corelight/bro-xor-exe-plugin|1.2
 )
 for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
