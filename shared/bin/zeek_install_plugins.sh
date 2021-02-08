@@ -76,7 +76,7 @@ ZKG_GITHUB_URLS=(
   https://github.com/corelight/CVE-2020-16898
   https://github.com/corelight/ripple20
   https://github.com/corelight/SIGRed
-  https://github.com/corelight/zeek-community-id
+  https://github.com/mmguero-dev/zeek-community-id
   https://github.com/corelight/zerologon
   https://github.com/cybera/zeek-sniffpass
   https://github.com/0xl3x1/zeek-EternalSafety
