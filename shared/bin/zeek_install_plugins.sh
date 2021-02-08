@@ -81,23 +81,23 @@ function clone_github_repo() {
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
-  https://github.com/0xl3x1/zeek-EternalSafety
-  https://github.com/0xxon/cve-2020-0601
-  https://github.com/0xxon/cve-2020-13777
-  https://github.com/amzn/zeek-plugin-profinet
-  https://github.com/amzn/zeek-plugin-s7comm
-  https://github.com/amzn/zeek-plugin-tds
-  https://github.com/corelight/callstranger-detector
-  https://github.com/corelight/CVE-2020-16898
-  https://github.com/corelight/ripple20
-  https://github.com/corelight/SIGRed
-  https://github.com/corelight/zeek-community-id|3.0.0
-  https://github.com/corelight/zerologon
-  https://github.com/cybera/zeek-sniffpass
-  https://github.com/mitre-attack/bzar
-  https://github.com/precurse/zeek-httpattacks
-  https://github.com/salesforce/hassh
-  https://github.com/salesforce/ja3
+  "https://github.com/0xl3x1/zeek-EternalSafety"
+  "https://github.com/0xxon/cve-2020-0601"
+  "https://github.com/0xxon/cve-2020-13777"
+  "https://github.com/amzn/zeek-plugin-profinet"
+  "https://github.com/amzn/zeek-plugin-s7comm"
+  "https://github.com/amzn/zeek-plugin-tds"
+  "https://github.com/corelight/callstranger-detector"
+  "https://github.com/corelight/CVE-2020-16898"
+  "https://github.com/corelight/ripple20"
+  "https://github.com/corelight/SIGRed"
+  "https://github.com/corelight/zerologon"
+  "https://github.com/cybera/zeek-sniffpass"
+  "https://github.com/mitre-attack/bzar"
+  "https://github.com/corelight/zeek-community-id|3.0.0"
+  "https://github.com/precurse/zeek-httpattacks"
+  "https://github.com/salesforce/hassh"
+  "https://github.com/salesforce/ja3"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -131,7 +131,7 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 MANUAL_BRO_GITHUB_URLS=(
-  https://github.com/corelight/bro-xor-exe-plugin|1.2
+  "https://github.com/corelight/bro-xor-exe-plugin|1.2"
 )
 for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -146,11 +146,11 @@ for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
 done
 
 MANUAL_ZEEK_GITHUB_URLS=(
-  https://github.com/cisagov/icsnpp-bacnet
-  https://github.com/cisagov/icsnpp-bsap-ip
-  https://github.com/cisagov/icsnpp-bsap-serial
-  https://github.com/cisagov/icsnpp-enip
-  https://github.com/mmguero-dev/ldap-analyzer
+  "https://github.com/cisagov/icsnpp-bacnet"
+  "https://github.com/cisagov/icsnpp-bsap-ip"
+  "https://github.com/cisagov/icsnpp-bsap-serial"
+  "https://github.com/cisagov/icsnpp-enip"
+  "https://github.com/mmguero-dev/ldap-analyzer"
 )
 for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -165,8 +165,8 @@ for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
 done
 
 ICSNPP_UPDATES_GITHUB_URLS=(
-  https://github.com/cisagov/icsnpp-dnp3
-  https://github.com/cisagov/icsnpp-modbus
+  "https://github.com/cisagov/icsnpp-dnp3"
+  "https://github.com/cisagov/icsnpp-modbus"
 )
 for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
