@@ -81,6 +81,7 @@ function clone_github_repo() {
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
+  https://github.com/0xl3x1/zeek-EternalSafety
   https://github.com/0xxon/cve-2020-0601
   https://github.com/0xxon/cve-2020-13777
   https://github.com/amzn/zeek-plugin-profinet
@@ -90,10 +91,9 @@ ZKG_GITHUB_URLS=(
   https://github.com/corelight/CVE-2020-16898
   https://github.com/corelight/ripple20
   https://github.com/corelight/SIGRed
-  https://github.com/mmguero-dev/zeek-community-id
+  https://github.com/corelight/zeek-community-id|3.0.0
   https://github.com/corelight/zerologon
   https://github.com/cybera/zeek-sniffpass
-  https://github.com/0xl3x1/zeek-EternalSafety
   https://github.com/mitre-attack/bzar
   https://github.com/precurse/zeek-httpattacks
   https://github.com/salesforce/hassh
