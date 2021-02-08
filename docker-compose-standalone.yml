@@ -346,6 +346,7 @@ services:
     environment:
       << : *process-variables
       << : *zeek-variables
+      VIRTUAL_HOST : 'filemon.malcolm.local'
     expose:
       - 3310
       - 8440
