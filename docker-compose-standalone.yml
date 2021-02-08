@@ -512,6 +512,7 @@ services:
       - upload
       - htadmin
       - name-map-ui
+      - file-monitor
     ports:
       - "443:443"
       - "488:488"
