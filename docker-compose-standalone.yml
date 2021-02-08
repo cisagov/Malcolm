@@ -348,6 +348,7 @@ services:
       << : *zeek-variables
     expose:
       - 3310
+      - 8440
     volumes:
       - ./zeek-logs/extract_files:/data/zeek/extract_files
       - ./zeek-logs/current:/data/zeek/logs

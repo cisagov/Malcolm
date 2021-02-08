@@ -228,6 +228,7 @@ VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]
 
 EXPOSE 3310
+EXPOSE $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
 
