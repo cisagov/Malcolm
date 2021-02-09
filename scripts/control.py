@@ -57,6 +57,7 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
 
   # the elastic containers all follow the same naming pattern for these executables
   keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
+  dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
   # open up the docker-compose file and "grep" for the line where the keystore file
   # is bind-mounted into the service container (once and only once). the bind
@@ -98,7 +99,7 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
                      # if using stdin, indicate the container is "interactive", else noop (duplicate --rm)
                      '-T' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
 
-                     # execute as current UID:GID, as we're assuming this would match docker-compose YML PUID/PGID
+                     # execute as current UID:GID, as we're assuming this would match docker-compose YML PUID/PGID already running
                      # todo: alternately grep PUID/PGID out of docker-compose YML
                      '-u', f'{os.getuid()}:{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000:1000',
 
@@ -134,8 +135,10 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
                        # if using stdin, indicate the container is "interactive", else noop
                        '-i' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
 
-                       # the executable filespec
-                       '--entrypoint', keystoreBinProc,
+                       # this script will take care of dropping privileges for the correct UID/GID
+                       '--entrypoint', dockerUidGuidSetup,
+                       '--env', f'DEFAULT_UID={os.getuid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}',
+                       '--env', f'DEFAULT_GID={os.getgid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}',
 
                        # rw bind mount the local directory to contain the keystore file to the container directory
                        '-v', f'{localKeystoreDir}:{volumeKeystoreDir}:rw',
@@ -143,13 +146,14 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
                        # the work directory in the container is the directory to contain the keystore file
                        '-w', volumeKeystoreDir,
 
-                       # execute as 1000:1000; this should be the right thing to do as this is how the images were built
-                       # todo: alternately:
-                       #   '-u', f'{os.getuid()}:{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000:1000',
-                       '-u', '1000:1000',
+                       # execute as root, as docker-uid-gid-setup.sh will drop privileges for us
+                       '-u', 'root',
 
                        # the service image name grepped from the YML file
-                       serviceImage]
+                       serviceImage,
+
+                       # the executable filespec
+                       keystoreBinProc]
 
         else:
           raise Exception(f'Unable to identify docker image for {service} in {args.composeFile}')
