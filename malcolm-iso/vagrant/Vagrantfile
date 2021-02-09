@@ -30,15 +30,17 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "shell", inline: <<-STEP1
+    dpkg-reconfigure debconf -f noninteractive -p critical
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get dist-upgrade -y
+    apt-mark hold grub-pc
+    apt-get -qqy update
+    apt-get -y dist-upgrade
     sed -i "s/main/main contrib non-free/g" /etc/apt/sources.list
     echo "deb http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
     echo "deb-src http://httpredir.debian.org/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
-    apt-get update
+    apt-get -qqy update
     export KERNEL_VERSION=$(apt-cache search linux-image-5.9 | grep -Pv -- '(-(rt|cloud)-amd64|amd64-(dbg|unsigned))' | sort -r --sort=version | awk '{print $1}' | head -n 1 | sed 's/^linux-image-//' | sed 's/-amd64$//')
-    apt-get -t buster-backports install -y \
+    apt-get -t buster-backports -y install \
       linux-image-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-amd64 linux-headers-$KERNEL_VERSION-common \
       dkms build-essential linux-kbuild-5.9 linux-compiler-gcc-8-x86 \
       firmware-linux firmware-linux-nonfree firmware-misc-nonfree firmware-amd-graphics
@@ -48,14 +50,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: <<-STEP2
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get -t buster-backports install -y \
+    apt-get -qqy update
+    apt-get -t buster-backports -y install \
       rsync git live-build debootstrap xorriso squashfs-tools genisoimage pandoc imagemagick \
       apt-transport-https ca-certificates curl gnupg2 software-properties-common
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-    apt-get update
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    apt-get -qqy update
+    apt-get -y install docker-ce docker-ce-cli containerd.io
     usermod -a -G docker vagrant
   STEP2
 end
