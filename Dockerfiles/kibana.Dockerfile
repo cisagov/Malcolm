@@ -85,8 +85,11 @@ RUN yum install -y epel-release && \
       /usr/share/kibana/bin/kibana-plugin remove opendistroReportsKibana --allow-root
 
 ADD kibana/kibana.yml /usr/share/kibana/config/kibana.yml
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
-USER $DEFAULT_UID
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
+CMD ["/usr/local/bin/kibana-docker"]
 
 EXPOSE 5601
 
