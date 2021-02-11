@@ -696,12 +696,12 @@ def authSetup(wipe=False):
 
   # Open Distro for Elasticsearch authenticate sender account credentials
   # https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account
-  if YesOrNo('Store username/password for email alert sender account', default=False):
+  if YesOrNo('Store username/password for email alert sender account (see https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account)', default=False):
 
     # prompt username and password
     emailPassword = None
     emailPasswordConfirm = None
-    emailDestination = AskForString("Open Distro alerting destination name")
+    emailSender = AskForString("Open Distro alerting email sender name")
     emailUsername = AskForString("Email account username")
 
     while True:
@@ -712,8 +712,8 @@ def authSetup(wipe=False):
       eprint("Passwords do not match")
 
     # create elasticsearch keystore file, don't complain if it already exists, and set the keystore items
-    usernameKey = f'opendistro.alerting.destination.email.{emailDestination}.username'
-    passwordKey = f'opendistro.alerting.destination.email.{emailDestination}.password'
+    usernameKey = f'opendistro.alerting.destination.email.{emailSender}.username'
+    passwordKey = f'opendistro.alerting.destination.email.{emailSender}.password'
 
     keystore_op('elasticsearch', 'create', stdin='N')
     keystore_op('elasticsearch', 'remove', usernameKey)
