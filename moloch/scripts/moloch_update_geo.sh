@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-cd "/data/moloch/etc"
+cd "${ARKIMEDIR:-/data/moloch}"/etc
 
 wget -nv --no-check-certificate -O ipv4-address-space.csv_new https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv && \
   mv -f ipv4-address-space.csv_new ipv4-address-space.csv || \
