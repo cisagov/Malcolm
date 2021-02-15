@@ -47,7 +47,7 @@ except:
 #
 # returns True (success) or False (failure)
 #
-def keystore_op(service, *keystore_args, **run_process_kwargs):
+def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
   global args
   global dockerBin
   global dockerComposeBin
@@ -57,6 +57,8 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
 
   # the elastic containers all follow the same naming pattern for these executables
   keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
+
+  # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
   dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
   # open up the docker-compose file and "grep" for the line where the keystore file
@@ -135,8 +137,9 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
                        # if using stdin, indicate the container is "interactive", else noop
                        '-i' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
 
-                       # this script will take care of dropping privileges for the correct UID/GID
-                       '--entrypoint', dockerUidGuidSetup,
+                       # if     dropPriv, dockerUidGuidSetup will take care of dropping privileges for the correct UID/GID
+                       # if NOT dropPriv, enter with the keystore executable directly
+                       '--entrypoint', dockerUidGuidSetup if dropPriv else keystoreBinProc,
                        '--env', f'DEFAULT_UID={os.getuid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}',
                        '--env', f'DEFAULT_GID={os.getgid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}',
 
@@ -146,14 +149,18 @@ def keystore_op(service, *keystore_args, **run_process_kwargs):
                        # the work directory in the container is the directory to contain the keystore file
                        '-w', volumeKeystoreDir,
 
-                       # execute as root, as docker-uid-gid-setup.sh will drop privileges for us
-                       '-u', 'root',
+                       # if     dropPriv, execute as root, as docker-uid-gid-setup.sh will drop privileges for us
+                       # if NOT dropPriv, execute as 1000:1000; this should be the right thing to do as this is how the images were built
+                       #                  todo: alternately:
+                       #                    '-u', 'root' if dropPriv else f'{os.getuid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}:{os.getgid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}'
+                       '-u', 'root' if dropPriv else '1000:1000',
 
                        # the service image name grepped from the YML file
-                       serviceImage,
+                       serviceImage]
 
-                       # the executable filespec
-                       keystoreBinProc]
+          if dropPriv:
+            # the keystore executable filespec (as we used dockerUidGuidSetup as the entrypoint)
+            dockerCmd.append(keystoreBinProc)
 
         else:
           raise Exception(f'Unable to identify docker image for {service} in {args.composeFile}')
@@ -384,9 +391,9 @@ def start():
 
   # if the elasticsearch and logstash keystore don't exist exist, create empty ones
   if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('elasticsearch', 'elasticsearch.keystore'))):
-    keystore_op('elasticsearch', 'create')
+    keystore_op('elasticsearch', True, 'create')
   if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('logstash', os.path.join('certs', 'logstash.keystore')))):
-    keystore_op('logstash', 'create')
+    keystore_op('logstash', False, 'create')
 
   # make sure permissions are set correctly for the nginx worker processes
   for authFile in [os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
@@ -680,13 +687,13 @@ def authSetup(wipe=False):
       eprint("Passwords do not match")
 
     # create logstash keystore file, don't complain if it already exists, and set the keystore items
-    keystore_op('logstash', 'create', stdin='N')
-    keystore_op('logstash', 'remove', 'ES_EXTERNAL_USER', '--force')
-    keystore_op('logstash', 'add', 'ES_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
-    keystore_op('logstash', 'remove', 'ES_EXTERNAL_PASSWORD', '--force')
-    keystore_op('logstash', 'add', 'ES_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
-    success, results = keystore_op('logstash', 'list')
-    results = [x for x in results if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE'))]
+    keystore_op('logstash', False, 'create', stdin='N')
+    keystore_op('logstash', False, 'remove', 'ES_EXTERNAL_USER', '--force')
+    keystore_op('logstash', False, 'add', 'ES_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
+    keystore_op('logstash', False, 'remove', 'ES_EXTERNAL_PASSWORD', '--force')
+    keystore_op('logstash', False, 'add', 'ES_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
+    success, results = keystore_op('logstash', False, 'list')
+    results = [x.upper() for x in results if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE')) and (not x.upper().startswith('USING BUNDLED JDK'))]
     if success and ('ES_EXTERNAL_USER' in results) and ('ES_EXTERNAL_PASSWORD' in results):
       eprint(f"External Elasticsearch instance variables stored: {', '.join(results)}")
     else:
@@ -715,12 +722,12 @@ def authSetup(wipe=False):
     usernameKey = f'opendistro.alerting.destination.email.{emailSender}.username'
     passwordKey = f'opendistro.alerting.destination.email.{emailSender}.password'
 
-    keystore_op('elasticsearch', 'create', stdin='N')
-    keystore_op('elasticsearch', 'remove', usernameKey)
-    keystore_op('elasticsearch', 'add', usernameKey, '--stdin', stdin=emailUsername)
-    keystore_op('elasticsearch', 'remove', passwordKey)
-    keystore_op('elasticsearch', 'add', passwordKey, '--stdin', stdin=emailPassword)
-    success, results = keystore_op('elasticsearch', 'list')
+    keystore_op('elasticsearch', True, 'create', stdin='N')
+    keystore_op('elasticsearch', True, 'remove', usernameKey)
+    keystore_op('elasticsearch', True, 'add', usernameKey, '--stdin', stdin=emailUsername)
+    keystore_op('elasticsearch', True, 'remove', passwordKey)
+    keystore_op('elasticsearch', True, 'add', passwordKey, '--stdin', stdin=emailPassword)
+    success, results = keystore_op('elasticsearch', True, 'list')
     results = [x for x in results if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE'))]
     if success and (usernameKey in results) and (passwordKey in results):
       eprint(f"Email alert sender account variables stored: {', '.join(results)}")
