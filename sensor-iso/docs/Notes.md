@@ -1833,7 +1833,7 @@ While the examples in this document use the Elastic Stack (particularly [Logstas
 
 ## <a name="ForwardingZeekLogs"></a>Forwarding Zeek logs
 
-[Filebeat](https://www.elastic.co/products/beats/filebeat) can be used to forward Zeek logs (or any other kind of log) to a variety of destinations, including a [Logstash](https://www.elastic.co/products/logstash) instance for additional [parsing](https://github.com/idaholab/Malcolm/blob/master/logstash/pipelines/zeek/11_zeek_logs.conf) and [enrichment](https://github.com/idaholab/Malcolm/blob/master/logstash/pipelines/enrichment/01_input_log_enrichment.conf) or directly into an [Elasticsearch](https://www.elastic.co/products/elasticsearch) instance.
+[Filebeat](https://www.elastic.co/products/beats/filebeat) can be used to forward Zeek logs (or any other kind of log) to a variety of destinations, including a [Logstash](https://www.elastic.co/products/logstash) instance for additional [parsing](https://github.com/cisagov/Malcolm/blob/master/logstash/pipelines/zeek/11_zeek_logs.conf) and [enrichment](https://github.com/cisagov/Malcolm/blob/master/logstash/pipelines/enrichment/01_input_log_enrichment.conf) or directly into an [Elasticsearch](https://www.elastic.co/products/elasticsearch) instance.
 
 Here is an example `filebeat.yml` [configuration file](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) used to collect Zeek logs from a directory and forward them to a Logstash instance. Some values here are specified in the via environment variables with sane defaults if those environment variables are not specified:
 
@@ -2224,9 +2224,9 @@ Hedgehog Linux targets the following guidelines for establishing a secure config
 
 # <a name="Footer"></a>Copyright
 
-Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+Hedgehog Linux - part of [Malcolm](https://github.com/cisagov/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
+See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/master/License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 
