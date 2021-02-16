@@ -3,10 +3,10 @@ FROM amazon/opendistro-for-elasticsearch-kibana:1.12.0
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
-LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
-LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/kibana-od'
 LABEL org.opencontainers.image.description='Malcolm container providing Kibana (the Apache-licensed Open Distro variant)'
 
