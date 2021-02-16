@@ -88,7 +88,6 @@ libnl-3-200
 libnl-genl-3-200
 libnl-route-3-200
 libpam-pwquality
-librocksdb5.17
 libssl1.1
 libtcmalloc-minimal4
 libtool
@@ -134,7 +133,6 @@ procps
 psmisc
 pv
 pwgen
-python3
 rar
 rtkit
 samba-libs

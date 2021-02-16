@@ -99,9 +99,6 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/elasticsearch/nodes/"
   mkdir -p "$MALCOLM_DEST_DIR/elasticsearch-backup/"
-  mkdir -p "$MALCOLM_DEST_DIR/elastalert/config/"
-  mkdir -p "$MALCOLM_DEST_DIR/elastalert/rules/"
-  mkdir -p "$MALCOLM_DEST_DIR/elastalert/sample-rules/"
   mkdir -p "$MALCOLM_DEST_DIR/moloch-raw/"
   mkdir -p "$MALCOLM_DEST_DIR/moloch-logs/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/"
@@ -118,6 +115,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
   cp ./net-map.json "$MALCOLM_DEST_DIR/"
+  cp ./index-management-policy.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
@@ -128,14 +126,10 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py status
   ln -s ./control.py stop
   ln -s ./control.py wipe
-  sed -i 's@#!/usr/bin/env[[:space:]]*python$@#!/usr/bin/env python3@g' *.py
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
-  cp ./elastalert/config/* "$MALCOLM_DEST_DIR/elastalert/config/"
-  rm -f "$MALCOLM_DEST_DIR/elastalert/config/"smtp-auth.yaml
-  cp ./elastalert/sample-rules/* "$MALCOLM_DEST_DIR/elastalert/sample-rules/" 2>/dev/null || true
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
 

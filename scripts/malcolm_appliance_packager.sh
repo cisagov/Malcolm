@@ -68,9 +68,6 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch/nodes/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch-backup/"
-  mkdir $VERBOSE -p "$DESTDIR/elastalert/config/"
-  mkdir $VERBOSE -p "$DESTDIR/elastalert/rules/"
-  mkdir $VERBOSE -p "$DESTDIR/elastalert/sample-rules/"
   mkdir $VERBOSE -p "$DESTDIR/moloch-raw/"
   mkdir $VERBOSE -p "$DESTDIR/moloch-logs/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
@@ -86,14 +83,12 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
   cp $VERBOSE ./host-map.txt "$DESTDIR/"
   cp $VERBOSE ./net-map.json "$DESTDIR/"
+  cp $VERBOSE ./index-management-policy.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
-  cp $VERBOSE ./elastalert/config/* "$DESTDIR/elastalert/config/"
-  rm -f "$DESTDIR/elastalert/config/"smtp-auth.yaml
-  cp $VERBOSE ./elastalert/sample-rules/* "$DESTDIR/elastalert/sample-rules/" 2>/dev/null || true
   pushd "$DESTDIR" >/dev/null 2>&1
   pushd "./scripts" >/dev/null 2>&1
   ln -s ./control.py auth_setup

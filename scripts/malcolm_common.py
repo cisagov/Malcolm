@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-from __future__ import print_function
-
+import contextlib
 import getpass
 import json
 import os
@@ -25,15 +24,6 @@ ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 
 ###################################################################################################
-# python 2/3 portability
-
-PY3 = (sys.version_info.major >= 3)
-
-# bind raw_input to input in older versions of python
-try:
-  input = raw_input
-except NameError:
-  pass
 
 # attempt to import requests, will cover failure later
 try:
@@ -41,11 +31,6 @@ try:
   RequestsImported = True
 except ImportError:
   RequestsImported = False
-
-try:
-  FileNotFoundError
-except NameError:
-  FileNotFoundError = IOError
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"
@@ -70,6 +55,17 @@ DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compo
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
 
 ###################################################################################################
+# chdir to directory as context manager, returning automatically
+@contextlib.contextmanager
+def pushd(directory):
+  prevDir = os.getcwd()
+  os.chdir(directory)
+  try:
+    yield
+  finally:
+    os.chdir(prevDir)
+
+###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
@@ -84,11 +80,11 @@ def EscapeAnsi(line):
 def YesOrNo(question, default=None, forceInteraction=False, acceptDefault=False):
 
   if default == True:
-    questionStr = "\n{} (Y/n): ".format(question)
+    questionStr = f"\n{question} (Y/n): "
   elif default == False:
-    questionStr = "\n{} (y/N): ".format(question)
+    questionStr = f"\n{question} (y/N): "
   else:
-    questionStr = "\n{} (y/n): ".format(question)
+    questionStr = f"\n{question} (y/n): "
 
   if acceptDefault and (default is not None) and (not forceInteraction):
     reply = ''
@@ -115,7 +111,7 @@ def AskForString(question, default=None, forceInteraction=False, acceptDefault=F
   if acceptDefault and (default is not None) and (not forceInteraction):
     reply = default
   else:
-    reply = str(input('\n{}: '.format(question))).strip()
+    reply = str(input(f'\n{question}: ')).strip()
 
   return reply
 
@@ -140,7 +136,7 @@ def str2bool(v):
 def Which(cmd, debug=False):
   result = any(os.access(os.path.join(path, cmd), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
   if debug:
-    eprint("Which {} returned {}".format(cmd, result))
+    eprint(f"Which {cmd} returned {result}")
   return result
 
 ###################################################################################################
@@ -148,9 +144,9 @@ def Which(cmd, debug=False):
 def SizeHumanFormat(num, suffix='B'):
   for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
     if abs(num) < 1024.0:
-      return "%3.1f%s%s" % (num, unit, suffix)
+      return f"{num:3.1f}{unit}{suffix}"
     num /= 1024.0
-  return "%.1f%s%s" % (num, 'Yi', suffix)
+  return f"{num:.1f}{'Yi'}{suffix}"
 
 ###################################################################################################
 # is this string valid json? if so, load and return it
@@ -200,22 +196,18 @@ def run_process(command, stdout=True, stderr=True, stdin=None, retry=0, retrySle
 
   try:
     # run the command
-    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if (PY3 and stdin) else stdin, cwd=cwd, env=env)
+    retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else stdin, cwd=cwd, env=env)
 
     # split the output on newlines to return a list
-    if PY3:
-      if stderr and (len(cmderr) > 0): output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
-      if stdout and (len(cmdout) > 0): output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
-    else:
-      if stderr and (len(cmderr) > 0): output.extend(cmderr.split('\n'))
-      if stdout and (len(cmdout) > 0): output.extend(cmdout.split('\n'))
+    if stderr and (len(cmderr) > 0): output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
+    if stdout and (len(cmdout) > 0): output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
 
   except (FileNotFoundError, OSError, IOError) as e:
     if stderr:
-      output.append("Command {} not found or unable to execute".format(command))
+      output.append(f"Command {command} not found or unable to execute")
 
   if debug:
-    eprint("{}{} returned {}: {}".format(command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output))
+    eprint(f"{command}({stdin[:80] + bool(stdin[80:]) * '...' if stdin else ''}) returned {retcode}: {output}")
 
   if (retcode != 0) and retry and (retry > 0):
     # sleep then retry
@@ -234,13 +226,13 @@ def ImportRequests(debug=False):
 
     pyPlatform = platform.system()
     pyExec = sys.executable
-    pipCmd = 'pip3' if PY3 else 'pip2'
+    pipCmd = 'pip3'
     if not Which(pipCmd, debug=debug): pipCmd = 'pip'
 
-    eprint('The requests module is required under Python {} ({})'.format(platform.python_version(), pyExec))
+    eprint(f'The requests module is required under Python {platform.python_version()} ({pyExec})')
 
     if Which(pipCmd, debug=debug):
-      if YesOrNo('Importing the requests module failed. Attempt to install via {}?'.format(pipCmd)):
+      if YesOrNo(f'Importing the requests module failed. Attempt to install via {pipCmd}?'):
         installCmd = None
 
         if (pyPlatform == PLATFORM_LINUX) or (pyPlatform == PLATFORM_MAC):
@@ -262,9 +254,9 @@ def ImportRequests(debug=False):
             import requests
             RequestsImported = True
           except ImportError as e:
-            eprint("Importing the requests module still failed: {}".format(e))
+            eprint(f"Importing the requests module still failed: {e}")
         else:
-          eprint("Installation of requests module failed: {}".format(out))
+          eprint(f"Installation of requests module failed: {out}")
 
   if not RequestsImported:
     eprint("System-wide installation varies by platform and Python configuration. Please consult platform-specific documentation for installing Python modules.")
@@ -272,13 +264,13 @@ def ImportRequests(debug=False):
       eprint('You *may* be able to install pip and requests manually via: sudo sh -c "easy_install pip && pip install requests"')
     elif (pyPlatform == PLATFORM_LINUX):
       if Which('apt-get', debug=debug):
-        eprint('You *may* be able to install requests manually via: sudo apt-get install {}'.format('python3-requests' if PY3 else 'python-requests'))
+        eprint("You *may* be able to install requests manually via: sudo apt-get install python3-requests")
       elif Which('apt', debug=debug):
-        eprint('You *may* be able to install requests manually via: sudo apt install {}'.format('python3-requests' if PY3 else 'python-requests'))
+        eprint("You *may* be able to install requests manually via: sudo apt install python3-requests")
       elif Which('dnf', debug=debug):
-        eprint('You *may* be able to install requests manually via: sudo dnf install {}'.format('python3-requests' if PY3 else 'python2-requests'))
+        eprint("You *may* be able to install requests manually via: sudo dnf install python3-requests")
       elif Which('yum', debug=debug):
-        eprint('You *may* be able to install requests manually via: sudo yum install {}'.format('python-requests'))
+        eprint("You *may* be able to install requests manually via: sudo yum install python-requests")
 
   return RequestsImported
 
@@ -287,9 +279,9 @@ def ImportRequests(debug=False):
 def MalcolmAuthFilesExist():
   return os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd'))) and \
          os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))) and \
-         os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini'))) and \
          os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem')))) and \
          os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))) and \
+         os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini'))) and \
          os.path.isfile(os.path.join(MalcolmPath, 'auth.env'))
 
 ###################################################################################################
@@ -302,7 +294,7 @@ def DownloadToFile(url, local_filename, debug=False):
   fExists = os.path.isfile(local_filename)
   fSize = os.path.getsize(local_filename)
   if debug:
-    eprint("Download of {} to {} {} ({})".format(url, local_filename, "succeeded" if fExists else "failed", SizeHumanFormat(fSize)))
+    eprint(f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({SizeHumanFormat(fSize)})")
   return fExists and (fSize > 0)
 
 ###################################################################################################

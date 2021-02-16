@@ -7,20 +7,7 @@ export LANG=C.UTF-8
 
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
-  beautifulsoup4 \
   clamd \
-  colorama \
   debinterface \
   flare-capa \
-  ipaddress \
-  netifaces \
-  psutil \
-  pycryptodome \
-  pyinotify \
-  python-magic \
-  pythondialog \
-  pyzmq \
-  requests \
-  scapy \
-  yara-python \
   zkg

@@ -8,27 +8,40 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV GOPATH=/go
 ENV GOBIN=/go/bin
 ENV GOARCH=amd64
+ENV GOVERS="2:1.14~1~bpo10+1"
 ENV PATH="$GOBIN:${PATH}"
+ENV PYTHON_EXE=python3
 
-RUN apt-get update && apt-get install -y \
-      'golang=2:1.11~1' \
-      'golang-doc=2:1.11~1' \
-      'golang-go=2:1.11~1' \
-      'golang-src=2:1.11~1' \
+RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
+      echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
+      apt-get -q update && apt-get install -t buster-backports -y \
+      "golang-doc=$GOVERS" \
+      "golang-go=$GOVERS" \
+      "golang-src=$GOVERS" \
+      "golang=$GOVERS" \
       build-essential \
-      python \
-      python-pip \
-      python-virtualenv \
-      virtualenv \
+      curl \
       git \
-      curl && \
+      python3 \
+      python3-dev \
+      python3-pip \
+      python3-setuptools \
+      python3-virtualenv \
+      python3-wheel \
+      vim-tiny \
+      virtualenv && \
     rm -rf /var/lib/apt/lists/* && \
-    pip install pyyaml cookiecutter && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 2 && \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2 && \
+    python3 -m pip install -U pyyaml cookiecutter && \
     mkdir -p "$GOPATH/bin" && \
-    bash -c "curl https://glide.sh/get | bash"
+    bash -c "curl https://glide.sh/get | bash" && \
+    go get -u -d github.com/magefile/mage && \
+    cd $GOPATH/src/github.com/magefile/mage && \
+    go run bootstrap.go
 
 ENV BEATS=metricbeat
-ENV BEATS_VERSION=7.6.2
+ENV BEATS_VERSION=7.10.0
 
 ADD ./build.sh /build.sh
 RUN [ "chmod", "+x", "/build.sh" ]

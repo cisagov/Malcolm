@@ -94,14 +94,46 @@ auditbeat.modules:
                     - regexp:
                         auditd.summary.how: '^python3'
                 - and:
-                    - equals:
-                        auditd.summary.how: '/bin/bash'
+                    - or:
+                      - equals:
+                          auditd.summary.how: 'bash'
+                      - equals:
+                          auditd.summary.how: '/bin/bash'
                     - equals:
                         auditd.summary.actor.primary: 'sensor'
                     - equals:
                         auditd.data.syscall: 'chown'
                     - equals:
                         auditd.summary.object.primary: '/home/sensor/.bash_history'
+                - and:
+                    - equals:
+                        auditd.summary.how: '/opt/firefox/firefox-bin'
+                    - equals:
+                        auditd.summary.actor.primary: 'sensor'
+                    - or:
+                        - equals:
+                            auditd.data.syscall: 'chmod'
+                        - equals:
+                            auditd.data.syscall: 'open'
+                        - equals:
+                            auditd.data.syscall: 'openat'
+                        - equals:
+                            auditd.data.syscall: 'rename'
+                        - equals:
+                            auditd.data.syscall: 'renameat'
+                        - equals:
+                            auditd.data.syscall: 'rmdir'
+                        - equals:
+                            auditd.data.syscall: 'unlink'
+                    - or:
+                        - regexp:
+                            auditd.summary.object.primary: '^/home/sensor/\.(cache/)?mozilla/firefox/'
+                        - regexp:
+                            auditd.summary.object.primary: '^/home/sensor/\.config/mimeapps\.'
+                        - regexp:
+                            auditd.summary.object.primary: '^/tmp/(Temp-|firefox)'
+                        - equals:
+                            auditd.summary.object.primary: '/opt/firefox/fonts/'
                 - and:
                     - or:
                         - equals:

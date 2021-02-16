@@ -5,7 +5,7 @@
 [Malcolm](https://github.com/idaholab/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
-* **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
+* **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime (formerly Moloch), a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
 * **Streamlined deployment** – Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. This Docker-based deployment model, combined with a few simple scripts for setup and run-time management, makes Malcolm suitable to be deployed quickly across a variety of platforms and use cases, whether it be for long-term deployment on a Linux server in a security operations center (SOC) or for incident response on a Macbook for an individual engagement.
 * **Secure communications** – All communications with Malcolm, both from the user interface and from remote log forwarders, are secured with industry standard encryption protocols.
 * **Permissive license** – Malcolm is comprised of several widely used open source tools, making it an attractive alternative to security solutions requiring paid licenses.
@@ -76,7 +76,8 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
         + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
-    - [Elasticsearch index curation](#Curator)
+    - [Elasticsearch index management](#IndexManagement)
+    - [Alerting](#Alerting)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -98,29 +99,11 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
 
+The scripts to control Malcolm require Python 3.
+
 #### Source code
 
 The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
-
-#### <a name="XPython"></a>Cross-platform considerations when running Python scripts
-
-There are two Python scripts used to configure and run Malcolm that are referenced several times in this document: `install.py` and `control.py` (`control.py` is actually what is executed under the hood for the `logs`, `restart`, `start`, `stop` and `wipe` commands).
-
-To maximize compatibility across the various platforms capable of running Malcolm, for the time being these Python scripts are compatible with both the current major release of Python (Python 3.x) and the "sunsetted" Python 2.x.
-
-The line `#!/usr/bin/env python` line at the beginning of these Python scripts (known as the "hashbang" or "shebang") should ensure that the `python` interpreter that is executed is the one defined by the operating system as the default Python implementation for that system. In most cases this is handled correctly and automatically.
-
-However, this behavior is not consistent across all platforms.  On some platforms (for example, Ubuntu 20.04), `python2` and `python3` targets are provided, but not `python`. When this is the case, running Malcolm's Python scripts will result in an error like `/usr/bin/env: 'python': No such file or directory`.
-
-There are various workarounds for this scenario, including (but not limited to):
-
-1. Explicitly specifying the Python interpreter when running the scripts (e.g., `python3 ./scripts/install.py` or `python2 ./scripts/start`): this is the "safest" solution
-2. Defining a symlink called `python` in your `PATH` pointing to the desired interpreter (e.g., `sudo ln -r -s /usr/bin/python3 /usr/local/bin/python` or `ln -s /usr/bin/python3 ~/bin/python`, depending on your `PATH`); in Ubuntu 20.04 and up installing either the package [python-is-python3](https://packages.ubuntu.com/focal/python-is-python3) or [python-is-python2](https://packages.ubuntu.com/focal/python-is-python2) will take care of this for you
-3. Using `update-alternatives` to specify a target for calls to `python`
-
-For the most part, this document will just use the `./scripts/install.py`-style pattern to execute the scripts. Just be aware that you may have to adjust your usage as necessitated by your system.
-
-For more information on this topic, see [PEP 394 -- The "python" Command on Unix-Like Systems](https://legacy.python.org/dev/peps/pep-0394/).
 
 #### Building Malcolm from scratch
 
@@ -129,14 +112,13 @@ The `build.sh` script can build Malcolm's Docker images from scratch. See [Build
 #### Initial configuration
 
 You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](#ConfigAndTuning)).
-
+    
 #### Pull Malcolm's Docker images
 
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
-Pulling curator       ... done
-Pulling elastalert    ... done
+Pulling arkime        ... done
 Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
@@ -144,7 +126,6 @@ Pulling freq          ... done
 Pulling htadmin       ... done
 Pulling kibana        ... done
 Pulling logstash      ... done
-Pulling arkime        ... done
 Pulling name-map-ui   ... done
 Pulling nginx-proxy   ... done
 Pulling pcap-capture  ... done
@@ -157,22 +138,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.6.1               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.6.1               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.6.1               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.6.1               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.6.1               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.6.1               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.6.1               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.6.1               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.6.1               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.6.1               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/arkime                                2.6.1               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.6.1               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.6.1               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.6.1               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.6.1               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.6.1               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.0.0               xxxxxxxxxxxx        39 hours ago        683MB
+malcolmnetsec/elasticsearch-od                      3.0.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          3.0.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           3.0.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          3.0.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  3.0.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               3.0.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-helper                         3.0.0               xxxxxxxxxxxx        40 hours ago        141MB
+malcolmnetsec/kibana-od                             3.0.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          3.0.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/name-map-ui                           3.0.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           3.0.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          3.0.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          3.0.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  3.0.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -203,7 +183,7 @@ Malcolm processes network traffic data in the form of packet capture (PCAP) file
 
 Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments](#SegmentNaming) and [hosts](#HostNaming) based on user-defined IP address and MAC mappings, performing [TLS fingerprinting](#https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
 
-The enriched data is stored in an [Elasticsearch](https://www.elastic.co/products/elasticsearch) document store in a format suitable for analysis through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
+The enriched data is stored in an [Elasticsearch](https://opendistro.github.io/for-elasticsearch/) document store in a format suitable for analysis through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
 
 For smaller networks, use at home by network security enthusiasts, or in the field for incident response engagements, Malcolm can also easily be deployed locally on an ordinary consumer workstation or laptop. Malcolm can process local artifacts such as locally-generated Zeek logs, locally-captured PCAP files, and PCAP files collected offline without the use of a dedicated sensor appliance.
 
@@ -211,12 +191,12 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 
 Malcolm leverages the following excellent open source tools, among others.
 
-* [Arkime](https://molo.ch/) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
+* [Arkime](https://arkime.com/) (formerly Moloch) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
     * [moloch-capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
-* [Elasticsearch](https://www.elastic.co/products/elasticsearch) - a search and analytics engine for indexing and querying network traffic session metadata 
+* [Elasticsearch](https://www.elastic.co/products/elasticsearch) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - a search and analytics engine for indexing and querying network traffic session metadata 
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
-* [Kibana](https://www.elastic.co/products/kibana) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
+* [Kibana](https://www.elastic.co/products/kibana) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
 * [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
 * [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files
@@ -227,7 +207,6 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
-* [ElastAlert](https://github.com/Yelp/elastalert) - an alerting framework for Elasticsearch. Specifically, the [BitSensor fork of ElastAlert](https://github.com/bitsensor/elastalert), its Docker configuration and its corresponding [Kibana plugin](https://github.com/bitsensor/elastalert-kibana-plugin) are used.
 * [Mark Baggett](https://github.com/MarkBaggett)'s [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * [Florian Roth](https://github.com/Neo23x0)'s [Signature-Base](https://github.com/Neo23x0/signature-base) Yara ruleset
 * These Zeek plugins:
@@ -316,12 +295,10 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/master) results in the following subdirectories in your `malcolm/` working copy:
 
-* `curator` - code and configuration for the `curator` container which define rules for closing and/or deleting old Elasticsearch indices
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
-* `elastalert` - code and configuration for the `elastalert` container which provides an alerting framework for Elasticsearch
 * `elasticsearch` - an initially empty directory where the Elasticsearch database instance will reside
-* `elasticsearch-backup` - an initially empty directory for storing Elasticsearch [index snapshots](#Curator) 
+* `elasticsearch-backup` - an initially empty directory for storing Elasticsearch [index snapshots](#IndexManagement) 
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
@@ -363,19 +340,18 @@ $ ./scripts/build.sh
 
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
-* `malcolmnetsec/curator` (based on `debian:buster-slim`)
-* `malcolmnetsec/elastalert` (based on `bitsensor/elastalert`)
-* `malcolmnetsec/elasticsearch-oss` (based on `docker.elastic.co/elasticsearch/elasticsearch-oss`)
+* `malcolmnetsec/arkime` (based on `debian:buster-slim`)
+* `malcolmnetsec/elasticsearch-od` (based on `amazon/opendistro-for-elasticsearch`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
 * `malcolmnetsec/freq` (based on `debian:buster-slim`)
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
-* `malcolmnetsec/kibana-oss` (based on `docker.elastic.co/kibana/kibana-oss`)
+* `malcolmnetsec/kibana-od` (based on `amazon/opendistro-for-elasticsearch-kibana`)
+* `malcolmnetsec/kibana-helper` (based on `alpine:3.12`)
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
-* `malcolmnetsec/name-map-ui` (based on `alpine:3.11`)
-* `malcolmnetsec/arkime` (based on `debian:buster-slim`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.11`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.12`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.12`)
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
@@ -389,17 +365,22 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 ```
 $ ./scripts/malcolm_appliance_packager.sh 
 You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
+
+Store administrator username/password for local Malcolm access? (Y/n): 
+
 Administrator username: analyst
 analyst password: 
 analyst password (again): 
 
-(Re)generate self-signed certificates for HTTPS access [Y/n]? 
+(Re)generate self-signed certificates for HTTPS access (Y/n): 
 
-(Re)generate self-signed certificates for a remote log forwarder [Y/n]? 
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): 
 
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? 
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (y/N): 
+
+Store username/password for email alert sender account (y/N): 
+
 Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
-
 
 Do you need to package docker images also [y/N]? y
 This might take a few minutes...
@@ -503,16 +484,6 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `ES_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external Elasticsearch instances specified in `ES_EXTERNAL_HOSTS`
 
 * `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full SSL certificate validation; this may fail if using self-signed certificates (default `false`)
-
-* `KIBANA_OFFLINE_REGION_MAPS` – if set to `true`, a small internal server will be surfaced to Kibana to provide the ability to view region map visualizations even when an Internet connection is not available (default `true`)
-
-* `CURATOR_CLOSE_COUNT` and `CURATOR_CLOSE_UNITS` - determine behavior for automatically closing older Elasticsearch indices to conserve memory; see [Elasticsearch index curation](#Curator)
-
-* `CURATOR_DELETE_COUNT` and `CURATOR_DELETE_UNITS` - determine behavior for automatically deleting older Elasticsearch indices to reduce disk usage; see [Elasticsearch index curation](#Curator)
-
-* `CURATOR_DELETE_GIGS` - if the Elasticsearch indices representing the log data exceed this size, in gigabytes, older indices will be deleted to bring the total size back under this threshold; see [Elasticsearch index curation](#Curator)
-
-* `CURATOR_SNAPSHOT_DISABLED` - if set to `False`, daily snapshots (backups) will be made of the previous day's Elasticsearch log index; see [Elasticsearch index curation](#Curator)
 
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
 
@@ -692,7 +663,7 @@ After making these changes, right click on the Docker 🐋 icon in the system tr
 Installing and configuring Docker to run under Windows must be done manually, rather than through the `install.py` script as is done for Linux and macOS.
 
 1. In order to be able to configure Docker volume mounts correctly, you should be running [Windows 10, version 1803](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-1803) or higher.
-1. The control scripts in the `scripts/` directory are written in the Python. They also rely on a few other utilities such as OpenSSL and htpasswd. The easiest way to run these tools in Windows is using the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL) (however, they may also be installed and configured manually: [Python](https://www.python.org/downloads/windows); [OpenSSL](https://wiki.openssl.org/index.php/Binaries); [htpasswd](https://httpd.apache.org/docs/current/platform/windows.html#down), download the `httpd….zip` file and extract `htpasswd.exe` from the `Apache…\bin\` directory). To install WSL, run the following command in PowerShell as Administrator:
+1. The control scripts in the `scripts/` directory are written for Python 3. They also rely on a few other utilities such as OpenSSL and htpasswd. The easiest way to run these tools in Windows is using the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL) (however, they may also be installed and configured manually: [Python 3](https://www.python.org/downloads/windows); [OpenSSL](https://wiki.openssl.org/index.php/Binaries); [htpasswd](https://httpd.apache.org/docs/current/platform/windows.html#down), download the `httpd….zip` file and extract `htpasswd.exe` from the `Apache…\bin\` directory). To install WSL, run the following command in PowerShell as Administrator:
     + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
 1. Install the [Linux distribution of your choice](https://docs.microsoft.com/en-us/windows/wsl/install-win10#install-your-linux-distribution-of-choice) in WSL. These instructions have been tested using Debian, but will probably work with other distributions as well.
 1. Run the following commands in PowerShell as Administrator to enable required Windows features:
@@ -745,6 +716,8 @@ In either case, you **must** run `./scripts/auth_setup` before starting Malcolm 
     * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory
 * specify whether or not to store the username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (see the `ES_EXTERNAL_HOSTS`, `ES_EXTERNAL_SSL`, and `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
     * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
+* specify whether or not to [store the username/password](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account) for [email alert senders](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#create-destinations)
+    * these parameters are stored securely in the Elasticsearch keystore file `elasticsearch/elasticsearch.keystore`
 
 ##### <a name="AuthBasicAccountManagement"></a>Local account management
 
@@ -838,7 +811,7 @@ Malcolm can be configured to be automatically restarted when the Docker system d
 
 ### <a name="Wipe"></a>Clearing Malcolm’s data
 
-Run `./scripts/wipe` to stop the Malcolm instance and wipe its Elasticsearch database (including [index snapshots](#Curator)).
+Run `./scripts/wipe` to stop the Malcolm instance and wipe its Elasticsearch database (**including** [index snapshots and management policies](#IndexManagement) and [alerting configuration](#Alerting)).
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
@@ -1389,30 +1362,40 @@ When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`
 
 Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
-## <a name="Curator"></a>Elasticsearch index curation
+## <a name="IndexManagement"></a>Elasticsearch index management
 
-Malcolm uses [Elasticsearch Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/about.html) to periodically examine indices representing the log data and perform actions on indices meeting criteria for age or disk usage. The environment variables prefixed with `CURATOR_` in the [`docker-compose.yml`](#DockerComposeYml) file determine the criteria for the following actions:
+See [Index State Management](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/) in the Open Distro for Elasticsearch documentation on Index State Management [policies](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/policies/), [managed indices](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/managedindices/), [settings](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/settings/) and [APIs](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/).
 
-* [snapshot](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/snapshot.html) (back up) the previous day's Elasticsearch index once daily; by default snapshots are stored locally under the `./elasticsearch-backup/` directory mounted as a volume into the `elasticsearch` container
-* [close](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/close.html) indices [older than a specified age](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_age.html) in order to reduce RAM utilization
-* [delete](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/delete_indices.html) indices [older than a specified age](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_age.html) in order to reduce disk usage
-* [delete](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/delete_indices.html) the oldest indices in order to keep the total [database size under a specified threshold](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filtertype_space.html)
+Elasticsearch index management only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
-This behavior can also be modified by running [`./scripts/install.py --configure`](#ConfigAndTuning).
+## <a name="Alerting"></a>Alerting
 
-Other custom [filters](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/filters.html) and [actions](https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html) may be defined by the user by manually modifying the `action_file.yml` file used by the `curator` container and ensuring that it is mounted into the container as a volume in the `curator:` section of your `docker-compose.yml` file:
+See [Alerting](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/) in the Open Distro for Elasticsearch documentation.
+
+When using an email account to send alerts, you must [authenticate each sender account](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account) before you can send an email. The [`auth_setup`](#AuthSetup) script can be used to securely store the email account credentials:
 
 ```
-  curator:
-…
-    volumes:
-      - ./curator/config/action_file.yml:/config/action_file.yml
-…
+./scripts/auth_setup 
+
+Store administrator username/password for local Malcolm access? (Y/n): n
+
+(Re)generate self-signed certificates for HTTPS access (Y/n): n
+
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): n
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (y/N): n
+
+Store username/password for email alert sender account (y/N): y
+
+Open Distro alerting destination name: destination_alpha
+
+Email account username: analyst@example.org
+analyst@example.org password: 
+analyst@example.org password (again): 
+Email alert sender account variables stored: opendistro.alerting.destination.email.destination_alpha.password, opendistro.alerting.destination.email.destination_alpha.username
 ```
 
-The settings governing index curation can affect Malcolm's performance in both log ingestion and queries, and there are caveats that should be taken into consideration when configuring this feature. Please read the Elasticsearch documentation linked in this section with regards to index curation.
-
-Index curation only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
+This action should only be performed while Malcolm is [stopped](#StopAndRestart): otherwise the credentials will not be stored correctly.
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
@@ -1442,7 +1425,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-2.6.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-3.0.0.iso"
 …
 ```
 
@@ -1656,9 +1639,9 @@ Resolving deltas: 100% (81/81), done.
 user@host:~$ cd Malcolm/
 ```
 
-Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same. See the section on [**cross-platform considerations when running Python scripts**](#XPython) if you are adapting these instructions to another platform.
+Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
-user@host:~/Downloads$ sudo python3 ./install.py
+user@host:~/Downloads$ sudo ./install.py
 Installing required packages: ['apache2-utils', 'make', 'openssl']
 
 "docker info" failed, attempt to install Docker? (Y/n): y
@@ -1727,7 +1710,7 @@ Malcolm runtime files extracted to /home/user/Malcolm
 
 Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
 ```
-user@host:~/Malcolm$ python3 ./scripts/install.py --configure
+user@host:~/Malcolm$ ./scripts/install.py --configure
 ```
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
@@ -1742,29 +1725,9 @@ Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped')
 
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Periodically close old Elasticsearch indices? (Y/n): y
+Configure snapshot repository for Elasticsearch index state management? (y/N): n
 
-Indices older than 5 years will be periodically closed. Is this OK? (Y/n): n
-
-Enter index close threshold (e.g., 90 days, 2 years, etc.): 1 years
-
-Indices older than 1 years will be periodically closed. Is this OK? (Y/n): y
-
-Periodically delete old Elasticsearch indices? (Y/n): y
-
-Indices older than 10 years will be periodically deleted. Is this OK? (Y/n): n
-
-Enter index delete threshold (e.g., 90 days, 2 years, etc.): 5 years
-
-Indices older than 5 years will be periodically deleted. Is this OK? (Y/n): y
-
-Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size? (Y/n): y
-
-Indices will be deleted when the database exceeds 10000 gigabytes. Is this OK? (Y/n): n
-
-Enter index threshold in gigabytes: 100
-
-Indices will be deleted when the database exceeds 100 gigabytes. Is this OK? (Y/n): y
+Store snapshots locally in /home/user/Malcolm/elasticsearch-backup? (Y/n): y
 
 Automatically analyze all PCAP files with Zeek? (y/N): y
 
@@ -1809,23 +1772,25 @@ At this point you should **reboot your computer** so that the new system setting
 
 Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
-user@host:~/Malcolm$ python3 ./scripts/auth_setup
-Username: analyst
-analyst password:
-analyst password (again):
+user@host:~/Malcolm$ ./scripts/auth_setup
+Store administrator username/password for local Malcolm access? (Y/n): 
 
-(Re)generate self-signed certificates for HTTPS access [Y/n]? y
+Administrator username: analyst
+analyst password: 
+analyst password (again): 
 
-(Re)generate self-signed certificates for a remote log forwarder [Y/n]? y
+(Re)generate self-signed certificates for HTTPS access (Y/n): 
 
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance [y/N]? n
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): 
+
+Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (y/N): 
+
+Store username/password for email alert sender account (y/N): 
 ```
 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
-Pulling curator       ... done
-Pulling elastalert    ... done
 Pulling elasticsearch ... done
 Pulling file-monitor  ... done
 Pulling filebeat      ... done
@@ -1843,30 +1808,27 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/curator                               2.6.1               xxxxxxxxxxxx        40 hours ago        256MB
-malcolmnetsec/elastalert                            2.6.1               xxxxxxxxxxxx        40 hours ago        410MB
-malcolmnetsec/elasticsearch-oss                     2.6.1               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          2.6.1               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           2.6.1               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          2.6.1               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  2.6.1               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               2.6.1               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-oss                            2.6.1               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          2.6.1               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/arkime                                2.6.1               xxxxxxxxxxxx        17 hours ago        683MB
-malcolmnetsec/name-map-ui                           2.6.1               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           2.6.1               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          2.6.1               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          2.6.1               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  2.6.1               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.0.0               xxxxxxxxxxxx        39 hours ago        683MB
+malcolmnetsec/elasticsearch-od                      3.0.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          3.0.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           3.0.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          3.0.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  3.0.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               3.0.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-helper                         3.0.0               xxxxxxxxxxxx        40 hours ago        141MB
+malcolmnetsec/kibana-od                             3.0.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          3.0.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/name-map-ui                           3.0.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           3.0.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          3.0.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          3.0.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  3.0.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
 ```
-user@host:~/Malcolm$ python3 ./scripts/start
+user@host:~/Malcolm$ ./scripts/start
 Creating network "malcolm_default" with the default driver
-Creating malcolm_curator_1       ... done
-Creating malcolm_elastalert_1    ... done
 Creating malcolm_elasticsearch_1 ... done
 Creating malcolm_file-monitor_1  ... done
 Creating malcolm_filebeat_1      ... done
@@ -1893,7 +1855,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_curator_1, malcolm_elastalert_1, malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_arkime_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_arkime_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
 …
 ```
 
@@ -1948,7 +1910,7 @@ If you installed Malcolm from [pre-packaged installation files](https://github.c
     * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
 3. backup current Malcolm scripts, configuration files and certificates
     * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
-    * `cp -r elastalert/ filebeat/ htadmin/ logstash/ nginx/ auth.env cidr-map.txt docker-compose.yml host-map.txt net-map.json ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
+    * `cp -r filebeat/ htadmin/ logstash/ nginx/ auth.env cidr-map.txt docker-compose.yml host-map.txt net-map.json ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
 3. replace scripts and local documentation in your existing installation with the new ones
     * `rm -rf ./scripts ./README.md`
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`

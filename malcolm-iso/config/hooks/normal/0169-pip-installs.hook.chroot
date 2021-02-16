@@ -5,12 +5,4 @@ export LANG=C.UTF-8
 
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
-  beautifulsoup4 \
-  colorama \
-  debinterface \
-  docker-compose \
-  netifaces \
-  psutil \
-  pycryptodome \
-  pythondialog \
-  requests[security]
+  debinterface

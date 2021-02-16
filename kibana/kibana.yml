@@ -8,8 +8,11 @@ server.rewriteBasePath: true
 elasticsearch.hosts: ["${ELASTICSEARCH_URL}"]
 elasticsearch.requestTimeout: 180000
 kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
-elastalert-kibana-plugin.serverHost: elastalert
-elastalert-kibana-plugin.serverPort: 3030
+
+newsfeed.enabled: false
+telemetry.optIn: false
+telemetry.enabled: false
+security.showInsecureClusterWarning: false
 
 # offline region map
 map.regionmap:
@@ -25,6 +28,3 @@ map.regionmap:
             description: "Country Code2"
           - name: "NAME"
             description: "Country Name"
-
-server.cors: true
-server.cors.origin: ['*']

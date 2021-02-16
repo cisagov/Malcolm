@@ -12,5 +12,8 @@ else
   ES_URL="http://elasticsearch:9200"
 fi
 
-[[ -n $CURATOR_SNAPSHOT_REPO ]] && curl -H "Accept: application/json" -H "Content-type: application/json" -XPUT -fsSL "$ES_URL/_snapshot/$CURATOR_SNAPSHOT_REPO" \
-  -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$CURATOR_SNAPSHOT_REPO\", \"compress\": ${CURATOR_SNAPSHOT_COMPRESSED:-false} } }"
+[[ -n $ISM_SNAPSHOT_REPO ]] && \
+  curl -H "Accept: application/json" \
+  -H "Content-type: application/json" \
+  -XPUT -fsSL "$ES_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
+  -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": ${ISM_SNAPSHOT_COMPRESSED:-false} } }"

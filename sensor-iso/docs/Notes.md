@@ -1812,7 +1812,7 @@ The Elastic Stack's [Beats](https://www.elastic.co/products/beats) platform is a
 
 set -e
 
-BEATS_VER="7.6.2"
+BEATS_VER="7.10.0"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"

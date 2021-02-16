@@ -72,6 +72,17 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_WIREGUARD : ''
   ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS : 'true'
 
+x-kibana-helper-variables: &kibana-helper-variables
+  ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
+  ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
+  ISM_CLOSE_AGE : '60d'
+  ISM_COLD_AGE : '30d'
+  ISM_DELETE_AGE : '365d'
+  ISM_POLICY_NAME : 'session_index_policy'
+  ISM_SNAPSHOT_AGE : '1d'
+  ISM_SNAPSHOT_COMPRESSED : 'false'
+  ISM_SNAPSHOT_REPO : 'logs'
+
 x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP  : 'true'
   LOGSTASH_REVERSE_DNS : 'false'
@@ -82,27 +93,6 @@ x-logstash-variables: &logstash-variables
   #   See also volume mount for logstash.keystore below.
   # ES_EXTERNAL_USER : 'janedoe'
   # ES_EXTERNAL_PASSWORD : 'secret'
-
-x-kibana-variables: &kibana-variables
-  KIBANA_OFFLINE_REGION_MAPS : 'true'
-
-x-curator-variables: &curator-variables
-  # get index dates from actual date index was created (creation_date) vs. extracted from index name (name)
-  CURATOR_TIME_SOURCE : 'name'
-  # for managing automatic closing of older Elasticsearch indices (to conserve memory)
-  CURATOR_CLOSE_UNITS : years
-  CURATOR_CLOSE_COUNT : 10
-  # for managing automatic deleting of older Elasticsearch indices (to reduce disk consumption)
-  CURATOR_DELETE_UNITS : years
-  CURATOR_DELETE_COUNT : 99
-  # for managing automatic deleting of Elasticsearch indices based on cumulative size (to reduce disk consumption)
-  CURATOR_DELETE_GIGS : 1000000
-  # for managing automatic snapshots of Elasticsearch indices
-  CURATOR_SNAPSHOT_DISABLED : 'True'
-  # name of Elasticsearch snapshot repository under path.repo
-  CURATOR_SNAPSHOT_REPO : 'logs'
-  # controls compression of Elasticsearch snapshots managed by the curator
-  CURATOR_SNAPSHOT_COMPRESSED : 'false'
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
@@ -128,7 +118,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: malcolmnetsec/elasticsearch-oss:2.6.1
+    image: malcolmnetsec/elasticsearch-od:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -140,7 +130,7 @@ services:
       ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
       discovery.type : 'single-node'
-      # cluster.initial_master_nodes : 'elasticsearch'
+      discovery.zen.minimum_master_nodes : 1
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       indices.query.bool.max_clause_count : 2048
@@ -154,6 +144,7 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
+      - ./elasticsearch/elasticsearch.keystore:/usr/share/elasticsearch/config/elasticsearch.keystore:rw
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
       - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
     healthcheck:
@@ -162,81 +153,57 @@ services:
       timeout: 15s
       retries: 3
       start_period: 180s
+  kibana-helper:
+    image: malcolmnetsec/kibana-helper:3.0.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: kibana-helper
+    environment:
+      << : *process-variables
+      << : *kibana-helper-variables
+      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+      KIBANA_URL : 'http://kibana:5601/kibana'
+      VIRTUAL_HOST : 'kibana-helper.malcolm.local'
+      ARKIME_INDEX_PATTERN : 'sessions2-*'
+      ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
+      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
+      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
+    depends_on:
+      - elasticsearch
+    expose:
+      - 28991
+    volumes:
+      - ./index-management-policy.json:/data/index-management-policy.json:ro
+    healthcheck:
+      test: ["CMD", "supervisorctl", "status", "cron", "maps"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
   kibana:
-    image: malcolmnetsec/kibana-oss:2.6.1
+    image: malcolmnetsec/kibana-od:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: kibana
     environment:
       << : *process-variables
-      << : *kibana-variables
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
-      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
-      ARKIME_INDEX_PATTERN : 'sessions2-*'
-      ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
-      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
     depends_on:
       - elasticsearch
+      - kibana-helper
     expose:
       - 5601
-      - 28991
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/kibana/api/status"]
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 210s
-  elastalert:
-    image: malcolmnetsec/elastalert:2.6.1
-    restart: "no"
-    stdin_open: false
-    tty: true
-    hostname: elastalert
-    environment:
-      << : *process-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
-      ES_HOST : 'elasticsearch'
-      ES_PORT : 9200
-      VIRTUAL_HOST : 'elastalert.malcolm.local'
-    depends_on:
-      - elasticsearch
-    expose:
-      - 3030
-      - 3333
-    volumes:
-      - ./elastalert/config/elastalert.yaml:/opt/elastalert/config.yaml
-      - ./elastalert/config/smtp-auth.yaml:/opt/elastalert/smtp-auth.yaml:ro
-      - ./elastalert/config/config.json:/opt/elastalert-server/config/config.json
-      - ./elastalert/rules/:/opt/elastalert/rules/
-    healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:3030"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 210s
-  curator:
-    image: malcolmnetsec/curator:2.6.1
-    restart: "no"
-    stdin_open: false
-    tty: true
-    hostname: curator
-    environment:
-      << : *process-variables
-      << : *curator-variables
-      ES_HOST : 'elasticsearch'
-      ES_PORT : 9200
-    depends_on:
-      - elasticsearch
-    healthcheck:
-      test: ["CMD", "pidof", "supercronic"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
   logstash:
-    image: malcolmnetsec/logstash-oss:2.6.1
+    image: malcolmnetsec/logstash-oss:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -255,7 +222,7 @@ services:
       - 9001
       - 9600
     volumes:
-      # - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:ro
+      - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
@@ -269,7 +236,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:2.6.1
+    image: malcolmnetsec/filebeat-oss:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -306,7 +273,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:2.6.1
+    image: malcolmnetsec/arkime:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -345,7 +312,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:2.6.1
+    image: malcolmnetsec/zeek:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -371,16 +338,18 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:2.6.1
+    image: malcolmnetsec/file-monitor:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: filemon
+    hostname: file-monitor
     environment:
       << : *process-variables
       << : *zeek-variables
+      VIRTUAL_HOST : 'file-monitor.malcolm.local'
     expose:
       - 3310
+      - 8440
     volumes:
       - ./zeek-logs/extract_files:/data/zeek/extract_files
       - ./zeek-logs/current:/data/zeek/logs
@@ -392,7 +361,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:2.6.1
+    image: malcolmnetsec/pcap-capture:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -418,7 +387,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:2.6.1
+    image: malcolmnetsec/pcap-monitor:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -441,7 +410,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:2.6.1
+    image: malcolmnetsec/file-upload:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -467,7 +436,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:2.6.1
+    image: malcolmnetsec/htadmin:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -489,7 +458,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:2.6.1
+    image: malcolmnetsec/freq:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -507,7 +476,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:2.6.1
+    image: malcolmnetsec/name-map-ui:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -528,7 +497,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:2.6.1
+    image: malcolmnetsec/nginx-proxy:3.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -547,7 +516,6 @@ services:
     ports:
       - "443:443"
       - "488:488"
-      - "3030:3030"
       - "5601:5601"
       - "8443:8443"
       - "9200:9200"
