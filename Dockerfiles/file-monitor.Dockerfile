@@ -75,7 +75,7 @@ ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
-ENV YARA_VERSION "4.0.4"
+ENV YARA_VERSION "4.0.5"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
 ENV YARA_RULES_DIR "/yara-rules"
@@ -228,6 +228,7 @@ VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]
 
 EXPOSE 3310
+EXPOSE $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
 

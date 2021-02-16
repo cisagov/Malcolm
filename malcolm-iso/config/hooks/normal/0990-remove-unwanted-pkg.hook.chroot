@@ -9,12 +9,17 @@ apt-get -y --purge remove bluez-firmware \
                           deluge \
                           enchant \
                           ffmpeg \
+                          gdb \
+                          git \
                           gnome-accessibility-themes \
                           gucharmap \
                           libasound2-plugins \
                           libcupsfilters1 \
                           libcupsimage2 \
+                          libx264* \
+                          libx265* \
                           lxmusic \
+                          mailutils \
                           mpv \
                           pavucontrol \
                           prelink \

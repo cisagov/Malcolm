@@ -1,9 +1,15 @@
 #!/bin/bash
 
-BEATS_VER="7.6.2"
+BEATS_VER="7.10.0"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
+
+DOCKER_COMPOSE_VER="1.28.2"
+DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VER/docker-compose-$(uname -s)-$(uname -m)"
+
+# install docker-compose
+curl -o /usr/local/bin/docker-compose -sSL "$DOCKER_COMPOSE_URL" && chmod 755 /usr/local/bin/docker-compose
 
 # tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat
 for BEAT in filebeat metricbeat auditbeat packetbeat; do

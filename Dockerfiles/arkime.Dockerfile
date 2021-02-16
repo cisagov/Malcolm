@@ -214,10 +214,8 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
     cp -f /data/moloch_update_geo.sh $ARKIMEDIR/bin/moloch_update_geo.sh && \
     chmod u+s $ARKIMEDIR/bin/moloch-capture && \
-    chown -R $PUSER:$PGROUP $ARKIMEDIR/logs && \
     mkdir -p /var/run/moloch && \
-    chown -R $PUSER:$PGROUP /var/run/moloch
-
+    chown -R $PUSER:$PGROUP $ARKIMEDIR/etc $ARKIMEDIR/logs /var/run/moloch
 #Update Path
 ENV PATH="/data:$ARKIMEDIR/bin:${PATH}"
 

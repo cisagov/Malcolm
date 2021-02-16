@@ -7,20 +7,15 @@ rm -f /var/run/moloch/initialized /var/run/moloch/runwise
 echo "Giving Elasticsearch time to start..."
 /data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
-#Configure Arkime to Run
-if [ ! -f /var/run/moloch/configured ]; then
-	touch /var/run/moloch/configured
-  if [[ "$WISE" = "on" ]] ; then
-    $ARKIMEDIR/bin/Configure --wise
-  fi
-  $ARKIMEDIR/bin/Configure
-fi
+# download and/or update geo updates
+$ARKIMEDIR/bin/moloch_update_geo.sh
 
+# start and wait patiently for WISE
 if [[ "$WISE" = "on" ]] ; then
   touch /var/run/moloch/runwise
   echo "Giving WISE time to start..."
   sleep 5
-  until curl -sS --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
+  until curl -sSf --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
   do
       echo "Waiting for WISE to start"
       sleep 1
@@ -71,6 +66,9 @@ if [[ -n $ES_MAX_SHARDS_PER_NODE ]]; then
   # see https://github.com/elastic/elasticsearch/issues/40803
   curl -sS -H'Content-Type: application/json' -XPUT http://$ES_HOST:$ES_PORT/_cluster/settings -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$ES_MAX_SHARDS_PER_NODE\" } }"
 fi
+
+# before running viewer, call _refresh to make sure everything is available for search first
+curl -sS -XPOST http://$ES_HOST:$ES_PORT/_refresh
 
 touch /var/run/moloch/initialized
 

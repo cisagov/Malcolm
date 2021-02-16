@@ -1,9 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-
-from __future__ import print_function
 
 import argparse
 import datetime
@@ -44,13 +42,6 @@ origPath = os.getcwd()
 
 ###################################################################################################
 args = None
-PY3 = (sys.version_info.major >= 3)
-
-###################################################################################################
-try:
-  FileNotFoundError
-except NameError:
-  FileNotFoundError = IOError
 
 ###################################################################################################
 # get interactive user response to Y/N question
@@ -63,6 +54,9 @@ def InstallerYesOrNo(question, default=None, forceInteraction=False):
 def InstallerAskForString(question, default=None, forceInteraction=False):
   global args
   return AskForString(question, default=default, forceInteraction=forceInteraction, acceptDefault=args.acceptDefaults)
+
+def TrueOrFalseQuote(expression):
+  return "'{}'".format('true' if expression else 'false')
 
 ###################################################################################################
 class Installer(object):
@@ -79,7 +73,7 @@ class Installer(object):
     self.installPackageCmds = []
     self.requiredPackages = []
 
-    self.pipCmd = 'pip3' if PY3 else 'pip2'
+    self.pipCmd = 'pip3'
     if not Which(self.pipCmd, debug=self.debug): self.pipCmd = 'pip'
 
     self.tempDirName = tempfile.mkdtemp()
@@ -132,33 +126,33 @@ class Installer(object):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def install_required_packages(self):
-    if (len(self.requiredPackages) > 0): eprint("Installing required packages: {}".format(self.requiredPackages))
+    if (len(self.requiredPackages) > 0): eprint(f"Installing required packages: {self.requiredPackages}")
     return self.install_package(self.requiredPackages)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def install_docker_images(self, docker_image_file):
     result = False
-    if docker_image_file and os.path.isfile(docker_image_file) and InstallerYesOrNo('Load Malcolm Docker images from {}'.format(docker_image_file), default=True, forceInteraction=True):
+    if docker_image_file and os.path.isfile(docker_image_file) and InstallerYesOrNo(f'Load Malcolm Docker images from {docker_image_file}', default=True, forceInteraction=True):
       ecode, out = self.run_process(['docker', 'load', '-q', '-i', docker_image_file], privileged=True)
       if (ecode == 0):
         result = True
       else:
-        eprint("Loading Malcolm Docker images failed: {}".format(out))
+        eprint(f"Loading Malcolm Docker images failed: {out}")
     return result
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def install_malcolm_files(self, malcolm_install_file):
     result = False
     installPath = None
-    if malcolm_install_file and os.path.isfile(malcolm_install_file) and InstallerYesOrNo('Extract Malcolm runtime files from {}'.format(malcolm_install_file), default=True, forceInteraction=True):
+    if malcolm_install_file and os.path.isfile(malcolm_install_file) and InstallerYesOrNo(f'Extract Malcolm runtime files from {malcolm_install_file}', default=True, forceInteraction=True):
 
       # determine and create destination path for installation
       while True:
         defaultPath = os.path.join(origPath, 'malcolm')
-        installPath = InstallerAskForString('Enter installation path for Malcolm [{}]'.format(defaultPath), default=defaultPath, forceInteraction=True)
+        installPath = InstallerAskForString(f'Enter installation path for Malcolm [{defaultPath}]', default=defaultPath, forceInteraction=True)
         if (len(installPath) == 0): installPath = defaultPath
         if os.path.isdir(installPath):
-          eprint("{} already exists, please specify a different installation path".format(installPath))
+          eprint(f"{installPath} already exists, please specify a different installation path")
         else:
           try:
             os.makedirs(installPath)
@@ -167,38 +161,35 @@ class Installer(object):
           if os.path.isdir(installPath):
             break
           else:
-            eprint("Failed to create {}, please specify a different installation path".format(installPath))
+            eprint(f"Failed to create {installPath}, please specify a different installation path")
 
       # extract runtime files
       if installPath and os.path.isdir(installPath):
         if self.debug:
-          eprint("Created {} for Malcolm runtime files".format(installPath))
+          eprint(f"Created {installPath} for Malcolm runtime files")
         tar = tarfile.open(malcolm_install_file)
         try:
-          if PY3:
-            tar.extractall(path=installPath, numeric_owner=True)
-          else:
-            tar.extractall(path=installPath)
+          tar.extractall(path=installPath, numeric_owner=True)
         finally:
           tar.close()
 
         # .tar.gz normally will contain an intermediate subdirectory. if so, move files back one level
-        childDir = glob.glob('{}/*/'.format(installPath))
+        childDir = glob.glob(f'{installPath}/*/')
         if (len(childDir) == 1) and os.path.isdir(childDir[0]):
           if self.debug:
-            eprint("{} only contains {}".format(installPath, childDir[0]))
+            eprint(f"{installPath} only contains {childDir[0]}")
           for f in os.listdir(childDir[0]):
             shutil.move(os.path.join(childDir[0], f), installPath)
           shutil.rmtree(childDir[0], ignore_errors=True)
 
         # verify the installation worked
         if os.path.isfile(os.path.join(installPath, "docker-compose.yml")):
-          eprint("Malcolm runtime files extracted to {}".format(installPath))
+          eprint(f"Malcolm runtime files extracted to {installPath}")
           result = True
           with open(os.path.join(installPath, "install_source.txt"), 'w') as f:
-            f.write('{} (installed {})\n'.format(os.path.basename(malcolm_install_file), str(datetime.datetime.now())))
+            f.write(f'{os.path.basename(malcolm_install_file)} (installed {str(datetime.datetime.now())})\n')
         else:
-          eprint("Malcolm install file extracted to {}, but missing runtime files?".format(installPath))
+          eprint(f"Malcolm install file extracted to {installPath}, but missing runtime files?")
 
     return result, installPath
 
@@ -228,14 +219,14 @@ class Installer(object):
       puid = '1000'
       pgid = '1000'
 
-    while (not puid.isdigit()) or (not pgid.isdigit()) or (not InstallerYesOrNo('Malcolm processes will run as UID {} and GID {}. Is this OK?'.format(puid, pgid), default=True)):
+    while (not puid.isdigit()) or (not pgid.isdigit()) or (not InstallerYesOrNo(f'Malcolm processes will run as UID {puid} and GID {pgid}. Is this OK?', default=True)):
       puid = InstallerAskForString('Enter user ID (UID) for running non-root Malcolm processes')
       pgid = InstallerAskForString('Enter group ID (GID) for running non-root Malcolm processes')
 
     # guestimate how much memory we should use based on total system memory
 
     if self.debug:
-      eprint("{} contains {}, system memory is {} GiB".format(malcolm_install_path, composeFiles, self.totalMemoryGigs))
+      eprint(f"{malcolm_install_path} contains {composeFiles}, system memory is {self.totalMemoryGigs} GiB")
 
     if self.totalMemoryGigs >= 63.0:
       esMemory = '30g'
@@ -250,11 +241,11 @@ class Installer(object):
       esMemory = '6g'
       lsMemory = '2500m'
     elif self.totalMemoryGigs >= 7.0:
-      eprint("Detected only {} GiB of memory; performance will be suboptimal".format(self.totalMemoryGigs))
+      eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
       esMemory = '4g'
       lsMemory = '2500m'
     elif self.totalMemoryGigs > 0.0:
-      eprint("Detected only {} GiB of memory; performance will be suboptimal".format(self.totalMemoryGigs))
+      eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
       esMemory = '3500m'
       lsMemory = '2g'
     else:
@@ -262,7 +253,7 @@ class Installer(object):
       esMemory = '8g'
       lsMemory = '3g'
 
-    while not InstallerYesOrNo('Setting {} for Elasticsearch and {} for Logstash. Is this OK?'.format(esMemory, lsMemory), default=True):
+    while not InstallerYesOrNo(f'Setting {esMemory} for Elasticsearch and {lsMemory} for Logstash. Is this OK?', default=True):
       esMemory = InstallerAskForString('Enter memory for Elasticsearch (e.g., 16g, 9500m, etc.)')
       lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
 
@@ -270,7 +261,7 @@ class Installer(object):
     allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
     if InstallerYesOrNo('Restart Malcolm upon system or Docker daemon restart?', default=restart_mode_default):
       while restartMode not in allowedRestartModes:
-        restartMode = InstallerAskForString('Select Malcolm restart behavior {}'.format(allowedRestartModes), default='unless-stopped')
+        restartMode = InstallerAskForString(f'Select Malcolm restart behavior {allowedRestartModes}', default='unless-stopped')
     else:
       restartMode = 'no'
     if (restartMode == 'no'): restartMode = '"no"'
@@ -282,72 +273,69 @@ class Installer(object):
       allowedLdapModes = ('winldap', 'openldap')
       ldapServerType = None
       while ldapServerType not in allowedLdapModes:
-        ldapServerType = InstallerAskForString('Select LDAP server compatibility type {}'.format(allowedLdapModes), default='winldap')
+        ldapServerType = InstallerAskForString(f'Select LDAP server compatibility type {allowedLdapModes}', default='winldap')
       ldapStartTLS = InstallerYesOrNo('Use StartTLS for LDAP connection security?', default=True)
       try:
         with open(os.path.join(os.path.realpath(os.path.join(ScriptPath, "..")), ".ldap_config_defaults"), "w") as ldapDefaultsFile:
-          print("LDAP_SERVER_TYPE='{}'".format(ldapServerType), file=ldapDefaultsFile)
-          print("LDAP_PROTO='{}'".format('ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'), file=ldapDefaultsFile)
-          print("LDAP_PORT='{}'".format(3268 if ldapStartTLS else 3269), file=ldapDefaultsFile)
+          print(f"LDAP_SERVER_TYPE='{ldapServerType}'", file=ldapDefaultsFile)
+          print(f"LDAP_PROTO='{'ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'}'", file=ldapDefaultsFile)
+          print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
       except:
         pass
 
-    curatorSnapshots = InstallerYesOrNo('Create daily snapshots (backups) of Elasticsearch indices?', default=False)
-    curatorSnapshotDir = './elasticsearch-backup'
-    if curatorSnapshots:
-      if not InstallerYesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'elasticsearch-backup')), default=True):
-        while True:
-          curatorSnapshotDir = InstallerAskForString('Enter Elasticsearch index snapshot directory')
-          if (len(curatorSnapshotDir) > 1) and os.path.isdir(curatorSnapshotDir):
-            curatorSnapshotDir = os.path.realpath(curatorSnapshotDir)
-            break
+    indexSnapshotDir = None
+    indexSnapshotCompressed = False
+    indexSnapshotAge = '0'
+    indexColdAge = '0'
+    indexCloseAge = '0'
+    indexDeleteAge = '0'
+    indexPruneSizeLimit = '0'
+    indexPruneNameSort = False
 
-    curatorCloseUnits = 'years'
-    curatorCloseCount = '5'
-    if InstallerYesOrNo('Periodically close old Elasticsearch indices?', default=False):
-      while not InstallerYesOrNo('Indices older than {} {} will be periodically closed. Is this OK?'.format(curatorCloseCount, curatorCloseUnits), default=True):
-        while True:
-          curatorPeriod = InstallerAskForString('Enter index close threshold (e.g., 90 days, 2 years, etc.)').lower().split()
-          if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
-            curatorPeriod[1] += 's'
-          if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isdigit() and
-              (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
-            curatorCloseUnits = curatorPeriod[1]
-            curatorCloseCount = curatorPeriod[0]
-            break
-    else:
-      curatorCloseUnits = 'years'
-      curatorCloseCount = '99'
+    if InstallerYesOrNo('Configure Elasticsearch index state management?', default=False):
 
-    curatorDeleteUnits = 'years'
-    curatorDeleteCount = '10'
-    if InstallerYesOrNo('Periodically delete old Elasticsearch indices?', default=False):
-      while not InstallerYesOrNo('Indices older than {} {} will be periodically deleted. Is this OK?'.format(curatorDeleteCount, curatorDeleteUnits), default=True):
-        while True:
-          curatorPeriod = InstallerAskForString('Enter index delete threshold (e.g., 90 days, 2 years, etc.)').lower().split()
-          if (len(curatorPeriod) == 2) and (not curatorPeriod[1].endswith('s')):
-            curatorPeriod[1] += 's'
-          if ((len(curatorPeriod) == 2) and
-              curatorPeriod[0].isdigit() and
-              (curatorPeriod[1] in ('seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'))):
-            curatorDeleteUnits = curatorPeriod[1]
-            curatorDeleteCount = curatorPeriod[0]
-            break
-    else:
-      curatorDeleteUnits = 'years'
-      curatorDeleteCount = '99'
+      # configure snapshots
+      if InstallerYesOrNo('Configure index snapshots?', default=False):
 
-    curatorDeleteOverGigs = '10000'
-    if InstallerYesOrNo('Periodically delete the oldest Elasticsearch indices when the database exceeds a certain size?', default=False):
-      while not InstallerYesOrNo('Indices will be deleted when the database exceeds {} gigabytes. Is this OK?'.format(curatorDeleteOverGigs), default=True):
-        while True:
-          curatorSize = InstallerAskForString('Enter index threshold in gigabytes')
-          if (len(curatorSize) > 0) and curatorSize.isdigit():
-            curatorDeleteOverGigs = curatorSize
-            break
-    else:
-      curatorDeleteOverGigs = '9000000'
+        # snapshot repository directory and compression
+        indexSnapshotDir = './elasticsearch-backup'
+        if not InstallerYesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'elasticsearch-backup')), default=True):
+          while True:
+            indexSnapshotDir = InstallerAskForString('Enter Elasticsearch index snapshot directory')
+            if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
+              indexSnapshotDir = os.path.realpath(indexSnapshotDir)
+              break
+        indexSnapshotCompressed = InstallerYesOrNo('Compress index snapshots?', default=False)
+
+        # index age for snapshot
+        indexSnapshotAge = ''
+        while (not re.match(r'^\d+[dhms]$', indexSnapshotAge)) and (indexSnapshotAge != '0'):
+          indexSnapshotAge = InstallerAskForString('Enter index age for snapshot (e.g., 1d)')
+
+      # cold state age
+      if InstallerYesOrNo('Mark indices read-only as they age?', default=False):
+        indexColdAge = ''
+        while (not re.match(r'^\d+[dhms]$', indexColdAge)) and (indexColdAge != '0'):
+          indexColdAge = InstallerAskForString('Enter index age for "read-only" transition (e.g., 30d)')
+
+      # close state age
+      if InstallerYesOrNo('Close indices as they age?', default=False):
+        indexCloseAge = ''
+        while (not re.match(r'^\d+[dhms]$', indexCloseAge)) and (indexCloseAge != '0'):
+          indexCloseAge = InstallerAskForString('Enter index age for "close" transition (e.g., 60d)')
+
+      # delete state age
+      if InstallerYesOrNo('Delete indices as they age?', default=False):
+        indexDeleteAge = ''
+        while (not re.match(r'^\d+[dhms]$', indexDeleteAge)) and (indexDeleteAge != '0'):
+          indexDeleteAge = InstallerAskForString('Enter index age for "delete" transition (e.g., 365d)')
+
+      # delete based on index pattern size
+      if InstallerYesOrNo('Delete the oldest indices when the database exceeds a certain size?', default=False):
+        indexPruneSizeLimit = ''
+        while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (indexPruneSizeLimit != '0'):
+          indexPruneSizeLimit = InstallerAskForString('Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)')
+        indexPruneNameSort = InstallerYesOrNo('Determine oldest indices by name (instead of creation time)?', default=True)
 
     autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
     reverseDns = InstallerYesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
@@ -358,8 +346,8 @@ class Installer(object):
     externalEsForward = InstallerYesOrNo('Forward Logstash logs to external Elasticstack instance?', default=False)
     if externalEsForward:
       externalEsHost = InstallerAskForString('Enter external Elasticstack host:port (e.g., 10.0.0.123:9200)')
-      externalEsSsl = InstallerYesOrNo('Connect to "{}" using SSL?'.format(externalEsHost), default=True)
-      externalEsSslVerify = externalEsSsl and InstallerYesOrNo('Require SSL certificate validation for communication with "{}"?'.format(externalEsHost), default=False)
+      externalEsSsl = InstallerYesOrNo(f'Connect to "{externalEsHost}" using SSL?', default=True)
+      externalEsSslVerify = externalEsSsl and InstallerYesOrNo(f'Require SSL certificate validation for communication with "{externalEsHost}"?', default=False)
     else:
       externalEsHost = ""
       externalEsSsl = False
@@ -380,9 +368,9 @@ class Installer(object):
 
     if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
       while fileCarveMode not in allowedFileCarveModes:
-        fileCarveMode = InstallerAskForString('Select file extraction behavior {}'.format(allowedFileCarveModes), default=allowedFileCarveModes[0])
+        fileCarveMode = InstallerAskForString(f'Select file extraction behavior {allowedFileCarveModes}', default=allowedFileCarveModes[0])
       while filePreserveMode not in allowedFilePreserveModes:
-        filePreserveMode = InstallerAskForString('Select file preservation behavior {}'.format(allowedFilePreserveModes), default=allowedFilePreserveModes[0])
+        filePreserveMode = InstallerAskForString(f'Select file preservation behavior {allowedFilePreserveModes}', default=allowedFilePreserveModes[0])
       if fileCarveMode is not None:
         if InstallerYesOrNo('Scan extracted files with ClamAV?', default=False):
           clamAvScan = True
@@ -442,124 +430,122 @@ class Installer(object):
           # determine which service we're currently processing in the YML file
           serviceStartLine = False
           if servicesSectionFound and (serviceIndent is not None):
-            serviceMatch = re.search(r'^{}(\S+)\s*:\s*$'.format(serviceIndent), line)
+            serviceMatch = re.search(fr'^{serviceIndent}(\S+)\s*:\s*$', line)
             if serviceMatch is not None:
               currentService = serviceMatch.group(1).lower()
               serviceStartLine = True
 
           if (currentService is not None) and (restartMode is not None) and re.match(r'^\s*restart\s*:.*$', line):
             # elasticsearch backup directory
-            line = "{}restart: {}".format(serviceIndent * 2, restartMode)
+            line = f"{serviceIndent * 2}restart: {restartMode}"
           elif 'PUID' in line:
             # process UID
-            line = re.sub(r'(PUID\s*:\s*)(\S+)', r"\g<1>{}".format(puid), line)
+            line = re.sub(r'(PUID\s*:\s*)(\S+)', fr"\g<1>{puid}", line)
           elif 'PGID' in line:
             # process GID
-            line = re.sub(r'(PGID\s*:\s*)(\S+)', r"\g<1>{}".format(pgid), line)
+            line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
           elif 'NGINX_BASIC_AUTH' in line:
             # basic (useBasicAuth=true) vs ldap (useBasicAuth=false)
-            line = re.sub(r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if useBasicAuth else "'false'"), line)
+            line = re.sub(r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line)
           elif 'NGINX_LDAP_TLS_STUNNEL_PROTOCOL' in line:
             # ldap server type (windldap|openldap) for StartTLS
-            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL_PROTOCOL\s*:\s*)(\S+)', r"\g<1>'{}'".format(ldapServerType), line)
+            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL_PROTOCOL\s*:\s*)(\S+)', fr"\g<1>'{ldapServerType}'", line)
           elif 'NGINX_LDAP_TLS_STUNNEL' in line:
             # StartTLS vs. ldap:// or ldaps://
-            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if ((not useBasicAuth) and ldapStartTLS) else "'false'"), line)
+            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(((not useBasicAuth) and ldapStartTLS))}", line)
           elif 'ZEEK_EXTRACTOR_MODE' in line:
             # zeek file extraction mode
-            line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', r"\g<1>'{}'".format(fileCarveMode), line)
+            line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', fr"\g<1>'{fileCarveMode}'", line)
           elif 'EXTRACTED_FILE_PRESERVATION' in line:
             # zeek file preservation mode
-            line = re.sub(r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', r"\g<1>'{}'".format(filePreserveMode), line)
+            line = re.sub(r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', fr"\g<1>'{filePreserveMode}'", line)
           elif 'VTOT_API2_KEY' in line:
             # virustotal API key
-            line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', r"\g<1>'{}'".format(vtotApiKey), line)
+            line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', fr"\g<1>'{vtotApiKey}'", line)
           elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
             # file scanning via yara
-            line = re.sub(r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if yaraScan else "'false'"), line)
+            line = re.sub(r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(yaraScan)}", line)
           elif 'EXTRACTED_FILE_ENABLE_CAPA' in line:
             # PE file scanning via capa
-            line = re.sub(r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if capaScan else "'false'"), line)
+            line = re.sub(r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(capaScan)}", line)
           elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
             # file scanning via clamav
-            line = re.sub(r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if clamAvScan else "'false'"), line)
-          elif 'EXTRACTED_FILE_ENABLE_FRESHCLAM' in line:
+            line = re.sub(r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(clamAvScan)}", line)
+          elif 'EXTRACTED_FILE_UPDATE_RULES' in line:
             # rule updates (yara/capa via git, clamav via freshclam)
-            line = re.sub(r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if ruleUpdate else "'false'"), line)
+            line = re.sub(r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(ruleUpdate)}", line)
           elif 'PCAP_ENABLE_NETSNIFF' in line:
             # capture pcaps via netsniff-ng
-            line = re.sub(r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if pcapNetSniff else "'false'"), line)
+            line = re.sub(r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapNetSniff)}", line)
           elif 'PCAP_ENABLE_TCPDUMP' in line:
             # capture pcaps via tcpdump
-            line = re.sub(r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if pcapTcpDump else "'false'"), line)
+            line = re.sub(r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line)
           elif 'PCAP_IFACE' in line:
             # capture interface(s)
-            line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', r"\g<1>'{}'".format(pcapIface), line)
+            line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
           elif 'ES_JAVA_OPTS' in line:
             # elasticsearch memory allowance
-            line = re.sub(r'(-Xm[sx])(\w+)', r'\g<1>{}'.format(esMemory), line)
+            line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{esMemory}', line)
           elif 'LS_JAVA_OPTS' in line:
             # logstash memory allowance
-            line = re.sub(r'(-Xm[sx])(\w+)', r'\g<1>{}'.format(lsMemory), line)
+            line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', line)
           elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
             # automatic pcap analysis with Zeek
-            line = re.sub(r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if autoZeek else "'false'"), line)
+            line = re.sub(r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoZeek)}", line)
           elif 'LOGSTASH_REVERSE_DNS' in line:
             # automatic local reverse dns lookup
-            line = re.sub(r'(LOGSTASH_REVERSE_DNS\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if reverseDns else "'false'"), line)
+            line = re.sub(r'(LOGSTASH_REVERSE_DNS\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(reverseDns)}", line)
           elif 'LOGSTASH_OUI_LOOKUP' in line:
             # automatic MAC OUI lookup
-            line = re.sub(r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if autoOui else "'false'"), line)
+            line = re.sub(r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line)
           elif 'FREQ_LOOKUP' in line:
             # freq.py string randomness calculations
-            line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if autoFreq else "'false'"), line)
+            line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
           elif 'BEATS_SSL' in line:
             # enable/disable beats SSL
-            line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', r'\g<1>{}'.format("'true'" if logstashOpen and logstashSsl else "'false'"), line)
-          elif 'CURATOR_SNAPSHOT_DISABLED' in line:
-            # set count for index curation snapshot enable/disable
-            line = re.sub(r'(CURATOR_SNAPSHOT_DISABLED\s*:\s*)(\S+)', r'\g<1>{}'.format("'False'" if curatorSnapshots else "'True'"), line)
-          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and (curatorSnapshotDir is not None) and os.path.isdir(curatorSnapshotDir):
+            line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}", line)
+          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and (indexSnapshotDir is not None) and os.path.isdir(indexSnapshotDir):
             # elasticsearch backup directory
             volumeParts = line.strip().lstrip('-').lstrip().split(':')
-            volumeParts[0] = curatorSnapshotDir
+            volumeParts[0] = indexSnapshotDir
             line = "{}- {}".format(serviceIndent * 3, ':'.join(volumeParts))
-          elif 'CURATOR_CLOSE_COUNT' in line:
-            # set count for index curation close age
-            line = re.sub(r'(CURATOR_CLOSE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseCount), line)
-          elif 'CURATOR_CLOSE_UNITS' in line:
-            # set units for index curation close age
-            line = re.sub(r'(CURATOR_CLOSE_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorCloseUnits), line)
-          elif 'CURATOR_DELETE_COUNT' in line:
-            # set count for index curation delete age
-            line = re.sub(r'(CURATOR_DELETE_COUNT\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorDeleteCount), line)
-          elif 'CURATOR_DELETE_UNITS' in line:
-            # set units for index curation delete age
-            line = re.sub(r'(CURATOR_DELETE_UNITS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorDeleteUnits), line)
-          elif 'CURATOR_DELETE_GIGS' in line:
-            # set size for index deletion threshold
-            line = re.sub(r'(CURATOR_DELETE_GIGS\s*:\s*)(\S+)', r'\g<1>{}'.format(curatorDeleteOverGigs), line)
+          elif 'ISM_SNAPSHOT_AGE' in line:
+            # elasticsearch index state management snapshot age
+            line = re.sub(r'(ISM_SNAPSHOT_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexSnapshotAge}'", line)
+          elif 'ISM_COLD_AGE' in line:
+            # elasticsearch index state management cold (read-only) age
+            line = re.sub(r'(ISM_COLD_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexColdAge}'", line)
+          elif 'ISM_CLOSE_AGE' in line:
+            # elasticsearch index state management close age
+            line = re.sub(r'(ISM_CLOSE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexCloseAge}'", line)
+          elif 'ISM_DELETE_AGE' in line:
+            # elasticsearch index state management close age
+            line = re.sub(r'(ISM_DELETE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexDeleteAge}'", line)
+          elif 'ISM_SNAPSHOT_COMPRESSED' in line:
+            # elasticsearch index state management snapshot compression
+            line = re.sub(r'(ISM_SNAPSHOT_COMPRESSED\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(indexSnapshotCompressed)}", line)
+          elif 'ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
+            # delete based on index pattern size
+            line = re.sub(r'(ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)', fr"\g<1>'{indexPruneSizeLimit}'", line)
+          elif 'ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
+            # delete based on index pattern size (sorted by name vs. creation time)
+            line = re.sub(r'(ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}", line)
           elif 'ES_EXTERNAL_HOSTS' in line:
             # enable/disable forwarding Logstash to external Elasticsearch instance
-            line = re.sub(r'(#\s*)?(ES_EXTERNAL_HOSTS\s*:\s*)(\S+)', r"\g<2>'{}'".format(externalEsHost), line)
+            line = re.sub(r'(#\s*)?(ES_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
           elif 'ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
             # enable/disable SSL certificate verification for external Elasticsearch instance
-            line = re.sub(r'(#\s*)?(ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)', r'\g<2>{}'.format("'true'" if externalEsSsl and externalEsSslVerify else "'false'"), line)
+            line = re.sub(r'(#\s*)?(ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}", line)
           elif 'ES_EXTERNAL_SSL' in line:
             # enable/disable SSL certificate verification for external Elasticsearch instance
-            line = re.sub(r'(#\s*)?(ES_EXTERNAL_SSL\s*:\s*)(\S+)', r'\g<2>{}'.format("'true'" if externalEsSsl else "'false'"), line)
-          elif (len(externalEsHost) > 0) and re.match(r'^\s*#.+:/usr/share/logstash/config/logstash.keystore(:r[ow])?\s*$', line):
-            # make sure logstash.keystore is shared (volume mapping is not commented out)
-            leadingSpaces = len(line) - len(line.lstrip())
-            if leadingSpaces <= 0: leadingSpaces = 6
-            line = "{}{}".format(' ' * leadingSpaces, line.lstrip().lstrip('#').lstrip())
+            line = re.sub(r'(#\s*)?(ES_EXTERNAL_SSL\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}", line)
           elif logstashOpen and serviceStartLine and (currentService == 'logstash'):
             # exposing logstash port 5044 to the world
             print(line)
-            line = "{}ports:".format(serviceIndent * 2)
+            line = f"{serviceIndent * 2}ports:"
             print(line)
-            line = "{}- 0.0.0.0:5044:5044".format(serviceIndent * 3)
-          elif (not serviceStartLine) and (currentService == 'logstash') and re.match(r'^({}ports:|{}-.*5044:5044)\s*$'.format(serviceIndent * 2, serviceIndent * 3), line):
+            line = f"{serviceIndent * 3}- 0.0.0.0:5044:5044"
+          elif (not serviceStartLine) and (currentService == 'logstash') and re.match(fr'^({serviceIndent * 2}ports:|{serviceIndent * 3}-.*5044:5044)\s*$', line):
             # remove previous/leftover/duplicate exposing logstash port 5044 to the world
             skipLine = True
 
@@ -573,18 +559,18 @@ class Installer(object):
     # if the Malcolm dir is owned by root, see if they want to reassign ownership to a non-root user
     if (((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and
         (self.scriptUser == "root") and (getpwuid(os.stat(malcolm_install_path).st_uid).pw_name == self.scriptUser) and
-        InstallerYesOrNo('Set ownership of {} to an account other than {}?'.format(malcolm_install_path, self.scriptUser), default=True, forceInteraction=True)):
+        InstallerYesOrNo(f'Set ownership of {malcolm_install_path} to an account other than {self.scriptUser}?', default=True, forceInteraction=True)):
       tmpUser = ''
       while (len(tmpUser) == 0):
         tmpUser = InstallerAskForString('Enter user account').strip()
       err, out = self.run_process(['id', '-g', '-n', tmpUser], stderr=True)
       if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
-        tmpUser = "{}:{}".format(tmpUser, out[0])
+        tmpUser = f"{tmpUser}:{out[0]}"
       err, out = self.run_process(['chown', '-R', tmpUser, malcolm_install_path], stderr=True)
       if (err == 0):
-        if self.debug: eprint("Changing ownership of {} to {} succeeded".format(malcolm_install_path, tmpUser))
+        if self.debug: eprint(f"Changing ownership of {malcolm_install_path} to {tmpUser} succeeded")
       else:
-        eprint("Changing ownership of {} to {} failed: {}".format(malcolm_install_path, tmpUser, out))
+        eprint(f"Changing ownership of {malcolm_install_path} to {tmpUser} failed: {out}")
 
 
 ###################################################################################################
@@ -592,10 +578,7 @@ class LinuxInstaller(Installer):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def __init__(self, debug=False, configOnly=False):
-    if PY3:
-      super().__init__(debug, configOnly)
-    else:
-      super(LinuxInstaller, self).__init__(debug, configOnly)
+    super().__init__(debug, configOnly)
 
     self.distro = None
     self.codename = None
@@ -662,9 +645,7 @@ class LinuxInstaller(Installer):
       self.distro = "linux"
 
     if self.debug:
-      eprint("distro: {}{}{}".format(self.distro,
-                                     " {}".format(self.codename) if self.codename else "",
-                                     " {}".format(self.release) if self.release else ""))
+      eprint(f"distro: {self.distro}{f' {self.codename}' if self.codename else ''}{f' {self.release}' if self.release else ''}")
 
     if not self.codename: self.codename = self.distro
 
@@ -682,7 +663,7 @@ class LinuxInstaller(Installer):
       self.sudoCmd = ["sudo", "-n"]
       err, out = self.run_process(['whoami'], privileged=True)
       if ((err != 0) or (len(out) == 0) or (out[0] != 'root')) and (not self.configOnly):
-        raise Exception('{} must be run as root, or {} must be available'.format(ScriptName, self.sudoCmd))
+        raise Exception(f'{ScriptName} must be run as root, or {self.sudoCmd} must be available')
 
     # determine command to use to query if a package is installed
     if Which('dpkg', debug=self.debug):
@@ -758,7 +739,7 @@ class LinuxInstaller(Installer):
           requiredRepoPackages = []
 
         if len(requiredRepoPackages) > 0:
-          eprint("Installing required packages: {}".format(requiredRepoPackages))
+          eprint(f"Installing required packages: {requiredRepoPackages}")
           self.install_package(requiredRepoPackages)
 
         # install docker via repo if possible
@@ -768,8 +749,8 @@ class LinuxInstaller(Installer):
           # for debian/ubuntu, add docker GPG key and check its fingerprint
           if self.debug:
             eprint("Requesting docker GPG key for package signing")
-          dockerGpgKey = requests.get('https://download.docker.com/linux/{}/gpg'.format(self.distro), allow_redirects=True)
-          err, out = self.run_process(['apt-key', 'add'], stdin=dockerGpgKey.content.decode(sys.getdefaultencoding()) if PY3 else dockerGpgKey.content, privileged=True, stderr=False)
+          dockerGpgKey = requests.get(f'https://download.docker.com/linux/{self.distro}/gpg', allow_redirects=True)
+          err, out = self.run_process(['apt-key', 'add'], stdin=dockerGpgKey.content.decode(sys.getdefaultencoding()), privileged=True, stderr=False)
           if (err == 0):
             err, out = self.run_process(['apt-key', 'fingerprint', DEB_GPG_KEY_FINGERPRINT], privileged=True, stderr=False)
 
@@ -777,8 +758,8 @@ class LinuxInstaller(Installer):
           if (err == 0):
             if self.debug:
               eprint("Adding docker repository")
-            err, out = self.run_process(['add-apt-repository', '-y', '-r', 'deb [arch=amd64] https://download.docker.com/linux/{} {} stable'.format(self.distro, self.codename)], privileged=True)
-            err, out = self.run_process(['add-apt-repository', '-y', '-u', 'deb [arch=amd64] https://download.docker.com/linux/{} {} stable'.format(self.distro, self.codename)], privileged=True)
+            err, out = self.run_process(['add-apt-repository', '-y', '-r', f'deb [arch=amd64] https://download.docker.com/linux/{self.distro} {self.codename} stable'], privileged=True)
+            err, out = self.run_process(['add-apt-repository', '-y', '-u', f'deb [arch=amd64] https://download.docker.com/linux/{self.distro} {self.codename} stable'], privileged=True)
 
           # docker packages to install
           if (err == 0):
@@ -809,7 +790,7 @@ class LinuxInstaller(Installer):
           err, out = None, None
 
         if len(dockerPackages) > 0:
-          eprint("Installing docker packages: {}".format(dockerPackages))
+          eprint(f"Installing docker packages: {dockerPackages}")
           if self.install_package(dockerPackages):
             eprint("Installation of docker packages apparently succeeded")
             result = True
@@ -827,9 +808,9 @@ class LinuxInstaller(Installer):
             eprint("Installation of docker apparently succeeded")
             result = True
           else:
-            eprint("Installation of docker failed: {}".format(out))
+            eprint(f"Installation of docker failed: {out}")
         else:
-          eprint("Downloading {} to {} failed".format(dockerComposeUrl, tempFileName))
+          eprint(f"Downloading {dockerComposeUrl} to {tempFileName} failed")
 
     if result and ((self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS)):
       # centos/fedora don't automatically start/enable the daemon, so do so now
@@ -837,9 +818,9 @@ class LinuxInstaller(Installer):
       if (err == 0):
         err, out = self.run_process(['systemctl', 'enable', 'docker'], privileged=True)
         if (err != 0):
-          eprint("Enabling docker service failed: {}".format(out))
+          eprint(f"Enabling docker service failed: {out}")
       else:
-        eprint("Starting docker service failed: {}".format(out))
+        eprint(f"Starting docker service failed: {out}")
 
     # at this point we either have installed docker successfully or we have to give up, as we've tried all we could
     err, out = self.run_process(['docker', 'info'], privileged=True, retry=6, retrySleepSec=5)
@@ -850,7 +831,7 @@ class LinuxInstaller(Installer):
       # add non-root user to docker group if required
       usersToAdd = []
       if self.scriptUser == 'root':
-        while InstallerYesOrNo('Add {} non-root user to the "docker" group?'.format('a' if len(usersToAdd) == 0 else 'another')):
+        while InstallerYesOrNo(f"Add {'a' if len(usersToAdd) == 0 else 'another'} non-root user to the \"docker\" group?"):
           tmpUser = InstallerAskForString('Enter user account')
           if (len(tmpUser) > 0): usersToAdd.append(tmpUser)
       else:
@@ -860,13 +841,13 @@ class LinuxInstaller(Installer):
         err, out = self.run_process(['usermod', '-a', '-G', 'docker', user], privileged=True)
         if (err == 0):
           if self.debug:
-            eprint('Adding {} to "docker" group succeeded'.format(user))
+            eprint(f'Adding {user} to "docker" group succeeded')
         else:
-          eprint('Adding {} to "docker" group failed'.format(user))
+          eprint(f'Adding {user} to "docker" group failed')
 
     elif (err != 0):
       result = False
-      raise Exception('{} requires docker, please see {}'.format(ScriptName, DOCKER_INSTALL_URLS[self.distro]))
+      raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.distro]}')
 
     return result
 
@@ -897,7 +878,7 @@ class LinuxInstaller(Installer):
         if len(unames) == 2:
           # download docker-compose from github and save it to a temporary file
           tempFileName = os.path.join(self.tempDirName, dockerComposeCmd)
-          dockerComposeUrl = "https://github.com/docker/compose/releases/download/{}/docker-compose-{}-{}".format(DOCKER_COMPOSE_INSTALL_VERSION, unames[0], unames[1])
+          dockerComposeUrl = f"https://github.com/docker/compose/releases/download/{DOCKER_COMPOSE_INSTALL_VERSION}/docker-compose-{unames[0]}-{unames[1]}"
           if DownloadToFile(dockerComposeUrl, tempFileName, debug=self.debug):
             os.chmod(tempFileName, 493) # 493 = 0o755, mark as executable
             # put docker-compose into /usr/local/bin
@@ -906,10 +887,10 @@ class LinuxInstaller(Installer):
               eprint("Download and installation of docker-compose apparently succeeded")
               dockerComposeCmd = '/usr/local/bin/docker-compose'
             else:
-              raise Exception('Error copying {} to /usr/local/bin: {}'.format(tempFileName, out))
+              raise Exception(f'Error copying {tempFileName} to /usr/local/bin: {out}')
 
           else:
-            eprint("Downloading {} to {} failed".format(dockerComposeUrl, tempFileName))
+            eprint(f"Downloading {dockerComposeUrl} to {tempFileName} failed")
 
       elif InstallerYesOrNo('Install docker-compose via pip (privileged)?', default=False):
         # install docker-compose via pip (as root)
@@ -917,7 +898,7 @@ class LinuxInstaller(Installer):
         if (err == 0):
           eprint("Installation of docker-compose apparently succeeded")
         else:
-          eprint("Install docker-compose via pip failed with {}, {}".format(err, out))
+          eprint(f"Install docker-compose via pip failed with {err}, {out}")
 
       elif InstallerYesOrNo('Install docker-compose via pip (user)?', default=True):
         # install docker-compose via pip (regular user)
@@ -925,7 +906,7 @@ class LinuxInstaller(Installer):
         if (err == 0):
           eprint("Installation of docker-compose apparently succeeded")
         else:
-          eprint("Install docker-compose via pip failed with {}, {}".format(err, out))
+          eprint(f"Install docker-compose via pip failed with {err}, {out}")
 
     # see if docker-compose is now installed and runnable (try non-root and root)
     err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
@@ -938,7 +919,7 @@ class LinuxInstaller(Installer):
         eprint('"docker-compose version" succeeded')
 
     else:
-      raise Exception('{} requires docker-compose, please see {}'.format(ScriptName, DOCKER_COMPOSE_INSTALL_URLS[self.platform]))
+      raise Exception(f'{ScriptName} requires docker-compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}')
 
     return result
 
@@ -1028,28 +1009,26 @@ class LinuxInstaller(Installer):
     for config in configLinesToAdd:
 
       if (((len(config.distros) == 0) or (self.codename in config.distros)) and
-          (os.path.isfile(config.filename) or InstallerYesOrNo('\n{}\n{} does not exist, create it?'.format(config.description, config.filename), default=True))):
+          (os.path.isfile(config.filename) or InstallerYesOrNo(f'\n{config.description}\n{config.filename} does not exist, create it?', default=True))):
 
         confFileLines = [line.rstrip('\n') for line in open(config.filename)] if os.path.isfile(config.filename) else []
 
         if ((len(confFileLines) == 0) or
             (not os.path.isfile(config.filename) and (len(config.prefix) == 0)) or
             ((len(list(filter(lambda x: x.startswith(config.prefix), confFileLines))) == 0) and
-              InstallerYesOrNo('\n{}\n{} appears to be missing from {}, append it?'.format(config.description, config.prefix, config.filename), default=True))):
+              InstallerYesOrNo(f'\n{config.description}\n{config.prefix} appears to be missing from {config.filename}, append it?', default=True))):
 
-          err, out = self.run_process(['bash', '-c', "mkdir -p {} && echo -n -e '\\n{}\\n' >> '{}'".format(os.path.dirname(config.filename),
-                                                                                                           "\\n".join(config.lines),
-                                                                                                           config.filename)], privileged=True)
+          echoNewLineJoin = '\\n'
+          err, out = self.run_process(['bash',
+                                       '-c',
+                                       f"mkdir -p {os.path.dirname(config.filename)} && echo -n -e '{echoNewLineJoin}{echoNewLineJoin.join(config.lines)}{echoNewLineJoin} >> '{config.filename}'"], privileged=True)
 
 ###################################################################################################
 class MacInstaller(Installer):
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   def __init__(self, debug=False, configOnly=False):
-    if PY3:
-      super().__init__(debug, configOnly)
-    else:
-      super(MacInstaller, self).__init__(debug, configOnly)
+    super().__init__(debug, configOnly)
 
     self.sudoCmd = []
 
@@ -1064,7 +1043,7 @@ class MacInstaller(Installer):
       self.useBrew = False
       eprint('Docker can be installed and maintained with Homebrew, or manually.')
       if (not brewInstalled) and (not InstallerYesOrNo('Homebrew is not installed: continue with manual installation?', default=False)):
-        raise Exception('Follow the steps at {} to install Homebrew, then re-run {}'.format(HOMEBREW_INSTALL_URLS[self.platform], ScriptName))
+        raise Exception(f'Follow the steps at {HOMEBREW_INSTALL_URLS[self.platform]} to install Homebrew, then re-run {ScriptName}')
 
     if self.useBrew:
       # make sure we have brew cask
@@ -1074,13 +1053,13 @@ class MacInstaller(Installer):
         if (err == 0):
           if self.debug: eprint('"brew install cask" succeeded')
         else:
-          eprint('"brew install cask" failed with {}, {}'.format(err, out))
+          eprint(f'"brew install cask" failed with {err}, {out}')
 
       err, out = self.run_process(['brew', 'tap', 'homebrew/cask-versions'])
       if (err == 0):
         if self.debug: eprint('"brew tap homebrew/cask-versions" succeeded')
       else:
-        eprint('"brew tap homebrew/cask-versions" failed with {}, {}'.format(err, out))
+        eprint(f'"brew tap homebrew/cask-versions" failed with {err}, {out}')
 
       self.checkPackageCmds.append(['brew', 'cask', 'ls', '--versions'])
       self.installPackageCmds.append(['brew', 'cask', 'install'])
@@ -1120,7 +1099,7 @@ class MacInstaller(Installer):
 
     if (err != 0) and self.useBrew and self.package_is_installed(MAC_BREW_DOCKER_PACKAGE):
       # if docker is installed via brew, but not running, prompt them to start it
-      eprint('{} appears to be installed via Homebrew, but "docker info" failed'.format(MAC_BREW_DOCKER_PACKAGE))
+      eprint(f'{MAC_BREW_DOCKER_PACKAGE} appears to be installed via Homebrew, but "docker info" failed')
       while True:
         response = InstallerAskForString('Starting Docker the first time may require user interaction. Please find and start Docker in the Applications folder, then return here and type YES').lower()
         if (response == 'yes'):
@@ -1136,7 +1115,7 @@ class MacInstaller(Installer):
       if self.useBrew:
         # install docker via brew cask (requires user interaction)
         dockerPackages = [MAC_BREW_DOCKER_PACKAGE]
-        eprint("Installing docker packages: {}".format(dockerPackages))
+        eprint(f"Installing docker packages: {dockerPackages}")
         if self.install_package(dockerPackages):
           eprint("Installation of docker packages apparently succeeded")
           while True:
@@ -1148,14 +1127,14 @@ class MacInstaller(Installer):
 
       else:
         # install docker via downloaded dmg file (requires user interaction)
-        dlDirName = '/Users/{}/Downloads'.format(self.scriptUser)
+        dlDirName = f'/Users/{self.scriptUser}/Downloads'
         if os.path.isdir(dlDirName):
           tempFileName = os.path.join(dlDirName, 'Docker.dmg')
         else:
           tempFileName = os.path.join(self.tempDirName, 'Docker.dmg')
         if DownloadToFile('https://download.docker.com/mac/edge/Docker.dmg', tempFileName, debug=self.debug):
           while True:
-            response = InstallerAskForString('Installing and starting Docker the first time may require user interaction. Please open Finder and install {}, start Docker from the Applications folder, then return here and type YES'.format(tempFileName)).lower()
+            response = InstallerAskForString(f'Installing and starting Docker the first time may require user interaction. Please open Finder and install {tempFileName}, start Docker from the Applications folder, then return here and type YES').lower()
             if (response == 'yes'):
               break
 
@@ -1167,14 +1146,14 @@ class MacInstaller(Installer):
           eprint('"docker info" succeeded')
 
       elif (err != 0):
-        raise Exception('{} requires docker edge, please see {}'.format(ScriptName, DOCKER_INSTALL_URLS[self.platform]))
+        raise Exception(f'{ScriptName} requires docker edge, please see {DOCKER_INSTALL_URLS[self.platform]}')
 
     elif (err != 0):
-      raise Exception('{} requires docker edge, please see {}'.format(ScriptName, DOCKER_INSTALL_URLS[self.platform]))
+      raise Exception(f'{ScriptName} requires docker edge, please see {DOCKER_INSTALL_URLS[self.platform]}')
 
     # tweak CPU/RAM usage for Docker in Mac
     settingsFile = MAC_BREW_DOCKER_SETTINGS.format(self.scriptUser)
-    if result and os.path.isfile(settingsFile) and InstallerYesOrNo('Configure Docker resource usage in {}?'.format(settingsFile), default=True):
+    if result and os.path.isfile(settingsFile) and InstallerYesOrNo(f'Configure Docker resource usage in {settingsFile}?', default=True):
 
       # adjust CPU and RAM based on system resources
       if self.totalCores >= 16:
@@ -1203,7 +1182,7 @@ class MacInstaller(Installer):
       else:
         newMemoryGiB = 2
 
-      while not InstallerYesOrNo('Setting {} for CPU cores and {} GiB for RAM. Is this OK?'.format(newCpus if newCpus else "(unchanged)", newMemoryGiB if newMemoryGiB else "(unchanged)"), default=True):
+      while not InstallerYesOrNo(f"Setting {newCpus if newCpus else '(unchanged)'} for CPU cores and {newMemoryGiB if newMemoryGiB else '(unchanged)'} GiB for RAM. Is this OK?", default=True):
         newCpus = InstallerAskForString('Enter Docker CPU cores (e.g., 4, 8, 16)')
         newMemoryGiB = InstallerAskForString('Enter Docker RAM MiB (e.g., 8, 16, etc.)')
 
@@ -1234,7 +1213,7 @@ class MacInstaller(Installer):
               eprint('"docker info" succeeded')
 
         else:
-          eprint("Restarting Docker automatically failed: {}".format(out))
+          eprint(f"Restarting Docker automatically failed: {out}")
           while True:
             response = InstallerAskForString('Please restart Docker via the system taskbar, then return here and type YES').lower()
             if (response == 'yes'):
@@ -1249,7 +1228,7 @@ def main():
 
   # extract arguments from the command line
   # print (sys.argv[1:]);
-  parser = argparse.ArgumentParser(description='Malcolm install script', add_help=False, usage='{} <arguments>'.format(ScriptName))
+  parser = argparse.ArgumentParser(description='Malcolm install script', add_help=False, usage=f'{ScriptName} <arguments>')
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-m', '--malcolm-file', required=False, dest='mfile', metavar='<STR>', type=str, default='', help='Malcolm .tar.gz file for installation')
   parser.add_argument('-i', '--image-file', required=False, dest='ifile', metavar='<STR>', type=str, default='', help='Malcolm docker images .tar.gz file for installation')
@@ -1268,8 +1247,8 @@ def main():
 
   if args.debug:
     eprint(os.path.join(ScriptPath, ScriptName))
-    eprint("Arguments: {}".format(sys.argv[1:]))
-    eprint("Arguments: {}".format(args))
+    eprint(f"Arguments: {sys.argv[1:]}")
+    eprint(f"Arguments: {args}")
   else:
     sys.tracebacklimit = 0
 
@@ -1305,8 +1284,8 @@ def main():
     if args.configOnly:
       eprint("Only doing configuration, not installation")
     else:
-      eprint("Malcolm install file: {}".format(malcolmFile))
-      eprint("Docker images file: {}".format(imageFile))
+      eprint(f"Malcolm install file: {malcolmFile}")
+      eprint(f"Docker images file: {imageFile}")
 
   installerPlatform = platform.system()
   if installerPlatform == PLATFORM_LINUX:
@@ -1314,7 +1293,7 @@ def main():
   elif installerPlatform == PLATFORM_MAC:
     installer = MacInstaller(debug=args.debug, configOnly=args.configOnly)
   elif installerPlatform == PLATFORM_WINDOWS:
-    raise Exception('{} is not yet supported on {}'.format(ScriptName, installerPlatform))
+    raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
     installer = WindowsInstaller(debug=args.debug, configOnly=args.configOnly)
 
   success = False
@@ -1336,15 +1315,15 @@ def main():
       installPath = os.path.dirname(os.path.realpath(args.configFile))
     success = (installPath is not None) and os.path.isdir(installPath)
     if args.debug:
-      eprint("Malcolm installation detected at {}".format(installPath))
+      eprint(f"Malcolm installation detected at {installPath}")
 
   elif hasattr(installer, 'install_malcolm_files'):
     success, installPath = installer.install_malcolm_files(malcolmFile)
 
   if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
     installer.tweak_malcolm_runtime(installPath, expose_logstash_default=args.exposeLogstash, restart_mode_default=args.malcolmAutoRestart)
-    eprint("\nMalcolm has been installed to {}. See README.md for more information.".format(installPath))
-    eprint("Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {}.".format(os.path.join(installPath, "scripts")))
+    eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
+    eprint(f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}.")
 
 if __name__ == '__main__':
   main()

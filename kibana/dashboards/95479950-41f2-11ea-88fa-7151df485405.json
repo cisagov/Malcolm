@@ -1,21 +1,24 @@
 {
-  "version": "7.6.2",
+  "version": "7.10.0",
   "objects": [
     {
       "id": "95479950-41f2-11ea-88fa-7151df485405",
       "type": "dashboard",
-      "updated_at": "2021-01-25T16:58:03.455Z",
-      "version": "WzcwMywxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T16:31:39.543Z",
+      "version": "WzIwMTQsMV0=",
       "attributes": {
         "title": "Security Overview",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"w\":12,\"x\":8,\"y\":0},\"panelIndex\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"w\":15,\"x\":20,\"y\":0},\"panelIndex\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"w\":13,\"x\":35,\"y\":0},\"panelIndex\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"w\":15,\"x\":0,\"y\":23},\"panelIndex\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"gridData\":{\"h\":38,\"i\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"w\":15,\"x\":15,\"y\":23},\"panelIndex\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"w\":9,\"x\":30,\"y\":23},\"panelIndex\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"w\":9,\"x\":39,\"y\":23},\"panelIndex\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":null}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}}},\"gridData\":{\"h\":20,\"i\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"w\":15,\"x\":0,\"y\":41},\"panelIndex\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"a5c3b5c2-37c3-488d-81ab-d74a89d4be84\",\"w\":18,\"x\":30,\"y\":41},\"panelIndex\":\"a5c3b5c2-37c3-488d-81ab-d74a89d4be84\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":19,\"i\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"w\":48,\"x\":0,\"y\":61},\"panelIndex\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_10\"}]",
+        "panelsJSON": "[{\"version\":\"7.10.0\",\"gridData\":{\"h\":23,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":23,\"i\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"w\":12,\"x\":8,\"y\":0},\"panelIndex\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":23,\"i\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"w\":15,\"x\":20,\"y\":0},\"panelIndex\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":23,\"i\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"w\":13,\"x\":35,\"y\":0},\"panelIndex\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"w\":15,\"x\":0,\"y\":23},\"panelIndex\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":38,\"i\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"w\":15,\"x\":15,\"y\":23},\"panelIndex\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_5\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"w\":9,\"x\":30,\"y\":23},\"panelIndex\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"w\":9,\"x\":39,\"y\":23},\"panelIndex\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":20,\"i\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"w\":15,\"x\":0,\"y\":41},\"panelIndex\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":null}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":19,\"i\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"w\":48,\"x\":0,\"y\":61},\"panelIndex\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_9\"},{\"version\":\"7.10.0\",\"gridData\":{\"x\":30,\"y\":41,\"w\":18,\"h\":20,\"i\":\"6beedf2b-5d72-48af-a90f-f56781764efe\"},\"panelIndex\":\"6beedf2b-5d72-48af-a90f-f56781764efe\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"}}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         }
       },
       "references": [
@@ -67,26 +70,29 @@
         {
           "name": "panel_9",
           "type": "visualization",
-          "id": "10a01120-41f5-11ea-88fa-7151df485405"
+          "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_10",
           "type": "visualization",
-          "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405"
+          "id": "3a582cc0-6fab-11eb-958c-51e33b5cae2a"
         }
       ],
       "migrationVersion": {
-        "dashboard": "7.3.0"
+        "dashboard": "7.9.3"
       }
     },
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:33:04.763Z",
-      "version": "WzY4NCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:25:07.132Z",
+      "version": "WzY5MiwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
-        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/kibana#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/kibana#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/kibana#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/kibana#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/kibana#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/kibana#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/kibana#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/kibana#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/kibana#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/kibana#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/kibana#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/kibana#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/kibana#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/kibana#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/kibana#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/kibana#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/kibana#/dashboard/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/kibana#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/kibana#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/kibana#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/kibana#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/kibana#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/kibana#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/kibana#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/kibana#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/kibana#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/kibana#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/kibana#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/kibana#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/kibana#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/kibana#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/kibana#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/kibana#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/kibana#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/kibana#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/kibana#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/kibana#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/kibana#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/kibana#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/kibana#/dashboard/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/kibana#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/kibana#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/kibana#/dashboard/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/kibana#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/kibana#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/kibana#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/kibana#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/kibana#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/kibana#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -96,13 +102,16 @@
       },
       "references": [],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "a4f6eba0-41f5-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQzOCwxXQ==",
       "attributes": {
         "title": "Notices by Category",
@@ -123,14 +132,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "0e9b1a00-525e-11e9-9bd7-13d6d1bafa75",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:57:39.013Z",
-      "version": "WzcwMiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
+      "version": "WzQzOSwxXQ==",
       "attributes": {
         "title": "Signatures - Signature IDs",
         "visState": "{\"title\":\"Signatures - Signature IDs\",\"type\":\"horizontal_bar\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":40},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":20},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Signature ID\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_signatures.signature_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Signature ID\"}}]}",
@@ -150,13 +162,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "c5b1e590-41f3-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0MCwxXQ==",
       "attributes": {
         "title": "Clear-text Transmission of Passwords ",
@@ -176,13 +191,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "e9f27fa0-41f8-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0MSwxXQ==",
       "attributes": {
         "title": "Outdated/Insecure Application Protocols",
@@ -202,13 +220,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "f7b3ba60-41f7-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0MiwxXQ==",
       "attributes": {
         "title": "Connections by Destination Country (region map)",
@@ -229,13 +250,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "0ffb5790-41f3-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0MywxXQ==",
       "attributes": {
         "title": "Inbound External Traffic by Country",
@@ -255,13 +279,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "4a183420-41f3-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0NCwxXQ==",
       "attributes": {
         "title": "Outbound Internal Traffic by Country",
@@ -281,13 +308,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "69241a80-421d-11ea-9084-41ab7c5fff2e",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0NSwxXQ==",
       "attributes": {
         "title": "DNS Queries by Randomness",
@@ -308,39 +338,16 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
-      }
-    },
-    {
-      "id": "10a01120-41f5-11ea-88fa-7151df485405",
-      "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
-      "version": "WzQ0NiwxXQ==",
-      "attributes": {
-        "title": "File Types Observed",
-        "visState": "{\"title\":\"File Types Observed\",\"type\":\"tagcloud\",\"params\":{\"scale\":\"square root\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":48,\"showLabel\":false,\"metric\":{\"type\":\"vis_dimension\",\"accessor\":1,\"format\":{\"id\":\"string\",\"params\":{}}},\"bucket\":{\"type\":\"vis_dimension\",\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.filetype\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Type\"}}]}",
-        "uiStateJSON": "{}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "sessions2-*"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405",
       "type": "visualization",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0NywxXQ==",
       "attributes": {
         "title": "External Remote Access Over Time",
@@ -361,14 +368,46 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "3a582cc0-6fab-11eb-958c-51e33b5cae2a",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T16:31:17.388Z",
+      "version": "WzE5ODUsMV0=",
+      "attributes": {
+        "title": "File Types Observed",
+        "visState": "{\"title\":\"File Types Observed\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.filetype\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Type\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":42,\"showLabel\":true}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "sessions2-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "8f003748-a6f8-4244-9d4e-e38e4a48da4c",
       "type": "search",
-      "updated_at": "2021-01-25T16:33:01.716Z",
-      "version": "WzY2MCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:25:04.031Z",
+      "version": "WzY2OCwxXQ==",
       "attributes": {
         "title": "Notices - Logs",
         "description": "",
@@ -400,13 +439,16 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     },
     {
       "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
       "type": "search",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ0OSwxXQ==",
       "attributes": {
         "title": "Signatures - Logs",
@@ -437,14 +479,17 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     },
     {
       "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
       "type": "search",
-      "updated_at": "2021-01-25T16:33:02.736Z",
-      "version": "WzY2OCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:25:05.059Z",
+      "version": "WzY3NiwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
         "description": "",
@@ -478,13 +523,16 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     },
     {
       "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e",
       "type": "search",
-      "updated_at": "2021-01-25T16:32:41.413Z",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-15T14:24:42.447Z",
       "version": "WzQ1MSwxXQ==",
       "attributes": {
         "title": "DNS - Logs",
@@ -516,7 +564,7 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     }
   ]

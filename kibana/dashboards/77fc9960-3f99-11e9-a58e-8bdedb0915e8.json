@@ -1,11 +1,14 @@
 {
-  "version": "7.6.2",
+  "version": "7.10.0",
   "objects": [
     {
       "id": "77fc9960-3f99-11e9-a58e-8bdedb0915e8",
       "type": "dashboard",
-      "updated_at": "2020-02-13T15:37:23.331Z",
-      "version": "WzkzNCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:37.074Z",
+      "version": "WzUxOSwxXQ==",
       "attributes": {
         "title": "Connections - Destination - Responder Bytes (region map)",
         "hits": 0,
@@ -41,17 +44,20 @@
         }
       ],
       "migrationVersion": {
-        "dashboard": "7.3.0"
+        "dashboard": "7.9.3"
       }
     },
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
       "type": "visualization",
-      "updated_at": "2020-02-13T14:17:04.192Z",
-      "version": "Wzc3NiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:25:09.616Z",
+      "version": "Wzg3MiwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
-        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/kibana#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/kibana#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/kibana#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/kibana#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/kibana#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/kibana#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/kibana#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/kibana#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/kibana#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/kibana#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/kibana#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/kibana#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/kibana#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/kibana#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/kibana#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/kibana#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/kibana#/dashboard/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/kibana#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/kibana#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/kibana#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/kibana#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/kibana#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/kibana#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/kibana#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/kibana#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/kibana#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/kibana#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/kibana#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/kibana#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/kibana#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/kibana#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/kibana#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/kibana#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/kibana#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/kibana#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/kibana#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/kibana#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/kibana#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/kibana#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/kibana#/dashboard/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/kibana#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/kibana#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/kibana#/dashboard/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/kibana#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/kibana#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/kibana#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/kibana#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/kibana#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/kibana#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -61,14 +67,17 @@
       },
       "references": [],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "54431ec0-3f96-11e9-a58e-8bdedb0915e8",
       "type": "visualization",
-      "updated_at": "2020-02-13T14:16:35.430Z",
-      "version": "WzQ4MiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:37.074Z",
+      "version": "WzUyMSwxXQ==",
       "attributes": {
         "title": "Connections - Destination - Responder Bytes (region map)",
         "visState": "{\"title\":\"Connections - Destination - Responder Bytes (region map)\",\"type\":\"region_map\",\"params\":{\"addTooltip\":true,\"colorSchema\":\"Green to Red\",\"emsHotLink\":null,\"isDisplayWarning\":false,\"legendPosition\":\"bottomright\",\"mapCenter\":[0,0],\"mapZoom\":3,\"outlineWeight\":1,\"selectedJoinField\":{\"description\":\"Country Code\",\"name\":\"ISO_A2\"},\"selectedLayer\":{\"attribution\":\"https://exploratory.io/maps\",\"fields\":[{\"description\":\"Country Code\",\"name\":\"ISO_A2\"},{\"description\":\"Country Code2\",\"name\":\"WB_A2\"},{\"description\":\"Country Name\",\"name\":\"NAME\"}],\"format\":{\"type\":\"geojson\"},\"isEMS\":false,\"layerId\":\"self_hosted.World (offline)\",\"meta\":{\"feature_collection_path\":\"data\"},\"name\":\"World (offline)\",\"url\":\"/world.geojson\"},\"showAllShapes\":true,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"zeek_conn.resp_bytes\",\"customLabel\":\"Responder Bytes\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"dstGEO\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Responder Country\"}}]}",
@@ -88,14 +97,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "623ef480-4e73-11ea-b4e7-0f540ddf3a49",
       "type": "visualization",
-      "updated_at": "2020-02-13T15:17:58.982Z",
-      "version": "Wzg5NywxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:25:07.590Z",
+      "version": "Wzg1NCwxXQ==",
       "attributes": {
         "title": "Connections - Protocol Filters",
         "visState": "{\"title\":\"Connections - Protocol Filters\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1581606976709\",\"fieldName\":\"network.type\",\"parent\":\"\",\"label\":\"Network Layer\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1581606723028\",\"fieldName\":\"zeek.proto\",\"parent\":\"\",\"label\":\"Protocol\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"},{\"id\":\"1581606665268\",\"fieldName\":\"zeek.service\",\"parent\":\"\",\"label\":\"Service\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_2_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
@@ -124,17 +136,20 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "4dd65202-bd19-40d6-9e0d-ff41c6d5a4b5",
       "type": "visualization",
-      "updated_at": "2020-02-13T14:16:47.803Z",
-      "version": "WzYzMSwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:25:07.590Z",
+      "version": "Wzg1NSwxXQ==",
       "attributes": {
         "title": "Connections - Maps",
-        "visState": "{\"title\":\"Connections - Maps\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"markdown\":\"#### Coordinate Maps\\n[Source - Originator Bytes](/kibana/app/kibana#/dashboard/b50c8d17-6ed3-4de6-aed4-5181032810b2) ● [Destination - Responder Bytes](/kibana/app/kibana#/dashboard/d4fd6afd-15cb-42bf-8a25-03dd8e59b327) ● [Source - Sum of Total Bytes](/kibana/app/kibana#/dashboard/f394057d-1b16-4174-b994-7045f423a416) ● [Destination - Sum of Total Bytes](/kibana/app/kibana#/dashboard/60d78fbd-471c-4f59-a9e3-189b33a13644) ● [Source - Top Connection Duration](/kibana/app/kibana#/dashboard/e09a4b86-29b5-4256-bb3b-802ac9f90404) ● [Destination - Top Connection Duration](/kibana/app/kibana#/dashboard/0aed0e23-c8ac-4f2b-9f68-d04b6e7666b0)   \\n#### Region Maps\\n[Source - Originator Bytes ](/kibana/app/kibana#/dashboard/d41fe630-3f98-11e9-a58e-8bdedb0915e8) ● [Destination - Responder Bytes ](/kibana/app/kibana#/dashboard/77fc9960-3f99-11e9-a58e-8bdedb0915e8) ● [Source - Sum of Total Bytes ](/kibana/app/kibana#/dashboard/1ce42250-3f99-11e9-a58e-8bdedb0915e8) ● [Destination - Sum of Total Bytes ](/kibana/app/kibana#/dashboard/a16110b0-3f99-11e9-a58e-8bdedb0915e8) ● [Source - Top Connection Duration ](/kibana/app/kibana#/dashboard/39abfe30-3f99-11e9-a58e-8bdedb0915e8) ● [Destination - Top Connection Duration ](/kibana/app/kibana#/dashboard/b9f247c0-3f99-11e9-a58e-8bdedb0915e8)\",\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "visState": "{\"title\":\"Connections - Maps\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"markdown\":\"#### Coordinate Maps\\n[Source - Originator Bytes](/kibana/app/dashboards#/view/b50c8d17-6ed3-4de6-aed4-5181032810b2) ● [Destination - Responder Bytes](/kibana/app/dashboards#/view/d4fd6afd-15cb-42bf-8a25-03dd8e59b327) ● [Source - Sum of Total Bytes](/kibana/app/dashboards#/view/f394057d-1b16-4174-b994-7045f423a416) ● [Destination - Sum of Total Bytes](/kibana/app/dashboards#/view/60d78fbd-471c-4f59-a9e3-189b33a13644) ● [Source - Top Connection Duration](/kibana/app/dashboards#/view/e09a4b86-29b5-4256-bb3b-802ac9f90404) ● [Destination - Top Connection Duration](/kibana/app/dashboards#/view/0aed0e23-c8ac-4f2b-9f68-d04b6e7666b0)   \\n#### Region Maps\\n[Source - Originator Bytes ](/kibana/app/dashboards#/view/d41fe630-3f98-11e9-a58e-8bdedb0915e8) ● [Destination - Responder Bytes ](/kibana/app/dashboards#/view/77fc9960-3f99-11e9-a58e-8bdedb0915e8) ● [Source - Sum of Total Bytes ](/kibana/app/dashboards#/view/1ce42250-3f99-11e9-a58e-8bdedb0915e8) ● [Destination - Sum of Total Bytes ](/kibana/app/dashboards#/view/a16110b0-3f99-11e9-a58e-8bdedb0915e8) ● [Source - Top Connection Duration ](/kibana/app/dashboards#/view/39abfe30-3f99-11e9-a58e-8bdedb0915e8) ● [Destination - Top Connection Duration ](/kibana/app/dashboards#/view/b9f247c0-3f99-11e9-a58e-8bdedb0915e8)\",\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -144,14 +159,17 @@
       },
       "references": [],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
       "type": "search",
-      "updated_at": "2020-02-13T14:17:02.148Z",
-      "version": "Wzc2MCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:25:07.590Z",
+      "version": "Wzg1NiwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
         "description": "",
@@ -185,7 +203,7 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     }
   ]

@@ -1,21 +1,24 @@
 {
-  "version": "7.6.2",
+  "version": "7.10.0",
   "objects": [
     {
       "id": "2bec1490-eb94-11e9-a384-0fcf32210194",
       "type": "dashboard",
-      "updated_at": "2021-01-14T15:57:22.282Z",
-      "version": "WzY5NCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-11T14:45:42.395Z",
+      "version": "WzE2MDQsMV0=",
       "attributes": {
         "title": "BACnet",
         "hits": 0,
         "description": "Dashboard for the BACnet (Building Automation and Control Networks) Protocol",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":35,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":17,\"i\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\",\"w\":7,\"x\":8,\"y\":0},\"panelIndex\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":17,\"i\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\",\"w\":33,\"x\":15,\"y\":0},\"panelIndex\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\",\"w\":13,\"x\":8,\"y\":17},\"panelIndex\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\",\"w\":13,\"x\":21,\"y\":17},\"panelIndex\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"fd4e394a-eadf-4ec0-ac28-06e36a9891b2\",\"w\":14,\"x\":34,\"y\":17},\"panelIndex\":\"fd4e394a-eadf-4ec0-ac28-06e36a9891b2\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\",\"w\":11,\"x\":0,\"y\":35},\"panelIndex\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\",\"w\":11,\"x\":11,\"y\":35},\"panelIndex\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\",\"w\":26,\"x\":22,\"y\":35},\"panelIndex\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\",\"w\":25,\"x\":0,\"y\":53},\"panelIndex\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\",\"w\":23,\"x\":25,\"y\":53},\"panelIndex\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\",\"w\":48,\"x\":0,\"y\":71},\"panelIndex\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\",\"w\":48,\"x\":0,\"y\":89},\"panelIndex\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"a0050292-4d09-4c60-93cd-45f9516d1664\",\"w\":48,\"x\":0,\"y\":105},\"panelIndex\":\"a0050292-4d09-4c60-93cd-45f9516d1664\",\"version\":\"7.6.2\",\"panelRefName\":\"panel_13\"}]",
+        "panelsJSON": "[{\"version\":\"7.10.0\",\"gridData\":{\"h\":35,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":17,\"i\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\",\"w\":7,\"x\":8,\"y\":0},\"panelIndex\":\"f59d8cf5-80a3-48b9-be05-d6801203e9e4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":17,\"i\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\",\"w\":33,\"x\":15,\"y\":0},\"panelIndex\":\"bcc1cb9c-a8c4-4e3d-9d43-db85a009dd3a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\",\"w\":13,\"x\":8,\"y\":17},\"panelIndex\":\"1d52698a-869a-4b09-ae6a-0508a4d66c05\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\",\"w\":13,\"x\":21,\"y\":17},\"panelIndex\":\"7459b87c-93ee-44aa-b6c3-eb30948fee2a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"fd4e394a-eadf-4ec0-ac28-06e36a9891b2\",\"w\":14,\"x\":34,\"y\":17},\"panelIndex\":\"fd4e394a-eadf-4ec0-ac28-06e36a9891b2\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\",\"w\":11,\"x\":0,\"y\":35},\"panelIndex\":\"8ec8d974-809f-41c4-8039-6f738ee27e82\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\",\"w\":11,\"x\":11,\"y\":35},\"panelIndex\":\"62a15e29-78d4-4e05-a742-83ab72f69bef\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_7\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\",\"w\":26,\"x\":22,\"y\":35},\"panelIndex\":\"113b15fe-a59c-466a-b8cd-f3c7879b592c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\",\"w\":25,\"x\":0,\"y\":53},\"panelIndex\":\"2376eb03-4a0c-42cd-8adc-3f65cfb9eefd\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_9\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\",\"w\":23,\"x\":25,\"y\":53},\"panelIndex\":\"fb3d3f83-5b6b-4f0c-aad7-1182604cfa2a\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}},\"table\":null},\"panelRefName\":\"panel_10\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":18,\"i\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\",\"w\":48,\"x\":0,\"y\":71},\"panelIndex\":\"773ed96f-8933-4f9c-b52f-02fd2398b4bc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":16,\"i\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\",\"w\":48,\"x\":0,\"y\":89},\"panelIndex\":\"9ee45ae2-d182-4fac-9ac5-cae0aaabd552\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"7.10.0\",\"gridData\":{\"h\":15,\"i\":\"a0050292-4d09-4c60-93cd-45f9516d1664\",\"w\":48,\"x\":0,\"y\":105},\"panelIndex\":\"a0050292-4d09-4c60-93cd-45f9516d1664\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"}}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         }
       },
       "references": [
@@ -91,17 +94,20 @@
         }
       ],
       "migrationVersion": {
-        "dashboard": "7.3.0"
+        "dashboard": "7.9.3"
       }
     },
     {
       "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:37:03.752Z",
-      "version": "WzY3MywxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:25:09.616Z",
+      "version": "Wzg3MiwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
-        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/kibana#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/kibana#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/kibana#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/kibana#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/kibana#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/kibana#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/kibana#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/kibana#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/kibana#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/kibana#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/kibana#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/kibana#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/kibana#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/kibana#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/kibana#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/kibana#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/kibana#/dashboard/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/kibana#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/kibana#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/kibana#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/kibana#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/kibana#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/kibana#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/kibana#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/kibana#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/kibana#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/kibana#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/kibana#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/kibana#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/kibana#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/kibana#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/kibana#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/kibana#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/kibana#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/kibana#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/kibana#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/kibana#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/kibana#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/kibana#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/kibana#/dashboard/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/kibana#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/kibana#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/kibana#/dashboard/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/kibana#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/kibana#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/kibana#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/kibana#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/kibana#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/kibana#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Connections](/kibana/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherNet/IP](/kibana/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -111,14 +117,17 @@
       },
       "references": [],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "7fcb8b90-c7b7-11ea-8578-f3ff6bdd82b2",
       "type": "visualization",
-      "updated_at": "2021-01-14T16:38:28.425Z",
-      "version": "WzcyOSwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5MywxXQ==",
       "attributes": {
         "title": "BACnet - Log Count",
         "visState": "{\"title\":\"BACnet - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Log Count\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"zeek.logType\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
@@ -137,14 +146,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "0d0cbd30-c7b8-11ea-8578-f3ff6bdd82b2",
       "type": "visualization",
-      "updated_at": "2021-01-14T16:39:37.240Z",
-      "version": "WzczMSwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5NCwxXQ==",
       "attributes": {
         "title": "BACnet - Logs Over Time",
         "visState": "{\"title\":\"BACnet - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY\"}},\"params\":{\"date\":true,\"interval\":\"P365D\",\"intervalESValue\":365,\"intervalESUnit\":\"d\",\"format\":\"YYYY\",\"bounds\":{\"min\":\"1971-01-14T16:39:09.309Z\",\"max\":\"2021-01-14T16:39:09.309Z\"}},\"label\":\"firstPacket per 365 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Log Type\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-50y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"zeek.logType\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
@@ -163,14 +175,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "6eb9b2f0-c77b-11ea-8578-f3ff6bdd82b2",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE1NiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5NSwxXQ==",
       "attributes": {
         "title": "BACnet - BVLC Functions",
         "visState": "{\"title\":\"BACnet - BVLC Functions\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet.bvlc_function\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"BVLC Function\"}}]}",
@@ -190,14 +205,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "5cd45d10-c794-11ea-8578-f3ff6bdd82b2",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE1NywxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5NiwxXQ==",
       "attributes": {
         "title": "BACnet - Protocol Data Units (PDUs)",
         "visState": "{\"title\":\"BACnet - Protocol Data Units (PDUs)\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"PDU Service\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet.pdu_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Type\"}}]}",
@@ -217,14 +235,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "e548ad00-cab8-11ea-84cd-4f7b1f416f80",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE1OCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5NywxXQ==",
       "attributes": {
         "title": "BACnet - Errors",
         "visState": "{\"title\":\"BACnet - Errors\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"PDU Service\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet.result_code\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Result Code\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet.pdu_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Type\"}}]}",
@@ -244,14 +265,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "543975b0-cab3-11ea-84cd-4f7b1f416f80",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE2MSwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5OCwxXQ==",
       "attributes": {
         "title": "BACnet - Source IP",
         "visState": "{\"title\":\"BACnet - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}",
@@ -270,14 +294,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "98b559c0-cab3-11ea-84cd-4f7b1f416f80",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE2MiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzI5OSwxXQ==",
       "attributes": {
         "title": "BACnet - Destination IP",
         "visState": "{\"title\":\"BACnet - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source IP\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}}]}",
@@ -296,14 +323,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "1be7a440-dc0e-11ea-82b5-4506a254a95f",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:56:02.930Z",
-      "version": "WzY5MiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzMwMCwxXQ==",
       "attributes": {
         "title": "BACnet - Device Vendors",
         "visState": "{\"title\":\"BACnet - Device Vendors\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Unique count of zeek_bacnet_discovery.instance_number\",\"aggType\":\"cardinality\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Device Vendor\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"zeek_bacnet_discovery.instance_number\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek_bacnet_discovery.vendor\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Device Vendor\"}}]}",
@@ -323,14 +353,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "bfc334f0-ca05-11ea-8578-f3ff6bdd82b2",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE1OSwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzMwMSwxXQ==",
       "attributes": {
         "title": "BACnet  - Read and Write Property ",
         "visState": "{\"title\":\"BACnet  - Read and Write Property \",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":6,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":6,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Property Value\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_property.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_property.instance_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Identifier\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_property.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_property.property\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Property Type\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_property.value\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Property Value\"}}]}",
@@ -350,14 +383,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "cc0501c0-caab-11ea-84cd-4f7b1f416f80",
       "type": "visualization",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE2MCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzMwMiwxXQ==",
       "attributes": {
         "title": "BACnet - Device Discovery",
         "visState": "{\"title\":\"BACnet - Device Discovery\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":4,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Vendor\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_discovery.object_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Object Type\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_discovery.instance_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Identifier\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_discovery.pdu_service\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PDU Service\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_bacnet_discovery.vendor\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Vendor\"}}]}",
@@ -377,14 +413,17 @@
         }
       ],
       "migrationVersion": {
-        "visualization": "7.4.2"
+        "visualization": "7.10.0"
       }
     },
     {
       "id": "00294170-c77b-11ea-8578-f3ff6bdd82b2",
       "type": "search",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE2NCwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzMwMywxXQ==",
       "attributes": {
         "title": "BACnet - Logs",
         "description": "",
@@ -416,14 +455,17 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     },
     {
       "id": "ccfe3ca0-c77b-11ea-8578-f3ff6bdd82b2",
       "type": "search",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE2NSwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzMwNCwxXQ==",
       "attributes": {
         "title": "BACnet - Property Logs",
         "description": "",
@@ -456,14 +498,17 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     },
     {
       "id": "b5300770-c77b-11ea-8578-f3ff6bdd82b2",
       "type": "search",
-      "updated_at": "2021-01-14T15:36:15.796Z",
-      "version": "WzE2NiwxXQ==",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-02-10T21:24:19.112Z",
+      "version": "WzMwNSwxXQ==",
       "attributes": {
         "title": "BACnet - Discovery Logs",
         "description": "",
@@ -495,7 +540,7 @@
         }
       ],
       "migrationVersion": {
-        "search": "7.4.0"
+        "search": "7.9.3"
       }
     }
   ]

@@ -30,6 +30,8 @@ apt-get -y --purge remove bluez-firmware \
                           libcupsimage2 \
                           libgphoto2-6 \
                           libgphoto2-port12 \
+                          libx264* \
+                          libx265* \
                           lintian \
                           lxmusic \
                           mailutils \

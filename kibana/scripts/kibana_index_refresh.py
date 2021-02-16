@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-from __future__ import print_function
 
 import argparse
 import json
@@ -14,22 +12,13 @@ GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
 GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
 PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
+ES_GET_TEMPLATE_URI = '_template'
 
 ###################################################################################################
 debug = False
-PY3 = (sys.version_info.major >= 3)
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
-
-###################################################################################################
-if not PY3:
-  if hasattr(__builtins__, 'raw_input'): input = raw_input
-
-try:
-  FileNotFoundError
-except NameError:
-  FileNotFoundError = IOError
 
 ###################################################################################################
 # print to stderr
@@ -54,7 +43,9 @@ def main():
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
-  parser.add_argument('-k', '--kibana', dest='url', metavar='<protocol://host:port>', type=str, default='http://localhost:5601/kibana', help='Kibana URL')
+  parser.add_argument('-k', '--kibana', dest='kibanaUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('KIBANA_URL', 'http://kibana:5601/kibana'), help='Kibana URL')
+  parser.add_argument('-e', '--elastic', dest='elasticUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('ELASTICSEARCH_URL', 'http://elasticsearch:9200'), help='Elasticsearch URL')
+  parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
   try:
     parser.error = parser.exit
@@ -72,16 +63,22 @@ def main():
     sys.tracebacklimit = 0
 
   # get version number so kibana doesn't think we're doing a XSRF when we do the PUT
-  statusInfoResponse = requests.get('{}/{}'.format(args.url, GET_STATUS_API))
+  statusInfoResponse = requests.get('{}/{}'.format(args.kibanaUrl, GET_STATUS_API))
   statusInfoResponse.raise_for_status()
   statusInfo = statusInfoResponse.json()
   kibanaVersion = statusInfo['version']['number']
   if debug:
     eprint('Kibana version is {}'.format(kibanaVersion))
 
+  esInfoResponse = requests.get(args.elasticUrl)
+  esInfo = statusInfoResponse.json()
+  elasticVersion = statusInfo['version']['number']
+  if debug:
+    eprint('Elasticsearch version is {}'.format(elasticVersion))
+
   # find the ID of the index name (probably will be the same as the name)
   getIndexInfoResponse = requests.get(
-    '{}/{}'.format(args.url, GET_INDEX_PATTERN_INFO_URI),
+    '{}/{}'.format(args.kibanaUrl, GET_INDEX_PATTERN_INFO_URI),
     params={
       'type': 'index-pattern',
       'fields': 'id',
@@ -97,11 +94,57 @@ def main():
   if indexId is not None:
 
     # get the current fields list
-    getFieldsResponse = requests.get('{}/{}'.format(args.url, GET_FIELDS_URI),
+    getFieldsResponse = requests.get('{}/{}'.format(args.kibanaUrl, GET_FIELDS_URI),
                                      params={ 'pattern': args.index,
                                               'meta_fields': ["_source","_id","_type","_index","_score"] })
     getFieldsResponse.raise_for_status()
     getFieldsList = getFieldsResponse.json()['fields']
+    fieldsNames = [field['name'] for field in getFieldsList if 'name' in field]
+
+    # get the fields from the template, if specified, and merge those into the fields list
+    if args.template is not None:
+      try:
+
+        # request template from elasticsearch and pull the mappings/properties (field list) out
+        getTemplateResponse = requests.get('{}/{}/{}'.format(args.elasticUrl, ES_GET_TEMPLATE_URI, args.template))
+        getTemplateResponse.raise_for_status()
+        getTemplateInfo = getTemplateResponse.json()[args.template]['mappings']['properties']
+
+        # a field should be merged if it's not already in the list we have from kibana, and it's
+        # in the list of types we're merging (leave more complex types like nested and geolocation
+        # to be handled naturally as the data shows up)
+        for field in getTemplateInfo:
+          mergeFieldTypes = ("date", "float", "integer", "ip", "keyword", "long", "short", "text")
+          if ((field not in fieldsNames) and
+              ('type' in getTemplateInfo[field]) and
+              (getTemplateInfo[field]['type'] in mergeFieldTypes)):
+
+            # create field dict in same format as those returned by GET_FIELDS_URI above
+            mergedFieldInfo = {}
+            mergedFieldInfo['name'] = field
+            mergedFieldInfo['esTypes'] = [ getTemplateInfo[field]['type'] ]
+            if ((getTemplateInfo[field]['type'] == 'float') or
+                (getTemplateInfo[field]['type'] == 'integer') or
+                (getTemplateInfo[field]['type'] == 'long') or
+                (getTemplateInfo[field]['type'] == 'short')):
+              mergedFieldInfo['type'] = 'number'
+            elif ((getTemplateInfo[field]['type'] == 'keyword') or
+                  (getTemplateInfo[field]['type'] == 'text')):
+              mergedFieldInfo['type'] = 'string'
+            else:
+              mergedFieldInfo['type'] = getTemplateInfo[field]['type']
+            mergedFieldInfo['searchable'] = True
+            mergedFieldInfo['aggregatable'] = ("text" not in mergedFieldInfo['esTypes'])
+            mergedFieldInfo['readFromDocValues'] = mergedFieldInfo['aggregatable']
+            fieldsNames.append(field)
+            getFieldsList.append(mergedFieldInfo)
+
+          # elif debug:
+          #   eprint('Not merging {}: {}'.format(field, json.dumps(getTemplateInfo[field])))
+
+      except Exception as e:
+        eprint('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
+
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
@@ -228,7 +271,7 @@ def main():
     putIndexInfo['attributes']['fieldFormatMap'] = json.dumps(fieldFormatMap)
 
     if not args.dryrun:
-      putResponse = requests.put('{}/{}/{}'.format(args.url, PUT_INDEX_PATTERN_URI, indexId),
+      putResponse = requests.put('{}/{}/{}'.format(args.kibanaUrl, PUT_INDEX_PATTERN_URI, indexId),
                                  headers={ 'Content-Type': 'application/json',
                                            'kbn-xsrf': 'true',
                                            'kbn-version': kibanaVersion, },

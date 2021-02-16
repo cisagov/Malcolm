@@ -49,11 +49,25 @@ function get_latest_github_tagged_release() {
 # clone_github_repo
 #
 # clone the latest GitHub release tag if available (else, master/HEAD) under $SRC_BASE_DIR
+# release tag/branch can be overriden by specifying the branch name with after the URL delimited by a |
 #
 function clone_github_repo() {
-  REPO_URL="$1"
+  URL_PARAM="$1"
+  URL_BRANCH_DELIM='|'
+  URL_BRANCH_DELIM_COUNT="$(awk -F"${URL_BRANCH_DELIM}" '{print NF-1}' <<< "${URL_PARAM}")"
+  if (( $URL_BRANCH_DELIM_COUNT > 0 )); then
+    REPO_URL="$(echo "$URL_PARAM" | cut -d'|' -f1)"
+    BRANCH_OVERRIDE="$(echo "$URL_PARAM" | cut -d'|' -f2)"
+  else
+    REPO_URL="$URL_PARAM"
+    BRANCH_OVERRIDE=""
+  fi
   if [[ -n $REPO_URL ]]; then
-    REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
+    if [[ -n $BRANCH_OVERRIDE ]]; then
+      REPO_LATEST_RELEASE="$BRANCH_OVERRIDE"
+    else
+      REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
+    fi
     SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
     rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
@@ -67,23 +81,23 @@ function clone_github_repo() {
 
 # install Zeek packages that insatll nicely using zkg
 ZKG_GITHUB_URLS=(
-  https://github.com/0xl3x1/zeek-EternalSafety
-  https://github.com/0xxon/cve-2020-0601
-  https://github.com/0xxon/cve-2020-13777
-  https://github.com/amzn/zeek-plugin-profinet
-  https://github.com/amzn/zeek-plugin-s7comm
-  https://github.com/amzn/zeek-plugin-tds
-  https://github.com/corelight/callstranger-detector
-  https://github.com/corelight/CVE-2020-16898
-  https://github.com/corelight/ripple20
-  https://github.com/corelight/SIGRed
-  https://github.com/corelight/zerologon
-  https://github.com/cybera/zeek-sniffpass
-  https://github.com/mitre-attack/bzar
-  https://github.com/mmguero-dev/zeek-community-id
-  https://github.com/precurse/zeek-httpattacks
-  https://github.com/salesforce/hassh
-  https://github.com/salesforce/ja3
+  "https://github.com/0xl3x1/zeek-EternalSafety"
+  "https://github.com/0xxon/cve-2020-0601"
+  "https://github.com/0xxon/cve-2020-13777"
+  "https://github.com/amzn/zeek-plugin-profinet"
+  "https://github.com/amzn/zeek-plugin-s7comm"
+  "https://github.com/amzn/zeek-plugin-tds"
+  "https://github.com/corelight/callstranger-detector"
+  "https://github.com/corelight/CVE-2020-16898"
+  "https://github.com/corelight/ripple20"
+  "https://github.com/corelight/SIGRed"
+  "https://github.com/corelight/zerologon"
+  "https://github.com/cybera/zeek-sniffpass"
+  "https://github.com/mitre-attack/bzar"
+  "https://github.com/corelight/zeek-community-id|3.0.0"
+  "https://github.com/precurse/zeek-httpattacks"
+  "https://github.com/salesforce/hassh"
+  "https://github.com/salesforce/ja3"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -117,7 +131,7 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 MANUAL_BRO_GITHUB_URLS=(
-  https://github.com/corelight/bro-xor-exe-plugin
+  "https://github.com/corelight/bro-xor-exe-plugin|1.2"
 )
 for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -132,11 +146,11 @@ for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
 done
 
 MANUAL_ZEEK_GITHUB_URLS=(
-  https://github.com/cisagov/icsnpp-bacnet
-  https://github.com/cisagov/icsnpp-bsap-ip
-  https://github.com/cisagov/icsnpp-bsap-serial
-  https://github.com/cisagov/icsnpp-enip
-  https://github.com/mmguero-dev/ldap-analyzer
+  "https://github.com/cisagov/icsnpp-bacnet"
+  "https://github.com/cisagov/icsnpp-bsap-ip"
+  "https://github.com/cisagov/icsnpp-bsap-serial"
+  "https://github.com/cisagov/icsnpp-enip"
+  "https://github.com/mmguero-dev/ldap-analyzer"
 )
 for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -151,8 +165,8 @@ for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
 done
 
 ICSNPP_UPDATES_GITHUB_URLS=(
-  https://github.com/cisagov/icsnpp-dnp3
-  https://github.com/cisagov/icsnpp-modbus
+  "https://github.com/cisagov/icsnpp-dnp3"
+  "https://github.com/cisagov/icsnpp-modbus"
 )
 for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
