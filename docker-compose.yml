@@ -148,6 +148,7 @@ services:
       - IPC_LOCK
     volumes:
       - ./elasticsearch/elasticsearch.keystore:/usr/share/elasticsearch/config/elasticsearch.keystore:rw
+      - ./nginx/ca-trust:/usr/share/elasticsearch/ca-trust:ro
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
       - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
     healthcheck:
@@ -237,6 +238,7 @@ services:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
+      - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro

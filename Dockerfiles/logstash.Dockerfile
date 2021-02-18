@@ -73,6 +73,7 @@ RUN yum install -y epel-release && \
     rm -rf /opt/logstash-filter-ieee_oui /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
