@@ -23,12 +23,14 @@ ENV TERM xterm
 ARG GITHUB_OAUTH_TOKEN=""
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
+ENV JAVA_HOME=/usr/share/elasticsearch/jdk
 
 # Malcolm manages authentication and encryption via NGINX reverse proxy
 # https://opendistro.github.io/for-elasticsearch-docs/docs/security/configuration/disable/
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/docker/#customize-the-docker-image
 # https://github.com/opendistro-for-elasticsearch/opendistro-build/issues/613
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
+RUN yum install -y openssl && \
+  /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/elasticsearch/config/elasticsearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/elasticsearch/config/elasticsearch.yml && \
   sed -i "s/\b1000\b/\${PUID:-${DEFAULT_UID}}/g" /usr/local/bin/docker-entrypoint.sh && \

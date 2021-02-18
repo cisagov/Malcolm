@@ -38,8 +38,8 @@ find "$TRUSTED_CA_DIR" -type f -print0 | while read -d $'\0' CRT_FILE; do
   CRT_FILE_BASE="$(basename "$CRT_FILE" | sed 's/\.[^.]*$//')"
   if [[ -n $CRT_FILE_BASE ]] && [[ "$CRT_FILE_BASE" != \.* ]] ; then
     echo "Importing \"$CRT_FILE_BASE\"... "
-    ( "$KEYTOOL_BIN" -cacerts -importcert -file "$CRT_FILE" -alias "$CRT_FILE_BASE" -keypass changeit -storepass changeit -noprompt 2>&1 | grep -Pv "(already exists)" ) || true
-    "$KEYTOOL_BIN" -cacerts -list -alias "$CRT_FILE_BASE" -keypass changeit -storepass changeit -noprompt
+    ( "$KEYTOOL_BIN" -importcert -cacerts -trustcacerts -file "$CRT_FILE" -alias "$CRT_FILE_BASE" -keypass changeit -storepass changeit -noprompt 2>&1 | grep -Pv "(already exists)" ) || true
+    "$KEYTOOL_BIN" -list -cacerts -alias "$CRT_FILE_BASE" -keypass changeit -storepass changeit -noprompt
     echo
   fi
 done
