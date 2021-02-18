@@ -1,4 +1,4 @@
-FROM amazon/opendistro-for-elasticsearch-kibana:1.12.0
+FROM amazon/opendistro-for-elasticsearch-kibana:1.13.0
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -80,9 +80,7 @@ RUN yum install -y epel-release && \
       yum clean all && \
       usermod -a -G tty ${PUSER} && \
       # Malcolm manages authentication and encryption via NGINX reverse proxy
-      /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root && \
-      # https://github.com/opendistro-for-elasticsearch/kibana-reports/issues/259
-      /usr/share/kibana/bin/kibana-plugin remove opendistroReportsKibana --allow-root
+      /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root
 
 ADD kibana/kibana.yml /usr/share/kibana/config/kibana.yml
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

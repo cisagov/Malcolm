@@ -1,4 +1,4 @@
-FROM amazon/opendistro-for-elasticsearch:1.12.0
+FROM amazon/opendistro-for-elasticsearch:1.13.0
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -29,7 +29,6 @@ ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/docker/#customize-the-docker-image
 # https://github.com/opendistro-for-elasticsearch/opendistro-build/issues/613
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
-    /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_performance_analyzer && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/elasticsearch/config/elasticsearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/elasticsearch/config/elasticsearch.yml && \
   sed -i "s/\b1000\b/\${PUID:-${DEFAULT_UID}}/g" /usr/local/bin/docker-entrypoint.sh && \
