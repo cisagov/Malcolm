@@ -58,6 +58,8 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
         # need to generate index management file based on environment variables
         /data/elastic_index_policy_create.py \
           --policy "$INDEX_POLICY_NAME" \
+          --index-pattern "$INDEX_PATTERN" \
+          --priority 100 \
           --snapshot ${ISM_SNAPSHOT_AGE:-"0"} \
           --cold ${ISM_COLD_AGE:-"0"} \
           --close ${ISM_CLOSE_AGE:-"0"} \
