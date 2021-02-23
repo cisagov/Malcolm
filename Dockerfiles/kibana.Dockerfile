@@ -75,8 +75,12 @@ USER root
 
 RUN yum install -y epel-release && \
       yum update -y && \
-      yum install -y curl git npm patch psmisc zip unzip && \
+      yum install -y curl git patch psmisc zip unzip && \
       yum clean all && \
+      curl --silent --location https://rpm.nodesource.com/setup_10.x | bash - && \
+      curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo && \
+      rpm --import https://dl.yarnpkg.com/rpm/pubkey.gpg && \
+      yum install -y yarn nodejs && \
       usermod -a -G tty ${PUSER} && \
       # Malcolm manages authentication and encryption via NGINX reverse proxy
       /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root
