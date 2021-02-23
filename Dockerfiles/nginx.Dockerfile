@@ -33,12 +33,14 @@ RUN set -x ; \
 
 USER ${PUSER}
 
+# todo: when aports updates stunnel to 5.58, this will need to be updated
+
 RUN set -x ; \
     cd /apkbuild ; \
     tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
     cp /usr/src/patches/stunnel-5.56-open-ldap.patch /apkbuild/aports-master/community/stunnel/ ; \
     cd /apkbuild/aports-master/community/stunnel ; \
-    sed -i 's/5\.57/5.58/g' APKBUILD ; \
+    sed -i 's@https://www.stunnel.org/downloads/stunnel.*gz@ftp://ftp.stunnel.org/stunnel/archive/5.x/stunnel-5.57.tar.gz@' APKBUILD ; \
     sed -i 's/\(^makedepends="\)/\1patchutils /' APKBUILD ; \
     sed -i '/^source=/a \ \ \ \ \ \ \ \ stunnel-5.56-open-ldap.patch' APKBUILD ; \
     sed -i '/^sha512sums/,$d' APKBUILD ; \
