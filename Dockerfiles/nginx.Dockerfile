@@ -38,7 +38,7 @@ RUN set -x ; \
     tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
     cp /usr/src/patches/stunnel-5.56-open-ldap.patch /apkbuild/aports-master/community/stunnel/ ; \
     cd /apkbuild/aports-master/community/stunnel ; \
-    sed -i 's/5\.57/5.58/' APKBUILD ; \
+    sed -i 's/5\.57/5.58/g' APKBUILD ; \
     sed -i 's/\(^makedepends="\)/\1patchutils /' APKBUILD ; \
     sed -i '/^source=/a \ \ \ \ \ \ \ \ stunnel-5.56-open-ldap.patch' APKBUILD ; \
     sed -i '/^sha512sums/,$d' APKBUILD ; \
