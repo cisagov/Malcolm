@@ -57,33 +57,24 @@ USER root
 # cd /tmp && \
 #     rm -rf /tmp/npm-*
 
-# curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/mmguero-dev/kbn_sankey_vis/zip/feature/update_7.10.1" && \
-# cd /tmp && \
-#   echo "Installing Sankey visualization..." && \
-#   unzip /tmp/kibana-sankey.zip && \
-#   mkdir ./kibana &&\
-#   mv ./kbn_sankey_vis-* ./kibana/sankey_vis && \
-#   cd ./kibana/sankey_vis && \
-#   sed -i "s/7\.10\.2/7\.10\.2/g" ./package.json && \
-#   sed -i "s/7\.10\.2/7\.10\.2/g" ./kibana.json && \
-#   npm install --production && \
-#   cd /tmp && \
-#   zip -r sankey_vis.zip kibana --exclude ./kibana/sankey_vis/.git\* && \
-#   cd /usr/share/kibana/plugins && \
-#   /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
-#   rm -rf /tmp/kibana /tmp/*sankey*
-
 RUN yum install -y epel-release && \
-      yum update -y && \
-      yum install -y curl git patch psmisc zip unzip && \
-      yum clean all && \
-      curl --silent --location https://rpm.nodesource.com/setup_10.x | bash - && \
-      curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo && \
-      rpm --import https://dl.yarnpkg.com/rpm/pubkey.gpg && \
-      yum install -y yarn nodejs && \
-      usermod -a -G tty ${PUSER} && \
-      # Malcolm manages authentication and encryption via NGINX reverse proxy
-      /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root
+    yum update -y && \
+    yum install -y curl git patch psmisc zip unzip && \
+    yum clean all && \
+    curl --silent --location https://rpm.nodesource.com/setup_10.x | bash - && \
+    curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo && \
+    rpm --import https://dl.yarnpkg.com/rpm/pubkey.gpg && \
+    yum install -y yarn nodejs gcc-c++ make && \
+    usermod -a -G tty ${PUSER} && \
+    # Malcolm manages authentication and encryption via NGINX reverse proxy
+    /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root && \
+    mkdir -p /usr/local/src && \
+      git clone --single-branch --recursive --depth=1 --branch=feature/update_7.10.1 https://github.com/mmguero-dev/kbn_sankey_vis.git /usr/share/kibana/plugins/sankey_vis && \
+      cd /usr/share/kibana/plugins/sankey_vis && \
+      yarn install
+# https://github.com/uniberg/kbn_sankey_vis/issues/15
+# https://github.com/uniberg/kbn_sankey_vis/tree/feature/update_7.10.1
+# && yarn build --kibana-version 7.10.2
 
 ADD kibana/kibana.yml /usr/share/kibana/config/kibana.yml
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
