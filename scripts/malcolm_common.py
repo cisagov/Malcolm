@@ -270,7 +270,7 @@ def ImportRequests(debug=False):
       elif Which('dnf', debug=debug):
         eprint("You *may* be able to install requests manually via: sudo dnf install python3-requests")
       elif Which('yum', debug=debug):
-        eprint("You *may* be able to install requests manually via: sudo yum install python-requests")
+        eprint('You *may* be able to install pip and requests manually via: sudo sh -c "yum install python3-pip && python3 -m pip install requests"')
 
   return RequestsImported
 

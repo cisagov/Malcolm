@@ -16,9 +16,18 @@ import stat
 import sys
 
 from malcolm_common import *
-from contextlib import nullcontext
 from collections import defaultdict, namedtuple
 from subprocess import (PIPE, STDOUT, Popen, check_call, CalledProcessError)
+try:
+  from contextlib import nullcontext
+except ImportError:
+  class nullcontext(object):
+    def __init__(self, enter_result=None):
+      self.enter_result = enter_result
+    def __enter__(self):
+      return self.enter_result
+    def __exit__(self, *args):
+      pass
 
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
