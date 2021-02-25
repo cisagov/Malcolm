@@ -115,14 +115,14 @@ if [ -d "$WORKDIR" ]; then
   fi
 
   # write out some version stuff specific to this installation version
-  echo "BUILD_ID=$(date +'%Y-%m-%d')-${IMAGE_VERSION}"               > ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT=Hedgehog Linux Sensor v${IMAGE_VERSION}"            >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT_ID=hedgehog-sensor"                                 >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "ID_LIKE=debian"                                             >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "HOME_URL=https://malcolm.fyi"                               >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "DOCUMENTATION_URL=https://malcolm.fyi/hedgehog/"            >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "SUPPORT_URL=https://github.com/idaholab"                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=https://github.com/idaholab/malcolm/issues"  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""               > ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""          >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT_ID=\"hedgehog-sensor\""                                 >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "ID_LIKE=\"debian\""                                             >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "HOME_URL=\"https://malcolm.fyi\""                               >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""            >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=\"https://github.com/idaholab\""                    >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/moloch/etc"
