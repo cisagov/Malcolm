@@ -116,7 +116,7 @@ if [ -d "$WORKDIR" ]; then
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=$(date +'%Y-%m-%d')-${IMAGE_VERSION}"               > ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT=Hedgehog Linux (Sensor) v${IMAGE_VERSION}"          >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT=Hedgehog Linux Sensor v${IMAGE_VERSION}"            >> ./config/includes.chroot/opt/sensor/.os-info
   echo "VARIANT_ID=hedgehog-sensor"                                 >> ./config/includes.chroot/opt/sensor/.os-info
   echo "ID_LIKE=debian"                                             >> ./config/includes.chroot/opt/sensor/.os-info
   echo "HOME_URL=https://malcolm.fyi"                               >> ./config/includes.chroot/opt/sensor/.os-info

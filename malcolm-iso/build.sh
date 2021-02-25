@@ -141,7 +141,7 @@ if [ -d "$WORKDIR" ]; then
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=$(date +'%Y-%m-%d')-${IMAGE_VERSION}"               > "$MALCOLM_DEST_DIR"/.os-info
-  echo "VARIANT=Hedgehog Linux (Malcolm) v${IMAGE_VERSION}"         >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "VARIANT=Hedgehog Linux Malcolm v${IMAGE_VERSION}"           >> "$MALCOLM_DEST_DIR"/.os-info
   echo "VARIANT_ID=hedgehog-malcolm"                                >> "$MALCOLM_DEST_DIR"/.os-info
   echo "ID_LIKE=debian"                                             >> "$MALCOLM_DEST_DIR"/.os-info
   echo "HOME_URL=https://malcolm.fyi"                               >> "$MALCOLM_DEST_DIR"/.os-info
