@@ -79,7 +79,7 @@ if [ -d "$WORKDIR" ]; then
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
   echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.9=$(dpkg -s linux-kbuild-5.9 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-kbuild-5.10=$(dpkg -s linux-kbuild-5.10 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
@@ -113,6 +113,16 @@ if [ -d "$WORKDIR" ]; then
     SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
     [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
   fi
+
+  # write out some version stuff specific to this installation version
+  echo "BUILD_ID=$(date +'%Y-%m-%d')-${IMAGE_VERSION}"               > ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT=Hedgehog Linux (Sensor) v${IMAGE_VERSION}"          >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT_ID=hedgehog-sensor"                                 >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "ID_LIKE=debian"                                             >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "HOME_URL=https://malcolm.fyi"                               >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "DOCUMENTATION_URL=https://malcolm.fyi/hedgehog/"            >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=https://github.com/idaholab"                    >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=https://github.com/idaholab/malcolm/issues"  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/moloch/etc"

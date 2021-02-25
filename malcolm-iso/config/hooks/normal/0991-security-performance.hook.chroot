@@ -156,7 +156,16 @@ systemctl disable htpdate || true
 sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
 sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 
-# remove identifying operating system information
+# remove identifying operating system information from /etc/issue
 truncate -s 0 /etc/motd
 sed -i "s/Debian/Hedgehog/g" /etc/issue
 sed -i "s/Debian/Hedgehog/g" /etc/issue.net
+
+# set up /etc/os-release information (override values in /etc/os-release with custom values)
+if [[ -f /etc/skel/Malcolm/.os-info ]]; then
+  awk '
+    BEGIN {FS = OFS = "="}
+    {v1[$1] = $2}
+    END {for (key in v1) {print key, v1[key]}}
+  ' /etc/os-release /etc/skel/Malcolm/.os-info | sort | sponge /etc/os-release
+fi

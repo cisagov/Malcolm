@@ -22,6 +22,7 @@ from subprocess import (PIPE, STDOUT, Popen, CalledProcessError)
 ###################################################################################################
 ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
+MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 
 ###################################################################################################
 
