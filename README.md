@@ -170,7 +170,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 
 * Arkime: [https://localhost:443](https://localhost:443)
 * Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
-* Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/) or [https://localhost:8443](https://localhost:8443)
+* Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
 * [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
 * Account Management: [https://localhost:488](https://localhost:488)

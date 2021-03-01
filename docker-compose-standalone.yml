@@ -428,7 +428,7 @@ services:
     expose:
       - 80
     ports:
-      - 127.0.0.1:8022:22
+      - "127.0.0.1:8022:22"
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
     healthcheck:
@@ -519,9 +519,7 @@ services:
       - "443:443"
       - "488:488"
       - "5601:5601"
-      - "8443:8443"
-      - "9200:9200"
-      - "9600:9600"
+      # - "0.0.0.0:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro

@@ -23,7 +23,6 @@ UFW_ALLOW_RULES=(
   ssh
   5044
   5601/tcp
-  8443/tcp
   9200/tcp
 )
 for i in ${UFW_ALLOW_RULES[@]}; do
