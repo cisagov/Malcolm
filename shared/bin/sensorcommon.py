@@ -131,7 +131,7 @@ def text_from_html(body):
 
 ###################################################################################################
 # test a connection to an HTTP/HTTPS server
-def test_connection(protocol="http", host="127.0.0.1", port=80, uri="", username=None, password=None, ssl_verify="full"):
+def test_connection(protocol="http", host="127.0.0.1", port=80, uri="", username=None, password=None, ssl_verify="full", user_agent="hedgehog"):
   status = 400
   message = "Connection error"
   output = []
@@ -149,9 +149,9 @@ def test_connection(protocol="http", host="127.0.0.1", port=80, uri="", username
   if c:
     try:
       if username and password:
-        c.request('GET', f'/{uri}', headers={ 'Authorization' : 'Basic %s' %  b64encode(f"{username}:{password}".encode()).decode("ascii") })
+        c.request('GET', f'/{uri}', headers={ 'User-agent': user_agent, 'Authorization' : 'Basic %s' %  b64encode(f"{username}:{password}".encode()).decode("ascii") })
       else:
-        c.request('GET', f'/{uri}')
+        c.request('GET', f'/{uri}', headers={ 'User-agent': user_agent })
       res = c.getresponse()
       status = res.status
       message = res.reason
