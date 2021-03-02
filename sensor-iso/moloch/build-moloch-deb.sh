@@ -29,6 +29,10 @@ rm -f "moloch.tar.gz"
 mv "./arkime-"$ARKIME_VERSION "./moloch-"$ARKIME_VERSION || true
 cd "./moloch-"$ARKIME_VERSION
 
+for i in /moloch-src-patch/*; do
+  patch -p 1 -r - --no-backup-if-mismatch < $i || true
+done
+
 export PATH="$ARKIMEDIR/bin:/tmp/moloch-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
 ./easybutton-build.sh --dir "$ARKIMEDIR"

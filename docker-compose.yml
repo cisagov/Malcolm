@@ -121,7 +121,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-od:3.0.0
+    image: malcolmnetsec/elasticsearch-od:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -148,6 +148,7 @@ services:
       - IPC_LOCK
     volumes:
       - ./elasticsearch/elasticsearch.keystore:/usr/share/elasticsearch/config/elasticsearch.keystore:rw
+      - ./nginx/ca-trust:/usr/share/elasticsearch/ca-trust:ro
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
       - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
     healthcheck:
@@ -160,7 +161,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana-helper.Dockerfile
-    image: malcolmnetsec/kibana-helper:3.0.0
+    image: malcolmnetsec/kibana-helper:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -191,7 +192,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-od:3.0.0
+    image: malcolmnetsec/kibana-od:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -215,7 +216,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:3.0.0
+    image: malcolmnetsec/logstash-oss:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -237,6 +238,7 @@ services:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
+      - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
@@ -253,7 +255,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:3.0.0
+    image: malcolmnetsec/filebeat-oss:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -294,7 +296,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:3.0.0
+    image: malcolmnetsec/arkime:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -339,7 +341,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:3.0.0
+    image: malcolmnetsec/zeek:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -369,7 +371,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:3.0.0
+    image: malcolmnetsec/file-monitor:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -395,7 +397,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:3.0.0
+    image: malcolmnetsec/pcap-capture:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -424,7 +426,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:3.0.0
+    image: malcolmnetsec/pcap-monitor:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -450,7 +452,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:3.0.0
+    image: malcolmnetsec/file-upload:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -466,7 +468,7 @@ services:
     expose:
       - 80
     ports:
-      - 127.0.0.1:8022:22
+      - "127.0.0.1:8022:22"
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
     healthcheck:
@@ -476,7 +478,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:3.0.0
+    image: malcolmnetsec/htadmin:3.0.1
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -501,7 +503,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:3.0.0
+    image: malcolmnetsec/freq:3.0.1
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -522,7 +524,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:3.0.0
+    image: malcolmnetsec/name-map-ui:3.0.1
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -549,7 +551,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:3.0.0
+    image: malcolmnetsec/nginx-proxy:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -569,9 +571,7 @@ services:
       - "443:443"
       - "488:488"
       - "5601:5601"
-      - "8443:8443"
-      - "9200:9200"
-      - "9600:9600"
+      # - "0.0.0.0:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro

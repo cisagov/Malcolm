@@ -70,6 +70,10 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
   # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
   dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
+  # docker-compose use local temporary path
+  osEnv = os.environ.copy()
+  osEnv['TMPDIR'] = MalcolmTmpPath
+
   # open up the docker-compose file and "grep" for the line where the keystore file
   # is bind-mounted into the service container (once and only once). the bind
   # mount needs to exist in the YML file and the local directory containing the
@@ -99,7 +103,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
       dockerCmd = None
 
       # determine if Malcolm is running; if so, we'll use docker-compose exec, other wise we'll use docker run
-      err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps', '-q', service], debug=args.debug)
+      err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps', '-q', service], env=osEnv, debug=args.debug)
       out[:] = [x for x in out if x]
       if (err == 0) and (len(out) > 0):
         # Malcolm is running, we can use an existing container
@@ -183,7 +187,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         dockerCmd[:] = [x for x in dockerCmd if x]
 
         # execute the command, passing through run_process_kwargs to run_process as expanded keyword arguments
-        err, results = run_process(dockerCmd, debug=args.debug, **run_process_kwargs)
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, **run_process_kwargs)
         if (err != 0) or (not os.path.isfile(localKeystore)):
           raise Exception(f'Error processing command {service} keystore: {results}')
 
@@ -215,7 +219,11 @@ def status():
   global args
   global dockerComposeBin
 
-  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], debug=args.debug)
+  # docker-compose use local temporary path
+  osEnv = os.environ.copy()
+  osEnv['TMPDIR'] = MalcolmTmpPath
+
+  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], env=osEnv, debug=args.debug)
   if (err == 0):
     print("\n".join(out))
   else:
@@ -259,12 +267,14 @@ def logs():
 
   serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
 
-  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], debug=args.debug)
-  print("\n".join(out))
-
   # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
   osEnv = os.environ.copy()
   osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
+  # docker-compose use local temporary path
+  osEnv['TMPDIR'] = MalcolmTmpPath
+
+  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], env=osEnv, debug=args.debug)
+  print("\n".join(out))
 
   process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], env=osEnv, stdout=PIPE)
   while True:
@@ -345,13 +355,17 @@ def stop(wipe=False):
   global dockerBin
   global dockerComposeBin
 
+  # docker-compose use local temporary path
+  osEnv = os.environ.copy()
+  osEnv['TMPDIR'] = MalcolmTmpPath
+
   if wipe:
     # attempt to DELETE _template/zeek_template in Elasticsearch
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$ES_PORT/_template/zeek_template"'], debug=args.debug)
+    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$ES_PORT/_template/zeek_template"'], env=osEnv, debug=args.debug)
 
   # if stop.sh is being called with wipe.sh (after the docker-compose file)
   # then also remove named and anonymous volumes (not external volumes, of course)
-  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'down', '--volumes'][:5 if wipe else -1], debug=args.debug)
+  err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'down', '--volumes'][:5 if wipe else -1], env=osEnv, debug=args.debug)
   if (err == 0):
     eprint("Stopped Malcolm\n")
   else:
@@ -433,6 +447,8 @@ def start():
   # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
   osEnv = os.environ.copy()
   osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
+  # docker-compose use local temporary path
+  osEnv['TMPDIR'] = MalcolmTmpPath
 
   # start docker
   err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
@@ -709,7 +725,6 @@ def authSetup(wipe=False):
       eprint("Failed to store external Elasticsearch instance variables:\n")
       eprint("\n".join(results))
 
-
   # Open Distro for Elasticsearch authenticate sender account credentials
   # https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account
   if YesOrNo('Store username/password for email alert sender account (see https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account)', default=False):
@@ -786,13 +801,26 @@ def main():
     if (pyPlatform != PLATFORM_WINDOWS) and ((os.getuid() == 0) or (os.geteuid() == 0) or (getpass.getuser() == 'root')):
       raise Exception(f'{ScriptName} should not be run as root')
 
+    # create local temporary directory for docker-compose because we may have noexec on /tmp
+    try:
+      os.makedirs(MalcolmTmpPath)
+    except OSError as exc:
+      if (exc.errno == errno.EEXIST) and os.path.isdir(MalcolmTmpPath):
+        pass
+      else:
+        raise
+
+    # docker-compose use local temporary path
+    osEnv = os.environ.copy()
+    osEnv['TMPDIR'] = MalcolmTmpPath
+
     # make sure docker/docker-compose is available
     dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker.exe')) else 'docker'
     dockerComposeBin = 'docker-compose.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker-compose.exe')) else 'docker-compose'
     err, out = run_process([dockerBin, 'info'], debug=args.debug)
     if (err != 0):
       raise Exception(f'{ScriptName} requires docker, please run install.py')
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], debug=args.debug)
+    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], env=osEnv, debug=args.debug)
     if (err != 0):
       raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
 

@@ -120,7 +120,7 @@ if [[ -d "$SRC_DIR" ]]; then
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin|2.1.2")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \

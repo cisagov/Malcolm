@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2018 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 echo Target version: $BEATS_VERSION
 

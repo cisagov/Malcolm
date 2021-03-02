@@ -22,14 +22,14 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
       curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
       /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
-FROM docker.elastic.co/logstash/logstash-oss:7.10.0
+FROM docker.elastic.co/logstash/logstash-oss:7.10.2
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
-LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/master/README.md'
-LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/logstash-oss'
 LABEL org.opencontainers.image.description='Malcolm container providing Logstash (the Apache-licensed variant)'
 
@@ -54,6 +54,7 @@ ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_ELASTICSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_ELASTICSEARCH_OUTPUT_PIPELINE_ADDRESSES
+ENV JAVA_HOME=/usr/share/logstash/jdk
 
 USER root
 
@@ -61,7 +62,7 @@ COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y curl gettext python-setuptools python-pip python-requests python-yaml && \
+    yum install -y curl gettext python-setuptools python-pip python-requests python-yaml openssl && \
     yum clean all && \
     pip install py2-ipaddress supervisor && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
@@ -73,6 +74,7 @@ RUN yum install -y epel-release && \
     rm -rf /opt/logstash-filter-ieee_oui /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/

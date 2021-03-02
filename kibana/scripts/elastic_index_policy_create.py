@@ -9,6 +9,7 @@ import sys
 import time
 
 TEMPLATE_POLICY_ID_DEFAULT = 'session_index_policy'
+INDEX_PATTERN_DEFAULT = 'sessions2-*'
 TEMPLATE_SCHEMA_VERSION_DEFAULT = 1
 POLICY_STATE_HOT = 'hot'
 POLICY_STATE_SNAPSHOT = 'recent'
@@ -47,6 +48,8 @@ def main():
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('--policy', dest='policyId', metavar='<str>', type=str, default=TEMPLATE_POLICY_ID_DEFAULT, help='Index management policy ID')
+  parser.add_argument('--index-pattern', dest='indexPattern', metavar='<str>', type=str, default=os.getenv('ARKIME_INDEX_PATTERN', INDEX_PATTERN_DEFAULT), help='Index management policy index pattern (comma-separated)')
+  parser.add_argument('--priority', dest='templatePriority', metavar='<int>', type=int, default=100, help='Template priority')
   parser.add_argument('--version', dest='schemaVersion', metavar='<int>', type=int, default=TEMPLATE_SCHEMA_VERSION_DEFAULT, help='Index management policy template schema version')
   parser.add_argument('--replicas', dest='hotReplicaCount', metavar='<int>', type=int, default=POLICY_STATE_HOT_REPLICAS, help='Replica count for hot state')
   parser.add_argument('--snapshot', dest='snapshotAge', metavar='<str>', type=str, default='1d', help='Snapshot index age (e.g., 1d); 0 to disable')
@@ -136,6 +139,8 @@ def main():
   states[len(states)-1]['transitions'] = []
 
   policyDict['states'] = states
+  policyDict['ism_template'] = { 'index_patterns' : [x.strip() for x in args.indexPattern.split(',')],
+                                 'priority' : args.templatePriority }
   policy = dict()
   policy['policy'] = policyDict
   print(json.dumps(policy))

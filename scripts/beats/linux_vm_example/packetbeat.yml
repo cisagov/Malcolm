@@ -78,7 +78,6 @@ packetbeat.protocols:
     - 993   # IMAPS
     - 995   # POP3S
     - 5223  # XMPP over SSL
-    - 8443
     - 8883  # Secure MQTT
     - 9243  # Elasticsearch
 
