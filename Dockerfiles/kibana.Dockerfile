@@ -1,6 +1,72 @@
-FROM amazon/opendistro-for-elasticsearch-kibana:1.12.0
+FROM centos:7 AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+
+# set up build environment for kibana plugins built from source
+
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "kibana"
+ENV PGROUP "kibana"
+
+ENV TERM xterm
+
+ARG ELASTIC_VERSION="7.10.2"
+ENV ELASTIC_VERSION $ELASTIC_VERSION
+
+# base system dependencies for checking out and building elastic/kibana-based plugins
+
+USER root
+
+RUN yum install -y epel-release && \
+    yum update -y && \
+    yum install -y curl patch psmisc zip unzip gcc-c++ make && \
+    yum install -y https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm && \
+    yum install -y git && \
+    yum clean all && \
+    groupadd -g ${DEFAULT_GID} ${PGROUP} && \
+    adduser -u ${DEFAULT_UID} -d /home/kibana -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
+    mkdir -p /usr/share && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "v${ELASTIC_VERSION}" https://github.com/elastic/elasticsearch /usr/share/elastic && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "v${ELASTIC_VERSION}" https://github.com/elastic/kibana /usr/share/kibana && \
+    chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/kibana /usr/share/elastic
+
+# build plugins as non-root
+
+USER ${PUSER}
+
+# use nodenv (https://github.com/nodenv/nodenv) to manage nodejs/yarn
+
+ENV PATH "/home/kibana/.nodenv/bin:${PATH}"
+
+RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodules https://github.com/nodenv/nodenv.git /home/kibana/.nodenv && \
+    cd /home/kibana/.nodenv && \
+    ./src/configure && \
+    make -C src && \
+    cd /tmp && \
+    eval "$(nodenv init -)" && \
+    mkdir -p "$(nodenv root)"/plugins && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/nodenv/node-build.git "$(nodenv root)"/plugins/node-build && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/nodenv/nodenv-update.git "$(nodenv root)"/plugins/nodenv-update && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/pine/nodenv-yarn-install.git "$(nodenv root)"/plugins/nodenv-yarn-install && \
+    nodenv install "$(cat /usr/share/kibana/.node-version)" && \
+    nodenv global "$(cat /usr/share/kibana/.node-version)"
+
+# check out and build plugins
+
+RUN eval "$(nodenv init -)" && \
+    mkdir -p /usr/share/kibana/plugins && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch feature/update_7.10.1 https://github.com/mmguero-dev/kbn_sankey_vis.git /usr/share/kibana/plugins/sankey_vis && \
+    cd /usr/share/kibana/plugins/sankey_vis && \
+    yarn kbn bootstrap && \
+    yarn install && \
+    yarn build --kibana-version "${ELASTIC_VERSION}" && \
+    mv ./build/kbnSankeyVis-7.10.2.zip ./build/kbnSankeyVis.zip
+
+FROM amazon/opendistro-for-elasticsearch-kibana:1.13.0
+
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -40,23 +106,6 @@ ENV KIBANA_DEFAULT_DASHBOARD $KIBANA_DEFAULT_DASHBOARD
 
 USER root
 
-# TODO:
-# see https://github.com/uniberg/kbn_sankey_vis/issues/15#issuecomment-720700879
-# curl -sSL -o /tmp/kibana-sankey.zip "https://codeload.github.com/mmguero-dev/kbn_sankey_vis/zip/master" && \
-# cd /tmp && \
-#   echo "Installing Sankey visualization..." && \
-#   unzip /tmp/kibana-sankey.zip && \
-#   mkdir ./kibana &&\
-#   mv ./kbn_sankey_vis-* ./kibana/sankey_vis && \
-#   cd ./kibana/sankey_vis && \
-#   sed -i "s/7\.6\.3/7\.10\.0/g" ./package.json && \
-#   npm install && \
-#   cd /tmp && \
-#   zip -r sankey_vis.zip kibana --exclude ./kibana/sankey_vis/.git\* && \
-#   cd /usr/share/kibana/plugins && \
-#   /usr/share/kibana/bin/kibana-plugin install file:///tmp/sankey_vis.zip --allow-root && \
-#   rm -rf /tmp/kibana /tmp/*sankey* && \
-
 # curl -sSL -o /tmp/kibana-drilldown.zip "https://codeload.github.com/mmguero-dev/kibana-plugin-drilldownmenu/zip/master" && \
 # cd /tmp && \
 #   echo "Installing Drilldown menu plugin..." && \
@@ -74,15 +123,24 @@ USER root
 # cd /tmp && \
 #     rm -rf /tmp/npm-*
 
-RUN yum install -y epel-release && \
-      yum update -y && \
-      yum install -y curl git npm patch psmisc zip unzip && \
-      yum clean all && \
-      usermod -a -G tty ${PUSER} && \
-      # Malcolm manages authentication and encryption via NGINX reverse proxy
-      /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root && \
-      # https://github.com/opendistro-for-elasticsearch/kibana-reports/issues/259
-      /usr/share/kibana/bin/kibana-plugin remove opendistroReportsKibana --allow-root
+COPY --from=build /usr/share/kibana/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
+ADD "https://github.com/dlumbrer/kbn_network/releases/download/7.10.0-1/kbn_network-7.10.0.zip" /tmp/kibana-network.zip
+
+RUN yum install -y curl psmisc zip unzip && \
+    yum clean all && \
+    usermod -a -G tty ${PUSER} && \
+    # Malcolm manages authentication and encryption via NGINX reverse proxy
+    /usr/share/kibana/bin/kibana-plugin remove opendistroSecurityKibana --allow-root && \
+    cd /usr/share/kibana/plugins && \
+      /usr/share/kibana/bin/kibana-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
+    cd /tmp && \
+      unzip kibana-network.zip kibana/kbn_network/kibana.json kibana/kbn_network/package.json && \
+      sed -i "s/7\.10\.0/7\.10\.2/g" kibana/kbn_network/kibana.json && \
+      sed -i "s/7\.10\.0/7\.10\.2/g" kibana/kbn_network/package.json && \
+      zip kibana-network.zip kibana/kbn_network/kibana.json kibana/kbn_network/package.json && \
+      cd /usr/share/kibana/plugins && \
+      /usr/share/kibana/bin/kibana-plugin install file:///tmp/kibana-network.zip --allow-root && \
+      rm -rf /tmp/kibana-comments.zip /tmp/kibana
 
 ADD kibana/kibana.yml /usr/share/kibana/config/kibana.yml
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

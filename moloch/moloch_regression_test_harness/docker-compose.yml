@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-od:7.10.0
+    image: docker.elastic.co/elasticsearch/elasticsearch-od:7.10.2
     restart: "no"
     environment:
       logger.level : 'INFO'

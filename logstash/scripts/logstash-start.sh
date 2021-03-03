@@ -80,6 +80,8 @@ MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${ELASTICSEARCH_OUTPUT
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES_/${MALCOLM_ELASTICSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
+# import trusted CA certificates if necessary
+/usr/local/bin/jdk-cacerts-auto-import.sh || true
 
 # start logstash (adapted from docker-entrypoint)
 env2yaml /usr/share/logstash/config/logstash.yml

@@ -118,7 +118,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   elasticsearch:
-    image: malcolmnetsec/elasticsearch-od:3.0.0
+    image: malcolmnetsec/elasticsearch-od:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -145,6 +145,7 @@ services:
       - IPC_LOCK
     volumes:
       - ./elasticsearch/elasticsearch.keystore:/usr/share/elasticsearch/config/elasticsearch.keystore:rw
+      - ./nginx/ca-trust:/usr/share/elasticsearch/ca-trust:ro
       - ./elasticsearch:/usr/share/elasticsearch/data:delegated
       - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
     healthcheck:
@@ -154,7 +155,7 @@ services:
       retries: 3
       start_period: 180s
   kibana-helper:
-    image: malcolmnetsec/kibana-helper:3.0.0
+    image: malcolmnetsec/kibana-helper:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -182,7 +183,7 @@ services:
       retries: 3
       start_period: 30s
   kibana:
-    image: malcolmnetsec/kibana-od:3.0.0
+    image: malcolmnetsec/kibana-od:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -203,7 +204,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:3.0.0
+    image: malcolmnetsec/logstash-oss:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -223,6 +224,7 @@ services:
       - 9600
     volumes:
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
+      - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
@@ -236,7 +238,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:3.0.0
+    image: malcolmnetsec/filebeat-oss:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -273,7 +275,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:3.0.0
+    image: malcolmnetsec/arkime:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -312,7 +314,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:3.0.0
+    image: malcolmnetsec/zeek:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -338,7 +340,7 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:3.0.0
+    image: malcolmnetsec/file-monitor:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -361,7 +363,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:3.0.0
+    image: malcolmnetsec/pcap-capture:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -387,7 +389,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:3.0.0
+    image: malcolmnetsec/pcap-monitor:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -410,7 +412,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:3.0.0
+    image: malcolmnetsec/file-upload:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -426,7 +428,7 @@ services:
     expose:
       - 80
     ports:
-      - 127.0.0.1:8022:22
+      - "127.0.0.1:8022:22"
     volumes:
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
     healthcheck:
@@ -436,7 +438,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:3.0.0
+    image: malcolmnetsec/htadmin:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -458,7 +460,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:3.0.0
+    image: malcolmnetsec/freq:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -476,7 +478,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:3.0.0
+    image: malcolmnetsec/name-map-ui:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -497,7 +499,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:3.0.0
+    image: malcolmnetsec/nginx-proxy:3.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -517,9 +519,7 @@ services:
       - "443:443"
       - "488:488"
       - "5601:5601"
-      - "8443:8443"
-      - "9200:9200"
-      - "9600:9600"
+      # - "0.0.0.0:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro

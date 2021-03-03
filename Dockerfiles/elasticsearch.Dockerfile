@@ -1,4 +1,4 @@
-FROM amazon/opendistro-for-elasticsearch:1.12.0
+FROM amazon/opendistro-for-elasticsearch:1.13.0
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -23,19 +23,22 @@ ENV TERM xterm
 ARG GITHUB_OAUTH_TOKEN=""
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
+ENV JAVA_HOME=/usr/share/elasticsearch/jdk
 
 # Malcolm manages authentication and encryption via NGINX reverse proxy
 # https://opendistro.github.io/for-elasticsearch-docs/docs/security/configuration/disable/
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/docker/#customize-the-docker-image
 # https://github.com/opendistro-for-elasticsearch/opendistro-build/issues/613
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
-    /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_performance_analyzer && \
+RUN yum install -y openssl && \
+  /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/elasticsearch/config/elasticsearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/elasticsearch/config/elasticsearch.yml && \
-  sed -i "s/\b1000\b/\${PUID:-${DEFAULT_UID}}/g" /usr/local/bin/docker-entrypoint.sh
+  sed -i "s/\b1000\b/\${PUID:-${DEFAULT_UID}}/g" /usr/local/bin/docker-entrypoint.sh && \
+  sed -i '/[^#].*\/usr\/share\/elasticsearch\/bin\/elasticsearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/local/bin/docker-entrypoint.sh
 
 # just used for initial keystore creation
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 
 # to be populated at build-time:
 ARG BUILD_DATE

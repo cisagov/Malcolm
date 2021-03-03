@@ -18,6 +18,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     iproute2 \
     meson \
     ninja-build \
+    patch \
     python3-dev \
     python3-pip \
     python3-setuptools \
@@ -32,6 +33,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ADD build-moloch-deb.sh /usr/local/bin/
+ADD patch /moloch-src-patch
 ADD etc /moloch-etc
 
 ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-moloch-deb.sh"]

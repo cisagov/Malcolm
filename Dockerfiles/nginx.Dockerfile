@@ -10,7 +10,7 @@
 # build a patched APK of stunnel supporting ldap StartTLS (patched protocols.c)
 # (based on https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html)
 
-FROM alpine:3.12 as stunnel_build
+FROM alpine:3.13 as stunnel_build
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=300
@@ -33,20 +33,24 @@ RUN set -x ; \
 
 USER ${PUSER}
 
+# todo: when aports updates stunnel to 5.58, this will need to be updated
+
 RUN set -x ; \
     cd /apkbuild ; \
     tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
     cp /usr/src/patches/stunnel-5.56-open-ldap.patch /apkbuild/aports-master/community/stunnel/ ; \
     cd /apkbuild/aports-master/community/stunnel ; \
+    sed -i 's@https://www.stunnel.org/downloads/stunnel.*gz@ftp://ftp.stunnel.org/stunnel/archive/5.x/stunnel-5.57.tar.gz@' APKBUILD ; \
     sed -i 's/\(^makedepends="\)/\1patchutils /' APKBUILD ; \
     sed -i '/^source=/a \ \ \ \ \ \ \ \ stunnel-5.56-open-ldap.patch' APKBUILD ; \
-    sed -i "/^sha512sums=/a $(sha512sum stunnel-5.56-open-ldap.patch)" APKBUILD ; \
+    sed -i '/^sha512sums/,$d' APKBUILD ; \
     abuild-keygen -a -i -n ; \
+    abuild checksum ; \
     abuild -R
 
 ####################################################################################
 
-FROM alpine:3.12
+FROM alpine:3.13
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
@@ -100,7 +104,7 @@ ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP $NGINX_LDAP_TLS_STUNNEL_CHECK_IP
 ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
 # build latest nginx with nginx-auth-ldap
-ENV NGINX_VERSION=1.19.6
+ENV NGINX_VERSION=1.19.7
 ENV NGINX_AUTH_LDAP_BRANCH=master
 
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz

@@ -194,7 +194,7 @@ class Installer(object):
     return result, installPath
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  def tweak_malcolm_runtime(self, malcolm_install_path, expose_logstash_default=False, restart_mode_default=False):
+  def tweak_malcolm_runtime(self, malcolm_install_path, expose_elastic_default=False, expose_logstash_default=False, restart_mode_default=False):
     global args
 
     if not args.configFile:
@@ -341,6 +341,7 @@ class Installer(object):
     reverseDns = InstallerYesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
     autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
     autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
+    elasticOpen = InstallerYesOrNo('Expose Elasticsearch port to external hosts?', default=expose_elastic_default)
     logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
     logstashSsl = logstashOpen and InstallerYesOrNo('Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)', default=True)
     externalEsForward = InstallerYesOrNo('Forward Logstash logs to external Elasticstack instance?', default=False)
@@ -544,10 +545,15 @@ class Installer(object):
             print(line)
             line = f"{serviceIndent * 2}ports:"
             print(line)
-            line = f"{serviceIndent * 3}- 0.0.0.0:5044:5044"
-          elif (not serviceStartLine) and (currentService == 'logstash') and re.match(fr'^({serviceIndent * 2}ports:|{serviceIndent * 3}-.*5044:5044)\s*$', line):
+            line = f'{serviceIndent * 3}- "0.0.0.0:5044:5044"'
+          elif (not serviceStartLine) and (currentService == 'logstash') and re.match(fr'^({serviceIndent * 2}ports:|{serviceIndent * 3}-.*5044:5044)"?\s*$', line):
             # remove previous/leftover/duplicate exposing logstash port 5044 to the world
             skipLine = True
+          elif (not serviceStartLine) and (currentService == 'nginx-proxy') and re.match(r'^.*-.*\b9200:9200"?\s*$', line):
+            # comment/uncomment port forwarding for elastic based on elasticOpen
+            leadingSpaces = len(line) - len(line.lstrip())
+            if leadingSpaces <= 0: leadingSpaces = 6
+            line = f"{' ' * leadingSpaces}{'' if elasticOpen else '# '}{line.lstrip().lstrip('#').lstrip()}"
 
           if not skipLine: print(line)
 
@@ -1236,6 +1242,7 @@ def main():
   parser.add_argument('-f', '--configure-file', required=False, dest='configFile', metavar='<STR>', type=str, default='', help='Single docker-compose YML file to configure')
   parser.add_argument('-d', '--defaults', dest='acceptDefaults', type=str2bool, nargs='?', const=True, default=False, help="Accept defaults to prompts without user interaction")
   parser.add_argument('-l', '--logstash-expose', dest='exposeLogstash', type=str2bool, nargs='?', const=True, default=False, help="Expose Logstash port to external hosts")
+  parser.add_argument('-e', '--elasticsearch-expose', dest='exposeElastic', type=str2bool, nargs='?', const=True, default=False, help="Expose Elasticsearch port to external hosts")
   parser.add_argument('-r', '--restart-malcolm', dest='malcolmAutoRestart', type=str2bool, nargs='?', const=True, default=False, help="Restart Malcolm on system restart (unless-stopped)")
 
   try:
@@ -1321,7 +1328,7 @@ def main():
     success, installPath = installer.install_malcolm_files(malcolmFile)
 
   if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
-    installer.tweak_malcolm_runtime(installPath, expose_logstash_default=args.exposeLogstash, restart_mode_default=args.malcolmAutoRestart)
+    installer.tweak_malcolm_runtime(installPath, expose_elastic_default=args.exposeElastic, expose_logstash_default=args.exposeLogstash, restart_mode_default=args.malcolmAutoRestart)
     eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
     eprint(f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}.")
 

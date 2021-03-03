@@ -1,6 +1,6 @@
 FROM debian:buster-slim
 
-# Copyright (c) 2018 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 
@@ -41,7 +41,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     go run bootstrap.go
 
 ENV BEATS=metricbeat
-ENV BEATS_VERSION=7.10.0
+ENV BEATS_VERSION=7.10.2
 
 ADD ./build.sh /build.sh
 RUN [ "chmod", "+x", "/build.sh" ]

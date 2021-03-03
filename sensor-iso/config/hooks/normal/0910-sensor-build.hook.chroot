@@ -7,13 +7,13 @@ NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.
 
 SPICY_DIR="/opt/spicy"
 ZEEK_DIR="/opt/zeek"
-ZEEK_VER="3.0.12"
+ZEEK_VER="3.0.13"
 ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
 ZEEK_PATCH_URLS=(
   # nothing here for now
 )
 
-BEATS_VER="7.10.0"
+BEATS_VER="7.10.2"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
