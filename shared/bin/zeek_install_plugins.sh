@@ -9,7 +9,7 @@ fi
 
 # some of the packages will install via zkg, so the zkg config file must be present
 # read Zeek paths out of zkg config file for plugins that must be installed manually
-ZKG_CONFIG_FILE="$HOME/.zkg/config"
+ZKG_CONFIG_FILE="/opt/zeek/etc/zkg/config"
 if [[ -f "$ZKG_CONFIG_FILE" ]]; then
   ZEEK_SCRIPTS_DIR="$(grep -P "^script_dir\s*=\s*" "$ZKG_CONFIG_FILE" | sed 's/^script_dir[[:space:]]*=[[:space:]]*//')"
   ZEEK_DIST_DIR="$(grep -P "^zeek_dist\s*=\s*" "$ZKG_CONFIG_FILE" | sed 's/^zeek_dist[[:space:]]*=[[:space:]]*//')"
@@ -94,7 +94,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
-  "https://github.com/corelight/zeek-community-id|3.0.0"
+  "https://github.com/corelight/zeek-community-id"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
@@ -120,7 +120,7 @@ if [[ -d "$SRC_DIR" ]]; then
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin|2.1.2")"
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
@@ -131,7 +131,7 @@ if [[ -d "$SRC_DIR" ]]; then
 fi
 
 MANUAL_BRO_GITHUB_URLS=(
-  "https://github.com/corelight/bro-xor-exe-plugin|1.2"
+  "https://github.com/corelight/bro-xor-exe-plugin"
 )
 for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
