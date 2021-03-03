@@ -8,7 +8,7 @@ Hedgehog Linux is a Debian-based operating system built to
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions and other information to [Malcolm](https://github.com/cisagov/Malcolm)
+* generate and forward Zeek logs, Arkime sessions and other information to [Malcolm](https://github.com/idaholab/malcolm)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -154,7 +154,7 @@ In either case, upon selecting **OK** the network interface will be brought down
 
 ### <a name="ConfigTime"></a>Time synchronization
 
-Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/cisagov/Malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
+Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/idaholab/malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
 
 ![Time synchronization method](./docs/images/time_sync_mode.png)
 
@@ -211,7 +211,7 @@ You'll be prompted to specify which engine(s) to use to analyze extracted files.
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
 * scanning portable executable (PE) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, select **ZEEK_FILE_SCAN_CAPA** when specifying scanners for Zeek-carved files
 
-Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/cisagov/Malcolm#KibanaVisualizations) when forwarded to Malcolm.
+Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
 
 ![File quarantine](./docs/images/file_quarantine.png)
 
@@ -221,7 +221,7 @@ Finally, you will then be presented with the list of configuration variables tha
 
 ### <a name="ConfigForwarding"></a>Forwarding
 
-Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/cisagov/Malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
+Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/idaholab/malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
 
 ![Configure forwarders](./docs/images/forwarder_config.png)
 
@@ -239,7 +239,7 @@ Next you are asked whether the connection used for Zeek log forwarding should be
 
 ![Filebeat SSL certificate verification](./docs/images/filebeat_ssl.png)
 
-If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication), choose **None**.
+If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication), choose **None**.
 
 ![Unencrypted vs. SSL encryption for Zeek log forwarding](./docs/images/filebeat_ssl_verify.png)
 
@@ -255,9 +255,9 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ### <a name="moloch-capture"></a>moloch-capture: Arkime session forwarding
 
-[moloch-capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/cisagov/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+[moloch-capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/idaholab/malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
-First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication)), choose **None**.
+First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication)), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -285,7 +285,7 @@ Metricbeat gathers system resource metrics at an interval you specify. The defau
 
 ![Metricbeat interval](./docs/images/metricbeat_interval.png)
 
-Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication), choose **None**.
+Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -337,7 +337,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_ARKIME** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_ARKIME** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
@@ -390,7 +390,7 @@ zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 
 Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/) (with the [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin).
 
-To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/cisagov/Malcolm/) working copy and run:
+To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/idaholab/Malcolm/) working copy and run:
 
 ```
 $ ./sensor-iso/build_via_vagrant.sh -f
@@ -606,9 +606,9 @@ deb https://XXXXXX:443/debian buster-backports main contrib non-free
 5. Update underlying system packages with `apt-get`
     - `apt-get update && apt-get dist-upgrade`
 
-6. If there were [new system deb packages added](https://github.com/cisagov/Malcolm/tree/master/sensor-iso/config/package-lists) to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/commits/master/sensor-iso/config/package-lists) on GitHub), install them. If you're not sure, of course, you could just install everything, like this (although you may have to tweak some version numbers or something if the base distribution of your Hedgehog branch is different than `master`; in this example I'm not jumping between Debian releases, just upgrading within a release):
+6. If there were [new system deb packages added](https://github.com/idaholab/Malcolm/tree/master/sensor-iso/config/package-lists) to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/idaholab/Malcolm/commits/master/sensor-iso/config/package-lists) on GitHub), install them. If you're not sure, of course, you could just install everything, like this (although you may have to tweak some version numbers or something if the base distribution of your Hedgehog branch is different than `master`; in this example I'm not jumping between Debian releases, just upgrading within a release):
 ```
-$ for LIST in apps desktopmanager net system; do curl -L -J -O https://raw.github.com/cisagov/Malcolm/master/sensor-iso/config/package-lists/$LIST.list.chroot; done
+$ for LIST in apps desktopmanager net system; do curl -L -J -O https://raw.github.com/idaholab/Malcolm/master/sensor-iso/config/package-lists/$LIST.list.chroot; done
 ...
 $ apt-get install $(cat *.list.chroot)
 ```
@@ -618,7 +618,7 @@ $ apt-get install $(cat *.list.chroot)
     * `python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -r -n1 python3 -m pip install -U`
         - if this fails for some reason, you may need to reinstall pip first with `python3 -m pip install --force -U pip`
         - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip` (or whatever `python3.x` you have)
-    * If there were [new python packages](https://raw.githubusercontent.com/cisagov/Malcolm/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/blame/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
+    * If there were [new python packages](https://raw.githubusercontent.com/idaholab/Malcolm/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/idaholab/Malcolm/blame/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
         - `python3 -m pip install --no-compile --no-cache-dir --force-reinstall --upgrade --index-url=https://XXXXXX:443/pypi/simple --trusted-host=XXXXXX:443 colorama`
 
 8. Okay, **now** things start to get a little bit ugly. You're going to need access to the ISO of the release of Hedgehog Linux you're upgrading to, as we're going to grab some packages off of it. On another Linux system, [build it](#ISOBuild).
@@ -931,7 +931,7 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 * `sensorwatch` should show current writes to Zeek log files and PCAP files (depending on your configuration)
 * `tail -f /opt/sensor/sensor_ctl/log/*` should show no egregious errors
 * `zeek --version`, `zeek -N local` and `moloch-capture --version` ought to run and print out version information as expected
-* if you are forwarding to a [Malcolm](https://github.com/cisagov/Malcolm) aggregator, you should start seeing data momentarily
+* if you are forwarding to a [Malcolm](https://github.com/idaholab/malcolm) aggregator, you should start seeing data momentarily
     
 # <a name="MiscNotes"></a>Appendix F - Notes
 
@@ -939,9 +939,9 @@ If you are interesting in developing your own network traffic capture appliance 
 
 # <a name="Footer"></a>Copyright
 
-Hedgehog Linux - part of [Malcolm](https://github.com/cisagov/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/master/License.txt) for the terms of its release.
+See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 
