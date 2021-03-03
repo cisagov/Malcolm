@@ -60,19 +60,26 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
 
 RUN cd "${SRC_BASE_DIR}" && \
     curl -sSL "https://github.com/zeek/zeek/releases/download/v${ZEEK_VERSION}/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
-    cd "./zeek-${ZEEK_VERSION}" && \
-    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
-    ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools && \
-    cd build && \
-    ninja && \
-    ninja install
+      cd "./zeek-${ZEEK_VERSION}" && \
+      bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
+      ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools && \
+      cd build && \
+      ninja && \
+      ninja install
+
+RUN cd "${SRC_BASE_DIR}" && \
+    git -c core.askpass=true clone --single-branch --recursive --shallow-submodules https://github.com/zeek/spicy "${SRC_BASE_DIR}"/spicy && \
+      cd ./spicy && \
+      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ninja -j 2 -C build install
 
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
-RUN echo 'Y' | zkg autoconfig && \
-    bash /usr/local/bin/zeek_install_plugins.sh && \
-    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true" && \
-    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
+RUN echo 'Y' | zkg autoconfig
+# && \
+#     bash /usr/local/bin/zeek_install_plugins.sh && \
+# bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true" && \
+# bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 # FROM debian:buster-slim
 #

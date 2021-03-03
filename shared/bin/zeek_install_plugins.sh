@@ -7,9 +7,12 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
+SPICY_DIR=${SPICY_DIR:-/opt/spicy}
+ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
+
 # some of the packages will install via zkg, so the zkg config file must be present
 # read Zeek paths out of zkg config file for plugins that must be installed manually
-ZKG_CONFIG_FILE="/opt/zeek/etc/zkg/config"
+ZKG_CONFIG_FILE="$ZEEK_DIR/etc/zkg/config"
 if [[ -f "$ZKG_CONFIG_FILE" ]]; then
   ZEEK_SCRIPTS_DIR="$(grep -P "^script_dir\s*=\s*" "$ZKG_CONFIG_FILE" | sed 's/^script_dir[[:space:]]*=[[:space:]]*//')"
   ZEEK_DIST_DIR="$(grep -P "^zeek_dist\s*=\s*" "$ZKG_CONFIG_FILE" | sed 's/^zeek_dist[[:space:]]*=[[:space:]]*//')"
@@ -71,9 +74,9 @@ function clone_github_repo() {
     SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
     rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
-      git -c core.askpass=true clone --branch "$REPO_LATEST_RELEASE" --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --single-branch --branch "$REPO_LATEST_RELEASE" --recursive --shallow-submodules "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     else
-      git -c core.askpass=true clone --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --single-branch --recursive --shallow-submodules "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     fi
     [ $? -eq 0 ] && echo "$SRC_DIR" || echo "cloning \"$REPO_URL\" failed" >&2
   fi
@@ -170,31 +173,33 @@ ICSNPP_UPDATES_GITHUB_URLS=(
 )
 for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
-  [[ -d "$SRC_DIR" ]] && cp -r "$SRC_DIR"/scripts/ /opt/zeek/share/zeek/site/"$(basename "$SRC_DIR")"
+  [[ -d "$SRC_DIR" ]] && cp -r "$SRC_DIR"/scripts/ "$ZEEK_DIR"/share/zeek/site/"$(basename "$SRC_DIR")"
 done
 
-# install Spicy
-SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  cd "$SRC_DIR" && \
-    ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
-    ninja -j 2 -C build install
-  cd "$CWD"
+# install Spicy (if not already installed)
+if [[ ! -d "$SPICY_DIR" ]]; then
+  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ninja -j 2 -C build install
+    cd "$CWD"
+  fi
 fi
 
-if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
+if "$ZEEK_DIR"/bin/zeek -N | grep -q Zeek::Spicy; then
 
   # spicy-noise
   SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
     cd "$SRC_DIR" && \
-      /opt/spicy/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
+      "$SPICY_DIR"/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
       cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
       chmod 644 ./zeek/spicy-noise.hlto && \
-      echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.zeek && \
-      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise
+      echo "@load $ZEEK_DIR/share/zeek/site/spicy-noise/spicy-noise.hlto" >> ./zeek/__load__.zeek && \
+      cp -vr ./zeek "$ZEEK_DIR"/share/zeek/site/spicy-noise
     cd "$CWD"
   fi
 
@@ -203,7 +208,7 @@ if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
     cd "$SRC_DIR" && \
-      ./configure --with-spicy=/opt/spicy --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR"
+      ./configure --with-spicy="$SPICY_DIR" --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR"
       make && \
       make install
     cd "$CWD"
