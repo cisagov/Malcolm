@@ -82,10 +82,36 @@ function clone_github_repo() {
   fi
 }
 
-# install Zeek packages that insatll nicely using zkg
+# install Spicy (if not already installed)
+if [[ ! -d "$SPICY_DIR" ]]; then
+  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ninja -j 2 -C build install
+    cd "$CWD"
+  fi
+fi
+
+# install Zeek packages that install nicely using zkg
+
 # TODO check failing unit tests during install for:
 # - zeek-EternalSafety
 # - cve-2020-0601
+
+# TODO
+# https://github.com/zeek/spicy-analyzers
+# A collection of zeek-hosted spicy analyzers, some of which
+# "replace" the built-in zeek parsers for those protocols.
+# We need to compare the built-in ones, but use what we're used to until
+# we make the decision with eyes open. As of 2021/03/04, that list is:
+# - DHCP      - compare to Zeek DHCP
+# - DNS       - compare to Zeek DNS
+# - HTTP      - compare to Zeek HTTP
+# - Wireguard - compare to github.com/theparanoids/spicy-noise
+# - TFTP
+
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
@@ -97,13 +123,14 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/CVE-2020-16898"
   "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
+  "https://github.com/corelight/zeek-community-id"
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
-  "https://github.com/corelight/zeek-community-id"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
+  "https://github.com/zeek/spicy-analyzers"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
@@ -111,31 +138,6 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
 done
 
 # manual build processes that don't fit the other patterns
-
-# TODO: this one doesn't build yet
-# SRC_DIR="$(clone_github_repo "https://github.com/salesforce/GQUIC_Protocol_Analyzer")"
-# if [[ -d "$SRC_DIR" ]]; then
-#   CWD="$(pwd)"
-#   cd "$ZEEK_DIST_DIR"/aux/zeek-aux/plugin-support && \
-#     ./init-plugin ./zeek-quic Salesforce GQUIC && \
-#     cd ./zeek-quic && \
-#     rm -rf CMakeLists.txt ./scripts ./src && \
-#     cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
-#     ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-#     make && \
-#     make install
-#   cd "$CWD"
-# fi
-
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  cd "$SRC_DIR" && \
-    ./configure --with-kernel=/usr --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-    make && \
-    make install
-  cd "$CWD"
-fi
 
 MANUAL_ZEEK_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-bacnet"
@@ -166,21 +168,35 @@ for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
   [[ -d "$SRC_DIR" ]] && cp -r "$SRC_DIR"/scripts/ "$ZEEK_DIR"/share/zeek/site/"$(basename "$SRC_DIR")"
 done
 
-# install Spicy (if not already installed)
-if [[ ! -d "$SPICY_DIR" ]]; then
-  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
-  if [[ -d "$SRC_DIR" ]]; then
-    CWD="$(pwd)"
-    cd "$SRC_DIR" && \
-      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
-      ninja -j 2 -C build install
-    cd "$CWD"
-  fi
+# TODO: this one doesn't build yet
+# SRC_DIR="$(clone_github_repo "https://github.com/salesforce/GQUIC_Protocol_Analyzer")"
+# if [[ -d "$SRC_DIR" ]]; then
+#   CWD="$(pwd)"
+#   cd "$ZEEK_DIST_DIR"/aux/zeek-aux/plugin-support && \
+#     ./init-plugin ./zeek-quic Salesforce GQUIC && \
+#     cd ./zeek-quic && \
+#     rm -rf CMakeLists.txt ./scripts ./src && \
+#     cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
+#     ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+#     make && \
+#     make install
+#   cd "$CWD"
+# fi
+
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$SRC_DIR" && \
+    ./configure --with-kernel=/usr --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+    make && \
+    make install
+  cd "$CWD"
 fi
 
 if "$ZEEK_DIR"/bin/zeek -N | grep -q Zeek::Spicy; then
 
   # spicy-noise
+  # TODO: compare to spicy-analyzers Wireguard
   SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
@@ -190,30 +206,6 @@ if "$ZEEK_DIR"/bin/zeek -N | grep -q Zeek::Spicy; then
       chmod 644 ./zeek/spicy-noise.hlto && \
       echo "@load $ZEEK_DIR/share/zeek/site/spicy-noise/spicy-noise.hlto" >> ./zeek/__load__.zeek && \
       cp -vr ./zeek "$ZEEK_DIR"/share/zeek/site/spicy-noise
-    cd "$CWD"
-  fi
-
-  # https://github.com/zeek/spicy-analyzers
-  # A collection of zeek-hosted spicy analyzers, some of which
-  # "replace" the built-in zeek parsers for those protocols.
-  # TODO: compare the built-in ones, but use what we're used to until
-  # we make the decision with eyes open. As of 2021/03/04, that list is:
-  # - DHCP      - compare to Zeek DHCP
-  # - DNS       - compare to Zeek DNS
-  # - HTTP      - compare to Zeek HTTP
-  # - Wireguard - compare to github.com/theparanoids/spicy-noise
-  # - TFTP
-
-  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy-analyzers")"
-  if [[ -d "$SRC_DIR" ]]; then
-    CWD="$(pwd)"
-    cd "$SRC_DIR" && \
-      mkdir build && pushd build >/dev/null 2>&1 && cmake .. && make -j && popd >/dev/null 2>&1 && \
-      pushd tests >/dev/null 2>&1 && btest -j && popd >/dev/null 2>&1 && \
-      mkdir -p "$(spicy-config --zeek-module-path)" && \
-      mkdir -p $(spicy-config --zeek-prefix)/share/zeek/site/spicy-analyzers && \
-      cp -vr build/spicy-modules/*.hlto "$(spicy-config --zeek-module-path)" && \
-      cp -vr analyzer/* "$(spicy-config --zeek-prefix)"/share/zeek/site/spicy-analyzers
     cd "$CWD"
   fi
 
