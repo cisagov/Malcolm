@@ -111,6 +111,9 @@ fi
 # - HTTP      - compare to Zeek HTTP
 # - TFTP
 
+# TODO
+# - GQUIC_Protocol_Analyzer doesn't compile yet
+
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
@@ -123,6 +126,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
+  "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/zeek-4-compat"
   "https://github.com/mmguero-dev/zeek-plugin-profinet|topic/zeek-4-compat"
   "https://github.com/mmguero-dev/zeek-plugin-s7comm|topic/zeek-4-compat"
   "https://github.com/mmguero-dev/zeek-plugin-tds|topic/zeek-4-compat"
@@ -169,21 +173,6 @@ for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
   [[ -d "$SRC_DIR" ]] && cp -r "$SRC_DIR"/scripts/ "$ZEEK_DIR"/share/zeek/site/"$(basename "$SRC_DIR")"
 done
-
-# TODO: this one doesn't build yet
-SRC_DIR="$(clone_github_repo "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/zeek-4-compat")"
-if [[ -d "$SRC_DIR" ]]; then
-  CWD="$(pwd)"
-  cd "$ZEEK_DIST_DIR"/aux/zeek-aux/plugin-support && \
-    ./init-plugin ./zeek-quic Salesforce GQUIC && \
-    cd ./zeek-quic && \
-    rm -rf CMakeLists.txt ./scripts ./src && \
-    cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
-    ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-    make && \
-    make install
-  cd "$CWD"
-fi
 
 SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin|master")"
 if [[ -d "$SRC_DIR" ]]; then
