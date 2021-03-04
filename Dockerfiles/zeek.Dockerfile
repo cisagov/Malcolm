@@ -162,8 +162,8 @@ RUN echo 'Y' | zkg autoconfig
 #
 # # sanity check to make sure the plugins installed and copied over correctly
 # # these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-# ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 27
-# ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|ICSNPP_Bacnet/scripts/consts|ICSNPP_Bsap_ip/scripts/consts|ICSNPP_Bsap_serial/scripts/consts|ICSNPP_Enip/scripts/consts|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
+# ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 31
+# ENV ZEEK_THIRD_PARTY_GREP_STRING "(bzar/main|callstranger-detector/callstranger|Corelight/PE_XOR/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|hassh/hassh|icsnpp/bacnet/main|icsnpp/bsap-ip/main|icsnpp/bsap-serial/main|icsnpp/enip/main|ja3/ja3|ripple20/ripple20|Salesforce/GQUIC/main|SIGRed/CVE-2020-1350|spicy-analyzers/protocol/dhcp/__load__|spicy-analyzers/protocol/dns/__load__|spicy-analyzers/protocol/http/__load__|spicy-analyzers/protocol/tftp/__load__|spicy-analyzers/protocol/wireguard/__load__|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/__load__|Zeek_AF_Packet/scripts/init|Zeek_LDAP/scripts/main|Zeek_Spicy/scripts/base/spicy/main|zerologon/main)\.(zeek|bro)"
 #
 # RUN mkdir -p /tmp/logs && \
 #     cd /tmp/logs && \
@@ -171,6 +171,11 @@ RUN echo 'Y' | zkg autoconfig
 #       bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_GREP_STRING" loaded_scripts.log) == $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat loaded_scripts.log && exit 1)" && \
 #       cd /tmp && \
 #       rm -rf /tmp/logs /tmp/pcaps
+#
+# RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
+#     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
+#     usermod -a -G tty ${PUSER} && \
+#     ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 #
 # #Whether or not to auto-tag logs based on filename
 # ARG AUTO_TAG=true
@@ -224,11 +229,6 @@ RUN echo 'Y' | zkg autoconfig
 # ENV ZEEK_DISABLE_SPICY_HTTP $ZEEK_DISABLE_SPICY_HTTP
 # ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 # ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
-#
-# RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
-#     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
-#     usermod -a -G tty ${PUSER} && \
-#     ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 #
 # ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 #
