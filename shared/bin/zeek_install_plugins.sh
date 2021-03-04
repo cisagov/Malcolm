@@ -111,10 +111,6 @@ fi
 # - HTTP      - compare to Zeek HTTP
 # - TFTP
 
-# TODO
-# - GQUIC_Protocol_Analyzer doesn't compile yet
-# - wip: https://github.com/ckreibich/GQUIC_Protocol_Analyzer/tree/topic/christian/zeek-4.0.0-fixes
-
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
