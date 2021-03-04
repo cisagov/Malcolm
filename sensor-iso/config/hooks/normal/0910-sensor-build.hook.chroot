@@ -88,7 +88,9 @@ lb_custom.InterfacePrefix=af_packet::
 EOF
 
 # set up default zeek local policy
-cp -f /usr/local/etc/zeek/*.zeek /opt/zeek/share/zeek/site/
+cp -f /usr/local/etc/zeek/*.zeek "${ZEEK_DIR}"/share/zeek/site/
+[[ -d "${ZEEK_DIR}"/share/zeek/site/packages/spicy-analyzers/ ]] && \
+  cp -f /usr/local/etc/zeek/spicy_load.zeek.override "${ZEEK_DIR}"/share/zeek/site/packages/spicy-analyzers/__load__.zeek
 
 # cleanup
 cd /tmp

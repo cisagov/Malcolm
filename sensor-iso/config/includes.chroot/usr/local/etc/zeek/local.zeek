@@ -13,8 +13,9 @@ global disable_quic = (getenv("ZEEK_DISABLE_QUIC") == "") ? F : T;
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
 global disable_telnet = (getenv("ZEEK_DISABLE_TELNET") == "") ? F : T;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
-global disable_wireguard = (getenv("ZEEK_DISABLE_WIREGUARD") == "") ? F : T;
-global disable_wireguard_transport_packets = (getenv("ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS") == "") ? F : T;
+
+# see ${ZEEK_DIR}/share/zeek/site/packages/spicy-analyzers/__load__.zeek
+# for similar global direcives for the spicy-analyzers parsers
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
@@ -74,18 +75,6 @@ redef ignore_checksums = T;
 
 @if (!disable_telnet)
   @load ./login.zeek
-@endif
-
-@if (!disable_wireguard)
-  @load ./spicy-noise
-  event zeek_init() &priority=-5 {
-    if (disable_wireguard_transport_packets) {
-      Log::remove_default_filter(WireGuard::WGLOG);
-      Log::add_filter(WireGuard::WGLOG,
-        [$name = "wireguard-verbose",
-         $pred(rec: WireGuard::Info) = { return (rec$msg_type != "TRANSPORT"); }]);
-    }
-  }
 @endif
 
 @if (!disable_pe_xor)

@@ -109,7 +109,6 @@ fi
 # - DHCP      - compare to Zeek DHCP
 # - DNS       - compare to Zeek DNS
 # - HTTP      - compare to Zeek HTTP
-# - Wireguard - compare to github.com/theparanoids/spicy-noise
 # - TFTP
 
 ZKG_GITHUB_URLS=(
@@ -191,22 +190,4 @@ if [[ -d "$SRC_DIR" ]]; then
     make && \
     make install
   cd "$CWD"
-fi
-
-if "$ZEEK_DIR"/bin/zeek -N | grep -q Zeek::Spicy; then
-
-  # spicy-noise
-  # TODO: compare to spicy-analyzers Wireguard
-  SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
-  if [[ -d "$SRC_DIR" ]]; then
-    CWD="$(pwd)"
-    cd "$SRC_DIR" && \
-      "$SPICY_DIR"/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
-      cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
-      chmod 644 ./zeek/spicy-noise.hlto && \
-      echo "@load $ZEEK_DIR/share/zeek/site/spicy-noise/spicy-noise.hlto" >> ./zeek/__load__.zeek && \
-      cp -vr ./zeek "$ZEEK_DIR"/share/zeek/site/spicy-noise
-    cd "$CWD"
-  fi
-
 fi
