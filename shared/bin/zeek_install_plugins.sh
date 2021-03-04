@@ -115,7 +115,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
   "https://github.com/0xxon/cve-2020-13777"
-  "https://github.com/amzn/zeek-plugin-profinet"
   "https://github.com/amzn/zeek-plugin-s7comm"
   "https://github.com/amzn/zeek-plugin-tds"
   "https://github.com/corelight/callstranger-detector"
@@ -126,6 +125,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
+  "https://github.com/mmguero-dev/zeek-plugin-profinet|topic/zeek-4-compat"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
@@ -168,19 +168,19 @@ for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
 done
 
 # TODO: this one doesn't build yet
-# SRC_DIR="$(clone_github_repo "https://github.com/salesforce/GQUIC_Protocol_Analyzer")"
-# if [[ -d "$SRC_DIR" ]]; then
-#   CWD="$(pwd)"
-#   cd "$ZEEK_DIST_DIR"/aux/zeek-aux/plugin-support && \
-#     ./init-plugin ./zeek-quic Salesforce GQUIC && \
-#     cd ./zeek-quic && \
-#     rm -rf CMakeLists.txt ./scripts ./src && \
-#     cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
-#     ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
-#     make && \
-#     make install
-#   cd "$CWD"
-# fi
+SRC_DIR="$(clone_github_repo "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/zeek-4-compat")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$ZEEK_DIST_DIR"/aux/zeek-aux/plugin-support && \
+    ./init-plugin ./zeek-quic Salesforce GQUIC && \
+    cd ./zeek-quic && \
+    rm -rf CMakeLists.txt ./scripts ./src && \
+    cp -vr "$SRC_DIR"/CMakeLists.txt "$SRC_DIR"/scripts "$SRC_DIR"/src ./ && \
+    ./configure --bro-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+    make && \
+    make install
+  cd "$CWD"
+fi
 
 SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
 if [[ -d "$SRC_DIR" ]]; then
