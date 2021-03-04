@@ -138,6 +138,9 @@ done
 
 # manual build processes that don't fit the other patterns
 
+# TODO
+# - there are still some issues with ldap-analyzer, getting some garbage output for some fields
+
 MANUAL_ZEEK_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap-ip"
@@ -182,11 +185,11 @@ if [[ -d "$SRC_DIR" ]]; then
   cd "$CWD"
 fi
 
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin|master")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
-    ./configure --with-kernel=/usr --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR" && \
+    ./configure --with-kernel=/usr --install-root="$ZEEK_PLUGIN_DIR" && \
     make && \
     make install
   cd "$CWD"
