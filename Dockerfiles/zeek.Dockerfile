@@ -5,17 +5,15 @@ FROM debian:buster-slim AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 # build zeek and plugins (spicy, additional protocol parsers, etc.)
-
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
-ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_VERSION "4.0.0"
 
-ENV PATH "${ZEEK_DIR}/bin:${PATH}"
+ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
 # empty for now...
 # ADD zeek/patches ${ZEEK_PATCH_DIR}
