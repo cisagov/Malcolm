@@ -9,7 +9,6 @@ global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == "") ? 
 global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F : T;
 global disable_mqtt = (getenv("ZEEK_DISABLE_MQTT") == "") ? F : T;
 global disable_pe_xor = (getenv("ZEEK_DISABLE_PE_XOR") == "") ? F : T;
-global disable_quic = (getenv("ZEEK_DISABLE_QUIC") == "") ? F : T;
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
 global disable_telnet = (getenv("ZEEK_DISABLE_TELNET") == "") ? F : T;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
@@ -79,10 +78,6 @@ redef ignore_checksums = T;
 
 @if (!disable_pe_xor)
   @load Corelight/PE_XOR
-@endif
-
-@if (!disable_quic)
-  @load Salesforce/GQUIC
 @endif
 
 @if (!disable_bzar)
