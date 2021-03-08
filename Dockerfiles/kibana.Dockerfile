@@ -22,7 +22,7 @@ USER root
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y curl patch psmisc zip unzip gcc-c++ make && \
+    yum install -y curl patch psmisc zip unzip gcc-c++ make moreutils jq && \
     yum install -y https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm && \
     yum install -y git && \
     yum clean all && \
@@ -62,10 +62,11 @@ RUN eval "$(nodenv init -)" && \
     cd /usr/share/kibana/plugins/sankey_vis && \
     yarn kbn bootstrap && \
     yarn install && \
+    cat kibana.json | jq 'del(.requiredBundles)' | sponge kibana.json && \
     yarn build --kibana-version "${ELASTIC_VERSION}" && \
     mv ./build/kbnSankeyVis-7.10.2.zip ./build/kbnSankeyVis.zip
 
-FROM amazon/opendistro-for-elasticsearch-kibana:1.13.0
+FROM amazon/opendistro-for-elasticsearch-kibana:1.13.1
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
