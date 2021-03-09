@@ -245,10 +245,14 @@ def logs():
       | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | update_mapping
       | throttling\s+index
-      | executing\s+attempt_transition\s+for
+      | executing\s+attempt_(transition|set_replica_count)\s+for
       | but\s+there\s+are\s+no\s+living\s+connections
       | saved_objects
       | retry\.go.+(send\s+unwait|done$)
+      | scheduling\s+job\s*id.+opendistro-ism
+      | descheduling\s+job\s*id
+      | updating\s+number_of_replicas
+      | running\s+full\s+sweep
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
       | \b(d|es)?stats\.json
       | /_ns_/nstest\.html
