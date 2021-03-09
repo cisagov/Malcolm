@@ -124,7 +124,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zeek-openvpn"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
-  "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/christian/zeek-4.0.0-fixes"
+  "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/zeek-4-compat"
   "https://github.com/mmguero-dev/zeek-plugin-profinet|topic/zeek-4-compat"
   "https://github.com/mmguero-dev/zeek-plugin-s7comm|topic/zeek-4-compat"
   "https://github.com/mmguero-dev/zeek-plugin-tds|topic/zeek-4-compat"
