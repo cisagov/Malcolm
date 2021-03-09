@@ -31,7 +31,7 @@ mkdir -p /opt/hedgehog_install_artifacts/
 # some environment variables needed for build
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
-export PATH="${ZEEK_DIR}"/bin:$PATH
+export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH
 
 # a moloch .deb is built and installed in a different context
 
@@ -70,7 +70,7 @@ ninja install
 # checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
 
 # install 3rd party Zeek plugins and scripts
-zkg autoconfig
+echo 'Y' | zkg autoconfig
 bash /usr/local/bin/zeek_install_plugins.sh
 rm -Rf /root/.zkg /usr/local/src/*/.git
 
