@@ -245,6 +245,7 @@ def logs():
       | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | update_mapping
       | throttling\s+index
+      | executing\s+attempt_transition\s+for
       | but\s+there\s+are\s+no\s+living\s+connections
       | saved_objects
       | retry\.go.+(send\s+unwait|done$)
