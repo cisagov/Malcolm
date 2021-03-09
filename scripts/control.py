@@ -248,6 +248,7 @@ def logs():
       | executing\s+attempt_(transition|set_replica_count)\s+for
       | but\s+there\s+are\s+no\s+living\s+connections
       | saved_objects
+      | /kibana/(api/ui_metric/report|internal/search/es)
       | retry\.go.+(send\s+unwait|done$)
       | scheduling\s+job\s*id.+opendistro-ism
       | descheduling\s+job\s*id
