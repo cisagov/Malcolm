@@ -241,6 +241,7 @@ def logs():
   ignoreRegEx = re.compile(r"""
     .+(
         deprecated
+      | DEPRECATION
       | eshealth
       | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | update_mapping
