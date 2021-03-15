@@ -62,7 +62,6 @@ RUN eval "$(nodenv init -)" && \
     cd /usr/share/kibana/plugins/sankey_vis && \
     yarn kbn bootstrap && \
     yarn install && \
-    cat kibana.json | jq 'del(.requiredBundles)' | sponge kibana.json && \
     yarn build --kibana-version "${ELASTIC_VERSION}" && \
     mv ./build/kbnSankeyVis-7.10.2.zip ./build/kbnSankeyVis.zip
 
