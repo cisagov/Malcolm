@@ -220,6 +220,12 @@ ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 ADD file-monitor/*update.sh /usr/local/bin/
 
+USER ${PUSER}
+
+RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
+
+USER root
+
 WORKDIR /data/zeek/extract_files
 
 VOLUME ["$CAPA_RULES_DIR"]
