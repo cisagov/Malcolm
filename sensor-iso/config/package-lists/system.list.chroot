@@ -36,8 +36,6 @@ dosfstools
 ebtables
 efibootmgr
 eject
-exfat-fuse
-exfat-utils
 fatresize
 file
 flex
