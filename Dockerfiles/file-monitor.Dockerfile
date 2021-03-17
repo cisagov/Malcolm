@@ -224,6 +224,8 @@ USER ${PUSER}
 
 RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
 
+USER root
+
 WORKDIR /data/zeek/extract_files
 
 VOLUME ["$CAPA_RULES_DIR"]
