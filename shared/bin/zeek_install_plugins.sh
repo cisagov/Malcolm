@@ -79,7 +79,8 @@ function clone_github_repo() {
   fi
 }
 
-# install Zeek packages that insatll nicely using zkg
+# install Zeek packages that install nicely using zkg
+# todo: "https://github.com/corelight/zeek-openvpn"
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
@@ -92,7 +93,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zerologon"
-  "https://github.com/corelight/zeek-openvpn"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
   "https://github.com/corelight/zeek-community-id|3.0.0"

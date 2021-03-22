@@ -57,8 +57,9 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
     python3-pip \
     python3-setuptools \
     python3-wheel && \
-  pip3 install --no-cache-dir zkg btest pre-commit && \
-  cd "${SRC_BASE_DIR}" && \
+  pip3 install --no-cache-dir zkg btest pre-commit
+
+  RUN cd "${SRC_BASE_DIR}" && \
     curl -sSL "https://old.zeek.org/downloads/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
     cd "./zeek-${ZEEK_VERSION}" && \
     bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
@@ -66,8 +67,9 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
     cd build && \
     ninja && \
     ninja install && \
-    zkg autoconfig && \
-    bash /usr/local/bin/zeek_install_plugins.sh && \
+    zkg autoconfig
+
+  RUN bash /usr/local/bin/zeek_install_plugins.sh && \
     bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true" && \
     bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
