@@ -1,4 +1,4 @@
-FROM centos:7 AS build
+FROM amazonlinux:2 AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -20,12 +20,8 @@ ENV ELASTIC_VERSION $ELASTIC_VERSION
 
 USER root
 
-RUN yum install -y epel-release && \
-    yum update -y && \
-    yum install -y curl patch psmisc zip unzip gcc-c++ make moreutils jq && \
-    yum install -y https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm && \
-    yum install -y git && \
-    yum clean all && \
+RUN amazon-linux-extras install -y epel && \
+    yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
     adduser -u ${DEFAULT_UID} -d /home/kibana -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
     mkdir -p /usr/share && \

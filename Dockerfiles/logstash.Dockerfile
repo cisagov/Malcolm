@@ -1,12 +1,30 @@
-FROM centos:7 AS build
+FROM amazonlinux:2 AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-RUN yum install -y epel-release && \
-    yum update -y && \
-    yum install -y java-11-openjdk-devel curl wget tar which \
-                patch libyaml-devel libffi-devel glibc-headers autoconf gcc-c++ glibc-devel \
-                readline-devel zlib-devel openssl-d evel bzip2 automake libtool bison make
+RUN amazon-linux-extras install -y epel && \
+    yum install -y \
+      autoconf \
+      automake \
+      bison \
+      bzip2 \
+      curl \
+      gcc-c++ \
+      glibc-devel \
+      glibc-headers \
+      java-latest-openjdk-devel \
+      libffi-devel \
+      libtool \
+      libyaml-devel \
+      make \
+      openssl-devel \
+      patch \
+      procps \
+      readline-devel \
+      tar \
+      wget \
+      which \
+      zlib-devel
 
 ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
 
