@@ -356,7 +356,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.service:(ssh OR rdp OR rfb OR telnet OR rlogin OR rsh) AND tags:(external_source OR external_destination)\",\"language\":\"kuery\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.service:(ssh OR rdp OR rfb OR telnet OR rlogin OR rsh OR openvpn OR wireguard) AND tags:(external_source OR external_destination)\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },

@@ -12,12 +12,10 @@ ENV SPICY_DIR "/opt/spicy"
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV ZEEK_DIR "/opt/zeek"
 ENV ZEEK_PATCH_DIR "${SRC_BASE_DIR}/zeek-patches"
-ENV ZEEK_SRC_DIR "${SRC_BASE_DIR}/zeek-${ZEEK_VERSION}"
 ENV ZEEK_VERSION "3.0.13"
 
-ENV PATH "${ZEEK_DIR}/bin:${PATH}"
+ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
-ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # empty for now...
 # ADD zeek/patches ${ZEEK_PATCH_DIR}
 
@@ -57,20 +55,28 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
     python3-pip \
     python3-setuptools \
     python3-wheel && \
-  pip3 install --no-cache-dir zkg btest pre-commit
+  pip3 install --no-cache-dir btest pre-commit GitPython semantic-version zkg
 
-  RUN cd "${SRC_BASE_DIR}" && \
+RUN cd "${SRC_BASE_DIR}" && \
     curl -sSL "https://old.zeek.org/downloads/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C "${SRC_BASE_DIR}" && \
-    cd "./zeek-${ZEEK_VERSION}" && \
-    bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
-    ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools && \
-    cd build && \
-    ninja && \
-    ninja install && \
-    zkg autoconfig
+      cd "./zeek-${ZEEK_VERSION}" && \
+      bash -c "for i in ${ZEEK_PATCH_DIR}/* ; do patch -p 1 -r - --no-backup-if-mismatch < \$i || true; done" && \
+      ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools && \
+      cd build && \
+      ninja && \
+      ninja install
 
-  RUN bash /usr/local/bin/zeek_install_plugins.sh && \
-    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true" && \
+RUN cd "${SRC_BASE_DIR}" && \
+    git -c core.askpass=true clone --single-branch --recursive --shallow-submodules https://github.com/zeek/spicy "${SRC_BASE_DIR}"/spicy && \
+      cd ./spicy && \
+      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ninja -j 2 -C build install
+
+ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
+
+RUN zkg autoconfig && \
+    bash /usr/local/bin/zeek_install_plugins.sh && \
+    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rvf '{}' \; 2>/dev/null || true" && \
     bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 FROM debian:buster-slim
@@ -153,17 +159,26 @@ ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 #Update Path
 ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
-# sanity check to make sure the plugins installed and copied over correctly
-# these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 27
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(Bro_LDAP/scripts/main|bzar/main|callstranger|Corelight/PE_XOR/main|cve-2020-0601|CVE-2020-1350|cve-2020-13777|CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20|Salesforce/GQUIC/main|spicy-noise|spicy/main|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|ICSNPP_Bacnet/scripts/consts|ICSNPP_Bsap_ip/scripts/consts|ICSNPP_Bsap_serial/scripts/consts|ICSNPP_Enip/scripts/consts|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/main|Zeek_AF_Packet/scripts/init|zerologon/main)\.(zeek|bro)"
+# sanity checks to make sure the plugins installed and copied over correctly
+# these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 19
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OPENVPN|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|Bro::LDAP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP_IP|ICSNPP::BSAP_SERIAL|ICSNPP::ENIP|Salesforce::GQUIC|Zeek::AF_Packet|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
+ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 13
+ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
-      $ZEEK_DIR/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_GREP_STRING" loaded_scripts.log) == $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat loaded_scripts.log && exit 1)" && \
-      cd /tmp && \
-      rm -rf /tmp/logs /tmp/pcaps
+    $ZEEK_DIR/bin/zeek -NN local >zeeknn.log 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
+    $ZEEK_DIR/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
+    cd /tmp && \
+    rm -rf /tmp/logs /tmp/pcaps
+
+RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
+    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
+    usermod -a -G tty ${PUSER} && \
+    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
@@ -191,29 +206,32 @@ ARG ZEEK_DISABLE_HASH_ALL_FILES=
 ARG ZEEK_DISABLE_LOG_PASSWORDS=
 ARG ZEEK_DISABLE_MQTT=
 ARG ZEEK_DISABLE_PE_XOR=
-ARG ZEEK_DISABLE_QUIC=
 ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
 ARG ZEEK_DISABLE_TELNET=
 ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
-ARG ZEEK_DISABLE_WIREGUARD=
-ARG ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS=
+# TODO: assess spicy-analyzer that replace built-in Zeek parsers
+# for now, disable them by default when a Zeek parser exists
+ARG ZEEK_DISABLE_SPICY_DHCP=true
+ARG ZEEK_DISABLE_SPICY_DNS=true
+ARG ZEEK_DISABLE_SPICY_HTTP=true
+ARG ZEEK_DISABLE_SPICY_OPENVPN=
+ARG ZEEK_DISABLE_SPICY_TFTP=
+ARG ZEEK_DISABLE_SPICY_WIREGUARD=
 
 ENV ZEEK_DISABLE_MITRE_BZAR $ZEEK_DISABLE_MITRE_BZAR
 ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
 ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
 ENV ZEEK_DISABLE_MQTT $ZEEK_DISABLE_MQTT
 ENV ZEEK_DISABLE_PE_XOR $ZEEK_DISABLE_PE_XOR
-ENV ZEEK_DISABLE_QUIC $ZEEK_DISABLE_QUIC
 ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS
 ENV ZEEK_DISABLE_TELNET $ZEEK_DISABLE_TELNET
 ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
-ENV ZEEK_DISABLE_WIREGUARD $ZEEK_DISABLE_WIREGUARD
-ENV ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS $ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS
-
-RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
-    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
-    usermod -a -G tty ${PUSER} && \
-    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
+ENV ZEEK_DISABLE_SPICY_DHCP $ZEEK_DISABLE_SPICY_DHCP
+ENV ZEEK_DISABLE_SPICY_DNS $ZEEK_DISABLE_SPICY_DNS
+ENV ZEEK_DISABLE_SPICY_HTTP $ZEEK_DISABLE_SPICY_HTTP
+ENV ZEEK_DISABLE_SPICY_OPENVPN $ZEEK_DISABLE_SPICY_OPENVPN
+ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
+ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

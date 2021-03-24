@@ -229,7 +229,6 @@ Malcolm leverages the following excellent open source tools, among others.
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * SoftwareConsultingEmporium's [Bro::LDAP](https://github.com/SoftwareConsultingEmporium/ldap-analyzer) analyzer
-    * Verizon Media's [spicy-noise](https://github.com/theparanoids/spicy-noise) WireGuard analyzer plugin
     * Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
@@ -260,6 +259,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |NT Lan Manager (NTLM)|[🔗](https://en.wikipedia.org/wiki/NT_LAN_Manager)|[🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b38c36ed-2804-4868-a9ff-8dd3182128e4?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ntlm/main.zeek.html#type-NTLM::Info)|
 |Network Time Protocol (NTP)|[🔗](https://en.wikipedia.org/wiki/Network_Time_Protocol)|[🔗](http://www.ntp.org)||[✓](https://docs.zeek.org/en/latest/scripts/base/protocols/ntp/main.zeek.html#type-NTP::Info)|
 |Oracle|[🔗](https://en.wikipedia.org/wiki/Oracle_Net_Services)|[🔗](https://docs.oracle.com/cd/E11882_01/network.112/e41945/layers.htm#NETAG004)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/oracle.c)||
+|OpenVPN|[🔗](https://en.wikipedia.org/wiki/OpenVPN)|[🔗](https://openvpn.net/community-resources/openvpn-protocol/)||[✓](https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/openvpn/main.zeek)|
 |PostgreSQL|[🔗](https://en.wikipedia.org/wiki/PostgreSQL)|[🔗](https://www.postgresql.org/)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/postgresql.c)||
 |Process Field Net (PROFINET)|[🔗](https://en.wikipedia.org/wiki/PROFINET)|[🔗](https://us.profinet.com/technology/profinet/)||[✓](https://github.com/amzn/zeek-plugin-profinet/blob/master/scripts/main.zeek)|
 |Remote Authentication Dial-In User Service (RADIUS)|[🔗](https://en.wikipedia.org/wiki/RADIUS)|[🔗](https://tools.ietf.org/html/rfc2865)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/radius.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/radius/main.zeek.html#type-RADIUS::Info)|
@@ -276,8 +276,8 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
 |Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/idaholab/Malcolm/blob/master/zeek/config/login.zeek)|
-|TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-tftp)|
-|WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/theparanoids/spicy-noise/blob/master/zeek/spicy-noise.zeek)|
+|TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/tftp/tftp.zeek)|
+|WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard/main.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
 
 Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).

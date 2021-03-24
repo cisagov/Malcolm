@@ -7,6 +7,9 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
+SPICY_DIR=${SPICY_DIR:-/opt/spicy}
+ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
+
 # some of the packages will install via zkg, so the zkg config file must be present
 # read Zeek paths out of zkg config file for plugins that must be installed manually
 ZKG_CONFIG_FILE="$HOME/.zkg/config"
@@ -71,16 +74,27 @@ function clone_github_repo() {
     SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
     rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
-      git -c core.askpass=true clone --branch "$REPO_LATEST_RELEASE" --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --single-branch --branch "$REPO_LATEST_RELEASE" --recursive --shallow-submodules "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     else
-      git -c core.askpass=true clone --recursive "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      git -c core.askpass=true clone --single-branch --recursive --shallow-submodules "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
     fi
     [ $? -eq 0 ] && echo "$SRC_DIR" || echo "cloning \"$REPO_URL\" failed" >&2
   fi
 }
 
+# install Spicy (if not already installed)
+if [[ ! -d "$SPICY_DIR" ]]; then
+  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
+  if [[ -d "$SRC_DIR" ]]; then
+    CWD="$(pwd)"
+    cd "$SRC_DIR" && \
+      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ninja -j 2 -C build install
+    cd "$CWD"
+  fi
+fi
+
 # install Zeek packages that install nicely using zkg
-# todo: "https://github.com/corelight/zeek-openvpn"
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
@@ -92,10 +106,10 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/CVE-2020-16898"
   "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
+  "https://github.com/corelight/zeek-community-id|3.0.0"
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
-  "https://github.com/corelight/zeek-community-id|3.0.0"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
@@ -171,43 +185,33 @@ ICSNPP_UPDATES_GITHUB_URLS=(
 )
 for i in ${ICSNPP_UPDATES_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
-  [[ -d "$SRC_DIR" ]] && cp -r "$SRC_DIR"/scripts/ /opt/zeek/share/zeek/site/"$(basename "$SRC_DIR")"
+  [[ -d "$SRC_DIR" ]] && cp -r "$SRC_DIR"/scripts/ "$ZEEK_DIR"/share/zeek/site/"$(basename "$SRC_DIR")"
 done
 
-# install Spicy
-SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy")"
+# TODO
+# https://github.com/zeek/spicy-analyzers
+# A collection of zeek-hosted spicy analyzers, some of which
+# "replace" the built-in zeek parsers for those protocols.
+# We need to compare the built-in ones, but use what we're used to until
+# we make the decision with eyes open. As of 2021/03/24, that list is:
+# - DHCP      - compare to Zeek DHCP
+# - DNS       - compare to Zeek DNS
+# - HTTP      - compare to Zeek HTTP
+# - OpenVPN
+# - TFTP
+# - WireGuard
+SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy-analyzers")"
 if [[ -d "$SRC_DIR" ]]; then
   CWD="$(pwd)"
   cd "$SRC_DIR" && \
-    ./configure --generator=Ninja --prefix=/opt/spicy --with-zeek=/opt/zeek --enable-ccache && \
-    ninja -j 2 -C build install
+    mkdir ./build && \
+    cd ./build && \
+    cmake -DCMAKE_INSTALL_PREFIX="$SPICY_DIR" .. && \
+    make -j && \
+    cd .. && \
+    make -C build install
+  mkdir -p -v "$ZEEK_DIR"/share/zeek/site/packages/spicy-analyzers && \
+    cp -vr analyzer/* "$ZEEK_DIR"/share/zeek/site/packages/spicy-analyzers && \
+    ln -sr "$ZEEK_DIR"/share/zeek/site/packages/spicy-analyzers "$ZEEK_DIR"/share/zeek/site/spicy-analyzers
   cd "$CWD"
-fi
-
-if /opt/zeek/bin/zeek -N | grep -q Zeek::Spicy; then
-
-  # spicy-noise
-  SRC_DIR="$(clone_github_repo "https://github.com/theparanoids/spicy-noise")"
-  if [[ -d "$SRC_DIR" ]]; then
-    CWD="$(pwd)"
-    cd "$SRC_DIR" && \
-      /opt/spicy/bin/spicyz -o spicy-noise.hlto spicy-noise.spicy spicy-noise.evt && \
-      cp -f ./spicy-noise.hlto ./zeek/spicy-noise.hlto && \
-      chmod 644 ./zeek/spicy-noise.hlto && \
-      echo '@load /opt/zeek/share/zeek/site/spicy-noise/spicy-noise.hlto' >> ./zeek/__load__.zeek && \
-      cp -vr ./zeek /opt/zeek/share/zeek/site/spicy-noise
-    cd "$CWD"
-  fi
-
-  # spicy-tftp
-  SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy-tftp")"
-  if [[ -d "$SRC_DIR" ]]; then
-    CWD="$(pwd)"
-    cd "$SRC_DIR" && \
-      ./configure --with-spicy=/opt/spicy --zeek-dist="$ZEEK_DIST_DIR" --install-root="$ZEEK_PLUGIN_DIR"
-      make && \
-      make install
-    cd "$CWD"
-  fi
-
 fi

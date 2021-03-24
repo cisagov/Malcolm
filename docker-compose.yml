@@ -65,12 +65,15 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_LOG_PASSWORDS : ''
   ZEEK_DISABLE_MQTT : ''
   ZEEK_DISABLE_PE_XOR : ''
-  ZEEK_DISABLE_QUIC : ''
   ZEEK_DISABLE_SSL_VALIDATE_CERTS : ''
   ZEEK_DISABLE_TELNET : ''
   ZEEK_DISABLE_TRACK_ALL_ASSETS : ''
-  ZEEK_DISABLE_WIREGUARD : ''
-  ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS : 'true'
+  ZEEK_DISABLE_SPICY_DHCP : 'true'
+  ZEEK_DISABLE_SPICY_DNS : 'true'
+  ZEEK_DISABLE_SPICY_HTTP : 'true'
+  ZEEK_DISABLE_SPICY_OPENVPN : ''
+  ZEEK_DISABLE_SPICY_TFTP : ''
+  ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
 x-kibana-helper-variables: &kibana-helper-variables
   ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
@@ -498,7 +501,7 @@ services:
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
-      interval: 30s
+      interval: 60s
       timeout: 15s
       retries: 3
       start_period: 60s

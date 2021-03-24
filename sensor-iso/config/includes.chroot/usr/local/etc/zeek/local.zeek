@@ -9,12 +9,20 @@ global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == "") ? 
 global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F : T;
 global disable_mqtt = (getenv("ZEEK_DISABLE_MQTT") == "") ? F : T;
 global disable_pe_xor = (getenv("ZEEK_DISABLE_PE_XOR") == "") ? F : T;
-global disable_quic = (getenv("ZEEK_DISABLE_QUIC") == "") ? F : T;
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
 global disable_telnet = (getenv("ZEEK_DISABLE_TELNET") == "") ? F : T;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
-global disable_wireguard = (getenv("ZEEK_DISABLE_WIREGUARD") == "") ? F : T;
-global disable_wireguard_transport_packets = (getenv("ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS") == "") ? F : T;
+
+global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
+global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
+global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == "") ? F : T;
+global disable_spicy_openvpn = (getenv("ZEEK_DISABLE_SPICY_OPENVPN") == "") ? F : T;
+global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == "") ? F : T;
+global disable_spicy_wireguard = (getenv("ZEEK_DISABLE_SPICY_WIREGUARD") == "") ? F : T;
+
+
+# see ${ZEEK_DIR}/share/zeek/site/packages/spicy-analyzers/__load__.zeek
+# for similar global direcives for the spicy-analyzers parsers
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
@@ -76,24 +84,8 @@ redef ignore_checksums = T;
   @load ./login.zeek
 @endif
 
-@if (!disable_wireguard)
-  @load ./spicy-noise
-  event zeek_init() &priority=-5 {
-    if (disable_wireguard_transport_packets) {
-      Log::remove_default_filter(WireGuard::WGLOG);
-      Log::add_filter(WireGuard::WGLOG,
-        [$name = "wireguard-verbose",
-         $pred(rec: WireGuard::Info) = { return (rec$msg_type != "TRANSPORT"); }]);
-    }
-  }
-@endif
-
 @if (!disable_pe_xor)
   @load Corelight/PE_XOR
-@endif
-
-@if (!disable_quic)
-  @load Salesforce/GQUIC
 @endif
 
 @if (!disable_bzar)
@@ -106,6 +98,31 @@ redef ignore_checksums = T;
 @load icsnpp/bsap-ip
 @load icsnpp/bsap-serial
 @load icsnpp/enip
+
+@load ./spicy-analyzers
+event zeek_init() &priority=-5 {
+  if (disable_spicy_dhcp) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DHCP);
+  }
+  if (disable_spicy_dns) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DNS);
+  }
+  if (disable_spicy_http) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HTTP);
+  }
+  if (disable_spicy_openvpn) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_TCP_HMAC);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC);
+  }
+  if (disable_spicy_tftp) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_TFTP);
+  }
+  if (disable_spicy_wireguard) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
+  }
+}
 
 # custom packages managed by zkg via packages/packages.zeek
 @load ./packages/packages.zeek

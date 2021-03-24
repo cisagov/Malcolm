@@ -767,22 +767,6 @@ function ZeekLogs (api, section) {
   this.software_version_addlField = this.api.addField("field:zeek_software.version_addl;db:zeek_software.version_addl;kind:termfield;friendly:Additional Version;help:Additional Version");
   this.software_unparsed_versionField = this.api.addField("field:zeek_software.unparsed_version;db:zeek_software.unparsed_version;kind:termfield;friendly:Version;help:Version");
 
-  // spicy-noise.log (renamed to "noise" in Logstash)
-  // https://github.com/theparanoids/spicy-noise/blob/master/zeek/spicy-noise.zeek
-  this.noise_msg_typeField = this.api.addField("field:zeek_noise.msg_type;db:zeek_noise.msg_type;kind:termfield;friendly:Message Type;help:Message Type");
-  this.noise_senderField = this.api.addField("field:zeek_noise.sender;db:zeek_noise.sender;kind:termfield;friendly:Sender;help:Sender");
-  this.noise_receiverField = this.api.addField("field:zeek_noise.receiver;db:zeek_noise.receiver;kind:termfield;friendly:Receiver;help:Receiver");
-  this.noise_unenc_ephemeralField = this.api.addField("field:zeek_noise.unenc_ephemeral;db:zeek_noise.unenc_ephemeral;kind:termfield;friendly:Unencrypted Ephermeral;help:Unencrypted Ephermeral");
-  this.noise_enc_staticField = this.api.addField("field:zeek_noise.enc_static;db:zeek_noise.enc_static;kind:termfield;friendly:Encrypted Static;help:Encrypted Static");
-  this.noise_enc_timestampField = this.api.addField("field:zeek_noise.enc_timestamp;db:zeek_noise.enc_timestamp;kind:termfield;friendly:Encrypted Timestamp;help:Encrypted Timestamp");
-  this.noise_enc_nothingField = this.api.addField("field:zeek_noise.enc_nothing;db:zeek_noise.enc_nothing;kind:termfield;friendly:Encrypted Nothing;help:Encrypted Nothing");
-  this.noise_nonceField = this.api.addField("field:zeek_noise.nonce;db:zeek_noise.nonce;kind:termfield;friendly:Nonce;help:Nonce");
-  this.noise_enc_cookieField = this.api.addField("field:zeek_noise.enc_cookie;db:zeek_noise.enc_cookie;kind:termfield;friendly:Encrypted Cookie;help:Encrypted Cookie");
-  this.noise_mac1Field = this.api.addField("field:zeek_noise.mac1;db:zeek_noise.mac1;kind:termfield;friendly:MAC1;help:MAC1");
-  this.noise_mac2Field = this.api.addField("field:zeek_noise.mac2;db:zeek_noise.mac2;kind:termfield;friendly:MAC2;help:MAC2");
-  this.noise_enc_payload_lenField = this.api.addField("field:zeek_noise.enc_payload_len;db:zeek_noise.enc_payload_len;kind:integer;friendly:Encrypted Payload Length;help:Encrypted Payload Length");
-  this.noise_enc_payloadField = this.api.addField("field:zeek_noise.enc_payload;db:zeek_noise.enc_payload;kind:termfield;friendly:Encrypted Payload;help:Encrypted Payload");
-
   // ssh.log
   // https://docs.zeek.org/en/stable/scripts/base/protocols/ssh/main.zeek.html#type-SSH::Info
   this.ssh_versionField = this.api.addField("field:zeek_ssh.version;db:zeek_ssh.version;kind:integer;friendly:Version;help:Version");
@@ -932,6 +916,12 @@ function ZeekLogs (api, section) {
   this.weird_addlField = this.api.addField("field:zeek_weird.addl;db:zeek_weird.addl;kind:termfield;friendly:Additional Info;help:Additional Info");
   this.weird_noticeField = this.api.addField("field:zeek_weird.notice;db:zeek_weird.notice;kind:termfield;friendly:Notice;help:Generated a notice");
   this.weird_peerField = this.api.addField("field:zeek_weird.peer;db:zeek_weird.peer;kind:termfield;friendly:Remote Peer;help:Remote Peer");
+
+  // wireguard_header.log
+  // https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard
+  this.wireguard_header_packet_typeField = this.api.addField("field:zeek_wireguard_header.packet_type;db:zeek_wireguard_header.packet_type;kind:termfield;friendly:Packet Type;help:Packet Type");
+  this.wireguard_header_sender_indexField = this.api.addField("field:zeek_wireguard_header.sender_index;db:zeek_wireguard_header.sender_index;kind:integer;friendly:Sender Index;help:Sender Index");
+  this.wireguard_header_receiver_indexField = this.api.addField("field:zeek_wireguard_header.receiver_index;db:zeek_wireguard_header.receiver_index;kind:integer;friendly:Receiver Index;help:Receiver Index");
 
   // x509.log
   // https://docs.zeek.org/en/stable/scripts/base/files/x509/main.zeek.html#type-X509::Info
@@ -1347,19 +1337,6 @@ function ZeekLogs (api, section) {
     "zeek_mysql.response",
     "zeek_mysql.rows",
     "zeek_mysql.success",
-    "zeek_noise.msg_type",
-    "zeek_noise.sender",
-    "zeek_noise.receiver",
-    "zeek_noise.unenc_ephemeral",
-    "zeek_noise.enc_static",
-    "zeek_noise.enc_timestamp",
-    "zeek_noise.enc_nothing",
-    "zeek_noise.nonce",
-    "zeek_noise.enc_cookie",
-    "zeek_noise.mac1",
-    "zeek_noise.mac2",
-    "zeek_noise.enc_payload_len",
-    "zeek_noise.enc_payload",
     "zeek_notice.actions",
     "zeek_notice.category",
     "zeek_notice.dropped",
@@ -1696,6 +1673,9 @@ function ZeekLogs (api, section) {
     "zeek_weird.name",
     "zeek_weird.notice",
     "zeek_weird.peer",
+    "zeek_wireguard.packet_type",
+    "zeek_wireguard.sender_index",
+    "zeek_wireguard.receiver_index",
     "zeek_x509.basic_constraints_ca",
     "zeek_x509.basic_constraints_path_len",
     "zeek_x509.certificate_curve",
@@ -1900,7 +1880,6 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_mqtt_publish", "require:zeek_mqtt_publish;title:Zeek mqtt_publish.log;fields:zeek_mqtt_publish.from_client,zeek_mqtt_publish.retain,zeek_mqtt_publish.qos,zeek_mqtt_publish.status,zeek_mqtt_publish.topic,zeek_mqtt_publish.payload,zeek_mqtt_publish.payload_len");
   this.api.addView("zeek_mqtt_subscribe", "require:zeek_mqtt_subscribe;title:Zeek mqtt_subscribe.log;fields:zeek_mqtt_subscribe.action,zeek_mqtt_subscribe.topics,zeek_mqtt_subscribe.qos_levels,zeek_mqtt_subscribe.granted_qos_level,zeek_mqtt_subscribe.ack");
   this.api.addView("zeek_mysql", "require:zeek_mysql;title:Zeek mysql.log;fields:zeek_mysql.cmd,zeek_mysql.arg,zeek_mysql.success,zeek_mysql.rows,zeek_mysql.response");
-  this.api.addView("zeek_noise", "require:zeek_noise;title:Zeek spicy-noise.log;fields:zeek_noise.msg_type,zeek_noise.sender,zeek_noise.receiver,zeek_noise.unenc_ephemeral,zeek_noise.enc_static,zeek_noise.enc_timestamp,zeek_noise.enc_nothing,zeek_noise.nonce,zeek_noise.enc_cookie,zeek_noise.mac1,zeek_noise.mac2,zeek_noise.enc_payload_len,zeek_noise.enc_payload");
   this.api.addView("zeek_notice", "require:zeek_notice;title:Zeek notice.log;fields:zeek_notice.file_mime_type,zeek_notice.file_desc,zeek_notice.note,zeek_notice.msg,zeek_notice.sub,zeek_notice.src,zeek_notice.dst,zeek_notice.p,zeek_notice.n,zeek_notice.peer_descr,zeek_notice.actions,zeek_notice.suppress_for,zeek_notice.dropped,zeek_notice.remote_location_country_code,zeek_notice.remote_location_region,zeek_notice.remote_location_latitude,zeek_notice.remote_location_longitude,zeek_notice.category,zeek_notice.sub_category");
   this.api.addView("zeek_ntlm", "require:zeek_ntlm;title:Zeek ntlm.log;fields:zeek_ntlm.host,zeek_ntlm.domain,zeek_ntlm.success,zeek_ntlm.status,zeek_ntlm.server_nb_computer,zeek_ntlm.server_dns_computer,zeek_ntlm.server_tree");
   this.api.addView("zeek_ntp", "require:zeek_ntp;title:Zeek ntp.log;fields:zeek_ntp.version,zeek_ntp.mode,zeek_ntp.mode_str,zeek_ntp.stratum,zeek_ntp.poll,zeek_ntp.precision,zeek_ntp.root_delay,zeek_ntp.root_disp,zeek_ntp.ref_id,zeek_ntp.ref_time,zeek_ntp.org_time,zeek_ntp.rec_time,zeek_ntp.xmt_time,zeek_ntp.num_exts");
@@ -1929,6 +1908,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_tftp", "require:zeek_tftp;title:Zeek tftp.log;fields:zeek_tftp.block_acked,zeek_tftp.block_sent,zeek_tftp.error_code,zeek_tftp.error_msg,zeek_tftp.fname,zeek_tftp.mode,zeek_tftp.size,zeek_tftp.uid_data,zeek_tftp.wrq");
   this.api.addView("zeek_tunnel", "require:zeek_tunnel;title:Zeek tunnel.log;fields:zeek_tunnel.tunnel_type,zeek_tunnel.action");
   this.api.addView("zeek_weird", "require:zeek_weird;title:Zeek weird.log;fields:zeek_weird.name,zeek_weird.addl,zeek_weird.notice,zeek_weird.peer");
+  this.api.addView("zeek_wireguard", "require:zeek_wireguard;title:Zeek wireguard.log;fields:zeek_wireguard.packet_type,zeek_wireguard.sender_index,zeek_wireguard.receiver_index");
   this.api.addView("zeek_x509", "require:zeek_x509;title:Zeek x509.log;fields:zeek_x509.certificate_version,zeek_x509.certificate_serial,zeek_x509.certificate_subject.CN,zeek_x509.certificate_subject.C,zeek_x509.certificate_subject.O,zeek_x509.certificate_subject.OU,zeek_x509.certificate_subject.ST,zeek_x509.certificate_subject.SN,zeek_x509.certificate_subject.L,zeek_x509.certificate_subject.DC,zeek_x509.certificate_subject.GN,zeek_x509.certificate_subject.pseudonym,zeek_x509.certificate_subject.serialNumber,zeek_x509.certificate_subject.title,zeek_x509.certificate_subject.initials,zeek_x509.certificate_subject.emailAddress,zeek_x509.certificate_subject.description,zeek_x509.certificate_subject.postalCode,zeek_x509.certificate_subject.street,zeek_x509.certificate_issuer.CN,zeek_x509.certificate_issuer.DC,zeek_x509.certificate_issuer.C,zeek_x509.certificate_issuer.O,zeek_x509.certificate_issuer.OU,zeek_x509.certificate_issuer.ST,zeek_x509.certificate_issuer.SN,zeek_x509.certificate_issuer.L,zeek_x509.certificate_issuer.GN,zeek_x509.certificate_issuer.pseudonym,zeek_x509.certificate_issuer.serialNumber,zeek_x509.certificate_issuer.title,zeek_x509.certificate_issuer.initials,zeek_x509.certificate_issuer.emailAddress,zeek_x509.certificate_not_valid_before,zeek_x509.certificate_not_valid_after,zeek_x509.certificate_key_alg,zeek_x509.certificate_sig_alg,zeek_x509.certificate_key_type,zeek_x509.certificate_key_length,zeek_x509.certificate_exponent,zeek_x509.certificate_curve,zeek_x509.san_dns,zeek_x509.san_uri,zeek_x509.san_email,zeek_x509.san_ip,zeek_x509.basic_constraints_ca,zeek_x509.basic_constraints_path_len");
 
   // Add the source as available

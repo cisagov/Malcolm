@@ -1,4 +1,3 @@
-#!/bin/bash
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -31,7 +30,7 @@ mkdir -p /opt/hedgehog_install_artifacts/
 # some environment variables needed for build
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
-export PATH="${ZEEK_DIR}"/bin:$PATH
+export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH
 
 # a moloch .deb is built and installed in a different context
 
@@ -88,7 +87,7 @@ lb_custom.InterfacePrefix=af_packet::
 EOF
 
 # set up default zeek local policy
-cp -f /usr/local/etc/zeek/*.zeek /opt/zeek/share/zeek/site/
+cp -f /usr/local/etc/zeek/*.zeek "${ZEEK_DIR}"/share/zeek/site/
 
 # cleanup
 cd /tmp
