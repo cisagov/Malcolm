@@ -69,7 +69,7 @@ RUN cd "${SRC_BASE_DIR}" && \
 RUN cd "${SRC_BASE_DIR}" && \
     git -c core.askpass=true clone --single-branch --recursive --shallow-submodules https://github.com/zeek/spicy "${SRC_BASE_DIR}"/spicy && \
       cd ./spicy && \
-      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ./configure --build-zeek-plugin=yes --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
       ninja -j 2 -C build install
 
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/

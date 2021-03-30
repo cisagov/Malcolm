@@ -22,8 +22,10 @@ YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
-CAPA_URL="https://github.com/fireeye/capa"
-CAPA_RULES_DIR="/opt/capa-rules"
+CAPA_VERSION="1.6.0"
+CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
+CAPA_DIR="/usr/local/bin"
+CAPA_BIN="${CAPA_DIR}/capa"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
@@ -123,23 +125,21 @@ tar czf yara-rules-hedgehog.tar.gz "$(basename "${YARA_RULES_DIR}")"
 mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
-# capa (installed via pip) rules
+# capa
 cd /tmp
-git clone --depth 1 --single-branch --branch "v$(/usr/local/bin/capa --version 2>&1 | awk '{print $2}')" "${CAPA_URL}" ./capa
-cd ./capa
-git submodule init rules
-git submodule update --depth 1 rules
-cd ../
-rm -rf "${CAPA_RULES_DIR}"
-mv ./capa/rules "${CAPA_RULES_DIR}"
-rm -rf "${CAPA_RULES_DIR}"/.git* ./capa
+rm -rf /tmp/capa*
+curl -fsSL -o ./capa.zip "${CAPA_URL}"
+unzip ./capa.zip
+chmod 755 ./capa
+mkdir -p "${CAPA_DIR}"
+mv ./capa "${CAPA_BIN}"
+rm -rf /tmp/capa*
 
-cd "${CAPA_RULES_DIR}"/..
-tar czf capa-rules-hedgehog.tar.gz "$(basename "${CAPA_RULES_DIR}")"
-mv ./capa-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+cp "${CAPA_BIN}" /opt/hedgehog_install_artifacts/
 
 # update clamav signatures
 freshclam --stdout --quiet --no-warnings
+
 ###
 
 # tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat

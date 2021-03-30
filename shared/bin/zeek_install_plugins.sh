@@ -88,7 +88,7 @@ if [[ ! -d "$SPICY_DIR" ]]; then
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
     cd "$SRC_DIR" && \
-      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ./configure --build-zeek-plugin=yes --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
       ninja -j 2 -C build install
     cd "$CWD"
   fi
