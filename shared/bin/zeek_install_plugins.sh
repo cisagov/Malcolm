@@ -160,12 +160,13 @@ for i in ${MANUAL_BRO_GITHUB_URLS[@]}; do
   fi
 done
 
+# TODO: "https://github.com/mmguero-dev/ldap-analyzer" is just broken right now.
+# memory errors, segfaults etc. disabling for the moment
 MANUAL_ZEEK_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap-ip"
   "https://github.com/cisagov/icsnpp-bsap-serial"
   "https://github.com/cisagov/icsnpp-enip"
-  "https://github.com/mmguero-dev/ldap-analyzer"
 )
 for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
