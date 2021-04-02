@@ -241,6 +241,7 @@ def logs():
   ignoreRegEx = re.compile(r"""
     .+(
         deprecated
+      | DEPRECATION
       | eshealth
       | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | update_mapping
@@ -267,6 +268,7 @@ def logs():
       | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
       | curl.+localhost.+GET\s+/api/status\s+200
+      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
       | \b1.+GET\s+/\s+.+401.+curl
     )
   """, re.VERBOSE | re.IGNORECASE)

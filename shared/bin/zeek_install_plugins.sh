@@ -88,7 +88,7 @@ if [[ ! -d "$SPICY_DIR" ]]; then
   if [[ -d "$SRC_DIR" ]]; then
     CWD="$(pwd)"
     cd "$SRC_DIR" && \
-      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ./configure --build-zeek-plugin=yes --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
       ninja -j 2 -C build install
     cd "$CWD"
   fi
@@ -96,38 +96,35 @@ fi
 
 # install Zeek packages that install nicely using zkg
 
-# TODO check failing unit tests during install for:
-# - zeek-EternalSafety
-# - cve-2020-0601
-
 # TODO
 # https://github.com/zeek/spicy-analyzers
 # A collection of zeek-hosted spicy analyzers, some of which
 # "replace" the built-in zeek parsers for those protocols.
 # We need to compare the built-in ones, but use what we're used to until
-# we make the decision with eyes open. As of 2021/03/04, that list is:
+# we make the decision with eyes open. As of 2021/03/24, that list is:
 # - DHCP      - compare to Zeek DHCP
 # - DNS       - compare to Zeek DNS
 # - HTTP      - compare to Zeek HTTP
+# - OpenVPN
 # - TFTP
+# - WireGuard
 
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
   "https://github.com/0xxon/cve-2020-13777"
+  "https://github.com/amzn/zeek-plugin-profinet"
+  "https://github.com/amzn/zeek-plugin-s7comm"
+  "https://github.com/amzn/zeek-plugin-tds"
   "https://github.com/corelight/callstranger-detector"
   "https://github.com/corelight/CVE-2020-16898"
   "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
   "https://github.com/corelight/zerologon"
-  "https://github.com/corelight/zeek-openvpn"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mitre-attack/bzar"
   "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/zeek-4-compat"
-  "https://github.com/mmguero-dev/zeek-plugin-profinet|topic/zeek-4-compat"
-  "https://github.com/mmguero-dev/zeek-plugin-s7comm|topic/zeek-4-compat"
-  "https://github.com/mmguero-dev/zeek-plugin-tds|topic/zeek-4-compat"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
@@ -140,8 +137,8 @@ done
 
 # manual build processes that don't fit the other patterns
 
-# TODO
-# - there are still some issues with ldap-analyzer, getting some garbage output for some fields
+# TODO: "https://github.com/mmguero-dev/ldap-analyzer" is just broken right now.
+# memory errors, segfaults etc. disabling for the moment
 
 MANUAL_ZEEK_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-bacnet"
@@ -149,7 +146,6 @@ MANUAL_ZEEK_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-bsap-serial"
   "https://github.com/cisagov/icsnpp-enip"
   "https://github.com/corelight/bro-xor-exe-plugin"
-  "https://github.com/mmguero-dev/ldap-analyzer|topic/zeek-4-compat"
 )
 for i in ${MANUAL_ZEEK_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"

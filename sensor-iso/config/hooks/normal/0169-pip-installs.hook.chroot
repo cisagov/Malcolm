@@ -9,5 +9,4 @@ export LANG=C.UTF-8
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   clamd \
   debinterface \
-  flare-capa \
   zkg

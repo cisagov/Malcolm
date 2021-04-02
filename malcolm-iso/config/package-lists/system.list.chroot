@@ -31,8 +31,6 @@ dosfstools
 ebtables
 efibootmgr
 eject
-exfat-fuse
-exfat-utils
 fatresize
 fonts-dejavu
 fuse

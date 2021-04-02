@@ -68,14 +68,14 @@ RUN cd "${SRC_BASE_DIR}" && \
 RUN cd "${SRC_BASE_DIR}" && \
     git -c core.askpass=true clone --single-branch --recursive --shallow-submodules https://github.com/zeek/spicy "${SRC_BASE_DIR}"/spicy && \
       cd ./spicy && \
-      ./configure --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
+      ./configure --build-zeek-plugin=yes --generator=Ninja --prefix="$SPICY_DIR" --with-zeek="$ZEEK_DIR" --enable-ccache && \
       ninja -j 2 -C build install
 
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 RUN echo 'Y' | zkg autoconfig && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
-    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rf '{}' \; 2>/dev/null || true" && \
+    bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rvf '{}' \; 2>/dev/null || true" && \
     bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 FROM debian:buster-slim
@@ -159,17 +159,27 @@ ADD zeek/config/spicy_load.zeek.override ${ZEEK_DIR}/share/zeek/site/packages/sp
 #Update Path
 ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
 
-# sanity check to make sure the plugins installed and copied over correctly
-# these ENVs should match the number of third party plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 31
-ENV ZEEK_THIRD_PARTY_GREP_STRING "(bzar/main|callstranger-detector/callstranger|Corelight/PE_XOR/main|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|hassh/hassh|icsnpp/bacnet/main|icsnpp/bsap-ip/main|icsnpp/bsap-serial/main|icsnpp/enip/main|ja3/ja3|ripple20/ripple20|GQUIC_Protocol_Analyzer/main|SIGRed/CVE-2020-1350|spicy-analyzers/protocol/dhcp/__load__|spicy-analyzers/protocol/dns/__load__|spicy-analyzers/protocol/http/__load__|spicy-analyzers/protocol/tftp/__load__|spicy-analyzers/protocol/wireguard/__load__|zeek-community-id/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-plugin-profinet/main|zeek-plugin-s7comm/main|zeek-plugin-tds/main|zeek-sniffpass/__load__|Zeek_AF_Packet/scripts/init|Zeek_LDAP/scripts/main|Zeek_Spicy/scripts/base/spicy/main|zerologon/main)\.(zeek|bro)"
+# sanity checks to make sure the plugins installed and copied over correctly
+# these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
+# todo: Bro::LDAP is broken right now, disabled
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 18
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OPENVPN|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP_IP|ICSNPP::BSAP_SERIAL|ICSNPP::ENIP|Salesforce::GQUIC|Zeek::AF_Packet|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
+ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 13
+ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
-      $ZEEK_DIR/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_GREP_STRING" loaded_scripts.log) == $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat loaded_scripts.log && exit 1)" && \
-      cd /tmp && \
-      rm -rf /tmp/logs /tmp/pcaps
+    $ZEEK_DIR/bin/zeek -NN local >zeeknn.log 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
+    $ZEEK_DIR/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
+    cd /tmp && \
+    rm -rf /tmp/logs /tmp/pcaps
+
+RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
+    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
+    usermod -a -G tty ${PUSER} && \
+    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
@@ -210,6 +220,7 @@ ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
 ARG ZEEK_DISABLE_SPICY_DHCP=true
 ARG ZEEK_DISABLE_SPICY_DNS=true
 ARG ZEEK_DISABLE_SPICY_HTTP=true
+ARG ZEEK_DISABLE_SPICY_OPENVPN=
 ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
 
@@ -224,6 +235,7 @@ ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
 ENV ZEEK_DISABLE_SPICY_DHCP $ZEEK_DISABLE_SPICY_DHCP
 ENV ZEEK_DISABLE_SPICY_DNS $ZEEK_DISABLE_SPICY_DNS
 ENV ZEEK_DISABLE_SPICY_HTTP $ZEEK_DISABLE_SPICY_HTTP
+ENV ZEEK_DISABLE_SPICY_OPENVPN $ZEEK_DISABLE_SPICY_OPENVPN
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 

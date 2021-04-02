@@ -71,6 +71,7 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_DHCP : 'true'
   ZEEK_DISABLE_SPICY_DNS : 'true'
   ZEEK_DISABLE_SPICY_HTTP : 'true'
+  ZEEK_DISABLE_SPICY_OPENVPN : ''
   ZEEK_DISABLE_SPICY_TFTP : ''
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
@@ -457,7 +458,7 @@ services:
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
-      interval: 30s
+      interval: 60s
       timeout: 15s
       retries: 3
       start_period: 60s
