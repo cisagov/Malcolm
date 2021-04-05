@@ -26,19 +26,20 @@ RUN amazon-linux-extras install -y epel && \
       which \
       zlib-devel
 
-ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
-
 RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -" && \
     /bin/bash -lc "command curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -" && \
     /bin/bash -lc "curl -L get.rvm.io | bash -s stable" && \
     /bin/bash -lc "rvm autolibs fail" && \
-    /bin/bash -lc "rvm install jruby-9.2.13.0" && \
-    /bin/bash -lc "rvm use jruby-9.2.13.0 --default" && \
-    /bin/bash -lc "gem install bundler --no-document" && \
-    cd /opt && \
-      mkdir -p ./logstash-filter-ieee_oui && \
-      curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
-      /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
+    /bin/bash -lc "rvm install jruby-9.2.17.0" && \
+    /bin/bash -lc "rvm use jruby-9.2.17.0 --default" && \
+    /bin/bash -lc "gem install bundler --no-document"
+
+ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
+
+RUN cd /opt && \
+    mkdir -p ./logstash-filter-ieee_oui && \
+    curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
+    /bin/bash -lc "export JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-ieee_oui && ( bundle install || bundle install ) && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
 FROM docker.elastic.co/logstash/logstash-oss:7.10.2
 
