@@ -159,6 +159,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       chmod 755 ./capa && \
       mkdir -p "${CAPA_DIR}" && \
       mv ./capa "${CAPA_BIN}" && \
+      rm -f ./capa.zip && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
@@ -174,7 +175,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
         python3-dev && \
       apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
       apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && \
+      rm -rf /var/lib/apt/lists/* /tmp/* && \
     mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
     curl -s -S -L -o "${CLAMAV_RULES_DIR}"/main.cvd http://database.clamav.net/main.cvd && \
       curl -s -S -L -o "${CLAMAV_RULES_DIR}"/daily.cvd http://database.clamav.net/daily.cvd && \

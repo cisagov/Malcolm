@@ -128,11 +128,10 @@ ZKG_GITHUB_URLS=(
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
-  "https://github.com/zeek/spicy-analyzers"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
-  [[ -d "$SRC_DIR" ]] && zkg install --force "$SRC_DIR"
+  [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
 
 # manual build processes that don't fit the other patterns
@@ -175,5 +174,33 @@ if [[ -d "$SRC_DIR" ]]; then
     ./configure --with-kernel=/usr --install-root="$ZEEK_PLUGIN_DIR" && \
     make && \
     make install
+  cd "$CWD"
+fi
+
+# TODO
+# https://github.com/zeek/spicy-analyzers
+# A collection of zeek-hosted spicy analyzers, some of which
+# "replace" the built-in zeek parsers for those protocols.
+# We need to compare the built-in ones, but use what we're used to until
+# we make the decision with eyes open. As of 2021/03/24, that list is:
+# - DHCP      - compare to Zeek DHCP
+# - DNS       - compare to Zeek DNS
+# - HTTP      - compare to Zeek HTTP
+# - OpenVPN
+# - TFTP
+# - WireGuard
+SRC_DIR="$(clone_github_repo "https://github.com/zeek/spicy-analyzers")"
+if [[ -d "$SRC_DIR" ]]; then
+  CWD="$(pwd)"
+  cd "$SRC_DIR" && \
+    mkdir ./build && \
+    cd ./build && \
+    cmake -DCMAKE_INSTALL_PREFIX="$SPICY_DIR" .. && \
+    make -j && \
+    cd .. && \
+    make -C build install
+  mkdir -p -v "$ZEEK_DIR"/share/zeek/site/packages/spicy-analyzers && \
+    cp -vr analyzer/* "$ZEEK_DIR"/share/zeek/site/packages/spicy-analyzers && \
+    ln -sr "$ZEEK_DIR"/share/zeek/site/packages/spicy-analyzers "$ZEEK_DIR"/share/zeek/site/spicy-analyzers
   cd "$CWD"
 fi

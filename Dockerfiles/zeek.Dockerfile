@@ -154,7 +154,6 @@ ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
-ADD zeek/config/spicy_load.zeek.override ${ZEEK_DIR}/share/zeek/site/packages/spicy-analyzers/__load__.zeek
 
 #Update Path
 ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
@@ -175,11 +174,6 @@ RUN mkdir -p /tmp/logs && \
       bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
     cd /tmp && \
     rm -rf /tmp/logs /tmp/pcaps
-
-RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
-    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
-    usermod -a -G tty ${PUSER} && \
-    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
