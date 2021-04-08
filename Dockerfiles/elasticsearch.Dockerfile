@@ -33,12 +33,17 @@ RUN yum install -y openssl && \
   /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/elasticsearch/config/elasticsearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/elasticsearch/config/elasticsearch.yml && \
-  sed -i "s/\b1000\b/\${PUID:-${DEFAULT_UID}}/g" /usr/local/bin/docker-entrypoint.sh && \
   sed -i '/[^#].*\/usr\/share\/elasticsearch\/bin\/elasticsearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/local/bin/docker-entrypoint.sh
 
 # just used for initial keystore creation
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+
+USER root
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
