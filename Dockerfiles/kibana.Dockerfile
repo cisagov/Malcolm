@@ -61,7 +61,7 @@ RUN eval "$(nodenv init -)" && \
     yarn build --kibana-version "${ELASTIC_VERSION}" && \
     mv ./build/kbnSankeyVis-7.10.2.zip ./build/kbnSankeyVis.zip
 
-FROM amazon/opendistro-for-elasticsearch-kibana:1.13.1
+FROM amazon/opendistro-for-elasticsearch-kibana:1.13.2
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
