@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
-from __future__ import print_function
 import os
 from os.path import splitext
 from tempfile import gettempdir
