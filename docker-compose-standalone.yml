@@ -516,9 +516,9 @@ services:
       - name-map-ui
       - file-monitor
     ports:
-      - "443:443"
-      - "488:488"
-      - "5601:5601"
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:488:488"
+      - "0.0.0.0:5601:5601"
       # - "0.0.0.0:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
