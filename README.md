@@ -778,7 +778,6 @@ In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` 
 
 * **StartTLS**
     - `NGINX_LDAP_TLS_STUNNEL` set to `true` in [`docker-compose.yml`](#DockerComposeYml)
-    - `NGINX_LDAP_TLS_STUNNEL_PROTOCOL` set to `winldap` (for Microsoft Active Directory Domain Services) or `openldap` (for OpenLDAP) in [`docker-compose.yml`](#DockerComposeYml)
     - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
 * **LDAPS**
     - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](#DockerComposeYml)

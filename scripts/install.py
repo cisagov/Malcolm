@@ -448,9 +448,6 @@ class Installer(object):
           elif 'NGINX_BASIC_AUTH' in line:
             # basic (useBasicAuth=true) vs ldap (useBasicAuth=false)
             line = re.sub(r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line)
-          elif 'NGINX_LDAP_TLS_STUNNEL_PROTOCOL' in line:
-            # ldap server type (windldap|openldap) for StartTLS
-            line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL_PROTOCOL\s*:\s*)(\S+)', fr"\g<1>'{ldapServerType}'", line)
           elif 'NGINX_LDAP_TLS_STUNNEL' in line:
             # StartTLS vs. ldap:// or ldaps://
             line = re.sub(r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(((not useBasicAuth) and ldapStartTLS))}", line)
