@@ -17,9 +17,6 @@ x-auth-variables: &auth-variables
   #   For StartTLS, set NGINX_LDAP_TLS_STUNNEL=true to issue the StartTLS command
   #   and use stunnel to tunnel the connection.
   NGINX_LDAP_TLS_STUNNEL : 'false'
-  # When NGINX_LDAP_TLS_STUNNEL=true, which protocol to use when initiating the
-  # "extendedReq(1) LDAP_START_TLS_OID" command: winldap or openldap
-  NGINX_LDAP_TLS_STUNNEL_PROTOCOL : 'winldap'
   # stunnel will require and verify certificates for StartTLS when one or more
   # trusted CA certificate files are placed in the ./nginx/ca-trust directory.
   # For additional security, hostname or IP address checking of the associated
