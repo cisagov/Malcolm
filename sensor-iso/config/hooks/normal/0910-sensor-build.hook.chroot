@@ -72,7 +72,7 @@ ninja install
 # checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
 
 # install 3rd party Zeek plugins and scripts
-echo 'Y' | zkg autoconfig
+zkg autoconfig --force
 bash /usr/local/bin/zeek_install_plugins.sh
 rm -Rf /root/.zkg /usr/local/src/*/.git
 
