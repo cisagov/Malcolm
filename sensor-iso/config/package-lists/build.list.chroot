@@ -10,6 +10,8 @@ libclang1-11
 libfl-dev
 libfl2
 libgoogle-perftools4
+libjansson-dev
+libjansson4
 libmaxminddb-dev
 libmaxminddb0
 libpcap-dev

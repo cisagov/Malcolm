@@ -69,7 +69,6 @@ less
 libatomic1
 libffi6
 libgtk2.0-bin
-libjansson4
 libjson-perl
 libkrb5-3
 liblsan0
