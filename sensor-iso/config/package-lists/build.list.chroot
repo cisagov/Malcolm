@@ -12,6 +12,8 @@ libfl2
 libgoogle-perftools4
 libjansson-dev
 libjansson4
+libmagic-dev
+libmagic1
 libmaxminddb-dev
 libmaxminddb0
 libpcap-dev

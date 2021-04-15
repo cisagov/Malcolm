@@ -71,8 +71,6 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       libclang-${LLVM_VERSION}-dev \
       libfl-dev \
       libgoogle-perftools4 \
-      libjansson-dev \
-      libjansson4 \
       libkrb5-3 \
       libmaxminddb-dev \
       libmaxminddb0 \
