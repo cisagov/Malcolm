@@ -36,6 +36,9 @@ CAPA_BIN="${CAPA_DIR}/capa"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
+# install a newer cmake from backports
+apt-get -q update
+apt-get install -q -y -t buster-backports --no-install-recommends cmake
 
 # a moloch .deb is built and installed in a different context
 
@@ -82,6 +85,9 @@ cd /tmp
 zkg autoconfig --force
 zkg install --force --skiptests zeek/spicy-plugin
 bash /usr/local/bin/zeek_install_plugins.sh
+for FILE in /opt/zeek/var/lib/zkg/logs/*; do
+  [[ -r "$FILE" ]] && echo "$FILE" && cat "$FILE" && echo ""
+done
 
 # cleanup/strip build artifacts
 find "${ZEEK_DIR}"/lib -type d -name CMakeFiles -exec rm -rf "{}" \; 2>/dev/null || true

@@ -1,5 +1,6 @@
 bison
 ccache
+checkinstall
 clang-11
 cmake
 git
