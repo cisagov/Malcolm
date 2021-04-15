@@ -96,6 +96,7 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       supervisor \
       vim-tiny \
       zlib1g-dev && \
+    python3 -m pip install --no-cache-dir pyzmq && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
