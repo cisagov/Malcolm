@@ -58,7 +58,7 @@ cd /usr/local/src/zeek-patches
 for i in ${ZEEK_PATCH_URLS[@]}; do
   curl -L -J -O "$i"
 done
-cd /tmp
+cd /usr/local/src
 curl -L -o zeek-$ZEEK_VER.tar.gz "$ZEEK_URL"
 tar -xvzf zeek-$ZEEK_VER.tar.gz
 cd zeek-$ZEEK_VER
@@ -74,14 +74,21 @@ ninja install
 # install 3rd party Zeek plugins and scripts
 zkg autoconfig --force
 bash /usr/local/bin/zeek_install_plugins.sh
-rm -Rf /root/.zkg /usr/local/src/*/.git
+
+# remove clone/build artifacts
+find "${ZEEK_DIR}"/lib -type d -name CMakeFiles -exec rm -rvf '{}' \; 2>/dev/null || true
+find "${ZEEK_DIR}"/var/lib/zkg -type d -name build -exec rm -rvf '{}' \; 2>/dev/null || true
+find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -exec rm -rvf '{}' \; 2>/dev/null || true
+find /usr/local/src -type d -name .git -exec rm -rvf '{}' \; 2>/dev/null || true
+rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch
 
 # strip for file size
 file "${ZEEK_DIR}"/{lib,bin}/* \
      "${ZEEK_DIR}"/lib/zeek/plugins/packages/*/lib/* \
      "${ZEEK_DIR}"/lib/zeek/plugins/*/lib/* \
      "${SPICY_DIR}"/{lib,bin}/* \
-     "${SPICY_DIR}"/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded
+     "${SPICY_DIR}"/lib/spicy/Zeek_Spicy/lib/* | grep -Pi 'ELF 64-bit.*not stripped' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded
+
 
 cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
 # all interfaces using lb_method=custom should use AF_PACKET
@@ -93,7 +100,7 @@ EOF
 cp -f /usr/local/etc/zeek/*.zeek "${ZEEK_DIR}"/share/zeek/site/
 
 # cleanup
-cd /tmp
+cd /usr/local/src
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
 mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*

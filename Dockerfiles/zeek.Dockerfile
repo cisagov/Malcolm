@@ -33,6 +33,7 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
         git \
         google-perftools \
         jq \
+        libcap2-bin \
         libfl-dev \
         libgoogle-perftools-dev \
         libkrb5-dev \
@@ -76,7 +77,10 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 RUN zkg autoconfig --force && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
     bash -c "find ${ZEEK_DIR}/lib -type d -name CMakeFiles -exec rm -rvf '{}' \; 2>/dev/null || true" && \
-    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
+    bash -c "find ${ZEEK_DIR}/var/lib/zkg -type d -name build -exec rm -rvf '{}' \; 2>/dev/null || true" && \
+    bash -c "find ${ZEEK_DIR}/var/lib/zkg/clones -type d -name .git -exec rm -rvf '{}' \; 2>/dev/null || true" && \
+    rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch && \
+    bash -c "file ${ZEEK_DIR}/{lib,bin}/* ${ZEEK_DIR}/lib/zeek/plugins/packages/*/lib/* ${ZEEK_DIR}/lib/zeek/plugins/*/lib/* ${SPICY_DIR}/{lib,bin}/* ${SPICY_DIR}/lib/spicy/Zeek_Spicy/lib/* | grep -Pi 'ELF 64-bit.*not stripped' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 FROM debian:buster-slim
 
@@ -140,7 +144,7 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       python3-pip \
       python3-setuptools \
       python3-wheel && \
-    pip3 install --no-cache-dir pyzmq && \
+    pip3 install --no-cache-dir pyzmq GitPython semantic-version && \
     bash -c "( find /opt/zeek/ -type l ! -exec test -r {} \; -print | xargs -r -l rm -vf ) || true" && \
     apt-get -q -y --purge remove libssl-dev && \
       apt-get -q -y autoremove && \
