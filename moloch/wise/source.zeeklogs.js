@@ -281,6 +281,80 @@ function ZeekLogs (api, section) {
   this.enip_sender_contextField = this.api.addField("field:zeek_enip.sender_context;db:zeek_enip.sender_context;kind:termfield;friendly:Sender Context;help:Sender Context");
   this.enip_optionsField = this.api.addField("field:zeek_enip.options;db:zeek_enip.options;kind:termfield;friendly:Options;help:Options");
 
+  // TODO: put in friendly descriptions for ECAT and integers
+
+  // ecat_registers.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_registers_commandField = this.api.addField("field:zeek_ecat_registers.command;db:zeek_ecat_registers.command;kind:termfield;friendly:command;help:command");
+  this.ecat_registers_slave_addrField = this.api.addField("field:zeek_ecat_registers.slave_addr;db:zeek_ecat_registers.slave_addr;kind:termfield;friendly:slave_addr;help:slave_addr");
+  this.ecat_registers_register_typeField = this.api.addField("field:zeek_ecat_registers.register_type;db:zeek_ecat_registers.register_type;kind:termfield;friendly:register_type;help:register_type");
+  this.ecat_registers_register_addrField = this.api.addField("field:zeek_ecat_registers.register_addr;db:zeek_ecat_registers.register_addr;kind:termfield;friendly:register_addr;help:register_addr");
+  this.ecat_registers_dataField = this.api.addField("field:zeek_ecat_registers.data;db:zeek_ecat_registers.data;kind:termfield;friendly:data;help:data");
+
+  // ecat_log_address.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_log_address_log_addrField = this.api.addField("field:zeek_ecat_log_address.log_addr;db:zeek_ecat_log_address.log_addr;kind:termfield;friendly:log_addr;help:log_addr");
+  this.ecat_log_address_lengthField = this.api.addField("field:zeek_ecat_log_address.length;db:zeek_ecat_log_address.length;kind:termfield;friendly:length;help:length");
+  this.ecat_log_address_commandField = this.api.addField("field:zeek_ecat_log_address.command;db:zeek_ecat_log_address.command;kind:termfield;friendly:command;help:command");
+  this.ecat_log_address_dataField = this.api.addField("field:zeek_ecat_log_address.data;db:zeek_ecat_log_address.data;kind:termfield;friendly:data;help:data");
+
+  // ecat_dev_info.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_dev_info_slave_idField = this.api.addField("field:zeek_ecat_dev_info.slave_id;db:zeek_ecat_dev_info.slave_id;kind:termfield;friendly:slave_id;help:slave_id");
+  this.ecat_dev_info_revisionField = this.api.addField("field:zeek_ecat_dev_info.revision;db:zeek_ecat_dev_info.revision;kind:termfield;friendly:revision;help:revision");
+  this.ecat_dev_info_dev_typeField = this.api.addField("field:zeek_ecat_dev_info.dev_type;db:zeek_ecat_dev_info.dev_type;kind:termfield;friendly:dev_type;help:dev_type");
+  this.ecat_dev_info_buildField = this.api.addField("field:zeek_ecat_dev_info.build;db:zeek_ecat_dev_info.build;kind:termfield;friendly:build;help:build");
+  this.ecat_dev_info_fmmucntField = this.api.addField("field:zeek_ecat_dev_info.fmmucnt;db:zeek_ecat_dev_info.fmmucnt;kind:termfield;friendly:fmmucnt;help:fmmucnt");
+  this.ecat_dev_info_smcountField = this.api.addField("field:zeek_ecat_dev_info.smcount;db:zeek_ecat_dev_info.smcount;kind:termfield;friendly:smcount;help:smcount");
+  this.ecat_dev_info_portsField = this.api.addField("field:zeek_ecat_dev_info.ports;db:zeek_ecat_dev_info.ports;kind:termfield;friendly:ports;help:ports");
+  this.ecat_dev_info_dpramField = this.api.addField("field:zeek_ecat_dev_info.dpram;db:zeek_ecat_dev_info.dpram;kind:termfield;friendly:dpram;help:dpram");
+  this.ecat_dev_info_featuresField = this.api.addField("field:zeek_ecat_dev_info.features;db:zeek_ecat_dev_info.features;kind:termfield;friendly:features;help:features");
+
+  // ecat_aoe_info.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_aoe_info_resp_idField = this.api.addField("field:zeek_ecat_aoe_info.resp_id;db:zeek_ecat_aoe_info.resp_id;kind:termfield;friendly:resp_id;help:resp_id");
+  this.ecat_aoe_info_resp_portField = this.api.addField("field:zeek_ecat_aoe_info.resp_port;db:zeek_ecat_aoe_info.resp_port;kind:termfield;friendly:resp_port;help:resp_port");
+  this.ecat_aoe_info_orig_idField = this.api.addField("field:zeek_ecat_aoe_info.orig_id;db:zeek_ecat_aoe_info.orig_id;kind:termfield;friendly:orig_id;help:orig_id");
+  this.ecat_aoe_info_orig_portField = this.api.addField("field:zeek_ecat_aoe_info.orig_port;db:zeek_ecat_aoe_info.orig_port;kind:termfield;friendly:orig_port;help:orig_port");
+  this.ecat_aoe_info_commandField = this.api.addField("field:zeek_ecat_aoe_info.command;db:zeek_ecat_aoe_info.command;kind:termfield;friendly:command;help:command");
+  this.ecat_aoe_info_stateField = this.api.addField("field:zeek_ecat_aoe_info.state;db:zeek_ecat_aoe_info.state;kind:termfield;friendly:state;help:state");
+  this.ecat_aoe_info_dataField = this.api.addField("field:zeek_ecat_aoe_info.data;db:zeek_ecat_aoe_info.data;kind:termfield;friendly:data;help:data");
+
+  // ecat_coe_info.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_coe_info_numberField = this.api.addField("field:zeek_ecat_coe_info.number;db:zeek_ecat_coe_info.number;kind:termfield;friendly:number;help:number");
+  this.ecat_coe_info_typeField = this.api.addField("field:zeek_ecat_coe_info.type;db:zeek_ecat_coe_info.type;kind:termfield;friendly:type;help:type");
+  this.ecat_coe_info_req_respField = this.api.addField("field:zeek_ecat_coe_info.req_resp;db:zeek_ecat_coe_info.req_resp;kind:termfield;friendly:req_resp;help:req_resp");
+  this.ecat_coe_info_indexField = this.api.addField("field:zeek_ecat_coe_info.index;db:zeek_ecat_coe_info.index;kind:termfield;friendly:index;help:index");
+  this.ecat_coe_info_subindexField = this.api.addField("field:zeek_ecat_coe_info.subindex;db:zeek_ecat_coe_info.subindex;kind:termfield;friendly:subindex;help:subindex");
+  this.ecat_coe_info_dataoffsetField = this.api.addField("field:zeek_ecat_coe_info.dataoffset;db:zeek_ecat_coe_info.dataoffset;kind:termfield;friendly:dataoffset;help:dataoffset");
+
+  // ecat_foe_info.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_foe_info_opcodeField = this.api.addField("field:zeek_ecat_foe_info.opcode;db:zeek_ecat_foe_info.opcode;kind:termfield;friendly:opcode;help:opcode");
+  this.ecat_foe_info_reservedField = this.api.addField("field:zeek_ecat_foe_info.reserved;db:zeek_ecat_foe_info.reserved;kind:termfield;friendly:reserved;help:reserved");
+  this.ecat_foe_info_packet_numField = this.api.addField("field:zeek_ecat_foe_info.packet_num;db:zeek_ecat_foe_info.packet_num;kind:termfield;friendly:packet_num;help:packet_num");
+  this.ecat_foe_info_error_codeField = this.api.addField("field:zeek_ecat_foe_info.error_code;db:zeek_ecat_foe_info.error_code;kind:termfield;friendly:error_code;help:error_code");
+  this.ecat_foe_info_filenameField = this.api.addField("field:zeek_ecat_foe_info.filename;db:zeek_ecat_foe_info.filename;kind:termfield;friendly:filename;help:filename");
+  this.ecat_foe_info_dataField = this.api.addField("field:zeek_ecat_foe_info.data;db:zeek_ecat_foe_info.data;kind:termfield;friendly:data;help:data");
+
+  // ecat_soe_info.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_soe_info_opcodeField = this.api.addField("field:zeek_ecat_soe_info.opcode;db:zeek_ecat_soe_info.opcode;kind:termfield;friendly:opcode;help:opcode");
+  this.ecat_soe_info_incompleteField = this.api.addField("field:zeek_ecat_soe_info.incomplete;db:zeek_ecat_soe_info.incomplete;kind:termfield;friendly:incomplete;help:incomplete");
+  this.ecat_soe_info_errorField = this.api.addField("field:zeek_ecat_soe_info.error;db:zeek_ecat_soe_info.error;kind:termfield;friendly:error;help:error");
+  this.ecat_soe_info_drive_numField = this.api.addField("field:zeek_ecat_soe_info.drive_num;db:zeek_ecat_soe_info.drive_num;kind:termfield;friendly:drive_num;help:drive_num");
+  this.ecat_soe_info_elementField = this.api.addField("field:zeek_ecat_soe_info.element;db:zeek_ecat_soe_info.element;kind:termfield;friendly:element;help:element");
+  this.ecat_soe_info_indexField = this.api.addField("field:zeek_ecat_soe_info.index;db:zeek_ecat_soe_info.index;kind:termfield;friendly:index;help:index");
+
+  // ecat_arp_info.log
+  // https://github.com/cisagov/ICSNPP
+  this.ecat_arp_info_arp_typeField = this.api.addField("field:zeek_ecat_arp_info.arp_type;db:zeek_ecat_arp_info.arp_type;kind:termfield;friendly:arp_type;help:arp_type");
+  this.ecat_arp_info_orig_proto_addrField = this.api.addField("field:zeek_ecat_arp_info.orig_proto_addr;db:zeek_ecat_arp_info.orig_proto_addr;kind:termfield;friendly:orig_proto_addr;help:orig_proto_addr");
+  this.ecat_arp_info_orig_hw_addrField = this.api.addField("field:zeek_ecat_arp_info.orig_hw_addr;db:zeek_ecat_arp_info.orig_hw_addr;kind:termfield;friendly:orig_hw_addr;help:orig_hw_addr");
+  this.ecat_arp_info_resp_proto_addrField = this.api.addField("field:zeek_ecat_arp_info.resp_proto_addr;db:zeek_ecat_arp_info.resp_proto_addr;kind:termfield;friendly:resp_proto_addr;help:resp_proto_addr");
+  this.ecat_arp_info_resp_hw_addrField = this.api.addField("field:zeek_ecat_arp_info.resp_hw_addr;db:zeek_ecat_arp_info.resp_hw_addr;kind:termfield;friendly:resp_hw_addr;help:resp_hw_addr");
+
   // files.log
   // https://docs.zeek.org/en/stable/scripts/base/frameworks/files/main.zeek.html#type-Files::Info
   this.files_tx_hostsField = this.api.addField("field:zeek_files.tx_hosts;db:zeek_files.tx_hosts;kind:termfield;friendly:Transmitter;help:Transmitter");
@@ -366,6 +440,33 @@ function ZeekLogs (api, section) {
   this.intel_sourcesField = this.api.addField("field:zeek_intel.sources;db:zeek_intel.sources;kind:termfield;friendly:Match Source;help:Match Source");
   this.intel_file_mime_typeField = this.api.addField("field:zeek_intel.file_mime_type;db:zeek_intel.file_mime_type;kind:termfield;friendly:File Magic;help:File Magic");
   this.intel_file_descriptionField = this.api.addField("field:zeek_intel.file_description;db:zeek_intel.file_description;kind:termfield;friendly:File Description;help:File Description");
+
+  // TODO: put in friendly descriptions for IPSEC and integers
+
+  // ipsec.log
+  // https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/ipsec/main.zeek
+  this.ipsec_is_origField = this.api.addField("field:zeek_ipsec.is_orig;db:zeek_ipsec.is_orig;kind:termfield;friendly:is_orig;help:is_orig");
+  this.ipsec_initiator_spiField = this.api.addField("field:zeek_ipsec.initiator_spi;db:zeek_ipsec.initiator_spi;kind:termfield;friendly:initiator_spi;help:initiator_spi");
+  this.ipsec_responder_spiField = this.api.addField("field:zeek_ipsec.responder_spi;db:zeek_ipsec.responder_spi;kind:termfield;friendly:responder_spi;help:responder_spi");
+  this.ipsec_maj_verField = this.api.addField("field:zeek_ipsec.maj_ver;db:zeek_ipsec.maj_ver;kind:termfield;friendly:maj_ver;help:maj_ver");
+  this.ipsec_min_verField = this.api.addField("field:zeek_ipsec.min_ver;db:zeek_ipsec.min_ver;kind:termfield;friendly:min_ver;help:min_ver");
+  this.ipsec_exchange_typeField = this.api.addField("field:zeek_ipsec.exchange_type;db:zeek_ipsec.exchange_type;kind:termfield;friendly:exchange_type;help:exchange_type");
+  this.ipsec_flag_eField = this.api.addField("field:zeek_ipsec.flag_e;db:zeek_ipsec.flag_e;kind:termfield;friendly:flag_e;help:flag_e");
+  this.ipsec_flag_cField = this.api.addField("field:zeek_ipsec.flag_c;db:zeek_ipsec.flag_c;kind:termfield;friendly:flag_c;help:flag_c");
+  this.ipsec_flag_aField = this.api.addField("field:zeek_ipsec.flag_a;db:zeek_ipsec.flag_a;kind:termfield;friendly:flag_a;help:flag_a");
+  this.ipsec_flag_iField = this.api.addField("field:zeek_ipsec.flag_i;db:zeek_ipsec.flag_i;kind:termfield;friendly:flag_i;help:flag_i");
+  this.ipsec_flag_vField = this.api.addField("field:zeek_ipsec.flag_v;db:zeek_ipsec.flag_v;kind:termfield;friendly:flag_v;help:flag_v");
+  this.ipsec_flag_rField = this.api.addField("field:zeek_ipsec.flag_r;db:zeek_ipsec.flag_r;kind:termfield;friendly:flag_r;help:flag_r");
+  this.ipsec_message_idField = this.api.addField("field:zeek_ipsec.message_id;db:zeek_ipsec.message_id;kind:termfield;friendly:message_id;help:message_id");
+  this.ipsec_vendor_idsField = this.api.addField("field:zeek_ipsec.vendor_ids;db:zeek_ipsec.vendor_ids;kind:termfield;friendly:vendor_ids;help:vendor_ids");
+  this.ipsec_notify_messagesField = this.api.addField("field:zeek_ipsec.notify_messages;db:zeek_ipsec.notify_messages;kind:termfield;friendly:notify_messages;help:notify_messages");
+  this.ipsec_transformsField = this.api.addField("field:zeek_ipsec.transforms;db:zeek_ipsec.transforms;kind:termfield;friendly:transforms;help:transforms");
+  this.ipsec_ke_dh_groupsField = this.api.addField("field:zeek_ipsec.ke_dh_groups;db:zeek_ipsec.ke_dh_groups;kind:termfield;friendly:ke_dh_groups;help:ke_dh_groups");
+  this.ipsec_proposalsField = this.api.addField("field:zeek_ipsec.proposals;db:zeek_ipsec.proposals;kind:termfield;friendly:proposals;help:proposals");
+  this.ipsec_certificatesField = this.api.addField("field:zeek_ipsec.certificates;db:zeek_ipsec.certificates;kind:termfield;friendly:certificates;help:certificates");
+  this.ipsec_transform_attributesField = this.api.addField("field:zeek_ipsec.transform_attributes;db:zeek_ipsec.transform_attributes;kind:termfield;friendly:transform_attributes;help:transform_attributes");
+  this.ipsec_lengthField = this.api.addField("field:zeek_ipsec.length;db:zeek_ipsec.length;kind:termfield;friendly:length;help:length");
+  this.ipsec_hashField = this.api.addField("field:zeek_ipsec.hash;db:zeek_ipsec.hash;kind:termfield;friendly:hash;help:hash");
 
   // irc.log
   // https://docs.zeek.org/en/stable/scripts/base/protocols/irc/main.zeek.html#type-IRC::Info
@@ -1175,6 +1276,54 @@ function ZeekLogs (api, section) {
     "zeek_dns.Z",
     "zeek_dpd.failure_reason",
     "zeek_dpd.service",
+    "zeek_ecat_aoe_info.command",
+    "zeek_ecat_aoe_info.data",
+    "zeek_ecat_aoe_info.orig_id",
+    "zeek_ecat_aoe_info.orig_port",
+    "zeek_ecat_aoe_info.resp_id",
+    "zeek_ecat_aoe_info.resp_port",
+    "zeek_ecat_aoe_info.state",
+    "zeek_ecat_arp_info.arp_type",
+    "zeek_ecat_arp_info.orig_hw_addr",
+    "zeek_ecat_arp_info.orig_proto_addr",
+    "zeek_ecat_arp_info.resp_hw_addr",
+    "zeek_ecat_arp_info.resp_proto_addr",
+    "zeek_ecat_coe_info.dataoffset",
+    "zeek_ecat_coe_info.index",
+    "zeek_ecat_coe_info.number",
+    "zeek_ecat_coe_info.req_resp",
+    "zeek_ecat_coe_info.subindex",
+    "zeek_ecat_coe_info.type",
+    "zeek_ecat_dev_info.build",
+    "zeek_ecat_dev_info.dev_type",
+    "zeek_ecat_dev_info.dpram",
+    "zeek_ecat_dev_info.features",
+    "zeek_ecat_dev_info.fmmucnt",
+    "zeek_ecat_dev_info.ports",
+    "zeek_ecat_dev_info.revision",
+    "zeek_ecat_dev_info.slave_id",
+    "zeek_ecat_dev_info.smcount",
+    "zeek_ecat_foe_info.data",
+    "zeek_ecat_foe_info.error_code",
+    "zeek_ecat_foe_info.filename",
+    "zeek_ecat_foe_info.opcode",
+    "zeek_ecat_foe_info.packet_num",
+    "zeek_ecat_foe_info.reserved",
+    "zeek_ecat_log_address.command",
+    "zeek_ecat_log_address.data",
+    "zeek_ecat_log_address.length",
+    "zeek_ecat_log_address.log_addr",
+    "zeek_ecat_registers.command",
+    "zeek_ecat_registers.data",
+    "zeek_ecat_registers.register_addr",
+    "zeek_ecat_registers.register_type",
+    "zeek_ecat_registers.slave_addr",
+    "zeek_ecat_soe_info.drive_num",
+    "zeek_ecat_soe_info.element",
+    "zeek_ecat_soe_info.error",
+    "zeek_ecat_soe_info.incomplete",
+    "zeek_ecat_soe_info.index",
+    "zeek_ecat_soe_info.opcode",
     "zeek_enip.enip_command",
     "zeek_enip.enip_status",
     "zeek_enip.length",
@@ -1252,6 +1401,28 @@ function ZeekLogs (api, section) {
     "zeek_intel.seen_node",
     "zeek_intel.seen_where",
     "zeek_intel.sources",
+    'zeek_ipsec.is_orig',
+    'zeek_ipsec.initiator_spi',
+    'zeek_ipsec.responder_spi',
+    'zeek_ipsec.maj_ver',
+    'zeek_ipsec.min_ver',
+    'zeek_ipsec.exchange_type',
+    'zeek_ipsec.flag_e',
+    'zeek_ipsec.flag_c',
+    'zeek_ipsec.flag_a',
+    'zeek_ipsec.flag_i',
+    'zeek_ipsec.flag_v',
+    'zeek_ipsec.flag_r',
+    'zeek_ipsec.message_id',
+    'zeek_ipsec.vendor_ids',
+    'zeek_ipsec.notify_messages',
+    'zeek_ipsec.transforms',
+    'zeek_ipsec.ke_dh_groups',
+    'zeek_ipsec.proposals',
+    'zeek_ipsec.certificates',
+    'zeek_ipsec.transform_attributes',
+    'zeek_ipsec.length',
+    'zeek_ipsec.hash',
     "zeek_irc.addl",
     "zeek_irc.command",
     "zeek_irc.dcc_file_name",
@@ -1858,12 +2029,21 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_dnp3_objects", "require:zeek_dnp3_objects;title:Zeek dnp3_objects.log;fields:zeek_dnp3_objects.function_code,zeek_dnp3_objects.object_type,zeek_dnp3_objects.object_count,zeek_dnp3_objects.range_low,zeek_dnp3_objects.range_high");
   this.api.addView("zeek_dns", "require:zeek_dns;title:Zeek dns.log;fields:zeek_dns.trans_id,zeek_dns.rtt,zeek_dns.query,zeek_dns.qclass,zeek_dns.qclass_name,zeek_dns.qtype,zeek_dns.qtype_name,zeek_dns.rcode,zeek_dns.rcode_name,zeek_dns.AA,zeek_dns.TC,zeek_dns.RD,zeek_dns.RA,zeek_dns.Z,zeek_dns.answers,zeek_dns.TTLs,zeek_dns.rejected");
   this.api.addView("zeek_dpd", "require:zeek_dpd;title:Zeek dpd.log;fields:zeek_dpd.service,zeek_dpd.failure_reason");
+  this.api.addView("zeek_ecat_registers", "require:zeek_ecat_registers;title:Zeek ecat_registers.log;fields:zeek_ecat_registers.command,zeek_ecat_registers.slave_addr,zeek_ecat_registers.register_type,zeek_ecat_registers.register_addr,zeek_ecat_registers.data");
+  this.api.addView("zeek_ecat_log_address", "require:zeek_ecat_log_address;title:Zeek ecat_log_address.log;fields:zeek_ecat_log_address.log_addr,zeek_ecat_log_address.length,zeek_ecat_log_address.command,zeek_ecat_log_address.data");
+  this.api.addView("zeek_ecat_dev_info", "require:zeek_ecat_dev_info;title:Zeek ecat_dev_info.log;fields:zeek_ecat_dev_info.slave_id,zeek_ecat_dev_info.revision,zeek_ecat_dev_info.dev_type,zeek_ecat_dev_info.build,zeek_ecat_dev_info.fmmucnt,zeek_ecat_dev_info.smcount,zeek_ecat_dev_info.ports,zeek_ecat_dev_info.dpram,zeek_ecat_dev_info.features");
+  this.api.addView("zeek_ecat_aoe_info", "require:zeek_ecat_aoe_info;title:Zeek ecat_aoe_info.log;fields:zeek_ecat_aoe_info.resp_id,zeek_ecat_aoe_info.resp_port,zeek_ecat_aoe_info.orig_id,zeek_ecat_aoe_info.orig_port,zeek_ecat_aoe_info.command,zeek_ecat_aoe_info.state,zeek_ecat_aoe_info.data");
+  this.api.addView("zeek_ecat_coe_info", "require:zeek_ecat_coe_info;title:Zeek ecat_coe_info.log;fields:zeek_ecat_coe_info.number,zeek_ecat_coe_info.type,zeek_ecat_coe_info.req_resp,zeek_ecat_coe_info.index,zeek_ecat_coe_info.subindex,zeek_ecat_coe_info.dataoffset");
+  this.api.addView("zeek_ecat_foe_info", "require:zeek_ecat_foe_info;title:Zeek ecat_foe_info.log;fields:zeek_ecat_foe_info.opcode,zeek_ecat_foe_info.reserved,zeek_ecat_foe_info.packet_num,zeek_ecat_foe_info.error_code,zeek_ecat_foe_info.filename,zeek_ecat_foe_info.data");
+  this.api.addView("zeek_ecat_soe_info", "require:zeek_ecat_soe_info;title:Zeek ecat_soe_info.log;fields:zeek_ecat_soe_info.opcode,zeek_ecat_soe_info.incomplete,zeek_ecat_soe_info.error,zeek_ecat_soe_info.drive_num,zeek_ecat_soe_info.element,zeek_ecat_soe_info.index");
+  this.api.addView("zeek_ecat_arp_info", "require:zeek_ecat_arp_info;title:Zeek ecat_arp_info.log;fields:zeek_ecat_arp_info.arp_type,zeek_ecat_arp_info.orig_proto_addr,zeek_ecat_arp_info.orig_hw_addr,zeek_ecat_arp_info.resp_proto_addr,zeek_ecat_arp_info.resp_hw_addr");
   this.api.addView("zeek_enip", "require:zeek_enip;title:Zeek enip.log;fields:zeek_enip.enip_command,zeek_enip.length,zeek_enip.session_handle,zeek_enip.enip_status,zeek_enip.sender_context,zeek_enip.options");
   this.api.addView("zeek_files", "require:zeek_files;title:Zeek files.log;fields:zeek_files.tx_hosts,zeek_files.rx_hosts,zeek_files.conn_uids,zeek_files.source,zeek_files.depth,zeek_files.analyzers,zeek_files.mime_type,zeek_files.filename,zeek_files.duration,zeek_files.local_orig,zeek_files.is_orig,zeek_files.seen_bytes,zeek_files.total_bytes,zeek_files.missing_bytes,zeek_files.overflow_bytes,zeek_files.timedout,zeek_files.parent_fuid,zeek_files.md5,zeek_files.sha1,zeek_files.sha256,zeek_files.extracted,zeek_files.extracted_cutoff,zeek_files.extracted_size");
   this.api.addView("zeek_ftp", "require:zeek_ftp;title:Zeek ftp.log;fields:zeek_ftp.command,zeek_ftp.arg,zeek_ftp.mime_type,zeek_ftp.file_size,zeek_ftp.reply_code,zeek_ftp.reply_msg,zeek_ftp.data_channel_passive,zeek_ftp.data_channel_orig_h,zeek_ftp.data_channel_resp_h,zeek_ftp.data_channel_resp_p");
   this.api.addView("zeek_gquic", "require:zeek_gquic;title:Zeek gquic.log;fields:zeek_gquic.version,zeek_gquic.server_name,zeek_gquic.user_agent,zeek_gquic.tag_count,zeek_gquic.cyu,zeek_gquic.cyutags");
   this.api.addView("zeek_http", "require:zeek_http;title:Zeek http.log;fields:zeek_http.trans_depth,zeek_http.method,zeek_http.host,zeek_http.uri,zeek_http.origin,zeek_http.post_password_plain,zeek_http.post_username,zeek_http.referrer,zeek_http.version,zeek_http.user_agent,zeek_http.request_body_len,zeek_http.response_body_len,zeek_http.status_code,zeek_http.status_msg,zeek_http.info_code,zeek_http.info_msg,zeek_http.tags,zeek_http.proxied,zeek_http.orig_fuids,zeek_http.orig_filenames,zeek_http.orig_mime_types,zeek_http.resp_fuids,zeek_http.resp_filenames,zeek_http.resp_mime_types");
   this.api.addView("zeek_intel", "require:zeek_intel;title:Zeek intel.log;fields:zeek_intel.indicator,zeek_intel.indicator_type,zeek_intel.seen_where,zeek_intel.seen_node,zeek_intel.matched,zeek_intel.sources,zeek_intel.file_mime_type,zeek_intel.file_description");
+  this.api.addView("zeek_ipsec", "require:zeek_ipsec;title:Zeek ipsec.log;fields:zeek_ipsec.is_orig,zeek_ipsec.initiator_spi,zeek_ipsec.responder_spi,zeek_ipsec.maj_ver,zeek_ipsec.min_ver,zeek_ipsec.exchange_type,zeek_ipsec.flag_e,zeek_ipsec.flag_c,zeek_ipsec.flag_a,zeek_ipsec.flag_i,zeek_ipsec.flag_v,zeek_ipsec.flag_r,zeek_ipsec.message_id,zeek_ipsec.vendor_ids,zeek_ipsec.notify_messages,zeek_ipsec.transforms,zeek_ipsec.ke_dh_groups,zeek_ipsec.proposals,zeek_ipsec.certificates,zeek_ipsec.transform_attributes,zeek_ipsec.length,zeek_ipsec.hash");
   this.api.addView("zeek_irc", "require:zeek_irc;title:Zeek irc.log;fields:zeek_irc.nick,zeek_irc.command,zeek_irc.value,zeek_irc.addl,zeek_irc.dcc_file_name,zeek_irc.dcc_file_size,zeek_irc.dcc_mime_type");
   this.api.addView("zeek_iso_cotp", "require:zeek_iso_cotp;title:Zeek iso_cotp.log;fields:zeek_iso_cotp.pdu_type");
   this.api.addView("zeek_kerberos", "require:zeek_kerberos;title:Zeek kerberos.log;fields:zeek_kerberos.cname,zeek_kerberos.sname,zeek_kerberos.success,zeek_kerberos.error_msg,zeek_kerberos.from,zeek_kerberos.till,zeek_kerberos.cipher,zeek_kerberos.forwardable,zeek_kerberos.renewable,zeek_kerberos.request_type,zeek_kerberos.client_cert_subject,zeek_kerberos.client_cert_fuid,zeek_kerberos.server_cert_subject,zeek_kerberos.server_cert_fuid");

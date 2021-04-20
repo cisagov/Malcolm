@@ -110,6 +110,7 @@ done
 # - DHCP      - compare to Zeek DHCP
 # - DNS       - compare to Zeek DNS
 # - HTTP      - compare to Zeek HTTP
+# - IPSEC
 # - OpenVPN
 # - TFTP
 # - WireGuard
