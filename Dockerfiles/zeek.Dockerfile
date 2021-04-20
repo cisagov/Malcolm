@@ -51,7 +51,19 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # build and install system packages, zeek, spicy and plugins
 RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
     apt-get -q update && \
-    apt-get install -q -y --no-install-recommends gnupg2 curl ca-certificates && \
+    apt-get install -q -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      file \
+      git \
+      gnupg2 \
+      jq \
+      less \
+      libcap2-bin \
+      moreutils \
+      procps \
+      psmisc \
+      vim-tiny && \
     ( curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - ) && \
     echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
@@ -61,13 +73,8 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       ccache \
       clang-${LLVM_VERSION} \
       cmake \
-      file \
       flex \
-      git \
-      jq \
-      less \
       libatomic1 \
-      libcap2-bin \
       libclang-${LLVM_VERSION}-dev \
       libfl-dev \
       libgoogle-perftools4 \
@@ -83,10 +90,7 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       llvm-${LLVM_VERSION}-dev \
       locales-all \
       make \
-      moreutils \
       ninja-build \
-      procps \
-      psmisc \
       python3 \
       python3-git \
       python3-pip \
@@ -94,7 +98,6 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       python3-setuptools \
       python3-wheel \
       supervisor \
-      vim-tiny \
       zlib1g-dev && \
     python3 -m pip install --no-cache-dir pyzmq && \
     mkdir -p /tmp/zeek-packages && \
