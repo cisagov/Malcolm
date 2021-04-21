@@ -1015,11 +1015,11 @@ function ZeekLogs (api, section) {
   this.weird_noticeField = this.api.addField("field:zeek_weird.notice;db:zeek_weird.notice;kind:termfield;friendly:Notice;help:Generated a notice");
   this.weird_peerField = this.api.addField("field:zeek_weird.peer;db:zeek_weird.peer;kind:termfield;friendly:Remote Peer;help:Remote Peer");
 
-  // wireguard_header.log
+  // wireguard.log
   // https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard
-  this.wireguard_header_packet_typeField = this.api.addField("field:zeek_wireguard.packet_type;db:zeek_wireguard.packet_type;kind:termfield;friendly:Packet Type;help:Packet Type");
-  this.wireguard_header_sender_indexField = this.api.addField("field:zeek_wireguard.sender_index;db:zeek_wireguard.sender_index;kind:integer;friendly:Sender Index;help:Sender Index");
-  this.wireguard_header_receiver_indexField = this.api.addField("field:zeek_wireguard.receiver_index;db:zeek_wireguard.receiver_index;kind:integer;friendly:Receiver Index;help:Receiver Index");
+  this.wireguard_establishedField = this.api.addField("field:zeek_wireguard.established;db:zeek_wireguard.established;kind:termfield;friendly:Established;help:Established");
+  this.wireguard_initiationsField = this.api.addField("field:zeek_wireguard.initiations;db:zeek_wireguard.initiations;kind:integer;friendly:Initiation Packets;help:Initiation Packets");
+  this.wireguard_responsesField = this.api.addField("field:zeek_wireguard.responses;db:zeek_wireguard.responses;kind:integer;friendly:Response Packets;help:Response Packets");
 
   // x509.log
   // https://docs.zeek.org/en/stable/scripts/base/files/x509/main.zeek.html#type-X509::Info
@@ -1842,9 +1842,9 @@ function ZeekLogs (api, section) {
     "zeek_weird.name",
     "zeek_weird.notice",
     "zeek_weird.peer",
-    "zeek_wireguard.packet_type",
-    "zeek_wireguard.sender_index",
-    "zeek_wireguard.receiver_index",
+    "zeek_wireguard.established",
+    "zeek_wireguard.initiations",
+    "zeek_wireguard.responses",
     "zeek_x509.basic_constraints_ca",
     "zeek_x509.basic_constraints_path_len",
     "zeek_x509.certificate_curve",
@@ -2086,7 +2086,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_tftp", "require:zeek_tftp;title:Zeek tftp.log;fields:zeek_tftp.block_acked,zeek_tftp.block_sent,zeek_tftp.error_code,zeek_tftp.error_msg,zeek_tftp.fname,zeek_tftp.mode,zeek_tftp.size,zeek_tftp.uid_data,zeek_tftp.wrq");
   this.api.addView("zeek_tunnel", "require:zeek_tunnel;title:Zeek tunnel.log;fields:zeek_tunnel.tunnel_type,zeek_tunnel.action");
   this.api.addView("zeek_weird", "require:zeek_weird;title:Zeek weird.log;fields:zeek_weird.name,zeek_weird.addl,zeek_weird.notice,zeek_weird.peer");
-  this.api.addView("zeek_wireguard", "require:zeek_wireguard;title:Zeek wireguard.log;fields:zeek_wireguard.packet_type,zeek_wireguard.sender_index,zeek_wireguard.receiver_index");
+  this.api.addView("zeek_wireguard", "require:zeek_wireguard;title:Zeek wireguard.log;fields:zeek_wireguard.established,zeek_wireguard.initiations,zeek_wireguard.responses");
   this.api.addView("zeek_x509", "require:zeek_x509;title:Zeek x509.log;fields:zeek_x509.certificate_version,zeek_x509.certificate_serial,zeek_x509.certificate_subject.CN,zeek_x509.certificate_subject.C,zeek_x509.certificate_subject.O,zeek_x509.certificate_subject.OU,zeek_x509.certificate_subject.ST,zeek_x509.certificate_subject.SN,zeek_x509.certificate_subject.L,zeek_x509.certificate_subject.DC,zeek_x509.certificate_subject.GN,zeek_x509.certificate_subject.pseudonym,zeek_x509.certificate_subject.serialNumber,zeek_x509.certificate_subject.title,zeek_x509.certificate_subject.initials,zeek_x509.certificate_subject.emailAddress,zeek_x509.certificate_subject.description,zeek_x509.certificate_subject.postalCode,zeek_x509.certificate_subject.street,zeek_x509.certificate_issuer.CN,zeek_x509.certificate_issuer.DC,zeek_x509.certificate_issuer.C,zeek_x509.certificate_issuer.O,zeek_x509.certificate_issuer.OU,zeek_x509.certificate_issuer.ST,zeek_x509.certificate_issuer.SN,zeek_x509.certificate_issuer.L,zeek_x509.certificate_issuer.GN,zeek_x509.certificate_issuer.pseudonym,zeek_x509.certificate_issuer.serialNumber,zeek_x509.certificate_issuer.title,zeek_x509.certificate_issuer.initials,zeek_x509.certificate_issuer.emailAddress,zeek_x509.certificate_not_valid_before,zeek_x509.certificate_not_valid_after,zeek_x509.certificate_key_alg,zeek_x509.certificate_sig_alg,zeek_x509.certificate_key_type,zeek_x509.certificate_key_length,zeek_x509.certificate_exponent,zeek_x509.certificate_curve,zeek_x509.san_dns,zeek_x509.san_uri,zeek_x509.san_email,zeek_x509.san_ip,zeek_x509.basic_constraints_ca,zeek_x509.basic_constraints_path_len");
 
   // Add the source as available
