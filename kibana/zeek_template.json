@@ -480,6 +480,7 @@
         "zeek_ipsec.flag_i": { "type": "keyword" },
         "zeek_ipsec.flag_v": { "type": "keyword" },
         "zeek_ipsec.flag_r": { "type": "keyword" },
+        "zeek_ipsec.flags": { "type": "keyword" },
         "zeek_ipsec.message_id": { "type": "keyword" },
         "zeek_ipsec.vendor_ids": { "type": "keyword" },
         "zeek_ipsec.notify_messages": { "type": "keyword" },

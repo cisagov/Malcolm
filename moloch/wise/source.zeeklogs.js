@@ -453,6 +453,7 @@ function ZeekLogs (api, section) {
   this.ipsec_flag_iField = this.api.addField("field:zeek_ipsec.flag_i;db:zeek_ipsec.flag_i;kind:termfield;friendly:Flag I;help:Flag I");
   this.ipsec_flag_vField = this.api.addField("field:zeek_ipsec.flag_v;db:zeek_ipsec.flag_v;kind:termfield;friendly:Flag V;help:Flag V");
   this.ipsec_flag_rField = this.api.addField("field:zeek_ipsec.flag_r;db:zeek_ipsec.flag_r;kind:termfield;friendly:Flag R;help:Flag R");
+  this.ipsec_flagsField = this.api.addField("field:zeek_ipsec.flags;db:zeek_ipsec.flags;kind:termfield;friendly:Flags;help:Flags");
   this.ipsec_message_idField = this.api.addField("field:zeek_ipsec.message_id;db:zeek_ipsec.message_id;kind:termfield;friendly:Message ID;help:Message ID");
   this.ipsec_vendor_idsField = this.api.addField("field:zeek_ipsec.vendor_ids;db:zeek_ipsec.vendor_ids;kind:termfield;friendly:Vendor ID;help:Vendor ID");
   this.ipsec_notify_messagesField = this.api.addField("field:zeek_ipsec.notify_messages;db:zeek_ipsec.notify_messages;kind:termfield;friendly:Notify Message Type;help:Notify Message Type");
@@ -1016,9 +1017,9 @@ function ZeekLogs (api, section) {
 
   // wireguard_header.log
   // https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard
-  this.wireguard_header_packet_typeField = this.api.addField("field:zeek_wireguard_header.packet_type;db:zeek_wireguard_header.packet_type;kind:termfield;friendly:Packet Type;help:Packet Type");
-  this.wireguard_header_sender_indexField = this.api.addField("field:zeek_wireguard_header.sender_index;db:zeek_wireguard_header.sender_index;kind:integer;friendly:Sender Index;help:Sender Index");
-  this.wireguard_header_receiver_indexField = this.api.addField("field:zeek_wireguard_header.receiver_index;db:zeek_wireguard_header.receiver_index;kind:integer;friendly:Receiver Index;help:Receiver Index");
+  this.wireguard_header_packet_typeField = this.api.addField("field:zeek_wireguard.packet_type;db:zeek_wireguard.packet_type;kind:termfield;friendly:Packet Type;help:Packet Type");
+  this.wireguard_header_sender_indexField = this.api.addField("field:zeek_wireguard.sender_index;db:zeek_wireguard.sender_index;kind:integer;friendly:Sender Index;help:Sender Index");
+  this.wireguard_header_receiver_indexField = this.api.addField("field:zeek_wireguard.receiver_index;db:zeek_wireguard.receiver_index;kind:integer;friendly:Receiver Index;help:Receiver Index");
 
   // x509.log
   // https://docs.zeek.org/en/stable/scripts/base/files/x509/main.zeek.html#type-X509::Info
@@ -1409,6 +1410,7 @@ function ZeekLogs (api, section) {
     'zeek_ipsec.flag_i',
     'zeek_ipsec.flag_v',
     'zeek_ipsec.flag_r',
+    'zeek_ipsec.flags',
     'zeek_ipsec.message_id',
     'zeek_ipsec.vendor_ids',
     'zeek_ipsec.notify_messages',
@@ -2039,7 +2041,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_gquic", "require:zeek_gquic;title:Zeek gquic.log;fields:zeek_gquic.version,zeek_gquic.server_name,zeek_gquic.user_agent,zeek_gquic.tag_count,zeek_gquic.cyu,zeek_gquic.cyutags");
   this.api.addView("zeek_http", "require:zeek_http;title:Zeek http.log;fields:zeek_http.trans_depth,zeek_http.method,zeek_http.host,zeek_http.uri,zeek_http.origin,zeek_http.post_password_plain,zeek_http.post_username,zeek_http.referrer,zeek_http.version,zeek_http.user_agent,zeek_http.request_body_len,zeek_http.response_body_len,zeek_http.status_code,zeek_http.status_msg,zeek_http.info_code,zeek_http.info_msg,zeek_http.tags,zeek_http.proxied,zeek_http.orig_fuids,zeek_http.orig_filenames,zeek_http.orig_mime_types,zeek_http.resp_fuids,zeek_http.resp_filenames,zeek_http.resp_mime_types");
   this.api.addView("zeek_intel", "require:zeek_intel;title:Zeek intel.log;fields:zeek_intel.indicator,zeek_intel.indicator_type,zeek_intel.seen_where,zeek_intel.seen_node,zeek_intel.matched,zeek_intel.sources,zeek_intel.file_mime_type,zeek_intel.file_description");
-  this.api.addView("zeek_ipsec", "require:zeek_ipsec;title:Zeek ipsec.log;fields:zeek_ipsec.is_orig,zeek_ipsec.initiator_spi,zeek_ipsec.responder_spi,zeek_ipsec.maj_ver,zeek_ipsec.min_ver,zeek_ipsec.exchange_type,zeek_ipsec.flag_e,zeek_ipsec.flag_c,zeek_ipsec.flag_a,zeek_ipsec.flag_i,zeek_ipsec.flag_v,zeek_ipsec.flag_r,zeek_ipsec.message_id,zeek_ipsec.vendor_ids,zeek_ipsec.notify_messages,zeek_ipsec.transforms,zeek_ipsec.ke_dh_groups,zeek_ipsec.proposals,zeek_ipsec.certificates,zeek_ipsec.transform_attributes,zeek_ipsec.length,zeek_ipsec.hash");
+  this.api.addView("zeek_ipsec", "require:zeek_ipsec;title:Zeek ipsec.log;fields:zeek_ipsec.is_orig,zeek_ipsec.initiator_spi,zeek_ipsec.responder_spi,zeek_ipsec.maj_ver,zeek_ipsec.min_ver,zeek_ipsec.exchange_type,zeek_ipsec.flag_e,zeek_ipsec.flag_c,zeek_ipsec.flag_a,zeek_ipsec.flag_i,zeek_ipsec.flag_v,zeek_ipsec.flag_r,zeek_ipsec.flags,zeek_ipsec.message_id,zeek_ipsec.vendor_ids,zeek_ipsec.notify_messages,zeek_ipsec.transforms,zeek_ipsec.ke_dh_groups,zeek_ipsec.proposals,zeek_ipsec.certificates,zeek_ipsec.transform_attributes,zeek_ipsec.length,zeek_ipsec.hash");
   this.api.addView("zeek_irc", "require:zeek_irc;title:Zeek irc.log;fields:zeek_irc.nick,zeek_irc.command,zeek_irc.value,zeek_irc.addl,zeek_irc.dcc_file_name,zeek_irc.dcc_file_size,zeek_irc.dcc_mime_type");
   this.api.addView("zeek_iso_cotp", "require:zeek_iso_cotp;title:Zeek iso_cotp.log;fields:zeek_iso_cotp.pdu_type");
   this.api.addView("zeek_kerberos", "require:zeek_kerberos;title:Zeek kerberos.log;fields:zeek_kerberos.cname,zeek_kerberos.sname,zeek_kerberos.success,zeek_kerberos.error_msg,zeek_kerberos.from,zeek_kerberos.till,zeek_kerberos.cipher,zeek_kerberos.forwardable,zeek_kerberos.renewable,zeek_kerberos.request_type,zeek_kerberos.client_cert_subject,zeek_kerberos.client_cert_fuid,zeek_kerberos.server_cert_subject,zeek_kerberos.server_cert_fuid");
