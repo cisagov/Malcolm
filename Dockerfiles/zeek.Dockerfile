@@ -25,7 +25,7 @@ ENV PUSER_PRIV_DROP true
 
 # for download and install
 ARG ZEEK_LTS=1
-ARG ZEEK_VERSION=4.0.0-0
+ARG ZEEK_VERSION=4.0.1-0
 ARG SPICY_VERSION=1.0.0
 
 ENV ZEEK_LTS $ZEEK_LTS
@@ -43,7 +43,7 @@ ENV CCACHE_COMPRESS 1
 # put Zeek and Spicy in PATH
 ENV ZEEK_DIR "/opt/zeek"
 ENV SPICY_DIR "/opt/spicy"
-ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${PATH}"
+ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${ZEEK_DIR}/lib/zeek/plugins/packages/spicy-plugin/bin:${PATH}"
 
 # add script for building 3rd-party plugins
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
