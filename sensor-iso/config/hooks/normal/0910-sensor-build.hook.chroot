@@ -12,7 +12,7 @@ export CCACHE_COMPRESS=1
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-ZEEK_VERSION=4.0.0-0
+ZEEK_VERSION=4.0.1-0
 ZEEK_LTS=1
 SPICY_VERSION=1.0.0
 ZEEK_DIR="/opt/zeek"
@@ -24,12 +24,12 @@ BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
-YARA_VERSION="4.0.5"
+YARA_VERSION="4.1.0"
 YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
-CAPA_VERSION="1.6.2"
+CAPA_VERSION="1.6.3"
 CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 CAPA_DIR="/usr/local/bin"
 CAPA_BIN="${CAPA_DIR}/capa"
