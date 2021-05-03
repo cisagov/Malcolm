@@ -76,6 +76,9 @@ sed -i "s/^[[:space:]]*password[[:space:]]*requisite[[:space:]]*pam_pwquality\.s
 # enable cryptsetup support on boot
 sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
 
+# enable guests to mount vmware/etc. fuse-based mounts with allow_other
+sed -i "s/#user_allow_other.*/user_allow_other/" /etc/fuse.conf
+
 # some permissions
 find /etc/audit -type d -exec chmod 750 "{}" \;
 find /etc/audit -type f -exec chmod 640 "{}" \;
