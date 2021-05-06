@@ -94,7 +94,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
-  "https://github.com/zeek/spicy-analyzers|main"
+  "https://github.com/mmguero-dev/spicy-analyzers|topic/ldap"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
