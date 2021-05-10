@@ -167,8 +167,8 @@
           "dstIp",
           "dstPort",
           "zeek_ldap.operation",
-          "zeek_ldap.value",
-          "zeek_ldap.entry",
+          "zeek_ldap.object",
+          "zeek_ldap.argument",
           "zeek.result"
         ],
         "sort": [

@@ -507,14 +507,24 @@ function ZeekLogs (api, section) {
   this.known_modbus_device_typeField = this.api.addField("field:zeek_known_modbus.device_type;db:zeek_known_modbus.device_type;kind:termfield;friendly:Role;help:Role");
 
   // ldap.log
-  // https://github.com/SoftwareConsultingEmporium/ldap-analyzer/blob/master/scripts/main.bro
-  this.ldap_message_idField = this.api.addField("field:zeek_ldap.message_id;db:zeek_ldap.message_id;kind:termfield;friendly:Message ID;help:Message ID");
+  // https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/ldap/ldap.zeek
+  this.ldap_message_idField = this.api.addField("field:zeek_ldap.message_id;db:zeek_ldap.message_id;kind:integer;friendly:Message ID;help:Message ID");
+  this.ldap_versionField = this.api.addField("field:zeek_ldap.version;db:zeek_ldap.version;kind:integer;friendly:LDAP Version;help:LDAP Version");
   this.ldap_operationField = this.api.addField("field:zeek_ldap.operation;db:zeek_ldap.operation;kind:termfield;friendly:Operation;help:Operation");
-  this.ldap_valueField = this.api.addField("field:zeek_ldap.value;db:zeek_ldap.value;kind:termfield;friendly:Request Value;help:Request Value");
-  this.ldap_entryField = this.api.addField("field:zeek_ldap.entry;db:zeek_ldap.entry;kind:termfield;friendly:Entry;help:Entry");
-  this.ldap_result_codeField = this.api.addField("field:zeek_ldap.result_code;db:zeek_ldap.result_code;kind:integer;friendly:Result Code;help:Result Code");
-  this.ldap_resultField = this.api.addField("field:zeek_ldap.result;db:zeek_ldap.result;kind:integer;friendly:Result;help:Result");
-  this.ldap_errorField = this.api.addField("field:zeek_ldap.error;db:zeek_ldap.error;kind:termfield;friendly:Error;help:Error");
+  this.ldap_result_codeField = this.api.addField("field:zeek_ldap.result_code;db:zeek_ldap.result_code;kind:termfield;friendly:Result Code;help:Result Code");
+  this.ldap_result_messageField = this.api.addField("field:zeek_ldap.result_message;db:zeek_ldap.result_message;kind:termfield;friendly:Diagnostic Message;help:Diagnostic Message");
+  this.ldap_objectField = this.api.addField("field:zeek_ldap.object;db:zeek_ldap.object;kind:termfield;friendly:Object;help:Object");
+  this.ldap_argumentField = this.api.addField("field:zeek_ldap.argument;db:zeek_ldap.argument;kind:termfield;friendly:Arguments;help:Arguments");
+
+  // ldap_search.log
+  // https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/ldap/ldap.zeek
+  this.ldap_search_message_idField = this.api.addField("field:zeek_ldap_search.message_id;db:zeek_ldap_search.message_id;kind:integer;friendly:Message ID;help:Message ID");
+  this.ldap_search_scopeField = this.api.addField("field:zeek_ldap_search.scope;db:zeek_ldap_search.scope;kind:termfield;friendly:Scope;help:Scope");
+  this.ldap_search_derefField = this.api.addField("field:zeek_ldap_search.deref;db:zeek_ldap_search.deref;kind:termfield;friendly:Dereference Alias;help:Dereference Alias");
+  this.ldap_search_base_objectField = this.api.addField("field:zeek_ldap_search.base_object;db:zeek_ldap_search.base_object;kind:termfield;friendly:Base Object;help:Base Object");
+  this.ldap_search_result_countField = this.api.addField("field:zeek_ldap_search.result_count;db:zeek_ldap_search.result_count;kind:integer;friendly:Result Count;help:Result Count");
+  this.ldap_search_result_codeField = this.api.addField("field:zeek_ldap_search.result_code;db:zeek_ldap_search.result_code;kind:termfield;friendly:Result Code;help:Result Code");
+  this.ldap_search_result_messageField = this.api.addField("field:zeek_ldap_search.result_message;db:zeek_ldap_search.result_message;kind:termfield;friendly:Diagnostic Message;help:Diagnostic Message");
 
   // login.log - custom login.log module (rudimentary, login/rlogin/rsh analyzers are old and not the greatest)
   this.login_successField = this.api.addField("field:zeek_login.success;db:zeek_login.success;kind:termfield;friendly:Successful Login;help:Successful Login");
@@ -1447,13 +1457,20 @@ function ZeekLogs (api, section) {
     "zeek_known_certs.serial",
     "zeek_known_certs.subject",
     "zeek_known_modbus.device_type",
-    "zeek_ldap.entry",
-    "zeek_ldap.error",
     "zeek_ldap.message_id",
+    "zeek_ldap.version",
     "zeek_ldap.operation",
-    "zeek_ldap.result",
     "zeek_ldap.result_code",
-    "zeek_ldap.value",
+    "zeek_ldap.result_message",
+    "zeek_ldap.object",
+    "zeek_ldap.argument",
+    "zeek_ldap_search.message_id",
+    "zeek_ldap_search.scope",
+    "zeek_ldap_search.deref",
+    "zeek_ldap_search.base_object",
+    "zeek_ldap_search.result_count",
+    "zeek_ldap_search.result_code",
+    "zeek_ldap_search.result_message",
     "zeek_login.client_user",
     "zeek_login.confused",
     "zeek_login.success",
@@ -2047,7 +2064,8 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_kerberos", "require:zeek_kerberos;title:Zeek kerberos.log;fields:zeek_kerberos.cname,zeek_kerberos.sname,zeek_kerberos.success,zeek_kerberos.error_msg,zeek_kerberos.from,zeek_kerberos.till,zeek_kerberos.cipher,zeek_kerberos.forwardable,zeek_kerberos.renewable,zeek_kerberos.request_type,zeek_kerberos.client_cert_subject,zeek_kerberos.client_cert_fuid,zeek_kerberos.server_cert_subject,zeek_kerberos.server_cert_fuid");
   this.api.addView("zeek_known_certs", "require:zeek_known_certs;title:Zeek known_certs.log;fields:zeek_known_certs.subject,zeek_known_certs.issuer_subject,zeek_known_certs.serial");
   this.api.addView("zeek_known_modbus", "require:zeek_known_modbus;title:Zeek zeek_known_modbus.log;fields:zeek_known_modbus.device_type");
-  this.api.addView("zeek_ldap", "require:zeek_ldap;title:Zeek ldap.log;fields:zeek_ldap.message_id,zeek_ldap.operation,zeek_ldap.value,zeek_ldap.entry,zeek_ldap.result,zeek_ldap.result_code,zeek_ldap.error");
+  this.api.addView("zeek_ldap", "require:zeek_ldap;title:Zeek ldap.log;fields:zeek_ldap.message_id,zeek_ldap.version,zeek_ldap.operation,zeek_ldap.result_code,zeek_ldap.result_message,zeek_ldap.object,zeek_ldap.argument");
+  this.api.addView("zeek_ldap_search", "require:zeek_ldap_search;title:Zeek ldap_search.log;fields:zeek_ldap_search.message_id,zeek_ldap_search.scope,zeek_ldap_search.deref,zeek_ldap_search.base_object,zeek_ldap_search.result_count,zeek_ldap_search.result_code,zeek_ldap_search.result_message");
   this.api.addView("zeek_login", "require:zeek_login;title:Zeek login.log;fields:zeek_login.client_user,zeek_login.confused,zeek_login.success");
   this.api.addView("zeek_modbus", "require:zeek_modbus;title:Zeek modbus.log;fields:zeek_modbus.func,zeek_modbus.exception");
   this.api.addView("zeek_modbus_detailed", "require:zeek_modbus_detailed;title:Zeek modbus_detailed.log;fields:zeek_modbus_detailed.unit_id,zeek_modbus_detailed.func,zeek_modbus_detailed.network_direction,zeek_modbus_detailed.address,zeek_modbus_detailed.quantity,zeek_modbus_detailed.values");
