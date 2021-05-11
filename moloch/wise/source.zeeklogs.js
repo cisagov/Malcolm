@@ -310,9 +310,7 @@ function ZeekLogs (api, section) {
 
   // ecat_aoe_info.log
   // https://github.com/cisagov/ICSNPP
-  this.ecat_aoe_info_resp_idField = this.api.addField("field:zeek_ecat_aoe_info.resp_id;db:zeek_ecat_aoe_info.resp_id;kind:termfield;friendly:Target ID;help:Target ID");
   this.ecat_aoe_info_resp_portField = this.api.addField("field:zeek_ecat_aoe_info.resp_port;db:zeek_ecat_aoe_info.resp_port;kind:termfield;friendly:Target Port;help:Target Port");
-  this.ecat_aoe_info_orig_idField = this.api.addField("field:zeek_ecat_aoe_info.orig_id;db:zeek_ecat_aoe_info.orig_id;kind:termfield;friendly:Sender ID;help:Sender ID");
   this.ecat_aoe_info_orig_portField = this.api.addField("field:zeek_ecat_aoe_info.orig_port;db:zeek_ecat_aoe_info.orig_port;kind:termfield;friendly:Sender Port;help:Sender Port");
   this.ecat_aoe_info_commandField = this.api.addField("field:zeek_ecat_aoe_info.command;db:zeek_ecat_aoe_info.command;kind:termfield;friendly:Command;help:Command");
   this.ecat_aoe_info_stateField = this.api.addField("field:zeek_ecat_aoe_info.state;db:zeek_ecat_aoe_info.state;kind:termfield;friendly:State Flags;help:State Flags");
@@ -1285,9 +1283,7 @@ function ZeekLogs (api, section) {
     "zeek_dpd.service",
     "zeek_ecat_aoe_info.command",
     "zeek_ecat_aoe_info.data",
-    "zeek_ecat_aoe_info.orig_id",
     "zeek_ecat_aoe_info.orig_port",
-    "zeek_ecat_aoe_info.resp_id",
     "zeek_ecat_aoe_info.resp_port",
     "zeek_ecat_aoe_info.state",
     "zeek_ecat_arp_info.arp_type",
@@ -2047,7 +2043,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_ecat_registers", "require:zeek_ecat_registers;title:Zeek ecat_registers.log;fields:zeek_ecat_registers.command,zeek_ecat_registers.slave_addr,zeek_ecat_registers.register_type,zeek_ecat_registers.register_addr,zeek_ecat_registers.data");
   this.api.addView("zeek_ecat_log_address", "require:zeek_ecat_log_address;title:Zeek ecat_log_address.log;fields:zeek_ecat_log_address.log_addr,zeek_ecat_log_address.length,zeek_ecat_log_address.command,zeek_ecat_log_address.data");
   this.api.addView("zeek_ecat_dev_info", "require:zeek_ecat_dev_info;title:Zeek ecat_dev_info.log;fields:zeek_ecat_dev_info.slave_id,zeek_ecat_dev_info.revision,zeek_ecat_dev_info.dev_type,zeek_ecat_dev_info.build,zeek_ecat_dev_info.fmmucnt,zeek_ecat_dev_info.smcount,zeek_ecat_dev_info.ports,zeek_ecat_dev_info.dpram,zeek_ecat_dev_info.features");
-  this.api.addView("zeek_ecat_aoe_info", "require:zeek_ecat_aoe_info;title:Zeek ecat_aoe_info.log;fields:zeek_ecat_aoe_info.resp_id,zeek_ecat_aoe_info.resp_port,zeek_ecat_aoe_info.orig_id,zeek_ecat_aoe_info.orig_port,zeek_ecat_aoe_info.command,zeek_ecat_aoe_info.state,zeek_ecat_aoe_info.data");
+  this.api.addView("zeek_ecat_aoe_info", "require:zeek_ecat_aoe_info;title:Zeek ecat_aoe_info.log;fields:zeek_ecat_aoe_info.resp_port,zeek_ecat_aoe_info.orig_port,zeek_ecat_aoe_info.command,zeek_ecat_aoe_info.state,zeek_ecat_aoe_info.data");
   this.api.addView("zeek_ecat_coe_info", "require:zeek_ecat_coe_info;title:Zeek ecat_coe_info.log;fields:zeek_ecat_coe_info.number,zeek_ecat_coe_info.type,zeek_ecat_coe_info.req_resp,zeek_ecat_coe_info.index,zeek_ecat_coe_info.subindex,zeek_ecat_coe_info.dataoffset");
   this.api.addView("zeek_ecat_foe_info", "require:zeek_ecat_foe_info;title:Zeek ecat_foe_info.log;fields:zeek_ecat_foe_info.opcode,zeek_ecat_foe_info.reserved,zeek_ecat_foe_info.packet_num,zeek_ecat_foe_info.error_code,zeek_ecat_foe_info.filename,zeek_ecat_foe_info.data");
   this.api.addView("zeek_ecat_soe_info", "require:zeek_ecat_soe_info;title:Zeek ecat_soe_info.log;fields:zeek_ecat_soe_info.opcode,zeek_ecat_soe_info.incomplete,zeek_ecat_soe_info.error,zeek_ecat_soe_info.drive_num,zeek_ecat_soe_info.element,zeek_ecat_soe_info.index");
