@@ -40,7 +40,6 @@ Hedgehog Linux is a Debian-based operating system built to
     - [STIG compliance exceptions](#STIGExceptions)
     - [CIS benchmark compliance exceptions](#CISExceptions)
 * [Appendix E - Upgrades](#UpgradePlan)
-* [Appendix F - Notes](#MiscNotes)
 * [Copyright](#Footer)
 
 # <a name="Installation"></a>Sensor installation
@@ -404,7 +403,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-3.0.2.iso"
+Finished, created "/sensor-build/hedgehog-3.1.0.iso"
 …
 ```
 
@@ -933,10 +932,6 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 * `zeek --version`, `zeek -N local` and `moloch-capture --version` ought to run and print out version information as expected
 * if you are forwarding to a [Malcolm](https://github.com/idaholab/malcolm) aggregator, you should start seeing data momentarily
     
-# <a name="MiscNotes"></a>Appendix F - Notes
-
-If you are interesting in developing your own network traffic capture appliance or would like to know more about the inner-workings of Hedgehog Linux, please read the [Notes](./docs/Notes.md) document that captures some of those details.
-
 # <a name="Footer"></a>Copyright
 
 Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.

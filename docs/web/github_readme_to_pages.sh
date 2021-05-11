@@ -60,7 +60,6 @@ GenerateMarkdownHeader " " "hedgehog" >> $OUTPUT_FILE
 curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/README.md \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
   | sed "s@/[Mm]alcolm/blob/master/@/Malcolm/blob/$BRANCH/@g" \
-  | sed "s@\](\./docs/Notes.md@\](https://github.com/idaholab/Malcolm/blob/$BRANCH/sensor-iso/docs/Notes.md)@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/@g" \
   >> $OUTPUT_FILE
 
