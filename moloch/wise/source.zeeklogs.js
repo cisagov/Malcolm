@@ -508,7 +508,7 @@ function ZeekLogs (api, section) {
 
   // ldap.log
   // https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/ldap/ldap.zeek
-  this.ldap_message_idField = this.api.addField("field:zeek_ldap.message_id;db:zeek_ldap.message_id;kind:integer;friendly:Message ID;help:Message ID");
+  this.ldap_message_idField = this.api.addField("field:zeek_ldap.message_id;db:zeek_ldap.message_id;kind:termfield;friendly:Message ID;help:Message ID");
   this.ldap_versionField = this.api.addField("field:zeek_ldap.version;db:zeek_ldap.version;kind:integer;friendly:LDAP Version;help:LDAP Version");
   this.ldap_operationField = this.api.addField("field:zeek_ldap.operation;db:zeek_ldap.operation;kind:termfield;friendly:Operation;help:Operation");
   this.ldap_result_codeField = this.api.addField("field:zeek_ldap.result_code;db:zeek_ldap.result_code;kind:termfield;friendly:Result Code;help:Result Code");
@@ -518,7 +518,7 @@ function ZeekLogs (api, section) {
 
   // ldap_search.log
   // https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/ldap/ldap.zeek
-  this.ldap_search_message_idField = this.api.addField("field:zeek_ldap_search.message_id;db:zeek_ldap_search.message_id;kind:integer;friendly:Message ID;help:Message ID");
+  this.ldap_search_message_idField = this.api.addField("field:zeek_ldap_search.message_id;db:zeek_ldap_search.message_id;kind:termfield;friendly:Message ID;help:Message ID");
   this.ldap_search_scopeField = this.api.addField("field:zeek_ldap_search.scope;db:zeek_ldap_search.scope;kind:termfield;friendly:Scope;help:Scope");
   this.ldap_search_derefField = this.api.addField("field:zeek_ldap_search.deref;db:zeek_ldap_search.deref;kind:termfield;friendly:Dereference Alias;help:Dereference Alias");
   this.ldap_search_base_objectField = this.api.addField("field:zeek_ldap_search.base_object;db:zeek_ldap_search.base_object;kind:termfield;friendly:Base Object;help:Base Object");
