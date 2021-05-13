@@ -48,11 +48,10 @@ USER root
 
 RUN yum install -y epel-release && \
         yum update -y && \
-        yum install -y curl inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python-setuptools python-pip && \
+        yum install -y curl inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python3-setuptools python3-pip && \
         yum clean all && \
     ln -sr /usr/sbin/fuser /bin/fuser && \
-    easy_install supervisor && \
-    pip install patool entrypoint2 pyunpack python-magic ordered-set==3.1.1 && \
+    python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -96,7 +95,7 @@ VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data"]
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:

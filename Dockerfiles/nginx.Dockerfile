@@ -7,8 +7,6 @@
 #             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
 
 ####################################################################################
-# build a patched APK of stunnel supporting ldap StartTLS (patched protocols.c)
-# (based on https://www.stunnel.org/pipermail/stunnel-users/2013-November/004437.html)
 
 FROM alpine:3.13 as stunnel_build
 
@@ -20,12 +18,11 @@ ENV PUSER "builder"
 ENV PGROUP "abuild"
 
 ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
-ADD nginx/src/*.patch /usr/src/patches/
 
 USER root
 
 RUN set -x ; \
-    apk add --no-cache alpine-sdk patchutils sudo openssl-dev linux-headers; \
+    apk add --no-cache alpine-sdk sudo openssl-dev linux-headers; \
     sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers ; \
     adduser -D -u ${DEFAULT_UID} -h /apkbuild -G ${PGROUP} ${PUSER} ; \
     addgroup ${PUSER} wheel ; \
@@ -33,17 +30,10 @@ RUN set -x ; \
 
 USER ${PUSER}
 
-# todo: when aports updates stunnel to 5.58, this will need to be updated
-
 RUN set -x ; \
     cd /apkbuild ; \
     tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
-    cp /usr/src/patches/stunnel-5.56-open-ldap.patch /apkbuild/aports-master/community/stunnel/ ; \
     cd /apkbuild/aports-master/community/stunnel ; \
-    sed -i 's@https://www.stunnel.org/downloads/stunnel.*gz@ftp://ftp.stunnel.org/stunnel/archive/5.x/stunnel-5.57.tar.gz@' APKBUILD ; \
-    sed -i 's/\(^makedepends="\)/\1patchutils /' APKBUILD ; \
-    sed -i '/^source=/a \ \ \ \ \ \ \ \ stunnel-5.56-open-ldap.patch' APKBUILD ; \
-    sed -i '/^sha512sums/,$d' APKBUILD ; \
     abuild-keygen -a -i -n ; \
     abuild checksum ; \
     abuild -R
@@ -83,9 +73,6 @@ ARG NGINX_BASIC_AUTH=true
 #   and use stunnel to tunnel the connection.
 ARG NGINX_LDAP_TLS_STUNNEL=false
 
-# when initiating the "extendedReq(1) LDAP_START_TLS_OID" command, which protocol to use: winldap or openldap
-ARG NGINX_LDAP_TLS_STUNNEL_PROTOCOL=winldap
-
 # stunnel will require and verify certificates for StartTLS when one or more
 # trusted CA certificate files are placed in the ./nginx/ca-trust directory.
 # For additional security, hostname or IP address checking of the associated
@@ -98,13 +85,12 @@ ARG NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=2
 
 ENV NGINX_BASIC_AUTH $NGINX_BASIC_AUTH
 ENV NGINX_LDAP_TLS_STUNNEL $NGINX_LDAP_TLS_STUNNEL
-ENV NGINX_LDAP_TLS_STUNNEL_PROTOCOL $NGINX_LDAP_TLS_STUNNEL_PROTOCOL
 ENV NGINX_LDAP_TLS_STUNNEL_CHECK_HOST $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
 ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP $NGINX_LDAP_TLS_STUNNEL_CHECK_IP
 ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
 # build latest nginx with nginx-auth-ldap
-ENV NGINX_VERSION=1.19.7
+ENV NGINX_VERSION=1.20.0
 ENV NGINX_AUTH_LDAP_BRANCH=master
 
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz

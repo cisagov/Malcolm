@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
@@ -41,18 +41,11 @@
 #     ZEEKFLDx01x00007FFF
 #
 
-from __future__ import print_function
-
 import sys
 import os
 import json
 from collections import defaultdict
 from ordered_set import OrderedSet
-
-try:
-  basestring
-except NameError:  # Python 3
-  basestring = str
 
 # lists of all known fields for each type of zeek log we're concerned with mapping (ordered as in the .log file header)
 # are stored in zeek-log-fields.json
@@ -90,23 +83,21 @@ def main():
   zeekLogFields = defaultdict(list)
 
   # load from json canonical list of known zeek log fields we're concerned with mapping
-  try:
-    zeekLogFieldsTmp = json.load(open(FIELDS_JSON_FILE, 'r'))
-    if isinstance(zeekLogFieldsTmp, dict):
-      for logType, listOfFieldLists in zeekLogFieldsTmp.items():
-        if isinstance(logType, basestring) and isinstance(listOfFieldLists, list):
-          zeekLogFields[str(logType)] = [OrderedSet(fieldList) for fieldList in listOfFieldLists]
-        else:
-          dataError = True
-          break
-    else:
-      dataError = True
-  except:
+  zeekLogFieldsTmp = json.load(open(FIELDS_JSON_FILE, 'r'))
+  if isinstance(zeekLogFieldsTmp, dict):
+    for logType, listOfFieldLists in zeekLogFieldsTmp.items():
+      if isinstance(logType, str) and isinstance(listOfFieldLists, list):
+        zeekLogFields[str(logType)] = [OrderedSet(fieldList) for fieldList in listOfFieldLists]
+      else:
+        dataError = True
+        break
+  else:
     dataError = True
+
 
   if dataError:
     # something is wrong with the json file
-    eprint("Error loading {} (not found or incorrectly formatted)".format(os.path.join(SCRIPT_PATH, FIELDS_JSON_FILE)))
+    eprint("Error loading {} (not found or incorrectly formatted)".format(FIELDS_JSON_FILE))
 
   else:
     if (len(sys.argv) == 2) and os.path.isfile(sys.argv[1]):
