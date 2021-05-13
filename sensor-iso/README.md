@@ -40,7 +40,6 @@ Hedgehog Linux is a Debian-based operating system built to
     - [STIG compliance exceptions](#STIGExceptions)
     - [CIS benchmark compliance exceptions](#CISExceptions)
 * [Appendix E - Upgrades](#UpgradePlan)
-* [Appendix F - Notes](#MiscNotes)
 * [Copyright](#Footer)
 
 # <a name="Installation"></a>Sensor installation
@@ -404,7 +403,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-3.0.1.iso"
+Finished, created "/sensor-build/hedgehog-3.1.0.iso"
 …
 ```
 
@@ -641,7 +640,7 @@ moloch_2.2.3-1_amd64.deb                                                        
 netsniff-ng_0.6.6-1_amd64.deb                                                   100%  330KB  52.1MB/s   00:00    
 packetbeat-tweaked-7.6.2-amd64.deb                                              100%   14MB  59.2MB/s   00:00    
 protologbeat                                                                    100%   56MB  38.1MB/s   00:01    
-zeek_3.0.10-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
+zeek_3.0.20-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
 ```
 
 12. Replace the old `/usr/local/bin/protologbeat` with the new one:
@@ -669,7 +668,7 @@ The following packages will be REMOVED:
 After this operation, 160 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 118490 files and directories currently installed.)
-Removing zeek (3.0.10-1) ...
+Removing zeek (3.0.20-1) ...
 dpkg: warning: while removing zeek, directory '/opt/zeek/spool' not empty so not removed
 dpkg: warning: while removing zeek, directory '/opt/zeek/share/zeek/site' not empty so not removed
 dpkg: warning: while removing zeek, directory '/opt/zeek/lib' not empty so not removed
@@ -697,8 +696,8 @@ Preparing to unpack .../netsniff-ng_0.6.6-1_amd64.deb ...
 Unpacking netsniff-ng (0.6.6-1) over (0.6.6-1) ...
 Preparing to unpack .../packetbeat-tweaked-7.6.2-amd64.deb ...
 Unpacking packetbeat (7.6.2) over (6.8.4) ...
-Preparing to unpack .../zeek_3.0.10-1_amd64.deb ...
-Unpacking zeek (3.0.10-1) over (3.0.0-1) ...
+Preparing to unpack .../zeek_3.0.20-1_amd64.deb ...
+Unpacking zeek (3.0.20-1) over (3.0.0-1) ...
 Setting up auditbeat (7.6.2) ...
 Installing new version of [...]
 [...]
@@ -714,7 +713,7 @@ Setting up netsniff-ng (0.6.6-1) ...
 Setting up packetbeat (7.6.2) ...
 Installing new version of [...]
 [...]
-Setting up zeek (3.0.10-1) ...
+Setting up zeek (3.0.20-1) ...
 Processing triggers for systemd (232-25+deb9u12) ...
 Processing triggers for man-db (2.7.6.1-2) ...
 ```
@@ -933,10 +932,6 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 * `zeek --version`, `zeek -N local` and `moloch-capture --version` ought to run and print out version information as expected
 * if you are forwarding to a [Malcolm](https://github.com/cisagov/Malcolm) aggregator, you should start seeing data momentarily
     
-# <a name="MiscNotes"></a>Appendix F - Notes
-
-If you are interesting in developing your own network traffic capture appliance or would like to know more about the inner-workings of Hedgehog Linux, please read the [Notes](./docs/Notes.md) document that captures some of those details.
-
 # <a name="Footer"></a>Copyright
 
 Hedgehog Linux - part of [Malcolm](https://github.com/cisagov/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
