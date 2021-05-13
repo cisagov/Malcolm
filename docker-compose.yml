@@ -17,9 +17,6 @@ x-auth-variables: &auth-variables
   #   For StartTLS, set NGINX_LDAP_TLS_STUNNEL=true to issue the StartTLS command
   #   and use stunnel to tunnel the connection.
   NGINX_LDAP_TLS_STUNNEL : 'false'
-  # When NGINX_LDAP_TLS_STUNNEL=true, which protocol to use when initiating the
-  # "extendedReq(1) LDAP_START_TLS_OID" command: winldap or openldap
-  NGINX_LDAP_TLS_STUNNEL_PROTOCOL : 'winldap'
   # stunnel will require and verify certificates for StartTLS when one or more
   # trusted CA certificate files are placed in the ./nginx/ca-trust directory.
   # For additional security, hostname or IP address checking of the associated
@@ -60,17 +57,17 @@ x-zeek-variables: &zeek-variables
   EXTRACTED_FILE_HTTP_SERVER_KEY : 'quarantined'
   # environment variables for tweaking Zeek at runtime (see local.zeek)
   # set to a non-blank value to disable the corresponding feature
-  ZEEK_DISABLE_MITRE_BZAR : ''
   ZEEK_DISABLE_HASH_ALL_FILES : ''
   ZEEK_DISABLE_LOG_PASSWORDS : ''
-  ZEEK_DISABLE_MQTT : ''
-  ZEEK_DISABLE_PE_XOR : ''
-  ZEEK_DISABLE_QUIC : ''
   ZEEK_DISABLE_SSL_VALIDATE_CERTS : ''
-  ZEEK_DISABLE_TELNET : ''
   ZEEK_DISABLE_TRACK_ALL_ASSETS : ''
-  ZEEK_DISABLE_WIREGUARD : ''
-  ZEEK_DISABLE_WIREGUARD_TRANSPORT_PACKETS : 'true'
+  ZEEK_DISABLE_SPICY_DHCP : 'true'
+  ZEEK_DISABLE_SPICY_DNS : 'true'
+  ZEEK_DISABLE_SPICY_HTTP : 'true'
+  ZEEK_DISABLE_SPICY_IPSEC : ''
+  ZEEK_DISABLE_SPICY_OPENVPN : ''
+  ZEEK_DISABLE_SPICY_TFTP : ''
+  ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
 x-kibana-helper-variables: &kibana-helper-variables
   ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
@@ -121,7 +118,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-od:3.0.1
+    image: malcolmnetsec/elasticsearch-od:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -161,7 +158,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana-helper.Dockerfile
-    image: malcolmnetsec/kibana-helper:3.0.1
+    image: malcolmnetsec/kibana-helper:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -192,7 +189,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-od:3.0.1
+    image: malcolmnetsec/kibana-od:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -216,7 +213,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:3.0.1
+    image: malcolmnetsec/logstash-oss:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -255,7 +252,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:3.0.1
+    image: malcolmnetsec/filebeat-oss:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -296,7 +293,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:3.0.1
+    image: malcolmnetsec/arkime:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -341,7 +338,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:3.0.1
+    image: malcolmnetsec/zeek:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -371,7 +368,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:3.0.1
+    image: malcolmnetsec/file-monitor:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -397,7 +394,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:3.0.1
+    image: malcolmnetsec/pcap-capture:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -426,7 +423,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:3.0.1
+    image: malcolmnetsec/pcap-monitor:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -452,7 +449,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:3.0.1
+    image: malcolmnetsec/file-upload:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -478,7 +475,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:3.0.1
+    image: malcolmnetsec/htadmin:3.1.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -498,12 +495,12 @@ services:
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
-      interval: 30s
+      interval: 60s
       timeout: 15s
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:3.0.1
+    image: malcolmnetsec/freq:3.1.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -524,7 +521,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:3.0.1
+    image: malcolmnetsec/name-map-ui:3.1.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -551,7 +548,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:3.0.1
+    image: malcolmnetsec/nginx-proxy:3.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -568,9 +565,9 @@ services:
       - name-map-ui
       - file-monitor
     ports:
-      - "443:443"
-      - "488:488"
-      - "5601:5601"
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:488:488"
+      - "0.0.0.0:5601:5601"
       # - "0.0.0.0:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw

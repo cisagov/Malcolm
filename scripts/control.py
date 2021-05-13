@@ -77,18 +77,25 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
   # open up the docker-compose file and "grep" for the line where the keystore file
   # is bind-mounted into the service container (once and only once). the bind
   # mount needs to exist in the YML file and the local directory containing the
-  # keystore file needs to exist (although the file itself might not yet)
+  # keystore file needs to exist (although the file itself might not yet).
+  # also get PUID and PGID variables from the docker-compose file.
   localKeystore = None
   localKeystoreDir = None
   localKeystorePreExists = False
   volumeKeystore = None
   volumeKeystoreDir = None
+  uidGidDict = defaultdict(str)
 
   try:
 
     composeFileLines = list()
+    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
     with open(args.composeFile, 'r') as f:
-      composeFileLines = [x for x in f.readlines() if re.search(fr'-.*?{service}.keystore\s*:.*{service}.keystore', x)]
+      allLines = f.readlines()
+      composeFileLines = [x for x in allLines if re.search(fr'-.*?{service}.keystore\s*:.*{service}.keystore', x)]
+      uidGidDict.update(dict(x.split(':') for x in [''.join(x.split()) for x in allLines if re.search(fr'^\s*P[UG]ID\s*:\s*\d+\s*$', x)]))
+
     if (len(composeFileLines) == 1) and (len(composeFileLines[0]) > 0):
       matches = re.search(fr'-\s*(?P<localKeystore>.*?{service}.keystore)\s*:\s*(?P<volumeKeystore>.*?{service}.keystore)', composeFileLines[0])
       if matches:
@@ -114,9 +121,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                      # if using stdin, indicate the container is "interactive", else noop (duplicate --rm)
                      '-T' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
 
-                     # execute as current UID:GID, as we're assuming this would match docker-compose YML PUID/PGID already running
-                     # todo: alternately grep PUID/PGID out of docker-compose YML
-                     '-u', f'{os.getuid()}:{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000:1000',
+                     # execute as UID:GID in docker-compose.yml file
+                     '-u', f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}'
 
                      # the work directory in the container is the directory to contain the keystore file
                      '-w', volumeKeystoreDir,
@@ -153,8 +159,9 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                        # if     dropPriv, dockerUidGuidSetup will take care of dropping privileges for the correct UID/GID
                        # if NOT dropPriv, enter with the keystore executable directly
                        '--entrypoint', dockerUidGuidSetup if dropPriv else keystoreBinProc,
-                       '--env', f'DEFAULT_UID={os.getuid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}',
-                       '--env', f'DEFAULT_GID={os.getgid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}',
+                       '--env', f'DEFAULT_UID={uidGidDict["PUID"]}',
+                       '--env', f'DEFAULT_GID={uidGidDict["PGID"]}',
+                       '--env', f'PUSER_CHOWN={volumeKeystoreDir}',
 
                        # rw bind mount the local directory to contain the keystore file to the container directory
                        '-v', f'{localKeystoreDir}:{volumeKeystoreDir}:rw',
@@ -163,10 +170,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                        '-w', volumeKeystoreDir,
 
                        # if     dropPriv, execute as root, as docker-uid-gid-setup.sh will drop privileges for us
-                       # if NOT dropPriv, execute as 1000:1000; this should be the right thing to do as this is how the images were built
-                       #                  todo: alternately:
-                       #                    '-u', 'root' if dropPriv else f'{os.getuid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}:{os.getgid() if (pyPlatform != PLATFORM_WINDOWS) else 1000}'
-                       '-u', 'root' if dropPriv else '1000:1000',
+                       # if NOT dropPriv, execute as UID:GID in docker-compose.yml file
+                       '-u', 'root' if dropPriv else f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
 
                        # the service image name grepped from the YML file
                        serviceImage]
@@ -241,13 +246,20 @@ def logs():
   ignoreRegEx = re.compile(r"""
     .+(
         deprecated
+      | DEPRECATION
       | eshealth
       | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | update_mapping
       | throttling\s+index
+      | executing\s+attempt_(transition|set_replica_count)\s+for
       | but\s+there\s+are\s+no\s+living\s+connections
       | saved_objects
+      | /kibana/(api/ui_metric/report|internal/search/es)
       | retry\.go.+(send\s+unwait|done$)
+      | scheduling\s+job\s*id.+opendistro-ism
+      | descheduling\s+job\s*id
+      | updating\s+number_of_replicas
+      | running\s+full\s+sweep
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
       | \b(d|es)?stats\.json
       | /_ns_/nstest\.html
@@ -261,6 +273,7 @@ def logs():
       | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
       | curl.+localhost.+GET\s+/api/status\s+200
+      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
       | \b1.+GET\s+/\s+.+401.+curl
     )
   """, re.VERBOSE | re.IGNORECASE)
@@ -416,7 +429,7 @@ def start():
   if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('elasticsearch', 'elasticsearch.keystore'))):
     keystore_op('elasticsearch', True, 'create')
   if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('logstash', os.path.join('certs', 'logstash.keystore')))):
-    keystore_op('logstash', False, 'create')
+    keystore_op('logstash', True, 'create')
 
   # make sure permissions are set correctly for the nginx worker processes
   for authFile in [os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),

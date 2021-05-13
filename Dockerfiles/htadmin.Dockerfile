@@ -77,6 +77,7 @@ RUN apt-get update && \
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD docs/images/favicon/favicon.ico /var/www/htadmin/
 ADD htadmin/supervisord.conf /supervisord.conf
+ADD htadmin/htadmin.sh /usr/local/bin/
 ADD htadmin/src /var/www/htadmin/
 ADD htadmin/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
 ADD htadmin/nginx/sites-available/default /etc/nginx/sites-available/default

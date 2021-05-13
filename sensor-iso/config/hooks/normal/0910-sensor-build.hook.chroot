@@ -2,36 +2,43 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
+# some environment variables needed for build using llvm/clang
+export CC="clang-11"
+export CXX="clang++-11"
+export ASM="clang-11"
+export CCACHE_DIR="/var/spool/ccache"
+export CCACHE_COMPRESS=1
+
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-SPICY_DIR="/opt/spicy"
+ZEEK_VERSION=4.0.1-0
+ZEEK_LTS=1
+SPICY_VERSION=1.0.0
 ZEEK_DIR="/opt/zeek"
-ZEEK_VER="3.0.13"
-ZEEK_URL="https://old.zeek.org/downloads/zeek-$ZEEK_VER.tar.gz"
-ZEEK_PATCH_URLS=(
-  # nothing here for now
-)
+SPICY_DIR="/opt/spicy"
+export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH
 
 BEATS_VER="7.10.2"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
-YARA_VERSION="4.0.5"
+YARA_VERSION="4.1.0"
 YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
-CAPA_URL="https://github.com/fireeye/capa"
-CAPA_RULES_DIR="/opt/capa-rules"
+CAPA_VERSION="1.6.3"
+CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
+CAPA_DIR="/usr/local/bin"
+CAPA_BIN="${CAPA_DIR}/capa"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
-# some environment variables needed for build
-export CCACHE_DIR="/var/spool/ccache"
-export CCACHE_COMPRESS=1
-export PATH="${ZEEK_DIR}"/bin:$PATH
+# install a newer cmake from backports
+apt-get -q update
+apt-get install -q -y -t buster-backports --no-install-recommends cmake
 
 # a moloch .deb is built and installed in a different context
 
@@ -50,36 +57,50 @@ cd ..
 rm -Rf netsniff-$NETSNIFF_VER.tar.gz netsniff-ng-$NETSNIFF_VER
 ##
 
-# Build and install zeek
-mkdir -p /usr/local/src/zeek-patches
-cd /usr/local/src/zeek-patches
-for i in ${ZEEK_PATCH_URLS[@]}; do
-  curl -L -J -O "$i"
-done
+# Download and install zeek, spicy and 3rd-party zeek plugins
+mkdir -p /tmp/zeek-packages /tmp/spicy-packages "${CCACHE_DIR}"
+
+# zeek
+cd /tmp/zeek-packages
+if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
+curl -sSL --remote-name-all \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_10/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb"
+dpkg -i ./*.deb
+
+# spicy
+cd /tmp/spicy-packages
+curl -sSL --remote-name-all \
+  "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian10.deb"
+dpkg -i ./*.deb
+
+# plugins
 cd /tmp
-curl -L -o zeek-$ZEEK_VER.tar.gz "$ZEEK_URL"
-tar -xvzf zeek-$ZEEK_VER.tar.gz
-cd zeek-$ZEEK_VER
-for i in /usr/local/src/zeek-patches/*; do
-  patch -p 1 -r - --no-backup-if-mismatch < "$i" || true
-done
-./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
-cd build
-ninja
-ninja install
-# checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
-
-# install 3rd party Zeek plugins and scripts
-zkg autoconfig
+zkg autoconfig --force
+zkg install --force --skiptests zeek/spicy-plugin
 bash /usr/local/bin/zeek_install_plugins.sh
-rm -Rf /root/.zkg /usr/local/src/*/.git
+for FILE in /opt/zeek/var/lib/zkg/logs/*; do
+  [[ -r "$FILE" ]] && echo "$FILE" && cat "$FILE" && echo ""
+done
 
-# strip for file size
-file "${ZEEK_DIR}"/{lib,bin}/* \
-     "${ZEEK_DIR}"/lib/zeek/plugins/packages/*/lib/* \
-     "${ZEEK_DIR}"/lib/zeek/plugins/*/lib/* \
-     "${SPICY_DIR}"/{lib,bin}/* \
-     "${SPICY_DIR}"/lib/spicy/Zeek_Spicy/lib/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded
+# cleanup/strip build artifacts
+find "${ZEEK_DIR}"/lib -type d -name CMakeFiles -exec rm -rf "{}" \; 2>/dev/null || true
+find "${ZEEK_DIR}"/var/lib/zkg -type d -name build -exec rm -rf "{}" \; 2>/dev/null || true
+find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \;
+rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch
+find "${ZEEK_DIR}/" "${SPICY_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded
+mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/ && \
+  ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/bin/spicyz \
+           "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz
+mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
+  ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
+           "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif
 
 cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
 # all interfaces using lb_method=custom should use AF_PACKET
@@ -88,12 +109,12 @@ lb_custom.InterfacePrefix=af_packet::
 EOF
 
 # set up default zeek local policy
-cp -f /usr/local/etc/zeek/*.zeek /opt/zeek/share/zeek/site/
+cp -f /usr/local/etc/zeek/*.zeek "${ZEEK_DIR}"/share/zeek/site/
 
 # cleanup
-cd /tmp
+cd /usr/local/src
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
-mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/spicy-packages /tmp/zeek-packages /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
@@ -124,23 +145,21 @@ tar czf yara-rules-hedgehog.tar.gz "$(basename "${YARA_RULES_DIR}")"
 mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
-# capa (installed via pip) rules
+# capa
 cd /tmp
-git clone --depth 1 --single-branch --branch "v$(/usr/local/bin/capa --version 2>&1 | awk '{print $2}')" "${CAPA_URL}" ./capa
-cd ./capa
-git submodule init rules
-git submodule update --depth 1 rules
-cd ../
-rm -rf "${CAPA_RULES_DIR}"
-mv ./capa/rules "${CAPA_RULES_DIR}"
-rm -rf "${CAPA_RULES_DIR}"/.git* ./capa
+rm -rf /tmp/capa*
+curl -fsSL -o ./capa.zip "${CAPA_URL}"
+unzip ./capa.zip
+chmod 755 ./capa
+mkdir -p "${CAPA_DIR}"
+mv ./capa "${CAPA_BIN}"
+rm -rf /tmp/capa*
 
-cd "${CAPA_RULES_DIR}"/..
-tar czf capa-rules-hedgehog.tar.gz "$(basename "${CAPA_RULES_DIR}")"
-mv ./capa-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+cp "${CAPA_BIN}" /opt/hedgehog_install_artifacts/
 
 # update clamav signatures
 freshclam --stdout --quiet --no-warnings
+
 ###
 
 # tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat
@@ -214,6 +233,7 @@ ln -s -f /opt/moloch/bin/npx /usr/local/bin
 # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
 # regenerated when we are about to deploy zeek itself.
 # so, now make a complete backup of /opt/zeek as it's going to have its ownership changed during runtime
+# TODO: check this with .deb install
 rsync -a "${ZEEK_DIR}"/ "${ZEEK_DIR}".orig
 
 # enable sensor init scripts

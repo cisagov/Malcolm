@@ -71,7 +71,7 @@ if mkdir $LOCKDIR; then
       mkdir -p "$DESTDIR"
       mkdir -p "$DESTDIR_EXTRACTED"
       mv -v "{}" "$DESTNAME"
-      python -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
+      python3 -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
       find "$DESTDIR_EXTRACTED" -type f -name "*.log" | while read LOGFILE
       do
         PROCESS_TIME=$(date +%s%N)

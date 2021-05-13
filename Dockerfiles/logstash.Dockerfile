@@ -1,26 +1,45 @@
-FROM centos:7 AS build
+FROM amazonlinux:2 AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-RUN yum install -y epel-release && \
-    yum update -y && \
-    yum install -y java-1.8.0-openjdk-devel curl wget tar which \
-                patch libyaml-devel libffi-devel glibc-headers autoconf gcc-c++ glibc-devel \
-                readline-devel zlib-devel openssl-d evel bzip2 automake libtool bison make
-
-ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
+RUN amazon-linux-extras install -y epel && \
+    yum install -y \
+      autoconf \
+      automake \
+      bison \
+      bzip2 \
+      curl \
+      gcc-c++ \
+      glibc-devel \
+      glibc-headers \
+      java-latest-openjdk-devel \
+      libffi-devel \
+      libtool \
+      libyaml-devel \
+      make \
+      openssl-devel \
+      patch \
+      procps \
+      readline-devel \
+      tar \
+      wget \
+      which \
+      zlib-devel
 
 RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -" && \
     /bin/bash -lc "command curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -" && \
     /bin/bash -lc "curl -L get.rvm.io | bash -s stable" && \
     /bin/bash -lc "rvm autolibs fail" && \
-    /bin/bash -lc "rvm install jruby-9.2.5.0" && \
-    /bin/bash -lc "rvm use jruby-9.2.5.0 --default" && \
-    /bin/bash -lc "gem install bundler --no-ri --no-rdoc" && \
-    cd /opt && \
-      mkdir -p ./logstash-filter-ieee_oui && \
-      curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
-      /bin/bash -lc "cd /opt/logstash-filter-ieee_oui && bundle install && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
+    /bin/bash -lc "rvm install jruby-9.2.17.0" && \
+    /bin/bash -lc "rvm use jruby-9.2.17.0 --default" && \
+    /bin/bash -lc "gem install bundler --no-document"
+
+ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
+
+RUN cd /opt && \
+    mkdir -p ./logstash-filter-ieee_oui && \
+    curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
+    /bin/bash -lc "export JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-ieee_oui && ( bundle install || bundle install ) && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
 
 FROM docker.elastic.co/logstash/logstash-oss:7.10.2
 

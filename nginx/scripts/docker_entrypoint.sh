@@ -143,7 +143,6 @@ else
     # pick a random local port to listen on for the client side of the tunnel
     read PORT_LOWER POWER_UPPER < /proc/sys/net/ipv4/ip_local_port_range
     LOCAL_PORT=$(shuf -i $PORT_LOWER-$POWER_UPPER -n 1)
-    LDAP_PROTOCOL=${NGINX_LDAP_TLS_STUNNEL_PROTOCOL:-"winldap"}
 
     # create PEM key for stunnel (this key doesn't matter as we're only using stunnel in client mode)
     pushd /tmp >/dev/null 2>&1
@@ -172,7 +171,7 @@ $STUNNEL_CHECK_IP_LINE
 [stunnel.ldap_start_tls]
 accept = localhost:$LOCAL_PORT
 connect = $REMOTE_HOST:$REMOTE_PORT
-protocol = $LDAP_PROTOCOL
+protocol = ldap
 EOF
 
     # rewrite modified copy of user ldap configuration to point to local end of tunnel instead of remote

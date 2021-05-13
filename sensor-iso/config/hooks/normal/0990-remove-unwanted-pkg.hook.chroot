@@ -2,20 +2,15 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# remove development packages
+# remove development packages not necessary for building dynamic Zeek plugins
 apt-get -y --purge remove \
   checkinstall \
-  cpp-9 \
-  gcc-9 \
-  gcc-9-base \
   gdb \
-  google-perftools \
   libc6-dbg \
-  libgcc-9-dev \
-  libllvm11 \
   ninja-build \
-  $(dpkg --get-selections | grep -Pv "(^(libyaml-dev|dpkg|libgcc|libpcap)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+  $(dpkg --get-selections | grep -Pv "(^(dpkg|libclang|libfl|libgcc|libmaxminddb|libpcap|libssl|libyaml|llvm|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /var/spool/ccache
+
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \
@@ -52,10 +47,6 @@ apt-get -y --purge remove bluez-firmware \
                           youtube-dl || true
 
 apt-get -y autoremove
-
-rm -f /etc/apt/sources.list.d/testing.list
-apt-get -y update
-
 apt-get clean
 
 # remove any residual configs
