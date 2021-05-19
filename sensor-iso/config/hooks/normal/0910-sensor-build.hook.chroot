@@ -14,7 +14,7 @@ NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.
 
 ZEEK_VERSION=4.0.1-0
 ZEEK_LTS=1
-SPICY_VERSION=1.1.0
+SPICY_VERSION=1.0.0
 ZEEK_DIR="/opt/zeek"
 SPICY_DIR="/opt/spicy"
 export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH
