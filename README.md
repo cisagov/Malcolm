@@ -92,6 +92,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Upgrading Malcolm](#UpgradePlan)
 * [Forks](#Forks)
 * [Copyright](#Footer)
+* [Contact](#Contact)
 
 ## <a name="QuickStart"></a>Quick start
 
@@ -1951,17 +1952,17 @@ Once the upgraded instance Malcolm has started up, you'll probably want to impor
 
 See [`License.txt`](./License.txt) for the terms of its release.
 
-### Contact information of author(s):
+## Other Software
+
+Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
+
+* [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
+* [Supported Open Source Software](https://github.com/idaholab)
+* [Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
+* [Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
+
+## <a name="Contact"></a>Contact information of author(s):
 
 [Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Malcolm)
 
-## Other Software
-Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
-
-[Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
-
-[Supported Open Source Software](https://github.com/idaholab)
-
-[Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
-
-[Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
+[![Join the chat at https://gitter.im/malcolmnetsec/community](https://badges.gitter.im/malcolmnetsec/community.svg)](https://gitter.im/malcolmnetsec/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
