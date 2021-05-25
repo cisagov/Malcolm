@@ -404,7 +404,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"zeek.logType:(bacnet* OR bsap* OR cip* OR dnp3* OR enip OR iso_cotp OR modbus* OR mqtt* OR profinet OR s7comm)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"zeek.logType:(bacnet* OR bsap* OR cip* OR dnp3* OR ecat* OR enip OR iso_cotp OR modbus* OR mqtt* OR profinet OR s7comm)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
