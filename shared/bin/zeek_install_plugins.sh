@@ -65,8 +65,11 @@ function clone_github_repo() {
   fi
 }
 
-# install Zeek packages that install nicely using zkg
+# don't consume as many resources when building spicy-analyzers, even if it's slower.
+# https://github.com/zeek/spicy-analyzers/pull/60
+export SPICY_ZKG_PROCESSES=1
 
+# install Zeek packages that install nicely using zkg
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
