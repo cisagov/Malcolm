@@ -71,7 +71,7 @@ def main():
           fingerprint.update(headerInfo)
 
         for item in root.findall('./Payload'):
-          filterFor = item.attrib['For'] if 'For' in item.attrib else None
+          filterFor = item.attrib['For'].strip() if 'For' in item.attrib else None
           if filterFor:
             payloadInfo = defaultdict(lambda: None) if filterFor not in fingerprint['Payloads'] else fingerprint['Payloads'][filterFor]
             payloadFilters = defaultdict(lambda: None) if payloadInfo['Filters'] == None else payloadInfo['Filters']
@@ -94,10 +94,10 @@ def main():
             fingerprint['Payloads'][filterFor] = payloadInfo
 
         for item in root.findall('./Filter'):
-          filterFor = item.attrib['For'] if 'For' in item.attrib else None
+          filterFor = item.attrib['For'].strip() if 'For' in item.attrib else None
           if filterFor in fingerprint['Payloads']:
             filterName = item.attrib['Name'] if 'Name' in item.attrib else f"{len(fingerprint['Payloads'][filterFor]['Filters'])+1}"
-            filterDetails = defaultdict(lambda: None) if filterName not in fingerprint['Payloads'][filterFor]['Filters'] else fingerprint['Payloads'][filterFor]['Filters'][filterName]
+            filterDetails = defaultdict(lambda: '-') if filterName not in fingerprint['Payloads'][filterFor]['Filters'] else fingerprint['Payloads'][filterFor]['Filters'][filterName]
             for child in item:
               if child.text:
                 filterDetails[child.tag] = int(child.text) if child.text.isdigit() else child.text
@@ -108,8 +108,12 @@ def main():
 
       fingerprints[os.path.basename(fingerprintFile)] = fingerprint
 
-  print(json.dumps(fingerprints))
-
+  #print(json.dumps(fingerprints))
+  for filename, fingerprint in fingerprints.items():
+    if "Payloads" in fingerprint:
+      for name, payload in fingerprint["Payloads"].items():
+        if "Filters" in payload:
+          eprint(f'{name} -> {json.dumps(payload["Filters"])}')
 
 ###################################################################################################
 if __name__ == '__main__':
