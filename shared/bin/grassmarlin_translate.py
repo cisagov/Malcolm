@@ -23,6 +23,9 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 
 ###################################################################################################
+IGNORE_FINTERPRINT_FILES = ("Operating System.xml")
+
+###################################################################################################
 # main
 def main():
   global args
@@ -31,7 +34,7 @@ def main():
   parser = argparse.ArgumentParser(description=script_name, add_help=False, usage='{} <arguments>'.format(script_name))
   parser.add_argument('-d', '--defaults', dest='accept_defaults', type=mmguero.str2bool, nargs='?', const=True, default=False, metavar='true|false', help="Accept defaults to prompts without user interaction")
   parser.add_argument('-v', '--verbose', dest='debug', type=mmguero.str2bool, nargs='?', const=True, default=False, metavar='true|false', help="Verbose/debug output")
-  parser.add_argument('input', metavar='<string>', type=str, nargs='+', help="Input")
+  parser.add_argument(dest='input', metavar='<string>', type=str, nargs='+', help="Input file(s)")
   try:
     parser.error = parser.exit
     args = parser.parse_args()
@@ -54,7 +57,10 @@ def main():
     fingerprint = defaultdict(lambda: None)
     fingerprint['Payloads'] = {}
 
-    if (args.input is not None) and os.path.isfile(fingerprintFile):
+    if ((args.input is not None) and
+        os.path.isfile(fingerprintFile) and
+        (os.path.basename(fingerprintFile) not in IGNORE_FINTERPRINT_FILES)):
+
       root = ET.parse(fingerprintFile).getroot();
       if (root.tag == 'Fingerprint'):
 
@@ -74,8 +80,6 @@ def main():
             details = defaultdict(lambda: None)
             if (returnItem := item.find('./Always/Return')) is not None:
               payloadInfo.update(returnItem.attrib)
-              #payloadInfo['Confidence'] = int(returnItem.attrib['Confidence']) if 'Confidence' in returnItem.attrib else None
-              #payloadInfo['Direction'] = returnItem.attrib['Direction'] if 'Direction' in returnItem.attrib else None
               if (detailsItem := returnItem.find('./Details')) is not None:
                 if (categoryItem := detailsItem.find('./Category')) is not None:
                   details['Category'] = categoryItem.text;
@@ -95,12 +99,16 @@ def main():
             filterName = item.attrib['Name'] if 'Name' in item.attrib else f"{len(fingerprint['Payloads'][filterFor]['Filters'])+1}"
             filterDetails = defaultdict(lambda: None) if filterName not in fingerprint['Payloads'][filterFor]['Filters'] else fingerprint['Payloads'][filterFor]['Filters'][filterName]
             for child in item:
-              filterDetails[child.tag] = int(child.text) if child.text.isdigit() else child.text
+              if child.text:
+                filterDetails[child.tag] = int(child.text) if child.text.isdigit() else child.text
+              if child.attrib:
+                filterDetails[child.tag] = child.attrib
+
             fingerprint['Payloads'][filterFor]['Filters'][filterName] = filterDetails
 
-    fingerprints[os.path.basename(fingerprintFile)] = fingerprint
+      fingerprints[os.path.basename(fingerprintFile)] = fingerprint
 
-  eprint(json.dumps(fingerprints))
+  print(json.dumps(fingerprints))
 
 
 ###################################################################################################
