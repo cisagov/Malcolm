@@ -1,7 +1,7 @@
 module Best_Guess;
 
 # given an input map file with the following format:
-# proto dport sport name  category  role
+# proto	dport	sport	name	service	category	role
 # (see https://docs.zeek.org/en/master/frameworks/input.html#reading-data-into-tables
 # for details on how the table is loaded),
 # load up the table on zeek_init and for each connection_state_remove
@@ -19,9 +19,10 @@ type Best_Guess_Key: record {
 };
 
 
-# Other table values include name, category, and role.
+# Other table values include name, service, category, and role.
 type Best_Guess_Value: record {
   name: string &optional;
+  service: string &optional;
   category: string &optional;
   role: string &optional;
 };
@@ -48,6 +49,7 @@ export {
 
     # protocol guess values for log
     name: string &log &optional;
+    service: string &log &optional;
     category: string &log &optional;
     role: string &log &optional;
 
@@ -82,6 +84,7 @@ event connection_state_remove(c: connection) {
   local dp = port_to_count(c$id$resp_p);
   local sp = port_to_count(c$id$orig_p);
   local guess = Best_Guess_Value($name="");
+  local service: string = "";
   local category: string = "";
   local role: string = "";
 
@@ -109,6 +112,8 @@ event connection_state_remove(c: connection) {
       # as category and role may be undefined, check them before accessing
       if (guess?$category)
         category = guess$category;
+      if (guess?$service)
+        service = guess$service;
       if (guess?$role)
         role = guess$role;
 
@@ -118,6 +123,7 @@ event connection_state_remove(c: connection) {
                                     $id=c$id,
                                     $proto=p,
                                     $name=guess$name,
+                                    $service=service,
                                     $category=category,
                                     $role=role,
                                     $guess_info=guess);

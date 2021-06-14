@@ -27,6 +27,7 @@ orig_path = os.getcwd()
 
 ###################################################################################################
 IGNORE_FINTERPRINT_FILES = ("Operating System.xml")
+IGNORE_COMMON_PORTS = (21, 22, 80, 443, 502, 8000, 8080)
 
 ###################################################################################################
 # main
@@ -111,36 +112,38 @@ def main():
               if child.attrib:
                 filterDetails[child.tag] = child.attrib
 
-            # we're covering modbus traffic pretty thoroughly already, don't bother with duplicates/redundancy here
-            onlyModbusDst = False
-            onlyModbusSrc = False
-            if ((filterDetails["DstPort"] == 502) and (filterDetails["SrcPort"] in [502, '-'])):
-              onlyModbusDst = True
-            if ((filterDetails["SrcPort"] == 502) and (filterDetails["DstPort"] in [502, '-'])):
-              onlyModbusSrc = True
-            if onlyModbusDst:
+            # we're going to filter out some very common traffic types here (modbus, basic HTTP, etc.) which would probably
+            # always be either redundant or a false positive
+            onlyCommonDst = ((filterDetails["DstPort"] in IGNORE_COMMON_PORTS) and (filterDetails["SrcPort"] in [filterDetails["DstPort"], '-']))
+            onlyCommonSrc = ((filterDetails["SrcPort"] in IGNORE_COMMON_PORTS) and (filterDetails["DstPort"] in [filterDetails["SrcPort"], '-']))
+            if onlyCommonDst:
               del filterDetails["DstPort"]
-            if onlyModbusSrc:
+            if onlyCommonSrc:
               del filterDetails["SrcPort"]
 
             fingerprint['Payloads'][filterFor]['Filters'][filterName] = filterDetails
 
       fingerprints[os.path.basename(fingerprintFile)] = fingerprint
 
-  print('\t'.join(['#fields', 'proto', 'dport', 'sport', 'name', 'category', 'role']))
+  print('\t'.join(['#fields', 'proto', 'dport', 'sport', 'name', 'service', 'category', 'role']))
   for filename, fingerprint in fingerprints.items():
     if "Payloads" in fingerprint:
       for name, payload in fingerprint["Payloads"].items():
         if "Filters" in payload:
           for filtername, filters in payload["Filters"].items():
-            nameItems = [x for x in list(OrderedDict.fromkeys(" ".join([fingerprint["Name"], name, filtername]).split())) if x.lower() not in ["dst", "src", "dstport", "srcport", "default"]]
-            zeekItems = [protomap[filters["TransportProtocol"]],
-                         filters["DstPort"] if (filters["DstPort"] != '-') else 0,
-                         filters["SrcPort"] if (filters["SrcPort"] != '-') else 0,
-                         " ".join(nameItems),
-                         payload["Details"]["Category"],
-                         payload["Details"]["Role"]]
-            print('\t'.join(map(str,zeekItems)))
+            # need to have at least one port to guess, protocol isn't enough by itself
+            dstPort = filters["DstPort"] if (filters["DstPort"] != '-') else 0
+            srcPort = filters["SrcPort"] if (filters["SrcPort"] != '-') else 0
+            if (dstPort != 0) or (srcPort != 0):
+              nameItems = [x for x in list(OrderedDict.fromkeys(" ".join([fingerprint["Name"], name, filtername]).split())) if x.lower() not in ["dst", "src", "dstport", "srcport", "default"]]
+              zeekItems = [protomap[filters["TransportProtocol"]],
+                           dstPort,
+                           srcPort,
+                           " ".join(nameItems),
+                           payload["Details"]["ICSProtocol"],
+                           payload["Details"]["Category"],
+                           payload["Details"]["Role"]]
+              print('\t'.join(map(str,zeekItems)))
 
 ###################################################################################################
 if __name__ == '__main__':
