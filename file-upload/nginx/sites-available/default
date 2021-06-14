@@ -8,6 +8,11 @@ server {
     root /var/www/upload;
     index index.php index.html index.htm;
 
+    location ^~ /server/php/files {
+        deny all;
+        return 404;
+    }
+
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_buffers 16 64k;
