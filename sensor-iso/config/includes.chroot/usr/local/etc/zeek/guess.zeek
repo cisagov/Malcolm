@@ -48,8 +48,8 @@ export {
     proto: transport_proto &log &optional;
 
     # protocol guess values for log
-    name: string &log &optional;
     service: string &log &optional;
+    name: string &log &optional;
     category: string &log &optional;
     role: string &log &optional;
 
@@ -88,8 +88,9 @@ event connection_state_remove(c: connection) {
   local category: string = "";
   local role: string = "";
 
-  # since dp and sp don't mean the same thing for ICMP...
-  if (p != icmp) {
+  # 1. only check connections for which we don't already know "service"
+  # 2. skip ICMP, since dp and sp don't mean the same thing for ICMP
+  if (((!c?$service) || (|c$service| == 0)) && (p != icmp)) {
 
     # Look up permutations of transport protocol + destination port + source port
     # from more-specific to less-specific.
@@ -122,8 +123,8 @@ event connection_state_remove(c: connection) {
                                     $uid=c$uid,
                                     $id=c$id,
                                     $proto=p,
-                                    $name=guess$name,
                                     $service=service,
+                                    $name=guess$name,
                                     $category=category,
                                     $role=role,
                                     $guess_info=guess);
