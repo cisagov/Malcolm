@@ -8,6 +8,7 @@ global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == "") ? 
 global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F : T;
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
+global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == "") ? F : T;
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
@@ -62,6 +63,10 @@ redef ignore_checksums = T;
 @load policy/protocols/modbus/known-masters-slaves
 @load policy/protocols/mqtt
 @load ./login.zeek
+
+@if (!disable_best_guess_ics)
+  @load ./guess.zeek
+@endif
 
 @load packages
 

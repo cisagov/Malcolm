@@ -109,7 +109,7 @@ lb_custom.InterfacePrefix=af_packet::
 EOF
 
 # set up default zeek local policy
-cp -f /usr/local/etc/zeek/*.zeek "${ZEEK_DIR}"/share/zeek/site/
+cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/zeek/site/
 
 # cleanup
 cd /usr/local/src

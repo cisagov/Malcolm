@@ -147,6 +147,7 @@ ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
+ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
@@ -195,6 +196,7 @@ ARG ZEEK_DISABLE_HASH_ALL_FILES=
 ARG ZEEK_DISABLE_LOG_PASSWORDS=
 ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
 ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
+ARG ZEEK_DISABLE_BEST_GUESS_ICS=
 # TODO: assess spicy-analyzer that replace built-in Zeek parsers
 # for now, disable them by default when a Zeek parser exists
 ARG ZEEK_DISABLE_SPICY_DHCP=true
@@ -209,6 +211,7 @@ ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
 ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
 ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS
 ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
+ENV ZEEK_DISABLE_BEST_GUESS_ICS $ZEEK_DISABLE_BEST_GUESS_ICS
 ENV ZEEK_DISABLE_SPICY_DHCP $ZEEK_DISABLE_SPICY_DHCP
 ENV ZEEK_DISABLE_SPICY_DNS $ZEEK_DISABLE_SPICY_DNS
 ENV ZEEK_DISABLE_SPICY_HTTP $ZEEK_DISABLE_SPICY_HTTP
