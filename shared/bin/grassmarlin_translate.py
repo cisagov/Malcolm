@@ -8,12 +8,15 @@ import os
 import sys
 import pprint
 import json
+import socket
 import xml.etree.ElementTree as ET
 
 import mmguero
 from mmguero import eprint
 
+from itertools import groupby
 from collections import defaultdict
+from collections import OrderedDict
 
 ###################################################################################################
 args = None
@@ -50,6 +53,10 @@ def main():
   else:
     sys.tracebacklimit = 0
 
+  # map protocol numbers to lowercase names (e.g., 6 to 'tcp'), defaulting to '-' for zeek to signify "not set"
+  protomap = defaultdict(lambda: 'unknown_transport')
+  protomap.update({num:name[8:].lower() for name, num in vars(socket).items() if name.startswith("IPPROTO")})
+
   fingerprints = defaultdict(lambda: None)
 
   for fingerprintFile in args.input:
@@ -77,7 +84,7 @@ def main():
             payloadFilters = defaultdict(lambda: None) if payloadInfo['Filters'] == None else payloadInfo['Filters']
             if (descriptionItem := item.find('./Description')) is not None:
               payloadInfo['Description'] = ' '.join(descriptionItem.text.split())
-            details = defaultdict(lambda: None)
+            details = defaultdict(lambda: '-')
             if (returnItem := item.find('./Always/Return')) is not None:
               payloadInfo.update(returnItem.attrib)
               if (detailsItem := returnItem.find('./Details')) is not None:
@@ -104,16 +111,36 @@ def main():
               if child.attrib:
                 filterDetails[child.tag] = child.attrib
 
+            # we're covering modbus traffic pretty thoroughly already, don't bother with duplicates/redundancy here
+            onlyModbusDst = False
+            onlyModbusSrc = False
+            if ((filterDetails["DstPort"] == 502) and (filterDetails["SrcPort"] in [502, '-'])):
+              onlyModbusDst = True
+            if ((filterDetails["SrcPort"] == 502) and (filterDetails["DstPort"] in [502, '-'])):
+              onlyModbusSrc = True
+            if onlyModbusDst:
+              del filterDetails["DstPort"]
+            if onlyModbusSrc:
+              del filterDetails["SrcPort"]
+
             fingerprint['Payloads'][filterFor]['Filters'][filterName] = filterDetails
 
       fingerprints[os.path.basename(fingerprintFile)] = fingerprint
 
-  #print(json.dumps(fingerprints))
+  print('\t'.join(['#fields', 'proto', 'dport', 'sport', 'name', 'category', 'role']))
   for filename, fingerprint in fingerprints.items():
     if "Payloads" in fingerprint:
       for name, payload in fingerprint["Payloads"].items():
         if "Filters" in payload:
-          eprint(f'{name} -> {json.dumps(payload["Filters"])}')
+          for filtername, filters in payload["Filters"].items():
+            nameItems = [x for x in list(OrderedDict.fromkeys(" ".join([fingerprint["Name"], name, filtername]).split())) if x.lower() not in ["dst", "src", "dstport", "srcport", "default"]]
+            zeekItems = [protomap[filters["TransportProtocol"]],
+                         filters["DstPort"] if (filters["DstPort"] != '-') else 0,
+                         filters["SrcPort"] if (filters["SrcPort"] != '-') else 0,
+                         " ".join(nameItems),
+                         payload["Details"]["Category"],
+                         payload["Details"]["Role"]]
+            print('\t'.join(map(str,zeekItems)))
 
 ###################################################################################################
 if __name__ == '__main__':

@@ -76,11 +76,10 @@ event connection_state_remove(c: connection) {
     guess = proto_guesses[p, 0, sp];
   else if ([unknown_transport, dp, sp] in proto_guesses)
     guess = proto_guesses[unknown_transport, dp, sp];
-  # TODO is this overkill?
-  #else if ([unknown_transport, dp, 0] in proto_guesses)
-  #  guess = proto_guesses[unknown_transport, dp, 0];
-  #else if ([unknown_transport, 0, sp] in proto_guesses)
-  #  guess = proto_guesses[unknown_transport, 0, sp];
+  else if ([unknown_transport, dp, 0] in proto_guesses)
+    guess = proto_guesses[unknown_transport, dp, 0];
+  else if ([unknown_transport, 0, sp] in proto_guesses)
+    guess = proto_guesses[unknown_transport, 0, sp];
 
   if ((guess?$name) && (guess$name != "")) {
 
