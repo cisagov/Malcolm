@@ -80,7 +80,6 @@ unknown_transport	3341	0	OMF Data H ANET-H	ANET-H	ICS_HOST	-
 unknown_transport	9600	0	Omron Factory Interface Network Service	FIN (Factory Interface Network) Service	PLC	-
 unknown_transport	2198	0	OneHome Remote Access	-	HMI	-
 unknown_transport	2199	0	OneHome Service Port	-	HMI	-
-unknown_transport	135	0	OPC OLE for Process Control	-	-	-
 unknown_transport	9094	0	Panasonic FP	-	PLC	-
 unknown_transport	8500	0	Panasonic FP2	-	PLC	-
 unknown_transport	1962	0	Phoenix Contact PCWorx ENGINEERING WORKSTATION 1962	-	WORKSTATION	ENGINEER

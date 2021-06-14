@@ -26,7 +26,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 
 ###################################################################################################
-IGNORE_FINTERPRINT_FILES = ("Operating System.xml")
+IGNORE_FINTERPRINT_FILES = ("Operating System.xml", "OPC.xml")
 IGNORE_COMMON_PORTS = (21, 22, 80, 443, 502, 8000, 8080)
 
 ###################################################################################################
