@@ -249,10 +249,8 @@
         "hits": 0,
         "columns": [
           "zeek.proto",
-          "zeek.service",
           "zeek_bestguess.name",
           "zeek_bestguess.category",
-          "zeek_bestguess.role",
           "zeek.orig_h",
           "zeek.orig_p",
           "zeek.resp_h",

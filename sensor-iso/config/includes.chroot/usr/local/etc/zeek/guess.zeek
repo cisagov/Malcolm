@@ -1,7 +1,7 @@
 module Best_Guess;
 
 # given an input map file with the following format:
-# proto	dport	sport	name	service	category	role
+# proto	dport	sport	name	category
 # (see https://docs.zeek.org/en/master/frameworks/input.html#reading-data-into-tables
 # for details on how the table is loaded),
 # load up the table on zeek_init and for each connection_state_remove
@@ -19,12 +19,10 @@ type Best_Guess_Key: record {
 };
 
 
-# Other table values include name, service, category, and role.
+# Other table values include name, category.
 type Best_Guess_Value: record {
   name: string &optional;
-  service: string &optional;
   category: string &optional;
-  role: string &optional;
 };
 
 export {
@@ -48,10 +46,8 @@ export {
     proto: transport_proto &log &optional;
 
     # protocol guess values for log
-    service: string &log &optional;
     name: string &log &optional;
     category: string &log &optional;
-    role: string &log &optional;
 
     # originating structure containing guess info
     guess_info: Best_Guess_Value &optional;
@@ -84,9 +80,7 @@ event connection_state_remove(c: connection) {
   local dp = port_to_count(c$id$resp_p);
   local sp = port_to_count(c$id$orig_p);
   local guess = Best_Guess_Value($name="");
-  local service: string = "";
   local category: string = "";
-  local role: string = "";
 
   # 1. only check connections for which we don't already know "service"
   # 2. skip ICMP, since dp and sp don't mean the same thing for ICMP
@@ -110,23 +104,17 @@ event connection_state_remove(c: connection) {
     # if a best guess was made based on protocol and ports, log it
     if ((guess?$name) && (guess$name != "")) {
 
-      # as category and role may be undefined, check them before accessing
+      # as category may be undefined, check before accessing
       if (guess?$category)
         category = guess$category;
-      if (guess?$service)
-        service = guess$service;
-      if (guess?$role)
-        role = guess$role;
 
       # log entry into bestguess.log
       local info = Best_Guess::Info($ts=network_time(),
                                     $uid=c$uid,
                                     $id=c$id,
                                     $proto=p,
-                                    $service=service,
                                     $name=guess$name,
                                     $category=category,
-                                    $role=role,
                                     $guess_info=guess);
       Log::write(Best_Guess::BEST_GUESS_LOG, info);
 

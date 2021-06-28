@@ -109,7 +109,6 @@ function ZeekLogs (api, section) {
   // bestguess.log
   this.bestguess_nameField = this.api.addField("field:zeek_bestguess.name;db:zeek_bestguess.name;kind:termfield;friendly:Best Guess Name;help:Best Guess Name");
   this.bestguess_categoryField = this.api.addField("field:zeek_bestguess.category;db:zeek_bestguess.category;kind:termfield;friendly:Best Guess Category;help:Best Guess Category");
-  this.bestguess_roleField = this.api.addField("field:zeek_bestguess.role;db:zeek_bestguess.role;kind:termfield;friendly:Best Guess Role;help:Best Guess Role");
 
   // bsap_ip_header.log
   // https://github.com/cisagov/ICSNPP/tree/master/zeek_bsap_ip_parser
@@ -1156,7 +1155,6 @@ function ZeekLogs (api, section) {
     "zeek_bacnet_property.property",
     "zeek_bacnet_property.value",
     "zeek_bestguess.name",
-    "zeek_bestguess.role",
     "zeek_bestguess.category",
     "zeek_bsap_ip_header.num_msg",
     "zeek_bsap_ip_header.type_name",
@@ -2030,7 +2028,7 @@ function ZeekLogs (api, section) {
   this.api.addView("zeek_bacnet", "require:zeek_bacnet;title:Zeek bacnet.log;fields:zeek_bacnet.bvlc_function,zeek_bacnet.pdu_type,zeek_bacnet.pdu_service,zeek_bacnet.invoke_id,zeek_bacnet.result_code");
   this.api.addView("zeek_bacnet_discovery", "require:zeek_bacnet_discovery;title:Zeek bacnet_discovery.log;fields:zeek_bacnet_discovery.pdu_service,zeek_bacnet_discovery.object_type,zeek_bacnet_discovery.instance_number,zeek_bacnet_discovery.vendor,zeek_bacnet_discovery.range,zeek_bacnet_discovery.range_low,zeek_bacnet_discovery.range_high,zeek_bacnet_discovery.object_name");
   this.api.addView("zeek_bacnet_property", "require:zeek_bacnet_property;title:Zeek bacnet_property.log;fields:zeek_bacnet_property.pdu_service,zeek_bacnet_property.object_type,zeek_bacnet_property.instance_number,zeek_bacnet_property.property,zeek_bacnet_property.array_index,zeek_bacnet_property.value");
-  this.api.addView("zeek_bestguess", "require:zeek_bestguess;title:Zeek bestguess.log;fields:zeek_bestguess.name,zeek_bestguess.role,zeek_bestguess.category");
+  this.api.addView("zeek_bestguess", "require:zeek_bestguess;title:Zeek bestguess.log;fields:zeek_bestguess.name,zeek_bestguess.category");
   this.api.addView("zeek_bsap_ip_header", "require:zeek_bsap_ip_header;title:Zeek bsap_ip_header.log;fields:zeek_bsap_ip_header.num_msg,zeek_bsap_ip_header.type_name");
   this.api.addView("zeek_bsap_ip_rdb", "require:zeek_bsap_ip_rdb;title:Zeek bsap_ip_rdb.log;fields:zeek_bsap_ip_rdb.app_func_code,zeek_bsap_ip_rdb.data,zeek_bsap_ip_rdb.data_len,zeek_bsap_ip_rdb.func_code,zeek_bsap_ip_rdb.header_size,zeek_bsap_ip_rdb.mes_seq,zeek_bsap_ip_rdb.node_status,zeek_bsap_ip_rdb.res_seq,zeek_bsap_ip_rdb.sequence");
   this.api.addView("zeek_bsap_ip_unknown", "require:zeek_bsap_ip_unknown;title:Zeek bsap_ip_unknown.log;fields:zeek_bsap_ip_unknown.data");
