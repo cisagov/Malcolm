@@ -1,196 +1,359 @@
 #fields	proto	dport	sport	name	service	category	role
-unknown_transport	2085	0	ADA Control ADA-CIP	ADA-CIP	ICS_HOST	-
-unknown_transport	2846	0	AIMPP Hello 2846	-	ICS_HOST	-
-unknown_transport	2847	0	AIMPP Port Req 2847	-	ICS_HOST	-
-unknown_transport	210	0	ANSI 1 z39.50	-	-	-
-unknown_transport	1153	0	ANSI 2 c1222-asse	ANSI	-	-
-unknown_transport	4123	0	Bizware Task Manager 1	-	-	-
-unknown_transport	4120	0	Bizware Production Server 1	-	-	-
-unknown_transport	4121	0	Bizware Server Manager 1	-	-	-
-unknown_transport	4125	0	Bizware CTP Server 1	-	-	-
-unknown_transport	4122	0	Bizware PlantMetrics Server 1	-	-	-
-unknown_transport	4450	0	CAMP Common ASCII Message Protocol	-	ICS_HOST	-
-unknown_transport	2757	0	CNRP Common Name Resolution Protocol	-	ICS_HOST	-
-tcp	2455	0	CodeSys Gateway Server 1 2455	CodeSys	-	SERVER
-tcp	1200	0	CodeSys Gateway Server 2 1200	CodeSys	-	SERVER
+unknown_transport	0	2221	Rockwell CSP	-	ICS_HOST	-
+unknown_transport	0	2222	Rockwell CSP	-	ICS_HOST	-
+unknown_transport	0	2223	Rockwell CSP	-	ICS_HOST	-
+unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q SLAVE	-	PLC	SLAVE
+unknown_transport	0	5413	Wonderware	-	ICS_HOST	OTHER
+unknown_transport	0	5891	Intelligent Instrumentation EDAS	Intelligent Instrumentation EDAS	ICS_HOST	-
 unknown_transport	0	7022	CT Discovery Protocol CTDP	-	ICS_HOST	-
-unknown_transport	7022	0	CT Discovery Protocol CTDP	-	ICS_HOST	-
-unknown_transport	4452	0	CTI Program Load	CT Program Load	ICS_HOST	-
-unknown_transport	4451	0	CTI System Message	CT System Message	ICS_HOST	-
-unknown_transport	3743	0	Cutler-Hammer IP Port IPCS Command	-	ICS_HOST	-
-unknown_transport	5050	0	Danfoss ECL Apex	-	PLC	-
-unknown_transport	3881	0	Data Acquisition and Control IDAC Intelligent	Intelligent Data Acquisition and Control	ICS_HOST	-
-unknown_transport	0	7201	DLIP	DLIP	ICS_HOST	-
-unknown_transport	7201	0	DLIP	DLIP	ICS_HOST	-
-unknown_transport	3639	0	Extensible Automation xAP-HA	-	-	-
-unknown_transport	6543	0	FactoryTalk Alarming Server 1	-	-	-
-unknown_transport	1330	0	FactoryTalk Object RPC 1	-	-	-
-unknown_transport	7600	0	FactoryTalk Event Multiplexor 1	-	-	-
-unknown_transport	1331	0	FactoryTalk Service control 1	-	-	-
-unknown_transport	1332	0	FactoryTalk Server Health 1	-	-	-
-unknown_transport	0	7700	Factory Talk Event Server 1	-	-	-
-unknown_transport	3060	0	Factory Talk Directory Server File Transfer 1	-	-	-
-unknown_transport	0	7710	Factory Talk Directory Server 1	-	-	-
-unknown_transport	3873	0	Fagordnc 1	-	-	-
-unknown_transport	3873	0	Fagor DNC	-	ICS_HOST	-
-unknown_transport	500	0	Fatek FB Series	-	PLC	-
-unknown_transport	3622	0	FF LAN Redundancy Port 1	-	-	-
-tcp	1090	1090	FF Fieldbus Message Specification 1	-	-	-
-tcp	1091	1091	FF SYstem Management 1	-	-	-
-unknown_transport	1089	1089	FF Annunciation 1	-	-	-
-unknown_transport	27000	0	FlexLM Server 1	-	-	-
 unknown_transport	0	7200	FODMS FLIP	FODMS FLIP	ICS_HOST	-
-unknown_transport	3004	0	Hitachi EHV Series	-	PLC	-
-unknown_transport	3250	0	HMS HICP Port HMC	HMS HICP	ICS_HOST	-
+unknown_transport	0	7201	DLIP	DLIP	ICS_HOST	-
+tcp	0	7700	Rockwell FactoryTalk Event Server	-	HMI	SERVER
+unknown_transport	0	7710	Factory Talk Directory Server	-	-	-
+unknown_transport	0	7720	Rockwell RSViewSE	-	HMI	SERVER
+unknown_transport	0	7721	Rockwell RSViewSE	-	-	-
+unknown_transport	0	7722	RSVIEWSE HMI Activation	-	-	-
+unknown_transport	0	9212	Server View DBMS Access	Server View DBMS	ICS_HOST	-
+unknown_transport	0	9213	ServerStart RemoteControl	ServerStart RemoteControl	ICS_HOST	-
+unknown_transport	0	23400	Novar Data	Novar Data	ICS_HOST	-
+unknown_transport	0	23401	Novar Alarm	Novar Alarm	ICS_HOST	-
+unknown_transport	0	23402	Novar Global	Novar Global	ICS_HOST	-
+unknown_transport	0	34963	PROFInet RT Multicast	RT Multicast	ICS_HOST	-
+unknown_transport	0	34964	PROFInet Context Manager	Context Manager	ICS_HOST	-
+unknown_transport	0	44818	Rockwell Encapsulation	-	ICS_HOST	-
+unknown_transport	210	0	ANSI 1 z39.50	-	-	-
+tcp	400	0	Rockwell RSSql Transaction Manager	-	ICS_HOST	-
+tcp	401	0	Rockwell RSSql Compression Server	-	ICS_HOST	-
+tcp	402	0	Rockwell RSSql Configuration Server	-	ICS_HOST	-
+unknown_transport	500	0	Fatek FB Series	-	PLC	-
+unknown_transport	554	0	RTP RTSP Streaming Protocol	-	-	-
+unknown_transport	789	0	Red Lion CrimsonV3	-	HMI	-
+unknown_transport	1025	0	Mitsubishi Electronic FX	-	PLC	-
+unknown_transport	1089	0	Rockwell Foundation Fieldbus	-	ICS_HOST	-
+unknown_transport	1090	0	Rockwell Foundation Fieldbus	-	-	-
+unknown_transport	1091	0	Rockwell Foundation Fieldbus	-	-	-
+tcp	1132	0	Rockwell AADvance	-	-	-
+unknown_transport	1153	0	ANSI 2 c1222-asse	ANSI	-	-
+tcp	1200	0	CodeSys Gateway Server	CodeSys	-	SERVER
+tcp	1330	0	Rockwell FactoryTalk Object RPC	-	HMI	-
+tcp	1331	0	Rockwell FactoryTalk Service Control	-	HMI	SERVER
+tcp	1332	0	Rockwell FactoryTalk Server Health	-	HMI	SERVER
+tcp	1433	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint SQL	-	HMI	SERVER
+tcp	1434	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint MSSQL	-	HMI	SERVER
+unknown_transport	1541	0	Foxboro/Invensys Foxboro DCS Informix	-	-	-
+unknown_transport	1962	0	Phoenix Contact PCWorx ENGINEERING WORKSTATION	-	WORKSTATION	ENGINEER
+unknown_transport	2004	0	LS FEnet	Koyo Ethernet	-	-
+udp	2010	0	Rockwell AADvance Discover Tool	-	RTU	SLAVE
+udp	2011	0	Rockwell AADvance Discover Tool	-	RTU	SLAVE
+unknown_transport	2085	0	ADA Control ADA-CIP	ADA-CIP	ICS_HOST	-
+unknown_transport	2198	0	OneHome Remote Access	-	HMI	-
+unknown_transport	2199	0	OneHome Service Port	-	HMI	-
+unknown_transport	2221	0	Rockwell CSP	-	ICS_HOST	-
+unknown_transport	2222	0	Rockwell CSP	-	ICS_HOST	-
+unknown_transport	2223	0	Rockwell CSP	-	ICS_HOST	-
+tcp	2393	0	OLAP	-	-	-
+tcp	2394	0	OLAP	-	-	-
 unknown_transport	2404	0	IEC 60870-5-104	IEC 60870-5-104	ICS_HOST	-
-unknown_transport	5069	0	I-NET 2000-NPR	I-NET 2000-NPR	ICS_HOST	-
-unknown_transport	0	5891	Intelligent Instrumentation EDAS units Undocumented unites	Intelligent Instrumentation EDAS	ICS_HOST	-
-unknown_transport	3614	0	Invensys Sigma Port 1	-	-	-
+unknown_transport	2423	0	RNRP Redundant Network Routing	RNRP	ICS_HOST	-
+tcp	2455	0	CodeSys Gateway Server	CodeSys	-	SERVER
+unknown_transport	2540	0	LonWorks	-	-	-
+unknown_transport	2541	0	LonWorks	-	-	-
+unknown_transport	2729	0	TCIM-Control	TCIM-Control	ICS_HOST	-
+unknown_transport	2757	0	CNRP Common Name Resolution Protocol	-	ICS_HOST	-
+unknown_transport	2846	0	AIMPP Hello	-	ICS_HOST	-
+unknown_transport	2847	0	AIMPP Port Req	-	ICS_HOST	-
+unknown_transport	3004	0	Hitachi EHV Series	-	PLC	-
+unknown_transport	3060	0	Rockwell FactoryTalk Directory Server File Transfer	-	HMI	-
+unknown_transport	3240	0	Trio Motion Control	Trio Motion Control	ICS_HOST	-
+unknown_transport	3250	0	HMS HICP Port HMC	HMS HICP	ICS_HOST	-
+unknown_transport	3338	0	OMF Data B ANET-B	ANET-B	ICS_HOST	-
+unknown_transport	3340	0	OMF Data M ANET-M	ANET-M	ICS_HOST	-
+unknown_transport	3341	0	OMF Data H ANET-H	ANET-H	ICS_HOST	-
+tcp	3480	0	OPC UA Discovery	-	-	SERVER
+unknown_transport	3614	0	Schleicher Satchwell Sigma	Invensys Sigma	ICS_HOST	-
+unknown_transport	3622	0	Rockwell FF LAN Redundancy Port	-	ICS_HOST	-
+unknown_transport	3639	0	Extensible Automation xAP-HA	-	-	-
 unknown_transport	3743	0	IP Control Systems Ltd ICS Command	IP Control Systems Ltd	ICS_HOST	-
-unknown_transport	3848	0	IT Environmental Monitor Item Service	IT Environmental Monitor	ICS_HOST	-
 unknown_transport	3794	0	JAUS Robots	JAUS Robots	ICS_HOST	-
+unknown_transport	3820	0	Siemens AuD SCP	-	ICS_HOST	-
+unknown_transport	3848	0	IT Environmental Monitor Item Service	IT Environmental Monitor	ICS_HOST	-
+unknown_transport	3873	0	Fagor DNC	-	ICS_HOST	-
+unknown_transport	3875	0	PNBSCADA	PNBSCADA	ICS_HOST	-
+unknown_transport	3881	0	Data Acquisition and Control IDAC Intelligent	Intelligent Data Acquisition and Control	ICS_HOST	-
+unknown_transport	4000	0	Emerson/Fisher ROC Plus	-	-	-
+tcp	4120	0	Rockwell Bizware Production Server	-	ICS_HOST	SERVER
+tcp	4121	0	Rockwell Bizware Server Manager	-	ICS_HOST	OPERATOR
+tcp	4122	0	Rockwell Bizware PlantMetrics Server	-	ICS_HOST	SERVER
+tcp	4123	0	Rockwell Bizware Task Manager	-	ICS_HOST	OPERATOR
+tcp	4124	0	Rockwell Bizware Scheduler	-	ICS_HOST	SERVER
+tcp	4125	0	Rockwell Bizware CTP Server	-	ICS_HOST	SERVER
+unknown_transport	4450	0	CAMP Common ASCII Message Protocol	-	ICS_HOST	-
+unknown_transport	4451	0	CTI System Message	CT System Message	ICS_HOST	-
+unknown_transport	4452	0	CTI Program Load	CT Program Load	ICS_HOST	-
+unknown_transport	4999	0	Mitsubishi Electronic MELSEC-Q	-	PLC	-
+udp	5000	0	Rockwell AADvance Peer to P2P	-	ICS_HOST	-
+unknown_transport	5001	0	Mitsubishi Electronic FX3u Fx3u	-	PLC	-
+unknown_transport	5004	0	RTP Time Transport	-	-	-
+unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER	-	MTU	MASTER
+unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER	-	MTU	MASTER
+tcp	5050	0	Telvent OASyS DNA	-	-	-
+unknown_transport	5050	0	Danfoss ECL Apex	-	PLC	-
+tcp	5051	0	Telvent OASyS DNA	-	-	-
+tcp	5052	0	Telvent OASyS DNA	-	-	-
+tcp	5065	0	Telvent OASyS DNA	-	-	-
+unknown_transport	5069	0	I-NET 2000-NPR	I-NET 2000-NPR	ICS_HOST	-
+unknown_transport	5413	0	Wonderware	-	HMI	-
+tcp	5450	0	Rockwell FactoryTalk PI Network Manager	-	HMI	ENGINEER
+tcp	5454	0	Rockwell FactoryTalk Analysis Framework	-	HMI	-
+tcp	5455	0	Rockwell FactoryTalk Analysis Framework	-	HMI	-
+tcp	5456	0	Rockwell FactoryTalk ACE2 Scheduler	-	HMI	-
+tcp	5457	0	Rockwell FactoryTalk Asset Framework Server	-	HMI	SERVER
+tcp	5458	0	Rockwell FactoryTalk PI Notification	-	HMI	-
+tcp	6543	0	Rockwell FactoryTalk Alarming Server	-	HMI	-
+tcp	7002	0	Rockwell FactoryTalk Asset Centre Services	-	HMI	-
+tcp	7003	0	Rockwell FactoryTalk Asset Centre Services	-	HMI	-
+tcp	7004	0	Rockwell FactoryTalk Asset Centre Services	-	HMI	-
+unknown_transport	7022	0	CT Discovery Protocol CTDP	-	ICS_HOST	-
+unknown_transport	7201	0	DLIP	DLIP	ICS_HOST	-
+tcp	7600	0	Rockwell FactoryTalk Event Multiplexor	-	HMI	-
+tcp	7710	0	Rockwell FactoryTalk Directory Server	-	HMI	SERVER
+tcp	8081	0	Rockwell Bizware HTTP Server Manager	-	ICS_HOST	OPERATOR
+tcp	8083	0	Rockwell Bizware HTTP CTP Server	-	ICS_HOST	-
+unknown_transport	8500	0	Panasonic FP2	-	PLC	-
 unknown_transport	8501	0	Keyence KV-5000	-	PLC	-
+unknown_transport	9094	0	Panasonic FP	-	PLC	-
+unknown_transport	9600	0	Omron Factory Interface Network Service	FINS (Factory Interface Network Service)	PLC	-
+tcp	10001	0	Rockwell AADvance Serial Data	-	ICS_HOST	-
+tcp	10002	0	Rockwell AADvance Serial Data	-	ICS_HOST	-
+tcp	10003	0	Rockwell AADvance Serial Data	-	ICS_HOST	-
+tcp	10004	0	Rockwell AADvance Serial Data	-	ICS_HOST	-
+tcp	10005	0	Rockwell AADvance Serial Data	-	ICS_HOST	-
+tcp	10006	0	Rockwell AADvance Serial Data	-	ICS_HOST	-
+tcp	10307	0	ABB Ranger	-	-	-
+tcp	10311	0	ABB Ranger	-	-	-
+tcp	10364	0	ABB Ranger	-	-	-
+tcp	10365	0	ABB Ranger	-	-	-
+tcp	10407	0	ABB Ranger	-	-	-
+tcp	10409	0	ABB Ranger	-	-	-
+tcp	10410	0	ABB Ranger	-	-	-
+tcp	10412	0	ABB Ranger	-	-	-
+tcp	10414	0	ABB Ranger	-	-	-
+tcp	10415	0	ABB Ranger	-	-	-
+tcp	10428	0	ABB Ranger	-	-	-
+tcp	10431	0	ABB Ranger	-	-	-
+tcp	10432	0	ABB Ranger	-	-	-
+tcp	10447	0	ABB Ranger	-	-	-
+tcp	10449	0	ABB Ranger	-	-	-
+tcp	10450	0	ABB Ranger	-	-	-
+unknown_transport	11001	0	Johnson Controls Metasys N1	-	-	-
+tcp	12135	0	Telvent OASyS DNA	-	-	-
+tcp	12136	0	Telvent OASyS DNA	-	-	-
+tcp	12137	0	Telvent OASyS DNA	-	-	-
+tcp	12316	0	ABB Ranger	-	-	-
+tcp	12645	0	ABB Ranger	-	-	-
+tcp	12647	0	ABB Ranger	-	-	-
+tcp	12648	0	ABB Ranger	-	-	-
+tcp	13722	0	ABB Ranger	-	-	-
+tcp	13724	0	ABB Ranger	-	-	-
+tcp	13782	0	ABB Ranger	-	-	-
+tcp	13783	0	ABB Ranger	-	-	-
+tcp	18000	0	Iconic Genesis32 GenBroker	-	-	-
+unknown_transport	20256	0	Unitronics Socket1	-	PLC	SLAVE
+unknown_transport	20257	0	Unitronics Unitronicsw Socket3 Socket2	-	PLC	SLAVE
+unknown_transport	20547	0	ProconOS	ProconOS	PLC	-
+tcp	27000	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27001	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27002	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27003	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27004	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27005	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27006	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27007	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27008	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
+tcp	27009	0	Rockwell FlexLM Server	-	ICS_HOST	SERVER
 unknown_transport	28784	0	Koyo Ethernet	Koyo Ethernet	PLC	-
-unknown_transport	2541	0	LonWorks2 1	-	-	-
-unknown_transport	2540	0	LonWorks 1	-	-	-
-unknown_transport	2541	0	LonWorks 2	-	-	-
-unknown_transport	2004	0	LS GLOFA FEnet	Koyo Ethernet	-	-
-unknown_transport	2004	0	LS XGB FEnet	Koyo Ethernet	-	-
-unknown_transport	2004	0	LS XGK FEnet	Koyo Ethernet	-	-
-unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER 5006	-	MTU	MASTER
-unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER 5007	-	MTU	MASTER
-unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q SLAVE 5006	-	PLC	SLAVE
-unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q SLAVE 5007	-	PLC	SLAVE
-unknown_transport	4999	0	Mitsubishi Electronic MELSEC-Q 4999	-	PLC	-
-unknown_transport	4999	0	Mitsubishi Electronic QJ71E71 4999	-	PLC	-
-unknown_transport	1025	0	Mitsubishi Electronic FX 1025	-	PLC	-
-unknown_transport	5001	0	Mitsubishi Electronic FX3u Fx3u 5001	-	PLC	-
+unknown_transport	34962	0	PROFInet RT Unicast	RT Unicast	ICS_HOST	-
+tcp	38000	0	SNC GENe	-	-	-
+tcp	38001	0	SNC GENe	-	-	-
+tcp	38011	0	SNC GENe	-	-	-
+tcp	38012	0	SNC GENe	-	-	-
+tcp	38014	0	SNC GENe	-	-	-
+tcp	38015	0	SNC GENe	-	-	-
+tcp	38200	0	SNC GENe	-	-	-
+tcp	38210	0	SNC GENe	-	-	-
+tcp	38301	0	SNC GENe	-	-	-
+tcp	38400	0	SNC GENe	-	-	-
+tcp	38589	0	ABB Ranger	-	-	-
+tcp	38593	0	ABB Ranger	-	-	-
+tcp	38600	0	ABB Ranger	-	-	-
+tcp	38700	0	SNC GENe	-	-	-
+tcp	38971	0	ABB Ranger	-	-	-
+tcp	39129	0	ABB Ranger	-	-	-
+tcp	39278	0	ABB Ranger	-	-	-
+unknown_transport	44818	0	Rockwell Encapsulation	-	ICS_HOST	-
+unknown_transport	45678	0	Foxboro/Invensys Foxboro DCS AIMAPI	-	-	-
+tcp	49281	0	Rockwell FactoryTalk Live Data/SE HMI Tag Server	-	HMI	SERVER
+tcp	50001	0	Siemens Spectrum Power TG	-	-	-
+tcp	50002	0	Siemens Spectrum Power TG	-	-	-
+tcp	50003	0	Siemens Spectrum Power TG	-	-	-
+tcp	50004	0	Siemens Spectrum Power TG	-	-	-
+tcp	50005	0	Siemens Spectrum Power TG	-	-	-
+tcp	50006	0	Siemens Spectrum Power TG	-	-	-
+tcp	50007	0	Siemens Spectrum Power TG	-	-	-
+tcp	50008	0	Siemens Spectrum Power TG	-	-	-
+tcp	50009	0	Siemens Spectrum Power TG	-	-	-
+tcp	50010	0	Siemens Spectrum Power TG	-	-	-
+tcp	50011	0	Siemens Spectrum Power TG	-	-	-
+tcp	50012	0	Siemens Spectrum Power TG	-	-	-
+tcp	50013	0	Siemens Spectrum Power TG	-	-	-
+tcp	50014	0	Siemens Spectrum Power TG	-	-	-
+tcp	50015	0	Siemens Spectrum Power TG	-	-	-
+tcp	50016	0	Siemens Spectrum Power TG	-	-	-
+tcp	50018	0	Siemens Spectrum Power TG	-	-	-
+tcp	50019	0	Siemens Spectrum Power TG	-	-	-
+tcp	50020	0	Siemens Spectrum Power TG	-	-	-
+tcp	50021	0	Siemens Spectrum Power TG	-	-	-
+tcp	50025	0	Siemens Spectrum Power TG	-	-	-
+tcp	50026	0	Siemens Spectrum Power TG	-	-	-
+tcp	50027	0	Siemens Spectrum Power TG	-	-	-
+tcp	50028	0	Siemens Spectrum Power TG	-	-	-
+tcp	50110	0	Siemens Spectrum Power TG	-	-	-
+tcp	50111	0	Siemens Spectrum Power TG	-	-	-
 unknown_transport	55000	0	Mitsubishi Electronic FL-Net Cyclic Transmission	-	-	-
 unknown_transport	55001	0	Mitsubishi Electronic FL-Net Message Transmission	-	-	-
 unknown_transport	55002	0	Mitsubishi Electronic FL-Net Participation Request Frame	-	-	-
 unknown_transport	55003	0	Mitsubishi Electronic FL-Net Sending Service	-	-	-
-unknown_transport	0	23401	Novar Alarm	Novar Alarm	ICS_HOST	-
-unknown_transport	0	23402	Novar Global	Novar Global	ICS_HOST	-
-unknown_transport	0	23400	Novar Data	Novar Data	ICS_HOST	-
-tcp	2393	0	OLAP 1	-	-	-
-tcp	2394	0	OLAP 2	-	-	-
-unknown_transport	3338	0	OMF Data B ANET-B	ANET-B	ICS_HOST	-
-unknown_transport	3340	0	OMF Data M ANET-M	ANET-M	ICS_HOST	-
-unknown_transport	3341	0	OMF Data H ANET-H	ANET-H	ICS_HOST	-
-unknown_transport	9600	0	Omron Factory Interface Network Service	FIN (Factory Interface Network) Service	PLC	-
-unknown_transport	2198	0	OneHome Remote Access	-	HMI	-
-unknown_transport	2199	0	OneHome Service Port	-	HMI	-
-unknown_transport	9094	0	Panasonic FP	-	PLC	-
-unknown_transport	8500	0	Panasonic FP2	-	PLC	-
-unknown_transport	1962	0	Phoenix Contact PCWorx ENGINEERING WORKSTATION 1962	-	WORKSTATION	ENGINEER
-unknown_transport	3875	0	PNBSCADA	PNBSCADA	ICS_HOST	-
-unknown_transport	20547	0	ProconOS	ProconOS	PLC	-
-unknown_transport	0	34963	PROFInet RT Multicast	RT Multicast	ICS_HOST	-
-unknown_transport	34962	0	PROFInet RT Unicast	RT Unicast	ICS_HOST	-
-unknown_transport	0	34964	PROFInet Context Manager	Context Manager	ICS_HOST	-
-unknown_transport	789	0	Red Lion CrimsonV3	-	HMI	-
-unknown_transport	2423	0	RNRP Redundant Network Routing	RNRP	ICS_HOST	-
-tcp	1132	0	Rockwell AADvance SNCP	-	ICS_HOST	-
-tcp	1132	0	Rockwell AADvance ModbusRTU	-	RTU	SLAVE
-udp	2010	0	Rockwell AADvance Discover Tool 2010	-	RTU	SLAVE
-udp	2011	0	Rockwell AADvance Discover Tool 2011	-	RTU	SLAVE
-udp	5000	0	Rockwell AADvance Peer to P2P	-	ICS_HOST	-
-tcp	10001	0	Rockwell AADvance Serial Data 10001	-	ICS_HOST	-
-tcp	10002	0	Rockwell AADvance Serial Data 10002	-	ICS_HOST	-
-tcp	10003	0	Rockwell AADvance Serial Data 10003	-	ICS_HOST	-
-tcp	10004	0	Rockwell AADvance Serial Data 10004	-	ICS_HOST	-
-tcp	10005	0	Rockwell AADvance Serial Data 10005	-	ICS_HOST	-
-tcp	10006	0	Rockwell AADvance Serial Data 10006	-	ICS_HOST	-
 tcp	55555	0	Rockwell AADvance Telnet	-	ICS_HOST	-
-tcp	4123	0	Rockwell Bizware Task Manager	-	ICS_HOST	-
-tcp	4120	0	Rockwell Bizware Production Server	-	ICS_HOST	-
-tcp	4121	0	Rockwell Bizware Server Manager	-	ICS_HOST	-
-tcp	4125	0	Rockwell Bizware CTP Server	-	ICS_HOST	-
-tcp	4122	0	Rockwell Bizware PlantMetrics Server	-	ICS_HOST	-
-tcp	4124	0	Rockwell Bizware Scheduler	-	ICS_HOST	-
-tcp	8081	0	Rockwell Bizware HTTP Server Manager	-	ICS_HOST	-
-tcp	8083	0	Rockwell Bizware HTTP CTP Server	-	ICS_HOST	-
-unknown_transport	0	2221	Rockwell CSP CSP1	-	ICS_HOST	-
-unknown_transport	2221	0	Rockwell CSP CSP1	-	ICS_HOST	-
-unknown_transport	0	2222	Rockwell CSP CSP2	-	ICS_HOST	-
-unknown_transport	2222	0	Rockwell CSP CSP2	-	ICS_HOST	-
-unknown_transport	0	2223	Rockwell CSP CSP3	-	ICS_HOST	-
-unknown_transport	2223	0	Rockwell CSP CSP3	-	ICS_HOST	-
-unknown_transport	0	44818	Rockwell Encapsulation	-	ICS_HOST	-
-unknown_transport	44818	0	Rockwell Encapsulation	-	ICS_HOST	-
-tcp	6543	0	Rockwell FactoryTalk Alarming Server	-	HMI	-
-tcp	1330	0	Rockwell FactoryTalk Object RPC	-	HMI	-
-tcp	7600	0	Rockwell FactoryTalk Event Multiplexor	-	HMI	-
-tcp	1331	0	Rockwell FactoryTalk Service Control	-	HMI	SERVER
-tcp	1332	0	Rockwell FactoryTalk Server Health	-	HMI	SERVER
-tcp	0	7700	Rockwell FactoryTalk Event Server	-	HMI	SERVER
-unknown_transport	3060	0	Rockwell FactoryTalk Directory Server File Transfer	-	HMI	-
-tcp	7710	0	Rockwell FactoryTalk Directory Server	-	HMI	SERVER
-tcp	5450	0	Rockwell FactoryTalk PI Network Manager	-	HMI	ENGINEER
-tcp	5454	0	Rockwell FactoryTalk Analysis Framework 5454	-	HMI	-
-tcp	5455	0	Rockwell FactoryTalk Analysis Framework 5455	-	HMI	-
-tcp	5456	0	Rockwell FactoryTalk ACE2 Scheduler	-	HMI	-
-tcp	5457	0	Rockwell FactoryTalk Asset Framework Server	-	HMI	SERVER
-tcp	5458	0	Rockwell FactoryTalk PI Notification	-	HMI	-
-tcp	7002	0	Rockwell FactoryTalk Asset Centre Services 7002	-	HMI	-
-tcp	7003	0	Rockwell FactoryTalk Asset Centre Services 7003	-	HMI	-
-tcp	7004	0	Rockwell FactoryTalk Asset Centre Services 7004	-	HMI	-
-tcp	1433	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint SQL	-	HMI	SERVER
-tcp	1434	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint MSSQL	-	HMI	SERVER
-tcp	49281	0	Rockwell FactoryTalk Live Data/SE HMI Tag Server	-	HMI	SERVER
+unknown_transport	55555	0	Foxboor/Invensys Foxboro DCS FoxAPI	-	-	-
+tcp	56001	0	Telvent OASyS DNA	-	-	-
+tcp	56001	0	Telvent OASyS DNA	-	-	-
+tcp	56002	0	Telvent OASyS DNA	-	-	-
+tcp	56003	0	Telvent OASyS DNA	-	-	-
+tcp	56004	0	Telvent OASyS DNA	-	-	-
+tcp	56005	0	Telvent OASyS DNA	-	-	-
+tcp	56006	0	Telvent OASyS DNA	-	-	-
+tcp	56007	0	Telvent OASyS DNA	-	-	-
+tcp	56008	0	Telvent OASyS DNA	-	-	-
+tcp	56009	0	Telvent OASyS DNA	-	-	-
+tcp	56010	0	Telvent OASyS DNA	-	-	-
+tcp	56011	0	Telvent OASyS DNA	-	-	-
+tcp	56012	0	Telvent OASyS DNA	-	-	-
+tcp	56013	0	Telvent OASyS DNA	-	-	-
+tcp	56014	0	Telvent OASyS DNA	-	-	-
+tcp	56015	0	Telvent OASyS DNA	-	-	-
+tcp	56016	0	Telvent OASyS DNA	-	-	-
+tcp	56017	0	Telvent OASyS DNA	-	-	-
+tcp	56018	0	Telvent OASyS DNA	-	-	-
+tcp	56019	0	Telvent OASyS DNA	-	-	-
+tcp	56020	0	Telvent OASyS DNA	-	-	-
+tcp	56021	0	Telvent OASyS DNA	-	-	-
+tcp	56022	0	Telvent OASyS DNA	-	-	-
+tcp	56023	0	Telvent OASyS DNA	-	-	-
+tcp	56024	0	Telvent OASyS DNA	-	-	-
+tcp	56025	0	Telvent OASyS DNA	-	-	-
+tcp	56026	0	Telvent OASyS DNA	-	-	-
+tcp	56027	0	Telvent OASyS DNA	-	-	-
+tcp	56028	0	Telvent OASyS DNA	-	-	-
+tcp	56029	0	Telvent OASyS DNA	-	-	-
+tcp	56030	0	Telvent OASyS DNA	-	-	-
+tcp	56031	0	Telvent OASyS DNA	-	-	-
+tcp	56032	0	Telvent OASyS DNA	-	-	-
+tcp	56033	0	Telvent OASyS DNA	-	-	-
+tcp	56034	0	Telvent OASyS DNA	-	-	-
+tcp	56035	0	Telvent OASyS DNA	-	-	-
+tcp	56036	0	Telvent OASyS DNA	-	-	-
+tcp	56037	0	Telvent OASyS DNA	-	-	-
+tcp	56038	0	Telvent OASyS DNA	-	-	-
+tcp	56039	0	Telvent OASyS DNA	-	-	-
+tcp	56040	0	Telvent OASyS DNA	-	-	-
+tcp	56041	0	Telvent OASyS DNA	-	-	-
+tcp	56042	0	Telvent OASyS DNA	-	-	-
+tcp	56043	0	Telvent OASyS DNA	-	-	-
+tcp	56044	0	Telvent OASyS DNA	-	-	-
+tcp	56045	0	Telvent OASyS DNA	-	-	-
+tcp	56046	0	Telvent OASyS DNA	-	-	-
+tcp	56047	0	Telvent OASyS DNA	-	-	-
+tcp	56048	0	Telvent OASyS DNA	-	-	-
+tcp	56049	0	Telvent OASyS DNA	-	-	-
+tcp	56050	0	Telvent OASyS DNA	-	-	-
+tcp	56051	0	Telvent OASyS DNA	-	-	-
+tcp	56052	0	Telvent OASyS DNA	-	-	-
+tcp	56053	0	Telvent OASyS DNA	-	-	-
+tcp	56054	0	Telvent OASyS DNA	-	-	-
+tcp	56055	0	Telvent OASyS DNA	-	-	-
+tcp	56056	0	Telvent OASyS DNA	-	-	-
+tcp	56057	0	Telvent OASyS DNA	-	-	-
+tcp	56058	0	Telvent OASyS DNA	-	-	-
+tcp	56059	0	Telvent OASyS DNA	-	-	-
+tcp	56060	0	Telvent OASyS DNA	-	-	-
+tcp	56061	0	Telvent OASyS DNA	-	-	-
+tcp	56062	0	Telvent OASyS DNA	-	-	-
+tcp	56063	0	Telvent OASyS DNA	-	-	-
+tcp	56064	0	Telvent OASyS DNA	-	-	-
+tcp	56065	0	Telvent OASyS DNA	-	-	-
+tcp	56066	0	Telvent OASyS DNA	-	-	-
+tcp	56067	0	Telvent OASyS DNA	-	-	-
+tcp	56068	0	Telvent OASyS DNA	-	-	-
+tcp	56069	0	Telvent OASyS DNA	-	-	-
+tcp	56070	0	Telvent OASyS DNA	-	-	-
+tcp	56071	0	Telvent OASyS DNA	-	-	-
+tcp	56072	0	Telvent OASyS DNA	-	-	-
+tcp	56073	0	Telvent OASyS DNA	-	-	-
+tcp	56074	0	Telvent OASyS DNA	-	-	-
+tcp	56075	0	Telvent OASyS DNA	-	-	-
+tcp	56076	0	Telvent OASyS DNA	-	-	-
+tcp	56077	0	Telvent OASyS DNA	-	-	-
+tcp	56078	0	Telvent OASyS DNA	-	-	-
+tcp	56079	0	Telvent OASyS DNA	-	-	-
+tcp	56080	0	Telvent OASyS DNA	-	-	-
+tcp	56081	0	Telvent OASyS DNA	-	-	-
+tcp	56082	0	Telvent OASyS DNA	-	-	-
+tcp	56083	0	Telvent OASyS DNA	-	-	-
+tcp	56084	0	Telvent OASyS DNA	-	-	-
+tcp	56085	0	Telvent OASyS DNA	-	-	-
+tcp	56086	0	Telvent OASyS DNA	-	-	-
+tcp	56087	0	Telvent OASyS DNA	-	-	-
+tcp	56088	0	Telvent OASyS DNA	-	-	-
+tcp	56089	0	Telvent OASyS DNA	-	-	-
+tcp	56090	0	Telvent OASyS DNA	-	-	-
+tcp	56091	0	Telvent OASyS DNA	-	-	-
+tcp	56092	0	Telvent OASyS DNA	-	-	-
+tcp	56093	0	Telvent OASyS DNA	-	-	-
+tcp	56094	0	Telvent OASyS DNA	-	-	-
+tcp	56095	0	Telvent OASyS DNA	-	-	-
+tcp	56096	0	Telvent OASyS DNA	-	-	-
+tcp	56097	0	Telvent OASyS DNA	-	-	-
+tcp	56098	0	Telvent OASyS DNA	-	-	-
+tcp	56099	0	Telvent OASyS DNA	-	-	-
 tcp	60093	0	Rockwell FactoryTalk Diagnostics	-	HMI	-
+tcp	62900	0	SNC GENe	-	-	-
+tcp	62911	0	SNC GENe	-	-	-
+tcp	62924	0	SNC GENe	-	-	-
+tcp	62930	0	SNC GENe	-	-	-
+tcp	62938	0	SNC GENe	-	-	-
+tcp	62956	0	SNC GENe	-	-	-
+tcp	62957	0	SNC GENe	-	-	-
+tcp	62963	0	SNC GENe	-	-	-
+tcp	62981	0	SNC GENe	-	-	-
+tcp	62982	0	SNC GENe	-	-	-
+tcp	62985	0	SNC GENe	-	-	-
+tcp	62992	0	SNC GENe	-	-	-
+tcp	63012	0	SNC GENe	-	-	-
+tcp	63027	0	SNC GENe	-	-	-
+tcp	63028	0	SNC GENe	-	-	-
+tcp	63029	0	SNC GENe	-	-	-
+tcp	63030	0	SNC GENe	-	-	-
+tcp	63031	0	SNC GENe	-	-	-
+tcp	63032	0	SNC GENe	-	-	-
+tcp	63033	0	SNC GENe	-	-	-
+tcp	63034	0	SNC GENe	-	-	-
+tcp	63035	0	SNC GENe	-	-	-
+tcp	63036	0	SNC GENe	-	-	-
+tcp	63041	0	SNC GENe	-	-	-
+tcp	63075	0	SNC GENe	-	-	-
+tcp	63079	0	SNC GENe	-	-	-
+tcp	63082	0	SNC GENe	-	-	-
+tcp	63088	0	SNC GENe	-	-	-
+tcp	63094	0	SNC GENe	-	-	-
 tcp	65207	0	Rockwell FactoryTalk VantagePoint Incuity Server Advertiser	-	HMI	SERVER
-unknown_transport	3622	0	Rockwell FF LAN Redundancy Port	-	ICS_HOST	-
-unknown_transport	1090	0	Rockwell FF Fieldbus Message Specification	-	ICS_HOST	-
-unknown_transport	1091	0	Rockwell FF System Management	-	ICS_HOST	-
-unknown_transport	1089	0	Rockwell FF Annunciation	-	ICS_HOST	-
-tcp	27000	0	Rockwell FlexLM Server 1	-	ICS_HOST	SERVER
-tcp	27001	0	Rockwell FlexLM Server 2	-	ICS_HOST	SERVER
-tcp	27002	0	Rockwell FlexLM Server 3	-	ICS_HOST	SERVER
-tcp	27003	0	Rockwell FlexLM Server 4	-	ICS_HOST	SERVER
-tcp	27004	0	Rockwell FlexLM Server 5	-	ICS_HOST	SERVER
-tcp	27005	0	Rockwell FlexLM Server 6	-	ICS_HOST	SERVER
-tcp	27006	0	Rockwell FlexLM Server 7	-	ICS_HOST	SERVER
-tcp	27007	0	Rockwell FlexLM Server 8	-	ICS_HOST	SERVER
-tcp	27008	0	Rockwell FlexLM Server 9	-	ICS_HOST	SERVER
-tcp	27009	0	Rockwell FlexLM Server 10	-	ICS_HOST	SERVER
-tcp	4120	0	Rockwell RSBizWare RPC Production Server	-	-	SERVER
-tcp	4121	0	Rockwell RSBizWare RPC Server Manager	-	-	OPERATOR
-tcp	4122	0	Rockwell RSBizWare RPC PlantMetrics Server	-	-	SERVER
-tcp	4123	0	Rockwell RSBizWare RPC Task Manager	-	-	OPERATOR
-tcp	4124	0	Rockwell RSBizWare RPC Scheduler Server	-	-	SERVER
-tcp	4125	0	Rockwell RSBizWare RPC Scheduler CTP Server	-	-	SERVER
-tcp	8081	0	Rockwell RSBizWare HTTP Server Manager	-	-	OPERATOR
-tcp	400	0	Rockwell RSSql Transaction Manager	-	ICS_HOST	-
-tcp	401	0	Rockwell RSSql Compression Server	-	ICS_HOST	-
-tcp	402	0	Rockwell RSSql Configuration Server	-	ICS_HOST	-
-unknown_transport	0	7720	Rockwell RSViewSE HMI Server	-	HMI	SERVER
-unknown_transport	0	7721	Rockwell RSViewSE Server Framework	-	HMI	SERVER
-unknown_transport	0	7721	Rockwell RSViewSE HMI Activation	-	HMI	OTHER
-unknown_transport	0	7721	Rockwell RSViewSE Directory Server	-	HMI	SERVER
-unknown_transport	0	2221	Rockwell CSP1 1	-	ICS_HOST	-
-unknown_transport	2222	0	Rockwell CSP2 1	-	ICS_HOST	-
-unknown_transport	0	44818	Rockwell Encapsulation 1	-	ICS_HOST	-
-unknown_transport	400	0	RSSql Transaction Manager 1	-	-	-
-unknown_transport	401	0	RSSql Compression Server 1	-	-	-
-unknown_transport	402	0	RSSql Configuration Server 1	-	-	-
-unknown_transport	0	7722	RSVIEWSE HMI Activation 1	-	-	-
-unknown_transport	0	7720	RSViewSE HMI Server 1	-	-	-
-unknown_transport	0	7721	RSViewSE Server Framework 1	-	-	-
-unknown_transport	554	0	RTP RTSP Streaming Protocol	-	-	-
-unknown_transport	5004	0	RTP Time Transport	-	-	-
-unknown_transport	5050	0	SAIA S-BUS	-	-	-
-unknown_transport	20547	0	Schleicher XCX 300	-	PLC	-
-unknown_transport	3614	0	Schleicher Satchwell Sigma port Port	Invensys Sigma Port	ICS_HOST	-
-unknown_transport	0	9213	ServerStart RemoteControl	ServerStart RemoteControl	ICS_HOST	-
-unknown_transport	0	9212	Server View dmbs Access 1	-	-	-
-unknown_transport	0	9212	Server View DBMS Access	Server View DBMS access	ICS_HOST	-
-unknown_transport	3820	0	Siemens AuD SCP	-	ICS_HOST	-
-unknown_transport	2729	0	TCIM-Control	TCIM-Control	ICS_HOST	-
-unknown_transport	3240	0	Trio Motion Control	Trio Motion Control	ICS_HOST	-
-unknown_transport	0	5891	Undocumented usage by Intelligent Instrumentation EDAS unites 1	-	-	-
-unknown_transport	20256	0	Unitronics Socket1	-	PLC	SLAVE
-unknown_transport	20257	0	Unitronics Unitronicsw Socket3 Socket2	-	PLC	SLAVE
-unknown_transport	5413	0	Wonderware WonderwareDST	-	HMI	-
-unknown_transport	0	5413	Wonderware WonderwareSRC	-	HMI	-
-unknown_transport	0	5413	WWIO Talk	-	ICS_HOST	OTHER
+tcp	65443	0	SNC GENe	-	-	-
