@@ -9,10 +9,10 @@ unknown_transport	0	7022	CT Discovery Protocol CTDP	ICS Host
 unknown_transport	0	7200	FODMS FLIP	ICS Host
 unknown_transport	0	7201	DLIP	ICS Host
 tcp	0	7700	Rockwell FactoryTalk Event Server	HMI
-unknown_transport	0	7710	Factory Talk Directory Server	-
+unknown_transport	0	7710	FactoryTalk Directory Server	HMI
 unknown_transport	0	7720	Rockwell RSViewSE	HMI
-unknown_transport	0	7721	Rockwell RSViewSE	-
-unknown_transport	0	7722	Rockwell RSViewSE HMI Activation	-
+unknown_transport	0	7721	Rockwell RSViewSE	HMI
+unknown_transport	0	7722	Rockwell RSViewSE HMI Activation	HMI
 unknown_transport	0	9212	Server View DBMS Access	ICS Host
 unknown_transport	0	9213	ServerStart RemoteControl	ICS Host
 unknown_transport	0	23400	Novar Data	ICS Host
@@ -21,19 +21,19 @@ unknown_transport	0	23402	Novar Global	ICS Host
 unknown_transport	0	34963	PROFInet RT Multicast	ICS Host
 unknown_transport	0	34964	PROFInet Context Manager	ICS Host
 unknown_transport	0	44818	Rockwell Encapsulation	ICS Host
-unknown_transport	210	0	ANSI 1 z39.50	-
+unknown_transport	210	0	ANSI 1 z39.50	ICS Host
 tcp	400	0	Rockwell RSSql Transaction Manager	ICS Host
 tcp	401	0	Rockwell RSSql Compression Server	ICS Host
 tcp	402	0	Rockwell RSSql Configuration Server	ICS Host
 unknown_transport	500	0	Fatek FB Series	PLC
-unknown_transport	554	0	RTP RTSP Streaming Protocol	-
+unknown_transport	554	0	RTP RTSP Streaming Protocol	ICS Host
 unknown_transport	789	0	Red Lion CrimsonV3	HMI
 unknown_transport	1025	0	Mitsubishi Electronic FX	PLC
 unknown_transport	1089	0	Rockwell Foundation Fieldbus	ICS Host
-unknown_transport	1090	0	Rockwell Foundation Fieldbus	-
-unknown_transport	1091	0	Rockwell Foundation Fieldbus	-
-tcp	1132	0	Rockwell AADvance	-
-unknown_transport	1153	0	ANSI 2 c1222-asse	-
+unknown_transport	1090	0	Rockwell Foundation Fieldbus	ICS Host
+unknown_transport	1091	0	Rockwell Foundation Fieldbus	ICS Host
+tcp	1132	0	Rockwell AADvance	ICS Host
+unknown_transport	1153	0	ANSI C12.22	-
 tcp	1200	0	CodeSys Gateway Server	-
 tcp	1330	0	Rockwell FactoryTalk Object RPC	HMI
 tcp	1331	0	Rockwell FactoryTalk Service Control	HMI
@@ -96,11 +96,11 @@ unknown_transport	5001	0	Mitsubishi Electronic FX3u Fx3u	PLC
 unknown_transport	5004	0	RTP Time Transport	-
 unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER	MTU
 unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER	MTU
-tcp	5050	0	Telvent OASyS DNA	-
+tcp	5050	0	OASyS SCADA	-
 unknown_transport	5050	0	Danfoss ECL Apex	PLC
-tcp	5051	0	Telvent OASyS DNA	-
-tcp	5052	0	Telvent OASyS DNA	-
-tcp	5065	0	Telvent OASyS DNA	-
+tcp	5051	0	OASyS SCADA	-
+tcp	5052	0	OASyS SCADA	-
+tcp	5065	0	OASyS SCADA	-
 unknown_transport	5069	0	I-NET 2000-NPR	ICS Host
 unknown_transport	5413	0	Wonderware	HMI
 tcp	5450	0	Rockwell FactoryTalk PI Network Manager	HMI
@@ -146,9 +146,9 @@ tcp	10447	0	ABB Ranger	-
 tcp	10449	0	ABB Ranger	-
 tcp	10450	0	ABB Ranger	-
 unknown_transport	11001	0	Johnson Controls Metasys N1	-
-tcp	12135	0	Telvent OASyS DNA	-
-tcp	12136	0	Telvent OASyS DNA	-
-tcp	12137	0	Telvent OASyS DNA	-
+tcp	12135	0	OASyS SCADA	-
+tcp	12136	0	OASyS SCADA	-
+tcp	12137	0	OASyS SCADA	-
 tcp	12316	0	ABB Ranger	-
 tcp	12645	0	ABB Ranger	-
 tcp	12647	0	ABB Ranger	-
@@ -225,106 +225,106 @@ unknown_transport	55002	0	Mitsubishi Electronic FL-Net Participation Request Fra
 unknown_transport	55003	0	Mitsubishi Electronic FL-Net Sending Service	-
 tcp	55555	0	Rockwell AADvance Telnet	ICS Host
 unknown_transport	55555	0	Foxboor/Invensys Foxboro DCS FoxAPI	-
-tcp	56001	0	Telvent OASyS DNA	-
-tcp	56001	0	Telvent OASyS DNA	-
-tcp	56002	0	Telvent OASyS DNA	-
-tcp	56003	0	Telvent OASyS DNA	-
-tcp	56004	0	Telvent OASyS DNA	-
-tcp	56005	0	Telvent OASyS DNA	-
-tcp	56006	0	Telvent OASyS DNA	-
-tcp	56007	0	Telvent OASyS DNA	-
-tcp	56008	0	Telvent OASyS DNA	-
-tcp	56009	0	Telvent OASyS DNA	-
-tcp	56010	0	Telvent OASyS DNA	-
-tcp	56011	0	Telvent OASyS DNA	-
-tcp	56012	0	Telvent OASyS DNA	-
-tcp	56013	0	Telvent OASyS DNA	-
-tcp	56014	0	Telvent OASyS DNA	-
-tcp	56015	0	Telvent OASyS DNA	-
-tcp	56016	0	Telvent OASyS DNA	-
-tcp	56017	0	Telvent OASyS DNA	-
-tcp	56018	0	Telvent OASyS DNA	-
-tcp	56019	0	Telvent OASyS DNA	-
-tcp	56020	0	Telvent OASyS DNA	-
-tcp	56021	0	Telvent OASyS DNA	-
-tcp	56022	0	Telvent OASyS DNA	-
-tcp	56023	0	Telvent OASyS DNA	-
-tcp	56024	0	Telvent OASyS DNA	-
-tcp	56025	0	Telvent OASyS DNA	-
-tcp	56026	0	Telvent OASyS DNA	-
-tcp	56027	0	Telvent OASyS DNA	-
-tcp	56028	0	Telvent OASyS DNA	-
-tcp	56029	0	Telvent OASyS DNA	-
-tcp	56030	0	Telvent OASyS DNA	-
-tcp	56031	0	Telvent OASyS DNA	-
-tcp	56032	0	Telvent OASyS DNA	-
-tcp	56033	0	Telvent OASyS DNA	-
-tcp	56034	0	Telvent OASyS DNA	-
-tcp	56035	0	Telvent OASyS DNA	-
-tcp	56036	0	Telvent OASyS DNA	-
-tcp	56037	0	Telvent OASyS DNA	-
-tcp	56038	0	Telvent OASyS DNA	-
-tcp	56039	0	Telvent OASyS DNA	-
-tcp	56040	0	Telvent OASyS DNA	-
-tcp	56041	0	Telvent OASyS DNA	-
-tcp	56042	0	Telvent OASyS DNA	-
-tcp	56043	0	Telvent OASyS DNA	-
-tcp	56044	0	Telvent OASyS DNA	-
-tcp	56045	0	Telvent OASyS DNA	-
-tcp	56046	0	Telvent OASyS DNA	-
-tcp	56047	0	Telvent OASyS DNA	-
-tcp	56048	0	Telvent OASyS DNA	-
-tcp	56049	0	Telvent OASyS DNA	-
-tcp	56050	0	Telvent OASyS DNA	-
-tcp	56051	0	Telvent OASyS DNA	-
-tcp	56052	0	Telvent OASyS DNA	-
-tcp	56053	0	Telvent OASyS DNA	-
-tcp	56054	0	Telvent OASyS DNA	-
-tcp	56055	0	Telvent OASyS DNA	-
-tcp	56056	0	Telvent OASyS DNA	-
-tcp	56057	0	Telvent OASyS DNA	-
-tcp	56058	0	Telvent OASyS DNA	-
-tcp	56059	0	Telvent OASyS DNA	-
-tcp	56060	0	Telvent OASyS DNA	-
-tcp	56061	0	Telvent OASyS DNA	-
-tcp	56062	0	Telvent OASyS DNA	-
-tcp	56063	0	Telvent OASyS DNA	-
-tcp	56064	0	Telvent OASyS DNA	-
-tcp	56065	0	Telvent OASyS DNA	-
-tcp	56066	0	Telvent OASyS DNA	-
-tcp	56067	0	Telvent OASyS DNA	-
-tcp	56068	0	Telvent OASyS DNA	-
-tcp	56069	0	Telvent OASyS DNA	-
-tcp	56070	0	Telvent OASyS DNA	-
-tcp	56071	0	Telvent OASyS DNA	-
-tcp	56072	0	Telvent OASyS DNA	-
-tcp	56073	0	Telvent OASyS DNA	-
-tcp	56074	0	Telvent OASyS DNA	-
-tcp	56075	0	Telvent OASyS DNA	-
-tcp	56076	0	Telvent OASyS DNA	-
-tcp	56077	0	Telvent OASyS DNA	-
-tcp	56078	0	Telvent OASyS DNA	-
-tcp	56079	0	Telvent OASyS DNA	-
-tcp	56080	0	Telvent OASyS DNA	-
-tcp	56081	0	Telvent OASyS DNA	-
-tcp	56082	0	Telvent OASyS DNA	-
-tcp	56083	0	Telvent OASyS DNA	-
-tcp	56084	0	Telvent OASyS DNA	-
-tcp	56085	0	Telvent OASyS DNA	-
-tcp	56086	0	Telvent OASyS DNA	-
-tcp	56087	0	Telvent OASyS DNA	-
-tcp	56088	0	Telvent OASyS DNA	-
-tcp	56089	0	Telvent OASyS DNA	-
-tcp	56090	0	Telvent OASyS DNA	-
-tcp	56091	0	Telvent OASyS DNA	-
-tcp	56092	0	Telvent OASyS DNA	-
-tcp	56093	0	Telvent OASyS DNA	-
-tcp	56094	0	Telvent OASyS DNA	-
-tcp	56095	0	Telvent OASyS DNA	-
-tcp	56096	0	Telvent OASyS DNA	-
-tcp	56097	0	Telvent OASyS DNA	-
-tcp	56098	0	Telvent OASyS DNA	-
-tcp	56099	0	Telvent OASyS DNA	-
+tcp	56001	0	OASyS SCADA	-
+tcp	56001	0	OASyS SCADA	-
+tcp	56002	0	OASyS SCADA	-
+tcp	56003	0	OASyS SCADA	-
+tcp	56004	0	OASyS SCADA	-
+tcp	56005	0	OASyS SCADA	-
+tcp	56006	0	OASyS SCADA	-
+tcp	56007	0	OASyS SCADA	-
+tcp	56008	0	OASyS SCADA	-
+tcp	56009	0	OASyS SCADA	-
+tcp	56010	0	OASyS SCADA	-
+tcp	56011	0	OASyS SCADA	-
+tcp	56012	0	OASyS SCADA	-
+tcp	56013	0	OASyS SCADA	-
+tcp	56014	0	OASyS SCADA	-
+tcp	56015	0	OASyS SCADA	-
+tcp	56016	0	OASyS SCADA	-
+tcp	56017	0	OASyS SCADA	-
+tcp	56018	0	OASyS SCADA	-
+tcp	56019	0	OASyS SCADA	-
+tcp	56020	0	OASyS SCADA	-
+tcp	56021	0	OASyS SCADA	-
+tcp	56022	0	OASyS SCADA	-
+tcp	56023	0	OASyS SCADA	-
+tcp	56024	0	OASyS SCADA	-
+tcp	56025	0	OASyS SCADA	-
+tcp	56026	0	OASyS SCADA	-
+tcp	56027	0	OASyS SCADA	-
+tcp	56028	0	OASyS SCADA	-
+tcp	56029	0	OASyS SCADA	-
+tcp	56030	0	OASyS SCADA	-
+tcp	56031	0	OASyS SCADA	-
+tcp	56032	0	OASyS SCADA	-
+tcp	56033	0	OASyS SCADA	-
+tcp	56034	0	OASyS SCADA	-
+tcp	56035	0	OASyS SCADA	-
+tcp	56036	0	OASyS SCADA	-
+tcp	56037	0	OASyS SCADA	-
+tcp	56038	0	OASyS SCADA	-
+tcp	56039	0	OASyS SCADA	-
+tcp	56040	0	OASyS SCADA	-
+tcp	56041	0	OASyS SCADA	-
+tcp	56042	0	OASyS SCADA	-
+tcp	56043	0	OASyS SCADA	-
+tcp	56044	0	OASyS SCADA	-
+tcp	56045	0	OASyS SCADA	-
+tcp	56046	0	OASyS SCADA	-
+tcp	56047	0	OASyS SCADA	-
+tcp	56048	0	OASyS SCADA	-
+tcp	56049	0	OASyS SCADA	-
+tcp	56050	0	OASyS SCADA	-
+tcp	56051	0	OASyS SCADA	-
+tcp	56052	0	OASyS SCADA	-
+tcp	56053	0	OASyS SCADA	-
+tcp	56054	0	OASyS SCADA	-
+tcp	56055	0	OASyS SCADA	-
+tcp	56056	0	OASyS SCADA	-
+tcp	56057	0	OASyS SCADA	-
+tcp	56058	0	OASyS SCADA	-
+tcp	56059	0	OASyS SCADA	-
+tcp	56060	0	OASyS SCADA	-
+tcp	56061	0	OASyS SCADA	-
+tcp	56062	0	OASyS SCADA	-
+tcp	56063	0	OASyS SCADA	-
+tcp	56064	0	OASyS SCADA	-
+tcp	56065	0	OASyS SCADA	-
+tcp	56066	0	OASyS SCADA	-
+tcp	56067	0	OASyS SCADA	-
+tcp	56068	0	OASyS SCADA	-
+tcp	56069	0	OASyS SCADA	-
+tcp	56070	0	OASyS SCADA	-
+tcp	56071	0	OASyS SCADA	-
+tcp	56072	0	OASyS SCADA	-
+tcp	56073	0	OASyS SCADA	-
+tcp	56074	0	OASyS SCADA	-
+tcp	56075	0	OASyS SCADA	-
+tcp	56076	0	OASyS SCADA	-
+tcp	56077	0	OASyS SCADA	-
+tcp	56078	0	OASyS SCADA	-
+tcp	56079	0	OASyS SCADA	-
+tcp	56080	0	OASyS SCADA	-
+tcp	56081	0	OASyS SCADA	-
+tcp	56082	0	OASyS SCADA	-
+tcp	56083	0	OASyS SCADA	-
+tcp	56084	0	OASyS SCADA	-
+tcp	56085	0	OASyS SCADA	-
+tcp	56086	0	OASyS SCADA	-
+tcp	56087	0	OASyS SCADA	-
+tcp	56088	0	OASyS SCADA	-
+tcp	56089	0	OASyS SCADA	-
+tcp	56090	0	OASyS SCADA	-
+tcp	56091	0	OASyS SCADA	-
+tcp	56092	0	OASyS SCADA	-
+tcp	56093	0	OASyS SCADA	-
+tcp	56094	0	OASyS SCADA	-
+tcp	56095	0	OASyS SCADA	-
+tcp	56096	0	OASyS SCADA	-
+tcp	56097	0	OASyS SCADA	-
+tcp	56098	0	OASyS SCADA	-
+tcp	56099	0	OASyS SCADA	-
 tcp	60093	0	Rockwell FactoryTalk Diagnostics	HMI
 tcp	62900	0	SNC GENe	-
 tcp	62911	0	SNC GENe	-
