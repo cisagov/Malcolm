@@ -1,178 +1,178 @@
 #fields	proto	dport	sport	name	category
-unknown_transport	0	2221	Rockwell CSP	ICS Host
-unknown_transport	0	2222	Rockwell CSP	ICS Host
-unknown_transport	0	2223	Rockwell CSP	ICS Host
-unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q SLAVE	PLC
-unknown_transport	0	5413	Wonderware	ICS Host
-unknown_transport	0	5891	Intelligent Instrumentation EDAS	ICS Host
-unknown_transport	0	7022	CT Discovery Protocol CTDP	ICS Host
-unknown_transport	0	7200	FODMS FLIP	ICS Host
-unknown_transport	0	7201	DLIP	ICS Host
-tcp	0	7700	Rockwell FactoryTalk Event Server	HMI
-unknown_transport	0	7710	FactoryTalk Directory Server	HMI
-unknown_transport	0	7720	Rockwell RSViewSE	HMI
-unknown_transport	0	7721	Rockwell RSViewSE	HMI
-unknown_transport	0	7722	Rockwell RSViewSE HMI Activation	HMI
-unknown_transport	0	9212	Server View DBMS Access	ICS Host
-unknown_transport	0	9213	ServerStart RemoteControl	ICS Host
-unknown_transport	0	23400	Novar Data	ICS Host
-unknown_transport	0	23401	Novar Alarm	ICS Host
-unknown_transport	0	23402	Novar Global	ICS Host
-unknown_transport	0	34963	PROFInet RT Multicast	ICS Host
-unknown_transport	0	34964	PROFInet Context Manager	ICS Host
-unknown_transport	0	44818	Rockwell Encapsulation	ICS Host
-unknown_transport	210	0	ANSI 1 z39.50	ICS Host
-tcp	400	0	Rockwell RSSql Transaction Manager	ICS Host
-tcp	401	0	Rockwell RSSql Compression Server	ICS Host
-tcp	402	0	Rockwell RSSql Configuration Server	ICS Host
-unknown_transport	500	0	Fatek FB Series	PLC
-unknown_transport	554	0	RTP RTSP Streaming Protocol	ICS Host
-unknown_transport	789	0	Red Lion CrimsonV3	HMI
-unknown_transport	1025	0	Mitsubishi Electronic FX	PLC
-unknown_transport	1089	0	Rockwell Foundation Fieldbus	ICS Host
-unknown_transport	1090	0	Rockwell Foundation Fieldbus	ICS Host
-unknown_transport	1091	0	Rockwell Foundation Fieldbus	ICS Host
-tcp	1132	0	Rockwell AADvance	ICS Host
+unknown_transport	0	2221	Rockwell CSP	Rockwell Automation
+unknown_transport	0	2222	Rockwell CSP	Rockwell Automation
+unknown_transport	0	2223	Rockwell CSP	Rockwell Automation
+unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q SLAVE	Mitsubishi Electric
+unknown_transport	0	5413	Wonderware	AVEVA Wonderware
+unknown_transport	0	5891	Intelligent Instrumentation EDAS	Intelligent Instrumentation
+unknown_transport	0	7022	CT Discovery Protocol CTDP	-
+unknown_transport	0	7200	Fiber Optics Data Multiplexing Services FLIP	-
+unknown_transport	0	7201	DLIP	-
+tcp	0	7700	Rockwell FactoryTalk Event Server	Rockwell Automation
+unknown_transport	0	7710	Rockwell FactoryTalk Directory Server	Rockwell Automation
+unknown_transport	0	7720	Rockwell RSViewSE	Rockwell Automation
+unknown_transport	0	7721	Rockwell RSViewSE	Rockwell Automation
+unknown_transport	0	7722	Rockwell RSViewSE HMI Activation	Rockwell Automation
+unknown_transport	0	9212	Server View DBMS Access	-
+unknown_transport	0	9213	ServerStart RemoteControl	-
+unknown_transport	0	23400	Novar Data	Honeywell
+unknown_transport	0	23401	Novar Alarm	Honeywell
+unknown_transport	0	23402	Novar Global	Honeywell
+unknown_transport	0	34963	PROFInet RT Multicast	PROFIBUS and PROFINET
+unknown_transport	0	34964	PROFInet Context Manager	PROFIBUS and PROFINET
+unknown_transport	0	44818	Rockwell Encapsulation	Rockwell Automation
+unknown_transport	210	0	ANSI Z39.50	-
+tcp	400	0	Rockwell RSSql Transaction Manager	Rockwell Automation
+tcp	401	0	Rockwell RSSql Compression Server	Rockwell Automation
+tcp	402	0	Rockwell RSSql Configuration Server	Rockwell Automation
+unknown_transport	500	0	Fatek FB Series	FATEK Automation
+unknown_transport	554	0	RTP RTSP Streaming Protocol	-
+unknown_transport	789	0	Red Lion CrimsonV3	Red Lion
+unknown_transport	1025	0	Mitsubishi Electronic FX	Mitsubishi Electric
+unknown_transport	1089	0	Rockwell Foundation Fieldbus	Rockwell Automation
+unknown_transport	1090	0	Rockwell Foundation Fieldbus	Rockwell Automation
+unknown_transport	1091	0	Rockwell Foundation Fieldbus	Rockwell Automation
+tcp	1132	0	Rockwell AADvance	Rockwell Automation
 unknown_transport	1153	0	ANSI C12.22	-
-tcp	1200	0	CodeSys Gateway Server	-
-tcp	1330	0	Rockwell FactoryTalk Object RPC	HMI
-tcp	1331	0	Rockwell FactoryTalk Service Control	HMI
-tcp	1332	0	Rockwell FactoryTalk Server Health	HMI
-tcp	1433	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint SQL	HMI
-tcp	1434	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint MSSQL	HMI
-unknown_transport	1541	0	Foxboro/Invensys Foxboro DCS Informix	-
-unknown_transport	1962	0	Phoenix Contact PCWorx Engineering Workstation	Workstation
-unknown_transport	2004	0	LS FEnet	-
-udp	2010	0	Rockwell AADvance Discover Tool	RTU
-udp	2011	0	Rockwell AADvance Discover Tool	RTU
-unknown_transport	2085	0	ADA Control ADA-CIP	ICS Host
-unknown_transport	2198	0	OneHome Remote Access	HMI
-unknown_transport	2199	0	OneHome Service Port	HMI
-unknown_transport	2221	0	Rockwell CSP	ICS Host
-unknown_transport	2222	0	Rockwell CSP	ICS Host
-unknown_transport	2223	0	Rockwell CSP	ICS Host
-tcp	2393	0	OLAP	-
-tcp	2394	0	OLAP	-
-unknown_transport	2404	0	IEC 60870-5-104	ICS Host
-unknown_transport	2423	0	RNRP Redundant Network Routing	ICS Host
-tcp	2455	0	CodeSys Gateway Server	-
-unknown_transport	2540	0	LonWorks	-
-unknown_transport	2541	0	LonWorks	-
-unknown_transport	2729	0	TCIM-Control	ICS Host
-unknown_transport	2757	0	CNRP Common Name Resolution Protocol	ICS Host
-unknown_transport	2846	0	AIMPP Hello	ICS Host
-unknown_transport	2847	0	AIMPP Port Req	ICS Host
-unknown_transport	3004	0	Hitachi EHV Series	PLC
-unknown_transport	3060	0	Rockwell FactoryTalk Directory Server File Transfer	HMI
-unknown_transport	3240	0	Trio Motion Control	ICS Host
-unknown_transport	3250	0	HMS HICP Port HMC	ICS Host
-unknown_transport	3338	0	OMF Data B ANET-B	ICS Host
-unknown_transport	3340	0	OMF Data M ANET-M	ICS Host
-unknown_transport	3341	0	OMF Data H ANET-H	ICS Host
+tcp	1200	0	CodeSys Gateway Server	CODESYS
+tcp	1330	0	Rockwell FactoryTalk Object RPC	Rockwell Automation
+tcp	1331	0	Rockwell FactoryTalk Service Control	Rockwell Automation
+tcp	1332	0	Rockwell FactoryTalk Server Health	Rockwell Automation
+tcp	1433	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint SQL	Rockwell Automation
+tcp	1434	0	Rockwell FactoryTalk Asset Centre Server/VantagePoint MSSQL	Rockwell Automation
+unknown_transport	1541	0	Foxboro/Invensys Foxboro DCS Informix	Schneider Electric
+unknown_transport	1962	0	Phoenix Contact PC WORX Engineering Workstation	PHOENIX CONTACT
+unknown_transport	2004	0	LS FEnet	LS Electric
+udp	2010	0	Rockwell AADvance Discover Tool	Rockwell Automation
+udp	2011	0	Rockwell AADvance Discover Tool	Rockwell Automation
+unknown_transport	2085	0	ADA Control ADA-CIP	-
+unknown_transport	2198	0	OneHome Remote Access	-
+unknown_transport	2199	0	OneHome Service Port	-
+unknown_transport	2221	0	Rockwell CSP	Rockwell Automation
+unknown_transport	2222	0	Rockwell CSP	Rockwell Automation
+unknown_transport	2223	0	Rockwell CSP	Rockwell Automation
+tcp	2393	0	OLAP	Microsoft
+tcp	2394	0	OLAP	Microsoft
+unknown_transport	2404	0	IEC 60870-5-104	-
+unknown_transport	2423	0	RNRP Redundant Network Routing	ABB
+tcp	2455	0	CodeSys Gateway Server	CODESYS
+unknown_transport	2540	0	LonWorks	LonWorks
+unknown_transport	2541	0	LonWorks	LonWorks
+unknown_transport	2729	0	TCIM Control	-
+unknown_transport	2757	0	CNRP Common Name Resolution Protocol	-
+unknown_transport	2846	0	AIMPP Hello	-
+unknown_transport	2847	0	AIMPP Port Req	-
+unknown_transport	3004	0	Hitachi EHV Series	-
+unknown_transport	3060	0	Rockwell FactoryTalk Directory Server File Transfer	Rockwell Automation
+unknown_transport	3240	0	Trio Motion Control	-
+unknown_transport	3250	0	HMS HICP Port HMC	-
+unknown_transport	3338	0	OMF Data B ANET-B	-
+unknown_transport	3340	0	OMF Data M ANET-M	-
+unknown_transport	3341	0	OMF Data H ANET-H	-
 tcp	3480	0	OPC UA Discovery	-
-unknown_transport	3614	0	Schleicher Satchwell Sigma	ICS Host
-unknown_transport	3622	0	Rockwell FF LAN Redundancy Port	ICS Host
+unknown_transport	3614	0	Schleicher Satchwell Sigma	-
+unknown_transport	3622	0	Rockwell FF LAN Redundancy Port	Rockwell Automation
 unknown_transport	3639	0	Extensible Automation xAP-HA	-
-unknown_transport	3743	0	IP Control Systems Ltd ICS Command	ICS Host
-unknown_transport	3794	0	JAUS Robots	ICS Host
-unknown_transport	3820	0	Siemens AuD SCP	ICS Host
-unknown_transport	3848	0	IT Environmental Monitor Item Service	ICS Host
-unknown_transport	3873	0	Fagor DNC	ICS Host
-unknown_transport	3875	0	PNBSCADA	ICS Host
-unknown_transport	3881	0	Data Acquisition and Control IDAC Intelligent	ICS Host
+unknown_transport	3743	0	IP Control Systems Ltd ICS Command	-
+unknown_transport	3794	0	JAUS Robots	-
+unknown_transport	3820	0	Siemens AuD SCP	Siemens AG
+unknown_transport	3848	0	IT Environmental Monitor Item Service	-
+unknown_transport	3873	0	Fagor DNC	-
+unknown_transport	3875	0	PNBSCADA	-
+unknown_transport	3881	0	Data Acquisition and Control IDAC Intelligent	-
 unknown_transport	4000	0	Emerson/Fisher ROC Plus	-
-tcp	4120	0	Rockwell Bizware Production Server	ICS Host
-tcp	4121	0	Rockwell Bizware Server Manager	ICS Host
-tcp	4122	0	Rockwell Bizware PlantMetrics Server	ICS Host
-tcp	4123	0	Rockwell Bizware Task Manager	ICS Host
-tcp	4124	0	Rockwell Bizware Scheduler	ICS Host
-tcp	4125	0	Rockwell Bizware CTP Server	ICS Host
-unknown_transport	4450	0	CAMP Common ASCII Message Protocol	ICS Host
-unknown_transport	4451	0	CTI System Message	ICS Host
-unknown_transport	4452	0	CTI Program Load	ICS Host
-unknown_transport	4999	0	Mitsubishi Electronic MELSEC-Q	PLC
-udp	5000	0	Rockwell AADvance Peer to P2P	ICS Host
-unknown_transport	5001	0	Mitsubishi Electronic FX3u Fx3u	PLC
+tcp	4120	0	Rockwell Bizware Production Server	Rockwell Automation
+tcp	4121	0	Rockwell Bizware Server Manager	Rockwell Automation
+tcp	4122	0	Rockwell Bizware PlantMetrics Server	Rockwell Automation
+tcp	4123	0	Rockwell Bizware Task Manager	Rockwell Automation
+tcp	4124	0	Rockwell Bizware Scheduler	Rockwell Automation
+tcp	4125	0	Rockwell Bizware CTP Server	Rockwell Automation
+unknown_transport	4450	0	CAMP Common ASCII Message Protocol	-
+unknown_transport	4451	0	CTI System Message	-
+unknown_transport	4452	0	CTI Program Load	-
+unknown_transport	4999	0	Mitsubishi Electronic MELSEC-Q	Mitsubishi Electric
+udp	5000	0	Rockwell AADvance Peer to P2P	Rockwell Automation
+unknown_transport	5001	0	Mitsubishi Electronic FX3u Fx3u	Mitsubishi Electric
 unknown_transport	5004	0	RTP Time Transport	-
-unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER	MTU
-unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER	MTU
+unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER	Mitsubishi Electric
+unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER	Mitsubishi Electric
 tcp	5050	0	OASyS SCADA	-
-unknown_transport	5050	0	Danfoss ECL Apex	PLC
+unknown_transport	5050	0	Danfoss ECL Apex	-
 tcp	5051	0	OASyS SCADA	-
 tcp	5052	0	OASyS SCADA	-
 tcp	5065	0	OASyS SCADA	-
-unknown_transport	5069	0	I-NET 2000-NPR	ICS Host
-unknown_transport	5413	0	Wonderware	HMI
-tcp	5450	0	Rockwell FactoryTalk PI Network Manager	HMI
-tcp	5454	0	Rockwell FactoryTalk Analysis Framework	HMI
-tcp	5455	0	Rockwell FactoryTalk Analysis Framework	HMI
-tcp	5456	0	Rockwell FactoryTalk ACE2 Scheduler	HMI
-tcp	5457	0	Rockwell FactoryTalk Asset Framework Server	HMI
-tcp	5458	0	Rockwell FactoryTalk PI Notification	HMI
-tcp	6543	0	Rockwell FactoryTalk Alarming Server	HMI
-tcp	7002	0	Rockwell FactoryTalk Asset Centre Services	HMI
-tcp	7003	0	Rockwell FactoryTalk Asset Centre Services	HMI
-tcp	7004	0	Rockwell FactoryTalk Asset Centre Services	HMI
-unknown_transport	7022	0	CT Discovery Protocol CTDP	ICS Host
-unknown_transport	7201	0	DLIP	ICS Host
-tcp	7600	0	Rockwell FactoryTalk Event Multiplexor	HMI
-tcp	7710	0	Rockwell FactoryTalk Directory Server	HMI
-tcp	8081	0	Rockwell Bizware HTTP Server Manager	ICS Host
-tcp	8083	0	Rockwell Bizware HTTP CTP Server	ICS Host
-unknown_transport	8500	0	Panasonic FP2	PLC
-unknown_transport	8501	0	Keyence KV-5000	PLC
-unknown_transport	9094	0	Panasonic FP	PLC
-unknown_transport	9600	0	Omron Factory Interface Network Service	PLC
-tcp	10001	0	Rockwell AADvance Serial Data	ICS Host
-tcp	10002	0	Rockwell AADvance Serial Data	ICS Host
-tcp	10003	0	Rockwell AADvance Serial Data	ICS Host
-tcp	10004	0	Rockwell AADvance Serial Data	ICS Host
-tcp	10005	0	Rockwell AADvance Serial Data	ICS Host
-tcp	10006	0	Rockwell AADvance Serial Data	ICS Host
-tcp	10307	0	ABB Ranger	-
-tcp	10311	0	ABB Ranger	-
-tcp	10364	0	ABB Ranger	-
-tcp	10365	0	ABB Ranger	-
-tcp	10407	0	ABB Ranger	-
-tcp	10409	0	ABB Ranger	-
-tcp	10410	0	ABB Ranger	-
-tcp	10412	0	ABB Ranger	-
-tcp	10414	0	ABB Ranger	-
-tcp	10415	0	ABB Ranger	-
-tcp	10428	0	ABB Ranger	-
-tcp	10431	0	ABB Ranger	-
-tcp	10432	0	ABB Ranger	-
-tcp	10447	0	ABB Ranger	-
-tcp	10449	0	ABB Ranger	-
-tcp	10450	0	ABB Ranger	-
+unknown_transport	5069	0	I-NET 2000-NPR	-
+unknown_transport	5413	0	Wonderware	AVEVA Wonderware
+tcp	5450	0	Rockwell FactoryTalk PI Network Manager	Rockwell Automation
+tcp	5454	0	Rockwell FactoryTalk Analysis Framework	Rockwell Automation
+tcp	5455	0	Rockwell FactoryTalk Analysis Framework	Rockwell Automation
+tcp	5456	0	Rockwell FactoryTalk ACE2 Scheduler	Rockwell Automation
+tcp	5457	0	Rockwell FactoryTalk Asset Framework Server	Rockwell Automation
+tcp	5458	0	Rockwell FactoryTalk PI Notification	Rockwell Automation
+tcp	6543	0	Rockwell FactoryTalk Alarming Server	Rockwell Automation
+tcp	7002	0	Rockwell FactoryTalk Asset Centre Services	Rockwell Automation
+tcp	7003	0	Rockwell FactoryTalk Asset Centre Services	Rockwell Automation
+tcp	7004	0	Rockwell FactoryTalk Asset Centre Services	Rockwell Automation
+unknown_transport	7022	0	CT Discovery Protocol	-
+unknown_transport	7201	0	DLIP	-
+tcp	7600	0	Rockwell FactoryTalk Event Multiplexor	Rockwell Automation
+tcp	7710	0	Rockwell FactoryTalk Directory Server	Rockwell Automation
+tcp	8081	0	Rockwell Bizware HTTP Server Manager	Rockwell Automation
+tcp	8083	0	Rockwell Bizware HTTP CTP Server	Rockwell Automation
+unknown_transport	8500	0	Panasonic FP2	-
+unknown_transport	8501	0	Keyence KV-5000	-
+unknown_transport	9094	0	Panasonic FP	-
+unknown_transport	9600	0	Omron Factory Interface Network Service	-
+tcp	10001	0	Rockwell AADvance Serial Data	Rockwell Automation
+tcp	10002	0	Rockwell AADvance Serial Data	Rockwell Automation
+tcp	10003	0	Rockwell AADvance Serial Data	Rockwell Automation
+tcp	10004	0	Rockwell AADvance Serial Data	Rockwell Automation
+tcp	10005	0	Rockwell AADvance Serial Data	Rockwell Automation
+tcp	10006	0	Rockwell AADvance Serial Data	Rockwell Automation
+tcp	10307	0	ABB Ranger	ABB
+tcp	10311	0	ABB Ranger	ABB
+tcp	10364	0	ABB Ranger	ABB
+tcp	10365	0	ABB Ranger	ABB
+tcp	10407	0	ABB Ranger	ABB
+tcp	10409	0	ABB Ranger	ABB
+tcp	10410	0	ABB Ranger	ABB
+tcp	10412	0	ABB Ranger	ABB
+tcp	10414	0	ABB Ranger	ABB
+tcp	10415	0	ABB Ranger	ABB
+tcp	10428	0	ABB Ranger	ABB
+tcp	10431	0	ABB Ranger	ABB
+tcp	10432	0	ABB Ranger	ABB
+tcp	10447	0	ABB Ranger	ABB
+tcp	10449	0	ABB Ranger	ABB
+tcp	10450	0	ABB Ranger	ABB
 unknown_transport	11001	0	Johnson Controls Metasys N1	-
 tcp	12135	0	OASyS SCADA	-
 tcp	12136	0	OASyS SCADA	-
 tcp	12137	0	OASyS SCADA	-
-tcp	12316	0	ABB Ranger	-
-tcp	12645	0	ABB Ranger	-
-tcp	12647	0	ABB Ranger	-
-tcp	12648	0	ABB Ranger	-
-tcp	13722	0	ABB Ranger	-
-tcp	13724	0	ABB Ranger	-
-tcp	13782	0	ABB Ranger	-
-tcp	13783	0	ABB Ranger	-
+tcp	12316	0	ABB Ranger	ABB
+tcp	12645	0	ABB Ranger	ABB
+tcp	12647	0	ABB Ranger	ABB
+tcp	12648	0	ABB Ranger	ABB
+tcp	13722	0	ABB Ranger	ABB
+tcp	13724	0	ABB Ranger	ABB
+tcp	13782	0	ABB Ranger	ABB
+tcp	13783	0	ABB Ranger	ABB
 tcp	18000	0	Iconic Genesis32 GenBroker	-
-unknown_transport	20256	0	Unitronics Socket1	PLC
-unknown_transport	20257	0	Unitronics Unitronicsw Socket3 Socket2	PLC
-unknown_transport	20547	0	ProconOS	PLC
-tcp	27000	0	Rockwell FlexLM Server	ICS Host
-tcp	27001	0	Rockwell FlexLM Server	ICS Host
-tcp	27002	0	Rockwell FlexLM Server	ICS Host
-tcp	27003	0	Rockwell FlexLM Server	ICS Host
-tcp	27004	0	Rockwell FlexLM Server	ICS Host
-tcp	27005	0	Rockwell FlexLM Server	ICS Host
-tcp	27006	0	Rockwell FlexLM Server	ICS Host
-tcp	27007	0	Rockwell FlexLM Server	ICS Host
-tcp	27008	0	Rockwell FlexLM Server	ICS Host
-tcp	27009	0	Rockwell FlexLM Server	ICS Host
-unknown_transport	28784	0	Koyo Ethernet	PLC
-unknown_transport	34962	0	PROFInet RT Unicast	ICS Host
+unknown_transport	20256	0	Unitronics Socket1	-
+unknown_transport	20257	0	Unitronics Unitronicsw Socket3 Socket2	-
+unknown_transport	20547	0	ProconOS	-
+tcp	27000	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27001	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27002	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27003	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27004	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27005	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27006	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27007	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27008	0	Rockwell FlexLM Server	Rockwell Automation
+tcp	27009	0	Rockwell FlexLM Server	Rockwell Automation
+unknown_transport	28784	0	Koyo Ethernet	-
+unknown_transport	34962	0	PROFInet RT Unicast	PROFIBUS and PROFINET
 tcp	38000	0	SNC GENe	-
 tcp	38001	0	SNC GENe	-
 tcp	38011	0	SNC GENe	-
@@ -183,47 +183,47 @@ tcp	38200	0	SNC GENe	-
 tcp	38210	0	SNC GENe	-
 tcp	38301	0	SNC GENe	-
 tcp	38400	0	SNC GENe	-
-tcp	38589	0	ABB Ranger	-
-tcp	38593	0	ABB Ranger	-
-tcp	38600	0	ABB Ranger	-
+tcp	38589	0	ABB Ranger	ABB
+tcp	38593	0	ABB Ranger	ABB
+tcp	38600	0	ABB Ranger	ABB
 tcp	38700	0	SNC GENe	-
-tcp	38971	0	ABB Ranger	-
-tcp	39129	0	ABB Ranger	-
-tcp	39278	0	ABB Ranger	-
-unknown_transport	44818	0	Rockwell Encapsulation	ICS Host
-unknown_transport	45678	0	Foxboro/Invensys Foxboro DCS AIMAPI	-
-tcp	49281	0	Rockwell FactoryTalk Live Data/SE HMI Tag Server	HMI
-tcp	50001	0	Siemens Spectrum Power TG	-
-tcp	50002	0	Siemens Spectrum Power TG	-
-tcp	50003	0	Siemens Spectrum Power TG	-
-tcp	50004	0	Siemens Spectrum Power TG	-
-tcp	50005	0	Siemens Spectrum Power TG	-
-tcp	50006	0	Siemens Spectrum Power TG	-
-tcp	50007	0	Siemens Spectrum Power TG	-
-tcp	50008	0	Siemens Spectrum Power TG	-
-tcp	50009	0	Siemens Spectrum Power TG	-
-tcp	50010	0	Siemens Spectrum Power TG	-
-tcp	50011	0	Siemens Spectrum Power TG	-
-tcp	50012	0	Siemens Spectrum Power TG	-
-tcp	50013	0	Siemens Spectrum Power TG	-
-tcp	50014	0	Siemens Spectrum Power TG	-
-tcp	50015	0	Siemens Spectrum Power TG	-
-tcp	50016	0	Siemens Spectrum Power TG	-
-tcp	50018	0	Siemens Spectrum Power TG	-
-tcp	50019	0	Siemens Spectrum Power TG	-
-tcp	50020	0	Siemens Spectrum Power TG	-
-tcp	50021	0	Siemens Spectrum Power TG	-
-tcp	50025	0	Siemens Spectrum Power TG	-
-tcp	50026	0	Siemens Spectrum Power TG	-
-tcp	50027	0	Siemens Spectrum Power TG	-
-tcp	50028	0	Siemens Spectrum Power TG	-
-tcp	50110	0	Siemens Spectrum Power TG	-
-tcp	50111	0	Siemens Spectrum Power TG	-
-unknown_transport	55000	0	Mitsubishi Electronic FL-Net Cyclic Transmission	-
-unknown_transport	55001	0	Mitsubishi Electronic FL-Net Message Transmission	-
-unknown_transport	55002	0	Mitsubishi Electronic FL-Net Participation Request Frame	-
-unknown_transport	55003	0	Mitsubishi Electronic FL-Net Sending Service	-
-tcp	55555	0	Rockwell AADvance Telnet	ICS Host
+tcp	38971	0	ABB Ranger	ABB
+tcp	39129	0	ABB Ranger	ABB
+tcp	39278	0	ABB Ranger	ABB
+unknown_transport	44818	0	Rockwell Encapsulation	Rockwell Automation
+unknown_transport	45678	0	Foxboro/Invensys Foxboro DCS AIMAPI	Schneider Electric
+tcp	49281	0	Rockwell FactoryTalk Live Data/SE HMI Tag Server	Rockwell Automation
+tcp	50001	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50002	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50003	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50004	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50005	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50006	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50007	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50008	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50009	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50010	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50011	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50012	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50013	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50014	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50015	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50016	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50018	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50019	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50020	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50021	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50025	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50026	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50027	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50028	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50110	0	Siemens Spectrum Power TG	Siemens AG
+tcp	50111	0	Siemens Spectrum Power TG	Siemens AG
+unknown_transport	55000	0	Mitsubishi Electronic FL-Net Cyclic Transmission	Mitsubishi Electric
+unknown_transport	55001	0	Mitsubishi Electronic FL-Net Message Transmission	Mitsubishi Electric
+unknown_transport	55002	0	Mitsubishi Electronic FL-Net Participation Request Frame	Mitsubishi Electric
+unknown_transport	55003	0	Mitsubishi Electronic FL-Net Sending Service	Mitsubishi Electric
+tcp	55555	0	Rockwell AADvance Telnet	Rockwell Automation
 unknown_transport	55555	0	Foxboor/Invensys Foxboro DCS FoxAPI	-
 tcp	56001	0	OASyS SCADA	-
 tcp	56001	0	OASyS SCADA	-
@@ -325,7 +325,7 @@ tcp	56096	0	OASyS SCADA	-
 tcp	56097	0	OASyS SCADA	-
 tcp	56098	0	OASyS SCADA	-
 tcp	56099	0	OASyS SCADA	-
-tcp	60093	0	Rockwell FactoryTalk Diagnostics	HMI
+tcp	60093	0	Rockwell FactoryTalk Diagnostics	Rockwell Automation
 tcp	62900	0	SNC GENe	-
 tcp	62911	0	SNC GENe	-
 tcp	62924	0	SNC GENe	-
@@ -355,5 +355,5 @@ tcp	63079	0	SNC GENe	-
 tcp	63082	0	SNC GENe	-
 tcp	63088	0	SNC GENe	-
 tcp	63094	0	SNC GENe	-
-tcp	65207	0	Rockwell FactoryTalk VantagePoint Incuity Server Advertiser	HMI
+tcp	65207	0	Rockwell FactoryTalk VantagePoint Incuity Server Advertiser	Rockwell Automation
 tcp	65443	0	SNC GENe	-
