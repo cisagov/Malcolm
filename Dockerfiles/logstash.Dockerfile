@@ -2,7 +2,8 @@ FROM amazonlinux:2 AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-RUN yum install -y \
+RUN amazon-linux-extras install -y epel && \
+      yum install -y \
       autoconf \
       automake \
       bison \
