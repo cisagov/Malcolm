@@ -165,7 +165,7 @@
       "version": "WzI5MCwxXQ==",
       "attributes": {
         "title": "Best Guess - Disclaimer",
-        "visState": "{\"title\":\"Best Guess - Disclaimer\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"Note: This dashboard categorizes potential industrial control system traffic using transport protocol, source port and/or destination port instead of packet payload inspection. As such, these results should be viewed as a \\\"best guess\\\" and are likely to have more false positives than other protocol dashboards.\"}}",
+        "visState": "{\"title\":\"Best Guess - Disclaimer\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"Note: This dashboard categorizes potential industrial control system traffic using transport protocol, responding port and/or originating port instead of packet payload inspection. As such, these results should be viewed as a \\\"best guess\\\" and are likely to have more false positives than other protocol dashboards.\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
