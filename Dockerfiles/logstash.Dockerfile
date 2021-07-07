@@ -3,7 +3,7 @@ FROM amazonlinux:2 AS build
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 RUN amazon-linux-extras install -y epel && \
-      yum install -y \
+    yum install -y \
       autoconf \
       automake \
       bison \
@@ -79,7 +79,8 @@ USER root
 
 COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
 
-RUN yum update -y && \
+RUN yum install -y epel-release && \
+    yum update -y && \
     yum install -y curl gettext python-setuptools python-pip python-requests python-yaml openssl && \
     yum clean all && \
     pip install py2-ipaddress supervisor && \

@@ -20,7 +20,8 @@ ENV ELASTIC_VERSION $ELASTIC_VERSION
 
 USER root
 
-RUN yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
+RUN amazon-linux-extras install -y epel && \
+    yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
     adduser -u ${DEFAULT_UID} -d /home/kibana -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
     mkdir -p /usr/share && \
