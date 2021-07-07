@@ -30,7 +30,7 @@ ENV JAVA_HOME=/usr/share/elasticsearch/jdk
 # https://opendistro.github.io/for-elasticsearch-docs/docs/security/configuration/disable/
 # https://opendistro.github.io/for-elasticsearch-docs/docs/install/docker/#customize-the-docker-image
 # https://github.com/opendistro-for-elasticsearch/opendistro-build/issues/613
-RUN yum --disablerepo=epel -y install openssl && \
+RUN yum install -y openssl && \
   /usr/share/elasticsearch/bin/elasticsearch-plugin remove opendistro_security && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/elasticsearch/config/elasticsearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/elasticsearch/config/elasticsearch.yml && \
