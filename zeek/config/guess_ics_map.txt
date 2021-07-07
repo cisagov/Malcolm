@@ -93,7 +93,7 @@ unknown_transport	4451	0	CTI System Message	-
 unknown_transport	4452	0	CTI Program Load	-
 unknown_transport	4999	0	Mitsubishi Electronic MELSEC-Q	Mitsubishi Electric
 udp	5000	0	Rockwell AADvance Peer to P2P	Rockwell Automation
-unknown_transport	5001	0	Mitsubishi Electronic FX3u Fx3u	Mitsubishi Electric
+unknown_transport	5001	0	Mitsubishi Electronic FX3u	Mitsubishi Electric
 unknown_transport	5004	0	RTP Time Transport	-
 unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER	Mitsubishi Electric
 unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER	Mitsubishi Electric
