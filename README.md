@@ -2,7 +2,7 @@
 
 ![](./docs/images/logo/Malcolm_banner.png)
 
-[Malcolm](https://github.com/cisagov/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
+[Malcolm](https://github.com/idaholab/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
 * **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime (formerly Moloch), a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
@@ -91,6 +91,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 20.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
+* [Forks](#Forks)
 * [Copyright](#Footer)
 * [Contact](#Contact)
 
@@ -104,7 +105,7 @@ The scripts to control Malcolm require Python 3.
 
 #### Source code
 
-The files required to build and run Malcolm are available on its [GitHub page](https://github.com/cisagov/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 #### Building Malcolm from scratch
 
@@ -279,7 +280,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
-|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/master/zeek/config/login.zeek)|
+|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/idaholab/Malcolm/blob/master/zeek/config/login.zeek)|
 |TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/tftp/tftp.zeek)|
 |WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard/main.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
@@ -297,7 +298,7 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 ## <a name="Development"></a>Development
 
-Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/master) results in the following subdirectories in your `malcolm/` working copy:
+Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/master) results in the following subdirectories in your `malcolm/` working copy:
 
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
@@ -857,14 +858,14 @@ Note that currently Microsoft Windows and Apple macOS platforms run Docker insid
 
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/master/sensor-iso/) is a Debian-based operating system built to
+A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/master/sensor-iso/) is a Debian-based operating system built to
 
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
+* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
 
-Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/master/sensor-iso/README.md) for more information.
+Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/README.md) for more information.
 
 ### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
@@ -1627,13 +1628,13 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
 
-Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/cisagov/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
+Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
 The commands in this example should be executed as a non-root user.
 
-You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/cisagov/Malcolm/releases).
+You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/idaholab/Malcolm/releases).
 
-To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/cisagov/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
+To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/idaholab/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
@@ -1642,7 +1643,7 @@ malcolm_common.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
 
 If you are obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:
 ```
-user@host:~$ git clone https://github.com/cisagov/Malcolm
+user@host:~$ git clone https://github.com/idaholab/Malcolm
 Cloning into 'Malcolm'...
 remote: Enumerating objects: 443, done.
 remote: Counting objects: 100% (443/443), done.
@@ -1917,7 +1918,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 
 ### Scenario 2: Malcolm was installed from a packaged tarball
 
-If you installed Malcolm from [pre-packaged installation files](https://github.com/cisagov/malcolm#Packager), here are the basic steps to perform an upgrade:
+If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/malcolm#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
     * `./scripts/stop`
@@ -1954,11 +1955,24 @@ After upgrading following one of the previous outlines, give Malcolm several min
 
 Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
 
+## <a name="Forks"></a>Forks
+
+[CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
+
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
+[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See [`License.txt`](./License.txt) for the terms of its release.
+
+## Other Software
+
+Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
+
+* [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
+* [Supported Open Source Software](https://github.com/idaholab)
+* [Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
+* [Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
 
 ## <a name="Contact"></a>Contact information of author(s):
 
