@@ -234,11 +234,10 @@ def main():
   parser.add_argument('-v', '--verbose', dest='debug', help="Verbose output", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--extra-verbose', dest='verboseDebug', help="Super verbose output", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--start-sleep', dest='startSleepSec', help="Sleep for this many seconds before starting", metavar='<seconds>', type=int, default=0, required=False)
+  parser.add_argument('--req-limit', dest='reqLimit', help="Requests limit", metavar='<requests>', type=int, default=None, required=False)
   parser.add_argument('--malass-host', dest='malassHost', help="Malass host or IP address", metavar='<host>', type=str, required=False)
   parser.add_argument('--malass-port', dest='malassPort', help="Malass web interface port", metavar='<port>', type=int, default=80, required=False)
-  parser.add_argument('--malass-limit', dest='malassLimit', help="Malass maximum concurrent scans", metavar='<limit>', type=int, default=MAL_MAX_REQS, required=False)
   parser.add_argument('--vtot-api', dest='vtotApi', help="VirusTotal API key", metavar='<API key>', type=str, required=False)
-  parser.add_argument('--vtot-req-limit', dest='vtotReqLimit', help="VirusTotal requests per minute limit", metavar='<requests>', type=int, default=VTOT_MAX_REQS, required=False)
   parser.add_argument('--clamav', dest='enableClamAv', metavar='true|false', help="Enable ClamAV", type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--clamav-socket', dest='clamAvSocket', help="ClamAV socket filename", metavar='<filespec>', type=str, required=False, default=None)
   parser.add_argument('--yara', dest='enableYara', metavar='true|false', help="Enable Yara", type=str2bool, nargs='?', const=True, default=False, required=False)
@@ -277,21 +276,21 @@ def main():
 
   # intialize objects for virus scanning engines
   if (isinstance(args.malassHost, str) and (len(args.malassHost) > 1)):
-    checkConnInfo = MalassScan(args.malassHost, args.malassPort, reqLimit=args.malassLimit)
+    checkConnInfo = MalassScan(args.malassHost, args.malassPort, reqLimit=args.reqLimit)
   elif (isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.vtotReqLimit > 0)):
-    checkConnInfo = VirusTotalSearch(args.vtotApi, reqLimit=args.vtotReqLimit)
+    checkConnInfo = VirusTotalSearch(args.vtotApi, reqLimit=args.reqLimit)
   elif args.enableYara:
     yaraDirs = []
     if (not args.yaraCustomOnly):
       yaraDirs.append(YARA_RULES_DIR)
     yaraDirs.append(YARA_CUSTOM_RULES_DIR)
-    checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs)
+    checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs, reqLimit=args.reqLimit)
   elif args.enableCapa:
-    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug, rulesDir=args.capaRulesDir, verboseHits=args.capaVerbose)
+    checkConnInfo = CapaScan(debug=debug, verboseDebug=verboseDebug, rulesDir=args.capaRulesDir, verboseHits=args.capaVerbose, reqLimit=args.reqLimit)
   else:
     if not args.enableClamAv:
       eprint('No scanner specified, defaulting to ClamAV')
-    checkConnInfo = ClamAVScan(debug=debug, verboseDebug=verboseDebug, socketFileName=args.clamAvSocket)
+    checkConnInfo = ClamAVScan(debug=debug, verboseDebug=verboseDebug, socketFileName=args.clamAvSocket, reqLimit=args.reqLimit)
 
   carvedFileSub = CarvedFileSubscriberThreaded(debug=debug, verboseDebug=verboseDebug,
                                                host='localhost', port=VENTILATOR_PORT,

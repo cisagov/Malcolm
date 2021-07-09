@@ -25,8 +25,8 @@ ENV PUSER_PRIV_DROP true
 
 # for download and install
 ARG ZEEK_LTS=1
-ARG ZEEK_VERSION=4.0.1-0
-ARG SPICY_VERSION=1.0.0
+ARG ZEEK_VERSION=4.0.3-0
+ARG SPICY_VERSION=1.1.0
 
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
@@ -104,14 +104,14 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
       curl -sSL --remote-name-all \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_10/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
       dpkg -i ./*.deb && \
     mkdir -p /tmp/spicy-packages && \
       cd /tmp/spicy-packages && \
@@ -147,14 +147,15 @@ ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
+ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
 # todo: Bro::LDAP is broken right now, disabled
 ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 19
 ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OPENVPN|ANALYZER_SPICY_IPSEC|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_LDAP_TCP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP_IP|ICSNPP::BSAP_SERIAL|ICSNPP::ENIP|Salesforce::GQUIC|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
-ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 13
-ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|hassh/hassh|ja3/ja3|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 15
+ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-31166/detect|hassh/hassh|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
@@ -195,6 +196,7 @@ ARG ZEEK_DISABLE_HASH_ALL_FILES=
 ARG ZEEK_DISABLE_LOG_PASSWORDS=
 ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
 ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
+ARG ZEEK_DISABLE_BEST_GUESS_ICS=true
 # TODO: assess spicy-analyzer that replace built-in Zeek parsers
 # for now, disable them by default when a Zeek parser exists
 ARG ZEEK_DISABLE_SPICY_DHCP=true
@@ -209,6 +211,7 @@ ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
 ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
 ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS
 ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
+ENV ZEEK_DISABLE_BEST_GUESS_ICS $ZEEK_DISABLE_BEST_GUESS_ICS
 ENV ZEEK_DISABLE_SPICY_DHCP $ZEEK_DISABLE_SPICY_DHCP
 ENV ZEEK_DISABLE_SPICY_DNS $ZEEK_DISABLE_SPICY_DNS
 ENV ZEEK_DISABLE_SPICY_HTTP $ZEEK_DISABLE_SPICY_HTTP
