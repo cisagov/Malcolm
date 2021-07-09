@@ -146,8 +146,8 @@ if [ -d "$WORKDIR" ]; then
   echo "ID_LIKE=\"debian\""                                             >> "$MALCOLM_DEST_DIR"/.os-info
   echo "HOME_URL=\"https://malcolm.fyi\""                               >> "$MALCOLM_DEST_DIR"/.os-info
   echo "DOCUMENTATION_URL=\"https://malcolm.fyi/documentation/\""       >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "SUPPORT_URL=\"https://github.com/idaholab\""                    >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "SUPPORT_URL=\"https://github.com/cisagov\""                     >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""   >> "$MALCOLM_DEST_DIR"/.os-info
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/

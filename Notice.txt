@@ -1,6 +1,6 @@
 This project contains code from Idaho National Laboratory's Malcolm Project
 
-https://github.com/idaholab/Malcolm
+https://github.com/cisagov/Malcolm
 
 See License.txt for license terms.
 
