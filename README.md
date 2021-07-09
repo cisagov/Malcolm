@@ -78,6 +78,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index management](#IndexManagement)
     - [Alerting](#Alerting)
+    - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -472,6 +473,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
 
 * `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
+
+* `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 
 * `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 
@@ -1365,13 +1368,13 @@ When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`
 
 Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
-## <a name="IndexManagement"></a>Elasticsearch index management
+### <a name="IndexManagement"></a>Elasticsearch index management
 
 See [Index State Management](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/) in the Open Distro for Elasticsearch documentation on Index State Management [policies](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/policies/), [managed indices](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/managedindices/), [settings](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/settings/) and [APIs](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/).
 
 Elasticsearch index management only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
-## <a name="Alerting"></a>Alerting
+### <a name="Alerting"></a>Alerting
 
 See [Alerting](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/) in the Open Distro for Elasticsearch documentation.
 
@@ -1399,6 +1402,16 @@ Email alert sender account variables stored: opendistro.alerting.destination.ema
 ```
 
 This action should only be performed while Malcolm is [stopped](#StopAndRestart): otherwise the credentials will not be stored correctly.
+
+### <a name="ICSBestGuess"></a>"Best Guess" Fingerprinting for ICS Protocols
+
+There are many ICS (industrial control systems) protocols. While Malcolm's collection of [protocol parsers](#Protocols) includes a number of them, many, particularly those that are proprietary or less common, are unlikely to be supported with a full parser in the foreseeable future.
+
+In an effort to help identify more ICS traffic, Malcolm can use "buest guess" method based on transport protocol (e.g., TCP or UDP) and port(s) to categorize potential traffic communicating over some ICS protocols without full parser support. This feature involves a [mapping table](https://github.com/idaholab/Malcolm/blob/master/zeek/config/guess_ics_map.txt) and a [Zeek script](https://github.com/idaholab/Malcolm/blob/master/zeek/config/guess.zeek) to look up the transport protocol and destination and/or source port to make a best guess at whether a connection belongs to one of those protocols. These potential ICS communications are categorized by vendor where possible.
+
+Naturally, these lookups could produce false positives, so these connections are displayed in their own dashboard (the **Best Guess** dashboard found under the **ICS** section of Malcolm's [Kibana dashboards'](#KibanaVisualizations) navigation pane). Values such as IP addresses, ports, or UID can be used to [pivot to other dashboards](#ZeekArkimeFlowCorrelation) to investigate further.
+
+This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
