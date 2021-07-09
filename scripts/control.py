@@ -433,11 +433,13 @@ def start():
 
   # make sure permissions are set correctly for the nginx worker processes
   for authFile in [os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
-                   os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
                    os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
                    os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata'))]:
     # chmod 644 authFile
     os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+  for authFile in [os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))]:
+    # chmod 600 authFile
+    os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
 
   # make sure some directories exist before we start
   for path in [os.path.join(MalcolmPath, 'elasticsearch'),

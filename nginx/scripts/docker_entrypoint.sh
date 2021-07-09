@@ -177,6 +177,7 @@ EOF
     # rewrite modified copy of user ldap configuration to point to local end of tunnel instead of remote
     rm -f "$NGINX_RUNTIME_LDAP_CONF"
     touch "$NGINX_RUNTIME_LDAP_CONF"
+    chmod 600 "$NGINX_RUNTIME_LDAP_CONF"
     READ_LINE_NUM=0
     while IFS= read -r LINE; do
       READ_LINE_NUM=$((READ_LINE_NUM+1))
@@ -192,6 +193,7 @@ EOF
     # however, we do want to set SSL CA trust stuff if specified, so do that
     rm -f "$NGINX_RUNTIME_LDAP_CONF"
     touch "$NGINX_RUNTIME_LDAP_CONF"
+    chmod 600 "$NGINX_RUNTIME_LDAP_CONF"
     READ_LINE_NUM=0
     while IFS= read -r LINE; do
       READ_LINE_NUM=$((READ_LINE_NUM+1))
