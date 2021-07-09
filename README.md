@@ -2,7 +2,7 @@
 
 ![](./docs/images/logo/Malcolm_banner.png)
 
-[Malcolm](https://github.com/idaholab/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
+[Malcolm](https://github.com/cisagov/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
 * **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime (formerly Moloch), a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
@@ -78,6 +78,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index management](#IndexManagement)
     - [Alerting](#Alerting)
+    - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -90,7 +91,6 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 20.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
-* [Forks](#Forks)
 * [Copyright](#Footer)
 * [Contact](#Contact)
 
@@ -104,7 +104,7 @@ The scripts to control Malcolm require Python 3.
 
 #### Source code
 
-The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on its [GitHub page](https://github.com/cisagov/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 #### Building Malcolm from scratch
 
@@ -139,21 +139,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                3.1.0               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.1.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          3.1.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           3.1.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          3.1.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  3.1.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               3.1.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         3.1.0               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             3.1.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          3.1.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           3.1.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           3.1.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          3.1.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          3.1.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  3.1.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.1.1               xxxxxxxxxxxx        39 hours ago        683MB
+malcolmnetsec/elasticsearch-od                      3.1.1               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          3.1.1               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           3.1.1               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          3.1.1               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  3.1.1               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               3.1.1               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-helper                         3.1.1               xxxxxxxxxxxx        40 hours ago        141MB
+malcolmnetsec/kibana-od                             3.1.1               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          3.1.1               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/name-map-ui                           3.1.1               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           3.1.1               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          3.1.1               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          3.1.1               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  3.1.1               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -217,8 +217,10 @@ Malcolm leverages the following excellent open source tools, among others.
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin    
+    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin    
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+    * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
     * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
@@ -277,7 +279,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
-|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/idaholab/Malcolm/blob/master/zeek/config/login.zeek)|
+|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/master/zeek/config/login.zeek)|
 |TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/tftp/tftp.zeek)|
 |WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard/main.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
@@ -295,7 +297,7 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 ## <a name="Development"></a>Development
 
-Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/master) results in the following subdirectories in your `malcolm/` working copy:
+Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/master) results in the following subdirectories in your `malcolm/` working copy:
 
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
@@ -470,6 +472,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
 
 * `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
+
+* `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 
 * `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 
@@ -853,14 +857,14 @@ Note that currently Microsoft Windows and Apple macOS platforms run Docker insid
 
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/master/sensor-iso/) is a Debian-based operating system built to
+A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/master/sensor-iso/) is a Debian-based operating system built to
 
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
+* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
 
-Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/master/sensor-iso/README.md) for more information.
+Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/master/sensor-iso/README.md) for more information.
 
 ### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
@@ -1363,13 +1367,13 @@ When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`
 
 Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
-## <a name="IndexManagement"></a>Elasticsearch index management
+### <a name="IndexManagement"></a>Elasticsearch index management
 
 See [Index State Management](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/) in the Open Distro for Elasticsearch documentation on Index State Management [policies](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/policies/), [managed indices](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/managedindices/), [settings](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/settings/) and [APIs](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/).
 
 Elasticsearch index management only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
-## <a name="Alerting"></a>Alerting
+### <a name="Alerting"></a>Alerting
 
 See [Alerting](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/) in the Open Distro for Elasticsearch documentation.
 
@@ -1397,6 +1401,16 @@ Email alert sender account variables stored: opendistro.alerting.destination.ema
 ```
 
 This action should only be performed while Malcolm is [stopped](#StopAndRestart): otherwise the credentials will not be stored correctly.
+
+### <a name="ICSBestGuess"></a>"Best Guess" Fingerprinting for ICS Protocols
+
+There are many ICS (industrial control systems) protocols. While Malcolm's collection of [protocol parsers](#Protocols) includes a number of them, many, particularly those that are proprietary or less common, are unlikely to be supported with a full parser in the foreseeable future.
+
+In an effort to help identify more ICS traffic, Malcolm can use "buest guess" method based on transport protocol (e.g., TCP or UDP) and port(s) to categorize potential traffic communicating over some ICS protocols without full parser support. This feature involves a [mapping table](https://github.com/idaholab/Malcolm/blob/master/zeek/config/guess_ics_map.txt) and a [Zeek script](https://github.com/idaholab/Malcolm/blob/master/zeek/config/guess.zeek) to look up the transport protocol and destination and/or source port to make a best guess at whether a connection belongs to one of those protocols. These potential ICS communications are categorized by vendor where possible.
+
+Naturally, these lookups could produce false positives, so these connections are displayed in their own dashboard (the **Best Guess** dashboard found under the **ICS** section of Malcolm's [Kibana dashboards'](#KibanaVisualizations) navigation pane). Values such as IP addresses, ports, or UID can be used to [pivot to other dashboards](#ZeekArkimeFlowCorrelation) to investigate further.
+
+This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
@@ -1426,7 +1440,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-3.1.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-3.1.1.iso"
 …
 ```
 
@@ -1613,13 +1627,13 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
 
-Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
+Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/cisagov/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
 The commands in this example should be executed as a non-root user.
 
-You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/idaholab/Malcolm/releases).
+You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/cisagov/Malcolm/releases).
 
-To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/idaholab/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
+To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/cisagov/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
@@ -1628,7 +1642,7 @@ malcolm_common.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
 
 If you are obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:
 ```
-user@host:~$ git clone https://github.com/idaholab/Malcolm
+user@host:~$ git clone https://github.com/cisagov/Malcolm
 Cloning into 'Malcolm'...
 remote: Enumerating objects: 443, done.
 remote: Counting objects: 100% (443/443), done.
@@ -1809,21 +1823,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                3.1.0               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.1.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          3.1.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           3.1.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          3.1.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  3.1.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               3.1.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         3.1.0               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             3.1.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          3.1.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           3.1.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           3.1.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          3.1.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          3.1.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  3.1.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.1.1               xxxxxxxxxxxx        39 hours ago        683MB
+malcolmnetsec/elasticsearch-od                      3.1.1               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          3.1.1               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           3.1.1               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          3.1.1               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  3.1.1               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               3.1.1               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-helper                         3.1.1               xxxxxxxxxxxx        40 hours ago        141MB
+malcolmnetsec/kibana-od                             3.1.1               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          3.1.1               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/name-map-ui                           3.1.1               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           3.1.1               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          3.1.1               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          3.1.1               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  3.1.1               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1903,7 +1917,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 
 ### Scenario 2: Malcolm was installed from a packaged tarball
 
-If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/malcolm#Packager), here are the basic steps to perform an upgrade:
+If you installed Malcolm from [pre-packaged installation files](https://github.com/cisagov/malcolm#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
     * `./scripts/stop`
@@ -1940,24 +1954,11 @@ After upgrading following one of the previous outlines, give Malcolm several min
 
 Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
 
-## <a name="Forks"></a>Forks
-
-[CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
-
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
+[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See [`License.txt`](./License.txt) for the terms of its release.
-
-## Other Software
-
-Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
-
-* [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
-* [Supported Open Source Software](https://github.com/idaholab)
-* [Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
-* [Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
 
 ## <a name="Contact"></a>Contact information of author(s):
 

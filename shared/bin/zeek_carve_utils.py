@@ -365,9 +365,8 @@ class FileScanProvider(ABC):
     # returns this scanner name
     pass
 
-  @staticmethod
   @abstractmethod
-  def max_requests(cls):
+  def max_requests(self):
     # returns the maximum number of concurrently open requests this type of provider can handle
     pass
 
@@ -399,20 +398,19 @@ class VirusTotalSearch(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, apiKey, reqLimit=VTOT_MAX_REQS, reqLimitSec=VTOT_MAX_SEC):
+  def __init__(self, apiKey, reqLimit=None, reqLimitSec=None):
     self.apiKey = apiKey
     self.lock = Lock()
     self.history = deque()
-    self.reqLimit = reqLimit
-    self.reqLimitSec = reqLimitSec
+    self.reqLimit = reqLimit if reqLimit else VTOT_MAX_REQS
+    self.reqLimitSec = reqLimitSec if reqLimitSec else VTOT_MAX_SEC
 
   @staticmethod
   def scanner_name():
     return 'virustotal'
 
-  @staticmethod
-  def max_requests():
-    return VTOT_MAX_REQS
+  def max_requests(self):
+    return self.reqLimit
 
   @staticmethod
   def check_interval():
@@ -542,10 +540,10 @@ class MalassScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, host, port, reqLimit=MAL_MAX_REQS):
+  def __init__(self, host, port, reqLimit=None):
     self.host = host
     self.port = port
-    self.reqLimit = reqLimit
+    self.reqLimit = reqLimit if reqLimit else MAL_MAX_REQS
     self.transactionIdToFilenameDict = defaultdict(str)
     self.scanningFilesCount = AtomicInt(value=0)
 
@@ -553,9 +551,8 @@ class MalassScan(FileScanProvider):
   def scanner_name():
     return 'malass'
 
-  @staticmethod
-  def max_requests():
-    return MAL_MAX_REQS
+  def max_requests(self):
+    return self.reqLimit
 
   @staticmethod
   def check_interval():
@@ -716,19 +713,19 @@ class ClamAVScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False, verboseDebug=False, socketFileName=None):
+  def __init__(self, debug=False, verboseDebug=False, socketFileName=None, reqLimit=None):
     self.scanningFilesCount = AtomicInt(value=0)
     self.debug = debug
     self.verboseDebug = verboseDebug
     self.socketFileName = socketFileName
+    self.reqLimit = reqLimit if reqLimit else CLAM_MAX_REQS
 
   @staticmethod
   def scanner_name():
     return 'clamav'
 
-  @staticmethod
-  def max_requests():
-    return CLAM_MAX_REQS
+  def max_requests(self):
+    return self.reqLimit
 
   @staticmethod
   def check_interval():
@@ -760,7 +757,7 @@ class ClamAVScan(FileScanProvider):
 
       if connected:
         # first make sure we haven't exceeded rate limits
-        if (self.scanningFilesCount.increment() <= CLAM_MAX_REQS):
+        if (self.scanningFilesCount.increment() <= self.reqLimit):
           # we've got fewer than the allowed requests open, so we're good to go!
           allowed = True
         else:
@@ -835,10 +832,11 @@ class YaraScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False, verboseDebug=False, rulesDirs=[]):
+  def __init__(self, debug=False, verboseDebug=False, rulesDirs=[], reqLimit=None):
     self.scanningFilesCount = AtomicInt(value=0)
     self.debug = debug
     self.verboseDebug = verboseDebug
+    self.reqLimit = reqLimit if reqLimit else YARA_MAX_REQS
     self.ruleFilespecs = {}
     for yaraDir in rulesDirs:
       for root, dirs, files in os.walk(yaraDir):
@@ -863,9 +861,8 @@ class YaraScan(FileScanProvider):
   def scanner_name():
     return 'yara'
 
-  @staticmethod
-  def max_requests():
-    return YARA_MAX_REQS
+  def max_requests(self):
+    return self.reqLimit
 
   @staticmethod
   def check_interval():
@@ -885,7 +882,7 @@ class YaraScan(FileScanProvider):
     while (not allowed) and (not yaraResult.finished):
 
       # first make sure we haven't exceeded rate limits
-      if (self.scanningFilesCount.increment() <= YARA_MAX_REQS):
+      if (self.scanningFilesCount.increment() <= self.reqLimit):
         # we've got fewer than the allowed requests open, so we're good to go!
         allowed = True
       else:
@@ -959,20 +956,20 @@ class CapaScan(FileScanProvider):
 
   # ---------------------------------------------------------------------------------
   # constructor
-  def __init__(self, debug=False, verboseDebug=False, rulesDir=None, verboseHits=False):
+  def __init__(self, debug=False, verboseDebug=False, rulesDir=None, verboseHits=False, reqLimit=None):
     self.scanningFilesCount = AtomicInt(value=0)
     self.rulesDir = rulesDir
     self.debug = debug
     self.verboseDebug = verboseDebug
     self.verboseHits = verboseHits
+    self.reqLimit = reqLimit if reqLimit else CAPA_MAX_REQS
 
   @staticmethod
   def scanner_name():
     return 'capa'
 
-  @staticmethod
-  def max_requests():
-    return CAPA_MAX_REQS
+  def max_requests(self):
+    return self.reqLimit
 
   @staticmethod
   def check_interval():
@@ -993,7 +990,7 @@ class CapaScan(FileScanProvider):
       while (not allowed) and (not capaResult.finished):
 
         # first make sure we haven't exceeded rate limits
-        if (self.scanningFilesCount.increment() <= CAPA_MAX_REQS):
+        if (self.scanningFilesCount.increment() <= self.reqLimit):
           # we've got fewer than the allowed requests open, so we're good to go!
           allowed = True
         else:

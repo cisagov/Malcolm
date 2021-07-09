@@ -65,8 +65,11 @@ function clone_github_repo() {
   fi
 }
 
-# install Zeek packages that install nicely using zkg
+# don't consume as many resources when building spicy-analyzers, even if it's slower.
+# https://github.com/zeek/spicy-analyzers/pull/60
+export SPICY_ZKG_PROCESSES=1
 
+# install Zeek packages that install nicely using zkg
 ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
@@ -82,6 +85,8 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/corelight/callstranger-detector"
   "https://github.com/corelight/CVE-2020-16898"
+  "https://github.com/corelight/CVE-2021-31166"
+  "https://github.com/corelight/pingback"
   "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
@@ -94,7 +99,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
-  "https://github.com/mmguero-dev/spicy-analyzers"
+  "https://github.com/zeek/spicy-analyzers"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"

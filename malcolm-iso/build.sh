@@ -74,7 +74,7 @@ if [ -d "$WORKDIR" ]; then
   echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
   echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
   echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.9=$(dpkg -s linux-kbuild-5.9 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
+  echo "linux-kbuild-5.10=$(dpkg -s linux-kbuild-5.10 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
   echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
@@ -146,8 +146,8 @@ if [ -d "$WORKDIR" ]; then
   echo "ID_LIKE=\"debian\""                                             >> "$MALCOLM_DEST_DIR"/.os-info
   echo "HOME_URL=\"https://malcolm.fyi\""                               >> "$MALCOLM_DEST_DIR"/.os-info
   echo "DOCUMENTATION_URL=\"https://malcolm.fyi/documentation/\""       >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "SUPPORT_URL=\"https://github.com/idaholab\""                    >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "SUPPORT_URL=\"https://github.com/cisagov\""                     >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""   >> "$MALCOLM_DEST_DIR"/.os-info
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
