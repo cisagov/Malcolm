@@ -13,7 +13,7 @@ else
 fi
 
 [[ -n $ISM_SNAPSHOT_REPO ]] && \
-  curl -H "Accept: application/json" \
+  curl -w "\n" -H "Accept: application/json" \
   -H "Content-type: application/json" \
   -XPUT -fsSL "$ES_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
   -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": ${ISM_SNAPSHOT_COMPRESSED:-false} } }"
