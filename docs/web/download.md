@@ -16,7 +16,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | ISO | SHA256 |
 |---|---|
-| [malcolm-3.1.1.iso](/iso/malcolm-3.1.1.iso) (4.4GiB) |  [`d9177206a9ed27fed3d0aac4f180b62ab953d160d3c3b1494e5c63f497d0a69c`](/iso/malcolm-3.1.1.iso.sha256.txt) |
+| [malcolm-3.2.0.iso](/iso/malcolm-3.2.0.iso) (4.4GiB) |  [`14a625cce774d242af296911e288c22e2605a0dd3a2757196d169f4723641499`](/iso/malcolm-3.2.0.iso.sha256.txt) |
 
 ## Hedgehog Linux
 
@@ -26,7 +26,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | ISO | SHA256 |
 |---|---|
-| [hedgehog-3.1.1.iso](/iso/hedgehog-3.1.1.iso) (2.1GiB) |  [`5099b25a651d3e19d937b877f151cb4678b33f1c7383227f5f02e749df3f1113`](/iso/hedgehog-3.1.1.iso.sha256.txt) |
+| [hedgehog-3.2.0.iso](/iso/hedgehog-3.2.0.iso) (2.1GiB) |  [`859c858bad82a018f58fc4e8adba5866ea70b4f2730311edfbeeeb916d278655`](/iso/hedgehog-3.2.0.iso.sha256.txt) |
 
 ## Warning
 
