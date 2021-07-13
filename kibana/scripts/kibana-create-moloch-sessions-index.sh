@@ -49,7 +49,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
       /data/register-elasticsearch-snapshot-repo.sh
 
       # tweak the sessions template (sessions2-* zeek template file) to use the index management policy
-      if [[ -r "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
+      if [[ -f "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
         # user has provided a file for index management, use it
         cp "$INDEX_POLICY_FILE_HOST" "$INDEX_POLICY_FILE"
         INDEX_POLICY_NAME="$(cat "$INDEX_POLICY_FILE" | jq '..|objects|.policy_id//empty' | tr -d '"')"
@@ -67,33 +67,44 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
         > "$INDEX_POLICY_FILE"
       fi
 
-      if [[ -r "$INDEX_POLICY_FILE" ]]; then
+      if [[ -f "$INDEX_POLICY_FILE" ]]; then
         # make API call to define index management policy
         # https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/#create-policy
-        curl -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$ES_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
+        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$ES_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
 
-        if [[ -r "$ZEEK_TEMPLATE_FILE_ORIG" ]]; then
+        if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]]; then
           # insert opendistro.index_state_management.policy_id into index template settings: will be
           # imported by kibana-create-moloch-sessions-index.sh
           cat "$ZEEK_TEMPLATE_FILE_ORIG" | jq ".settings += {\"opendistro.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$ZEEK_TEMPLATE_FILE"
         fi
       fi
 
-      echo "Importing Kibana saved objects..."
+      echo "Importing zeek_template..."
+
+      if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$ZEEK_TEMPLATE_FILE" ]]; then
+        cp "$ZEEK_TEMPLATE_FILE_ORIG" "$ZEEK_TEMPLATE_FILE"
+      fi
 
       # load zeek_template containing zeek field type mappings (merged from /data/zeek_template.json to /data/init/zeek_template.json in kibana_helpers.sh on startup)
-      curl -L --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" "$ES_URL/_template/zeek_template?include_type_name=true" -d "@$ZEEK_TEMPLATE_FILE"
+      curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
+        "$ES_URL/_template/zeek_template?include_type_name=true" -d "@$ZEEK_TEMPLATE_FILE" 2>&1
+
+      echo "Importing index pattern..."
 
       # From https://github.com/elastic/kibana/issues/3709
       # Create index pattern
-      curl -L --silent --output /dev/null --show-error --fail -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
+      curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
         "$KIB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
-        -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}"
+        -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1
+
+      echo "Setting default index pattern..."
 
       # Make it the default index
-      curl -L --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
+      curl -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
         "$KIB_URL/api/kibana/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
+
+      echo "Importing Kibana saved objects..."
 
       # install default dashboards, index patterns, etc.
       for i in /opt/kibana/dashboards/*.json; do
