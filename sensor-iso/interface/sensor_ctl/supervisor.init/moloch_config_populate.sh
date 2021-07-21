@@ -17,7 +17,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; t
   fi
 
   # stick elasticsearch connection information in moloch config file
-  if [[ -n $ES_PROTOCOL ]] && [[ -n $ES_HOST ]]; then
+  if [[ -n $ES_PROTOCOL ]] && [[ -n $OS_HOST ]]; then
 
     # build elasticsearch URL for moloch-capture
     ARKIME_OPENSEARCH="${ES_PROTOCOL}://"
@@ -26,7 +26,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; t
       ARKIME_OPENSEARCH+="${ES_USERNAME}:${ES_PASSWORD}@"
     fi
 
-    ARKIME_OPENSEARCH+="${ES_HOST}"
+    ARKIME_OPENSEARCH+="${OS_HOST}"
 
     if [[ -n $OS_PORT ]]; then
       ARKIME_OPENSEARCH+=":${OS_PORT}"

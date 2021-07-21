@@ -374,7 +374,7 @@ def stop(wipe=False):
 
   if wipe:
     # attempt to DELETE _template/zeek_template in OpenSearch
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$OS_PORT/_template/zeek_template"'], env=osEnv, debug=args.debug)
+    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_template/zeek_template"'], env=osEnv, debug=args.debug)
 
   # if stop.sh is being called with wipe.sh (after the docker-compose file)
   # then also remove named and anonymous volumes (not external volumes, of course)

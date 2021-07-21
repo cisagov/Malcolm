@@ -101,8 +101,8 @@ class Constants:
   BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
   BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
   BEAT_KIBANA_DASHBOARDS_PATH = "BEAT_KIBANA_DASHBOARDS_PATH"
-  BEAT_KIBANA_HOST = "BEAT_KIBANA_HOST"
-  BEAT_KIBANA_PORT = "BEAT_KIBANA_PORT"
+  BEAT_DASHBOARDS_HOST = "BEAT_DASHBOARDS_HOST"
+  BEAT_DASHBOARDS_PORT = "BEAT_DASHBOARDS_PORT"
   BEAT_KIBANA_PROTOCOL = "BEAT_KIBANA_PROTOCOL"
   BEAT_KIBANA_SSL_VERIFY = "BEAT_KIBANA_SSL_VERIFY"
 
@@ -254,8 +254,8 @@ def input_elasticsearch_connection_info(forwarder,
         code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
 
       else:
-        return_dict[Constants.BEAT_KIBANA_HOST] = values[0]
-        return_dict[Constants.BEAT_KIBANA_PORT] = values[1]
+        return_dict[Constants.BEAT_DASHBOARDS_HOST] = values[0]
+        return_dict[Constants.BEAT_DASHBOARDS_PORT] = values[1]
         break
 
     if (d.yesno(f"Configure {forwarder} Kibana dashboards?") == Dialog.OK):
@@ -281,7 +281,7 @@ def input_elasticsearch_connection_info(forwarder,
           return_dict[Constants.BEAT_KIBANA_DASHBOARDS_PATH] = values[0]
           break
 
-  server_display_name = "Elasticsearch/Kibana" if Constants.BEAT_KIBANA_HOST in return_dict.keys() else "Elasticsearch"
+  server_display_name = "Elasticsearch/Kibana" if Constants.BEAT_DASHBOARDS_HOST in return_dict.keys() else "Elasticsearch"
 
   # HTTP/HTTPS authentication
   code, http_username = d.inputbox(f"{server_display_name} HTTP/HTTPS server username", init=default_username)
@@ -322,11 +322,11 @@ def input_elasticsearch_connection_info(forwarder,
       raise CancelledError
 
   # test Kibana connection
-  if Constants.BEAT_KIBANA_HOST in return_dict.keys():
+  if Constants.BEAT_DASHBOARDS_HOST in return_dict.keys():
     code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Kibana"))
     retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_KIBANA_PROTOCOL],
-                                               host=return_dict[Constants.BEAT_KIBANA_HOST],
-                                               port=return_dict[Constants.BEAT_KIBANA_PORT],
+                                               host=return_dict[Constants.BEAT_DASHBOARDS_HOST],
+                                               port=return_dict[Constants.BEAT_DASHBOARDS_PORT],
                                                uri="api/status",
                                                username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
                                                password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
@@ -391,9 +391,9 @@ def main():
           if len(line.strip()) > 0:
             name, var = remove_prefix(line, "export").partition("=")[::2]
             capture_config_dict[name.strip()] = var.strip().strip("'").strip('"')
-      if (Constants.BEAT_OS_HOST not in previous_config_values.keys()) and ("ES_HOST" in capture_config_dict.keys()):
-        previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["ES_HOST"]
-        previous_config_values[Constants.BEAT_KIBANA_HOST] = capture_config_dict["ES_HOST"]
+      if (Constants.BEAT_OS_HOST not in previous_config_values.keys()) and ("OS_HOST" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["OS_HOST"]
+        previous_config_values[Constants.BEAT_DASHBOARDS_HOST] = capture_config_dict["OS_HOST"]
       if (Constants.BEAT_OS_PORT not in previous_config_values.keys()) and ("OS_PORT" in capture_config_dict.keys()):
         previous_config_values[Constants.BEAT_OS_PORT] = capture_config_dict["OS_PORT"]
       if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("ES_USERNAME" in capture_config_dict.keys()):
@@ -782,8 +782,8 @@ def main():
             forwarder_dict.update(input_elasticsearch_connection_info(forwarder=fwd_mode,
                                                                       default_es_host=previous_config_values[Constants.BEAT_OS_HOST],
                                                                       default_es_port=previous_config_values[Constants.BEAT_OS_PORT],
-                                                                      default_kibana_host=previous_config_values[Constants.BEAT_KIBANA_HOST],
-                                                                      default_kibana_port=previous_config_values[Constants.BEAT_KIBANA_PORT],
+                                                                      default_kibana_host=previous_config_values[Constants.BEAT_DASHBOARDS_HOST],
+                                                                      default_kibana_port=previous_config_values[Constants.BEAT_DASHBOARDS_PORT],
                                                                       default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
                                                                       default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD]))
 

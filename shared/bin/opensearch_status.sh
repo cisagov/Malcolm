@@ -29,7 +29,7 @@ while getopts 've:i:p:w' OPTION; do
       ;;
 
     i)
-      ES_HOST="$OPTARG"
+      OS_HOST="$OPTARG"
       ;;
 
     p)
@@ -51,8 +51,8 @@ shift "$(($OPTIND -1))"
 if [[ -z $OS_URL ]]; then
   if [[ -n $OPENSEARCH_URL ]]; then
     OS_URL="$OPENSEARCH_URL"
-  elif [[ -n $ES_HOST ]] && [[ -n $OS_PORT ]]; then
-    OS_URL="http://$ES_HOST:$OS_PORT"
+  elif [[ -n $OS_HOST ]] && [[ -n $OS_PORT ]]; then
+    OS_URL="http://$OS_HOST:$OS_PORT"
   else
     OS_URL="http://opensearch:9200"
   fi

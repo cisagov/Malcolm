@@ -29,7 +29,7 @@ setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
-  host: "${BEAT_KIBANA_HOST}:${BEAT_KIBANA_PORT}"
+  host: "${BEAT_DASHBOARDS_HOST}:${BEAT_DASHBOARDS_PORT}"
   protocol: "${BEAT_KIBANA_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"

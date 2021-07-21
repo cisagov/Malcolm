@@ -54,7 +54,7 @@ BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
 BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
 BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
 BEAT_KIBANA_DASHBOARDS_PATH = "BEAT_KIBANA_DASHBOARDS_PATH"
-BEAT_KIBANA_HOST = "BEAT_KIBANA_HOST"
+BEAT_DASHBOARDS_HOST = "BEAT_DASHBOARDS_HOST"
 BEAT_KIBANA_PROTOCOL = "BEAT_KIBANA_PROTOCOL"
 BEAT_KIBANA_SSL_VERIFY = "BEAT_KIBANA_SSL_VERIFY"
 
@@ -85,7 +85,7 @@ setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
-  host: "${BEAT_KIBANA_HOST}"
+  host: "${BEAT_DASHBOARDS_HOST}"
   protocol: "${BEAT_KIBANA_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
@@ -252,7 +252,7 @@ class Beatbox(object):
                      BEAT_HTTP_USERNAME,
                      BEAT_KIBANA_DASHBOARDS_ENABLED,
                      BEAT_KIBANA_DASHBOARDS_PATH,
-                     BEAT_KIBANA_HOST,
+                     BEAT_DASHBOARDS_HOST,
                      BEAT_KIBANA_PROTOCOL,
                      BEAT_KIBANA_SSL_VERIFY]:
       self.keystoreItems[initItem] = ''
@@ -349,7 +349,7 @@ class Beatbox(object):
           tmpVal = AskForString("Enter {} connection host".format(destination), default=tmpDefault, acceptDefault=self.acceptDefaults)
         self.keystoreItems[BEAT_OS_HOST.replace('_OS_', '_KIBANA_' if (destination == 'Kibana') else '_OS_')] = tmpVal
 
-    if (BEAT_KIBANA_HOST in self.keystoreItems):
+    if (BEAT_DASHBOARDS_HOST in self.keystoreItems):
 
       #  configure kibana dashboards
       if YesOrNo("Configure {} Kibana dashboards?".format(self.beatName), default=True, acceptDefault=self.acceptDefaults):

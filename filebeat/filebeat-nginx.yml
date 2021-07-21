@@ -33,7 +33,7 @@ setup.dashboards.directory: "/usr/share/filebeat/kibana"
 
 #============================== Kibana =====================================
 setup.kibana:
-  host: "kibana:5601"
+  host: "dashboards:5601"
   path: "/kibana"
 
 #================================ Logging ======================================

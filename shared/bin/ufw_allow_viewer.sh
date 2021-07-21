@@ -7,7 +7,7 @@
 # retrieve PCAP segments from the local Arkime viewer instance
 
 # works with a comma-separated list of IP addresses in $ARKIME_PACKET_ACL, or
-# if that variable is not set, a single IP address in $ES_HOST
+# if that variable is not set, a single IP address in $OS_HOST
 
 [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
 [[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
@@ -32,8 +32,8 @@ else
   fi
 fi
 
-if [[ -z $ARKIME_VIEWER_PORT ]] || ( [[ -z $ARKIME_PACKET_ACL ]] && [[ -z $ES_HOST ]] ); then
-  echo "Either the remote Arkime viewer host (\$ARKIME_PACKET_ACL or \$ES_HOST) or the local Arkime viewer port (\$ARKIME_VIEWER_PORT) is undefined"
+if [[ -z $ARKIME_VIEWER_PORT ]] || ( [[ -z $ARKIME_PACKET_ACL ]] && [[ -z $OS_HOST ]] ); then
+  echo "Either the remote Arkime viewer host (\$ARKIME_PACKET_ACL or \$OS_HOST) or the local Arkime viewer port (\$ARKIME_VIEWER_PORT) is undefined"
   exit 1
 elif [[ ! -x /usr/sbin/ufw ]]; then
   echo "/usr/sbin/ufw does not exist or is not executable"
@@ -54,8 +54,8 @@ if [[ -n $ARKIME_PACKET_ACL ]]; then
     /usr/sbin/ufw allow proto tcp from $IP to any port $ARKIME_VIEWER_PORT
   done
   unset IFS
-elif [[ -n $ES_HOST ]]; then
-  /usr/sbin/ufw allow proto tcp from $ES_HOST to any port $ARKIME_VIEWER_PORT
+elif [[ -n $OS_HOST ]]; then
+  /usr/sbin/ufw allow proto tcp from $OS_HOST to any port $ARKIME_VIEWER_PORT
 fi
 
 # output status of rule

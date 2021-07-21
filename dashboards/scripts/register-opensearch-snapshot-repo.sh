@@ -6,8 +6,8 @@ if [ $# -gt 0 ]; then
   OS_URL="$1"
 elif [[ -n $OPENSEARCH_URL ]]; then
   OS_URL="$OPENSEARCH_URL"
-elif [[ -n $ES_HOST ]] && [[ -n $OS_PORT ]]; then
-  OS_URL="http://$ES_HOST:$OS_PORT"
+elif [[ -n $OS_HOST ]] && [[ -n $OS_PORT ]]; then
+  OS_URL="http://$OS_HOST:$OS_PORT"
 else
   OS_URL="http://opensearch:9200"
 fi

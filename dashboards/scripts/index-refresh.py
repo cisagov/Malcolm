@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -43,8 +43,8 @@ def main():
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
-  parser.add_argument('-k', '--kibana', dest='kibanaUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('KIBANA_URL', 'http://kibana:5601/kibana'), help='Kibana URL')
-  parser.add_argument('-e', '--elastic', dest='elasticUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='Elasticsearch URL')
+  parser.add_argument('-d', '--dashboards', dest='dashboardsUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'), help='Kibana URL')
+  parser.add_argument('-o', '--opensearch', dest='opensearchUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='Elasticsearch URL')
   parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
   try:
@@ -62,23 +62,23 @@ def main():
   else:
     sys.tracebacklimit = 0
 
-  # get version number so kibana doesn't think we're doing a XSRF when we do the PUT
-  statusInfoResponse = requests.get('{}/{}'.format(args.kibanaUrl, GET_STATUS_API))
+  # get version number so Dashboards doesn't think we're doing a XSRF when we do the PUT
+  statusInfoResponse = requests.get('{}/{}'.format(args.dashboardsUrl, GET_STATUS_API))
   statusInfoResponse.raise_for_status()
   statusInfo = statusInfoResponse.json()
-  kibanaVersion = statusInfo['version']['number']
+  dashboardsVersion = statusInfo['version']['number']
   if debug:
-    eprint('Kibana version is {}'.format(kibanaVersion))
+    eprint('Kibana version is {}'.format(dashboardsVersion))
 
-  esInfoResponse = requests.get(args.elasticUrl)
-  esInfo = statusInfoResponse.json()
-  elasticVersion = statusInfo['version']['number']
+  opensearchInfoResponse = requests.get(args.opensearchUrl)
+  opensearchInfo = statusInfoResponse.json()
+  opensearchVersion = statusInfo['version']['number']
   if debug:
-    eprint('Elasticsearch version is {}'.format(elasticVersion))
+    eprint('Elasticsearch version is {}'.format(opensearchVersion))
 
   # find the ID of the index name (probably will be the same as the name)
   getIndexInfoResponse = requests.get(
-    '{}/{}'.format(args.kibanaUrl, GET_INDEX_PATTERN_INFO_URI),
+    '{}/{}'.format(args.dashboardsUrl, GET_INDEX_PATTERN_INFO_URI),
     params={
       'type': 'index-pattern',
       'fields': 'id',
@@ -94,7 +94,7 @@ def main():
   if indexId is not None:
 
     # get the current fields list
-    getFieldsResponse = requests.get('{}/{}'.format(args.kibanaUrl, GET_FIELDS_URI),
+    getFieldsResponse = requests.get('{}/{}'.format(args.dashboardsUrl, GET_FIELDS_URI),
                                      params={ 'pattern': args.index,
                                               'meta_fields': ["_source","_id","_type","_index","_score"] })
     getFieldsResponse.raise_for_status()
@@ -105,12 +105,12 @@ def main():
     if args.template is not None:
       try:
 
-        # request template from elasticsearch and pull the mappings/properties (field list) out
-        getTemplateResponse = requests.get('{}/{}/{}'.format(args.elasticUrl, ES_GET_TEMPLATE_URI, args.template))
+        # request template from OpenSearch and pull the mappings/properties (field list) out
+        getTemplateResponse = requests.get('{}/{}/{}'.format(args.opensearchUrl, ES_GET_TEMPLATE_URI, args.template))
         getTemplateResponse.raise_for_status()
         getTemplateInfo = getTemplateResponse.json()[args.template]['mappings']['properties']
 
-        # a field should be merged if it's not already in the list we have from kibana, and it's
+        # a field should be merged if it's not already in the list we have from Dashboards, and it's
         # in the list of types we're merging (leave more complex types like nested and geolocation
         # to be handled naturally as the data shows up)
         for field in getTemplateInfo:
@@ -271,10 +271,10 @@ def main():
     putIndexInfo['attributes']['fieldFormatMap'] = json.dumps(fieldFormatMap)
 
     if not args.dryrun:
-      putResponse = requests.put('{}/{}/{}'.format(args.kibanaUrl, PUT_INDEX_PATTERN_URI, indexId),
+      putResponse = requests.put('{}/{}/{}'.format(args.dashboardsUrl, PUT_INDEX_PATTERN_URI, indexId),
                                  headers={ 'Content-Type': 'application/json',
                                            'kbn-xsrf': 'true',
-                                           'kbn-version': kibanaVersion, },
+                                           'kbn-version': dashboardsVersion, },
                                  data=json.dumps(putIndexInfo))
       putResponse.raise_for_status()
 

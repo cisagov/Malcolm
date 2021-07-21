@@ -175,7 +175,7 @@ services:
       << : *process-variables
       << : *kibana-helper-variables
       OPENSEARCH_URL : 'http://opensearch:9200'
-      KIBANA_URL : 'http://kibana:5601/kibana'
+      DASHBOARDS_URL : 'http://dashboards:5601/kibana'
       VIRTUAL_HOST : 'kibana-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'sessions2-*'
       ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
@@ -231,7 +231,7 @@ services:
       << : *logstash-variables
       << : *common-beats-variables
       << : *common-lookup-variables
-      ES_HOSTS : 'opensearch:9200'
+      OS_HOSTS : 'opensearch:9200'
       LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss2m -Djava.security.egd=file:/dev/./urandom'
     depends_on:
       - opensearch
@@ -314,7 +314,7 @@ services:
       << : *arkime-variables
       ARKIME_VERSION : '2.7.1'
       VIRTUAL_HOST : 'arkime.malcolm.local'
-      ES_HOST : 'opensearch'
+      OS_HOST : 'opensearch'
       OS_PORT : 9200
       ES_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'

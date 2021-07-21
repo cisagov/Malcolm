@@ -73,7 +73,7 @@ setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
-  host: "${BEAT_KIBANA_HOST}"
+  host: "${BEAT_DASHBOARDS_HOST}"
   protocol: "${BEAT_KIBANA_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
@@ -145,7 +145,7 @@ function Configure-Beat {
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_DASHBOARDS_ENABLED","--stdin","--force") "true"
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_DASHBOARDS_PATH","--stdin","--force") "C:\\Program Files\\$beat\\kibana"
   Run-Beat-Command $beat @("keystore","add","BEAT_OS_HOST","--stdin","--force") "$es_host"
-  Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_HOST","--stdin","--force") "$kb_host"
+  Run-Beat-Command $beat @("keystore","add","BEAT_DASHBOARDS_HOST","--stdin","--force") "$kb_host"
   Run-Beat-Command $beat @("keystore","add","BEAT_HTTP_USERNAME","--stdin","--force") "$es_user"
   Run-Beat-Command $beat @("keystore","add","BEAT_HTTP_PASSWORD","--stdin","--force") "$es_pass"
 
