@@ -44,7 +44,7 @@ def main():
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
   parser.add_argument('-k', '--kibana', dest='kibanaUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('KIBANA_URL', 'http://kibana:5601/kibana'), help='Kibana URL')
-  parser.add_argument('-e', '--elastic', dest='elasticUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('ELASTICSEARCH_URL', 'http://elasticsearch:9200'), help='Elasticsearch URL')
+  parser.add_argument('-e', '--elastic', dest='elasticUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='Elasticsearch URL')
   parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
   try:

@@ -93,10 +93,10 @@ class Constants:
   BEAT_LS_SSL_VERIFY = 'BEAT_LS_SSL_VERIFY'
 
   # specific to beats forwarded to elasticsearch (eg., metricbeat, auditbeat, filebeat-syslog)
-  BEAT_ES_HOST = "BEAT_ES_HOST"
-  BEAT_ES_PORT = "BEAT_ES_PORT"
-  BEAT_ES_PROTOCOL = "BEAT_ES_PROTOCOL"
-  BEAT_ES_SSL_VERIFY = "BEAT_ES_SSL_VERIFY"
+  BEAT_OS_HOST = "BEAT_OS_HOST"
+  BEAT_OS_PORT = "BEAT_OS_PORT"
+  BEAT_OS_PROTOCOL = "BEAT_OS_PROTOCOL"
+  BEAT_OS_SSL_VERIFY = "BEAT_OS_SSL_VERIFY"
   BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
   BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
   BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
@@ -205,8 +205,8 @@ def input_elasticsearch_connection_info(forwarder,
     elastic_protocol = "https"
     if (d.yesno("Elasticsearch SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
       elastic_ssl_verify = "full"
-  return_dict[Constants.BEAT_ES_PROTOCOL] = elastic_protocol
-  return_dict[Constants.BEAT_ES_SSL_VERIFY] = elastic_ssl_verify
+  return_dict[Constants.BEAT_OS_PROTOCOL] = elastic_protocol
+  return_dict[Constants.BEAT_OS_SSL_VERIFY] = elastic_ssl_verify
 
   while True:
     # host/port for Elasticsearch
@@ -223,8 +223,8 @@ def input_elasticsearch_connection_info(forwarder,
       code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
 
     else:
-      return_dict[Constants.BEAT_ES_HOST] = values[0]
-      return_dict[Constants.BEAT_ES_PORT] = values[1]
+      return_dict[Constants.BEAT_OS_HOST] = values[0]
+      return_dict[Constants.BEAT_OS_PORT] = values[1]
       break
 
   # Kibana configuration (if supported by forwarder)
@@ -307,12 +307,12 @@ def input_elasticsearch_connection_info(forwarder,
 
   # test Elasticsearch connection
   code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Elasticsearch"))
-  retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_ES_PROTOCOL],
-                                             host=return_dict[Constants.BEAT_ES_HOST],
-                                             port=return_dict[Constants.BEAT_ES_PORT],
+  retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_OS_PROTOCOL],
+                                             host=return_dict[Constants.BEAT_OS_HOST],
+                                             port=return_dict[Constants.BEAT_OS_PORT],
                                              username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
                                              password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
-                                             ssl_verify=return_dict[Constants.BEAT_ES_SSL_VERIFY])
+                                             ssl_verify=return_dict[Constants.BEAT_OS_SSL_VERIFY])
   if (retcode == 200):
     code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Elasticsearch", retcode, message))
   else:
@@ -391,11 +391,11 @@ def main():
           if len(line.strip()) > 0:
             name, var = remove_prefix(line, "export").partition("=")[::2]
             capture_config_dict[name.strip()] = var.strip().strip("'").strip('"')
-      if (Constants.BEAT_ES_HOST not in previous_config_values.keys()) and ("ES_HOST" in capture_config_dict.keys()):
-        previous_config_values[Constants.BEAT_ES_HOST] = capture_config_dict["ES_HOST"]
+      if (Constants.BEAT_OS_HOST not in previous_config_values.keys()) and ("ES_HOST" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["ES_HOST"]
         previous_config_values[Constants.BEAT_KIBANA_HOST] = capture_config_dict["ES_HOST"]
-      if (Constants.BEAT_ES_PORT not in previous_config_values.keys()) and ("ES_PORT" in capture_config_dict.keys()):
-        previous_config_values[Constants.BEAT_ES_PORT] = capture_config_dict["ES_PORT"]
+      if (Constants.BEAT_OS_PORT not in previous_config_values.keys()) and ("OS_PORT" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_OS_PORT] = capture_config_dict["OS_PORT"]
       if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("ES_USERNAME" in capture_config_dict.keys()):
         previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["ES_USERNAME"]
       if (Constants.ARKIME_PACKET_ACL not in previous_config_values.keys()) and ("ARKIME_PACKET_ACL" in capture_config_dict.keys()):
@@ -699,8 +699,8 @@ def main():
 
           # get elasticsearch/kibana connection information from user
           elastic_config_dict = input_elasticsearch_connection_info(forwarder=fwd_mode,
-                                                                    default_es_host=previous_config_values[Constants.BEAT_ES_HOST],
-                                                                    default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
+                                                                    default_es_host=previous_config_values[Constants.BEAT_OS_HOST],
+                                                                    default_es_port=previous_config_values[Constants.BEAT_OS_PORT],
                                                                     default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
                                                                     default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD])
           moloch_elastic_config_dict = elastic_config_dict.copy()
@@ -713,7 +713,7 @@ def main():
 
           # get list of IP addresses allowed for packet payload retrieval
           lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
-          lines.append(elastic_config_dict[Constants.BEAT_ES_HOST])
+          lines.append(elastic_config_dict[Constants.BEAT_OS_HOST])
           code, lines = d.editbox_str("\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL)
           if code != Dialog.OK:
             raise CancelledError
@@ -780,8 +780,8 @@ def main():
 
             # get elasticsearch/kibana connection information from user
             forwarder_dict.update(input_elasticsearch_connection_info(forwarder=fwd_mode,
-                                                                      default_es_host=previous_config_values[Constants.BEAT_ES_HOST],
-                                                                      default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
+                                                                      default_es_host=previous_config_values[Constants.BEAT_OS_HOST],
+                                                                      default_es_port=previous_config_values[Constants.BEAT_OS_PORT],
                                                                       default_kibana_host=previous_config_values[Constants.BEAT_KIBANA_HOST],
                                                                       default_kibana_port=previous_config_values[Constants.BEAT_KIBANA_PORT],
                                                                       default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],

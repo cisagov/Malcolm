@@ -1,4 +1,4 @@
-FROM alpine:3.14
+  FROM alpine:3.14
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -23,8 +23,8 @@ ENV TERM xterm
 ARG ARKIME_INDEX_PATTERN="sessions2-*"
 ARG ARKIME_INDEX_PATTERN_ID="sessions2-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
-ARG CREATE_ES_ARKIME_SESSION_INDEX="true"
-ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
+ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
+ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG ISM_SNAPSHOT_COMPRESSED=false
 ARG ISM_SNAPSHOT_REPO=logs
 ARG KIBANA_OFFLINE_REGION_MAPS_PORT="28991"
@@ -33,8 +33,8 @@ ARG KIBANA_URL="http://kibana:5601/kibana"
 ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
 ENV ARKIME_INDEX_PATTERN_ID $ARKIME_INDEX_PATTERN_ID
 ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
-ENV CREATE_ES_ARKIME_SESSION_INDEX $CREATE_ES_ARKIME_SESSION_INDEX
-ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
+ENV CREATE_OS_ARKIME_SESSION_INDEX $CREATE_OS_ARKIME_SESSION_INDEX
+ENV OPENSEARCH_URL $OPENSEARCH_URL
 ENV ISM_SNAPSHOT_COMPRESSED $ISM_SNAPSHOT_COMPRESSED
 ENV ISM_SNAPSHOT_REPO $ISM_SNAPSHOT_REPO
 ENV KIBANA_OFFLINE_REGION_MAPS_PORT $KIBANA_OFFLINE_REGION_MAPS_PORT
@@ -53,8 +53,8 @@ ADD kibana/scripts /data/
 ADD kibana/supervisord.conf /etc/supervisord.conf
 ADD kibana/zeek_template.json /data/zeek_template.json
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/elastic_search_status.sh /data/
-ADD shared/bin/elastic_index_size_prune.py /data/
+ADD shared/bin/opensearch_status.sh /data/
+ADD shared/bin/opensearch_index_size_prune.py /data/
 
 RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && \
     npm install -g http-server && \
@@ -72,7 +72,7 @@ RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && 
     chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /data/init && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/elastic_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $KIBANA_OFFLINE_REGION_MAPS_PORT
 

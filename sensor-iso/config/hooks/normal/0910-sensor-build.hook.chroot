@@ -26,7 +26,7 @@ BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_
 
 YARA_VERSION="4.1.1"
 YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
-YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
+YARA_RULOS_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
 CAPA_VERSION="1.6.3"
@@ -134,7 +134,7 @@ cd /tmp
 rm -rf /usr/local/src/yara*
 
 mkdir -p ./Neo23x0
-curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1
+curl -sSL "$YARA_RULOS_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1
 mkdir -p "${YARA_RULES_DIR}"/custom
 cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/
 cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE

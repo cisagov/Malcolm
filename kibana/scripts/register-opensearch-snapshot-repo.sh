@@ -3,17 +3,17 @@
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [ $# -gt 0 ]; then
-  ES_URL="$1"
-elif [[ -n $ELASTICSEARCH_URL ]]; then
-  ES_URL="$ELASTICSEARCH_URL"
-elif [[ -n $ES_HOST ]] && [[ -n $ES_PORT ]]; then
-  ES_URL="http://$ES_HOST:$ES_PORT"
+  OS_URL="$1"
+elif [[ -n $OPENSEARCH_URL ]]; then
+  OS_URL="$OPENSEARCH_URL"
+elif [[ -n $ES_HOST ]] && [[ -n $OS_PORT ]]; then
+  OS_URL="http://$ES_HOST:$OS_PORT"
 else
-  ES_URL="http://elasticsearch:9200"
+  OS_URL="http://opensearch:9200"
 fi
 
 [[ -n $ISM_SNAPSHOT_REPO ]] && \
   curl -w "\n" -H "Accept: application/json" \
   -H "Content-type: application/json" \
-  -XPUT -fsSL "$ES_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
+  -XPUT -fsSL "$OS_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
   -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": ${ISM_SNAPSHOT_COMPRESSED:-false} } }"

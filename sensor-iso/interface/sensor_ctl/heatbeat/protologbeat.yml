@@ -26,11 +26,11 @@ setup.template.json.name: "protologbeat"
 #-------------------------- Elasticsearch output -------------------------------
 output.elasticsearch:
   enabled: true
-  hosts: ["${BEAT_ES_HOST}:${BEAT_ES_PORT}"]
-  protocol: "${BEAT_ES_PROTOCOL}"
+  hosts: ["${BEAT_OS_HOST}:${BEAT_OS_PORT}"]
+  protocol: "${BEAT_OS_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+  ssl.verification_mode: "${BEAT_OS_SSL_VERIFY}"
   template.versions.2x.enabled: false
 
 #============================== Dashboards =====================================

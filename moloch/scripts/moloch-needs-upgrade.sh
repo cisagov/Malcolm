@@ -40,6 +40,6 @@ while read INDEX_NAME; do
     fi # compare INDEX_NAME vs. INDEX_PREFIX
   done # loop over ARKIME_INDEX_CURRENT_VERSIONS
 
-done <<<$(curl -fsS -H"Content-Type: application/json" -XGET "http://$ES_HOST:$ES_PORT/_cat/indices?v" | tail -n +2 | awk '{print $3}')
+done <<<$(curl -fsS -H"Content-Type: application/json" -XGET "http://$ES_HOST:$OS_PORT/_cat/indices?v" | tail -n +2 | awk '{print $3}')
 
 exit $RETURN_CODE

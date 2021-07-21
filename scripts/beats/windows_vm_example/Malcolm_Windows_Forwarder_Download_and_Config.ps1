@@ -55,11 +55,11 @@ fields_under_root: true
 #-------------------------- Elasticsearch output -------------------------------
 output.elasticsearch:
   enabled: true
-  hosts: ["${BEAT_ES_HOST}"]
-  protocol: "${BEAT_ES_PROTOCOL}"
+  hosts: ["${BEAT_OS_HOST}"]
+  protocol: "${BEAT_OS_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+  ssl.verification_mode: "${BEAT_OS_SSL_VERIFY}"
 
 setup.template.enabled: true
 setup.template.overwrite: false
@@ -138,13 +138,13 @@ function Configure-Beat {
   } while ($pwd1_text -ne $pwd2_text)
   $es_pass = ([Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($es_pass))).Trim()
 
-  Run-Beat-Command $beat @("keystore","add","BEAT_ES_PROTOCOL","--stdin","--force") "https"
+  Run-Beat-Command $beat @("keystore","add","BEAT_OS_PROTOCOL","--stdin","--force") "https"
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_PROTOCOL","--stdin","--force") "https"
-  Run-Beat-Command $beat @("keystore","add","BEAT_ES_SSL_VERIFY","--stdin","--force") "none"
+  Run-Beat-Command $beat @("keystore","add","BEAT_OS_SSL_VERIFY","--stdin","--force") "none"
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_SSL_VERIFY","--stdin","--force") "none"
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_DASHBOARDS_ENABLED","--stdin","--force") "true"
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_DASHBOARDS_PATH","--stdin","--force") "C:\\Program Files\\$beat\\kibana"
-  Run-Beat-Command $beat @("keystore","add","BEAT_ES_HOST","--stdin","--force") "$es_host"
+  Run-Beat-Command $beat @("keystore","add","BEAT_OS_HOST","--stdin","--force") "$es_host"
   Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_HOST","--stdin","--force") "$kb_host"
   Run-Beat-Command $beat @("keystore","add","BEAT_HTTP_USERNAME","--stdin","--force") "$es_user"
   Run-Beat-Command $beat @("keystore","add","BEAT_HTTP_PASSWORD","--stdin","--force") "$es_pass"

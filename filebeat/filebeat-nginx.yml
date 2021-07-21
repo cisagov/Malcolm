@@ -15,7 +15,7 @@ filebeat.modules:
 #-------------------------- Elasticsearch output -------------------------------
 output.elasticsearch:
   enabled: true
-  hosts: ["elasticsearch:9200"]
+  hosts: ["opensearch:9200"]
   indices:
     - index: "filebeat-%{[agent.version]}-nginx-%{+yyyy.MM.dd}"
       when.equals:

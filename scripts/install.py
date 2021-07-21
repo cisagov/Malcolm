@@ -194,7 +194,7 @@ class Installer(object):
     return result, installPath
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  def tweak_malcolm_runtime(self, malcolm_install_path, expose_elastic_default=False, expose_logstash_default=False, restart_mode_default=False):
+  def tweak_malcolm_runtime(self, malcolm_install_path, expose_opensearch_default=False, expose_logstash_default=False, restart_mode_default=False):
     global args
 
     if not args.configFile:
@@ -229,32 +229,32 @@ class Installer(object):
       eprint(f"{malcolm_install_path} contains {composeFiles}, system memory is {self.totalMemoryGigs} GiB")
 
     if self.totalMemoryGigs >= 63.0:
-      esMemory = '30g'
+      osMemory = '30g'
       lsMemory = '6g'
     elif self.totalMemoryGigs >= 31.0:
-      esMemory = '21g'
+      osMemory = '21g'
       lsMemory = '3500m'
     elif self.totalMemoryGigs >= 15.0:
-      esMemory = '10g'
+      osMemory = '10g'
       lsMemory = '3g'
     elif self.totalMemoryGigs >= 11.0:
-      esMemory = '6g'
+      osMemory = '6g'
       lsMemory = '2500m'
     elif self.totalMemoryGigs >= 7.0:
       eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
-      esMemory = '4g'
+      osMemory = '4g'
       lsMemory = '2500m'
     elif self.totalMemoryGigs > 0.0:
       eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
-      esMemory = '3500m'
+      osMemory = '3500m'
       lsMemory = '2g'
     else:
       eprint("Failed to determine system memory size, using defaults; performance may be suboptimal")
-      esMemory = '8g'
+      osMemory = '8g'
       lsMemory = '3g'
 
-    while not InstallerYesOrNo(f'Setting {esMemory} for Elasticsearch and {lsMemory} for Logstash. Is this OK?', default=True):
-      esMemory = InstallerAskForString('Enter memory for Elasticsearch (e.g., 16g, 9500m, etc.)')
+    while not InstallerYesOrNo(f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True):
+      osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
       lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
 
     restartMode = None
@@ -292,16 +292,16 @@ class Installer(object):
     indexPruneSizeLimit = '0'
     indexPruneNameSort = False
 
-    if InstallerYesOrNo('Configure Elasticsearch index state management?', default=False):
+    if InstallerYesOrNo('Configure OpenSearch index state management?', default=False):
 
       # configure snapshots
       if InstallerYesOrNo('Configure index snapshots?', default=False):
 
         # snapshot repository directory and compression
-        indexSnapshotDir = './elasticsearch-backup'
-        if not InstallerYesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'elasticsearch-backup')), default=True):
+        indexSnapshotDir = './opensearch-backup'
+        if not InstallerYesOrNo('Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'opensearch-backup')), default=True):
           while True:
-            indexSnapshotDir = InstallerAskForString('Enter Elasticsearch index snapshot directory')
+            indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
             if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
               indexSnapshotDir = os.path.realpath(indexSnapshotDir)
               break
@@ -341,12 +341,12 @@ class Installer(object):
     reverseDns = InstallerYesOrNo('Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False)
     autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
     autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
-    elasticOpen = InstallerYesOrNo('Expose Elasticsearch port to external hosts?', default=expose_elastic_default)
+    opensearchOpen = InstallerYesOrNo('Expose OpenSearch port to external hosts?', default=expose_opensearch_default)
     logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
     logstashSsl = logstashOpen and InstallerYesOrNo('Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)', default=True)
-    externalEsForward = InstallerYesOrNo('Forward Logstash logs to external Elasticstack instance?', default=False)
+    externalEsForward = InstallerYesOrNo('Forward Logstash logs to external OpenSearch instance?', default=False)
     if externalEsForward:
-      externalEsHost = InstallerAskForString('Enter external Elasticstack host:port (e.g., 10.0.0.123:9200)')
+      externalEsHost = InstallerAskForString('Enter external OpenSearch host:port (e.g., 10.0.0.123:9200)')
       externalEsSsl = InstallerYesOrNo(f'Connect to "{externalEsHost}" using SSL?', default=True)
       externalEsSslVerify = externalEsSsl and InstallerYesOrNo(f'Require SSL certificate validation for communication with "{externalEsHost}"?', default=False)
     else:
@@ -437,7 +437,7 @@ class Installer(object):
               serviceStartLine = True
 
           if (currentService is not None) and (restartMode is not None) and re.match(r'^\s*restart\s*:.*$', line):
-            # elasticsearch backup directory
+            # OpenSearch backup directory
             line = f"{serviceIndent * 2}restart: {restartMode}"
           elif 'PUID' in line:
             # process UID
@@ -481,9 +481,9 @@ class Installer(object):
           elif 'PCAP_IFACE' in line:
             # capture interface(s)
             line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
-          elif 'ES_JAVA_OPTS' in line:
-            # elasticsearch memory allowance
-            line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{esMemory}', line)
+          elif 'OS_JAVA_OPTS' in line:
+            # OpenSearch memory allowance
+            line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
           elif 'LS_JAVA_OPTS' in line:
             # logstash memory allowance
             line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', line)
@@ -502,41 +502,41 @@ class Installer(object):
           elif 'BEATS_SSL' in line:
             # enable/disable beats SSL
             line = re.sub(r'(BEATS_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}", line)
-          elif (currentService == 'elasticsearch') and re.match(r'^\s*-.+:/opt/elasticsearch/backup(:.+)?\s*$', line) and (indexSnapshotDir is not None) and os.path.isdir(indexSnapshotDir):
-            # elasticsearch backup directory
+          elif (currentService == 'opensearch') and re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line) and (indexSnapshotDir is not None) and os.path.isdir(indexSnapshotDir):
+            # OpenSearch backup directory
             volumeParts = line.strip().lstrip('-').lstrip().split(':')
             volumeParts[0] = indexSnapshotDir
             line = "{}- {}".format(serviceIndent * 3, ':'.join(volumeParts))
           elif 'ISM_SNAPSHOT_AGE' in line:
-            # elasticsearch index state management snapshot age
+            # OpenSearch index state management snapshot age
             line = re.sub(r'(ISM_SNAPSHOT_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexSnapshotAge}'", line)
           elif 'ISM_COLD_AGE' in line:
-            # elasticsearch index state management cold (read-only) age
+            # OpenSearch index state management cold (read-only) age
             line = re.sub(r'(ISM_COLD_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexColdAge}'", line)
           elif 'ISM_CLOSE_AGE' in line:
-            # elasticsearch index state management close age
+            # OpenSearch index state management close age
             line = re.sub(r'(ISM_CLOSE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexCloseAge}'", line)
           elif 'ISM_DELETE_AGE' in line:
-            # elasticsearch index state management close age
+            # OpenSearch index state management close age
             line = re.sub(r'(ISM_DELETE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexDeleteAge}'", line)
           elif 'ISM_SNAPSHOT_COMPRESSED' in line:
-            # elasticsearch index state management snapshot compression
+            # OpenSearch index state management snapshot compression
             line = re.sub(r'(ISM_SNAPSHOT_COMPRESSED\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(indexSnapshotCompressed)}", line)
-          elif 'ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
+          elif 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
             # delete based on index pattern size
-            line = re.sub(r'(ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)', fr"\g<1>'{indexPruneSizeLimit}'", line)
-          elif 'ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
+            line = re.sub(r'(OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)', fr"\g<1>'{indexPruneSizeLimit}'", line)
+          elif 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
             # delete based on index pattern size (sorted by name vs. creation time)
-            line = re.sub(r'(ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}", line)
-          elif 'ES_EXTERNAL_HOSTS' in line:
-            # enable/disable forwarding Logstash to external Elasticsearch instance
-            line = re.sub(r'(#\s*)?(ES_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
-          elif 'ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
-            # enable/disable SSL certificate verification for external Elasticsearch instance
-            line = re.sub(r'(#\s*)?(ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}", line)
-          elif 'ES_EXTERNAL_SSL' in line:
-            # enable/disable SSL certificate verification for external Elasticsearch instance
-            line = re.sub(r'(#\s*)?(ES_EXTERNAL_SSL\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}", line)
+            line = re.sub(r'(OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}", line)
+          elif 'OS_EXTERNAL_HOSTS' in line:
+            # enable/disable forwarding Logstash to external OpenSearch instance
+            line = re.sub(r'(#\s*)?(OS_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
+          elif 'OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
+            # enable/disable SSL certificate verification for external OpenSearch instance
+            line = re.sub(r'(#\s*)?(OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}", line)
+          elif 'OS_EXTERNAL_SSL' in line:
+            # enable/disable SSL certificate verification for external OpenSearch instance
+            line = re.sub(r'(#\s*)?(OS_EXTERNAL_SSL\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}", line)
           elif logstashOpen and serviceStartLine and (currentService == 'logstash'):
             # exposing logstash port 5044 to the world
             print(line)
@@ -547,10 +547,10 @@ class Installer(object):
             # remove previous/leftover/duplicate exposing logstash port 5044 to the world
             skipLine = True
           elif (not serviceStartLine) and (currentService == 'nginx-proxy') and re.match(r'^.*-.*\b9200:9200"?\s*$', line):
-            # comment/uncomment port forwarding for elastic based on elasticOpen
+            # comment/uncomment port forwarding for OpenSearch based on opensearchOpen
             leadingSpaces = len(line) - len(line.lstrip())
             if leadingSpaces <= 0: leadingSpaces = 6
-            line = f"{' ' * leadingSpaces}{'' if elasticOpen else '# '}{line.lstrip().lstrip('#').lstrip()}"
+            line = f"{' ' * leadingSpaces}{'' if opensearchOpen else '# '}{line.lstrip().lstrip('#').lstrip()}"
 
           if not skipLine: print(line)
 
@@ -1239,7 +1239,7 @@ def main():
   parser.add_argument('-f', '--configure-file', required=False, dest='configFile', metavar='<STR>', type=str, default='', help='Single docker-compose YML file to configure')
   parser.add_argument('-d', '--defaults', dest='acceptDefaults', type=str2bool, nargs='?', const=True, default=False, help="Accept defaults to prompts without user interaction")
   parser.add_argument('-l', '--logstash-expose', dest='exposeLogstash', type=str2bool, nargs='?', const=True, default=False, help="Expose Logstash port to external hosts")
-  parser.add_argument('-e', '--elasticsearch-expose', dest='exposeElastic', type=str2bool, nargs='?', const=True, default=False, help="Expose Elasticsearch port to external hosts")
+  parser.add_argument('-e', '--opensearch-expose', dest='exposeOpenSearch', type=str2bool, nargs='?', const=True, default=False, help="Expose OpenSearch port to external hosts")
   parser.add_argument('-r', '--restart-malcolm', dest='malcolmAutoRestart', type=str2bool, nargs='?', const=True, default=False, help="Restart Malcolm on system restart (unless-stopped)")
 
   try:
@@ -1325,7 +1325,7 @@ def main():
     success, installPath = installer.install_malcolm_files(malcolmFile)
 
   if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
-    installer.tweak_malcolm_runtime(installPath, expose_elastic_default=args.exposeElastic, expose_logstash_default=args.exposeLogstash, restart_mode_default=args.malcolmAutoRestart)
+    installer.tweak_malcolm_runtime(installPath, expose_opensearch_default=args.exposeOpenSearch, expose_logstash_default=args.exposeLogstash, restart_mode_default=args.malcolmAutoRestart)
     eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
     eprint(f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}.")
 

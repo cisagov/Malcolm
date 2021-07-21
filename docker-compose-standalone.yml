@@ -78,8 +78,8 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
 x-kibana-helper-variables: &kibana-helper-variables
-  ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
-  ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
+  OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
+  OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
   ISM_CLOSE_AGE : '60d'
   ISM_COLD_AGE : '30d'
   ISM_DELETE_AGE : '365d'
@@ -122,24 +122,24 @@ x-pcap-capture-variables: &pcap-capture-variables
 ################################################################################
 
 services:
-  elasticsearch:
-    image: malcolmnetsec/elasticsearch-od:3.2.2
+  opensearch:
+    image: malcolmnetsec/opensearch:3.2.2
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: elasticsearch
+    hostname: opensearch
     environment:
       << : *process-variables
       logger.level : 'WARN'
       bootstrap.memory_lock : 'true'
-      ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
+      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       indices.query.bool.max_clause_count : 2048
-      path.repo : '/opt/elasticsearch/backup'
+      path.repo : '/opt/opensearch/backup'
     expose:
       - 9200
     ulimits:
@@ -149,10 +149,10 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
-      - ./elasticsearch/elasticsearch.keystore:/usr/share/elasticsearch/config/elasticsearch.keystore:rw
-      - ./nginx/ca-trust:/usr/share/elasticsearch/ca-trust:ro
-      - ./elasticsearch:/usr/share/elasticsearch/data:delegated
-      - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
+      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
+      - ./nginx/ca-trust:/usr/share/opensearch/ca-trust:ro
+      - ./opensearch:/usr/share/opensearch/data:delegated
+      - ./opensearch-backup:/opt/opensearch/backup:delegated
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
       interval: 30s
@@ -168,15 +168,15 @@ services:
     environment:
       << : *process-variables
       << : *kibana-helper-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+      OPENSEARCH_URL : 'http://opensearch:9200'
       KIBANA_URL : 'http://kibana:5601/kibana'
       VIRTUAL_HOST : 'kibana-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'sessions2-*'
       ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
       ARKIME_INDEX_TIME_FIELD : 'firstPacket'
-      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
+      CREATE_OS_ARKIME_SESSION_INDEX : 'true'
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 28991
     volumes:
@@ -195,10 +195,10 @@ services:
     hostname: kibana
     environment:
       << : *process-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+      OPENSEARCH_URL : 'http://opensearch:9200'
       VIRTUAL_HOST : 'kibana.malcolm.local'
     depends_on:
-      - elasticsearch
+      - opensearch
       - kibana-helper
     expose:
       - 5601
@@ -219,10 +219,10 @@ services:
       << : *logstash-variables
       << : *common-beats-variables
       << : *common-lookup-variables
-      ES_HOSTS : 'elasticsearch:9200'
+      ES_HOSTS : 'opensearch:9200'
       LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss2m -Djava.security.egd=file:/dev/./urandom'
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 5044
       - 9001
@@ -293,8 +293,8 @@ services:
       << : *arkime-variables
       ARKIME_VERSION : '2.7.1'
       VIRTUAL_HOST : 'arkime.malcolm.local'
-      ES_HOST : 'elasticsearch'
-      ES_PORT : 9200
+      ES_HOST : 'opensearch'
+      OS_PORT : 9200
       ES_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
       WISE : 'on'
@@ -303,7 +303,7 @@ services:
         soft: -1
         hard: -1
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 8000
       - 8005
@@ -333,7 +333,7 @@ services:
         soft: -1
         hard: -1
     depends_on:
-      - elasticsearch
+      - opensearch
     volumes:
       - ./pcap:/pcap
       - ./zeek-logs/upload:/zeek/upload
@@ -402,9 +402,9 @@ services:
     environment:
       << : *process-variables
       << : *common-upload-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+      OPENSEARCH_URL : 'http://opensearch:9200'
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 30441
     volumes:

@@ -47,9 +47,9 @@ PLATFORM_LINUX_UBUNTU = 'ubuntu'
 OPERATION_RUN = 'run'
 OPERATION_CONFIGURE = 'config'
 
-BEAT_ES_HOST = "BEAT_ES_HOST"
-BEAT_ES_PROTOCOL = "BEAT_ES_PROTOCOL"
-BEAT_ES_SSL_VERIFY = "BEAT_ES_SSL_VERIFY"
+BEAT_OS_HOST = "BEAT_OS_HOST"
+BEAT_OS_PROTOCOL = "BEAT_OS_PROTOCOL"
+BEAT_OS_SSL_VERIFY = "BEAT_OS_SSL_VERIFY"
 BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
 BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
 BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
@@ -67,11 +67,11 @@ fields_under_root: true
 #-------------------------- Elasticsearch output -------------------------------
 output.elasticsearch:
   enabled: true
-  hosts: ["${BEAT_ES_HOST}"]
-  protocol: "${BEAT_ES_PROTOCOL}"
+  hosts: ["${BEAT_OS_HOST}"]
+  protocol: "${BEAT_OS_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_ES_SSL_VERIFY}"
+  ssl.verification_mode: "${BEAT_OS_SSL_VERIFY}"
 
 setup.template.enabled: true
 setup.template.overwrite: false
@@ -245,9 +245,9 @@ class Beatbox(object):
     self.beatInstallDir = None
     self.defaultKibanaDashboardDir = None
     self.keystoreItems = defaultdict(str)
-    for initItem in [BEAT_ES_HOST,
-                     BEAT_ES_PROTOCOL,
-                     BEAT_ES_SSL_VERIFY,
+    for initItem in [BEAT_OS_HOST,
+                     BEAT_OS_PROTOCOL,
+                     BEAT_OS_SSL_VERIFY,
                      BEAT_HTTP_PASSWORD,
                      BEAT_HTTP_USERNAME,
                      BEAT_KIBANA_DASHBOARDS_ENABLED,
@@ -295,8 +295,8 @@ class Beatbox(object):
     if (self.ymlFileSpec is not None):
 
       if os.path.isfile(self.ymlFileSpec):
-        # if it doesn't look like connectivity stuff (at last BEAT_ES_PROTOCOL) is in the YML file, offer to append it
-        if ((len(list(filter(lambda x: BEAT_ES_PROTOCOL in x, [line.rstrip('\n') for line in open(self.ymlFileSpec)]))) == 0) and
+        # if it doesn't look like connectivity stuff (at last BEAT_OS_PROTOCOL) is in the YML file, offer to append it
+        if ((len(list(filter(lambda x: BEAT_OS_PROTOCOL in x, [line.rstrip('\n') for line in open(self.ymlFileSpec)]))) == 0) and
             YesOrNo("Append connectivity boilerplate to {}?".format(self.ymlFileSpec), default=False, acceptDefault=self.acceptDefaults)):
           with open(self.ymlFileSpec, 'a') as ymlFile:
             ymlFile.write(BEAT_YML_TEMPLATE)
@@ -334,20 +334,20 @@ class Beatbox(object):
         while tmpVal not in ['http', 'https']:
           tmpVal = AskForString("Enter {} connection protocol (http or https) [{}]".format(destination, tmpDefault), default=tmpDefault, acceptDefault=self.acceptDefaults).lower()
           if (len(tmpVal) == 0): tmpVal = tmpDefault
-        self.keystoreItems[BEAT_ES_PROTOCOL.replace('_ES_', '_KIBANA_' if (destination == 'Kibana') else '_ES_')] = tmpVal
+        self.keystoreItems[BEAT_OS_PROTOCOL.replace('_OS_', '_KIBANA_' if (destination == 'Kibana') else '_OS_')] = tmpVal
 
         # SSL verification
         tmpVal, tmpDefault = '', 'none'
         while tmpVal not in ['none', 'full']:
           tmpVal = AskForString("Enter {} SSL verification (none (for self-signed certificates) or full) [{}]".format(destination, tmpDefault), default=tmpDefault, acceptDefault=self.acceptDefaults).lower()
           if (len(tmpVal) == 0): tmpVal = tmpDefault
-        self.keystoreItems[BEAT_ES_SSL_VERIFY.replace('_ES_', '_KIBANA_' if (destination == 'Kibana') else '_ES_')] = tmpVal
+        self.keystoreItems[BEAT_OS_SSL_VERIFY.replace('_OS_', '_KIBANA_' if (destination == 'Kibana') else '_OS_')] = tmpVal
 
         # host
         tmpVal, tmpDefault = '', ''
         while (len(tmpVal) == 0):
           tmpVal = AskForString("Enter {} connection host".format(destination), default=tmpDefault, acceptDefault=self.acceptDefaults)
-        self.keystoreItems[BEAT_ES_HOST.replace('_ES_', '_KIBANA_' if (destination == 'Kibana') else '_ES_')] = tmpVal
+        self.keystoreItems[BEAT_OS_HOST.replace('_OS_', '_KIBANA_' if (destination == 'Kibana') else '_OS_')] = tmpVal
 
     if (BEAT_KIBANA_HOST in self.keystoreItems):
 

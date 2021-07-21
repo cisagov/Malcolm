@@ -5,12 +5,12 @@
 set -euo pipefail
 shopt -s nocasematch
 
-if [[ -n $ELASTICSEARCH_URL ]]; then
-  ES_URL="$ELASTICSEARCH_URL"
-elif [[ -n $ES_HOST ]] && [[ -n $ES_PORT ]]; then
-  ES_URL="http://$ES_HOST:$ES_PORT"
+if [[ -n $OPENSEARCH_URL ]]; then
+  OS_URL="$OPENSEARCH_URL"
+elif [[ -n $ES_HOST ]] && [[ -n $OS_PORT ]]; then
+  OS_URL="http://$ES_HOST:$OS_PORT"
 else
-  ES_URL="http://elasticsearch:9200"
+  OS_URL="http://opensearch:9200"
 fi
 
 if [[ -n $KIBANA_URL ]]; then
@@ -32,10 +32,10 @@ ZEEK_TEMPLATE_FILE_ORIG="/data/zeek_template.json"
 INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 
 # is the argument to automatically create this index enabled?
-if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
+if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
   # give Elasticsearch time to start before configuring Kibana
-  /data/elastic_search_status.sh >/dev/null 2>&1
+  /data/opensearch_status.sh >/dev/null 2>&1
 
   # is the kibana process server up and responding to requests?
   if curl -L --silent --output /dev/null --fail -XGET "$KIB_URL/api/status" ; then
@@ -45,8 +45,8 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "Elasticsearch is running! Setting up index management policies..."
 
-      # register the repo location for elasticsearch snapshots
-      /data/register-elasticsearch-snapshot-repo.sh
+      # register the repo location for opensearch snapshots
+      /data/register-opensearch-snapshot-repo.sh
 
       # tweak the sessions template (sessions2-* zeek template file) to use the index management policy
       if [[ -f "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
@@ -56,7 +56,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       else
         # need to generate index management file based on environment variables
-        /data/elastic_index_policy_create.py \
+        /data/opensearch_index_policy_create.py \
           --policy "$INDEX_POLICY_NAME" \
           --index-pattern "$INDEX_PATTERN" \
           --priority 100 \
@@ -70,7 +70,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
       if [[ -f "$INDEX_POLICY_FILE" ]]; then
         # make API call to define index management policy
         # https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/#create-policy
-        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$ES_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
+        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
 
         if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]]; then
           # insert opendistro.index_state_management.policy_id into index template settings: will be
@@ -87,7 +87,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # load zeek_template containing zeek field type mappings (merged from /data/zeek_template.json to /data/init/zeek_template.json in kibana_helpers.sh on startup)
       curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
-        "$ES_URL/_template/zeek_template?include_type_name=true" -d "@$ZEEK_TEMPLATE_FILE" 2>&1
+        "$OS_URL/_template/zeek_template?include_type_name=true" -d "@$ZEEK_TEMPLATE_FILE" 2>&1
 
       echo "Importing index pattern..."
 

@@ -20,22 +20,22 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; t
   if [[ -n $ES_PROTOCOL ]] && [[ -n $ES_HOST ]]; then
 
     # build elasticsearch URL for moloch-capture
-    ARKIME_ELASTICSEARCH="${ES_PROTOCOL}://"
+    ARKIME_OPENSEARCH="${ES_PROTOCOL}://"
 
     if [[ -n $ES_USERNAME ]] && [[ -n $ES_PASSWORD ]]; then
-      ARKIME_ELASTICSEARCH+="${ES_USERNAME}:${ES_PASSWORD}@"
+      ARKIME_OPENSEARCH+="${ES_USERNAME}:${ES_PASSWORD}@"
     fi
 
-    ARKIME_ELASTICSEARCH+="${ES_HOST}"
+    ARKIME_OPENSEARCH+="${ES_HOST}"
 
-    if [[ -n $ES_PORT ]]; then
-      ARKIME_ELASTICSEARCH+=":${ES_PORT}"
+    if [[ -n $OS_PORT ]]; then
+      ARKIME_OPENSEARCH+=":${OS_PORT}"
     else
-      ARKIME_ELASTICSEARCH+=":9200"
+      ARKIME_OPENSEARCH+=":9200"
     fi
 
     # place the URL in the config file
-    sed -r -i "s|(elasticsearch)\s*=\s*.*|\1=$ARKIME_ELASTICSEARCH|" "$ARKIME_CONFIG_FILE"
+    sed -r -i "s|(elasticsearch)\s*=\s*.*|\1=$ARKIME_OPENSEARCH|" "$ARKIME_CONFIG_FILE"
   fi
 
   # if SSL certificate verification is turned off, supply the --insecure flag

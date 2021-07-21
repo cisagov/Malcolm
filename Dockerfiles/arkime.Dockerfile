@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV ARKIME_VERSION "2.7.1"
 ENV ARKIMEDIR "/data/moloch"
 ENV ARKIME_URL "https://codeload.github.com/arkime/arkime/tar.gz/v${ARKIME_VERSION}"
-ENV ARKIME_LOCALELASTICSEARCH no
+ENV ARKIME_LOCALOPENSEARCH no
 ENV ARKIME_INET yes
 
 ADD moloch/scripts/bs4_remove_div.py /data/
@@ -78,7 +78,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     sed -i 's/v-if.*password.*"/v-if="false"/g' ./viewer/vueapp/src/components/settings/Settings.vue && \
     rm -rf ./viewer/vueapp/src/components/upload && \
-    sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
+    sed -i "s/^\(ARKIME_LOCALOPENSEARCH=\).*/\1"$ARKIME_LOCALOPENSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
     ./easybutton-build.sh --install && \
     npm cache clean --force && \
@@ -106,8 +106,8 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG ES_HOST=elasticsearch
-ARG ES_PORT=9200
+ARG ES_HOST=opensearch
+ARG OS_PORT=9200
 ARG MALCOLM_USERNAME=admin
 ARG ARKIME_INTERFACE=eth0
 ARG ARKIME_ANALYZE_PCAP_THREADS=1
@@ -124,8 +124,8 @@ ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
 ENV ES_HOST $ES_HOST
-ENV ES_PORT $ES_PORT
-ENV ARKIME_ELASTICSEARCH "http://"$ES_HOST":"$ES_PORT
+ENV OS_PORT $OS_PORT
+ENV ARKIME_OPENSEARCH "http://"$ES_HOST":"$OS_PORT
 ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
@@ -186,7 +186,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD moloch/scripts /data/
 ADD shared/bin/pcap_moloch_and_zeek_processor.py /data/
 ADD shared/bin/pcap_utils.py /data/
-ADD shared/bin/elastic_search_status.sh /data/
+ADD shared/bin/opensearch_status.sh /data/
 ADD moloch/etc $ARKIMEDIR/etc/
 ADD moloch/wise/source.*.js $ARKIMEDIR/wiseService/
 ADD moloch/supervisord.conf /etc/supervisord.conf

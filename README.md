@@ -141,7 +141,7 @@ You can then observe that the images have been retrieved by running `docker imag
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/arkime                                3.2.2               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.2.2               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/opensearch                      3.2.2               xxxxxxxxxxxx        40 hours ago        690MB
 malcolmnetsec/file-monitor                          3.2.2               xxxxxxxxxxxx        39 hours ago        470MB
 malcolmnetsec/file-upload                           3.2.2               xxxxxxxxxxxx        39 hours ago        199MB
 malcolmnetsec/filebeat-oss                          3.2.2               xxxxxxxxxxxx        39 hours ago        555MB
@@ -346,7 +346,7 @@ $ ./scripts/build.sh
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
 * `malcolmnetsec/arkime` (based on `debian:buster-slim`)
-* `malcolmnetsec/elasticsearch-od` (based on `amazon/opendistro-for-elasticsearch`)
+* `malcolmnetsec/opensearch` (based on `amazon/opendistro-for-elasticsearch`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
@@ -458,7 +458,7 @@ Although `install.py` will attempt to automate many of the following configurati
 
 #### <a name="DockerComposeYml"></a>`docker-compose.yml` parameters
 
-Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4g -Xmx4g` values, replacing `4g` with a number that is half of your total system memory, or just under 32 gigabytes, whichever is less. So, for example, if I had 64 gigabytes of memory I would edit those values to be `-Xms31g -Xmx31g`. This indicates how much memory can be allocated to the Elasticsearch heaps. For a pleasant experience, I would suggest not using a value under 10 gigabytes. Similar values can be modified for Logstash with `LS_JAVA_OPTS`, where using 3 or 4 gigabytes is recommended.
+Edit `docker-compose.yml` and search for the `OPENSEARCH_JAVA_OPTS` key. Edit the `-Xms4g -Xmx4g` values, replacing `4g` with a number that is half of your total system memory, or just under 32 gigabytes, whichever is less. So, for example, if I had 64 gigabytes of memory I would edit those values to be `-Xms31g -Xmx31g`. This indicates how much memory can be allocated to the Elasticsearch heaps. For a pleasant experience, I would suggest not using a value under 10 gigabytes. Similar values can be modified for Logstash with `LS_JAVA_OPTS`, where using 3 or 4 gigabytes is recommended.
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
@@ -1825,7 +1825,7 @@ Pulling zeek          ... done
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
 malcolmnetsec/arkime                                3.2.2               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.2.2               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/opensearch                      3.2.2               xxxxxxxxxxxx        40 hours ago        690MB
 malcolmnetsec/file-monitor                          3.2.2               xxxxxxxxxxxx        39 hours ago        470MB
 malcolmnetsec/file-upload                           3.2.2               xxxxxxxxxxxx        39 hours ago        199MB
 malcolmnetsec/filebeat-oss                          3.2.2               xxxxxxxxxxxx        39 hours ago        555MB
