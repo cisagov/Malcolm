@@ -36,7 +36,7 @@ RUN set -x ; \
     cd /apkbuild/aports-master/community/stunnel ; \
     abuild-keygen -a -i -n ; \
     abuild checksum ; \
-    abuild -R
+    abuild -f -R
 
 ####################################################################################
 
