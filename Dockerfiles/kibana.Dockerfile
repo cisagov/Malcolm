@@ -54,7 +54,7 @@ RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodule
 
 RUN eval "$(nodenv init -)" && \
     mkdir -p /usr/share/kibana/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch feature/update_7.10.1 https://github.com/mmguero-dev/kbn_sankey_vis.git /usr/share/kibana/plugins/sankey_vis && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch master https://github.com/mmguero-dev/kbn_sankey_vis.git /usr/share/kibana/plugins/sankey_vis && \
     cd /usr/share/kibana/plugins/sankey_vis && \
     yarn kbn bootstrap && \
     yarn install && \
