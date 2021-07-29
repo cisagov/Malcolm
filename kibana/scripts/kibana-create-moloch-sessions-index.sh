@@ -124,7 +124,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
       # pin filters by default
       curl -L --silent --output /dev/null --show-error -XPOST "$KIB_URL/api/kibana/settings/filters:pinnedByDefault" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
-      # Create anomaly detectors
+      # Create anomaly detectors here
 
       echo "Kibana saved objects import complete!"
     fi
