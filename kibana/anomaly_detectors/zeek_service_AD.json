@@ -1,0 +1,73 @@
+{
+  "name": "zeek_service_AD",
+  "description": "A detector based on the zeek.service with a count of the zeek.action and zeek.results",
+  "time_field": "@timestamp",
+  "indices": [
+    "sessions2-*"
+  ],
+  "category_field": [
+    "zeek.service"
+  ],
+  "feature_attributes": [
+    {
+      "feature_name": "zeek_action",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "zeek_action": {
+          "value_count": {
+            "field": "zeek.action"
+          }
+        }
+      }
+    },
+    {
+      "feature_name": "zeek_result",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "zeek_result": {
+          "value_count": {
+            "field": "zeek.result"
+          }
+        }
+      }
+    }
+  ],
+  "filter_query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "zeek.service",
+            "boost": 1
+          }
+        },
+        {
+          "exists": {
+            "field": "zeek.action",
+            "boost": 1
+          }
+        },
+        {
+          "exists": {
+            "field": "zeek.result",
+            "boost": 1
+          }
+        }
+      ],
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "window_delay": {
+    "period": {
+      "interval": 1,
+      "unit": "MINUTES"
+    }
+  },
+  "detection_interval": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  }
+}

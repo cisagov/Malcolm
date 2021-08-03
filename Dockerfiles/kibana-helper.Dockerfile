@@ -48,6 +48,7 @@ ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ADD kibana/dashboards /opt/kibana/dashboards
+ADD kibana/anomaly_detectors /opt/kibana/anomaly_detectors
 ADD kibana/maps /opt/maps
 ADD kibana/scripts /data/
 ADD kibana/supervisord.conf /etc/supervisord.conf
@@ -69,7 +70,7 @@ RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && 
       addgroup ${PUSER} tty ; \
       addgroup ${PUSER} shadow ; \
     mkdir -p /data/init && \
-    chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /data/init && \
+    chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /data/init /opt/kibana/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
     (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/elastic_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
