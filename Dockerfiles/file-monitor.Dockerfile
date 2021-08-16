@@ -86,7 +86,7 @@ ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz
 ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
 ENV YARA_RULES_DIR "/yara-rules"
 ENV YARA_RULES_SRC_DIR "$SRC_BASE_DIR/signature-base"
-ENV CAPA_VERSION "1.6.3"
+ENV CAPA_VERSION "2.0.0"
 ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 ENV CAPA_DIR "/opt/capa"
 ENV CAPA_BIN "${CAPA_DIR}/capa"
@@ -183,9 +183,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* && \
     mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
-    curl -s -S -L -o "${CLAMAV_RULES_DIR}"/main.cvd http://database.clamav.net/main.cvd && \
-      curl -s -S -L -o "${CLAMAV_RULES_DIR}"/daily.cvd http://database.clamav.net/daily.cvd && \
-      curl -s -S -L -o "${CLAMAV_RULES_DIR}"/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
