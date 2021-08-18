@@ -89,8 +89,9 @@ x-kibana-helper-variables: &kibana-helper-variables
   ISM_SNAPSHOT_REPO : 'logs'
 
 x-logstash-variables: &logstash-variables
-  LOGSTASH_OUI_LOOKUP  : 'true'
-  LOGSTASH_REVERSE_DNS : 'false'
+  LOGSTASH_OUI_LOOKUP       : 'true'
+  LOGSTASH_SEVERITY_SCORING : 'true'
+  LOGSTASH_REVERSE_DNS      : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
   # ES_EXTERNAL_SSL : 'true'
   # ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
@@ -108,6 +109,7 @@ x-common-upload-variables: &common-upload-variables
 
 x-common-lookup-variables: &common-lookup-variables
   FREQ_LOOKUP : 'false'
+  FREQ_SEVERITY_THRESHOLD : '2.0'
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
