@@ -77,6 +77,8 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index management](#IndexManagement)
+    - [Event severity scoring](#Severity)
+        + [Customizing event severity scoring](#SeverityConfig)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
@@ -486,6 +488,12 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
 
+* `LOGSTASH_SEVERITY_SCORING` - if set to `true`, Logstash will perform [severity scoring](#Severity) when analyzing Zeek logs (default `true`)
+
+* `FREQ_LOOKUP` - if set to `true`, domain names (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq) (default `false`)
+
+* `FREQ_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the entropy threshold for assigning severity to events with entropy scores calculated by [`freq`](https://github.com/MarkBaggett/freq); a lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`) (default `2.0`)
+
 * `ES_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external Elasticsearch instance in addition to the one maintained locally by Malcolm
 
 * `ES_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external Elasticsearch instances specified in `ES_EXTERNAL_HOSTS`
@@ -781,7 +789,7 @@ Authentication over LDAP can be done using one of three ways, [two of which](htt
 
 * **StartTLS** - the [standard extension](https://tools.ietf.org/html/rfc2830) to the LDAP protocol to establish an encrypted SSL/TLS connection within an already established LDAP connection
 * **LDAPS** - a commonly used (though unofficial and considered deprecated) method in which SSL negotiation takes place before any commands are sent from the client to the server
-* **Unencrypted** (clear text) (***not recommended***)
+* **Unencrypted** (cleartext) (***not recommended***)
 
 In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file, the `NGINX_LDAP_TLS_STUNNEL` and `NGINX_LDAP_TLS_STUNNEL` environment variables are used in conjunction with the values in `nginx/nginx_ldap.conf` to define the LDAP connection security level. Use the following combinations of values to achieve the connection security methods above, respectively:
 
@@ -1373,6 +1381,40 @@ Restarting Logstash may take several minutes, after which log ingestion will be 
 See [Index State Management](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/) in the Open Distro for Elasticsearch documentation on Index State Management [policies](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/policies/), [managed indices](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/managedindices/), [settings](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/settings/) and [APIs](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/).
 
 Elasticsearch index management only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
+
+### <a name="Severity"></a>Event severity scoring
+
+As Zeek logs are parsed and enriched prior to indexing, a severity score can be assigned when one or more of the following conditions are met:
+
+* cross-segment network traffic (if [network subnets were defined](#HostAndSubnetNaming))
+* connection origination and destination (e.g., inbound, outbound, external, internal)
+* domain names (from DNS queries and SSL server names) with high entropy as calculated by [freq](https://github.com/MarkBaggett/freq)
+    - The entropy threshold for this condition to trigger can be adjusted by setting the `FREQ_SEVERITY_THRESHOLD` environment variable in [`docker-compose.yml`](#DockerComposeYml). A lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`).
+* file transfers (categorized by mime type)
+* `notice.log` and `weird.log` entries, including those generated by Zeek plugins detecting vulnerabilities (see the list of Zeek plugins under [Components](#Components))
+* detection of cleartext passwords
+* use of insecure or outdated protocols
+* hits on [extracted files](#ZeekFileExtraction)
+
+As this feature is [improved](https://github.com/idaholab/Malcolm/issues/19) it's expected that additional categories will be identified and implemented for severity scoring.
+
+When a Zeek log satisfies more than one of these conditions its severity scores will be summed, with a maximum score of `100`. A Zeek log's severity score is indexed in the `event.severity` field and the conditions which contributed to its score are indexed in `event.severity_tags`.
+
+#### <a name="SeverityConfig"></a>Customizing event severity scoring
+
+These categories' severity scores can be customized by editing `logstash/maps/malcolm_severity.yaml`:
+
+* Each category can be assigned a number between `1` and `100` for severity scoring.
+* Any category may be disabled by assigning it a score of `0`.
+* A severity score can be assigned for any [supported protocol](#Protocols) by adding an entry with the key formatted like `"PROTOCOL_XYZ"`, where `XYZ` is the uppercased value of the protocol as stored in the `zeek.service` field. For example, to assign a score of `40` to Zeek logs generated for SSH traffic, you could add the following line to `malcolm_severity.yaml`:
+
+```
+"PROTOCOL_SSH": 40
+```
+
+Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take effect. The [hostname and CIDR subnet names interface](#NameMapUI) provides a convenient button for restarting Logstash.
+
+Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCORING` environment variable to `false`  in the [`docker-compose.yml`](#DockerComposeYml) file and [restarting Malcolm](#StopAndRestart).
 
 ### <a name="Alerting"></a>Alerting
 
