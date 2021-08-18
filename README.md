@@ -1384,7 +1384,7 @@ Elasticsearch index management only deals with disk space consumed by Elasticsea
 
 ### <a name="Severity"></a>Event severity scoring
 
-As Zeek logs are parsed and enriched prior to indexing, a severity score can be assigned when one or more of the following conditions are met:
+As Zeek logs are parsed and enriched prior to indexing, a severity score up to `100` (a higher score indicating a more severe event) can be assigned when one or more of the following conditions are met:
 
 * cross-segment network traffic (if [network subnets were defined](#HostAndSubnetNaming))
 * connection origination and destination (e.g., inbound, outbound, external, internal)
