@@ -8,6 +8,38 @@
 
 ####################################################################################
 
+FROM alpine:3.13 as stunnel_build
+
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=300
+ENV DEFAULT_UID $DEFAULT_UID
+ENV DEFAULT_GID $DEFAULT_GID
+ENV PUSER "builder"
+ENV PGROUP "abuild"
+
+ADD https://codeload.github.com/alpinelinux/aports/tar.gz/master /aports-master.tar.gz
+
+USER root
+
+RUN set -x ; \
+    apk add --no-cache alpine-sdk sudo openssl-dev linux-headers; \
+    sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers ; \
+    adduser -D -u ${DEFAULT_UID} -h /apkbuild -G ${PGROUP} ${PUSER} ; \
+    addgroup ${PUSER} wheel ; \
+    chmod 644 /aports-master.tar.gz
+
+USER ${PUSER}
+
+RUN set -x ; \
+    cd /apkbuild ; \
+    tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
+    cd /apkbuild/aports-master/community/stunnel ; \
+    abuild-keygen -a -i -n ; \
+    abuild checksum ; \
+    abuild -f -R
+
+####################################################################################
+
 FROM alpine:3.13
 
 LABEL maintainer="malcolm.netsec@gmail.com"
@@ -63,6 +95,8 @@ ENV NGINX_AUTH_LDAP_BRANCH=master
 
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
+
+COPY --from=stunnel_build /apkbuild/packages/community/x86_64/stunnel-*.apk /tmp/
 
 RUN set -x ; \
     CONFIG="\
@@ -180,12 +214,13 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap stunnel supervisor tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap supervisor tzdata; \
   update-ca-certificates; \
+  apk add --no-cache --allow-untrusted /tmp/stunnel-*.apk; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /tmp/stunnel-*.apk /nginx.tar.gz /nginx-auth-ldap.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
