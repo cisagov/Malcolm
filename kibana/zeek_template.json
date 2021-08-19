@@ -39,6 +39,8 @@
         "event.kind": { "type": "keyword" },
         "event.outcome": { "type": "keyword" },
         "event.provider": { "type": "keyword" },
+        "event.risk_score": { "type": "float" },
+        "event.risk_score_norm": { "type": "float" },
         "event.start": { "type": "date" },
         "event.severity": { "type": "integer" },
         "event.severity_tags": { "type": "keyword" },

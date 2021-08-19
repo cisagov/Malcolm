@@ -27,6 +27,8 @@ function ZeekLogs (api, section) {
   // add right-clicks
   var allFields = [
     "communityId",
+    "event.risk_score",
+    "event.risk_score_norm",
     "event.severity",
     "event.severity_tags",
     "host.name",
@@ -953,6 +955,7 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek, 'freq_score_v1', 'Freq Score v1', 'zeek.freq_score_v1')\n" +
     "      +arrayList(session.zeek, 'freq_score_v2', 'Freq Score v2', 'zeek.freq_score_v2')\n" +
     "      +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
+    "      +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
     "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
     // file information
