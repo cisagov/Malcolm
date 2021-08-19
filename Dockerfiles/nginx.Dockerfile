@@ -34,6 +34,7 @@ RUN set -x ; \
     cd /apkbuild ; \
     tar xvf /aports-master.tar.gz aports-master/community/stunnel ; \
     cd /apkbuild/aports-master/community/stunnel ; \
+    sed -i "s@www\.stunnel\.org/downloads/@ftp.osuosl.org/pub/blfs/conglomeration/stunnel/@" APKBUILD ; \
     abuild-keygen -a -i -n ; \
     abuild checksum ; \
     abuild -f -R
