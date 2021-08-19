@@ -110,6 +110,8 @@ x-common-upload-variables: &common-upload-variables
 x-common-lookup-variables: &common-lookup-variables
   FREQ_LOOKUP : 'false'
   FREQ_SEVERITY_THRESHOLD : '2.0'
+  TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
+  CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
