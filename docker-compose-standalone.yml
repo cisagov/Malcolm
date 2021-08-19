@@ -112,6 +112,7 @@ x-common-lookup-variables: &common-lookup-variables
   FREQ_SEVERITY_THRESHOLD : '2.0'
   TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
   CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
+  QUESTIONABLE_COUNTRY_CODES : 'CN,KP,KR,RU,UA'
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
