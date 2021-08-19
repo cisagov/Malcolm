@@ -131,7 +131,6 @@ RUN set -x ; \
     openldap-dev \
     pcre-dev \
     perl-dev \
-    stunnel \
     tar \
     zlib-dev \
     ; \
@@ -181,7 +180,7 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap supervisor tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap stunnel supervisor tzdata; \
   update-ca-certificates; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
