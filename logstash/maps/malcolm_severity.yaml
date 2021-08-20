@@ -1,28 +1,29 @@
-"CONNECTION_CROSS_SEGMENT": 20
-"CONNECTION_EXTERNAL": 20
-"CONNECTION_INBOUND": 50
-"CONNECTION_INTERNAL": 0
-"CONNECTION_OUTBOUND": 20
-"CONNECTION_TUNNEL": 10
-"CONNECTION_VPN": 30
-"CONNECTION_SIZE": 20
-"CONNECTION_DURATION": 20
-"QUESTIONABLE_COUNTRY": 40
-"DOMAIN_HIGH_ENTROPY": 0
-"FILE_TYPE": 0
-"FILE_TYPE_HIGH": 75
-"FILE_TYPE_MEDIUM": 50
-"NOTICE_MITRE_ATTACK": 80
-"NOTICE_OTHER": 60
-"NOTICE_PROTOCOL": 60
-"NOTICE_SCAN": 60
-"NOTICE_VULN": 90
-"PASSWORD_CLEARTEXT": 90
-"PROTOCOL_OUTDATED_OR_INSECURE": 60
-"SIGNATURES_CAPA": 50
-"SIGNATURES_CLAMAV": 90
-"SIGNATURES_MALASS": 90
-"SIGNATURES_OTHER": 75
-"SIGNATURES_VIRUSTOTAL": 90
-"SIGNATURES_YARA": 90
-"WEIRD_OTHER": 30
+# keys should match the event.severity_tags values set in 19_severity.conf
+"Cross-segment traffic": 20
+"External traffic": 20
+"Inbound traffic": 50
+"Internal traffic": 0
+"Outbound traffic": 20
+"Tunneled traffic": 10
+"VPN traffic": 30
+"High volume connection": 20
+"Long connection": 20
+"Country of concern": 40
+"High entropy domain": 0
+"File transfer": 0
+"File transfer (high concern)": 75
+"File transfer (medium concern)": 50
+"MITRE ATT&CK framework technique": 80
+"Notice (other)": 60
+"Notice (protocol)": 60
+"Notice (scan)": 60
+"Notice (vulnerability)": 90
+"Cleartext password": 90
+"Insecure or outdated protocol": 60
+"File scan (capa)": 50
+"File scan (ClamAV)": 90
+"File scan (Malass)": 90
+"Signature": 75
+"File scan (VirusTotal)": 90
+"File scan (YARA)": 90
+"Weird": 30
