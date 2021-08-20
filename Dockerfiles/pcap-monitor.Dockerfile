@@ -53,7 +53,7 @@ RUN apt-get update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    pip3 install --no-cache-dir elasticsearch elasticsearch_dsl pyzmq pyinotify python-magic && \
+    pip3 install --no-cache-dir elasticsearch==7.10.1 elasticsearch_dsl==7.4.0 pyzmq pyinotify python-magic && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
