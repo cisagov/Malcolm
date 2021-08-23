@@ -1,0 +1,47 @@
+{
+  "name": "zeek_filetype_AD",
+  "description": "Detect anomalies based on transferred file type",
+  "time_field": "firstPacket",
+  "indices": [
+    "sessions2-*"
+  ],
+  "feature_attributes": [
+    {
+      "feature_name": "zeek_filetype",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "zeek_filetype": {
+          "value_count": {
+            "field": "zeek.filetype"
+          }
+        }
+      }
+    }
+  ],
+  "filter_query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "zeek.filetype",
+            "boost": 1
+          }
+        }
+      ],
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "detection_interval": {
+    "period": {
+      "interval": 10,
+      "unit": "Minutes"
+    }
+  },
+  "window_delay": {
+    "period": {
+      "interval": 1,
+      "unit": "Minutes"
+    }
+  }
+}
