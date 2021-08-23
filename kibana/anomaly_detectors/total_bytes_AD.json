@@ -1,7 +1,7 @@
 {
   "name": "total_bytes_AD",
-  "description": "A detector based on total bytes summed.",
-  "time_field": "@timestamp",
+  "description": "Detect anomalies based on total bytes, summed",
+  "time_field": "firstPacket",
   "indices": [
     "sessions2-*"
   ],

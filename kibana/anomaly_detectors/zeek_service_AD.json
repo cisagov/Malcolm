@@ -1,7 +1,7 @@
 {
   "name": "zeek_service_AD",
-  "description": "A detector based on the zeek.service with a count of the zeek.action and zeek.results",
-  "time_field": "@timestamp",
+  "description": "Detect anomalies based application protocol, aggregated by action and by result",
+  "time_field": "firstPacket",
   "indices": [
     "sessions2-*"
   ],
