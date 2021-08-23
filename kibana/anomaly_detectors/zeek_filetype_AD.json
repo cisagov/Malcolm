@@ -1,7 +1,7 @@
 {
   "name": "zeek_filetype_AD",
-  "description": "A detector based on zeek filetype counted.",
-  "time_field": "@timestamp",
+  "description": "Detect anomalies based on transferred file type",
+  "time_field": "firstPacket",
   "indices": [
     "sessions2-*"
   ],

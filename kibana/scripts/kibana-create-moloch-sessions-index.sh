@@ -124,12 +124,20 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
       # pin filters by default
       curl -L --silent --output /dev/null --show-error -XPOST "$KIB_URL/api/kibana/settings/filters:pinnedByDefault" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
+      echo "Kibana saved objects import complete!"
+
+      # before we go on to create the anomaly detectors, we need to wait for actual sessions2-* documents
+      /data/elastic_search_status.sh -w >/dev/null 2>&1
+
+      echo "Creating Kibana anomaly detectors..."
+
       # Create anomaly detectors here
       for i in /opt/kibana/anomaly_detectors/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$ES_URL/_opendistro/_anomaly_detection/detectors" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
-      echo "Kibana saved objects import complete!"
+      echo "Kibana anomaly detectors creation complete!"
+
     fi
   fi
 fi
