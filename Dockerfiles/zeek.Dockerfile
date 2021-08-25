@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -49,8 +49,7 @@ ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${ZEEK_DIR}/lib/zeek/plugins/packages
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # build and install system packages, zeek, spicy and plugins
-RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
-    apt-get -q update && \
+RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       ca-certificates \
       curl \
@@ -65,10 +64,10 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       psmisc \
       vim-tiny && \
     ( curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - ) && \
-    echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
-    echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
+    echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
+    echo "deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
-    apt-get install -q -y -t buster-backports --no-install-recommends \
+    apt-get install -q -y --no-install-recommends \
       bison \
       ccache \
       clang-${LLVM_VERSION} \
@@ -104,14 +103,14 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
       curl -sSL --remote-name-all \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
       dpkg -i ./*.deb && \
     mkdir -p /tmp/spicy-packages && \
       cd /tmp/spicy-packages && \
