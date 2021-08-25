@@ -2,7 +2,7 @@
 unknown_transport	0	2221	Rockwell CSP	Rockwell Automation
 unknown_transport	0	2222	Rockwell CSP	Rockwell Automation
 unknown_transport	0	2223	Rockwell CSP	Rockwell Automation
-unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q SLAVE	Mitsubishi Electric
+unknown_transport	0	5007	Mitsubishi Electronic MELSEC-Q	Mitsubishi Electric
 unknown_transport	0	5413	Wonderware	AVEVA
 unknown_transport	0	5891	Intelligent Instrumentation EDAS	Intelligent Instrumentation
 unknown_transport	0	7022	CT Discovery Protocol CTDP	-
@@ -95,8 +95,8 @@ unknown_transport	4999	0	Mitsubishi Electronic MELSEC-Q	Mitsubishi Electric
 udp	5000	0	Rockwell AADvance Peer to P2P	Rockwell Automation
 unknown_transport	5001	0	Mitsubishi Electronic FX3u	Mitsubishi Electric
 unknown_transport	5004	0	RTP Time Transport	-
-unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q MASTER	Mitsubishi Electric
-unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q MASTER	Mitsubishi Electric
+unknown_transport	5006	0	Mitsubishi Electronic MELSEC-Q	Mitsubishi Electric
+unknown_transport	5007	0	Mitsubishi Electronic MELSEC-Q	Mitsubishi Electric
 tcp	5050	0	OASyS SCADA	AVEVA
 unknown_transport	5050	0	Danfoss ECL Apex	Danfoss
 tcp	5051	0	OASyS SCADA	AVEVA

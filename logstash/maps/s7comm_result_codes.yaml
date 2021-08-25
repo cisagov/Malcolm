@@ -196,7 +196,7 @@
 "55302": "The referenced job is in a state in which the requested function cannot be performed"
 "55303": "Function aborted due to overload, meaning executing the read cycle takes longer than the set scan cycle time"
 "56321": "Date and/or time invalid"
-"57857": "CPU is already the master"
+"57857": "CPU is already the coordinator"
 "57858": "Connect and update not possible due to different user program in flash module"
 "57859": "Connect and update not possible due to different firmware"
 "57860": "Connect and update not possible due to different memory configuration"
