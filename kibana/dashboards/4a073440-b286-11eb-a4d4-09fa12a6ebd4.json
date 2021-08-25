@@ -294,7 +294,7 @@
           "dstOui",
           "zeek.action",
           "zeek_ecat_registers.register_type",
-          "zeek_ecat_registers.slave_addr",
+          "zeek_ecat_registers.server_addr",
           "zeek_ecat_registers.register_addr"
         ],
         "sort": [],
