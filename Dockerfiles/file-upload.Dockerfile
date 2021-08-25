@@ -1,4 +1,4 @@
-FROM debian:buster-slim AS build
+FROM debian:bullseye-slim AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -23,7 +23,7 @@ RUN apt-get update && \
     rm -rf /jQuery-File-Upload/*.html /jQuery-File-Upload/test/ /jQuery-File-Upload/server/gae-go/ \
            /jQuery-File-Upload/server/gae-python/
 
-FROM debian:buster-slim AS runtime
+FROM debian:bullseye-slim AS runtime
 
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
@@ -58,9 +58,9 @@ RUN apt-get update && \
       supervisor \
       vim-tiny \
       less \
-      php7.3-gd \
-      php7.3-fpm \
-      php7.3-apcu \
+      php7.4-gd \
+      php7.4-fpm \
+      php7.4-apcu \
       nginx-light && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
