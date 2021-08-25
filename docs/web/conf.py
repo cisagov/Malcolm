@@ -319,7 +319,7 @@ COMPILERS = {
 # Nikola supports logo display.  If you have one, you can put the URL here.
 # Final output is <img src="LOGO_URL" id="logo" alt="BLOG_TITLE">.
 # The URL may be relative to the site root.
-LOGO_URL = 'https://raw.githubusercontent.com/idaholab/Malcolm/master/docs/images/logo/Malcolm_reflection_white.png'
+LOGO_URL = 'https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/logo/Malcolm_reflection_white.png'
 
 # If you want to hide the title of your website (for example, if your logo
 # already contains the text), set this to False.
@@ -619,7 +619,7 @@ REDIRECTIONS = []
 # https://getnikola.com/handbook.html#deploying-to-github
 # You will need to configure the deployment branch on GitHub.
 GITHUB_SOURCE_BRANCH = 'src'
-GITHUB_DEPLOY_BRANCH = 'master'
+GITHUB_DEPLOY_BRANCH = 'main'
 
 # The name of the remote where you wish to push to, using github_deploy.
 GITHUB_REMOTE_NAME = 'origin'
@@ -901,7 +901,7 @@ FEED_LINKS_APPEND_QUERY = False
 # A HTML fragment describing the license, for the sidebar.
 # (translatable)
 LICENSE = LICENSE = """
-<a rel="license" href="https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt">License</a>"""
+<a rel="license" href="https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt">License</a>"""
 # I recommend using the Creative Commons' wizard:
 # https://creativecommons.org/choose/
 # LICENSE = """

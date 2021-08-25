@@ -36,4 +36,4 @@ Read carefully the installation documentation for [Malcolm](/documentation/#ISOI
 
 ## Disclaimer
 
-The terms of [Malcolm's license](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) also apply to these unofficial builds of the Malcolm and Hedgehog Linux installer ISOs: neither the organizations funding Malcolm's development, its developers nor the maintainer of this site makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness or usefulness of any data, apparatus or process disclosed therein.
+The terms of [Malcolm's license](https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt) also apply to these unofficial builds of the Malcolm and Hedgehog Linux installer ISOs: neither the organizations funding Malcolm's development, its developers nor the maintainer of this site makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness or usefulness of any data, apparatus or process disclosed therein.

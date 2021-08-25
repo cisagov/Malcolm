@@ -21,7 +21,7 @@ EOF
 if [[ -n "$1" ]]; then
   BRANCH="$1"
 else
-  BRANCH="master"
+  BRANCH="main"
 fi
 
 OUTPUT_DIR=./pages
@@ -37,7 +37,7 @@ curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/RE
   | sed '/name="TableOfContents"/,$d' \
   | sed 's/^# Malcolm$//' \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
-  | sed "s@/[Mm]alcolm/blob/master/@/Malcolm/blob/$BRANCH/@g" \
+  | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/@g" \
   >> $OUTPUT_FILE
 
@@ -49,7 +49,7 @@ curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/RE
   | sed '0,/name="TableOfContents"/d' \
   | sed '/## Other Software/,$d' \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
-  | sed "s@/[Mm]alcolm/blob/master/@/Malcolm/blob/$BRANCH/@g" \
+  | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/@g" \
   >> $OUTPUT_FILE
 
@@ -59,7 +59,7 @@ OUTPUT_FILE="$OUTPUT_DIR"/hedgehog.md
 GenerateMarkdownHeader " " "hedgehog" >> $OUTPUT_FILE
 curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/README.md \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
-  | sed "s@/[Mm]alcolm/blob/master/@/Malcolm/blob/$BRANCH/@g" \
+  | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/@g" \
   >> $OUTPUT_FILE
 
