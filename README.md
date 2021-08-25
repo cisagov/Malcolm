@@ -104,7 +104,7 @@ The scripts to control Malcolm require Python 3.
 
 #### Source code
 
-The files required to build and run Malcolm are available on its [GitHub page](https://github.com/cisagov/Malcolm/tree/master). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on its [GitHub page](https://github.com/cisagov/Malcolm/tree/main). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 #### Building Malcolm from scratch
 
@@ -279,7 +279,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
-|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/master/zeek/config/login.zeek)|
+|Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/main/zeek/config/login.zeek)|
 |TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/tftp/tftp.zeek)|
 |WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard/main.zeek)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
@@ -297,7 +297,7 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 ## <a name="Development"></a>Development
 
-Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/master) results in the following subdirectories in your `malcolm/` working copy:
+Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
 
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
@@ -857,14 +857,14 @@ Note that currently Microsoft Windows and Apple macOS platforms run Docker insid
 
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/master/sensor-iso/) is a Debian-based operating system built to
+A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/main/sensor-iso/) is a Debian-based operating system built to
 
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
 * generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/malcolm)
 
-Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/master/sensor-iso/README.md) for more information.
+Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/main/sensor-iso/README.md) for more information.
 
 ### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
@@ -1627,7 +1627,7 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
 
-Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/cisagov/Malcolm/tree/master), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
+Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/cisagov/Malcolm/tree/main), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
 The commands in this example should be executed as a non-root user.
 

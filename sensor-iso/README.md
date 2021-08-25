@@ -605,9 +605,9 @@ deb https://XXXXXX:443/debian buster-backports main contrib non-free
 5. Update underlying system packages with `apt-get`
     - `apt-get update && apt-get dist-upgrade`
 
-6. If there were [new system deb packages added](https://github.com/cisagov/Malcolm/tree/master/sensor-iso/config/package-lists) to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/commits/master/sensor-iso/config/package-lists) on GitHub), install them. If you're not sure, of course, you could just install everything, like this (although you may have to tweak some version numbers or something if the base distribution of your Hedgehog branch is different than `master`; in this example I'm not jumping between Debian releases, just upgrading within a release):
+6. If there were [new system deb packages added](https://github.com/cisagov/Malcolm/tree/main/sensor-iso/config/package-lists) to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/commits/main/sensor-iso/config/package-lists) on GitHub), install them. If you're not sure, of course, you could just install everything, like this (although you may have to tweak some version numbers or something if the base distribution of your Hedgehog branch is different than `main`; in this example I'm not jumping between Debian releases, just upgrading within a release):
 ```
-$ for LIST in apps desktopmanager net system; do curl -L -J -O https://raw.github.com/cisagov/Malcolm/master/sensor-iso/config/package-lists/$LIST.list.chroot; done
+$ for LIST in apps desktopmanager net system; do curl -L -J -O https://raw.github.com/cisagov/Malcolm/main/sensor-iso/config/package-lists/$LIST.list.chroot; done
 ...
 $ apt-get install $(cat *.list.chroot)
 ```
@@ -617,7 +617,7 @@ $ apt-get install $(cat *.list.chroot)
     * `python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -r -n1 python3 -m pip install -U`
         - if this fails for some reason, you may need to reinstall pip first with `python3 -m pip install --force -U pip`
         - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip` (or whatever `python3.x` you have)
-    * If there were [new python packages](https://raw.githubusercontent.com/cisagov/Malcolm/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/blame/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
+    * If there were [new python packages](https://raw.githubusercontent.com/cisagov/Malcolm/main/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/blame/main/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
         - `python3 -m pip install --no-compile --no-cache-dir --force-reinstall --upgrade --index-url=https://XXXXXX:443/pypi/simple --trusted-host=XXXXXX:443 colorama`
 
 8. Okay, **now** things start to get a little bit ugly. You're going to need access to the ISO of the release of Hedgehog Linux you're upgrading to, as we're going to grab some packages off of it. On another Linux system, [build it](#ISOBuild).
@@ -936,7 +936,7 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 
 Hedgehog Linux - part of [Malcolm](https://github.com/cisagov/Malcolm) - is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/master/License.txt) for the terms of its release.
+See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/main/License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 

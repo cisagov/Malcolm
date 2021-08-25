@@ -174,7 +174,7 @@ KeyboardInterrupt
 
 [Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
-See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt) for the terms of its release.
+See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 
