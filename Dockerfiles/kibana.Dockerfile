@@ -66,7 +66,7 @@ FROM amazon/opendistro-for-elasticsearch-kibana:1.13.2
 LABEL maintainer="malcolm.netsec@gmail.com"
 LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/kibana-od'

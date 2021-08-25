@@ -8,10 +8,10 @@ var wiseSource     = require('./wiseSource.js')
 // Part of Malcolm (https://github.com/idaholab/malcolm)
 //
 // Data may be populated with Malcolm's Zeek Logstash filters:
-//   (particularly https://raw.githubusercontent.com/idaholab/Malcolm/master/logstash/pipeline-main/11_zeek_logs.conf)
+//   (particularly https://raw.githubusercontent.com/idaholab/Malcolm/main/logstash/pipeline-main/11_zeek_logs.conf)
 //
 // Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-// see https://raw.githubusercontent.com/idaholab/Malcolm/master/License.txt
+// see https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 function ZeekLogs (api, section) {
   ZeekLogs.super_.call(this, api, section);
