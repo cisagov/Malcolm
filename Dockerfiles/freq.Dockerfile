@@ -37,7 +37,7 @@ RUN apt-get update && \
       python3 \
       python3-dev \
       python3-pip && \
-    pip3 install supervisor && \
+    pip3 install supervisor six && \
     cd /opt && \
     mkdir -p ./freq_server && \
       curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \
