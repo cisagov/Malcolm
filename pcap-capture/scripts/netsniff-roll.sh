@@ -46,7 +46,7 @@ while true; do
       PROC_START_SECONDS_AGO=$((NOW_DATE_UNIX-PROC_START_DATE_UNIX))
 
       # see what arguments this netsniff-ng was started with
-      NETSNIFF_ARGS=($(cat /proc/$NETSNIFF_PID/cmdline | tr '\000' ' ' | python3 -c 'import shlex; print(shlex.split(None))' | tr -d '[],'))
+      NETSNIFF_ARGS=($(cat /proc/$NETSNIFF_PID/cmdline | tr '\000' ' ' | python3 -c 'import sys; import shlex; print(shlex.split(sys.stdin.readline()))' | tr -d '[],'))
       NETSNIFF_ARGS_LEN=${#NETSNIFF_ARGS[@]}
 
       # extract the --out directory and --prefix prefix for the file(s) being written to by this netsniff-ng
