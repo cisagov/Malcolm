@@ -20,10 +20,8 @@
 "Notice (vulnerability)": 90
 "Cleartext password": 90
 "Insecure or outdated protocol": 60
-"File scan (capa)": 50
-"File scan (ClamAV)": 90
-"File scan (Malass)": 90
+"Signature (capa)": 50
+"Signature (ClamAV)": 90
 "Signature": 75
-"File scan (VirusTotal)": 90
-"File scan (YARA)": 90
+"Signature (YARA)": 90
 "Weird": 30
