@@ -36,7 +36,7 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
 
   # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
-  $ARKIMEDIR/bin/moloch-capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+  $ARKIMEDIR/bin/capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
 
   #set some default settings I want for arkime

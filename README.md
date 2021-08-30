@@ -194,7 +194,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 Malcolm leverages the following excellent open source tools, among others.
 
 * [Arkime](https://arkime.com/) (formerly Moloch) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
-    * [moloch-capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
+    * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
 * [Elasticsearch](https://www.elastic.co/products/elasticsearch) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - a search and analytics engine for indexing and querying network traffic session metadata 
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
@@ -300,7 +300,7 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
 
-* `arkime` - code and configuration for the `arkime` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
+* `arkime` - code and configuration for the `arkime` container which processes PCAP files using `capture` and which serves the Viewer application
 * `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
 * `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images

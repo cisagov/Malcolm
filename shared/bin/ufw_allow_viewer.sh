@@ -3,7 +3,7 @@
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # manage a UFW rule for allowing a remote Arkime viewer instance (on the same host
-# to which moloch-capture is forwarding session logs) to connect to and
+# to which arkime's capture is forwarding session logs) to connect to and
 # retrieve PCAP segments from the local Arkime viewer instance
 
 # works with a comma-separated list of IP addresses in $ARKIME_PACKET_ACL, or

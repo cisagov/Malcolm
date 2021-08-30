@@ -212,7 +212,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     chmod 755 /opt/*.sh && \
     ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_arkime_processor.py && \
     cp -f /opt/arkime_update_geo.sh $ARKIMEDIR/bin/arkime_update_geo.sh && \
-    chmod u+s $ARKIMEDIR/bin/moloch-capture && \
+    chmod u+s $ARKIMEDIR/bin/capture && \
     mkdir -p /var/run/arkime && \
     chown -R $PUSER:$PGROUP $ARKIMEDIR/etc $ARKIMEDIR/logs /var/run/arkime
 #Update Path

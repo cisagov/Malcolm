@@ -19,7 +19,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   # stick elasticsearch connection information in arkime config file
   if [[ -n $ES_PROTOCOL ]] && [[ -n $ES_HOST ]]; then
 
-    # build elasticsearch URL for moloch-capture
+    # build elasticsearch URL for capture
     ARKIME_ELASTICSEARCH="${ES_PROTOCOL}://"
 
     if [[ -n $ES_USERNAME ]] && [[ -n $ES_PASSWORD ]]; then
@@ -60,7 +60,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   export ARKIME_NODE_NAME="$(hostname --long)"
   export ARKIME_NODE_HOST="$PRIMARY_IP"
 
-  # get sensor user-owned copies of the moloch-capture lookup files into /opt/sensor/sensor_ctl/arkime
+  # get sensor user-owned copies of the capture lookup files into /opt/sensor/sensor_ctl/arkime
   rsync -a --update /opt/arkime/etc/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb} /opt/sensor/sensor_ctl/arkime/
   chmod 600 /opt/sensor/sensor_ctl/arkime/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb}
 

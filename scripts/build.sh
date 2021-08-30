@@ -106,7 +106,7 @@ FILES_IN_IMAGES=(
   "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"
   "/opt/arkime/etc/ipv4-address-space.csv;arkime"
   "/opt/arkime/etc/oui.txt;arkime"
-  "/opt/arkime/bin/moloch-capture;arkime"
+  "/opt/arkime/bin/capture;arkime"
   "/var/www/html/list.min.js;name-map-ui"
   "/var/www/html/jquery.min.js;name-map-ui"
   "/opt/zeek/bin/zeek;zeek"

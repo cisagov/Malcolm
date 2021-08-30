@@ -4,7 +4,7 @@
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
-# Process queued files reported by pcap_watcher.py, using either moloch-capture or zeek to process
+# Process queued files reported by pcap_watcher.py, using either arkime's capture or zeek to process
 # them for session creation and logging into the Elasticsearch database
 #
 # Run the script with --help for options
@@ -32,7 +32,7 @@ MAX_WORKER_PROCESSES_DEFAULT = 1
 PCAP_PROCESSING_MODE_ARKIME = "arkime"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
 
-ARKIME_CAPTURE_PATH = "/opt/arkime/bin/moloch-capture"
+ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
 
 ZEEK_PATH = "/opt/zeek/bin/zeek"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
@@ -115,7 +115,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
           if notLocked: cmd.append('--nolockpcap')
           cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
-          # execute moloch-capture for pcap file
+          # execute capture for pcap file
           retcode, output = run_process(cmd, debug=verboseDebug)
           if (retcode == 0):
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
@@ -257,7 +257,7 @@ def main():
   requiredNamed = parser.add_argument_group('required arguments')
   requiredNamed.add_argument('--pcap-directory', dest='pcapBaseDir', help='Base directory for PCAP files', metavar='<directory>', type=str, required=True)
   if (processingMode == PCAP_PROCESSING_MODE_ARKIME):
-    parser.add_argument('--arkime', required=False, dest='executable', help="moloch-capture executable path", metavar='<STR>', type=str, default=ARKIME_CAPTURE_PATH)
+    parser.add_argument('--arkime', required=False, dest='executable', help="Arkime capture executable path", metavar='<STR>', type=str, default=ARKIME_CAPTURE_PATH)
     parser.add_argument('--managed', dest='notLocked', help="Allow Arkime to manage PCAP files", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
     parser.add_argument('--zeek', required=False, dest='executable', help="zeek executable path", metavar='<STR>', type=str, default=ZEEK_PATH)
@@ -306,7 +306,7 @@ def main():
   # we'll pull from the topic in the main thread and queue them for processing by the worker threads
   newFileQueue = deque()
 
-  # start worker threads which will pull filenames/tags to be processed by moloch-capture
+  # start worker threads which will pull filenames/tags to be processed by capture
   if (processingMode == PCAP_PROCESSING_MODE_ARKIME):
     scannerThreads = ThreadPool(args.threads, arkimeCaptureFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autotag,args.notLocked],))
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
@@ -327,7 +327,7 @@ def main():
       fileInfo = None
 
     if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-      # queue for the workers to process with moloch-capture
+      # queue for the workers to process with capture
       newFileQueue.append(fileInfo)
       if debug: eprint(f"{scriptName}:\t📨\t{fileInfo}")
 
