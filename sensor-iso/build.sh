@@ -125,8 +125,8 @@ if [ -d "$WORKDIR" ]; then
   echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
-  mkdir -p "$SCRIPT_PATH/moloch/etc"
-  pushd "$SCRIPT_PATH/moloch/etc"
+  mkdir -p "$SCRIPT_PATH/arkime/etc"
+  pushd "$SCRIPT_PATH/arkime/etc"
   MAXMIND_GEOIP_DB_LICENSE_KEY=""
   if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
     MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
@@ -143,10 +143,10 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/moloch:/build arkime-build:latest -o /build
-  cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
+  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
+  cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
 
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/

@@ -194,7 +194,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 Malcolm leverages the following excellent open source tools, among others.
 
 * [Arkime](https://arkime.com/) (formerly Moloch) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
-    * [moloch-capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
+    * [arkime-capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
 * [Elasticsearch](https://www.elastic.co/products/elasticsearch) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - a search and analytics engine for indexing and querying network traffic session metadata 
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
@@ -300,6 +300,9 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
 
+* `arkime` - code and configuration for the `arkime` container which processes PCAP files using `arkime-capture` and which serves the Viewer application
+* `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
+* `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
 * `elasticsearch` - an initially empty directory where the Elasticsearch database instance will reside
@@ -312,9 +315,6 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](#ISO) for a minimal Debian-based Linux installation for running Malcolm
-* `moloch` - code and configuration for the `arkime` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
-* `moloch-logs` - an initially empty directory to which the `arkime` container will write some debug log files
-* `moloch-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
@@ -910,7 +910,7 @@ The Arkime interface will be accessible over HTTPS on port 443 at the docker hos
 
 A stock installation of Arkime extracts all of its network connection ("session") metadata ("SPI" or "Session Profile Information") from full packet capture artifacts (PCAP files). Zeek (formerly Bro) generates similar session metadata, linking network events to sessions via a connection UID. Malcolm aims to facilitate analysis of Zeek logs by mapping values from Zeek logs to the Arkime session database schema for equivalent fields, and by creating new "native" Arkime database fields for all the other Zeek log values for which there is not currently an equivalent in Arkime:
 
-![Zeek log session record](./docs/images/screenshots/moloch_session_zeek.png)
+![Zeek log session record](./docs/images/screenshots/arkime_session_zeek.png)
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
@@ -918,7 +918,7 @@ One value of particular mention is **Zeek Log Type** (`zeek.logType` in Elastics
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
-![Zeek fields](./docs/images/screenshots/moloch_help_fields.png)
+![Zeek fields](./docs/images/screenshots/arkime_help_fields.png)
 
 The values of records created from Zeek logs can be expanded and viewed like any native Arkime session by clicking the plus **➕** icon to the left of the record in the Sessions view. However, note that when dealing with these Zeek records the full packet contents are not available, so buttons dealing with viewing and exporting PCAP information will not behave as they would for records from PCAP files. Other than that, Zeek records and their values are usable in Malcolm just like native PCAP session records.
 
@@ -934,7 +934,7 @@ The `rootId` field is used by Arkime to link session records together when a par
 
 Filtering on community ID OR'ed with zeek UID (e.g., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Arkime sessions and Zeek logs generated by a particular network connection.
 
-![Correlating Arkime sessions and Zeek logs](./docs/images/screenshots/moloch_correlate_communityid_uid.png)
+![Correlating Arkime sessions and Zeek logs](./docs/images/screenshots/arkime_correlate_communityid_uid.png)
 
 ### <a name="ArkimeHelp"></a>Help
 
@@ -944,7 +944,7 @@ Click the icon of the owl 🦉 in the upper-left hand corner of to access the Ar
 
 The **Sessions** view provides low-level details of the sessions being investigated, whether they be Arkime sessions created from PCAP files or [Zeek logs mapped](#ArkimeZeek) to the Arkime session database schema.
 
-![Arkime's Sessions view](./docs/images/screenshots/moloch_sessions.png)
+![Arkime's Sessions view](./docs/images/screenshots/arkime_sessions.png)
 
 The **Sessions** view contains many controls for filtering the sessions displayed from all sessions down to sessions of interest:
 
@@ -953,7 +953,7 @@ The **Sessions** view contains many controls for filtering the sessions displaye
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
 * views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including several on the `zeek.logType` field. 
 
-![Malcolm views](./docs/images/screenshots/moloch_log_filter.png)
+![Malcolm views](./docs/images/screenshots/arkime_log_filter.png)
 
 * map: A global map can be expanded by clicking the globe **🌎** icon. This allows filtering sessions by IP-based geolocation when possible.
 
@@ -975,7 +975,7 @@ See also Arkime's usage documentation for more information on the [Sessions view
 
 Clicking the down arrow **▼** icon to the far right of the search bar presents a list of actions including **PCAP Export** (see Arkime's [sessions help](https://localhost/help#sessions) for information on the other actions).  When full PCAP sessions are displayed, the **PCAP Export** feature allows you to create a new PCAP file from the matching Arkime sessions, including controls for which sessions are included (open items, visible items, or all matching items) and whether or not to include linked segments. Click **Export PCAP** button to generate the PCAP, after which you'll be presented with a browser download dialog to save or open the file. Note that depending on the scope of the filters specified this might take a long time (or, possibly even time out).
 
-![Export PCAP](./docs/images/screenshots/moloch_export_pcap.png)
+![Export PCAP](./docs/images/screenshots/arkime_export_pcap.png)
 
 See the [issues](#Issues) section of this document for an error that can occur using this feature when Zeek log sessions are displayed.View
 
@@ -983,11 +983,11 @@ See the [issues](#Issues) section of this document for an error that can occur u
 
 Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (e.g., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Arkime and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
 
-![Arkime's SPIView](./docs/images/screenshots/moloch_spiview.png)
+![Arkime's SPIView](./docs/images/screenshots/arkime_spiview.png)
 
 Click the the plus **➕** icon to the right of a category to expand it. The values for specific fields are displayed by clicking the field description in the field list underneath the category name. The list of field names can be filtered by typing part of the field name in the *Search for fields to display in this category* text input. The **Load All** and **Unload All** buttons can be used to toggle display of all of the fields belonging to that category. Once displayed, a field's name or one of its values may be clicked to provide further actions for filtering or displaying that field or its values. Of particular interest may be the **Open [fieldname] SPI Graph** option when clicking on a field's name. This will open a new tab with the SPI Graph ([see below](#ArkimeSPIGraph)) populated with the field's top values.
 
-Note that because the SPIView page can potentially run many queries, SPIView limits the search domain to seven days (in other words, seven indices, as each index represents one day's worth of data). When using SPIView, you will have best results if you limit your search time frame to less than or equal to seven days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini](./etc/moloch/config.ini) and rebuilding the `malcolmnetsec/arkime` docker container.
+Note that because the SPIView page can potentially run many queries, SPIView limits the search domain to seven days (in other words, seven indices, as each index represents one day's worth of data). When using SPIView, you will have best results if you limit your search time frame to less than or equal to seven days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini](./etc/arkime/config.ini) and rebuilding the `malcolmnetsec/arkime` docker container.
 
 See also Arkime's usage documentation for more information on [SPIView](https://localhost/help#spiview).
 
@@ -995,7 +995,7 @@ See also Arkime's usage documentation for more information on [SPIView](https://
 
 Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **Graph** visualizes the occurrence of some field's top *n* values over time, and (optionally) geographically. This is particularly useful for identifying trends in a particular type of communication over time: traffic using a particular protocol when seen sparsely at regular intervals on that protocol's date histogram in the SPIGraph may indicate a connection check, polling, or beaconing (for example, see the `llmnr` protocol in the screenshot below).
 
-![Arkime's SPIGraph](./docs/images/screenshots/moloch_spigraph.png)
+![Arkime's SPIGraph](./docs/images/screenshots/arkime_spigraph.png)
 
 Controls can be found underneath the time bounding controls for selecting the field of interest, the number of elements to be displayed, the sort order, and a periodic refresh of the data.
 
@@ -1005,7 +1005,7 @@ See also Arkime's usage documentation for more information on [SPIGraph](https:/
 
 The **Connections** page presents network communications via a force-directed graph, making it easy to visualize logical relationships between network hosts.
 
-![Arkime's Connections graph](./docs/images/screenshots/moloch_connections.png)
+![Arkime's Connections graph](./docs/images/screenshots/arkime_connections.png)
 
 Controls are available for specifying the query size (where smaller values will execute more quickly but may only contain an incomplete representation of the top *n* sessions, and larger values may take longer to execute but will be more complete), which fields to use as the source and destination for node values, a minimum connections threshold, and the method for determining the "weight" of the link between two nodes. As is the case with most other visualizations in Arkime, the graph is interactive: clicking on a node or the link between two nodes can be used to modify query filters, and the nodes themselves may be repositioned by dragging and dropping them. A node's color indicates whether it communicated as a source/originator, a destination/responder, or both.
 
@@ -1034,15 +1034,15 @@ Clicking the **Create a packet search job** on the Hunt page will allow you to s
 
 Click the **➕ Create** button to begin the search. Arkime will scan the source PCAP files from which the sessions were created according to the search criteria. Note that whatever filters were specified when the hunt job is executed will apply to the hunt job as well; the number of sessions matching the current filters will be displayed above the hunt job parameters with text like "ⓘ Creating a new packet search job will search the packets of # sessions."
 
-![Hunt creation](./docs/images/screenshots/moloch_hunt_creation.png)
+![Hunt creation](./docs/images/screenshots/arkime_hunt_creation.png)
 
 Once a hunt job is submitted, it will be assigned a unique hunt ID (a long unique string of characters like `yuBHAGsBdljYmwGkbEMm`) and its progress will be updated periodically in the **Hunt Job Queue** with the execution percent complete, the number of matches found so far, and the other parameters with which the job was submitted. More details for the hunt job can be viewed by expanding its row with the plus **➕** icon on the left.
 
-![Hunt completed](./docs/images/screenshots/moloch_hunt_finished.png)
+![Hunt completed](./docs/images/screenshots/arkime_hunt_finished.png)
 
 Once the hunt job is complete (and a minute or so has passed, as the `huntId` must be added to the matching session records in the database), click the folder **📂** icon on the right side of the hunt job row to open a new [Sessions](#ArkimeSessions) tab with the search bar prepopulated to filter to sessions with packets matching the search criteria.
 
-![Hunt result sessions](./docs/images/screenshots/moloch_hunt_sessions.png)
+![Hunt result sessions](./docs/images/screenshots/arkime_hunt_sessions.png)
 
 From this list of filtered sessions you can expand session details and explore packet payloads which matched the hunt search criteria.
 
@@ -1056,15 +1056,15 @@ Arkime provides several other reports which show information about the state of 
 
 The **Files** list displays a list of PCAP files processed by Arkime, the date and time of the earliest packet in each file, and the file size:
 
-![Arkime's Files list](./docs/images/screenshots/moloch_files.png)
+![Arkime's Files list](./docs/images/screenshots/arkime_files.png)
 
 The **ES Indices** list (available under the **Stats** page) lists the Elasticsearch indices within which log data is contained:
 
-![Arkime's ES indices list](./docs/images/screenshots/moloch_es_stats.png)
+![Arkime's ES indices list](./docs/images/screenshots/arkime_es_stats.png)
 
 The **History** view provides a historical list of queries issues to Arkime and the details of those queries:
 
-![Arkime's History view](./docs/images/screenshots/moloch_history.png)
+![Arkime's History view](./docs/images/screenshots/arkime_history.png)
 
 See also Arkime's usage documentation for more information on the [Files list](https://localhost/help#files), [statistics](https://localhost/help#files), and [history](https://localhost/help#history).
 
@@ -1076,9 +1076,9 @@ The **Settings** page can be used to tweak Arkime preferences, defined additiona
 
 See Arkime's usage documentation for more information on [settings](https://localhost/help#settings).
 
-![Arkime general settings](./docs/images/screenshots/moloch_general_settings.png)
+![Arkime general settings](./docs/images/screenshots/arkime_general_settings.png)
 
-![Arkime custom view management](./docs/images/screenshots/moloch_view_settings.png)
+![Arkime custom view management](./docs/images/screenshots/arkime_view_settings.png)
 
 ## <a name="Kibana"></a>Kibana
 
@@ -1342,7 +1342,7 @@ As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's sour
 
 If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if they contain different values, the tag `cross_segment` will be added to the log's `tags` field for convenient identification of cross-segment traffic. This traffic could be easily visualized using Arkime's **Connections** graph, by setting the **Src:** value to **Originating Network Segment** and the **Dst:** value to **Responding Network Segment**:
 
-![Cross-segment traffic in Connections](./docs/images/screenshots/moloch_connections_segments.png)
+![Cross-segment traffic in Connections](./docs/images/screenshots/arkime_connections_segments.png)
 
 #### <a name="NameMapUI"></a>Defining hostname and CIDR subnet names interface
 

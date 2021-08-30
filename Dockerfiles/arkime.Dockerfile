@@ -4,14 +4,14 @@ FROM debian:bullseye-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "2.7.1"
-ENV ARKIMEDIR "/data/moloch"
+ENV ARKIME_VERSION "3.0.0"
+ENV ARKIMEDIR "/data/arkime"
 ENV ARKIME_URL "https://codeload.github.com/arkime/arkime/tar.gz/v${ARKIME_VERSION}"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes
 
-ADD moloch/scripts/bs4_remove_div.py /data/
-ADD moloch/patch/* /data/patches/
+ADD arkime/scripts/bs4_remove_div.py /data/
+ADD arkime/patch/* /data/patches/
 ADD README.md $ARKIMEDIR/doc/
 ADD doc.css $ARKIMEDIR/doc/
 ADD docs/images $ARKIMEDIR/doc/images/
@@ -64,9 +64,9 @@ RUN apt-get -q update && \
     sed -i "s@docs/images@images@g" README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIMEDIR/doc/doc.css -o $ARKIMEDIR/doc/README.html $ARKIMEDIR/doc/README.md && \
   cd /data && \
-    mkdir -p "./moloch-"$ARKIME_VERSION && \
-    curl -sSL "$ARKIME_URL" | tar xzvf - -C "./moloch-"$ARKIME_VERSION --strip-components 1 && \
-    cd "./moloch-"$ARKIME_VERSION && \
+    mkdir -p "./arkime-"$ARKIME_VERSION && \
+    curl -sSL "$ARKIME_URL" | tar xzvf - -C "./arkime-"$ARKIME_VERSION --strip-components 1 && \
+    cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /data/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     find $ARKIMEDIR/doc/images/screenshots -name "*.png" -delete && \
     export PATH="$ARKIMEDIR/bin:${PATH}" && \
@@ -129,7 +129,7 @@ ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
 ENV ARKIME_PASSWORD "ignored"
-ENV ARKIMEDIR "/data/moloch"
+ENV ARKIMEDIR "/data/arkime"
 ENV ARKIME_ANALYZE_PCAP_THREADS $ARKIME_ANALYZE_PCAP_THREADS
 ENV WISE $WISE
 ENV VIEWER $VIEWER
@@ -182,13 +182,13 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 
 # add configuration and scripts
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD moloch/scripts /data/
-ADD shared/bin/pcap_moloch_and_zeek_processor.py /data/
+ADD arkime/scripts /data/
+ADD shared/bin/pcap_arkime_and_zeek_processor.py /data/
 ADD shared/bin/pcap_utils.py /data/
 ADD shared/bin/elastic_search_status.sh /data/
-ADD moloch/etc $ARKIMEDIR/etc/
-ADD moloch/wise/source.*.js $ARKIMEDIR/wiseService/
-ADD moloch/supervisord.conf /etc/supervisord.conf
+ADD arkime/etc $ARKIMEDIR/etc/
+ADD arkime/wise/source.*.js $ARKIMEDIR/wiseService/
+ADD arkime/supervisord.conf /etc/supervisord.conf
 
 # MaxMind now requires a (free) license key to download the free versions of
 # their GeoIP databases. This should be provided as a build argument.
@@ -210,11 +210,11 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIMEDIR $PUSER && \
       usermod -a -G tty $PUSER && \
     chmod 755 /data/*.sh && \
-    ln -sfr /data/pcap_moloch_and_zeek_processor.py /data/pcap_moloch_processor.py && \
-    cp -f /data/moloch_update_geo.sh $ARKIMEDIR/bin/moloch_update_geo.sh && \
-    chmod u+s $ARKIMEDIR/bin/moloch-capture && \
-    mkdir -p /var/run/moloch && \
-    chown -R $PUSER:$PGROUP $ARKIMEDIR/etc $ARKIMEDIR/logs /var/run/moloch
+    ln -sfr /data/pcap_arkime_and_zeek_processor.py /data/pcap_arkime_processor.py && \
+    cp -f /data/arkime_update_geo.sh $ARKIMEDIR/bin/arkime_update_geo.sh && \
+    chmod u+s $ARKIMEDIR/bin/arkime-capture && \
+    mkdir -p /var/run/arkime && \
+    chown -R $PUSER:$PGROUP $ARKIMEDIR/etc $ARKIMEDIR/logs /var/run/arkime
 #Update Path
 ENV PATH="/data:$ARKIMEDIR/bin:${PATH}"
 

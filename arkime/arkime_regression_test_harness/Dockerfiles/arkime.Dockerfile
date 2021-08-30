@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV GITHUB_URL "https://github.com/arkime/arkime/"
 ENV GITHUB_BRANCH "master"
-ENV ARKIMEDIR "/data/moloch"
+ENV ARKIMEDIR "/data/arkime"
 ENV ARKIMEUSER "arkime"
 
 USER root

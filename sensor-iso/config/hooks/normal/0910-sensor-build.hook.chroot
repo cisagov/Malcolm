@@ -40,7 +40,7 @@ mkdir -p /opt/hedgehog_install_artifacts/
 apt-get -q update
 apt-get install -q -y -t buster-backports --no-install-recommends cmake
 
-# a moloch .deb is built and installed in a different context
+# an arkime .deb is built and installed in a different context
 
 # Install netsniff-ng
 cd /tmp
@@ -217,16 +217,16 @@ chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
-chown root:netdev /opt/moloch/bin/moloch-capture && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/moloch/bin/moloch-capture
+chown root:netdev /opt/arkime/bin/arkime-capture && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/arkime-capture
 
 ln -s -f "${ZEEK_DIR}"/bin/zeek /usr/local/bin/
 ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
 ln -s -f /usr/sbin/tcpdump /usr/local/bin/
-ln -s -f /opt/moloch/bin/moloch-capture /usr/local/bin/
-ln -s -f /opt/moloch/bin/npm /usr/local/bin
-ln -s -f /opt/moloch/bin/node /usr/local/bin
-ln -s -f /opt/moloch/bin/npx /usr/local/bin
+ln -s -f /opt/arkime/bin/arkime-capture /usr/local/bin/
+ln -s -f /opt/arkime/bin/npm /usr/local/bin
+ln -s -f /opt/arkime/bin/node /usr/local/bin
+ln -s -f /opt/arkime/bin/npx /usr/local/bin
 ###
 
 # zeekctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user.

@@ -73,7 +73,7 @@ RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && 
     chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /data/init /opt/kibana/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/elastic_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/kibana-create-arkime-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/elastic_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $KIBANA_OFFLINE_REGION_MAPS_PORT
 

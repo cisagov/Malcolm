@@ -867,12 +867,12 @@ function ZeekLogs (api, section) {
   // add right-click for searching IANA for ports
   var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
   this.api.addRightClick("malcolm_websearch_port",            {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:portFieldsStr});
-  this.api.addRightClick("malcolm_websearch_port_moloch",     {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category:"port"});
+  this.api.addRightClick("malcolm_websearch_port_arkime",     {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category:"port"});
 
   // add right-click for searching VirusTotal for hash signatures
   var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
   this.api.addRightClick("malcolm_vt_fields_hash",         {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", fields:hashFieldsStr});
-  this.api.addRightClick("malcolm_vt_fields_hash_moloch",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", category:"md5"});
+  this.api.addRightClick("malcolm_vt_fields_hash_arkime",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", category:"md5"});
 
   // add right-click for searching the web for signature IDs
   var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');

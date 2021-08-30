@@ -4,7 +4,7 @@
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
-# Process queued files reported by pcap_watcher.py, using either moloch-capture or zeek to process
+# Process queued files reported by pcap_watcher.py, using either arkime-capture or zeek to process
 # them for session creation and logging into the Elasticsearch database
 #
 # Run the script with --help for options
@@ -29,10 +29,10 @@ from itertools import chain, repeat
 ###################################################################################################
 MAX_WORKER_PROCESSES_DEFAULT = 1
 
-PCAP_PROCESSING_MODE_ARKIME = "moloch"
+PCAP_PROCESSING_MODE_ARKIME = "arkime"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
 
-ARKIME_CAPTURE_PATH = "/data/moloch/bin/moloch-capture"
+ARKIME_CAPTURE_PATH = "/data/arkime/bin/arkime-capture"
 
 ZEEK_PATH = "/opt/zeek/bin/zeek"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
@@ -80,7 +80,7 @@ def debug_toggle_handler(signum, frame):
   debugToggled = True
 
 ###################################################################################################
-def molochCaptureFileWorker(molochWorkerArgs):
+def arkimeCaptureFileWorker(arkimeWorkerArgs):
   global debug
   global verboseDebug
   global shuttingDown
@@ -88,7 +88,7 @@ def molochCaptureFileWorker(molochWorkerArgs):
 
   scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
 
-  newFileQueue, pcapBaseDir, molochBin, autotag, notLocked = molochWorkerArgs[0], molochWorkerArgs[1], molochWorkerArgs[2], molochWorkerArgs[3], molochWorkerArgs[4]
+  newFileQueue, pcapBaseDir, arkimeBin, autotag, notLocked = arkimeWorkerArgs[0], arkimeWorkerArgs[1], arkimeWorkerArgs[2], arkimeWorkerArgs[3], arkimeWorkerArgs[4]
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
@@ -110,17 +110,17 @@ def molochCaptureFileWorker(molochWorkerArgs):
           fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
           if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-          # put together moloch execution command
-          cmd = [molochBin, '--quiet', '-r', fileInfo[FILE_INFO_DICT_NAME]]
+          # put together arkime execution command
+          cmd = [arkimeBin, '--quiet', '-r', fileInfo[FILE_INFO_DICT_NAME]]
           if notLocked: cmd.append('--nolockpcap')
           cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
-          # execute moloch-capture for pcap file
+          # execute arkime-capture for pcap file
           retcode, output = run_process(cmd, debug=verboseDebug)
           if (retcode == 0):
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
           else:
-            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{molochBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
 
 
   if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
@@ -257,7 +257,7 @@ def main():
   requiredNamed = parser.add_argument_group('required arguments')
   requiredNamed.add_argument('--pcap-directory', dest='pcapBaseDir', help='Base directory for PCAP files', metavar='<directory>', type=str, required=True)
   if (processingMode == PCAP_PROCESSING_MODE_ARKIME):
-    parser.add_argument('--moloch', required=False, dest='executable', help="moloch-capture executable path", metavar='<STR>', type=str, default=ARKIME_CAPTURE_PATH)
+    parser.add_argument('--arkime', required=False, dest='executable', help="arkime-capture executable path", metavar='<STR>', type=str, default=ARKIME_CAPTURE_PATH)
     parser.add_argument('--managed', dest='notLocked', help="Allow Arkime to manage PCAP files", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
     parser.add_argument('--zeek', required=False, dest='executable', help="zeek executable path", metavar='<STR>', type=str, default=ZEEK_PATH)
@@ -306,9 +306,9 @@ def main():
   # we'll pull from the topic in the main thread and queue them for processing by the worker threads
   newFileQueue = deque()
 
-  # start worker threads which will pull filenames/tags to be processed by moloch-capture
+  # start worker threads which will pull filenames/tags to be processed by arkime-capture
   if (processingMode == PCAP_PROCESSING_MODE_ARKIME):
-    scannerThreads = ThreadPool(args.threads, molochCaptureFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autotag,args.notLocked],))
+    scannerThreads = ThreadPool(args.threads, arkimeCaptureFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autotag,args.notLocked],))
   elif (processingMode == PCAP_PROCESSING_MODE_ZEEK):
     scannerThreads = ThreadPool(args.threads, zeekFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autozeek,args.autotag,args.zeekUploadDir,args.zeekExtractFileMode],))
 
@@ -327,7 +327,7 @@ def main():
       fileInfo = None
 
     if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-      # queue for the workers to process with moloch-capture
+      # queue for the workers to process with arkime-capture
       newFileQueue.append(fileInfo)
       if debug: eprint(f"{scriptName}:\t📨\t{fileInfo}")
 

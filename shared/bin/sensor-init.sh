@@ -38,7 +38,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
       chmod 600 /opt/sensor/sensor_ctl/control_vars.conf*
     fi
 
-    [[ -d /opt/sensor/sensor_ctl/moloch/config.ini ]] && chmod 600 /opt/sensor/sensor_ctl/moloch/config.ini
+    [[ -d /opt/sensor/sensor_ctl/arkime/config.ini ]] && chmod 600 /opt/sensor/sensor_ctl/arkime/config.ini
 
   fi
 

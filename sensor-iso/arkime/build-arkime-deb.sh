@@ -20,20 +20,20 @@ fi
 apt-get -q update
 
 mkdir -p /opt
-curl -L -o /tmp/moloch.tar.gz "https://github.com/arkime/arkime/archive/v$ARKIME_VERSION.tar.gz"
+curl -L -o /tmp/arkime.tar.gz "https://github.com/arkime/arkime/archive/v$ARKIME_VERSION.tar.gz"
 
 cd /tmp
-tar -xvf "moloch.tar.gz"
-rm -f "moloch.tar.gz"
+tar -xvf "arkime.tar.gz"
+rm -f "arkime.tar.gz"
 
-mv "./arkime-"$ARKIME_VERSION "./moloch-"$ARKIME_VERSION || true
-cd "./moloch-"$ARKIME_VERSION
+mv "./arkime-"$ARKIME_VERSION "./arkime-"$ARKIME_VERSION || true
+cd "./arkime-"$ARKIME_VERSION
 
-for i in /moloch-src-patch/*; do
+for i in /arkime-src-patch/*; do
   patch -p 1 -r - --no-backup-if-mismatch < $i || true
 done
 
-export PATH="$ARKIMEDIR/bin:/tmp/moloch-$ARKIME_VERSION/node_modules/.bin:${PATH}"
+export PATH="$ARKIMEDIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
 ./easybutton-build.sh --dir "$ARKIMEDIR"
 
@@ -45,13 +45,13 @@ cp -r ./capture/plugins/lua/samples "$ARKIMEDIR"/lua
 
 npm install license-checker; release/notice.txt.pl $ARKIMEDIR NOTICE release/CAPTURENOTICE > $ARKIMEDIR/NOTICE.txt
 
-ETC_FILES=$(shopt -s nullglob dotglob; echo /moloch-etc/*)
+ETC_FILES=$(shopt -s nullglob dotglob; echo /arkime-etc/*)
 if (( ${#ETC_FILES} )) ; then
   mkdir -p $ARKIMEDIR/etc
-  cp -r /moloch-etc/* $ARKIMEDIR/etc/
+  cp -r /arkime-etc/* $ARKIMEDIR/etc/
 fi
 
-fpm -s dir -t deb -n moloch -x opt/moloch/logs -x opt/moloch/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIMEDIR"
+fpm -s dir -t deb -n arkime -x opt/arkime/logs -x opt/arkime/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIMEDIR"
 
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 

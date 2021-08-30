@@ -391,7 +391,7 @@ def stop(wipe=False):
     shutil.rmtree(os.path.join(MalcolmPath, 'elasticsearch/nodes'), ignore_errors=True)
 
     # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
-    for dataDir in ['elasticsearch-backup', 'zeek-logs', 'moloch-logs', 'pcap', 'moloch-raw']:
+    for dataDir in ['elasticsearch-backup', 'zeek-logs', 'arkime-logs', 'pcap', 'arkime-raw']:
       for root, dirnames, filenames in os.walk(os.path.join(MalcolmPath, dataDir), topdown=True, onerror=None):
         for file in filenames:
           fileSpec = os.path.join(root, file)

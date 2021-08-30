@@ -3,7 +3,7 @@
 *-build.log
 .vagrant
 /config/packages.chroot/*.deb
-/moloch/*.deb
+/arkime/*.deb
 
 # a temporary copy of ../shared
 /shared

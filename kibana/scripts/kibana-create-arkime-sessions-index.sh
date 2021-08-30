@@ -74,7 +74,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
         if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]]; then
           # insert opendistro.index_state_management.policy_id into index template settings: will be
-          # imported by kibana-create-moloch-sessions-index.sh
+          # imported by kibana-create-arkime-sessions-index.sh
           cat "$ZEEK_TEMPLATE_FILE_ORIG" | jq ".settings += {\"opendistro.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$ZEEK_TEMPLATE_FILE"
         fi
       fi

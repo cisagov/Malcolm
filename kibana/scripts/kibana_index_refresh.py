@@ -178,7 +178,7 @@ def main():
     for field in getFieldsList:
       if field['name'][:1].isalpha():
 
-        # for Arkime to query by database field name, see moloch issue/PR 1461/1463
+        # for Arkime to query by database field name, see arkime issue/PR 1461/1463
         valQuote = '"' if field['type'] == 'string' else ''
         valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}

@@ -4,9 +4,9 @@
 
 export ARKIME_HTTPS_FLAG=""
 
-if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; then
+if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; then
 
-  ARKIME_CONFIG_FILE="$SUPERVISOR_PATH"/moloch/config.ini
+  ARKIME_CONFIG_FILE="$SUPERVISOR_PATH"/arkime/config.ini
 
   # capture interface(s)
   if [[ -n $CAPTURE_INTERFACE ]]; then
@@ -16,10 +16,10 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; t
     sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "$ARKIME_CONFIG_FILE"
   fi
 
-  # stick elasticsearch connection information in moloch config file
+  # stick elasticsearch connection information in arkime config file
   if [[ -n $ES_PROTOCOL ]] && [[ -n $ES_HOST ]]; then
 
-    # build elasticsearch URL for moloch-capture
+    # build elasticsearch URL for arkime-capture
     ARKIME_ELASTICSEARCH="${ES_PROTOCOL}://"
 
     if [[ -n $ES_USERNAME ]] && [[ -n $ES_PASSWORD ]]; then
@@ -60,9 +60,9 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/moloch/config.ini ]]; t
   export ARKIME_NODE_NAME="$(hostname --long)"
   export ARKIME_NODE_HOST="$PRIMARY_IP"
 
-  # get sensor user-owned copies of the moloch-capture lookup files into /opt/sensor/sensor_ctl/moloch
-  rsync -a --update /opt/moloch/etc/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb} /opt/sensor/sensor_ctl/moloch/
-  chmod 600 /opt/sensor/sensor_ctl/moloch/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb}
+  # get sensor user-owned copies of the arkime-capture lookup files into /opt/sensor/sensor_ctl/arkime
+  rsync -a --update /opt/arkime/etc/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb} /opt/sensor/sensor_ctl/arkime/
+  chmod 600 /opt/sensor/sensor_ctl/arkime/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb}
 
   # update the firewall ACL (via ufw) to allow retrieval of packets
   sudo --non-interactive /usr/local/bin/ufw_allow_viewer.sh

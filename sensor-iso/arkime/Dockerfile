@@ -6,8 +6,8 @@ LABEL maintainer="malcolm.netsec@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "2.7.1"
-ENV ARKIMEDIR "/opt/moloch"
+ENV ARKIME_VERSION "3.0.0"
+ENV ARKIMEDIR "/opt/arkime"
 
 RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
   apt-get -q update && \
@@ -32,8 +32,8 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD build-moloch-deb.sh /usr/local/bin/
-ADD patch /moloch-src-patch
-ADD etc /moloch-etc
+ADD build-arkime-deb.sh /usr/local/bin/
+ADD patch /arkime-src-patch
+ADD etc /arkime-etc
 
-ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-moloch-deb.sh"]
+ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-arkime-deb.sh"]

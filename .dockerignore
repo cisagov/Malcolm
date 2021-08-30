@@ -16,8 +16,8 @@ elasticsearch
 elasticsearch-backup
 malcolm-iso
 sensor-iso
-moloch-logs
-moloch-raw
+arkime-logs
+arkime-raw
 nginx/nginx_ldap.conf
 pcap
 scripts
