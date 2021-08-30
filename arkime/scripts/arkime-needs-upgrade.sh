@@ -11,15 +11,14 @@ set -e
 
 # see Arkime's db.pl (https://github.com/arkime/arkime/blob/master/db/db.pl) near the bottom for this list
  declare -A ARKIME_INDEX_CURRENT_VERSIONS=(
-  [dstats_v]=dstats_v4
-  [fields_v]=fields_v3
-  [files_v]=files_v6
-  [hunts_v]=hunts_v2
-  [lookups_v]=lookups_v1
-  [queries_v]=queries_v3
-  [sequence_v]=sequence_v3
-  [stats_v]=stats_v4
-  [users_v]=users_v7
+  [arkime_dstats_v]=arkime_dstats_v30
+  [arkime_fields_v]=arkime_fields_v30
+  [arkime_files_v]=arkime_files_v30
+  [arkime_hunts_v]=arkime_hunts_v30
+  [arkime_lookups_v]=arkime_lookups_v30
+  [arkime_queries_v]=arkime_queries_v30
+  [arkime_stats_v]=arkime_stats_v30
+  [arkime_users_v]=arkime_users_v30
 )
 
 # get a list of all current indices and loop over them

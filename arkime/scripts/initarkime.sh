@@ -24,8 +24,8 @@ if [[ "$WISE" = "on" ]] ; then
   echo
 fi
 
-# initialize the contents of the Elasticearch database if it has never been initialized (ie., the users_v# table hasn't been created)
-if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_PORT/_cat/indices/users_v*" | wc -l) < 1 ]]; then
+# initialize the contents of the Elasticearch database if it has never been initialized (ie., the arkime_users_v# table hasn't been created)
+if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_PORT/_cat/indices/arkime_users_v*" | wc -l) < 1 ]]; then
 
   echo "Initializing Elasticsearch database..."
 
