@@ -4,7 +4,7 @@
 
 
 echo "Checking Elasticsearch..."
-/data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
+/opt/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
 #Wipe is the same initalize except it keeps users intact
 echo WIPE | /opt/arkime/db/db.pl http://$ES_HOST:$ES_PORT wipe
