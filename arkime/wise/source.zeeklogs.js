@@ -893,9 +893,9 @@ function ZeekLogs (api, section) {
 
   // add right-clicks for pivoting into Kibana from Arkime (see nginx.conf)
   var filterLabel = "Kibana %DBFIELD%";
-  var filterUrl = "idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
+  var filterUrl = "idark2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
-  this.api.addRightClick("malcolm_kibana_cat_ip",       {name:filterLabel, url:"idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
+  this.api.addRightClick("malcolm_kibana_cat_ip",       {name:filterLabel, url:"idark2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
   this.api.addRightClick("malcolm_kibana_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
   this.api.addRightClick("malcolm_kibana_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
   this.api.addRightClick("malcolm_kibana_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});

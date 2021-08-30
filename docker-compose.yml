@@ -331,11 +331,11 @@ services:
       - 8081
     volumes:
       - ./pcap:/data/pcap
-      - ./arkime-logs:/data/arkime/logs
-      - ./arkime-raw:/data/arkime/raw
-      - ./arkime/etc/config.ini:/data/arkime/etc/config.ini:ro
-      - ./arkime/etc/user_settings.json:/data/arkime/etc/user_settings.json:ro
-      - ./arkime/wise/source.zeeklogs.js:/data/arkime/wiseService/source.zeeklogs.js:ro
+      - ./arkime-logs:/opt/arkime/logs
+      - ./arkime-raw:/opt/arkime/raw
+      - ./arkime/etc/config.ini:/opt/arkime/etc/config.ini:ro
+      - ./arkime/etc/user_settings.json:/opt/arkime/etc/user_settings.json:ro
+      - ./arkime/wise/source.zeeklogs.js:/opt/arkime/wiseService/source.zeeklogs.js:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8005/_ns_/nstest.html"]
       interval: 90s

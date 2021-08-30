@@ -5,7 +5,7 @@
 rm -f /var/run/arkime/initialized /var/run/arkime/runwise
 
 echo "Giving Elasticsearch time to start..."
-/data/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
+/opt/elastic_search_status.sh 2>&1 && echo "Elasticsearch is running!"
 
 # download and/or update geo updates
 $ARKIMEDIR/bin/arkime_update_geo.sh
@@ -36,7 +36,7 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
 
   # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
-  $ARKIMEDIR/bin/arkime-capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+  $ARKIMEDIR/bin/moloch-capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
 
   #set some default settings I want for arkime
@@ -48,7 +48,7 @@ else
   echo "Elasticsearch database previously initialized!"
   echo
 
-  if /data/arkime-needs-upgrade.sh 2>&1; then
+  if /opt/arkime-needs-upgrade.sh 2>&1; then
     echo "Elasticsearch database needs to be upgraded for $ARKIME_VERSION!"
     $ARKIMEDIR/db/db.pl http://$ES_HOST:$ES_PORT upgradenoprompt
     echo "Elasticsearch database upgrade complete!"
@@ -58,7 +58,7 @@ else
     echo "Elasticsearch database is up-to-date for Arkime version $ARKIME_VERSION!"
     echo
 
-  fi # if /data/arkime-needs-upgrade.sh
+  fi # if /opt/arkime-needs-upgrade.sh
 fi # if/else Elasticsearch database initialized
 
 # increase Elasticsearch max shards per node from default if desired

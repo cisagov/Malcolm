@@ -310,8 +310,8 @@ services:
       - 8081
     volumes:
       - ./pcap:/data/pcap
-      - ./arkime-logs:/data/arkime/logs
-      - ./arkime-raw:/data/arkime/raw
+      - ./arkime-logs:/opt/arkime/logs
+      - ./arkime-raw:/opt/arkime/raw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8005/_ns_/nstest.html"]
       interval: 90s

@@ -106,7 +106,7 @@ if mkdir "$DESTDIR"; then
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   README_HTML="$RUN_PATH/$(basename $DESTDIR).README.html"
-  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/arkime' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /data/arkime/doc/README.html" > "$README_HTML" || true
+  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/arkime' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /opt/arkime/doc/README.html" > "$README_HTML" || true
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"

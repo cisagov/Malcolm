@@ -57,7 +57,7 @@ class Constants:
   AUDITBEAT='auditbeat'
   HEATBEAT='heatbeat' # protologbeat to log temperature and other misc. stuff
   SYSLOGBEAT='filebeat-syslog' # another filebeat instance for syslog
-  ARKIMECAP='arkime-capture'
+  ARKIMECAP='moloch-capture'
 
   BEAT_DIR = {
     FILEBEAT : f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -695,7 +695,7 @@ def main():
           raise CancelledError
 
         if (fwd_mode == Constants.ARKIMECAP):
-          # forwarding configuration for arkime-capture
+          # forwarding configuration for moloch-capture
 
           # get elasticsearch/kibana connection information from user
           elastic_config_dict = input_elasticsearch_connection_info(forwarder=fwd_mode,
