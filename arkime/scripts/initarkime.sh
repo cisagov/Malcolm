@@ -32,7 +32,7 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
 	$ARKIMEDIR/db/db.pl http://$ES_HOST:$ES_PORT initnoprompt
 
 	# this password isn't going to be used by Arkime, nginx will do the auth instead
-	$ARKIMEDIR/bin/moloch_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
+	$ARKIMEDIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
 
   # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
@@ -40,7 +40,7 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
   rm -f /tmp/not_a_packet.pcap
 
   #set some default settings I want for arkime
-  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$ARKIMEDIR/etc/user_settings.json"
+  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/arkime_users_v30/user/$MALCOLM_USERNAME/_update -d "@$ARKIMEDIR/etc/user_settings.json"
 
   echo -e "\nElasticsearch database initialized!\n"
 
