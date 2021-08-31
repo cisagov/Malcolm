@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV ARKIME_VERSION "3.0.0"
 ENV ARKIMEDIR "/opt/arkime"
-ENV ARKIME_URL "https://codeload.github.com/arkime/arkime/tar.gz/v${ARKIME_VERSION}"
+ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes
 
@@ -64,8 +64,7 @@ RUN apt-get -q update && \
     sed -i "s@docs/images@images@g" README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIMEDIR/doc/doc.css -o $ARKIMEDIR/doc/README.html $ARKIMEDIR/doc/README.md && \
   cd /opt && \
-    mkdir -p "./arkime-"$ARKIME_VERSION && \
-    curl -sSL "$ARKIME_URL" | tar xzvf - -C "./arkime-"$ARKIME_VERSION --strip-components 1 && \
+    git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     find $ARKIMEDIR/doc/images/screenshots -name "*.png" -delete && \
@@ -79,7 +78,9 @@ RUN apt-get -q update && \
     rm -rf ./viewer/vueapp/src/components/upload && \
     sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
-    ./easybutton-build.sh --install && \
+    ./easybutton-build.sh && \
+    npm -g config set user root && \
+    make install && \
     npm cache clean --force && \
     bash -c "file ${ARKIMEDIR}/bin/* ${ARKIMEDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
