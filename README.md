@@ -1976,6 +1976,6 @@ Idaho National Laboratory is a cutting edge research facility which is constantl
 
 ## <a name="Contact"></a>Contact information of author(s):
 
-[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Malcolm)
+[Seth Grover](mailto:malcolm@inl.gov?subject=Malcolm)
 
 [![Join the chat at https://gitter.im/malcolmnetsec/community](https://badges.gitter.im/malcolmnetsec/community.svg)](https://gitter.im/malcolmnetsec/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

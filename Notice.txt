@@ -36,4 +36,4 @@ OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 Authors:
 
-Seth Grover (malcolm.netsec@gmail.com)
+Seth Grover (malcolm@inl.gov)
