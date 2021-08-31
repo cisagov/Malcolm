@@ -46,7 +46,7 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
   echo "Setting defaults..."
 
   #set some default settings I want for arkime
-  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/arkime_users_v30/user/$MALCOLM_USERNAME/_update -d "@$ARKIMEDIR/etc/user_settings.json"
+  curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/arkime_users/_update/$MALCOLM_USERNAME -d "@$ARKIMEDIR/etc/user_settings.json"
 
   echo -e "\nElasticsearch database initialized!\n"
 
