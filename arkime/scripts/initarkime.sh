@@ -31,13 +31,19 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$ES_HOST:$ES_P
 
 	$ARKIMEDIR/db/db.pl http://$ES_HOST:$ES_PORT initnoprompt
 
+  echo "Creating default user..."
+
 	# this password isn't going to be used by Arkime, nginx will do the auth instead
 	$ARKIMEDIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
+
+  echo "Initializing fields..."
 
   # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
   $ARKIMEDIR/bin/capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
+
+  echo "Setting defaults..."
 
   #set some default settings I want for arkime
   curl -sS -H'Content-Type: application/json' -XPOST http://$ES_HOST:$ES_PORT/arkime_users_v30/user/$MALCOLM_USERNAME/_update -d "@$ARKIMEDIR/etc/user_settings.json"
