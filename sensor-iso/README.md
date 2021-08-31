@@ -940,4 +940,4 @@ See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/main/Lice
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Network%20sensor%20development)
+[Seth Grover](mailto:malcolm@inl.gov?subject=Network%20sensor%20development)

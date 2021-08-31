@@ -54,4 +54,4 @@ See [`License.txt`](../../License.txt) for the terms of its release.
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Malcolm)
+[Seth Grover](mailto:malcolm@inl.gov?subject=Malcolm)

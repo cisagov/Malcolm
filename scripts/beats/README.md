@@ -178,4 +178,4 @@ See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/main/Lice
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Malcolm)
+[Seth Grover](mailto:malcolm@inl.gov?subject=Malcolm)
