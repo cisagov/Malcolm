@@ -32,9 +32,9 @@ MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
 MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 32*1024*1024*1024
 
 ###################################################################################################
-# for querying the Arkime's "files" Elasticsearch index to avoid re-processing (duplicating sessions for)
+# for querying the Arkime's "arkime_files" Elasticsearch index to avoid re-processing (duplicating sessions for)
 # files that have already been processed
-ARKIME_FILES_INDEX = "files"
+ARKIME_FILES_INDEX = "arkime_files"
 ARKIME_FILE_TYPE = "file"
 ARKIME_FILE_SIZE_FIELD = "filesize"
 
