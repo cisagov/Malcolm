@@ -1,5 +1,5 @@
 {
-  "index_patterns" : ["sessions2-*"],
+  "index_patterns" : ["arkime_sessions3-*"],
   "order" : 0,
   "settings" : {
     "index" : {

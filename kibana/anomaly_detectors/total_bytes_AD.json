@@ -3,7 +3,7 @@
   "description": "Detect anomalies based on total bytes, summed",
   "time_field": "firstPacket",
   "indices": [
-    "sessions2-*"
+    "arkime_sessions3-*"
   ],
   "feature_attributes": [
     {

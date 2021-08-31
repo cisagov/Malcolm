@@ -21,8 +21,8 @@ else
   KIB_URL="http://kibana:5601/kibana"
 fi
 
-INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"sessions2-*"}
-INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"sessions2-*"}
+INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
+INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 
 INDEX_POLICY_FILE="/data/init/index-management-policy.json"
@@ -48,7 +48,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
       # register the repo location for elasticsearch snapshots
       /data/register-elasticsearch-snapshot-repo.sh
 
-      # tweak the sessions template (sessions2-* zeek template file) to use the index management policy
+      # tweak the sessions template (arkime_sessions3-* zeek template file) to use the index management policy
       if [[ -f "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
         # user has provided a file for index management, use it
         cp "$INDEX_POLICY_FILE_HOST" "$INDEX_POLICY_FILE"
@@ -126,7 +126,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "Kibana saved objects import complete!"
 
-      # before we go on to create the anomaly detectors, we need to wait for actual sessions2-* documents
+      # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
       /data/elastic_search_status.sh -w >/dev/null 2>&1
 
       echo "Creating Kibana anomaly detectors..."

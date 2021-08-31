@@ -171,8 +171,8 @@ services:
       ELASTICSEARCH_URL : 'http://elasticsearch:9200'
       KIBANA_URL : 'http://kibana:5601/kibana'
       VIRTUAL_HOST : 'kibana-helper.malcolm.local'
-      ARKIME_INDEX_PATTERN : 'sessions2-*'
-      ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
+      ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
+      ARKIME_INDEX_PATTERN_ID : 'arkime_sessions3-*'
       ARKIME_INDEX_TIME_FIELD : 'firstPacket'
       CREATE_ES_ARKIME_SESSION_INDEX : 'true'
     depends_on:

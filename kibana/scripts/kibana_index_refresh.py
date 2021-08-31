@@ -42,7 +42,7 @@ def main():
 
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
-  parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
+  parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='arkime_sessions3-*', help='Index Pattern Name')
   parser.add_argument('-k', '--kibana', dest='kibanaUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('KIBANA_URL', 'http://kibana:5601/kibana'), help='Kibana URL')
   parser.add_argument('-e', '--elastic', dest='elasticUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('ELASTICSEARCH_URL', 'http://elasticsearch:9200'), help='Elasticsearch URL')
   parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
