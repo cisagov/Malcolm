@@ -403,7 +403,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-3.2.2.iso"
+Finished, created "/sensor-build/hedgehog-3.3.0.iso"
 …
 ```
 

@@ -131,7 +131,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-od:3.2.2
+    image: malcolmnetsec/elasticsearch-od:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -171,7 +171,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana-helper.Dockerfile
-    image: malcolmnetsec/kibana-helper:3.2.2
+    image: malcolmnetsec/kibana-helper:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -202,7 +202,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-od:3.2.2
+    image: malcolmnetsec/kibana-od:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -226,7 +226,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:3.2.2
+    image: malcolmnetsec/logstash-oss:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -266,7 +266,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:3.2.2
+    image: malcolmnetsec/filebeat-oss:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -307,7 +307,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:3.2.2
+    image: malcolmnetsec/arkime:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -352,7 +352,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:3.2.2
+    image: malcolmnetsec/zeek:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -382,7 +382,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:3.2.2
+    image: malcolmnetsec/file-monitor:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -408,7 +408,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:3.2.2
+    image: malcolmnetsec/pcap-capture:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -437,7 +437,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:3.2.2
+    image: malcolmnetsec/pcap-monitor:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -463,7 +463,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:3.2.2
+    image: malcolmnetsec/file-upload:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -489,7 +489,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:3.2.2
+    image: malcolmnetsec/htadmin:3.3.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -514,7 +514,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:3.2.2
+    image: malcolmnetsec/freq:3.3.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -535,7 +535,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:3.2.2
+    image: malcolmnetsec/name-map-ui:3.3.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -562,7 +562,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:3.2.2
+    image: malcolmnetsec/nginx-proxy:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
