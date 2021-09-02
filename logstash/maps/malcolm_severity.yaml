@@ -20,6 +20,7 @@
 "Notice (vulnerability)": 90
 "Cleartext password": 90
 "Insecure or outdated protocol": 60
+"Service on non-standard port": 40
 "Signature (capa)": 50
 "Signature (ClamAV)": 90
 "Signature": 75
