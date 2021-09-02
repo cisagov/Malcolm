@@ -185,6 +185,7 @@
         "zeek.ts": { "type": "date" },
         "zeek.uid": { "type": "keyword" },
         "zeek.user": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
+        "zeek.user_agent": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
         "zeek_bacnet.bvlc_function": { "type": "keyword" },
         "zeek_bacnet.pdu_type": { "type": "keyword" },
         "zeek_bacnet.pdu_service": { "type": "keyword" },

@@ -75,6 +75,7 @@ function ZeekLogs (api, section) {
     "zeek.ts",
     "zeek.uid",
     "zeek.user",
+    "zeek.user_agent",
     "zeek_bacnet.bvlc_function",
     "zeek_bacnet.invoke_id",
     "zeek_bacnet.pdu_type",
@@ -924,7 +925,7 @@ function ZeekLogs (api, section) {
     // basic connection information
     "  if (session.zeek.orig_h || session.zeek.orig_p || session.zeek.orig_l2_addr || session.zeek.resp_h || " +
     "      session.zeek.resp_p || session.zeek.resp_l2_addr || session.zeek.proto || session.zeek.service || " +
-    "      session.zeek.service_version || session.zeek.user || session.zeek.password || " +
+    "      session.zeek.service_version || session.zeek.user_agent || session.zeek.user || session.zeek.password || " +
     "      session.zeek.action || session.zeek.result || session.zeek.freq_score_v1 || session.zeek.freq_score_v2 )\n" +
     "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
     "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
@@ -952,6 +953,7 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek, 'result', 'Result', 'zeek.result')\n" +
     "      +arrayList(session.zeek, 'user', 'User', 'zeek.user')\n" +
     "      +arrayList(session.zeek, 'password', 'Password', 'zeek.password')\n" +
+    "      +arrayList(session.zeek, 'user_agent', 'User Agent', 'zeek.user_agent')\n" +
     "      +arrayList(session.zeek, 'freq_score_v1', 'Freq Score v1', 'zeek.freq_score_v1')\n" +
     "      +arrayList(session.zeek, 'freq_score_v2', 'Freq Score v2', 'zeek.freq_score_v2')\n" +
     "      +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
