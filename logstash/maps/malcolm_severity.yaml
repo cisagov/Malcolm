@@ -8,6 +8,10 @@
 "VPN traffic": 30
 "High volume connection": 20
 "Long connection": 20
+"Connection aborted (originator)": 30
+"Connection aborted (responder)": 50
+"Connection attempt rejected": 40
+"Connection attempt, no reply": 20
 "Country of concern": 40
 "High entropy domain": 0
 "File transfer": 0
