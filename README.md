@@ -1403,6 +1403,7 @@ As Zeek logs are parsed and enriched prior to indexing, a severity score up to `
 * detection of cleartext passwords
 * use of insecure or outdated protocols
 * tunneled traffic or use of VPN protocols
+* rejected or aborted connections
 * common network services communicating over non-standard ports
 * file scanning engine hits on [extracted files](#ZeekFileExtraction)
 * large connection or file transfer
