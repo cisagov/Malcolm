@@ -178,4 +178,4 @@ See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/main/Licen
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:malcolm@inl.gov?subject=Malcolm)
+[malcolm@inl.gov](mailto:malcolm@inl.gov?subject=Malcolm)

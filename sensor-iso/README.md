@@ -953,4 +953,4 @@ See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/main/Licen
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:malcolm@inl.gov?subject=Network%20sensor%20development)
+[malcolm@inl.gov](mailto:malcolm@inl.gov?subject=Network%20sensor%20development)

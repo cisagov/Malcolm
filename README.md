@@ -2032,6 +2032,6 @@ See [`License.txt`](./License.txt) for the terms of its release.
 
 ## <a name="Contact"></a>Contact information of author(s):
 
-[Seth Grover](mailto:malcolm@inl.gov?subject=Malcolm)
+[malcolm@inl.gov](mailto:malcolm@inl.gov?subject=Malcolm)
 
 [![Join the chat at https://gitter.im/malcolmnetsec/community](https://badges.gitter.im/malcolmnetsec/community.svg)](https://gitter.im/malcolmnetsec/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
