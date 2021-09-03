@@ -393,12 +393,6 @@ services:
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
-    healthcheck:
-      test: ["CMD", "supervisorctl", "status", "netsniff-roll"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
   pcap-monitor:
     image: malcolmnetsec/pcap-monitor:3.3.0
     restart: "no"
