@@ -1,8 +1,8 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
@@ -81,12 +81,12 @@ ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
-ENV YARA_VERSION "4.1.1"
+ENV YARA_VERSION "4.1.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
 ENV YARA_RULES_DIR "/yara-rules"
 ENV YARA_RULES_SRC_DIR "$SRC_BASE_DIR/signature-base"
-ENV CAPA_VERSION "1.6.3"
+ENV CAPA_VERSION "2.0.0"
 ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 ENV CAPA_DIR "/opt/capa"
 ENV CAPA_BIN "${CAPA_DIR}/capa"
@@ -102,8 +102,8 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
-    apt-get update && \
+RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
+    apt-get -q update && \
     apt-get install --no-install-recommends -y -q \
       automake \
       bc \
@@ -183,9 +183,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* && \
     mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
-    curl -s -S -L -o "${CLAMAV_RULES_DIR}"/main.cvd http://database.clamav.net/main.cvd && \
-      curl -s -S -L -o "${CLAMAV_RULES_DIR}"/daily.cvd http://database.clamav.net/daily.cvd && \
-      curl -s -S -L -o "${CLAMAV_RULES_DIR}"/bytecode.cvd http://database.clamav.net/bytecode.cvd && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \

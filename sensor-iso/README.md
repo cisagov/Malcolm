@@ -387,7 +387,20 @@ zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 
 # <a name="ISOBuild"></a>Appendix A - Generating the ISO
 
-Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/) (with the [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin).
+Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host with Vagrant:
+
+* [Vagrant](https://www.vagrantup.com/)
+    - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
+    - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
+    - [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box
+
+The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
+
+* [VirtualBox](https://www.virtualbox.org/) [provider](https://www.vagrantup.com/docs/providers/virtualbox)
+    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
+* [libvirt](https://libvirt.org/) 
+    - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box to `libvirt` format
 
 To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/cisagov/Malcolm/) working copy and run:
 
@@ -403,7 +416,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-3.2.1.iso"
+Finished, created "/sensor-build/hedgehog-3.3.0.iso"
 …
 ```
 
@@ -617,7 +630,7 @@ $ apt-get install $(cat *.list.chroot)
     * `python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -r -n1 python3 -m pip install -U`
         - if this fails for some reason, you may need to reinstall pip first with `python3 -m pip install --force -U pip`
         - some *very* old builds of Hedgehog Linux had separate Python 3.5 and 3.7 installations: in this case, you'd need to do this for both `python3 -m pip` and `python3.7 -m pip` (or whatever `python3.x` you have)
-    * If there were [new python packages](https://raw.githubusercontent.com/cisagov/Malcolm/main/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/blame/main/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
+    * If there were [new python packages](https://raw.githubusercontent.com/cisagov/Malcolm/master/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) added to this release of Hedgehog Linux (you might have to [manually compare](https://github.com/cisagov/Malcolm/blame/main/sensor-iso/config/hooks/normal/0169-pip-installs.hook.chroot) on GitHub), install them. If you are using a PyPI mirror, replace `XXXXXX` here with your mirror's IP. The `colorama` package is used here as an example, your package list might vary.
         - `python3 -m pip install --no-compile --no-cache-dir --force-reinstall --upgrade --index-url=https://XXXXXX:443/pypi/simple --trusted-host=XXXXXX:443 colorama`
 
 8. Okay, **now** things start to get a little bit ugly. You're going to need access to the ISO of the release of Hedgehog Linux you're upgrading to, as we're going to grab some packages off of it. On another Linux system, [build it](#ISOBuild).
@@ -940,4 +953,4 @@ See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/main/Licen
 
 ### Contact information of author(s):
 
-[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Network%20sensor%20development)
+[malcolm@inl.gov](mailto:malcolm@inl.gov?subject=Network%20sensor%20development)

@@ -17,6 +17,6 @@ else
       </body>
       </html>
 EOF
-  python -m SimpleHTTPServer 80
+  python3 -m http.server 80
   popd >/dev/null 2>&1
 fi

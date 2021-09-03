@@ -1,9 +1,9 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
@@ -26,7 +26,7 @@ ENV PUSER_PRIV_DROP true
 # for download and install
 ARG ZEEK_LTS=1
 ARG ZEEK_VERSION=4.0.3-0
-ARG SPICY_VERSION=1.1.0
+ARG SPICY_VERSION=1.2.1
 
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
@@ -49,8 +49,7 @@ ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${ZEEK_DIR}/lib/zeek/plugins/packages
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # build and install system packages, zeek, spicy and plugins
-RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list && \
-    apt-get -q update && \
+RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       ca-certificates \
       curl \
@@ -65,10 +64,10 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       psmisc \
       vim-tiny && \
     ( curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - ) && \
-    echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
-    echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
+    echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
+    echo "deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
     apt-get -q update && \
-    apt-get install -q -y -t buster-backports --no-install-recommends \
+    apt-get install -q -y --no-install-recommends \
       bison \
       ccache \
       clang-${LLVM_VERSION} \
@@ -104,14 +103,14 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/so
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
       curl -sSL --remote-name-all \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
       dpkg -i ./*.deb && \
     mkdir -p /tmp/spicy-packages && \
       cd /tmp/spicy-packages && \
@@ -201,9 +200,13 @@ ARG ZEEK_DISABLE_BEST_GUESS_ICS=true
 # for now, disable them by default when a Zeek parser exists
 ARG ZEEK_DISABLE_SPICY_DHCP=true
 ARG ZEEK_DISABLE_SPICY_DNS=true
+ARG ZEEK_DISABLE_SPICY_FACEFISH=
 ARG ZEEK_DISABLE_SPICY_HTTP=true
 ARG ZEEK_DISABLE_SPICY_IPSEC=
+ARG ZEEK_DISABLE_SPICY_LDAP=
 ARG ZEEK_DISABLE_SPICY_OPENVPN=
+ARG ZEEK_DISABLE_SPICY_STUN=
+ARG ZEEK_DISABLE_SPICY_TAILSCALE=
 ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
 
@@ -212,10 +215,16 @@ ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
 ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS
 ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
 ENV ZEEK_DISABLE_BEST_GUESS_ICS $ZEEK_DISABLE_BEST_GUESS_ICS
+
 ENV ZEEK_DISABLE_SPICY_DHCP $ZEEK_DISABLE_SPICY_DHCP
 ENV ZEEK_DISABLE_SPICY_DNS $ZEEK_DISABLE_SPICY_DNS
+ENV ZEEK_DISABLE_SPICY_FACEFISH $ZEEK_DISABLE_SPICY_FACEFISH
 ENV ZEEK_DISABLE_SPICY_HTTP $ZEEK_DISABLE_SPICY_HTTP
+ENV ZEEK_DISABLE_SPICY_IPSEC $ZEEK_DISABLE_SPICY_IPSEC
+ENV ZEEK_DISABLE_SPICY_LDAP $ZEEK_DISABLE_SPICY_LDAP
 ENV ZEEK_DISABLE_SPICY_OPENVPN $ZEEK_DISABLE_SPICY_OPENVPN
+ENV ZEEK_DISABLE_SPICY_STUN $ZEEK_DISABLE_SPICY_STUN
+ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 

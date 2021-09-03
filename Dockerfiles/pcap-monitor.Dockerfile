@@ -1,8 +1,8 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
@@ -53,7 +53,7 @@ RUN apt-get update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    pip3 install --no-cache-dir elasticsearch elasticsearch_dsl pyzmq pyinotify python-magic && \
+    pip3 install --no-cache-dir elasticsearch==7.10.1 elasticsearch_dsl==7.4.0 pyzmq pyinotify python-magic && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 

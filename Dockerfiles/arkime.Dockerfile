@@ -1,4 +1,4 @@
-FROM debian:buster-slim AS build
+FROM debian:bullseye-slim AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -16,8 +16,7 @@ ADD README.md $ARKIMEDIR/doc/
 ADD doc.css $ARKIMEDIR/doc/
 ADD docs/images $ARKIMEDIR/doc/images/
 
-RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
-    apt-get -q update && \
+RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
         binutils \
         bison \
@@ -84,10 +83,10 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
     npm cache clean --force && \
     bash -c "file ${ARKIMEDIR}/bin/* ${ARKIMEDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
@@ -142,7 +141,7 @@ ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
 COPY --from=build $ARKIMEDIR $ARKIMEDIR
 
-RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list && \
+RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
       curl \
@@ -176,7 +175,7 @@ RUN sed -i "s/buster main/buster main contrib non-free/" /etc/apt/sources.list &
     ln -sfr $ARKIMEDIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIMEDIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIMEDIR/bin/npx /usr/local/bin/npx && \
-    apt-get -q -y --purge remove gcc gcc-8 cpp cpp-8 libssl-dev && \
+    apt-get -q -y --purge remove gcc gcc-10 cpp cpp-10 libssl-dev && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
