@@ -387,7 +387,20 @@ zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 
 # <a name="ISOBuild"></a>Appendix A - Generating the ISO
 
-Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/) (with the [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin).
+Official downloads of the Hedgehog Linux installer ISO are not provided: however, it can be built easily on an internet-connected Linux host with Vagrant:
+
+* [Vagrant](https://www.vagrantup.com/)
+    - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
+    - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
+    - [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box
+
+The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
+
+* [VirtualBox](https://www.virtualbox.org/) [provider](https://www.vagrantup.com/docs/providers/virtualbox)
+    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
+* [libvirt](https://libvirt.org/) 
+    - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box to `libvirt` format
 
 To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/idaholab/Malcolm/) working copy and run:
 
