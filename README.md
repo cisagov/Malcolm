@@ -1410,7 +1410,7 @@ As Zeek logs are parsed and enriched prior to indexing, a severity score up to `
 * long connection duration
     - The duration (in seconds) threshold for this condition to trigger can be adjusted by setting the `CONNECTION_SECONDS_SEVERITY_THRESHOLD` environment variable in [`docker-compose.yml`](#DockerComposeYml).
 
-As this feature is [improved](https://github.com/cisagov/Malcolm/issues/19) it's expected that additional categories will be identified and implemented for severity scoring.
+As this [feature](https://github.com/idaholab/Malcolm/issues/19) is improved it's expected that additional categories will be identified and implemented for severity scoring.
 
 When a Zeek log satisfies more than one of these conditions its severity scores will be summed, with a maximum score of `100`. A Zeek log's severity score is indexed in the `event.severity` field and the conditions which contributed to its score are indexed in `event.severity_tags`.
 
