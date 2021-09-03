@@ -1,8 +1,8 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
@@ -23,8 +23,8 @@ ENV PUSER_PRIV_DROP false
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG PHP_VERSION=7.3
-ARG MCRYPT_VERSION=1.0.2
+ARG PHP_VERSION=7.4
+ARG MCRYPT_VERSION=1.0.4
 ARG BOOTSTRAP_VERSION=3.3.6
 
 ENV PHP_VERSION $PHP_VERSION
@@ -35,7 +35,6 @@ ENV HTADMIN_URL "https://codeload.github.com/mmguero-dev/htadmin/tar.gz/master"
 
 RUN apt-get update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
-      bcrypt \
       ca-certificates \
       curl \
       libmcrypt-dev \

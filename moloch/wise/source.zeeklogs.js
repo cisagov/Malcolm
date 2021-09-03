@@ -5,13 +5,13 @@ var wiseSource     = require('./wiseSource.js')
 //////////////////////////////////////////////////////////////////////////////////
 // Arkime WISE Data Source definition for Zeek logs.
 //
-// Part of Malcolm (https://github.com/idaholab/malcolm)
+// Part of Malcolm (https://github.com/cisagov/malcolm)
 //
 // Data may be populated with Malcolm's Zeek Logstash filters:
-//   (particularly https://raw.githubusercontent.com/idaholab/Malcolm/main/logstash/pipeline-main/11_zeek_logs.conf)
+//   (particularly https://raw.githubusercontent.com/cisagov/Malcolm/main/logstash/pipeline-main/11_zeek_logs.conf)
 //
 // Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-// see https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt
+// see https://raw.githubusercontent.com/cisagov/Malcolm/main/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 function ZeekLogs (api, section) {
   ZeekLogs.super_.call(this, api, section);
@@ -27,6 +27,10 @@ function ZeekLogs (api, section) {
   // add right-clicks
   var allFields = [
     "communityId",
+    "event.risk_score",
+    "event.risk_score_norm",
+    "event.severity",
+    "event.severity_tags",
     "host.name",
     "ip.protocol",
     "mac.dst",
@@ -71,6 +75,7 @@ function ZeekLogs (api, section) {
     "zeek.ts",
     "zeek.uid",
     "zeek.user",
+    "zeek.user_agent",
     "zeek_bacnet.bvlc_function",
     "zeek_bacnet.invoke_id",
     "zeek_bacnet.pdu_type",
@@ -246,7 +251,7 @@ function ZeekLogs (api, section) {
     "zeek_ecat_dev_info.fmmucnt",
     "zeek_ecat_dev_info.ports",
     "zeek_ecat_dev_info.revision",
-    "zeek_ecat_dev_info.slave_id",
+    "zeek_ecat_dev_info.server_id",
     "zeek_ecat_dev_info.smcount",
     "zeek_ecat_foe_info.data",
     "zeek_ecat_foe_info.error_code",
@@ -262,7 +267,7 @@ function ZeekLogs (api, section) {
     "zeek_ecat_registers.data",
     "zeek_ecat_registers.register_addr",
     "zeek_ecat_registers.register_type",
-    "zeek_ecat_registers.slave_addr",
+    "zeek_ecat_registers.server_addr",
     "zeek_ecat_soe_info.drive_num",
     "zeek_ecat_soe_info.element",
     "zeek_ecat_soe_info.error",
@@ -920,7 +925,7 @@ function ZeekLogs (api, section) {
     // basic connection information
     "  if (session.zeek.orig_h || session.zeek.orig_p || session.zeek.orig_l2_addr || session.zeek.resp_h || " +
     "      session.zeek.resp_p || session.zeek.resp_l2_addr || session.zeek.proto || session.zeek.service || " +
-    "      session.zeek.service_version || session.zeek.user || session.zeek.password || " +
+    "      session.zeek.service_version || session.zeek.user_agent || session.zeek.user || session.zeek.password || " +
     "      session.zeek.action || session.zeek.result || session.zeek.freq_score_v1 || session.zeek.freq_score_v2 )\n" +
     "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
     "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
@@ -948,8 +953,12 @@ function ZeekLogs (api, section) {
     "      +arrayList(session.zeek, 'result', 'Result', 'zeek.result')\n" +
     "      +arrayList(session.zeek, 'user', 'User', 'zeek.user')\n" +
     "      +arrayList(session.zeek, 'password', 'Password', 'zeek.password')\n" +
+    "      +arrayList(session.zeek, 'user_agent', 'User Agent', 'zeek.user_agent')\n" +
     "      +arrayList(session.zeek, 'freq_score_v1', 'Freq Score v1', 'zeek.freq_score_v1')\n" +
     "      +arrayList(session.zeek, 'freq_score_v2', 'Freq Score v2', 'zeek.freq_score_v2')\n" +
+    "      +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
+    "      +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
+    "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
     // file information
     "  if (session.zeek.fuid || session.zeek.filename || session.zeek.filetype)\n" +
