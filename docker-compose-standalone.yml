@@ -89,8 +89,9 @@ x-kibana-helper-variables: &kibana-helper-variables
   ISM_SNAPSHOT_REPO : 'logs'
 
 x-logstash-variables: &logstash-variables
-  LOGSTASH_OUI_LOOKUP  : 'true'
-  LOGSTASH_REVERSE_DNS : 'false'
+  LOGSTASH_OUI_LOOKUP       : 'true'
+  LOGSTASH_SEVERITY_SCORING : 'true'
+  LOGSTASH_REVERSE_DNS      : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
   # ES_EXTERNAL_SSL : 'true'
   # ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
@@ -108,6 +109,10 @@ x-common-upload-variables: &common-upload-variables
 
 x-common-lookup-variables: &common-lookup-variables
   FREQ_LOOKUP : 'false'
+  FREQ_SEVERITY_THRESHOLD : '2.0'
+  TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
+  CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
+  QUESTIONABLE_COUNTRY_CODES : 'CN,IR,KP,RU,UA'
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
@@ -229,6 +234,7 @@ services:
       - 9600
     volumes:
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
+      - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
@@ -387,12 +393,6 @@ services:
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
-    healthcheck:
-      test: ["CMD", "supervisorctl", "status", "netsniff-roll"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
   pcap-monitor:
     image: malcolmnetsec/pcap-monitor:4.0.0
     restart: "no"

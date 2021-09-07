@@ -65,6 +65,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/nginx/ca-trust/"
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
+  mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch/nodes/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch-backup/"
@@ -89,6 +90,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
+  cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   pushd "$DESTDIR" >/dev/null 2>&1
   pushd "./scripts" >/dev/null 2>&1
   ln -s ./control.py auth_setup

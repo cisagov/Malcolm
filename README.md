@@ -77,6 +77,8 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
     - [Elasticsearch index management](#IndexManagement)
+    - [Event severity scoring](#Severity)
+        + [Customizing event severity scoring](#SeverityConfig)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
@@ -486,6 +488,18 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
 
+* `LOGSTASH_SEVERITY_SCORING` - if set to `true`, Logstash will perform [severity scoring](#Severity) when analyzing Zeek logs (default `true`)
+
+* `FREQ_LOOKUP` - if set to `true`, domain names (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq) (default `false`)
+
+* `FREQ_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the entropy threshold for assigning severity to events with entropy scores calculated by [`freq`](https://github.com/MarkBaggett/freq); a lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`) (default `2.0`)
+
+* `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the size threshold (in megabytes) for assigning severity to large connections or file transfers (default `1000`)
+
+* `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
+
+* `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
+
 * `ES_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external Elasticsearch instance in addition to the one maintained locally by Malcolm
 
 * `ES_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external Elasticsearch instances specified in `ES_EXTERNAL_HOSTS`
@@ -781,7 +795,7 @@ Authentication over LDAP can be done using one of three ways, [two of which](htt
 
 * **StartTLS** - the [standard extension](https://tools.ietf.org/html/rfc2830) to the LDAP protocol to establish an encrypted SSL/TLS connection within an already established LDAP connection
 * **LDAPS** - a commonly used (though unofficial and considered deprecated) method in which SSL negotiation takes place before any commands are sent from the client to the server
-* **Unencrypted** (clear text) (***not recommended***)
+* **Unencrypted** (cleartext) (***not recommended***)
 
 In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` in the `x-auth-variables` section near the top of the [`docker-compose.yml`](#DockerComposeYml) file, the `NGINX_LDAP_TLS_STUNNEL` and `NGINX_LDAP_TLS_STUNNEL` environment variables are used in conjunction with the values in `nginx/nginx_ldap.conf` to define the LDAP connection security level. Use the following combinations of values to achieve the connection security methods above, respectively:
 
@@ -1374,6 +1388,49 @@ See [Index State Management](https://opendistro.github.io/for-elasticsearch-docs
 
 Elasticsearch index management only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
+### <a name="Severity"></a>Event severity scoring
+
+As Zeek logs are parsed and enriched prior to indexing, a severity score up to `100` (a higher score indicating a more severe event) can be assigned when one or more of the following conditions are met:
+
+* cross-segment network traffic (if [network subnets were defined](#HostAndSubnetNaming))
+* connection origination and destination (e.g., inbound, outbound, external, internal)
+* traffic to or from countries of concern
+    - The comma-separated list of countries (by [ISO 3166-1 alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) can be customized by setting the `QUESTIONABLE_COUNTRY_CODES` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+* domain names (from DNS queries and SSL server names) with high entropy as calculated by [freq](https://github.com/MarkBaggett/freq)
+    - The entropy threshold for this condition to trigger can be adjusted by setting the `FREQ_SEVERITY_THRESHOLD` environment variable in [`docker-compose.yml`](#DockerComposeYml). A lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`).
+* file transfers (categorized by mime type)
+* `notice.log` and `weird.log` entries, including those generated by Zeek plugins detecting vulnerabilities (see the list of Zeek plugins under [Components](#Components))
+* detection of cleartext passwords
+* use of insecure or outdated protocols
+* tunneled traffic or use of VPN protocols
+* rejected or aborted connections
+* common network services communicating over non-standard ports
+* file scanning engine hits on [extracted files](#ZeekFileExtraction)
+* large connection or file transfer
+    - The size (in megabytes) threshold for this condition to trigger can be adjusted by setting the `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+* long connection duration
+    - The duration (in seconds) threshold for this condition to trigger can be adjusted by setting the `CONNECTION_SECONDS_SEVERITY_THRESHOLD` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+
+As this [feature](https://github.com/idaholab/Malcolm/issues/19) is improved it's expected that additional categories will be identified and implemented for severity scoring.
+
+When a Zeek log satisfies more than one of these conditions its severity scores will be summed, with a maximum score of `100`. A Zeek log's severity score is indexed in the `event.severity` field and the conditions which contributed to its score are indexed in `event.severity_tags`.
+
+#### <a name="SeverityConfig"></a>Customizing event severity scoring
+
+These categories' severity scores can be customized by editing `logstash/maps/malcolm_severity.yaml`:
+
+* Each category can be assigned a number between `1` and `100` for severity scoring.
+* Any category may be disabled by assigning it a score of `0`.
+* A severity score can be assigned for any [supported protocol](#Protocols) by adding an entry with the key formatted like `"PROTOCOL_XYZ"`, where `XYZ` is the uppercased value of the protocol as stored in the `zeek.service` field. For example, to assign a score of `40` to Zeek logs generated for SSH traffic, you could add the following line to `malcolm_severity.yaml`:
+
+```
+"PROTOCOL_SSH": 40
+```
+
+Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take effect. The [hostname and CIDR subnet names interface](#NameMapUI) provides a convenient button for restarting Logstash.
+
+Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCORING` environment variable to `false`  in the [`docker-compose.yml`](#DockerComposeYml) file and [restarting Malcolm](#StopAndRestart).
+
 ### <a name="Alerting"></a>Alerting
 
 See [Alerting](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/) in the Open Distro for Elasticsearch documentation.
@@ -1425,7 +1482,20 @@ Malcolm can be packaged into an installer ISO based on the current [stable relea
 
 ### <a name="ISOBuild"></a>Generating the ISO
 
-Official downloads of the Malcolm installer ISO are not provided: however, it can be built easily on an internet-connected Linux host running current versions of [VirtualBox](https://www.virtualbox.org/) and [Vagrant](https://www.vagrantup.com/) (with the [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin).
+Official downloads of the Malcolm installer ISO are not provided: however, it can be built easily on an internet-connected Linux host with Vagrant:
+
+* [Vagrant](https://www.vagrantup.com/)
+    - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
+    - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
+    - [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box
+
+The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
+
+* [VirtualBox](https://www.virtualbox.org/) [provider](https://www.vagrantup.com/docs/providers/virtualbox)
+    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
+* [libvirt](https://libvirt.org/) 
+    - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box to `libvirt` format
 
 To perform a clean build the Malcolm installer ISO, navigate to your local Malcolm working copy and run:
 
@@ -1959,6 +2029,10 @@ Once the upgraded instance Malcolm has started up, you'll probably want to impor
 
 [CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
 
+## <a name="Forks"></a>Forks
+
+[CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
+
 ## <a name="Footer"></a>Copyright
 
 [Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
@@ -1976,6 +2050,6 @@ Idaho National Laboratory is a cutting edge research facility which is constantl
 
 ## <a name="Contact"></a>Contact information of author(s):
 
-[Seth Grover](mailto:malcolm.netsec@gmail.com?subject=Malcolm)
+[malcolm@inl.gov](mailto:malcolm@inl.gov?subject=Malcolm)
 
 [![Join the chat at https://gitter.im/malcolmnetsec/community](https://badges.gitter.im/malcolmnetsec/community.svg)](https://gitter.im/malcolmnetsec/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

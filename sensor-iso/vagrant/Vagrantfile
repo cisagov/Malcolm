@@ -4,6 +4,10 @@ unless Vagrant.has_plugin?("vagrant-reload")
   raise 'vagrant-reload plugin is not installed!'
 end
 
+unless Vagrant.has_plugin?("vagrant-sshfs")
+  raise 'vagrant-sshfs plugin is not installed!'
+end
+
 # hack: https://github.com/hashicorp/vagrant/issues/8878#issuecomment-345112810
 class VagrantPlugins::ProviderVirtualBox::Action::Network
   def dhcp_server_matches_config?(dhcp_server, config)
@@ -13,12 +17,13 @@ end
 
 Vagrant.configure("2") do |config|
 
+  config.vm.define "vagrant-hedgehog-build"
   config.vm.box = "bento/debian-10"
 
   config.vm.network "private_network", type: "dhcp"
 
   config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.synced_folder "..", "/sensor-build"
+  config.vm.synced_folder "..", "/sensor-build", type: "sshfs", disabled: false
 
   if Vagrant.has_plugin?("vagrant-vbguest")
     config.vbguest.auto_update = false
@@ -27,6 +32,11 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "8192"
     vb.cpus = 2
+  end
+
+  config.vm.provider "libvirt" do |lv|
+    lv.memory = "8192"
+    lv.cpus = 4
   end
 
   config.vm.provision "shell", inline: <<-STEP1

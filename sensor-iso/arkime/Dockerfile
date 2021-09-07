@@ -2,7 +2,7 @@ FROM debian:buster-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-LABEL maintainer="malcolm.netsec@gmail.com"
+LABEL maintainer="malcolm@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 

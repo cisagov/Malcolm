@@ -63,8 +63,8 @@ RUN eval "$(nodenv init -)" && \
 
 FROM amazon/opendistro-for-elasticsearch-kibana:1.13.2
 
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
@@ -88,6 +88,7 @@ ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
 ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG KIBANA_DEFAULT_DASHBOARD="0ad3d7c2-3441-485e-9dfe-dbb22e84e576"
+ARG NODE_OPTIONS="--max_old_space_size=4096"
 
 ENV CREATE_ES_ARKIME_SESSION_INDEX $CREATE_ES_ARKIME_SESSION_INDEX
 ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
@@ -99,6 +100,7 @@ ENV KIBANA_OFFLINE_REGION_MAPS_PORT $KIBANA_OFFLINE_REGION_MAPS_PORT
 ENV PATH="/data:${PATH}"
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
 ENV KIBANA_DEFAULT_DASHBOARD $KIBANA_DEFAULT_DASHBOARD
+ENV NODE_OPTIONS $NODE_OPTIONS
 
 USER root
 
