@@ -31,7 +31,7 @@ class ZeekSource extends WISESource {
 
     // add right-clicks
     var allFields = [
-      "communityId",
+      "network.community_id",
       "event.risk_score",
       "event.risk_score_norm",
       "event.severity",

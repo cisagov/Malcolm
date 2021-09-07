@@ -397,8 +397,8 @@
           "zeek_notice.category",
           "zeek_notice.sub_category",
           "zeek_notice.msg",
-          "srcIp",
-          "dstIp",
+          "source.ip",
+          "destination.ip",
           "zeek.uid"
         ],
         "sort": [

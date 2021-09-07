@@ -450,9 +450,9 @@
           "zeek.service",
           "zeek.action",
           "zeek.result",
-          "srcIp",
-          "dstIp",
-          "dstPort",
+          "source.ip",
+          "destination.ip",
+          "destination.port",
           "zeek.uid"
         ],
         "sort": [

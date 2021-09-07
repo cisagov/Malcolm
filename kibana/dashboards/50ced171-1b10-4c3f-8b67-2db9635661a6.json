@@ -213,9 +213,9 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "srcIp",
-          "dstIp",
-          "dstPort",
+          "source.ip",
+          "destination.ip",
+          "destination.port",
           "zeek_mysql.cmd",
           "zeek_mysql.success",
           "zeek.uid"

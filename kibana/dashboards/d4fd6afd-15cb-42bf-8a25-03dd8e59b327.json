@@ -177,11 +177,11 @@
         "columns": [
           "zeek.proto",
           "zeek.service",
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "totBytes",
+          "source.ip",
+          "source.port",
+          "destination.ip",
+          "destination.port",
+          "network.bytes",
           "zeek.uid"
         ],
         "sort": [
