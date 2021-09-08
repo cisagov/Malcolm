@@ -77,7 +77,7 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_TFTP : ''
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
-x-kibana-helper-variables: &kibana-helper-variables
+x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
   ISM_CLOSE_AGE : '60d'
@@ -165,18 +165,18 @@ services:
       timeout: 15s
       retries: 3
       start_period: 180s
-  kibana-helper:
-    image: malcolmnetsec/kibana-helper:3.4.0
+  dashboards-helper:
+    image: malcolmnetsec/dashboards-helper:3.4.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: kibana-helper
+    hostname: dashboards-helper
     environment:
       << : *process-variables
-      << : *kibana-helper-variables
+      << : *dashboards-helper-variables
       OPENSEARCH_URL : 'http://opensearch:9200'
-      DASHBOARDS_URL : 'http://dashboards:5601/kibana'
-      VIRTUAL_HOST : 'kibana-helper.malcolm.local'
+      DASHBOARDS_URL : 'http://dashboards:5601/opensearch-dashboards'
+      VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'sessions2-*'
       ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
       ARKIME_INDEX_TIME_FIELD : 'firstPacket'
@@ -193,23 +193,23 @@ services:
       timeout: 15s
       retries: 3
       start_period: 30s
-  kibana:
+  dashboards:
     image: malcolmnetsec/opensearch-dashboards:3.4.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: kibana
+    hostname: dashboards
     environment:
       << : *process-variables
       OPENSEARCH_URL : 'http://opensearch:9200'
-      VIRTUAL_HOST : 'kibana.malcolm.local'
+      VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
       - opensearch
-      - kibana-helper
+      - dashboards-helper
     expose:
       - 5601
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/kibana/api/status"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/opensearch-dashboards/api/status"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -516,7 +516,7 @@ services:
       << : *nginx-variables
     depends_on:
       - arkime
-      - kibana
+      - dashboards
       - upload
       - htadmin
       - name-map-ui

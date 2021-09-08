@@ -48,7 +48,7 @@ ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ADD dashboards/dashboards /opt/dashboards
-ADD kibana/anomaly_detectors /opt/anomaly_detectors
+ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
