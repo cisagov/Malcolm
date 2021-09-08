@@ -328,7 +328,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
 
 TODO:
-* `malcolmnetsec/kibana-od` (based on `amazon/opendistro-for-elasticsearch-kibana`)
+* `malcolmnetsec/opensearch-dashboards` (based on `amazon/opendistro-for-elasticsearch-kibana`)
 * `malcolmnetsec/kibana-helper` (based on `alpine:3.12`)
 
 * `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)

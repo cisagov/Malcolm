@@ -67,17 +67,20 @@ ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-es
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-es
 ARG LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-es,external-es
+ARG LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION="1.0.0"
 
 ENV LOGSTASH_ENRICHMENT_PIPELINE $LOGSTASH_ENRICHMENT_PIPELINE
 ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES
+ENV LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION $LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION
 ENV JAVA_HOME=/usr/share/logstash/jdk
 
 USER root
 
 COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
+ADD "https://rubygems.org/downloads/logstash-output-opensearch-$LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION-java.gem" /opt/"logstash-output-opensearch-$LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION-java.gem"
 
 RUN yum install -y epel-release && \
     yum update -y && \
@@ -90,6 +93,7 @@ RUN yum install -y epel-release && \
                             logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                             logstash-input-beats logstash-output-elasticsearch && \
     logstash-plugin install /opt/logstash-filter-ieee_oui/logstash-filter-ieee_oui-1.0.6.gem && \
+    logstash-plugin install /opt/"logstash-output-opensearch-$LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION-java.gem" && \
     rm -rf /opt/logstash-filter-ieee_oui /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

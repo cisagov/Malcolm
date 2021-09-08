@@ -139,6 +139,7 @@ services:
     environment:
       << : *process-variables
       logger.level : 'INFO'
+      compatibility.override_main_response_version: 'true'
       bootstrap.memory_lock : 'true'
       OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
@@ -201,8 +202,8 @@ services:
   kibana:
     build:
       context: .
-      dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-od:3.4.0
+      dockerfile: Dockerfiles/dashboards.Dockerfile
+    image: malcolmnetsec/opensearch-dashboards:3.4.0
     restart: "no"
     stdin_open: false
     tty: true

@@ -7,7 +7,7 @@ server.basePath: "/kibana"
 server.rewriteBasePath: true
 elasticsearch.hosts: ["${OPENSEARCH_URL}"]
 elasticsearch.requestTimeout: 180000
-kibana.defaultAppId: "dashboard/${KIBANA_DEFAULT_DASHBOARD}"
+kibana.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
 newsfeed.enabled: false
 telemetry.optIn: false
