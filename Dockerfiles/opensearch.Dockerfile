@@ -1,8 +1,8 @@
-FROM opensearchproject/opensearch:1.0.0
+FROM opensearchproject/opensearch:1.0.1
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'

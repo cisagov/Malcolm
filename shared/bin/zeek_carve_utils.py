@@ -1074,7 +1074,7 @@ class CapaScan(FileScanProvider):
     if isinstance(resp, dict):
       hits = []
       if 'rules' in resp and isinstance(resp['rules'], dict):
-        hits.extend([item.replace('[', '[ATT&CK ') for sublist in dictsearch(resp['rules'], CAPA_ATTACK_KEY) for item in sublist])
+        hits.extend([f"{'::'.join(item['parts'])} [ATT&CK {item['id']}] " for sublist in dictsearch(resp['rules'], CAPA_ATTACK_KEY) for item in sublist])
         if verboseHits:
           hits.extend(list(resp['rules'].keys()))
 

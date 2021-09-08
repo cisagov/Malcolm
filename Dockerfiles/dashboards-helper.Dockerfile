@@ -1,8 +1,8 @@
 FROM alpine:3.14
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
@@ -48,6 +48,7 @@ ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ADD dashboards/dashboards /opt/dashboards
+ADD kibana/anomaly_detectors /opt/anomaly_detectors
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
@@ -69,7 +70,7 @@ RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && 
       addgroup ${PUSER} tty ; \
       addgroup ${PUSER} shadow ; \
     mkdir -p /data/init && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/maps /data/init && \
+    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
     (echo -e "*/2 * * * * /data/create-moloch-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template zeek_template\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})

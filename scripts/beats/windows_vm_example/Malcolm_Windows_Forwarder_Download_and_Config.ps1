@@ -1,5 +1,5 @@
 # configure a windows host to forward auditbeat and winlogbeat logs
-# to Malcolm (see https://github.com/idaholab/Malcolm/tree/master/scripts/beats)
+# to Malcolm (see https://github.com/idaholab/Malcolm/tree/main/scripts/beats)
 
 $beatversion = "7.6.2"
 
@@ -37,7 +37,7 @@ function Download-Beat {
   ((Get-Content -path "C:\\Program Files\\$beat\\install-service-$beat.ps1" -Raw) -replace 'ProgramData','Program Files') | Set-Content -Path "C:\\Program Files\\$beat\\install-service-$beat.ps1"
   ((Get-Content -path "C:\\Program Files\\$beat\\install-service-$beat.ps1" -Raw) -replace ' -path','  --path') | Set-Content -Path "C:\\Program Files\\$beat\\install-service-$beat.ps1"
 
-  Invoke-WebRequest -UseBasicParsing -OutFile "C:\\Program Files\\$beat\\$beat.yml" -Uri https://raw.githubusercontent.com/idaholab/Malcolm/master/scripts/beats/windows_vm_example/$beat.yml
+  Invoke-WebRequest -UseBasicParsing -OutFile "C:\\Program Files\\$beat\\$beat.yml" -Uri https://raw.githubusercontent.com/idaholab/Malcolm/main/scripts/beats/windows_vm_example/$beat.yml
   (Get-Content "C:\\Program Files\\$beat\\$beat.yml") | Set-Content "C:\\Program Files\\$beat\\$beat.yml"
 }
 

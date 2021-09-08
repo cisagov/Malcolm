@@ -89,8 +89,9 @@ x-kibana-helper-variables: &kibana-helper-variables
   ISM_SNAPSHOT_REPO : 'logs'
 
 x-logstash-variables: &logstash-variables
-  LOGSTASH_OUI_LOOKUP  : 'true'
-  LOGSTASH_REVERSE_DNS : 'false'
+  LOGSTASH_OUI_LOOKUP       : 'true'
+  LOGSTASH_SEVERITY_SCORING : 'true'
+  LOGSTASH_REVERSE_DNS      : 'false'
   # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
   # ES_EXTERNAL_SSL : 'true'
   # ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
@@ -108,6 +109,10 @@ x-common-upload-variables: &common-upload-variables
 
 x-common-lookup-variables: &common-lookup-variables
   FREQ_LOOKUP : 'false'
+  FREQ_SEVERITY_THRESHOLD : '2.0'
+  TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
+  CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
+  QUESTIONABLE_COUNTRY_CODES : 'CN,IR,KP,RU,UA'
 
 x-common-beats-variables: &common-beats-variables
   BEATS_SSL : 'false'
@@ -123,7 +128,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   opensearch:
-    image: malcolmnetsec/opensearch:3.2.2
+    image: malcolmnetsec/opensearch:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -160,7 +165,7 @@ services:
       retries: 3
       start_period: 180s
   kibana-helper:
-    image: malcolmnetsec/kibana-helper:3.2.2
+    image: malcolmnetsec/kibana-helper:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -188,7 +193,7 @@ services:
       retries: 3
       start_period: 30s
   kibana:
-    image: malcolmnetsec/kibana-od:3.2.2
+    image: malcolmnetsec/kibana-od:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -209,7 +214,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:3.2.2
+    image: malcolmnetsec/logstash-oss:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -229,6 +234,7 @@ services:
       - 9600
     volumes:
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
+      - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
@@ -243,7 +249,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:3.2.2
+    image: malcolmnetsec/filebeat-oss:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -280,7 +286,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:3.2.2
+    image: malcolmnetsec/arkime:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -319,7 +325,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:3.2.2
+    image: malcolmnetsec/zeek:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -345,7 +351,7 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:3.2.2
+    image: malcolmnetsec/file-monitor:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -368,7 +374,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:3.2.2
+    image: malcolmnetsec/pcap-capture:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -387,14 +393,8 @@ services:
       << : *pcap-capture-variables
     volumes:
       - ./pcap/upload:/pcap
-    healthcheck:
-      test: ["CMD", "supervisorctl", "status"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:3.2.2
+    image: malcolmnetsec/pcap-monitor:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -417,7 +417,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:3.2.2
+    image: malcolmnetsec/file-upload:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -443,7 +443,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:3.2.2
+    image: malcolmnetsec/htadmin:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -465,7 +465,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:3.2.2
+    image: malcolmnetsec/freq:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -483,7 +483,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:3.2.2
+    image: malcolmnetsec/name-map-ui:3.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -504,7 +504,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:3.2.2
+    image: malcolmnetsec/nginx-proxy:3.3.0
     restart: "no"
     stdin_open: false
     tty: true

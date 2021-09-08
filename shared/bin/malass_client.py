@@ -6,10 +6,9 @@
    The 'file upload' HTML form is used to 'upload a file', and several HTML form fields,
    to the Malass web server. (for scanning)
 
-   Author:  Brett Rasmussen
    Date :   Mar 20, 2013
    Revised: Mar  8, 2019
-   Revised: May  2, 2019 (Seth Grover)
+   Revised: May  2, 2019
 """
 
 import requests

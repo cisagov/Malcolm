@@ -96,6 +96,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/htadmin/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
+  mkdir -p "$MALCOLM_DEST_DIR/logstash/maps/"
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch/nodes/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch-backup/"
@@ -130,6 +131,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./README.md "$MALCOLM_DEST_DIR/"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
+  cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
 

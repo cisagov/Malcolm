@@ -1,4 +1,4 @@
-FROM debian:buster-slim AS build
+FROM debian:bullseye-slim AS build
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -23,12 +23,12 @@ RUN apt-get update && \
     rm -rf /jQuery-File-Upload/*.html /jQuery-File-Upload/test/ /jQuery-File-Upload/server/gae-go/ \
            /jQuery-File-Upload/server/gae-python/
 
-FROM debian:buster-slim AS runtime
+FROM debian:bullseye-slim AS runtime
 
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/file-upload'
@@ -48,6 +48,9 @@ ENV PUSER_PRIV_DROP false
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
+ARG PHP_VERSION=7.4
+ENV PHP_VERSION $PHP_VERSION
+
 COPY --from=build /jQuery-File-Upload/ /var/www/upload/
 
 RUN apt-get update && \
@@ -58,9 +61,9 @@ RUN apt-get update && \
       supervisor \
       vim-tiny \
       less \
-      php7.3-gd \
-      php7.3-fpm \
-      php7.3-apcu \
+      php$PHP_VERSION \
+      php$PHP_VERSION-fpm \
+      php$PHP_VERSION-apcu \
       nginx-light && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
@@ -72,7 +75,7 @@ ADD file-upload/jquery-file-upload/bootstrap.min.css /var/www/upload/bower_compo
 ADD file-upload/jquery-file-upload/index.html /var/www/upload/index.html
 ADD file-upload/jquery-file-upload/index.php /var/www/upload/server/php/index.php
 ADD file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
-ADD file-upload/php/php.ini /etc/php/7.3/fpm/php.ini
+ADD file-upload/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
 ADD file-upload/sshd_config /tmp/sshd_config
 ADD file-upload/supervisord.conf /supervisord.conf
 

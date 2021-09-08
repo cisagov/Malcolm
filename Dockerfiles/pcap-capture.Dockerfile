@@ -1,10 +1,10 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-LABEL maintainer="malcolm.netsec@gmail.com"
-LABEL org.opencontainers.image.authors='malcolm.netsec@gmail.com'
+LABEL maintainer="malcolm@inl.gov"
+LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/pcap-capture'
@@ -74,8 +74,8 @@ RUN apt-get update && \
       chmod -R 750 /etc/supervisor.d && \
     chown root:${PGROUP} /sbin/ethtool && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
-    chown root:${PGROUP} /usr/sbin/tcpdump && \
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump && \
+    chown root:${PGROUP} /usr/bin/tcpdump && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump && \
     chown root:${PGROUP} /usr/sbin/netsniff-ng && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng && \
     chmod 755 /usr/local/bin/*.sh
