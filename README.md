@@ -1486,7 +1486,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-3.3.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-3.4.0.iso"
 …
 ```
 
