@@ -4,8 +4,8 @@
 
 rm -f /var/run/moloch/initialized /var/run/moloch/runwise
 
-echo "Giving Elasticsearch time to start..."
-/data/opensearch_status.sh 2>&1 && echo "Elasticsearch is running!"
+echo "Giving OpenSearch time to start..."
+/data/opensearch_status.sh 2>&1 && echo "OpenSearch is running!"
 
 # download and/or update geo updates
 $ARKIMEDIR/bin/moloch_update_geo.sh
@@ -24,10 +24,10 @@ if [[ "$WISE" = "on" ]] ; then
   echo
 fi
 
-# initialize the contents of the Elasticearch database if it has never been initialized (ie., the users_v# table hasn't been created)
+# initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
 if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$OS_HOST:$OS_PORT/_cat/indices/users_v*" | wc -l) < 1 ]]; then
 
-  echo "Initializing Elasticsearch database..."
+  echo "Initializing OpenSearch database..."
 
 	$ARKIMEDIR/db/db.pl http://$OS_HOST:$OS_PORT initnoprompt
 
@@ -42,29 +42,29 @@ if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$OS_HOST:$OS_P
   #set some default settings I want for moloch
   curl -sS -H'Content-Type: application/json' -XPOST http://$OS_HOST:$OS_PORT/users_v7/user/$MALCOLM_USERNAME/_update -d "@$ARKIMEDIR/etc/user_settings.json"
 
-  echo -e "\nElasticsearch database initialized!\n"
+  echo -e "\nOpenSearch database initialized!\n"
 
 else
-  echo "Elasticsearch database previously initialized!"
+  echo "OpenSearch database previously initialized!"
   echo
 
   if /data/moloch-needs-upgrade.sh 2>&1; then
-    echo "Elasticsearch database needs to be upgraded for $ARKIME_VERSION!"
+    echo "OpenSearch database needs to be upgraded for $ARKIME_VERSION!"
     $ARKIMEDIR/db/db.pl http://$OS_HOST:$OS_PORT upgradenoprompt
-    echo "Elasticsearch database upgrade complete!"
+    echo "OpenSearch database upgrade complete!"
     echo
 
   else
-    echo "Elasticsearch database is up-to-date for Arkime version $ARKIME_VERSION!"
+    echo "OpenSearch database is up-to-date for Arkime version $ARKIME_VERSION!"
     echo
 
   fi # if /data/moloch-needs-upgrade.sh
-fi # if/else Elasticsearch database initialized
+fi # if/else OpenSearch database initialized
 
-# increase Elasticsearch max shards per node from default if desired
-if [[ -n $ES_MAX_SHARDS_PER_NODE ]]; then
+# increase OpenSearch max shards per node from default if desired
+if [[ -n $OS_MAX_SHARDS_PER_NODE ]]; then
   # see https://github.com/elastic/elasticsearch/issues/40803
-  curl -sS -H'Content-Type: application/json' -XPUT http://$OS_HOST:$OS_PORT/_cluster/settings -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$ES_MAX_SHARDS_PER_NODE\" } }"
+  curl -sS -H'Content-Type: application/json' -XPUT http://$OS_HOST:$OS_PORT/_cluster/settings -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OS_MAX_SHARDS_PER_NODE\" } }"
 fi
 
 # before running viewer, call _refresh to make sure everything is available for search first

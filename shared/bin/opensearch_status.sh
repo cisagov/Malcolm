@@ -9,10 +9,10 @@ ENCODING="utf-8"
 # options
 # -v      (verbose)
 #
-# -e url  (Elasticsearch URL, e.g., http://opensearch:9200)
+# -e url  (OpenSearch URL, e.g., http://opensearch:9200)
 # OR
-# -i ip   (Elasticsearch ip)
-# -p port (Elasticsearch port)
+# -i ip   (OpenSearch ip)
+# -p port (OpenSearch port)
 #
 # -w      (wait not only for "up" status, but also wait for actual sessions2-* logs to exist)
 
@@ -41,7 +41,7 @@ while getopts 've:i:p:w' OPTION; do
       ;;
 
     ?)
-      echo "script usage: $(basename $0) [-v] [-e <Elasticsearch URL>] [-w]" >&2
+      echo "script usage: $(basename $0) [-v] [-e <OpenSearch URL>] [-w]" >&2
       exit 1
       ;;
   esac
@@ -77,12 +77,12 @@ until [[ "$(curl -fsSL "$OS_URL/_cat/health?h=status" | sed -r 's/^[[:space:]]+|
   sleep 1
 done
 
-echo "Elasticsearch is up and healthy at "$OS_URL"" >&2
+echo "OpenSearch is up and healthy at "$OS_URL"" >&2
 
 if (( $WAIT_FOR_LOG_DATA == 1 )); then
   sleep 1
 
-  echo "Waiting until Elasticsearch has logs..." >&2
+  echo "Waiting until OpenSearch has logs..." >&2
 
   # wait until at least one sessions2-* index exists
   until (( $(curl -fs -H'Content-Type: application/json' -XGET "$OS_URL/_cat/indices/sessions2-*" 2>/dev/null | wc -l) > 0 )) ; do

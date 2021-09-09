@@ -29,7 +29,7 @@ ENV JAVA_HOME=/usr/share/opensearch/jdk
 USER root
 
 # Malcolm manages authentication and encryption via NGINX reverse proxy
-RUN yum install -y openssl && \
+RUN yum install -y openssl util-linux  && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/opensearch/config/opensearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml && \

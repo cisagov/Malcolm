@@ -26,7 +26,7 @@ x-auth-variables: &auth-variables
   NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL : 2
 
 x-nginx-variables: &nginx-variables
-  # Whether or not to write nginx's access.log and error.log to Elasticsearch
+  # Whether or not to write nginx's access.log and error.log to OpenSearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
 x-arkime-variables: &arkime-variables
@@ -323,7 +323,7 @@ services:
       VIRTUAL_HOST : 'arkime.malcolm.local'
       OS_HOST : 'opensearch'
       OS_PORT : 9200
-      ES_MAX_SHARDS_PER_NODE : 2500
+      OS_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
       WISE : 'on'
     ulimits:

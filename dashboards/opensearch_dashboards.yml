@@ -9,11 +9,6 @@ elasticsearch.hosts: ["${OPENSEARCH_URL}"]
 elasticsearch.requestTimeout: 180000
 opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
-newsfeed.enabled: false
-telemetry.optIn: false
-telemetry.enabled: false
-security.showInsecureClusterWarning: false
-
 # offline region map
 map.regionmap:
   includeElasticMapsService: false

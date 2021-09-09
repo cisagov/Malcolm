@@ -127,7 +127,7 @@ USER root
 # COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 # ADD "https://github.com/dlumbrer/kbn_network/releases/download/7.10.0-1/kbn_network-7.10.0.zip" /tmp/kibana-network.zip
 
-RUN yum install -y curl psmisc zip unzip && \
+RUN yum install -y curl psmisc util-linux zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
@@ -151,7 +151,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/local/bin/opensearch-dashboards-docker"]
+CMD ["/usr/share/opensearch-dashboards/opensearch-dashboards-docker-entrypoint.sh"]
 
 EXPOSE 5601
 
