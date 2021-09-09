@@ -143,7 +143,7 @@ if mkdir "$DESTDIR"; then
   echo "" | tee -a "$README"
   echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
   echo "  - Arkime: https://localhost/" | tee -a "$README"
-  echo "  - Kibana: https://localhost/kibana/" | tee -a "$README"
+  echo "  - OpenSearch Dashboards: https://localhost/dashboards/" | tee -a "$README"
   echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
   echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
   echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"

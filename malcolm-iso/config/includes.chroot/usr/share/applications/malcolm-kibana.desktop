@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
-Name=Malcolm - Kibana
-Exec=/opt/firefox/firefox https://localhost/kibana/
+Name=Malcolm - OpenSearch Dashboards
+Exec=/opt/firefox/firefox https://localhost/dashboards/
 Terminal=false
 X-MultipleArgs=false
 Type=Application

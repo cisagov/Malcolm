@@ -28,11 +28,11 @@ The purpose of this document is to provide some direction for those willing to m
 
 ### Logstash plugins
 
-## <a name="Kibana"></a>Kibana
+## <a name="dashboards"></a>OpenSearch Dashboards
 
 ### Adding new visualizations and dashboards
 
-### Kibana plugins
+### OpenSearch Dashboards plugins
 
 ## <a name="Moloch"></a>Moloch
 

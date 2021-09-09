@@ -43,7 +43,7 @@ def main():
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
-  parser.add_argument('-d', '--dashboards', dest='dashboardsUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'), help='Kibana URL')
+  parser.add_argument('-d', '--dashboards', dest='dashboardsUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'), help='Dashboards URL')
   parser.add_argument('-o', '--opensearch', dest='opensearchUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='Elasticsearch URL')
   parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
@@ -68,7 +68,7 @@ def main():
   statusInfo = statusInfoResponse.json()
   dashboardsVersion = statusInfo['version']['number']
   if debug:
-    eprint('Kibana version is {}'.format(dashboardsVersion))
+    eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
 
   opensearchInfoResponse = requests.get(args.opensearchUrl)
   opensearchInfo = statusInfoResponse.json()
@@ -148,7 +148,7 @@ def main():
     if debug:
       eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
-    # define field formatting map for Kibana -> Arkime drilldown and other URL drilldowns
+    # define field formatting map for Dashboards -> Arkime drilldown and other URL drilldowns
     #
     # see: https://github.com/cisagov/Malcolm/issues/133
     #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu

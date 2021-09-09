@@ -175,7 +175,7 @@ services:
       << : *process-variables
       << : *dashboards-helper-variables
       OPENSEARCH_URL : 'http://opensearch:9200'
-      DASHBOARDS_URL : 'http://dashboards:5601/opensearch-dashboards'
+      DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'sessions2-*'
       ARKIME_INDEX_PATTERN_ID : 'sessions2-*'
@@ -209,7 +209,7 @@ services:
     expose:
       - 5601
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/opensearch-dashboards/api/status"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
       timeout: 15s
       retries: 3

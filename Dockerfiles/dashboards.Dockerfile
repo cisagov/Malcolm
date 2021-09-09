@@ -151,7 +151,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/local/bin/kibana-docker"]
+CMD ["/usr/local/bin/opensearch-dashboards-docker"]
 
 EXPOSE 5601
 

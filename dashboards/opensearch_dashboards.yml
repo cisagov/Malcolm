@@ -1,13 +1,13 @@
 ---
-# Default Kibana configuration from kibana-docker.
+# Default OpenSearch dashboards configuration from github.
 
-server.name: kibana
+server.name: dashboards
 server.host: "0"
-server.basePath: "/kibana"
+server.basePath: "/dashboards"
 server.rewriteBasePath: true
 elasticsearch.hosts: ["${OPENSEARCH_URL}"]
 elasticsearch.requestTimeout: 180000
-kibana.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
+opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
 newsfeed.enabled: false
 telemetry.optIn: false

@@ -18,7 +18,7 @@ if [[ -n $DASHBOARDS_URL ]]; then
 elif [[ -n $DASHBOARDS_HOST ]] && [[ -n $DASHBOARDS_PORT ]]; then
   DASHB_URL="http://$DASHBOARDS_HOST:$DASHBOARDS_PORT"
 else
-  DASHB_URL="http://dashboards:5601/kibana"
+  DASHB_URL="http://dashboards:5601/dashboards"
 fi
 
 INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"sessions2-*"}
@@ -34,10 +34,10 @@ INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
-  # give Elasticsearch time to start before configuring Kibana
+  # give Elasticsearch time to start before configuring dashboards
   /data/opensearch_status.sh >/dev/null 2>&1
 
-  # is the kibana process server up and responding to requests?
+  # is the Dashboards process server up and responding to requests?
   if curl -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
 
     # have we not not already created the index pattern?
@@ -85,7 +85,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         cp "$ZEEK_TEMPLATE_FILE_ORIG" "$ZEEK_TEMPLATE_FILE"
       fi
 
-      # load zeek_template containing zeek field type mappings (merged from /data/zeek_template.json to /data/init/zeek_template.json in kibana_helpers.sh on startup)
+      # load zeek_template containing zeek field type mappings (merged from /data/zeek_template.json to /data/init/zeek_template.json in dashboard-helpers on startup)
       curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
         "$OS_URL/_template/zeek_template?include_type_name=true" -d "@$ZEEK_TEMPLATE_FILE" 2>&1
 
@@ -101,43 +101,43 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # Make it the default index
       curl -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
-        "$DASHB_URL/api/kibana/settings/defaultIndex" \
+        "$DASHB_URL/api/opensearch-dashboards/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
 
-      echo "Importing Kibana saved objects..."
+      echo "Importing OpenSearch Dashboards saved objects..."
 
       # install default dashboards, index patterns, etc.
-      for i in /opt/kibana/dashboards/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/kibana/dashboards/import?force=true" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+      for i in /opt/dashboards/*.json; do
+        curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       # set dark theme
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/kibana/settings/theme:darkMode" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/theme:darkMode" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
       # set default query time range
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/kibana/settings" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d \
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d \
         '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}'
 
       # turn off telemetry
       curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/telemetry/v2/optIn" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"enabled":false}'
 
       # pin filters by default
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/kibana/settings/filters:pinnedByDefault" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/filters:pinnedByDefault" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
-      echo "Kibana saved objects import complete!"
+      echo "OpenSearch Dashboards saved objects import complete!"
 
       # before we go on to create the anomaly detectors, we need to wait for actual sessions2-* documents
       /data/elastic_search_status.sh -w >/dev/null 2>&1
       sleep 60
 
-      echo "Creating Kibana anomaly detectors..."
+      echo "Creating OpenSearch anomaly detectors..."
 
       # Create anomaly detectors here
-      for i in /opt/kibana/anomaly_detectors/*.json; do
+      for i in /opt/anomaly_detectors/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$ES_URL/_opendistro/_anomaly_detection/detectors" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
-      echo "Kibana anomaly detectors creation complete!"
+      echo "OpenSearch anomaly detectors creation complete!"
 
     fi
   fi

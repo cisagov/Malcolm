@@ -19,7 +19,7 @@ function ZeekLogs (api, section) {
   // there are several files where the definitions of fields live: make sure to keep them in sync
   // - source.zeeklogs.js (this file)
   // - Arkime's config.ini
-  // - Kibana's zeek_template.json
+  // - Opensearch Dashboards's zeek_template.json
 
   // todo: look at expressions for things that have parents (tunnelling, parent files, etc.)
   // todo: look at IP types and use ipPrint?
@@ -896,17 +896,17 @@ function ZeekLogs (api, section) {
   this.api.addRightClick("malcolm_carved_file_quarantined",         {name:"Download (if quarantined)", url:"/dl-extracted-files/quarantine/%TEXT%", fields:carvedFieldsStr});
   this.api.addRightClick("malcolm_carved_file_preserved",           {name:"Download (if preserved)", url:"/dl-extracted-files/preserved/%TEXT%", fields:carvedFieldsStr});
 
-  // add right-clicks for pivoting into Kibana from Arkime (see nginx.conf)
-  var filterLabel = "Kibana %DBFIELD%";
+  // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
+  var filterLabel = "OpenSearch Dashboards %DBFIELD%";
   var filterUrl = "idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
-  this.api.addRightClick("malcolm_kibana_cat_ip",       {name:filterLabel, url:"idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
-  this.api.addRightClick("malcolm_kibana_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
-  this.api.addRightClick("malcolm_kibana_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
-  this.api.addRightClick("malcolm_kibana_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});
-  this.api.addRightClick("malcolm_kibana_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
-  this.api.addRightClick("malcolm_kibana_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
-  this.api.addRightClick("malcolm_kibana_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
+  this.api.addRightClick("malcolm_dashboards_cat_ip",       {name:filterLabel, url:"idmol2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
+  this.api.addRightClick("malcolm_dashboards_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
+  this.api.addRightClick("malcolm_dashboards_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
+  this.api.addRightClick("malcolm_dashboards_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});
+  this.api.addRightClick("malcolm_dashboards_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
+  this.api.addRightClick("malcolm_dashboards_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
+  this.api.addRightClick("malcolm_dashboards_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
 
   // add right-click for viewing original JSON document
   this.api.addRightClick("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});

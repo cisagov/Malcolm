@@ -31,10 +31,10 @@ setup.template.settings:
 setup.dashboards.enabled: true
 setup.dashboards.directory: "/usr/share/filebeat/kibana"
 
-#============================== Kibana =====================================
+#============================== Dashboards ======================================
 setup.kibana:
   host: "dashboards:5601"
-  path: "/kibana"
+  path: "/dashboards"
 
 #================================ Logging ======================================
 logging.metrics.enabled: false

@@ -254,7 +254,7 @@ def logs():
       | executing\s+attempt_(transition|set_replica_count)\s+for
       | but\s+there\s+are\s+no\s+living\s+connections
       | saved_objects
-      | /kibana/(api/ui_metric/report|internal/search/es)
+      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/es)
       | retry\.go.+(send\s+unwait|done$)
       | scheduling\s+job\s*id.+opendistro-ism
       | descheduling\s+job\s*id
@@ -342,8 +342,8 @@ def logs():
               # standardize and print the JSON output
               print(f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}")
 
-          elif ('kibana' in serviceStr):
-            # this is an output line from kibana, let's clean it up a bit: remove some clutter for the display
+          elif ('dashboards' in serviceStr):
+            # this is an output line from dashboards, let's clean it up a bit: remove some clutter for the display
             for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
               outputJson.pop(noisyKey, None)
 
@@ -472,7 +472,7 @@ def start():
     eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")
     eprint("------------------------------------------------------------------------------")
     eprint("  - Arkime: https://localhost/")
-    eprint("  - Kibana: https://localhost/kibana/")
+    eprint("  - OpenSearch Dashboards: https://localhost/dashboards/")
     eprint("  - PCAP upload (web): https://localhost/upload/")
     eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
     eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/\n")
