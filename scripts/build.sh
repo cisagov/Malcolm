@@ -93,7 +93,7 @@ fi
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
-  "/var/lib/clamav/main.cvd;file-monitor"
+  "/var/lib/clamav/main.cld;file-monitor"
   "/var/lib/clamav/daily.cld;file-monitor"
   "/var/lib/clamav/bytecode.cvd;file-monitor"
   "/var/www/upload/js/jquery.fileupload.js;file-upload"
