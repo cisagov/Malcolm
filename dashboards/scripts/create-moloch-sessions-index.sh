@@ -93,14 +93,14 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # From https://github.com/elastic/kibana/issues/3709
       # Create index pattern
-      curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
+      curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
         "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
         -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1
 
       echo "Setting default index pattern..."
 
       # Make it the default index
-      curl -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "kbn-xsrf: anything" \
+      curl -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
         "$DASHB_URL/api/opensearch-dashboards/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
 
@@ -108,21 +108,21 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # install default dashboards, index patterns, etc.
       for i in /opt/dashboards/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       # set dark theme
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/theme:darkMode" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/theme:darkMode" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
       # set default query time range
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d \
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d \
         '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}'
 
       # turn off telemetry
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/telemetry/v2/optIn" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"enabled":false}'
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/telemetry/v2/optIn" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"enabled":false}'
 
       # pin filters by default
-      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/filters:pinnedByDefault" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/filters:pinnedByDefault" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
       echo "OpenSearch Dashboards saved objects import complete!"
 
@@ -134,7 +134,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # Create anomaly detectors here
       for i in /opt/anomaly_detectors/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$ES_URL/_opendistro/_anomaly_detection/detectors" -H 'kbn-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        curl -L --silent --output /dev/null --show-error -XPOST "$ES_URL/_opendistro/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       echo "OpenSearch anomaly detectors creation complete!"

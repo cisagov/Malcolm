@@ -273,8 +273,8 @@ def main():
     if not args.dryrun:
       putResponse = requests.put('{}/{}/{}'.format(args.dashboardsUrl, PUT_INDEX_PATTERN_URI, indexId),
                                  headers={ 'Content-Type': 'application/json',
-                                           'kbn-xsrf': 'true',
-                                           'kbn-version': dashboardsVersion, },
+                                           'osd-xsrf': 'true',
+                                           'osd-version': dashboardsVersion, },
                                  data=json.dumps(putIndexInfo))
       putResponse.raise_for_status()
 
