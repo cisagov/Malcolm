@@ -128,6 +128,7 @@ if [[ "$CREATE_ES_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
       /data/elastic_search_status.sh -w >/dev/null 2>&1
+      sleep 60
 
       echo "Creating Kibana anomaly detectors..."
 
