@@ -23,7 +23,7 @@ elif $GREP -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2
   DOCKER_BIN=docker.exe
 fi
 
-if [ "$1" ]; then
+if [[ -f "$1" ]]; then
   CONFIG_FILE="$1"
   DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN -f "$CONFIG_FILE""
   shift # use remainder of arguments for services
@@ -36,6 +36,13 @@ function filesize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
   $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
+}
+
+function dirsize_in_image() {
+  FILESPEC="$2"
+  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  KBYTES="$($DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1")"
+  echo $(($KBYTES * 1024))
 }
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
@@ -93,9 +100,6 @@ fi
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
-  "/var/lib/clamav/main.cvd;file-monitor"
-  "/var/lib/clamav/daily.cld;file-monitor"
-  "/var/lib/clamav/bytecode.cvd;file-monitor"
   "/var/www/upload/js/jquery.fileupload.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
   "/var/www/htadmin/index.php;htadmin"
@@ -116,4 +120,14 @@ for i in ${FILES_IN_IMAGES[@]}; do
   FILE="$(echo "$i" | cut -d';' -f1)"
   IMAGE="$(echo "$i" | cut -d';' -f2)"
   (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
+done
+
+DIRS_IN_IMAGES=(
+  "/var/lib/clamav;file-monitor;200000000"
+)
+for i in ${DIRS_IN_IMAGES[@]}; do
+  DIR="$(echo "$i" | cut -d';' -f1)"
+  IMAGE="$(echo "$i" | cut -d';' -f2)"
+  MINSIZE="$(echo "$i" | cut -d';' -f3)"
+  (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
 done
