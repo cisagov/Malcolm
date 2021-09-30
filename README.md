@@ -107,7 +107,7 @@ The scripts to control Malcolm require Python 3.
 
 #### Source code
 
-The files required to build and run Malcolm are available on the [Idaho National Lab's GitHub page](https://github.com/idaholab/Malcolm/tree/main). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on its [GitHub page](https://github.com/idaholab/Malcolm/tree/main). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 #### Building Malcolm from scratch
 
@@ -142,21 +142,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.0               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      4.0.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           4.0.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  4.0.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               4.0.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         4.0.0               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             4.0.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           4.0.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           4.0.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          4.0.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  4.0.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        683MB
+malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        141MB
+malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -219,10 +219,11 @@ Malcolm leverages the following excellent open source tools, among others.
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
-    * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin    
-    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin    
+    * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
+    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
     * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
@@ -877,7 +878,7 @@ A remote network sensor appliance can be used to monitor network traffic, captur
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/malcolm)
+* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/Malcolm)
 
 Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/main/sensor-iso/README.md) for more information.
 
@@ -1511,7 +1512,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-3.4.0.iso"
 …
 ```
 
@@ -1894,21 +1895,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.0               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      4.0.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           4.0.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  4.0.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               4.0.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         4.0.0               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             4.0.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           4.0.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           4.0.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          4.0.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  4.0.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        683MB
+malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        690MB
+malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        470MB
+malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        199MB
+malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        555MB
+malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        390MB
+malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        180MB
+malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        141MB
+malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.16GB
+malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.41GB
+malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        137MB
+malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        120MB
+malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        111MB
+malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        157MB
+malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        887MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -1988,7 +1989,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 
 ### Scenario 2: Malcolm was installed from a packaged tarball
 
-If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/malcolm#Packager), here are the basic steps to perform an upgrade:
+If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/Malcolm#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
     * `./scripts/stop`

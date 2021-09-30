@@ -8,7 +8,7 @@ Hedgehog Linux is a Debian-based operating system built to
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions and other information to [Malcolm](https://github.com/idaholab/malcolm)
+* generate and forward Zeek logs, Arkime sessions and other information to [Malcolm](https://github.com/idaholab/Malcolm)
 
 ### <a name="TableOfContents"></a>Table of Contents
 
@@ -153,7 +153,7 @@ In either case, upon selecting **OK** the network interface will be brought down
 
 ### <a name="ConfigTime"></a>Time synchronization
 
-Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/idaholab/malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
+Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/idaholab/Malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
 
 ![Time synchronization method](./docs/images/time_sync_mode.png)
 
@@ -210,7 +210,7 @@ You'll be prompted to specify which engine(s) to use to analyze extracted files.
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
 * scanning portable executable (PE) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, select **ZEEK_FILE_SCAN_CAPA** when specifying scanners for Zeek-carved files
 
-Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/malcolm#KibanaVisualizations) when forwarded to Malcolm.
+Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/Malcolm#KibanaVisualizations) when forwarded to Malcolm.
 
 ![File quarantine](./docs/images/file_quarantine.png)
 
@@ -220,7 +220,7 @@ Finally, you will then be presented with the list of configuration variables tha
 
 ### <a name="ConfigForwarding"></a>Forwarding
 
-Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/idaholab/malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
+Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/idaholab/Malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
 
 ![Configure forwarders](./docs/images/forwarder_config.png)
 
@@ -238,7 +238,7 @@ Next you are asked whether the connection used for Zeek log forwarding should be
 
 ![Filebeat SSL certificate verification](./docs/images/filebeat_ssl.png)
 
-If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication), choose **None**.
+If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
 
 ![Unencrypted vs. SSL encryption for Zeek log forwarding](./docs/images/filebeat_ssl_verify.png)
 
@@ -254,9 +254,9 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ### <a name="arkime-capture"></a>capture: Arkime session forwarding
 
-[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/idaholab/malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/idaholab/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
-First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication)), choose **None**.
+First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication)), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -284,7 +284,7 @@ Metricbeat gathers system resource metrics at an interval you specify. The defau
 
 ![Metricbeat interval](./docs/images/metricbeat_interval.png)
 
-Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/malcolm#configure-authentication), choose **None**.
+Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
 
 ![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
@@ -336,7 +336,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
@@ -416,7 +416,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-4.0.0.iso"
+Finished, created "/sensor-build/hedgehog-3.4.0.iso"
 …
 ```
 
@@ -943,7 +943,7 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 * `sensorwatch` should show current writes to Zeek log files and PCAP files (depending on your configuration)
 * `tail -f /opt/sensor/sensor_ctl/log/*` should show no egregious errors
 * `zeek --version`, `zeek -N local` and `capture --version` ought to run and print out version information as expected
-* if you are forwarding to a [Malcolm](https://github.com/idaholab/malcolm) aggregator, you should start seeing data momentarily
+* if you are forwarding to a [Malcolm](https://github.com/idaholab/Malcolm) aggregator, you should start seeing data momentarily
     
 # <a name="Footer"></a>Copyright
 
