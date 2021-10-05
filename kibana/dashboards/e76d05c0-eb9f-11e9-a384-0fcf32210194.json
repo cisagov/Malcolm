@@ -403,9 +403,9 @@
         "hits": 0,
         "columns": [
           "source.ip",
-          "zeek.orig_p",
+          "source.port",
           "destination.ip",
-          "zeek.resp_p",
+          "destination.port",
           "zeek_iso_cotp.pdu_type",
           "zeek.uid"
         ],
