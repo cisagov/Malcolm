@@ -122,17 +122,17 @@
         {
           "name": "control_0_index_pattern",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         },
         {
           "name": "control_1_index_pattern",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         },
         {
           "name": "control_2_index_pattern",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -177,11 +177,11 @@
         "columns": [
           "zeek.proto",
           "zeek.service",
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "totBytes",
+          "source.ip",
+          "source.port",
+          "destination.ip",
+          "destination.port",
+          "network.bytes",
           "zeek.uid"
         ],
         "sort": [
@@ -199,7 +199,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {

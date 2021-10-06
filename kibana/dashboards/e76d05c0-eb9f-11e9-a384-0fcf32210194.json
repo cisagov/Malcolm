@@ -122,12 +122,12 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         },
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -156,12 +156,12 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         },
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -238,7 +238,7 @@
       "version": "WzgyNiwxXQ==",
       "attributes": {
         "title": "S7comm - Source IP",
-        "visState": "{\"title\":\"S7comm - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcIp\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}",
+        "visState": "{\"title\":\"S7comm - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
         "version": 1,
@@ -268,7 +268,7 @@
       "version": "WzgyNywxXQ==",
       "attributes": {
         "title": "S7comm - Destination IP",
-        "visState": "{\"title\":\"S7comm - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstIp\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstPort\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"}}]}",
+        "visState": "{\"title\":\"S7comm - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.port\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
@@ -361,8 +361,8 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "srcIp",
-          "dstIp",
+          "source.ip",
+          "destination.ip",
           "zeek_s7comm.rosctr",
           "zeek_s7comm.parameter",
           "zeek.uid"
@@ -382,7 +382,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -402,10 +402,10 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "srcIp",
-          "zeek.orig_p",
-          "dstIp",
-          "zeek.resp_p",
+          "source.ip",
+          "source.port",
+          "destination.ip",
+          "destination.port",
           "zeek_iso_cotp.pdu_type",
           "zeek.uid"
         ],
@@ -424,7 +424,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -444,8 +444,8 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "srcIp",
-          "dstIp",
+          "source.ip",
+          "destination.ip",
           "zeek_iso_cotp.pdu_type",
           "zeek_s7comm.parameter",
           "zeek_s7comm.data_info",
@@ -467,7 +467,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {

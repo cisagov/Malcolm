@@ -187,7 +187,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -216,7 +216,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -275,7 +275,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -304,7 +304,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -393,7 +393,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -416,8 +416,8 @@
           "zeek_notice.category",
           "zeek_notice.sub_category",
           "zeek_notice.msg",
-          "srcIp",
-          "dstIp",
+          "source.ip",
+          "destination.ip",
           "zeek.uid"
         ],
         "sort": [
@@ -435,7 +435,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -475,7 +475,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -497,11 +497,11 @@
         "columns": [
           "zeek.proto",
           "zeek.service",
-          "srcIp",
-          "srcPort",
-          "dstIp",
-          "dstPort",
-          "totBytes",
+          "source.ip",
+          "source.port",
+          "destination.ip",
+          "destination.port",
+          "network.bytes",
           "zeek.uid"
         ],
         "sort": [
@@ -519,7 +519,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -539,8 +539,8 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "srcIp",
-          "dstIp",
+          "source.ip",
+          "destination.ip",
           "zeek_dns.query",
           "zeek_dns.answers",
           "zeek.uid"
@@ -560,7 +560,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {

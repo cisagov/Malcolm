@@ -54,7 +54,7 @@ Plugin {
       id=malcolm-readme.desktop
     }
     Button {
-      id=malcolm-moloch.desktop
+      id=malcolm-arkime.desktop
     }
     Button {
       id=malcolm-kibana.desktop

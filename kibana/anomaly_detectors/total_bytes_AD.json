@@ -3,7 +3,7 @@
   "description": "Detect anomalies based on total bytes, summed",
   "time_field": "firstPacket",
   "indices": [
-    "sessions2-*"
+    "arkime_sessions3-*"
   ],
   "feature_attributes": [
     {
@@ -12,7 +12,7 @@
       "aggregation_query": {
         "total_bytes": {
           "sum": {
-            "field": "totBytes"
+            "field": "network.bytes"
           }
         }
       }
@@ -23,7 +23,7 @@
       "filter": [
         {
           "exists": {
-            "field": "totBytes",
+            "field": "network.bytes",
             "boost": 1
           }
         }

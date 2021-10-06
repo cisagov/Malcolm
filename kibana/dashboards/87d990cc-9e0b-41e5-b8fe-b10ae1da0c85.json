@@ -178,7 +178,7 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "srcIp",
+          "source.ip",
           "zeek_software.software_type",
           "zeek_software.name",
           "zeek_software.unparsed_version"
@@ -198,7 +198,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {

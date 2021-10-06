@@ -9,7 +9,7 @@ import sys
 import time
 
 TEMPLATE_POLICY_ID_DEFAULT = 'session_index_policy'
-INDEX_PATTERN_DEFAULT = 'sessions2-*'
+INDEX_PATTERN_DEFAULT = 'arkime_sessions3-*'
 TEMPLATE_SCHEMA_VERSION_DEFAULT = 1
 POLICY_STATE_HOT = 'hot'
 POLICY_STATE_SNAPSHOT = 'recent'

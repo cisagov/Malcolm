@@ -374,7 +374,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {
@@ -397,8 +397,8 @@
           "zeek_notice.category",
           "zeek_notice.sub_category",
           "zeek_notice.msg",
-          "srcIp",
-          "dstIp",
+          "source.ip",
+          "destination.ip",
           "zeek.uid"
         ],
         "sort": [
@@ -416,7 +416,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "sessions2-*"
+          "id": "arkime_sessions3-*"
         }
       ],
       "migrationVersion": {

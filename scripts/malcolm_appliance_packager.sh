@@ -69,8 +69,8 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch/nodes/"
   mkdir $VERBOSE -p "$DESTDIR/elasticsearch-backup/"
-  mkdir $VERBOSE -p "$DESTDIR/moloch-raw/"
-  mkdir $VERBOSE -p "$DESTDIR/moloch-logs/"
+  mkdir $VERBOSE -p "$DESTDIR/arkime-raw/"
+  mkdir $VERBOSE -p "$DESTDIR/arkime-logs/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
   mkdir $VERBOSE -p "$DESTDIR/yara/rules/"
@@ -108,7 +108,7 @@ if mkdir "$DESTDIR"; then
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   README_HTML="$RUN_PATH/$(basename $DESTDIR).README.html"
-  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/arkime' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /data/moloch/doc/README.html" > "$README_HTML" || true
+  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/arkime' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /opt/arkime/doc/README.html" > "$README_HTML" || true
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
