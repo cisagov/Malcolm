@@ -98,6 +98,7 @@ RUN apt-get -q update && \
       python3-wheel \
       supervisor \
       zlib1g-dev && \
+    ln -r -s /usr/bin/clang++-${LLVM_VERSION} /usr/bin/c++ && \
     python3 -m pip install --no-cache-dir pyzmq && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
