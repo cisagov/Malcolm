@@ -116,7 +116,7 @@ RUN apt-get -q update && \
     mkdir -p /tmp/spicy-packages && \
       cd /tmp/spicy-packages && \
     curl -sSL --remote-name-all \
-      "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian10.deb" && \
+      "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb" && \
       dpkg -i ./*.deb && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \

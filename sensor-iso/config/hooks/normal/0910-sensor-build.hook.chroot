@@ -64,21 +64,21 @@ mkdir -p /tmp/zeek-packages /tmp/spicy-packages "${CCACHE_DIR}"
 cd /tmp/zeek-packages
 if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
 curl -sSL --remote-name-all \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_10/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb"
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb"
 dpkg -i ./*.deb
 
 # spicy
 cd /tmp/spicy-packages
 curl -sSL --remote-name-all \
-  "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian10.deb"
+  "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb"
 dpkg -i ./*.deb
 
 # plugins
