@@ -24,8 +24,8 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP true
 
 # for download and install
-ARG ZEEK_LTS=
-ARG ZEEK_VERSION=4.1.1-0
+ARG ZEEK_LTS=1
+ARG ZEEK_VERSION=4.0.4-0
 ARG SPICY_VERSION=1.2.1
 
 ENV ZEEK_LTS $ZEEK_LTS
@@ -109,7 +109,6 @@ RUN apt-get -q update && \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
       dpkg -i ./*.deb && \
