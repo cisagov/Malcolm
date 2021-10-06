@@ -1,8 +1,8 @@
 diff --git a/viewer/vueapp/src/components/sessions/SessionDetail.vue b/viewer/vueapp/src/components/sessions/SessionDetail.vue
-index 72517d44..c75c5cc4 100644
+index a15f3b52..e7b0cd7b 100644
 --- a/viewer/vueapp/src/components/sessions/SessionDetail.vue
 +++ b/viewer/vueapp/src/components/sessions/SessionDetail.vue
-@@ -1049,7 +1049,7 @@ export default {
+@@ -844,7 +844,7 @@ export default {
  .session-detail dt {
    float: left;
    clear: left;
@@ -11,7 +11,7 @@ index 72517d44..c75c5cc4 100644
    text-align: right;
    margin-right: 6px;
    line-height: 1.7;
-@@ -1057,7 +1057,7 @@ export default {
+@@ -852,7 +852,7 @@ export default {
  }
  
  .session-detail dd {
