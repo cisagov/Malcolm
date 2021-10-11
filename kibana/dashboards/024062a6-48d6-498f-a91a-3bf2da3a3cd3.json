@@ -355,7 +355,7 @@
         "columns": [
           "zeek_x509.certificate_issuer.CN",
           "zeek_x509.certificate_subject.CN",
-          "zeek_x509..host_cert",
+          "zeek_x509.host_cert",
           "zeek_x509.client_cert",
           "zeek_x509.certificate_sig_alg",
           "zeek_x509.certificate_version",
