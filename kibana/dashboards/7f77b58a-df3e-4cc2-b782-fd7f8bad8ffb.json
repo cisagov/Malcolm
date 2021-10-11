@@ -672,8 +672,10 @@
           "destination.ip",
           "destination.port",
           "zeek_ssl.server_name",
-          "zeek_ssl.validation_status",
           "zeek_ssl.established",
+          "zeek_ssl.validation_status",
+          "zeek_ssl.ssl_history",
+          "zeek_ssl.sni_matches_cert",
           "zeek.uid"
         ],
         "sort": [
