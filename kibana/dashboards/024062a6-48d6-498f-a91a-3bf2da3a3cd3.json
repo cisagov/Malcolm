@@ -358,8 +358,7 @@
           "zeek_x509.host_cert",
           "zeek_x509.client_cert",
           "zeek_x509.certificate_sig_alg",
-          "zeek_x509.certificate_version",
-          "zeek.fuid"
+          "zeek_x509.certificate_version"
         ],
         "sort": [
           [
