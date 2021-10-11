@@ -909,7 +909,7 @@
         "zeek_x509.certificate_version": { "type": "integer" },
         "zeek_x509.client_cert": { "type": "keyword" },
         "zeek_x509.host_cert": { "type": "keyword" },
-        "zeek_x509.san_dns": { "type": "keyword" },
+        "zeek_x509.san_dns": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek_x509.san_email": { "type": "keyword" },
         "zeek_x509.san_ip": { "type": "ip" },
         "zeek_x509.san_uri": { "type": "keyword", "ignore_above": 16384, "fields": { "text": { "type": "text" } } }
