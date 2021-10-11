@@ -861,6 +861,7 @@ class ZeekSource extends WISESource {
       "zeek_x509.certificate_version",
       "zeek_x509.client_cert",
       "zeek_x509.host_cert",
+      "zeek_x509.fingerprint",
       "zeek_x509.san_dns",
       "zeek_x509.san_email",
       "zeek_x509.san_ip",

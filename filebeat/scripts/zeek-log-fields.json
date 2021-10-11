@@ -353,6 +353,28 @@
     "x509": [
         [
             "ts",
+            "id",
+            "certificate.version",
+            "certificate.serial",
+            "certificate.subject",
+            "certificate.issuer",
+            "certificate.not_valid_before",
+            "certificate.not_valid_after",
+            "certificate.key_alg",
+            "certificate.sig_alg",
+            "certificate.key_type",
+            "certificate.key_length",
+            "certificate.exponent",
+            "certificate.curve",
+            "san.dns",
+            "san.uri",
+            "san.email",
+            "san.ip",
+            "basic_constraints.ca",
+            "basic_constraints.path_len"
+        ],
+        [
+            "ts",
             "fingerprint",
             "certificate.version",
             "certificate.serial",
