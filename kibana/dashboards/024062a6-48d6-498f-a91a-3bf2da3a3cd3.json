@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T16:07:10.928Z",
-      "version": "Wzk1MiwxXQ==",
+      "updated_at": "2021-10-12T18:27:47.478Z",
+      "version": "Wzg4MywxXQ==",
       "attributes": {
         "title": "X.509",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":28,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":8,\"y\":8,\"w\":17,\"h\":20,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":46,\"w\":17,\"h\":21,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":17,\"y\":46,\"w\":15,\"h\":21,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":25,\"y\":8,\"w\":23,\"h\":20,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":36,\"y\":28,\"w\":12,\"h\":18,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":28,\"w\":12,\"h\":18,\"i\":\"aa7075cb-f9ef-4453-8c5f-90eccc6883c7\"},\"panelIndex\":\"aa7075cb-f9ef-4453-8c5f-90eccc6883c7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":12,\"y\":28,\"w\":12,\"h\":18,\"i\":\"92e238af-672e-4f6d-8ff0-bf9d9a3a2437\"},\"panelIndex\":\"92e238af-672e-4f6d-8ff0-bf9d9a3a2437\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":24,\"y\":28,\"w\":12,\"h\":18,\"i\":\"d4f7644a-5547-4976-a5df-a5a5ae4a5bed\"},\"panelIndex\":\"d4f7644a-5547-4976-a5df-a5a5ae4a5bed\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":32,\"y\":46,\"w\":16,\"h\":21,\"i\":\"cff03ff3-838f-40f1-84b5-f671ff537a6c\"},\"panelIndex\":\"cff03ff3-838f-40f1-84b5-f671ff537a6c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":67,\"w\":48,\"h\":39,\"i\":\"2a9de8ad-b593-4bf3-9fc4-703580b95500\"},\"panelIndex\":\"2a9de8ad-b593-4bf3-9fc4-703580b95500\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"}]",
+        "panelsJSON": "[{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":28,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":8,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":8,\"y\":8,\"w\":15,\"h\":20,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":46,\"w\":15,\"h\":20,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":15,\"y\":46,\"w\":19,\"h\":20,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":34,\"y\":8,\"w\":14,\"h\":20,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":23,\"y\":8,\"w\":11,\"h\":20,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":8,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":28,\"w\":12,\"h\":18,\"i\":\"aa7075cb-f9ef-4453-8c5f-90eccc6883c7\"},\"panelIndex\":\"aa7075cb-f9ef-4453-8c5f-90eccc6883c7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":12,\"y\":28,\"w\":12,\"h\":18,\"i\":\"5e719795-a525-43dd-974c-6145b6e15de1\"},\"panelIndex\":\"5e719795-a525-43dd-974c-6145b6e15de1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":24,\"y\":28,\"w\":12,\"h\":18,\"i\":\"92e238af-672e-4f6d-8ff0-bf9d9a3a2437\"},\"panelIndex\":\"92e238af-672e-4f6d-8ff0-bf9d9a3a2437\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":36,\"y\":28,\"w\":12,\"h\":18,\"i\":\"d4f7644a-5547-4976-a5df-a5a5ae4a5bed\"},\"panelIndex\":\"d4f7644a-5547-4976-a5df-a5a5ae4a5bed\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":34,\"y\":46,\"w\":14,\"h\":20,\"i\":\"cff03ff3-838f-40f1-84b5-f671ff537a6c\"},\"panelIndex\":\"cff03ff3-838f-40f1-84b5-f671ff537a6c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":66,\"w\":48,\"h\":39,\"i\":\"2a9de8ad-b593-4bf3-9fc4-703580b95500\"},\"panelIndex\":\"2a9de8ad-b593-4bf3-9fc4-703580b95500\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":105,\"w\":48,\"h\":24,\"i\":\"4535ecde-ff4e-4121-b783-deb678c5f1ff\"},\"panelIndex\":\"4535ecde-ff4e-4121-b783-deb678c5f1ff\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -70,22 +70,32 @@
         {
           "name": "panel_9",
           "type": "visualization",
-          "id": "b1481d20-2b64-11ec-a748-7936240e2919"
+          "id": "61410dd0-2b89-11ec-a9f2-3911c8571bfd"
         },
         {
           "name": "panel_10",
           "type": "visualization",
-          "id": "cdd2a1e0-2b64-11ec-a748-7936240e2919"
+          "id": "b1481d20-2b64-11ec-a748-7936240e2919"
         },
         {
           "name": "panel_11",
           "type": "visualization",
-          "id": "e70e3a00-2b75-11ec-b2c0-c162ed55b2ac"
+          "id": "cdd2a1e0-2b64-11ec-a748-7936240e2919"
         },
         {
           "name": "panel_12",
+          "type": "visualization",
+          "id": "e70e3a00-2b75-11ec-b2c0-c162ed55b2ac"
+        },
+        {
+          "name": "panel_13",
           "type": "search",
           "id": "858102a3-eec0-4ab3-82bb-a791e4eb364b"
+        },
+        {
+          "name": "panel_14",
+          "type": "search",
+          "id": "9c2ec460-2b88-11ec-a9f2-3911c8571bfd"
         }
       ],
       "migrationVersion": {
@@ -98,8 +108,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:41:10.551Z",
-      "version": "Wzc0MSwxXQ==",
+      "updated_at": "2021-10-12T17:35:08.437Z",
+      "version": "Wzc0MiwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
         "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/kibana/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/kibana/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/kibana/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/kibana/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/kibana/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/kibana/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/kibana/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/kibana/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/kibana/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/kibana/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/kibana/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/kibana/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intel Feeds](/kibana/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/kibana/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/kibana/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/kibana/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/kibana/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/kibana/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/kibana/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/kibana/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/kibana/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/kibana/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MySQL](/kibana/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/kibana/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/kibana/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [QUIC](/kibana/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/kibana/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/kibana/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/kibana/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/kibana/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/kibana/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/kibana/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/kibana/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/kibana/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/kibana/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/kibana/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [Syslog](/kibana/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/kibana/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/kibana/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/kibana/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/kibana/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/kibana/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/kibana/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/kibana/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/kibana/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/kibana/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/kibana/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/kibana/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [MQTT](/kibana/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [PROFINET](/kibana/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/kibana/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/kibana/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -121,7 +131,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzUsMV0=",
       "attributes": {
         "visState": "{\"title\":\"X.509 - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"line\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
@@ -151,7 +161,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzYsMV0=",
       "attributes": {
         "title": "X.509 - Certificate Signing Algorithm",
@@ -181,7 +191,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzcsMV0=",
       "attributes": {
         "visState": "{\"title\":\"X.509 - Certificate Subject\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_x509.certificate_subject_full\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Subject\"}}],\"listeners\":{}}",
@@ -211,7 +221,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzgsMV0=",
       "attributes": {
         "visState": "{\"title\":\"X.509 - Certificate Issuer\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_x509.certificate_issuer_full\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Issuer\"}}],\"listeners\":{}}",
@@ -241,7 +251,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzksMV0=",
       "attributes": {
         "title": "X.509 - Certificate Key Length",
@@ -271,7 +281,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzEwLDFd",
       "attributes": {
         "title": "X.509 - Certificate Key Algorithm",
@@ -301,7 +311,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzExLDFd",
       "attributes": {
         "title": "X.509 - Log Count",
@@ -331,8 +341,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:39.200Z",
-      "version": "WzM5NiwxXQ==",
+      "updated_at": "2021-10-12T17:34:37.046Z",
+      "version": "WzM5NywxXQ==",
       "attributes": {
         "title": "SSL - Relevant Notices",
         "visState": "{\"title\":\"SSL - Relevant Notices\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":4,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\"}},\"params\":{},\"label\":\"Notice Category\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\"}},\"params\":{},\"label\":\"Notice Subcategory\",\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\"}},\"params\":{},\"label\":\"Source IP\",\"aggType\":\"terms\"},{\"accessor\":3,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"1\"}},\"params\":{},\"label\":\"Destination IP\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_notice.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Notice Category\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_notice.sub_category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Notice Subcategory\"}}]}",
@@ -356,12 +366,42 @@
       }
     },
     {
+      "id": "61410dd0-2b89-11ec-a9f2-3911c8571bfd",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-10-12T18:22:38.381Z",
+      "version": "Wzg2MSwxXQ==",
+      "attributes": {
+        "title": "OCSP - Certificate Revocation",
+        "visState": "{\"title\":\"OCSP - Certificate Revocation\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek_ocsp.certStatus\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Certificate Status\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek_ocsp.revokereason\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Revocation Reason\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"NOT zeek_ocsp.certStatus:good\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "9c2ec460-2b88-11ec-a9f2-3911c8571bfd"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
       "id": "b1481d20-2b64-11ec-a748-7936240e2919",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzEzLDFd",
       "attributes": {
         "title": "X.509 - Is Host Certificate",
@@ -391,7 +431,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
+      "updated_at": "2021-10-12T17:34:03.402Z",
       "version": "WzE0LDFd",
       "attributes": {
         "title": "X.509 - Is Client Certificate",
@@ -421,8 +461,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T16:03:12.928Z",
-      "version": "WzkwMywxXQ==",
+      "updated_at": "2021-10-12T17:34:03.402Z",
+      "version": "WzE1LDFd",
       "attributes": {
         "title": "X.509 - Certificate Fingerprint",
         "visState": "{\"title\":\"X.509 - Certificate Fingerprint\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek_x509.fingerprint\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Certificate Fingerprint\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
@@ -451,8 +491,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:40:04.346Z",
-      "version": "WzE1LDFd",
+      "updated_at": "2021-10-12T17:34:03.402Z",
+      "version": "WzE2LDFd",
       "attributes": {
         "title": "X.509 - Logs",
         "description": "",
@@ -488,13 +528,51 @@
       }
     },
     {
+      "id": "9c2ec460-2b88-11ec-a9f2-3911c8571bfd",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2021-10-12T18:17:07.749Z",
+      "version": "WzgyOSwxXQ==",
+      "attributes": {
+        "title": "OCSP - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "zeek_ocsp.thisUpdate",
+          "zeek_ocsp.nextUpdate",
+          "zeek_ocsp.certStatus",
+          "zeek_ocsp.revokereason",
+          "zeek_ocsp.revoketime",
+          "zeek_ocsp.serialNumber",
+          "zeek.fuid"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"zeek.logType:ocsp\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
       "id": "8f003748-a6f8-4244-9d4e-e38e4a48da4c",
       "type": "search",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T15:41:07.517Z",
-      "version": "WzcxNiwxXQ==",
+      "updated_at": "2021-10-12T17:35:05.414Z",
+      "version": "WzcxNywxXQ==",
       "attributes": {
         "title": "Notices - Logs",
         "description": "",
