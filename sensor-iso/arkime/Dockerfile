@@ -33,7 +33,6 @@ RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list 
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ADD build-arkime-deb.sh /usr/local/bin/
-ADD patch /arkime-src-patch
 ADD etc /arkime-etc
 
 ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-arkime-deb.sh"]

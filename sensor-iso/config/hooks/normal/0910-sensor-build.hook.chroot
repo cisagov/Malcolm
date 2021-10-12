@@ -3,18 +3,18 @@
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # some environment variables needed for build using llvm/clang
-export CC="clang-11"
-export CXX="clang++-11"
-export ASM="clang-11"
+export CC="clang-13"
+export CXX="clang++-13"
+export ASM="clang-13"
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
-ln -r -s /usr/bin/clang++-11 /usr/bin/c++
+ln -r -s /usr/bin/clang++-13 /usr/bin/c++
 
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-ZEEK_VERSION=4.0.4-0
-ZEEK_LTS=1
+ZEEK_VERSION=4.1.1-0
+ZEEK_LTS=
 SPICY_VERSION=1.2.1
 ZEEK_DIR="/opt/zeek"
 SPICY_DIR="/opt/spicy"
@@ -71,6 +71,7 @@ curl -sSL --remote-name-all \
   "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
   "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
   "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
   "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
   "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb"
 dpkg -i ./*.deb

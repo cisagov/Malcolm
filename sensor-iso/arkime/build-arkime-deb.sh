@@ -2,6 +2,7 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
+ARKIME_URL="https://github.com/arkime/arkime.git"
 OUTPUT_DIR="/tmp"
 unset VERBOSE
 
@@ -19,19 +20,9 @@ fi
 
 apt-get -q update
 
-mkdir -p /opt
-curl -L -o /tmp/arkime.tar.gz "https://github.com/arkime/arkime/archive/v$ARKIME_VERSION.tar.gz"
-
 cd /tmp
-tar -xvf "arkime.tar.gz"
-rm -f "arkime.tar.gz"
-
-mv "./arkime-"$ARKIME_VERSION "./arkime-"$ARKIME_VERSION || true
+git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION
 cd "./arkime-"$ARKIME_VERSION
-
-for i in /arkime-src-patch/*; do
-  patch -p 1 -r - --no-backup-if-mismatch < $i || true
-done
 
 export PATH="$ARKIMEDIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
@@ -43,7 +34,8 @@ make install
 
 cp -r ./capture/plugins/lua/samples "$ARKIMEDIR"/lua
 
-npm install license-checker; release/notice.txt.pl $ARKIMEDIR NOTICE release/CAPTURENOTICE > $ARKIMEDIR/NOTICE.txt
+npm install license-checker
+release/notice.txt.pl $ARKIMEDIR NOTICE release/CAPTURENOTICE > $ARKIMEDIR/NOTICE.txt
 
 ETC_FILES=$(shopt -s nullglob dotglob; echo /arkime-etc/*)
 if (( ${#ETC_FILES} )) ; then
@@ -53,7 +45,7 @@ fi
 
 fpm -s dir -t deb -n arkime -x opt/arkime/logs -x opt/arkime/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIMEDIR"
 
-ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
+ls -l *.deb && mv -v *.deb "$"/
 
 cd /tmp
 
