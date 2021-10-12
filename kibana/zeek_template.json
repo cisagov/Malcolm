@@ -849,7 +849,7 @@
         "zeek_stun.method": { "type": "keyword" },
         "zeek_stun.class": { "type": "keyword" },
         "zeek_stun.attr_type": { "type": "keyword" },
-        "zeek_stun.attr_val": { "type": "keyword" },
+        "zeek_stun.attr_val": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text" } } },
         "zeek_stun_nat.is_orig": { "type": "keyword" },
         "zeek_stun_nat.wan_addr": { "type": "ip" },
         "zeek_stun_nat.wan_port": { "type": "integer" },
