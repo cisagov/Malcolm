@@ -318,7 +318,7 @@ services:
       << : *process-variables
       << : *common-upload-variables
       << : *arkime-variables
-      ARKIME_VERSION : '3.1.0'
+      ARKIME_VERSION : '3.1.1'
       VIRTUAL_HOST : 'arkime.malcolm.local'
       ES_HOST : 'elasticsearch'
       ES_PORT : 9200
