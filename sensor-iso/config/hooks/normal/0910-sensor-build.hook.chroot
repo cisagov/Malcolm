@@ -79,7 +79,7 @@ dpkg -i ./*.deb
 # spicy
 cd /tmp/spicy-packages
 curl -sSL --remote-name-all \
-  "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb"
+  "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian10.deb"
 dpkg -i ./*.deb
 
 # plugins
