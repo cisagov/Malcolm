@@ -1,0 +1,10 @@
+default 0
+timeout 5
+color cyan/blue white/blue
+splashimage /boot/grub/splash.xpm.gz
+
+LINUX_LIVE
+
+LINUX_INSTALL
+
+MEMTEST
