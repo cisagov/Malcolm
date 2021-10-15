@@ -115,14 +115,19 @@ db_get malcolm/xscreensaver_lock
 
 # store places defaults can exist for xscreensaver lock
 if [ -n $RET ]; then
-  URET="$(echo "$RET" | sed -r 's/\<./\U&/')"
-  sed -i "s/^\(xscreensaver.lock:\).*$/\1 $RET/g" /etc/skel/.Xresources 2>/dev/null || true
-  sed -i "s/^\(lock:\).*$/\1		$URET/g" /etc/skel/.xscreensaver 2>/dev/null  || true
-  sed -i "s/^\(\*lock:\).*$/\1			$URET/g" /etc/X11/app-defaults/XScreenSaver* 2>/dev/null || true
+  if [ "$RET" = false ]; then
+    PRESENTATION_MODE=true
+  else
+    PRESENTATION_MODE=false
+  fi
+  sed -i "s/\(.*presentation-mode.*value=\"\).*\(\".*\)$/\1$PRESENTATION_MODE\2/g" \
+    /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml 2>/dev/null || true
   # at this point users have already been created, so we need to re-apply our changes there
   for HOMEDIR in $(getent passwd | cut -d: -f6); do
-    [ -f /etc/skel/.Xresources ] && [ -f "$HOMEDIR"/.Xresources ] && cp -f /etc/skel/.Xresources "$HOMEDIR"/.Xresources
-    [ -f /etc/skel/.xscreensaver ] && [ -f "$HOMEDIR"/.xscreensaver ] && cp -f /etc/skel/.xscreensaver "$HOMEDIR"/.xscreensaver
+    [ -f /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml ] && \
+      [ -f "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml ] && \
+      cp -f /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml \
+            "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
   done
 fi
 

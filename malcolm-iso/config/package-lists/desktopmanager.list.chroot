@@ -3,6 +3,7 @@ dconf-cli
 file-roller
 fonts-symbola
 galculator
+gnome-themes-extra
 libnotify-bin
 mousepad
 mupdf
@@ -34,7 +35,6 @@ xfce4-places-plugin
 xfce4-power-manager
 xfce4-sensors-plugin
 xfce4-taskmanager
-xfce4-terminal
 xinit
 xorg
 xscreensaver
