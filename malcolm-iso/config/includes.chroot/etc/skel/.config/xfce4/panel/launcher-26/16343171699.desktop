@@ -7,3 +7,4 @@ Type=Application
 Icon=redo.png
 Categories=Network;
 StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-restart.desktop

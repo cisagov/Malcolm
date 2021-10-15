@@ -1,4 +1,4 @@
 include menu.cfg
 default vesamenu.c32
 prompt 0
-timeout 50
+timeout 0

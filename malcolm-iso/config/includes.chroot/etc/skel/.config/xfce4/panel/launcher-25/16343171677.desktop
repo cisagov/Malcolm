@@ -7,3 +7,4 @@ Type=Application
 Icon=/usr/share/icons/hicolor/64x64/malcolm.png
 Categories=Network;
 StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-start.desktop

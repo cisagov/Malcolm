@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - CyberChef
+Exec=/opt/firefox/firefox https://localhost/cyberchef/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=applications-science.png
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-cyberchef.desktop

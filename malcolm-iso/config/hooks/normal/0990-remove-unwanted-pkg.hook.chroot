@@ -8,12 +8,15 @@ apt-get -y --purge remove bluez-firmware \
                           cracklib-runtime \
                           gdb \
                           git \
+                          firmware-netronome \
+                          firmware-qcom-soc \
                           gnome-accessibility-themes \
                           libasound2-plugins \
                           libx264* \
                           libx265* \
                           pavucontrol \
                           pulseaudio \
+                          tango-icon-theme \
                           xdg-user-dirs \
                           yelp || true
 
