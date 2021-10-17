@@ -6,6 +6,7 @@ apt-get -y --purge remove build-essential $(dpkg --get-selections | grep -v dein
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \
                           cracklib-runtime \
+                          docker-scan-plugin \
                           gdb \
                           git \
                           firmware-netronome \
