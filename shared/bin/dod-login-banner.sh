@@ -4,6 +4,8 @@
 #  V-56585 / SV-70845r1_rule
 # https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585
 
+grep -q boot=live /proc/cmdline && exit 0
+
 BANNER_FILE="$(mktemp)"
 
 cat << 'EOF' > "$BANNER_FILE"
