@@ -10,7 +10,7 @@ Jinja2==2.11.3
 MarkupSafe==1.1.1
 psutil
 python-dotenv==0.14.0
-requests==2.24.0
+requests==2.26.0
 six==1.15.0
-urllib3==1.26.5
+urllib3==1.26.7
 Werkzeug==1.0.1

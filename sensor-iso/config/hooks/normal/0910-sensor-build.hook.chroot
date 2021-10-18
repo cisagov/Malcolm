@@ -8,7 +8,6 @@ export CXX="clang++-13"
 export ASM="clang-13"
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
-ln -r -s /usr/bin/clang++-13 /usr/bin/c++
 
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"

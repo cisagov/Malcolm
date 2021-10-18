@@ -8,7 +8,6 @@ apt-get -y --purge remove bluez-firmware \
                           cracklib-runtime \
                           docker-scan-plugin \
                           gdb \
-                          git \
                           firmware-netronome \
                           firmware-qcom-soc \
                           gnome-accessibility-themes \

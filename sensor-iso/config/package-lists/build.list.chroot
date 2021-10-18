@@ -18,6 +18,8 @@ libmaxminddb-dev
 libmaxminddb0
 libpcap-dev
 libpcap0.8
+libsodium-dev
+libsodium23
 libssl-dev
 libssl1.1
 libtcmalloc-minimal4

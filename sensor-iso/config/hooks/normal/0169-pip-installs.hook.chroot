@@ -11,5 +11,4 @@ export ASM="clang-13"
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   clamd \
-  debinterface==3.4.0 \
-  pyzmq
+  debinterface==3.4.0

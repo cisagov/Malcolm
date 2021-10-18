@@ -8,19 +8,16 @@ apt-get -y --purge remove \
   gdb \
   libc6-dbg \
   ninja-build \
-  $(dpkg --get-selections | grep -Pv "(^(dpkg|libclang|libfl|libgcc|libmaxminddb|libpcap|libssl|libyaml|llvm|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+  $(dpkg --get-selections | grep -Pv "(^(dpkg|libbroker|libc6|libclang|libcrypt|libdbus|libfl|libgcc|libmaxminddb|libnsl|libpcap|libpcap0.8|libssl|libtirpc|libyaml|linux-libc|llvm|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /var/spool/ccache
-
 
 # remove unwanted packages
 apt-get -y --purge remove \
   bluez-firmware \
   cracklib-runtime \
-  docker-scan-plugin \
   firmware-netronome \
   firmware-qcom-soc \
   gdb \
-  git \
   gnome-accessibility-themes \
   libasound2-plugins \
   libgphoto2-6 \
@@ -32,7 +29,6 @@ apt-get -y --purge remove \
   pavucontrol \
   poppler-data \
   pulseaudio \
-  python-wicd \
   strace \
   tango-icon-theme \
   wamerican \
