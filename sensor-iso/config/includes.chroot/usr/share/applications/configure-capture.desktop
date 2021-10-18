@@ -1,10 +1,10 @@
 [Desktop Entry]
 Version=1.0
 Name=Configure Capture and Forwarding
-Exec=/usr/bin/terminator --maximise -T "Configure Capture and Forwarding" -x /usr/local/bin/configure-capture.py
+Exec=/usr/bin/tilix --maximize -t "Configure Capture and Forwarding" -e /usr/local/bin/configure-capture.py
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Icon=network-receive.png
+Icon=network-receive
 Categories=Network;
 StartupNotify=true
