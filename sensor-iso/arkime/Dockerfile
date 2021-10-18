@@ -28,7 +28,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
     rubygems \
     sudo \
     wget && \
-  gem install --no-ri --no-rdoc fpm && \
+  gem install --no-document fpm && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
