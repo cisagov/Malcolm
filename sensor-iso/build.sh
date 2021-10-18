@@ -71,7 +71,8 @@ if [ -d "$WORKDIR" ]; then
              firmware-misc-nonfree \
              firmware-amd-graphics \
              firmware-iwlwifi \
-             firmware-atheros; do
+             firmware-atheros \
+             linux-headers-amd64; do
     echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
   done
 
