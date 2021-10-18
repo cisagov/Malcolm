@@ -13,38 +13,31 @@ rm -rf /var/spool/ccache
 
 
 # remove unwanted packages
-apt-get -y --purge remove bluez-firmware \
-                          cracklib-runtime \
-                          deluge \
-                          enchant \
-                          ffmpeg \
-                          gnome-accessibility-themes \
-                          gucharmap \
-                          libasound2-plugins \
-                          libcupsfilters1 \
-                          libcupsimage2 \
-                          libgphoto2-6 \
-                          libgphoto2-port12 \
-                          libx264* \
-                          libx265* \
-                          lintian \
-                          lxmusic \
-                          mailutils \
-                          mpv \
-                          pavucontrol \
-                          poppler-data \
-                          prelink \
-                          pulseaudio \
-                          python-wicd \
-                          smplayer \
-                          strace \
-                          wamerican \
-                          wicd \
-                          wicd-daemon \
-                          wicd-gtk \
-                          xdg-user-dirs \
-                          yelp \
-                          youtube-dl || true
+apt-get -y --purge remove \
+  bluez-firmware \
+  cracklib-runtime \
+  docker-scan-plugin \
+  firmware-netronome \
+  firmware-qcom-soc \
+  gdb \
+  git \
+  gnome-accessibility-themes \
+  libasound2-plugins \
+  libgphoto2-6 \
+  libgphoto2-port12 \
+  libx264* \
+  libx265* \
+  lintian \
+  network-manager* \
+  pavucontrol \
+  poppler-data \
+  pulseaudio \
+  python-wicd \
+  strace \
+  tango-icon-theme \
+  wamerican \
+  xdg-user-dirs \
+  yelp || true
 
 apt-get -y autoremove
 apt-get clean
@@ -54,7 +47,6 @@ dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 
 # disable automatic running of some services (but don't abort if we fail)
 systemctl disable supervisor.service || true
-systemctl disable systemd-timesyncd.service || true
 systemctl disable ctrl-alt-del.target || true
 systemctl disable hddtemp.service || true
 systemctl disable apt-daily.service || true

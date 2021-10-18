@@ -1,1 +1,1 @@
-deb http://apt.llvm.org/buster/ llvm-toolchain-buster-13 main
+deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-13 main

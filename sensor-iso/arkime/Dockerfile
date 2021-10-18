@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV ARKIME_VERSION "3.1.1"
 ENV ARKIMEDIR "/opt/arkime"
 
-RUN sed -i "s/buster main/buster main contrib non-free/g" /etc/apt/sources.list && \
+RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
   apt-get -q update && \
   apt-get install -q -y --no-install-recommends \
     build-essential \

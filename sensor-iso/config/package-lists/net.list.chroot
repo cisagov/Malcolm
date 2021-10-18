@@ -1,3 +1,5 @@
+apache2-utils
+ca-certificates
 curl
 ethtool
 htpdate
@@ -17,8 +19,8 @@ openssh-server
 openvpn
 rsync
 snmp
-ssh-askpass
 socat
+ssh-askpass
 tcpdump
 traceroute
 ufw

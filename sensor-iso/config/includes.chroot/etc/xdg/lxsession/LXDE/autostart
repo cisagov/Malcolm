@@ -1,5 +1,0 @@
-@lxpanel --profile LXDE
-@pcmanfm --desktop --profile LXDE
-@xscreensaver -no-splash
-@/usr/local/bin/capture-format-wait.sh
-@/opt/firefox/firefox --setDefaultBrowser --no-remote --private --kiosk http://127.0.0.1:5000
