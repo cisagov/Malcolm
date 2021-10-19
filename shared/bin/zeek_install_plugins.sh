@@ -83,7 +83,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/pingback"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
-  "https://github.com/J-Gras/zeek-af_packet-plugin"
   "https://github.com/mitre-attack/bzar"
   "https://github.com/mmguero-dev/cve-2020-0601|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/cve-2020-13777|zeek-v4.1-compatibility"
@@ -107,16 +106,7 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
   [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
 
-# TODO
-# https://github.com/zeek/spicy-analyzers
-# A collection of zeek-hosted spicy analyzers, some of which
-# "replace" the built-in zeek parsers for those protocols.
-# We need to compare the built-in ones, but use what we're used to until
-# we make the decision with eyes open. As of 2021/03/24, that list is:
-# - DHCP      - compare to Zeek DHCP
-# - DNS       - compare to Zeek DNS
-# - HTTP      - compare to Zeek HTTP
-# - IPSEC
-# - OpenVPN
-# - TFTP
-# - WireGuard
+SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
+if [[ -d "$SRC_DIR" ]]; then
+  KERNELHEADERS_LATEST=ON zkg install --force --skiptests "$SRC_DIR"
+fi
