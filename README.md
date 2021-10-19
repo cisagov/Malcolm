@@ -142,21 +142,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1896,21 +1896,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
