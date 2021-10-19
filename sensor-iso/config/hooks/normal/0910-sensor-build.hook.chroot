@@ -2,10 +2,7 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# some environment variables needed for build using llvm/clang
-export CC="clang-13"
-export CXX="clang++-13"
-export ASM="clang-13"
+# some environment variables needed for build
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
 

@@ -33,10 +33,6 @@ ENV ZEEK_VERSION $ZEEK_VERSION
 ENV SPICY_VERSION $SPICY_VERSION
 
 # for build
-ENV LLVM_VERSION "13"
-ENV CC "clang-${LLVM_VERSION}"
-ENV CXX "clang++-${LLVM_VERSION}"
-ENV ASM "clang-${LLVM_VERSION}"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
@@ -51,30 +47,21 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # build and install system packages, zeek, spicy and plugins
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
+      bison \
       ca-certificates \
+      ccache \
+      cmake \
       curl \
       file \
+      flex \
+      g++ \
+      gcc \
       git \
       gnupg2 \
       jq \
       less \
-      libcap2-bin \
-      moreutils \
-      procps \
-      psmisc \
-      vim-tiny && \
-    ( curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - ) && \
-    echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
-    echo "deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
-    apt-get -q update && \
-    apt-get install -q -y --no-install-recommends \
-      bison \
-      ccache \
-      clang-${LLVM_VERSION} \
-      cmake \
-      flex \
       libatomic1 \
-      libclang-${LLVM_VERSION}-dev \
+      libcap2-bin \
       libfl-dev \
       libgoogle-perftools4 \
       libkrb5-3 \
@@ -86,20 +73,20 @@ RUN apt-get -q update && \
       libtcmalloc-minimal4 \
       libunwind8 \
       libzmq5 \
-      llvm-${LLVM_VERSION}-dev \
       locales-all \
       make \
+      moreutils \
       ninja-build \
+      procps \
+      psmisc \
       python3 \
       python3-git \
-      python3-pip \
       python3-semantic-version \
-      python3-setuptools \
-      python3-wheel \
+      python3-zmq \
       supervisor \
+      swig \
+      vim-tiny \
       zlib1g-dev && \
-    ln -r -s /usr/bin/clang++-${LLVM_VERSION} /usr/bin/c++ && \
-    python3 -m pip install --no-cache-dir pyzmq && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \

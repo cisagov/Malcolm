@@ -4,9 +4,6 @@
 
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
-export CC="clang-13"
-export CXX="clang++-13"
-export ASM="clang-13"
 
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \

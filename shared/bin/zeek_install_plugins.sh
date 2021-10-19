@@ -89,7 +89,8 @@ ZKG_GITHUB_URLS=(
   "https://github.com/mmguero-dev/CVE-2021-38647|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/ripple20|zeek-v4.1-compatibility"
-  "https://github.com/mmguero-dev/spicy-analyzers"
+  "https://github.com/mmguero-dev/spicy-analyzers|main"
+  "https://github.com/mmguero-dev/zeek-af_packet-plugin|master"
   "https://github.com/mmguero-dev/zeek-EternalSafety|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/zeek-plugin-profinet|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/zeek-plugin-s7comm|zeek-v4.1-compatibility"
@@ -105,8 +106,3 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
   [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
-
-SRC_DIR="$(clone_github_repo "https://github.com/J-Gras/zeek-af_packet-plugin")"
-if [[ -d "$SRC_DIR" ]]; then
-  KERNELHEADERS_LATEST=ON zkg install --force --skiptests "$SRC_DIR"
-fi
