@@ -8,3 +8,4 @@ Type=Application
 Icon=view-restore
 Categories=Network;
 StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/sensor-services-status.desktop

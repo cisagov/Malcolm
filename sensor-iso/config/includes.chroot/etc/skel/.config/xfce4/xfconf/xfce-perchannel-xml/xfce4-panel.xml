@@ -76,42 +76,42 @@
     <property name="plugin-8" type="string" value="separator"/>
     <property name="plugin-15" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345907891.desktop"/>
+        <value type="string" value="16346759461.desktop"/>
       </property>
     </property>
     <property name="plugin-16" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345907992.desktop"/>
+        <value type="string" value="16346759562.desktop"/>
       </property>
     </property>
     <property name="plugin-17" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345908103.desktop"/>
+        <value type="string" value="16346759653.desktop"/>
       </property>
     </property>
     <property name="plugin-18" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345909644.desktop"/>
+        <value type="string" value="16346759724.desktop"/>
       </property>
     </property>
     <property name="plugin-19" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345909855.desktop"/>
+        <value type="string" value="16346759855.desktop"/>
       </property>
     </property>
     <property name="plugin-20" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345909976.desktop"/>
+        <value type="string" value="16346759956.desktop"/>
       </property>
     </property>
     <property name="plugin-21" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345910037.desktop"/>
+        <value type="string" value="16346760027.desktop"/>
       </property>
     </property>
     <property name="plugin-22" type="string" value="launcher">
       <property name="items" type="array">
-        <value type="string" value="16345910108.desktop"/>
+        <value type="string" value="16346760098.desktop"/>
       </property>
     </property>
   </property>

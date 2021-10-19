@@ -8,3 +8,4 @@ Type=Application
 Icon=reload
 Categories=Network;
 StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/sensor-services-full-restart.desktop

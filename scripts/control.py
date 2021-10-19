@@ -268,8 +268,9 @@ def logs():
       | use_field_mapping
       | reaped\s+unknown\s+pid
       | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
-      | GET\s+/(_cat/health|api/status|arkime_sessions3-).+HTTP/[\d\.].+\b200\b
-      | POST\s+/(d?stats/(d?stat|_doc|_search)|_bulk|fields/(field/)?_search).+HTTP/[\d\.].+\b20[01]\b
+      | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+      | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
+      | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
       | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
       | curl.+localhost.+GET\s+/api/status\s+200
