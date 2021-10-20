@@ -5,6 +5,7 @@ fonts-symbola
 galculator
 gnome-themes-extra
 libnotify-bin
+light-locker
 mousepad
 mupdf
 network-manager-gnome
@@ -37,7 +38,6 @@ xfce4-systemload-plugin
 xfce4-taskmanager
 xinit
 xorg
-xscreensaver
 xserver-xorg
 xserver-xorg-core
 xserver-xorg-video-qxl

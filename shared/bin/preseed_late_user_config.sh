@@ -4,7 +4,7 @@
 
 ##################################################################################
 # prompt whether to autologin or not
-# prompt whether or not to lock xscreensaver for the GUI session
+# prompt whether or not to lock screen for the GUI session on inactivity
 # prompt whether to use U.S. DoD login banner (https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585)
 # prompt for disabling IPV6 or not
 
@@ -23,13 +23,13 @@ Template: malcolm/autologin_title
 Type: text
 Description: Autologin?
 
-Template: malcolm/xscreensaver_lock
+Template: malcolm/screensaver_lock
 Type: boolean
 Default: false
 Description:
  Should the GUI session be locked due to inactivity?
 
-Template: malcolm/xscreensaver_title
+Template: malcolm/screensaver_title
 Type: text
 Description: Lock idle session?
 
@@ -104,34 +104,55 @@ fi
 echo "malcolm/autologin=$RET" > /tmp/malcolm.answer
 
 # set title
-db_settitle malcolm/xscreensaver_title
+db_settitle malcolm/screensaver_title
 
 # prompt
-db_input critical malcolm/xscreensaver_lock
+db_input critical malcolm/screensaver_lock
 db_go
 
 # get answer to $RET
-db_get malcolm/xscreensaver_lock
+db_get malcolm/screensaver_lock
 
-# store places defaults can exist for xscreensaver lock
+# store places defaults can exist for screensaver lock
 if [ -n $RET ]; then
   if [ "$RET" = false ]; then
-    PRESENTATION_MODE=true
+    SCREEN_LOCK=false
+    SCREEN_LOCK_INT=0
   else
-    PRESENTATION_MODE=false
+    SCREEN_LOCK=true
+    SCREEN_LOCK_INT=1
   fi
-  sed -i "s/\(.*presentation-mode.*value=\"\).*\(\".*\)$/\1$PRESENTATION_MODE\2/g" \
+
+  sed -i "s/\(.*lock-screen-suspend-hibernate.*value=\"\).*\(\".*\)$/\1$SCREEN_LOCK\2/g" \
     /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml 2>/dev/null || true
+  sed -i "s/\(.*LockScreen.*value=\"\).*\(\".*\)$/\1$SCREEN_LOCK\2/g" \
+    /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-session.xml 2>/dev/null || true
+  sed "s/\(lock-after-screensaver=\).*/\1uint32 $SCREEN_LOCK_INT/" \
+    /etc/skel/.config/light-locker-dconf-defaults.conf 2>/dev/null || true
+  sed "s/\(lock-on-suspend=\).*/\1$SCREEN_LOCK/" \
+    /etc/skel/.config/light-locker-dconf-defaults.conf 2>/dev/null || true
+
   # at this point users have already been created, so we need to re-apply our changes there
   for HOMEDIR in $(getent passwd | cut -d: -f6); do
     [ -f /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml ] && \
-      [ -f "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml ] && \
+      [ -d "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/ ] && \
       cp -f /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml \
-            "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml
+            "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/
+
+    [ -f /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-session.xml ] && \
+      [ -d "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/ ] && \
+      cp -f /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-session.xml \
+            "$HOMEDIR"/.config/xfce4/xfconf/xfce-perchannel-xml/
+
+    [ -f /etc/skel/.config/light-locker-dconf-defaults.conf ] && \
+      [ -d "$HOMEDIR"/.config/ ] && \
+      cp -f /etc/skel/.config/light-locker-dconf-defaults.conf \
+            "$HOMEDIR"/.config/
   done
+
 fi
 
-echo "malcolm/xscreensaver_lock=$RET" >> /tmp/malcolm.answer
+echo "malcolm/screensaver_lock=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/dod_banner_title

@@ -10,6 +10,7 @@ galculator
 gnome-themes-extra
 libclamunrar9
 libnotify-bin
+light-locker
 mousepad
 mupdf
 notify-osd
@@ -42,7 +43,6 @@ xfce4-systemload-plugin
 xfce4-taskmanager
 xinit
 xorg
-xscreensaver
 xserver-xorg
 xserver-xorg-core
 xserver-xorg-video-qxl
