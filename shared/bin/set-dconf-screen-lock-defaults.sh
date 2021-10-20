@@ -4,8 +4,8 @@
 
 grep -q boot=live /proc/cmdline && exit 0
 
-if [[ -f /etc/light-locker-dconf-defaults.conf ]]; then
-
-
-
+if [[ -f "$HOME"/.config/light-locker-dconf-defaults.conf ]]; then
+  dconf load / < "$HOME"/.config/light-locker-dconf-defaults.conf && \
+  dconf update && \
+  rm -f "$HOME"/.config/light-locker-dconf-defaults.conf
 fi
