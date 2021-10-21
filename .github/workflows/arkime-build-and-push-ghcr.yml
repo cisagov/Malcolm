@@ -56,5 +56,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfiles/arkime.Dockerfile
+          build-args: |
+            MAXMIND_GEOIP_DB_LICENSE_KEY=${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/arkime:${{ steps.extract_branch.outputs.branch }}
