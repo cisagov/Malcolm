@@ -1,4 +1,4 @@
-name: name-map-ui-build-and-push-ghcr
+name: freq-build-and-push-ghcr
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
     tags:
       - v*
     paths:
-      - 'name-map-ui/**'
-      - 'Dockerfiles/name-map-ui.Dockerfile'
+      - 'freq-server/**'
+      - 'Dockerfiles/freq.Dockerfile'
       - 'shared/bin/*'
   workflow_dispatch:
   repository_dispatch:
@@ -55,6 +55,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfiles/name-map-ui.Dockerfile
+          file: ./Dockerfiles/freq.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/name-map-ui:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/freq:${{ steps.extract_branch.outputs.branch }}

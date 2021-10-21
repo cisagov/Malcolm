@@ -1,4 +1,4 @@
-name: name-map-ui-build-and-push-ghcr
+name: file-monitor-build-and-push-ghcr
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
     tags:
       - v*
     paths:
-      - 'name-map-ui/**'
-      - 'Dockerfiles/name-map-ui.Dockerfile'
+      - 'file-monitor/**'
+      - 'Dockerfiles/file-monitor.Dockerfile'
       - 'shared/bin/*'
   workflow_dispatch:
   repository_dispatch:
@@ -55,6 +55,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfiles/name-map-ui.Dockerfile
+          file: ./Dockerfiles/file-monitor.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/name-map-ui:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/file-monitor:${{ steps.extract_branch.outputs.branch }}
