@@ -82,19 +82,10 @@ else
   MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 fi
 
-# for some debug branches this may be used to download artifacts from github
-if [ ${#GITHUB_OAUTH_TOKEN} -gt 1 ]; then
-  # prefer a local environment variable
-  GITHUB_TOKEN="$GITHUB_OAUTH_TOKEN"
-else
-  # nope
-  GITHUB_TOKEN="0"
-fi
-
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND build --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND build --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly
