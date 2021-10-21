@@ -75,10 +75,10 @@
   <sodipodi:namedview
      inkscape:document-rotation="0"
      inkscape:window-maximized="1"
-     inkscape:window-y="736"
-     inkscape:window-x="1080"
-     inkscape:window-height="1054"
-     inkscape:window-width="1920"
+     inkscape:window-y="0"
+     inkscape:window-x="2560"
+     inkscape:window-height="2134"
+     inkscape:window-width="3840"
      showgrid="false"
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
@@ -126,12 +126,12 @@
          style="font-style:normal;font-weight:bold;font-size:20px;line-height:1;-inkscape-font-specification:'DejaVu Sans Bold'"
          sodipodi:role="line"
          x="190.68135"
-         y="619.20685">@PROJECT@ @VERSION@ (@DISTRIBUTION@)</tspan><tspan
+         y="619.20685">Malcolm</tspan><tspan
          id="tspan3041"
          style="font-style:normal;font-weight:bold;font-size:20px;line-height:1;-inkscape-font-specification:'DejaVu Sans Bold'"
          sodipodi:role="line"
          x="190.68135"
-         y="639.20685">@ARCHITECTURE@</tspan><tspan
+         y="639.20685">@PROJECT@ @VERSION@ (@DISTRIBUTION@)</tspan><tspan
          id="tspan3037"
          style="font-style:normal;font-weight:bold;font-size:20px;line-height:1.2;-inkscape-font-specification:'DejaVu Sans Bold'"
          sodipodi:role="line"

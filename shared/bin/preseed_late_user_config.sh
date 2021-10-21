@@ -23,13 +23,13 @@ Template: malcolm/autologin_title
 Type: text
 Description: Autologin?
 
-Template: malcolm/screensaver_lock
+Template: malcolm/xscreensaver_lock
 Type: boolean
 Default: false
 Description:
  Should the GUI session be locked due to inactivity?
 
-Template: malcolm/screensaver_title
+Template: malcolm/xscreensaver_title
 Type: text
 Description: Lock idle session?
 
@@ -101,17 +101,17 @@ if [ -n $RET ] && [ -f /etc/lightdm/lightdm.conf ]; then
   fi
 fi
 
-echo "malcolm/autologin=$RET" > /tmp/malcolm.answer
+echo "malcolm/autologin=$RET" >> /tmp/malcolm.answer
 
 # set title
-db_settitle malcolm/screensaver_title
+db_settitle malcolm/xscreensaver_title
 
 # prompt
-db_input critical malcolm/screensaver_lock
+db_input critical malcolm/xscreensaver_lock
 db_go
 
 # get answer to $RET
-db_get malcolm/screensaver_lock
+db_get malcolm/xscreensaver_lock
 
 # store places defaults can exist for screensaver lock
 if [ -n $RET ]; then
@@ -127,9 +127,9 @@ if [ -n $RET ]; then
     /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-power-manager.xml 2>/dev/null || true
   sed -i "s/\(.*LockScreen.*value=\"\).*\(\".*\)$/\1$SCREEN_LOCK\2/g" \
     /etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-session.xml 2>/dev/null || true
-  sed "s/\(lock-after-screensaver=\).*/\1uint32 $SCREEN_LOCK_INT/" \
+  sed -i "s/\(lock-after-screensaver=\).*/\1uint32 $SCREEN_LOCK_INT/" \
     /etc/skel/.config/light-locker-dconf-defaults.conf 2>/dev/null || true
-  sed "s/\(lock-on-suspend=\).*/\1$SCREEN_LOCK/" \
+  sed -i "s/\(lock-on-suspend=\).*/\1$SCREEN_LOCK/" \
     /etc/skel/.config/light-locker-dconf-defaults.conf 2>/dev/null || true
 
   # at this point users have already been created, so we need to re-apply our changes there
@@ -152,7 +152,7 @@ if [ -n $RET ]; then
 
 fi
 
-echo "malcolm/screensaver_lock=$RET" >> /tmp/malcolm.answer
+echo "malcolm/xscreensaver_lock=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/dod_banner_title

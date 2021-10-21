@@ -44,7 +44,13 @@ if [ -d "$WORKDIR" ]; then
 
   chown -R root:root *
 
+  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
+    SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
+    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
+  fi
+
   # configure installation options
+  sed -i sed "s/^\(title-text[[:space:]]*:\).*/\1 \"Hedgehog Linux $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"/g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
@@ -90,11 +96,6 @@ if [ -d "$WORKDIR" ]; then
   # copy shared scripts
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
-
-  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
-    SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
-    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
-  fi
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""               > ./config/includes.chroot/opt/sensor/.os-info
