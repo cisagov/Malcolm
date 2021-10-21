@@ -15,6 +15,7 @@ apt-get -y --purge remove bluez-firmware \
                           libx264* \
                           libx265* \
                           pavucontrol \
+                          poppler-data \
                           pulseaudio \
                           tango-icon-theme \
                           xdg-user-dirs \
