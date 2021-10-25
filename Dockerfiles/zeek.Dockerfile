@@ -142,8 +142,8 @@ ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 # todo: Bro::LDAP is broken right now, disabled
 ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 19
 ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_LDAP_TCP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|Salesforce::GQUIC|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
-ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 16
-ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|hassh/hassh|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 17
+ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|hassh/hassh|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \

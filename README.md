@@ -218,12 +218,13 @@ Malcolm leverages the following excellent open source tools, among others.
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
-    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
-    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
+    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
+    * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
+    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
-    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
+    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
     * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
