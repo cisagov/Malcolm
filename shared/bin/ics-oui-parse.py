@@ -73,7 +73,7 @@ def main():
                       })
 
   companies.sort(key=lambda x: (x['low'], x['high']))
-  print(yaml.dump(companies))
+  print(yaml.dump(companies, allow_unicode=True))
   mmguero.eprint(len(companies))
 
 

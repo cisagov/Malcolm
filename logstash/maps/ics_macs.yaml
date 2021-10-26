@@ -510,7 +510,7 @@
   name: Cop Security System Corp
 - high: 00-26-28-FF-FF-FF
   low: 00-26-28-00-00-00
-  name: "Companytec Automação e Controle LTDA"
+  name: Companytec Automação e Controle LTDA
 - high: 00-26-33-FF-FF-FF
   low: 00-26-33-00-00-00
   name: Mir - Medical International Research
@@ -594,7 +594,7 @@
   name: Chuo Electric Works Co, Ltd
 - high: 00-50-C2-34-EF-FF
   low: 00-50-C2-34-E0-00
-  name: "ABB PowerTech S.p.A. Unitá Operativa Sace"
+  name: ABB Power Tech S.p.A. Unità  Operativa Sace
 - high: 00-50-C2-39-9F-FF
   low: 00-50-C2-39-90-00
   name: Advanced Micro Controls Inc
@@ -606,7 +606,7 @@
   name: Fluke Biomedical, Radiation Management Services
 - high: 00-50-C2-3D-EF-FF
   low: 00-50-C2-3D-E0-00
-  name: "ABB PowerTech S.p.A. Unitá Operativa Sace"
+  name: ABB Power Tech S.p.A. Unità  Operativa Sace
 - high: 00-50-C2-3E-9F-FF
   low: 00-50-C2-3E-90-00
   name: MedAvant Healthcare
@@ -720,7 +720,7 @@
   name: Saia Burgess Controls AG
 - high: 00-50-C2-88-3F-FF
   low: 00-50-C2-88-30-00
-  name: "Neocontrol Soluções em Automação"
+  name: Neocontrol Soluções em Automação
 - high: 00-50-C2-8B-CF-FF
   low: 00-50-C2-8B-C0-00
   name: Honeywell Sensotec
@@ -753,7 +753,7 @@
   name: Saia Burgess Controls AG
 - high: 00-50-C2-99-5F-FF
   low: 00-50-C2-99-50-00
-  name: "INTER CONTROL Hermann Köhler Elektrik GmbH & Co. KG"
+  name: INTER CONTROL Hermann Köhler Elektrik GmbH & Co. KG
 - high: 00-50-C2-9B-3F-FF
   low: 00-50-C2-9B-30-00
   name: Kahler Automation
@@ -1533,7 +1533,7 @@
   name: Valeo Interior Controls (Shenzhen) Co, Ltd
 - high: 44-D5-F2-CF-FF-FF
   low: 44-D5-F2-C0-00-00
-  name: "Neocontrol Soluções em Automação"
+  name: Neocontrol Soluções em Automação
 - high: 44-EA-D8-FF-FF-FF
   low: 44-EA-D8-00-00-00
   name: Texas Instruments
@@ -1929,7 +1929,7 @@
   name: Potter Electric Signal Co Llc
 - high: 70-B3-D5-89-1F-FF
   low: 70-B3-D5-89-10-00
-  name: "Neocontrol Soluções em Automação"
+  name: Neocontrol Soluções em Automação
 - high: 70-B3-D5-89-2F-FF
   low: 70-B3-D5-89-20-00
   name: ABB
@@ -2439,7 +2439,7 @@
   name: Texas Instruments
 - high: A4-11-63-1F-FF-FF
   low: A4-11-63-10-00-00
-  name: "INTER CONTROL Hermann Köhler Elektrik GmbH & Co. KG"
+  name: INTER CONTROL Hermann Köhler Elektrik GmbH & Co. KG
 - high: A4-34-F1-FF-FF-FF
   low: A4-34-F1-00-00-00
   name: Texas Instruments
@@ -2700,7 +2700,7 @@
   name: Texas Instruments
 - high: D0-A3-11-FF-FF-FF
   low: D0-A3-11-00-00-00
-  name: "Neuberger Gebäudeautomation GmbH"
+  name: Neuberger Gebäudeautomation GmbH
 - high: D0-B5-C2-FF-FF-FF
   low: D0-B5-C2-00-00-00
   name: Texas Instruments
