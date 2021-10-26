@@ -8,12 +8,12 @@ def register(params)
 end
 
 def filter(event)
-  _vals = event.get(@source)
+  _vals = event.get("#{@source}")
   if !_vals.nil? then
     if _vals.is_a?(Array) || _vals.is_a?(Hash) then
-      event.set(@target, _vals.length)
+      event.set("#{@target}", _vals.length)
     else
-      event.set(@target, 1)
+      event.set("#{@target}", 1)
     end
   end
   [event]

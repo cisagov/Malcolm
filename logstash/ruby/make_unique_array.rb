@@ -7,14 +7,14 @@ def register(params)
 end
 
 def filter(event)
-  _vals = event.get(@field)
+  _vals = event.get("#{@field}")
   if !_vals.nil? then
     if !_vals.is_a?(Array) then
       _newVals = Array.new
       _newVals.push(_vals)
       _vals = _newVals
     end
-    event.set(@field, _vals.uniq)
+    event.set("#{@field}", _vals.uniq)
   end
   [event]
 end

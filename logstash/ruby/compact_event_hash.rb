@@ -27,9 +27,9 @@ def compact(h)
 end
 
 def filter(event)
-  _hashfield = event.get(@field)
+  _hashfield = event.get("#{@field}")
   if !_hashfield.nil? && _hashfield.is_a?(Hash) then
-    event.set(@field, compact(_hashfield.to_hash))
+    event.set("#{@field}", compact(_hashfield.to_hash))
   end
   [event]
 end

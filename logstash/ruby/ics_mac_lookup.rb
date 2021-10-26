@@ -18,11 +18,11 @@ def register(params)
 end
 
 def filter(event)
-  if event.get(@source).nil? or @macmap.nil?
+  _mac = event.get("#{@source}")
+  if _mac.nil? or @macmap.nil?
     return [event]
   end
 
-  _mac = event.get(@source)
   if /\A([0-9a-fA-F]{2}[-:.]){5}([0-9a-fA-F]{2})\z/.match?(_mac)
     _macint = mac_string_to_integer(_mac)
     _name = @macmap.find{|key, value| key === _macint}&.[](1)
