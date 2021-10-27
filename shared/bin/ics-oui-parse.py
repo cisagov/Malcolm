@@ -10,8 +10,6 @@ import yaml
 from netaddr import *
 from operator import itemgetter
 
-import mmguero
-
 ###################################################################################################
 args = None
 debug = False
@@ -23,13 +21,29 @@ padded_mac_low = '00:00:00:00:00:00'
 padded_mac_high = 'FF:FF:FF:FF:FF:FF'
 
 ###################################################################################################
+# print to stderr
+def eprint(*args, **kwargs):
+  print(*args, file=sys.stderr, **kwargs)
+  sys.stderr.flush()
+
+###################################################################################################
+# convenient boolean argument parsing
+def str2bool(v):
+    if v.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif v.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise ValueError("Boolean value expected")
+
+###################################################################################################
 # main
 def main():
   global args
   global debug
 
   parser = argparse.ArgumentParser(description=script_name, add_help=False, usage='{} <arguments>'.format(script_name))
-  parser.add_argument('-v', '--verbose', dest='debug', type=mmguero.str2bool, nargs='?', const=True, default=False, metavar='true|false', help="Verbose/debug output")
+  parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, metavar='true|false', help="Verbose/debug output")
   parser.add_argument('-i', '--input', dest='input', type=str, default=None, required=False, metavar='<string>', help="Input")
   try:
     parser.error = parser.exit
@@ -40,9 +54,9 @@ def main():
 
   debug = args.debug
   if debug:
-    mmguero.eprint(os.path.join(script_path, script_name))
-    mmguero.eprint("Arguments: {}".format(sys.argv[1:]))
-    mmguero.eprint("Arguments: {}".format(args))
+    eprint(os.path.join(script_path, script_name))
+    eprint("Arguments: {}".format(sys.argv[1:]))
+    eprint("Arguments: {}".format(args))
   else:
     sys.tracebacklimit = 0
 
@@ -74,7 +88,7 @@ def main():
 
   companies.sort(key=lambda x: (x['low'], x['high']))
   print(yaml.dump(companies, allow_unicode=True))
-  mmguero.eprint(len(companies))
+  eprint(len(companies))
 
 
 ###################################################################################################
