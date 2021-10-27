@@ -71,10 +71,10 @@ export SPICY_ZKG_PROCESSES=1
 
 # install Zeek packages that install nicely using zkg
 ZKG_GITHUB_URLS=(
-  "https://github.com/cisagov/icsnpp-bacnet"
-  "https://github.com/cisagov/icsnpp-bsap"
+  "https://github.com/mmguero-dev/icsnpp-bacnet|conn-service"
+  "https://github.com/mmguero-dev/icsnpp-bsap|conn-service"
   "https://github.com/cisagov/icsnpp-dnp3"
-  "https://github.com/cisagov/icsnpp-enip"
+  "https://github.com/mmguero-dev/icsnpp-enip|conn-service"
   "https://github.com/cisagov/icsnpp-ethercat"
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/corelight/callstranger-detector"
