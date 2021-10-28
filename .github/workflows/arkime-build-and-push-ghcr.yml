@@ -3,9 +3,7 @@ name: arkime-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-    tags:
-      - v*
+      - development
     paths:
       - 'arkime/**'
       - 'Dockerfiles/arkime.Dockerfile'

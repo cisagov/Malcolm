@@ -3,9 +3,7 @@ name: pcap-capture-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-    tags:
-      - v*
+      - development
     paths:
       - 'pcap-capture/**'
       - 'Dockerfiles/pcap-capture.Dockerfile'

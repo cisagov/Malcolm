@@ -3,9 +3,7 @@ name: file-upload-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-    tags:
-      - v*
+      - development
     paths:
       - 'file-upload/**'
       - 'Dockerfiles/file-upload.Dockerfile'
