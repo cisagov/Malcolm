@@ -1,0 +1,2968 @@
+- high: 00-00-0A-FF-FF-FF
+  low: 00-00-0A-00-00-00
+  name: Omron Tateisi Electronics Co
+- high: 00-00-3B-FF-FF-FF
+  low: 00-00-3B-00-00-00
+  name: i Controls, Inc
+- high: 00-00-54-FF-FF-FF
+  low: 00-00-54-00-00-00
+  name: Schneider Electric
+- high: 00-00-5F-FF-FF-FF
+  low: 00-00-5F-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: 00-00-64-FF-FF-FF
+  low: 00-00-64-00-00-00
+  name: Yokogawa Digital Computer Corp
+- high: 00-00-87-FF-FF-FF
+  low: 00-00-87-00-00-00
+  name: Hitachi, Ltd
+- high: 00-00-BC-FF-FF-FF
+  low: 00-00-BC-00-00-00
+  name: Rockwell Automation
+- high: 00-01-23-FF-FF-FF
+  low: 00-01-23-00-00-00
+  name: Schneider Electric Japan Holdings Ltd
+- high: 00-01-31-FF-FF-FF
+  low: 00-01-31-00-00-00
+  name: Bosch Security Systems, Inc
+- high: 00-01-46-FF-FF-FF
+  low: 00-01-46-00-00-00
+  name: Tesco Controls, Inc
+- high: 00-02-2C-FF-FF-FF
+  low: 00-02-2C-00-00-00
+  name: ABB Bomem, Inc
+- high: 00-02-55-FF-FF-FF
+  low: 00-02-55-00-00-00
+  name: IBM Corp
+- high: 00-03-46-FF-FF-FF
+  low: 00-03-46-00-00-00
+  name: Hitachi Kokusai Electric, Inc
+- high: 00-03-80-FF-FF-FF
+  low: 00-03-80-00-00-00
+  name: Ssh Communications Security Corp
+- high: 00-03-8D-FF-FF-FF
+  low: 00-03-8D-00-00-00
+  name: Pcs Revenue Control Systems, Inc
+- high: 00-04-01-FF-FF-FF
+  low: 00-04-01-00-00-00
+  name: Osaki Electric Co, Ltd
+- high: 00-04-81-FF-FF-FF
+  low: 00-04-81-00-00-00
+  name: Econolite Control Products, Inc
+- high: 00-04-88-FF-FF-FF
+  low: 00-04-88-00-00-00
+  name: Eurotherm Controls
+- high: 00-04-AC-FF-FF-FF
+  low: 00-04-AC-00-00-00
+  name: IBM Corp
+- high: 00-04-EE-FF-FF-FF
+  low: 00-04-EE-00-00-00
+  name: Lincoln Electric Co
+- high: 00-05-4B-FF-FF-FF
+  low: 00-05-4B-00-00-00
+  name: Eaton Automation AG
+- high: 00-05-7C-FF-FF-FF
+  low: 00-05-7C-00-00-00
+  name: Rco Security AB
+- high: 00-05-97-FF-FF-FF
+  low: 00-05-97-00-00-00
+  name: Eagle Traffic Control Systems
+- high: 00-05-E4-FF-FF-FF
+  low: 00-05-E4-00-00-00
+  name: Red Lion Controls Inc
+- high: 00-06-15-FF-FF-FF
+  low: 00-06-15-00-00-00
+  name: Kimoto Electric Co, Ltd
+- high: 00-06-29-FF-FF-FF
+  low: 00-06-29-00-00-00
+  name: IBM Corp
+- high: 00-06-73-FF-FF-FF
+  low: 00-06-73-00-00-00
+  name: Tkh Security Solutions Usa
+- high: 00-06-FB-FF-FF-FF
+  low: 00-06-FB-00-00-00
+  name: Hitachi Printing Solutions, Ltd
+- high: 00-07-17-FF-FF-FF
+  low: 00-07-17-00-00-00
+  name: Wieland Electric GmbH
+- high: 00-07-AF-FF-FF-FF
+  low: 00-07-AF-00-00-00
+  name: Red Lion Controls, LP
+- high: 00-08-EA-FF-FF-FF
+  low: 00-08-EA-00-00-00
+  name: Motion Control Engineering, Inc
+- high: 00-08-F6-FF-FF-FF
+  low: 00-08-F6-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: 00-09-48-FF-FF-FF
+  low: 00-09-48-00-00-00
+  name: Vista Control Systems, Corp
+- high: 00-09-5C-FF-FF-FF
+  low: 00-09-5C-00-00-00
+  name: Philips Medical Systems - Cardiac and Monitoring Systems
+- high: 00-09-6B-FF-FF-FF
+  low: 00-09-6B-00-00-00
+  name: IBM Corp
+- high: 00-09-AB-FF-FF-FF
+  low: 00-09-AB-00-00-00
+  name: Netcontrol Oy
+- high: 00-09-F1-FF-FF-FF
+  low: 00-09-F1-00-00-00
+  name: Yamaki Electric Corp
+- high: 00-09-F5-FF-FF-FF
+  low: 00-09-F5-00-00-00
+  name: Emerson Network Power Co, Ltd
+- high: 00-0A-46-FF-FF-FF
+  low: 00-0A-46-00-00-00
+  name: Aro Welding Tech Sas
+- high: 00-0A-66-FF-FF-FF
+  low: 00-0A-66-00-00-00
+  name: Mitsubishi Electric System & Service Co, Ltd
+- high: 00-0A-6C-FF-FF-FF
+  low: 00-0A-6C-00-00-00
+  name: Walchem Corp
+- high: 00-0A-F6-FF-FF-FF
+  low: 00-0A-F6-00-00-00
+  name: Emerson Climate Tech Retail Solutions, Inc
+- high: 00-0B-97-FF-FF-FF
+  low: 00-0B-97-00-00-00
+  name: Matsushita Electric Industrial Co, Ltd
+- high: 00-0B-A2-FF-FF-FF
+  low: 00-0B-A2-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: 00-0B-A6-FF-FF-FF
+  low: 00-0B-A6-00-00-00
+  name: Miyakawa Electric Works Ltd
+- high: 00-0B-EC-FF-FF-FF
+  low: 00-0B-EC-00-00-00
+  name: Nippon Electric Instrument, Inc
+- high: 00-0C-09-FF-FF-FF
+  low: 00-0C-09-00-00-00
+  name: Hitachi IE Systems Co, Ltd
+- high: 00-0C-4D-FF-FF-FF
+  low: 00-0C-4D-00-00-00
+  name: Curtiss-Wright Controls Avionics & Electronics
+- high: 00-0C-5E-FF-FF-FF
+  low: 00-0C-5E-00-00-00
+  name: Calypso Medical
+- high: 00-0C-67-FF-FF-FF
+  low: 00-0C-67-00-00-00
+  name: Oyo Electric Co, Ltd
+- high: 00-0C-C1-FF-FF-FF
+  low: 00-0C-C1-00-00-00
+  name: Eaton Corp
+- high: 00-0D-60-FF-FF-FF
+  low: 00-0D-60-00-00-00
+  name: IBM Corp
+- high: 00-0D-97-FF-FF-FF
+  low: 00-0D-97-00-00-00
+  name: ABB Inc/Tropos
+- high: 00-0D-FA-FF-FF-FF
+  low: 00-0D-FA-00-00-00
+  name: Micro Control Systems Ltd
+- high: 00-0E-66-FF-FF-FF
+  low: 00-0E-66-00-00-00
+  name: Hitachi Industry & Control Solutions, Ltd
+- high: 00-0F-12-FF-FF-FF
+  low: 00-0F-12-00-00-00
+  name: Panasonic Europe Ltd
+- high: 00-0F-18-FF-FF-FF
+  low: 00-0F-18-00-00-00
+  name: Industrial Control Systems
+- high: 00-0F-73-FF-FF-FF
+  low: 00-0F-73-00-00-00
+  name: RS Automation Co, Ltd
+- high: 00-0F-A4-FF-FF-FF
+  low: 00-0F-A4-00-00-00
+  name: Sprecher Automation GmbH
+- high: 00-0F-FF-FF-FF-FF
+  low: 00-0F-FF-00-00-00
+  name: Control4
+- high: 00-10-48-FF-FF-FF
+  low: 00-10-48-00-00-00
+  name: Htrc Automation, Inc
+- high: 00-10-AB-FF-FF-FF
+  low: 00-10-AB-00-00-00
+  name: Koito Electric Industries, Ltd
+- high: 00-10-C1-FF-FF-FF
+  low: 00-10-C1-00-00-00
+  name: OI Electric Co, Ltd
+- high: 00-11-00-FF-FF-FF
+  low: 00-11-00-00-00-00
+  name: Schneider Electric
+- high: 00-11-25-FF-FF-FF
+  low: 00-11-25-00-00-00
+  name: IBM Corp
+- high: 00-11-37-FF-FF-FF
+  low: 00-11-37-00-00-00
+  name: Aichi Electric Co, Ltd
+- high: 00-11-4D-FF-FF-FF
+  low: 00-11-4D-00-00-00
+  name: Atsumi Electric Co, Ltd
+- high: 00-11-57-FF-FF-FF
+  low: 00-11-57-00-00-00
+  name: Oki Electric Industry Co, Ltd
+- high: 00-12-2C-FF-FF-FF
+  low: 00-12-2C-00-00-00
+  name: Soenen Controls N.V.
+- high: 00-12-31-FF-FF-FF
+  low: 00-12-31-00-00-00
+  name: Motion Control Systems, Inc
+- high: 00-12-37-FF-FF-FF
+  low: 00-12-37-00-00-00
+  name: Texas Instruments
+- high: 00-12-4B-FF-FF-FF
+  low: 00-12-4B-00-00-00
+  name: Texas Instruments
+- high: 00-12-4B-FF-FF-FF
+  low: 00-12-4B-00-00-00
+  name: Texas Instruments
+- high: 00-12-90-FF-FF-FF
+  low: 00-12-90-00-00-00
+  name: Kyowa Electric & Machinery Corp
+- high: 00-12-98-FF-FF-FF
+  low: 00-12-98-00-00-00
+  name: Mico Electric(Shenzhen) Ltd
+- high: 00-12-D1-FF-FF-FF
+  low: 00-12-D1-00-00-00
+  name: Texas Instruments
+- high: 00-12-D2-FF-FF-FF
+  low: 00-12-D2-00-00-00
+  name: Texas Instruments
+- high: 00-13-24-FF-FF-FF
+  low: 00-13-24-00-00-00
+  name: Schneider Electric Ultra Terminal
+- high: 00-13-45-FF-FF-FF
+  low: 00-13-45-00-00-00
+  name: Eaton Corp
+- high: 00-13-47-FF-FF-FF
+  low: 00-13-47-00-00-00
+  name: Red Lion Controls, LP
+- high: 00-13-84-FF-FF-FF
+  low: 00-13-84-00-00-00
+  name: Advanced Motion Controls
+- high: 00-13-DB-FF-FF-FF
+  low: 00-13-DB-00-00-00
+  name: Shoei Electric Co, Ltd
+- high: 00-14-1D-FF-FF-FF
+  low: 00-14-1D-00-00-00
+  name: Keba Industrial Automation Germany GmbH
+- high: 00-14-49-FF-FF-FF
+  low: 00-14-49-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 00-14-5E-FF-FF-FF
+  low: 00-14-5E-00-00-00
+  name: IBM Corp
+- high: 00-15-DD-FF-FF-FF
+  low: 00-15-DD-00-00-00
+  name: IP Control Systems Ltd
+- high: 00-16-E4-FF-FF-FF
+  low: 00-16-E4-00-00-00
+  name: Vanguard Security Engineering Corp
+- high: 00-17-5B-FF-FF-FF
+  low: 00-17-5B-00-00-00
+  name: Acs Solutions Switzerland Ltd
+- high: 00-17-83-FF-FF-FF
+  low: 00-17-83-00-00-00
+  name: Texas Instruments
+- high: 00-17-B1-FF-FF-FF
+  low: 00-17-B1-00-00-00
+  name: Acist Medical Systems, Inc
+- high: 00-17-B4-FF-FF-FF
+  low: 00-17-B4-00-00-00
+  name: Remote Security Systems, Llc
+- high: 00-17-E3-FF-FF-FF
+  low: 00-17-E3-00-00-00
+  name: Texas Instruments
+- high: 00-17-E4-FF-FF-FF
+  low: 00-17-E4-00-00-00
+  name: Texas Instruments
+- high: 00-17-E5-FF-FF-FF
+  low: 00-17-E5-00-00-00
+  name: Texas Instruments
+- high: 00-17-E6-FF-FF-FF
+  low: 00-17-E6-00-00-00
+  name: Texas Instruments
+- high: 00-17-E7-FF-FF-FF
+  low: 00-17-E7-00-00-00
+  name: Texas Instruments
+- high: 00-17-E8-FF-FF-FF
+  low: 00-17-E8-00-00-00
+  name: Texas Instruments
+- high: 00-17-E9-FF-FF-FF
+  low: 00-17-E9-00-00-00
+  name: Texas Instruments
+- high: 00-17-EA-FF-FF-FF
+  low: 00-17-EA-00-00-00
+  name: Texas Instruments
+- high: 00-17-EB-FF-FF-FF
+  low: 00-17-EB-00-00-00
+  name: Texas Instruments
+- high: 00-17-EC-FF-FF-FF
+  low: 00-17-EC-00-00-00
+  name: Texas Instruments
+- high: 00-17-EF-FF-FF-FF
+  low: 00-17-EF-00-00-00
+  name: IBM Corp
+- high: 00-18-2F-FF-FF-FF
+  low: 00-18-2F-00-00-00
+  name: Texas Instruments
+- high: 00-18-30-FF-FF-FF
+  low: 00-18-30-00-00-00
+  name: Texas Instruments
+- high: 00-18-31-FF-FF-FF
+  low: 00-18-31-00-00-00
+  name: Texas Instruments
+- high: 00-18-32-FF-FF-FF
+  low: 00-18-32-00-00-00
+  name: Texas Instruments
+- high: 00-18-33-FF-FF-FF
+  low: 00-18-33-00-00-00
+  name: Texas Instruments
+- high: 00-18-34-FF-FF-FF
+  low: 00-18-34-00-00-00
+  name: Texas Instruments
+- high: 00-18-64-FF-FF-FF
+  low: 00-18-64-00-00-00
+  name: Eaton Corp
+- high: 00-18-65-FF-FF-FF
+  low: 00-18-65-00-00-00
+  name: Siemens Healthcare Diagnostics Manufacturing Ltd
+- high: 00-18-B1-FF-FF-FF
+  low: 00-18-B1-00-00-00
+  name: IBM Corp
+- high: 00-18-BB-FF-FF-FF
+  low: 00-18-BB-00-00-00
+  name: Eliwell Controls srl
+- high: 00-19-87-FF-FF-FF
+  low: 00-19-87-00-00-00
+  name: Panasonic Mobile Communications Co, Ltd
+- high: 00-19-C9-FF-FF-FF
+  low: 00-19-C9-00-00-00
+  name: S&C Electric Co
+- high: 00-1A-14-FF-FF-FF
+  low: 00-1A-14-00-00-00
+  name: Xin Hua Control Engineering Co, Ltd
+- high: 00-1A-64-FF-FF-FF
+  low: 00-1A-64-00-00-00
+  name: IBM Corp
+- high: 00-1A-82-FF-FF-FF
+  low: 00-1A-82-00-00-00
+  name: Proba Building Automation Co, Ltd
+- high: 00-1A-8B-FF-FF-FF
+  low: 00-1A-8B-00-00-00
+  name: Chunil Electric Ind., Co
+- high: 00-1A-B6-FF-FF-FF
+  low: 00-1A-B6-00-00-00
+  name: Texas Instruments
+- high: 00-1A-B6-FF-FF-FF
+  low: 00-1A-B6-00-00-00
+  name: Texas Instruments
+- high: 00-1B-0A-FF-FF-FF
+  low: 00-1B-0A-00-00-00
+  name: Intelligent Distributed Controls Ltd
+- high: 00-1B-18-FF-FF-FF
+  low: 00-1B-18-00-00-00
+  name: Tsuken Electric Ind. Co, Ltd
+- high: 00-1B-AB-FF-FF-FF
+  low: 00-1B-AB-00-00-00
+  name: Telchemy, Inc
+- high: 00-1B-AC-FF-FF-FF
+  low: 00-1B-AC-00-00-00
+  name: Curtiss Wright Controls Embedded Computing
+- high: 00-1B-AE-FF-FF-FF
+  low: 00-1B-AE-00-00-00
+  name: Micro Control Systems, Inc
+- high: 00-1B-C2-FF-FF-FF
+  low: 00-1B-C2-00-00-00
+  name: Integrated Control Tech Limitied
+- high: 00-1B-C5-00-EF-FF
+  low: 00-1B-C5-00-E0-00
+  name: Vigor Electric Corp
+- high: 00-1B-C5-03-0F-FF
+  low: 00-1B-C5-03-00-00
+  name: OctoGate it Security Systems GmbH
+- high: 00-1B-C5-04-DF-FF
+  low: 00-1B-C5-04-D0-00
+  name: eiraku electric Corp
+- high: 00-1B-C5-04-EF-FF
+  low: 00-1B-C5-04-E0-00
+  name: Mitsubishi Electric India Pvt. Ltd
+- high: 00-1B-C5-0A-6F-FF
+  low: 00-1B-C5-0A-60-00
+  name: Balter Security GmbH
+- high: 00-1B-D3-FF-FF-FF
+  low: 00-1B-D3-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: 00-1B-E3-FF-FF-FF
+  low: 00-1B-E3-00-00-00
+  name: Health Hero Network, Inc
+- high: 00-1C-5B-FF-FF-FF
+  low: 00-1C-5B-00-00-00
+  name: Chubb Electronic Security Systems Ltd
+- high: 00-1C-5C-FF-FF-FF
+  low: 00-1C-5C-00-00-00
+  name: Integrated Medical Systems, Inc
+- high: 00-1C-FC-FF-FF-FF
+  low: 00-1C-FC-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: 00-1D-5D-FF-FF-FF
+  low: 00-1D-5D-00-00-00
+  name: Control Dynamics Pty. Ltd
+- high: 00-1D-9B-FF-FF-FF
+  low: 00-1D-9B-00-00-00
+  name: Hokuyo Automatic Co, Ltd
+- high: 00-1D-9C-FF-FF-FF
+  low: 00-1D-9C-00-00-00
+  name: Rockwell Automation
+- high: 00-1D-C5-FF-FF-FF
+  low: 00-1D-C5-00-00-00
+  name: Beijing Jiaxun Feihong Electricial Co, Ltd
+- high: 00-1D-CC-FF-FF-FF
+  low: 00-1D-CC-00-00-00
+  name: Ayon Cyber Security, Inc
+- high: 00-1E-1E-FF-FF-FF
+  low: 00-1E-1E-00-00-00
+  name: Honeywell Life Safety
+- high: 00-1E-D5-FF-FF-FF
+  low: 00-1E-D5-00-00-00
+  name: Tekon-Automatics
+- high: 00-1E-D9-FF-FF-FF
+  low: 00-1E-D9-00-00-00
+  name: Mitsubishi Precision Co, Ltd
+- high: 00-1F-53-FF-FF-FF
+  low: 00-1F-53-00-00-00
+  name: Gemac Chemnitz GmbH
+- high: 00-1F-67-FF-FF-FF
+  low: 00-1F-67-00-00-00
+  name: Hitachi, Ltd
+- high: 00-1F-B8-FF-FF-FF
+  low: 00-1F-B8-00-00-00
+  name: Universal Remote Control, Inc
+- high: 00-20-35-FF-FF-FF
+  low: 00-20-35-00-00-00
+  name: IBM Corp
+- high: 00-20-3D-FF-FF-FF
+  low: 00-20-3D-00-00-00
+  name: Honeywell Environmental & Combustion Controls
+- high: 00-20-85-FF-FF-FF
+  low: 00-20-85-00-00-00
+  name: Eaton Corp
+- high: 00-20-DF-FF-FF-FF
+  low: 00-20-DF-00-00-00
+  name: Kyosan Electric Mfg. Co, Ltd
+- high: 00-21-5E-FF-FF-FF
+  low: 00-21-5E-00-00-00
+  name: IBM Corp
+- high: 00-21-B3-FF-FF-FF
+  low: 00-21-B3-00-00-00
+  name: Ross Controls
+- high: 00-21-BA-FF-FF-FF
+  low: 00-21-BA-00-00-00
+  name: Texas Instruments
+- high: 00-22-00-FF-FF-FF
+  low: 00-22-00-00-00-00
+  name: IBM Corp
+- high: 00-22-6A-FF-FF-FF
+  low: 00-22-6A-00-00-00
+  name: Honeywell
+- high: 00-22-A5-FF-FF-FF
+  low: 00-22-A5-00-00-00
+  name: Texas Instruments
+- high: 00-22-D5-FF-FF-FF
+  low: 00-22-D5-00-00-00
+  name: Eaton Corp Electrical Group Data Center Solutions - Pulizzi
+- high: 00-22-D8-FF-FF-FF
+  low: 00-22-D8-00-00-00
+  name: Shenzhen Gst Security and Safety Tech Ltd
+- high: 00-22-DC-FF-FF-FF
+  low: 00-22-DC-00-00-00
+  name: Vigil Health Solutions Inc
+- high: 00-23-B6-FF-FF-FF
+  low: 00-23-B6-00-00-00
+  name: Securite Communications / Honeywell
+- high: 00-23-D4-FF-FF-FF
+  low: 00-23-D4-00-00-00
+  name: Texas Instruments
+- high: 00-24-15-FF-FF-FF
+  low: 00-24-15-00-00-00
+  name: Magnetic Autocontrol GmbH
+- high: 00-24-80-FF-FF-FF
+  low: 00-24-80-00-00-00
+  name: Meteocontrol GmbH
+- high: 00-24-BA-FF-FF-FF
+  low: 00-24-BA-00-00-00
+  name: Texas Instruments
+- high: 00-25-03-FF-FF-FF
+  low: 00-25-03-00-00-00
+  name: IBM Corp
+- high: 00-25-0A-FF-FF-FF
+  low: 00-25-0A-00-00-00
+  name: Security Expert Co Ltd
+- high: 00-25-36-FF-FF-FF
+  low: 00-25-36-00-00-00
+  name: Oki Electric Industry Co, Ltd
+- high: 00-25-DC-FF-FF-FF
+  low: 00-25-DC-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: 00-26-1D-FF-FF-FF
+  low: 00-26-1D-00-00-00
+  name: Cop Security System Corp
+- high: 00-26-28-FF-FF-FF
+  low: 00-26-28-00-00-00
+  name: Companytec Automação e Controle LTDA
+- high: 00-26-33-FF-FF-FF
+  low: 00-26-33-00-00-00
+  name: Mir - Medical International Research
+- high: 00-26-92-FF-FF-FF
+  low: 00-26-92-00-00-00
+  name: Mitsubishi Electric Corp
+- high: 00-30-C6-FF-FF-FF
+  low: 00-30-C6-00-00-00
+  name: Control Solutions, Inc
+- high: 00-35-FF-FF-FF-FF
+  low: 00-35-FF-00-00-00
+  name: Texas Instruments
+- high: 00-40-03-FF-FF-FF
+  low: 00-40-03-00-00-00
+  name: Emerson Process Management Power & Water Solutions, Inc
+- high: 00-40-1A-FF-FF-FF
+  low: 00-40-1A-00-00-00
+  name: Fuji Electric Co, Ltd
+- high: 00-40-38-FF-FF-FF
+  low: 00-40-38-00-00-00
+  name: Talent Electric Inc
+- high: 00-40-D8-FF-FF-FF
+  low: 00-40-D8-00-00-00
+  name: Ocean Office Automation Ltd
+- high: 00-40-ED-FF-FF-FF
+  low: 00-40-ED-00-00-00
+  name: Network Controls Int'Natl Inc
+- high: 00-50-40-FF-FF-FF
+  low: 00-50-40-00-00-00
+  name: Panasonic Electric Works Co, Ltd
+- high: 00-50-4C-FF-FF-FF
+  low: 00-50-4C-00-00-00
+  name: Galil Motion Control
+- high: 00-50-51-FF-FF-FF
+  low: 00-50-51-00-00-00
+  name: Iwatsu Electric Co, Ltd
+- high: 00-50-76-FF-FF-FF
+  low: 00-50-76-00-00-00
+  name: IBM Corp
+- high: 00-50-B4-FF-FF-FF
+  low: 00-50-B4-00-00-00
+  name: Satchwell Control Systems, Ltd
+- high: 00-50-C2-01-5F-FF
+  low: 00-50-C2-01-50-00
+  name: Leroy Automation
+- high: 00-50-C2-05-BF-FF
+  low: 00-50-C2-05-B0-00
+  name: Radiometer Medical A/S
+- high: 00-50-C2-07-6F-FF
+  low: 00-50-C2-07-60-00
+  name: Litton Guidance & Control Systems
+- high: 00-50-C2-09-0F-FF
+  low: 00-50-C2-09-00-00
+  name: Invensys Controls Network Systems
+- high: 00-50-C2-0C-5F-FF
+  low: 00-50-C2-0C-50-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-0C-6F-FF
+  low: 00-50-C2-0C-60-00
+  name: Advanced Medical Information Tech, Inc
+- high: 00-50-C2-13-CF-FF
+  low: 00-50-C2-13-C0-00
+  name: Nbg Industrial Automation B.V.
+- high: 00-50-C2-1D-8F-FF
+  low: 00-50-C2-1D-80-00
+  name: Guardian Controls International Ltd
+- high: 00-50-C2-1F-AF-FF
+  low: 00-50-C2-1F-A0-00
+  name: SP Controls, Inc
+- high: 00-50-C2-22-3F-FF
+  low: 00-50-C2-22-30-00
+  name: visicontrol GmbH
+- high: 00-50-C2-2A-DF-FF
+  low: 00-50-C2-2A-D0-00
+  name: ABB T&D Spa
+- high: 00-50-C2-31-3F-FF
+  low: 00-50-C2-31-30-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-34-CF-FF
+  low: 00-50-C2-34-C0-00
+  name: Chuo Electric Works Co, Ltd
+- high: 00-50-C2-34-EF-FF
+  low: 00-50-C2-34-E0-00
+  name: ABB Power Tech S.p.A. Unità  Operativa Sace
+- high: 00-50-C2-39-9F-FF
+  low: 00-50-C2-39-90-00
+  name: Advanced Micro Controls Inc
+- high: 00-50-C2-3C-EF-FF
+  low: 00-50-C2-3C-E0-00
+  name: Ward Leonard Electric Co
+- high: 00-50-C2-3D-5F-FF
+  low: 00-50-C2-3D-50-00
+  name: Fluke Biomedical, Radiation Management Services
+- high: 00-50-C2-3D-EF-FF
+  low: 00-50-C2-3D-E0-00
+  name: ABB Power Tech S.p.A. Unità  Operativa Sace
+- high: 00-50-C2-3E-9F-FF
+  low: 00-50-C2-3E-90-00
+  name: MedAvant Healthcare
+- high: 00-50-C2-49-BF-FF
+  low: 00-50-C2-49-B0-00
+  name: vg controls, Inc
+- high: 00-50-C2-4B-CF-FF
+  low: 00-50-C2-4B-C0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-4D-4F-FF
+  low: 00-50-C2-4D-40-00
+  name: Herholdt Controls srl
+- high: 00-50-C2-4D-9F-FF
+  low: 00-50-C2-4D-90-00
+  name: GE Security Kampro
+- high: 00-50-C2-4D-9F-FF
+  low: 00-50-C2-4D-90-00
+  name: GE Security Kampro
+- high: 00-50-C2-4F-0F-FF
+  low: 00-50-C2-4F-00-00
+  name: MedAvant Healthcare
+- high: 00-50-C2-51-6F-FF
+  low: 00-50-C2-51-60-00
+  name: Sowa Electric Co, Ltd
+- high: 00-50-C2-53-7F-FF
+  low: 00-50-C2-53-70-00
+  name: Dst Control AB
+- high: 00-50-C2-53-EF-FF
+  low: 00-50-C2-53-E0-00
+  name: Honeywell
+- high: 00-50-C2-55-0F-FF
+  low: 00-50-C2-55-00-00
+  name: Lju Automatisierungstechnik GmbH
+- high: 00-50-C2-5A-BF-FF
+  low: 00-50-C2-5A-B0-00
+  name: Eaton Corp Electrical Group Data Center Solutions - Pulizzi
+- high: 00-50-C2-5B-AF-FF
+  low: 00-50-C2-5B-A0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-5C-FF-FF
+  low: 00-50-C2-5C-F0-00
+  name: Innomed Medical Inc
+- high: 00-50-C2-60-1F-FF
+  low: 00-50-C2-60-10-00
+  name: MedAvant Healthcare
+- high: 00-50-C2-61-6F-FF
+  low: 00-50-C2-61-60-00
+  name: Honeywell
+- high: 00-50-C2-66-AF-FF
+  low: 00-50-C2-66-A0-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-67-EF-FF
+  low: 00-50-C2-67-E0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-6C-6F-FF
+  low: 00-50-C2-6C-60-00
+  name: MedAvant Healthcare
+- high: 00-50-C2-6F-DF-FF
+  low: 00-50-C2-6F-D0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-72-9F-FF
+  low: 00-50-C2-72-90-00
+  name: SP Controls, Inc
+- high: 00-50-C2-74-CF-FF
+  low: 00-50-C2-74-C0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-75-3F-FF
+  low: 00-50-C2-75-30-00
+  name: ABB
+- high: 00-50-C2-76-FF-FF
+  low: 00-50-C2-76-F0-00
+  name: Control and Robotics Solutions
+- high: 00-50-C2-79-0F-FF
+  low: 00-50-C2-79-00-00
+  name: GE Security Kampro
+- high: 00-50-C2-79-0F-FF
+  low: 00-50-C2-79-00-00
+  name: GE Security Kampro
+- high: 00-50-C2-7A-0F-FF
+  low: 00-50-C2-7A-00-00
+  name: MedAvant Healthcare
+- high: 00-50-C2-7A-3F-FF
+  low: 00-50-C2-7A-30-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-7A-5F-FF
+  low: 00-50-C2-7A-50-00
+  name: Quantum Medical Imaging
+- high: 00-50-C2-7B-FF-FF
+  low: 00-50-C2-7B-F0-00
+  name: Zoe Medical
+- high: 00-50-C2-7E-DF-FF
+  low: 00-50-C2-7E-D0-00
+  name: Genesis Automation Inc
+- high: 00-50-C2-7F-6F-FF
+  low: 00-50-C2-7F-60-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-7F-AF-FF
+  low: 00-50-C2-7F-A0-00
+  name: AutomationX GmbH
+- high: 00-50-C2-85-EF-FF
+  low: 00-50-C2-85-E0-00
+  name: Radiometer Medical ApS
+- high: 00-50-C2-86-4F-FF
+  low: 00-50-C2-86-40-00
+  name: Atg Automatisierungstechnik Gera GmbH
+- high: 00-50-C2-86-5F-FF
+  low: 00-50-C2-86-50-00
+  name: Persy Control Services B.v.
+- high: 00-50-C2-86-6F-FF
+  low: 00-50-C2-86-60-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-88-3F-FF
+  low: 00-50-C2-88-30-00
+  name: Neocontrol Soluções em Automação
+- high: 00-50-C2-8B-CF-FF
+  low: 00-50-C2-8B-C0-00
+  name: Honeywell Sensotec
+- high: 00-50-C2-8C-2F-FF
+  low: 00-50-C2-8C-20-00
+  name: Access Control Systems Jsc
+- high: 00-50-C2-8D-0F-FF
+  low: 00-50-C2-8D-00-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-8D-9F-FF
+  low: 00-50-C2-8D-90-00
+  name: Industrial Control and Communication Ltd
+- high: 00-50-C2-8E-DF-FF
+  low: 00-50-C2-8E-D0-00
+  name: AT-Automation Tech GmbH
+- high: 00-50-C2-8F-9F-FF
+  low: 00-50-C2-8F-90-00
+  name: Honeywell
+- high: 00-50-C2-91-EF-FF
+  low: 00-50-C2-91-E0-00
+  name: Automation Tec
+- high: 00-50-C2-92-4F-FF
+  low: 00-50-C2-92-40-00
+  name: Link Electric & Safety Control Co
+- high: 00-50-C2-93-3F-FF
+  low: 00-50-C2-93-30-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-97-7F-FF
+  low: 00-50-C2-97-70-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-99-5F-FF
+  low: 00-50-C2-99-50-00
+  name: INTER CONTROL Hermann Köhler Elektrik GmbH & Co. KG
+- high: 00-50-C2-9B-3F-FF
+  low: 00-50-C2-9B-30-00
+  name: Kahler Automation
+- high: 00-50-C2-9C-3F-FF
+  low: 00-50-C2-9C-30-00
+  name: GE Security Kampro
+- high: 00-50-C2-9C-3F-FF
+  low: 00-50-C2-9C-30-00
+  name: GE Security Kampro
+- high: 00-50-C2-9C-9F-FF
+  low: 00-50-C2-9C-90-00
+  name: Luminex Lighting Control Equipment
+- high: 00-50-C2-9D-2F-FF
+  low: 00-50-C2-9D-20-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-9E-1F-FF
+  low: 00-50-C2-9E-10-00
+  name: Enreduce Energy Control AB
+- high: 00-50-C2-9E-4F-FF
+  low: 00-50-C2-9E-40-00
+  name: Pyxis Controls Wll
+- high: 00-50-C2-9F-9F-FF
+  low: 00-50-C2-9F-90-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-A2-5F-FF
+  low: 00-50-C2-A2-50-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-A2-AF-FF
+  low: 00-50-C2-A2-A0-00
+  name: Astronics Custom Control Concepts
+- high: 00-50-C2-A3-BF-FF
+  low: 00-50-C2-A3-B0-00
+  name: IPcontrols GmbH
+- high: 00-50-C2-A6-FF-FF
+  low: 00-50-C2-A6-F0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-A9-8F-FF
+  low: 00-50-C2-A9-80-00
+  name: Sentry 360 Security
+- high: 00-50-C2-AB-AF-FF
+  low: 00-50-C2-AB-A0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-AC-FF-FF
+  low: 00-50-C2-AC-F0-00
+  name: SP Controls, Inc
+- high: 00-50-C2-AD-CF-FF
+  low: 00-50-C2-AD-C0-00
+  name: Synthesechemie Dr. Penth GmbH
+- high: 00-50-C2-AE-2F-FF
+  low: 00-50-C2-AE-20-00
+  name: Power Medical Interventions
+- high: 00-50-C2-AE-5F-FF
+  low: 00-50-C2-AE-50-00
+  name: Abs Gesellschaft f. Automatisierung, Bildverarbeitung und Software mbH
+- high: 00-50-C2-B0-0F-FF
+  low: 00-50-C2-B0-00-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-B0-BF-FF
+  low: 00-50-C2-B0-B0-00
+  name: Honeywell
+- high: 00-50-C2-B0-FF-FF
+  low: 00-50-C2-B0-F0-00
+  name: Nara Controls Inc
+- high: 00-50-C2-B1-EF-FF
+  low: 00-50-C2-B1-E0-00
+  name: Abbott Medical Optics
+- high: 00-50-C2-B3-2F-FF
+  low: 00-50-C2-B3-20-00
+  name: Byres Security Inc
+- high: 00-50-C2-B4-AF-FF
+  low: 00-50-C2-B4-A0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-B8-9F-FF
+  low: 00-50-C2-B8-90-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 00-50-C2-B9-2F-FF
+  low: 00-50-C2-B9-20-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-B9-EF-FF
+  low: 00-50-C2-B9-E0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-BF-2F-FF
+  low: 00-50-C2-BF-20-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-C0-AF-FF
+  low: 00-50-C2-C0-A0-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-C3-8F-FF
+  low: 00-50-C2-C3-80-00
+  name: Computer Automation Tech Inc
+- high: 00-50-C2-C4-2F-FF
+  low: 00-50-C2-C4-20-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-C6-3F-FF
+  low: 00-50-C2-C6-30-00
+  name: Potter Electric Signal Co Llc
+- high: 00-50-C2-C7-3F-FF
+  low: 00-50-C2-C7-30-00
+  name: Industry Controls, Inc
+- high: 00-50-C2-C7-BF-FF
+  low: 00-50-C2-C7-B0-00
+  name: Honeywell
+- high: 00-50-C2-C8-CF-FF
+  low: 00-50-C2-C8-C0-00
+  name: Lanmark Controls Inc
+- high: 00-50-C2-C8-DF-FF
+  low: 00-50-C2-C8-D0-00
+  name: Emergency Message Controls Llc
+- high: 00-50-C2-C9-CF-FF
+  low: 00-50-C2-C9-C0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-CD-7F-FF
+  low: 00-50-C2-CD-70-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-CD-CF-FF
+  low: 00-50-C2-CD-C0-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-CE-3F-FF
+  low: 00-50-C2-CE-30-00
+  name: Industrial Automatics Design Bureau
+- high: 00-50-C2-D0-FF-FF
+  low: 00-50-C2-D0-F0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-D2-CF-FF
+  low: 00-50-C2-D2-C0-00
+  name: Schneider Electric Motion Usa
+- high: 00-50-C2-D4-4F-FF
+  low: 00-50-C2-D4-40-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-D5-5F-FF
+  low: 00-50-C2-D5-50-00
+  name: Sterna Security
+- high: 00-50-C2-D7-3F-FF
+  low: 00-50-C2-D7-30-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-D8-4F-FF
+  low: 00-50-C2-D8-40-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-D9-5F-FF
+  low: 00-50-C2-D9-50-00
+  name: Honeywell
+- high: 00-50-C2-D9-AF-FF
+  low: 00-50-C2-D9-A0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-DC-0F-FF
+  low: 00-50-C2-DC-00-00
+  name: Security Services Group (Ssg)
+- high: 00-50-C2-DC-5F-FF
+  low: 00-50-C2-DC-50-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-DD-CF-FF
+  low: 00-50-C2-DD-C0-00
+  name: Vision & Control GmbH
+- high: 00-50-C2-DE-1F-FF
+  low: 00-50-C2-DE-10-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-DF-1F-FF
+  low: 00-50-C2-DF-10-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-DF-4F-FF
+  low: 00-50-C2-DF-40-00
+  name: Potter Electric Signal Co Llc
+- high: 00-50-C2-E1-3F-FF
+  low: 00-50-C2-E1-30-00
+  name: Automation Assist Japan Co
+- high: 00-50-C2-E1-8F-FF
+  low: 00-50-C2-E1-80-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-E1-9F-FF
+  low: 00-50-C2-E1-90-00
+  name: Zoe Medical
+- high: 00-50-C2-E1-CF-FF
+  low: 00-50-C2-E1-C0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-E2-7F-FF
+  low: 00-50-C2-E2-70-00
+  name: Control Systems Srl
+- high: 00-50-C2-E3-6F-FF
+  low: 00-50-C2-E3-60-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-E5-9F-FF
+  low: 00-50-C2-E5-90-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-E6-8F-FF
+  low: 00-50-C2-E6-80-00
+  name: Kyoritsu Electric Corp
+- high: 00-50-C2-E7-CF-FF
+  low: 00-50-C2-E7-C0-00
+  name: SP Controls, Inc
+- high: 00-50-C2-E8-0F-FF
+  low: 00-50-C2-E8-00-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-E8-4F-FF
+  low: 00-50-C2-E8-40-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-EA-0F-FF
+  low: 00-50-C2-EA-00-00
+  name: Robert Bosch Healthcare Systems, Inc
+- high: 00-50-C2-EA-7F-FF
+  low: 00-50-C2-EA-70-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-EC-CF-FF
+  low: 00-50-C2-EC-C0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-EE-DF-FF
+  low: 00-50-C2-EE-D0-00
+  name: Future Design Controls, Inc
+- high: 00-50-C2-EE-EF-FF
+  low: 00-50-C2-EE-E0-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-EF-1F-FF
+  low: 00-50-C2-EF-10-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-F1-7F-FF
+  low: 00-50-C2-F1-70-00
+  name: ABB Transmission and Distribution Automation Equipment (Xiamen) Co, Ltd
+- high: 00-50-C2-F1-BF-FF
+  low: 00-50-C2-F1-B0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-F2-DF-FF
+  low: 00-50-C2-F2-D0-00
+  name: Robert Bosch Healthcare Systems, Inc
+- high: 00-50-C2-F3-AF-FF
+  low: 00-50-C2-F3-A0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-F5-5F-FF
+  low: 00-50-C2-F5-50-00
+  name: Honeywell
+- high: 00-50-C2-F5-AF-FF
+  low: 00-50-C2-F5-A0-00
+  name: Sentry 360 Security
+- high: 00-50-C2-F5-BF-FF
+  low: 00-50-C2-F5-B0-00
+  name: Saia Burgess Controls AG
+- high: 00-50-C2-F9-FF-FF
+  low: 00-50-C2-F9-F0-00
+  name: Nanjing Sac Power Grid Automation Co, Ltd
+- high: 00-50-C2-FF-3F-FF
+  low: 00-50-C2-FF-30-00
+  name: Control Systems Srl
+- high: 00-60-41-FF-FF-FF
+  low: 00-60-41-00-00-00
+  name: Yokogawa Digital Computer Corp
+- high: 00-60-65-FF-FF-FF
+  low: 00-60-65-00-00-00
+  name: B&R Industrial Automation GmbH
+- high: 00-60-6A-FF-FF-FF
+  low: 00-60-6A-00-00-00
+  name: Mitsubishi Wireless Communications. Inc
+- high: 00-60-94-FF-FF-FF
+  low: 00-60-94-00-00-00
+  name: IBM Corp
+- high: 00-60-DA-FF-FF-FF
+  low: 00-60-DA-00-00-00
+  name: Red Lion Controls, LP
+- high: 00-60-ED-FF-FF-FF
+  low: 00-60-ED-00-00-00
+  name: Ricardo Test Automation Ltd
+- high: 00-6C-FD-FF-FF-FF
+  low: 00-6C-FD-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 00-6F-F2-FF-FF-FF
+  low: 00-6F-F2-00-00-00
+  name: Mitsumi Electric Co, Ltd
+- high: 00-80-59-FF-FF-FF
+  low: 00-80-59-00-00-00
+  name: Stanley Electric Co, Ltd
+- high: 00-80-63-FF-FF-FF
+  low: 00-80-63-00-00-00
+  name: Hirschmann Automation and Control GmbH
+- high: 00-80-66-FF-FF-FF
+  low: 00-80-66-00-00-00
+  name: Arcom Control Systems, Ltd
+- high: 00-80-87-FF-FF-FF
+  low: 00-80-87-00-00-00
+  name: Oki Electric Industry Co, Ltd
+- high: 00-80-94-FF-FF-FF
+  low: 00-80-94-00-00-00
+  name: Alfa Laval Automation AB
+- high: 00-80-97-FF-FF-FF
+  low: 00-80-97-00-00-00
+  name: Centralp Automatismes
+- high: 00-81-F9-FF-FF-FF
+  low: 00-81-F9-00-00-00
+  name: Texas Instruments
+- high: 00-90-09-FF-FF-FF
+  low: 00-90-09-00-00-00
+  name: i Controls, Inc
+- high: 00-90-2C-FF-FF-FF
+  low: 00-90-2C-00-00-00
+  name: Data & Control Equipment Ltd
+- high: 00-90-58-FF-FF-FF
+  low: 00-90-58-00-00-00
+  name: Ultra Electronics Command & Control Systems
+- high: 00-90-88-FF-FF-FF
+  low: 00-90-88-00-00-00
+  name: Baxall Security Ltd
+- high: 00-A0-1D-FF-FF-FF
+  low: 00-A0-1D-00-00-00
+  name: Red Lion Controls, LP
+- high: 00-A0-96-FF-FF-FF
+  low: 00-A0-96-00-00-00
+  name: Mitsumi Electric Co, Ltd
+- high: 00-A0-ED-FF-FF-FF
+  low: 00-A0-ED-00-00-00
+  name: Brooks Automation, Inc
+- high: 00-A0-F4-FF-FF-FF
+  low: 00-A0-F4-00-00-00
+  name: GE
+- high: 00-A7-84-FF-FF-FF
+  low: 00-A7-84-00-00-00
+  name: Itx security
+- high: 00-C0-0B-FF-FF-FF
+  low: 00-C0-0B-00-00-00
+  name: Norcontrol A.S.
+- high: 00-C0-2A-FF-FF-FF
+  low: 00-C0-2A-00-00-00
+  name: Ohkura Electric Co, Ltd
+- high: 00-C0-74-FF-FF-FF
+  low: 00-C0-74-00-00-00
+  name: Toyoda Automatic Loom
+- high: 00-C0-8F-FF-FF-FF
+  low: 00-C0-8F-00-00-00
+  name: Panasonic Electric Works Co, Ltd
+- high: 00-C0-92-FF-FF-FF
+  low: 00-C0-92-00-00-00
+  name: Mennen Medical Inc
+- high: 00-D0-2E-FF-FF-FF
+  low: 00-D0-2E-00-00-00
+  name: Communication Automation Corp
+- high: 00-D0-5B-FF-FF-FF
+  low: 00-D0-5B-00-00-00
+  name: Acroloop Motion Control
+- high: 00-D0-60-FF-FF-FF
+  low: 00-D0-60-00-00-00
+  name: Panasonic Europe Ltd
+- high: 00-D0-65-FF-FF-FF
+  low: 00-D0-65-00-00-00
+  name: Toko Electric
+- high: 00-D0-94-FF-FF-FF
+  low: 00-D0-94-00-00-00
+  name: Seeion Control Llc
+- high: 00-D0-E3-FF-FF-FF
+  low: 00-D0-E3-00-00-00
+  name: Ele-Chem Engineering Co, Ltd
+- high: 00-D6-32-FF-FF-FF
+  low: 00-D6-32-00-00-00
+  name: GE Energy
+- high: 00-E0-10-FF-FF-FF
+  low: 00-E0-10-00-00-00
+  name: Hess SB-Automatenbau GmbH
+- high: 00-E0-67-FF-FF-FF
+  low: 00-E0-67-00-00-00
+  name: eac Automation-Consulting GmbH
+- high: 00-E0-6C-FF-FF-FF
+  low: 00-E0-6C-00-00-00
+  name: Ultra Electronics Command & Control Systems
+- high: 00-E0-90-FF-FF-FF
+  low: 00-E0-90-00-00-00
+  name: Beckman Lab. Automation Div.
+- high: 00-E0-C0-FF-FF-FF
+  low: 00-E0-C0-00-00-00
+  name: Seiwa Electric Mfg. Co, Ltd
+- high: 00-E0-C9-FF-FF-FF
+  low: 00-E0-C9-00-00-00
+  name: AutomatedLogic Corp
+- high: 00-E4-00-FF-FF-FF
+  low: 00-E4-00-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 00-F8-60-FF-FF-FF
+  low: 00-F8-60-00-00-00
+  name: PT. Panggung Electric Citrabuana
+- high: 04-11-19-AF-FF-FF
+  low: 04-11-19-A0-00-00
+  name: CyOne Security AG
+- high: 04-20-9A-FF-FF-FF
+  low: 04-20-9A-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: 04-79-B7-FF-FF-FF
+  low: 04-79-B7-00-00-00
+  name: Texas Instruments
+- high: 04-A3-16-FF-FF-FF
+  low: 04-A3-16-00-00-00
+  name: Texas Instruments
+- high: 04-E4-51-FF-FF-FF
+  low: 04-E4-51-00-00-00
+  name: Texas Instruments
+- high: 04-EE-03-FF-FF-FF
+  low: 04-EE-03-00-00-00
+  name: Texas Instruments
+- high: 08-00-19-FF-FF-FF
+  low: 08-00-19-00-00-00
+  name: General Electric Corp
+- high: 08-00-28-FF-FF-FF
+  low: 08-00-28-00-00-00
+  name: Texas Instruments
+- high: 08-00-5A-FF-FF-FF
+  low: 08-00-5A-00-00-00
+  name: IBM Corp
+- high: 08-00-70-FF-FF-FF
+  low: 08-00-70-00-00-00
+  name: Mitsubishi Precision Co, Ltd
+- high: 08-17-F4-FF-FF-FF
+  low: 08-17-F4-00-00-00
+  name: IBM Corp
+- high: 08-4E-BF-FF-FF-FF
+  low: 08-4E-BF-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: 08-61-95-FF-FF-FF
+  low: 08-61-95-00-00-00
+  name: Rockwell Automation
+- high: 08-9F-97-FF-FF-FF
+  low: 08-9F-97-00-00-00
+  name: Leroy Automation
+- high: 0C-1C-57-FF-FF-FF
+  low: 0C-1C-57-00-00-00
+  name: Texas Instruments
+- high: 0C-61-CF-FF-FF-FF
+  low: 0C-61-CF-00-00-00
+  name: Texas Instruments
+- high: 0C-6A-E6-FF-FF-FF
+  low: 0C-6A-E6-00-00-00
+  name: Stanley Security Solutions
+- high: 0C-AE-7D-FF-FF-FF
+  low: 0C-AE-7D-00-00-00
+  name: Texas Instruments
+- high: 0C-B2-B7-FF-FF-FF
+  low: 0C-B2-B7-00-00-00
+  name: Texas Instruments
+- high: 0C-EC-80-FF-FF-FF
+  low: 0C-EC-80-00-00-00
+  name: Texas Instruments
+- high: 10-00-5A-FF-FF-FF
+  low: 10-00-5A-00-00-00
+  name: IBM Corp
+- high: 10-08-2C-FF-FF-FF
+  low: 10-08-2C-00-00-00
+  name: Texas Instruments
+- high: 10-18-9E-FF-FF-FF
+  low: 10-18-9E-00-00-00
+  name: Elmo Motion Control
+- high: 10-2E-AF-FF-FF-FF
+  low: 10-2E-AF-00-00-00
+  name: Texas Instruments
+- high: 10-4B-46-FF-FF-FF
+  low: 10-4B-46-00-00-00
+  name: Mitsubishi Electric Corp
+- high: 10-CE-A9-FF-FF-FF
+  low: 10-CE-A9-00-00-00
+  name: Texas Instruments
+- high: 10-DE-E4-FF-FF-FF
+  low: 10-DE-E4-00-00-00
+  name: automationNEXT GmbH
+- high: 14-15-7C-FF-FF-FF
+  low: 14-15-7C-00-00-00
+  name: Tokyo Cosmos Electric Co, Ltd
+- high: 14-41-46-FF-FF-FF
+  low: 14-41-46-00-00-00
+  name: Honeywell (China) Co, Ltd
+- high: 14-42-FC-FF-FF-FF
+  low: 14-42-FC-00-00-00
+  name: Texas Instruments
+- high: 14-49-78-FF-FF-FF
+  low: 14-49-78-00-00-00
+  name: Digital Control Inc
+- high: 14-4F-D7-9F-FF-FF
+  low: 14-4F-D7-90-00-00
+  name: Emerson Network Power (India) Pvt. Ltd
+- high: 18-04-ED-FF-FF-FF
+  low: 18-04-ED-00-00-00
+  name: Texas Instruments
+- high: 18-30-0C-FF-FF-FF
+  low: 18-30-0C-00-00-00
+  name: Hisense Electric Co, Ltd
+- high: 18-45-16-FF-FF-FF
+  low: 18-45-16-00-00-00
+  name: Texas Instruments
+- high: 18-46-44-FF-FF-FF
+  low: 18-46-44-00-00-00
+  name: Home Control Singapore Pte Ltd
+- high: 18-4C-08-FF-FF-FF
+  low: 18-4C-08-00-00-00
+  name: Rockwell Automation
+- high: 18-62-E4-FF-FF-FF
+  low: 18-62-E4-00-00-00
+  name: Texas Instruments
+- high: 18-79-A2-FF-FF-FF
+  low: 18-79-A2-00-00-00
+  name: Gmj Electric Ltd
+- high: 18-93-D7-FF-FF-FF
+  low: 18-93-D7-00-00-00
+  name: Texas Instruments
+- high: 18-99-F5-FF-FF-FF
+  low: 18-99-F5-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 18-AB-F5-FF-FF-FF
+  low: 18-AB-F5-00-00-00
+  name: Ultra Electronics Electrics
+- high: 1C-45-93-FF-FF-FF
+  low: 1C-45-93-00-00-00
+  name: Texas Instruments
+- high: 1C-87-74-0F-FF-FF
+  low: 1C-87-74-00-00-00
+  name: Philips Personal Health Solutions
+- high: 1C-A0-EF-0F-FF-FF
+  low: 1C-A0-EF-00-00-00
+  name: Tangshan Liulin Automation Equipment Co, Ltd
+- high: 1C-BA-8C-FF-FF-FF
+  low: 1C-BA-8C-00-00-00
+  name: Texas Instruments
+- high: 1C-CA-E3-4F-FF-FF
+  low: 1C-CA-E3-40-00-00
+  name: Sunray Medical Apparatus Co, Ltd
+- high: 1C-DF-52-FF-FF-FF
+  low: 1C-DF-52-00-00-00
+  name: Texas Instruments
+- high: 1C-E2-CC-FF-FF-FF
+  low: 1C-E2-CC-00-00-00
+  name: Texas Instruments
+- high: 20-91-48-FF-FF-FF
+  low: 20-91-48-00-00-00
+  name: Texas Instruments
+- high: 20-C3-8F-FF-FF-FF
+  low: 20-C3-8F-00-00-00
+  name: Texas Instruments
+- high: 20-C6-EB-FF-FF-FF
+  low: 20-C6-EB-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: 20-CD-39-FF-FF-FF
+  low: 20-CD-39-00-00-00
+  name: Texas Instruments
+- high: 20-D7-78-FF-FF-FF
+  low: 20-D7-78-00-00-00
+  name: Texas Instruments
+- high: 20-DF-3F-FF-FF-FF
+  low: 20-DF-3F-00-00-00
+  name: Nanjing Sac Power Grid Automation Co, Ltd
+- high: 24-71-89-FF-FF-FF
+  low: 24-71-89-00-00-00
+  name: Texas Instruments
+- high: 24-76-25-FF-FF-FF
+  low: 24-76-25-00-00-00
+  name: Texas Instruments
+- high: 24-7D-4D-FF-FF-FF
+  low: 24-7D-4D-00-00-00
+  name: Texas Instruments
+- high: 24-9F-89-FF-FF-FF
+  low: 24-9F-89-00-00-00
+  name: Texas Instruments
+- high: 24-E5-AA-FF-FF-FF
+  low: 24-E5-AA-00-00-00
+  name: Philips Oral Healthcare, Inc
+- high: 28-29-86-FF-FF-FF
+  low: 28-29-86-00-00-00
+  name: Apc by Schneider Electric
+- high: 28-E9-8E-FF-FF-FF
+  low: 28-E9-8E-00-00-00
+  name: Mitsubishi Electric Corp
+- high: 28-EC-9A-FF-FF-FF
+  low: 28-EC-9A-00-00-00
+  name: Texas Instruments
+- high: 28-F5-37-AF-FF-FF
+  low: 28-F5-37-A0-00-00
+  name: Honeywell Safety Products Usa, Inc
+- high: 28-FC-51-FF-FF-FF
+  low: 28-FC-51-00-00-00
+  name: The Electric Controller and Manufacturing Co, Llc
+- high: 2C-44-1B-FF-FF-FF
+  low: 2C-44-1B-00-00-00
+  name: Spectrum Medical Ltd
+- high: 2C-48-35-5F-FF-FF
+  low: 2C-48-35-50-00-00
+  name: Scout Security, Inc
+- high: 2C-62-5A-FF-FF-FF
+  low: 2C-62-5A-00-00-00
+  name: Finest Security Systems Co, Ltd
+- high: 2C-6B-7D-FF-FF-FF
+  low: 2C-6B-7D-00-00-00
+  name: Texas Instruments
+- high: 2C-8B-F2-FF-FF-FF
+  low: 2C-8B-F2-00-00-00
+  name: Hitachi Metals America Ltd
+- high: 2C-AB-33-FF-FF-FF
+  low: 2C-AB-33-00-00-00
+  name: Texas Instruments
+- high: 2C-E0-32-FF-FF-FF
+  low: 2C-E0-32-00-00-00
+  name: Tcl King Electrical Appliances (Huizhou) Co, Ltd
+- high: 2C-FF-65-FF-FF-FF
+  low: 2C-FF-65-00-00-00
+  name: Oki Electric Industry Co, Ltd
+- high: 30-09-F9-CF-FF-FF
+  low: 30-09-F9-C0-00-00
+  name: Honeywell
+- high: 30-45-11-FF-FF-FF
+  low: 30-45-11-00-00-00
+  name: Texas Instruments
+- high: 30-B3-A2-FF-FF-FF
+  low: 30-B3-A2-00-00-00
+  name: Shenzhen Heguang Measurement & Control Tech Co, Ltd
+- high: 30-BE-3B-FF-FF-FF
+  low: 30-BE-3B-00-00-00
+  name: Mitsubishi Electric Corp
+- high: 30-E2-83-FF-FF-FF
+  low: 30-E2-83-00-00-00
+  name: Texas Instruments
+- high: 34-03-DE-FF-FF-FF
+  low: 34-03-DE-00-00-00
+  name: Texas Instruments
+- high: 34-08-E1-FF-FF-FF
+  low: 34-08-E1-00-00-00
+  name: Texas Instruments
+- high: 34-14-B5-FF-FF-FF
+  low: 34-14-B5-00-00-00
+  name: Texas Instruments
+- high: 34-15-13-FF-FF-FF
+  low: 34-15-13-00-00-00
+  name: Texas Instruments
+- high: 34-2A-F1-FF-FF-FF
+  low: 34-2A-F1-00-00-00
+  name: Texas Instruments
+- high: 34-40-B5-FF-FF-FF
+  low: 34-40-B5-00-00-00
+  name: IBM
+- high: 34-51-80-FF-FF-FF
+  low: 34-51-80-00-00-00
+  name: Tcl King Electrical Appliances (Huizhou) Co, Ltd
+- high: 34-84-E4-FF-FF-FF
+  low: 34-84-E4-00-00-00
+  name: Texas Instruments
+- high: 34-B1-F7-FF-FF-FF
+  low: 34-B1-F7-00-00-00
+  name: Texas Instruments
+- high: 34-BA-51-FF-FF-FF
+  low: 34-BA-51-00-00-00
+  name: Se-Kure Controls, Inc
+- high: 34-C0-F9-FF-FF-FF
+  low: 34-C0-F9-00-00-00
+  name: Rockwell Automation
+- high: 34-E4-2A-FF-FF-FF
+  low: 34-E4-2A-00-00-00
+  name: Automatic Bar Controls Inc
+- high: 38-0B-3C-FF-FF-FF
+  low: 38-0B-3C-00-00-00
+  name: Texas Instruments
+- high: 38-81-D7-FF-FF-FF
+  low: 38-81-D7-00-00-00
+  name: Texas Instruments
+- high: 38-A5-B6-FF-FF-FF
+  low: 38-A5-B6-00-00-00
+  name: Shenzhen Megmeet Electrical Co, Ltd
+- high: 38-A8-CD-BF-FF-FF
+  low: 38-A8-CD-B0-00-00
+  name: Qingdao Hisense Hitachi Air-conditioning Systems Co, Ltd
+- high: 38-D2-69-FF-FF-FF
+  low: 38-D2-69-00-00-00
+  name: Texas Instruments
+- high: 38-E0-8E-FF-FF-FF
+  low: 38-E0-8E-00-00-00
+  name: Mitsubishi Electric Corp
+- high: 38-E8-EE-FF-FF-FF
+  low: 38-E8-EE-00-00-00
+  name: Nanjing Youkuo Electric Tech Co, Ltd
+- high: 38-F5-54-FF-FF-FF
+  low: 38-F5-54-00-00-00
+  name: Hisense Electric Co, Ltd
+- high: 3C-2D-B7-FF-FF-FF
+  low: 3C-2D-B7-00-00-00
+  name: Texas Instruments
+- high: 3C-39-E7-9F-FF-FF
+  low: 3C-39-E7-90-00-00
+  name: Zone Controls AB
+- high: 3C-59-1E-FF-FF-FF
+  low: 3C-59-1E-00-00-00
+  name: Tcl King Electrical Appliances (Huizhou) Co, Ltd
+- high: 3C-7A-C4-FF-FF-FF
+  low: 3C-7A-C4-00-00-00
+  name: Chemtronics
+- high: 3C-7D-B1-FF-FF-FF
+  low: 3C-7D-B1-00-00-00
+  name: Texas Instruments
+- high: 3C-A3-08-FF-FF-FF
+  low: 3C-A3-08-00-00-00
+  name: Texas Instruments
+- high: 3C-C2-E1-FF-FF-FF
+  low: 3C-C2-E1-00-00-00
+  name: Xin Hua Control Engineering Co, Ltd
+- high: 3C-E4-B0-FF-FF-FF
+  low: 3C-E4-B0-00-00-00
+  name: Texas Instruments
+- high: 3C-FA-D3-5F-FF-FF
+  low: 3C-FA-D3-50-00-00
+  name: Gulf Security Tech Co, Ltd
+- high: 3C-FA-D3-6F-FF-FF
+  low: 3C-FA-D3-60-00-00
+  name: Nox Medical
+- high: 40-06-A0-FF-FF-FF
+  low: 40-06-A0-00-00-00
+  name: Texas Instruments
+- high: 40-11-75-3F-FF-FF
+  low: 40-11-75-30-00-00
+  name: Beijing Hexinruitong Electric Power Tech Co, Ltd
+- high: 40-2E-71-FF-FF-FF
+  low: 40-2E-71-00-00-00
+  name: Texas Instruments
+- high: 40-41-01-FF-FF-FF
+  low: 40-41-01-00-00-00
+  name: Rockwell Automation
+- high: 40-50-E0-FF-FF-FF
+  low: 40-50-E0-00-00-00
+  name: Milton Security Group Llc
+- high: 40-5F-C2-FF-FF-FF
+  low: 40-5F-C2-00-00-00
+  name: Texas Instruments
+- high: 40-98-4E-FF-FF-FF
+  low: 40-98-4E-00-00-00
+  name: Texas Instruments
+- high: 40-BD-32-FF-FF-FF
+  low: 40-BD-32-00-00-00
+  name: Texas Instruments
+- high: 40-D8-55-01-1F-FF
+  low: 40-D8-55-01-10-00
+  name: Flexim Security Oy
+- high: 40-D8-55-02-0F-FF
+  low: 40-D8-55-02-00-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 40-D8-55-02-4F-FF
+  low: 40-D8-55-02-40-00
+  name: Electrical Geodesics Inc
+- high: 40-D8-55-08-0F-FF
+  low: 40-D8-55-08-00-00
+  name: Honeywell
+- high: 40-D8-55-09-3F-FF
+  low: 40-D8-55-09-30-00
+  name: Sentry 360 Security
+- high: 40-D8-55-09-5F-FF
+  low: 40-D8-55-09-50-00
+  name: Heart Force Medical
+- high: 40-D8-55-0B-4F-FF
+  low: 40-D8-55-0B-40-00
+  name: Mitsubishi Electric System & Service Co, Ltd
+- high: 40-D8-55-0E-6F-FF
+  low: 40-D8-55-0E-60-00
+  name: Kyoritsu Electric Corp
+- high: 40-D8-55-0E-CF-FF
+  low: 40-D8-55-0E-C0-00
+  name: Sentry 360 Security
+- high: 40-D8-55-17-2F-FF
+  low: 40-D8-55-17-20-00
+  name: Yawata Electric Industrial Co, Ltd
+- high: 40-D8-55-18-DF-FF
+  low: 40-D8-55-18-D0-00
+  name: Zoe Medical
+- high: 40-D8-55-19-6F-FF
+  low: 40-D8-55-19-60-00
+  name: Advanced Micro Controls Inc
+- high: 40-D8-55-1A-7F-FF
+  low: 40-D8-55-1A-70-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 40-D8-55-1B-9F-FF
+  low: 40-D8-55-1B-90-00
+  name: Beking Industrieele automatisering
+- high: 40-D8-55-1D-AF-FF
+  low: 40-D8-55-1D-A0-00
+  name: Energy Tech and Control Ltd
+- high: 40-F2-E9-FF-FF-FF
+  low: 40-F2-E9-00-00-00
+  name: IBM
+- high: 44-4B-5D-FF-FF-FF
+  low: 44-4B-5D-00-00-00
+  name: GE Healthcare
+- high: 44-C1-5C-FF-FF-FF
+  low: 44-C1-5C-00-00-00
+  name: Texas Instruments
+- high: 44-D5-F2-BF-FF-FF
+  low: 44-D5-F2-B0-00-00
+  name: Valeo Interior Controls (Shenzhen) Co, Ltd
+- high: 44-D5-F2-CF-FF-FF
+  low: 44-D5-F2-C0-00-00
+  name: Neocontrol Soluções em Automação
+- high: 44-EA-D8-FF-FF-FF
+  low: 44-EA-D8-00-00-00
+  name: Texas Instruments
+- high: 48-70-1E-FF-FF-FF
+  low: 48-70-1E-00-00-00
+  name: Texas Instruments
+- high: 4C-21-8C-FF-FF-FF
+  low: 4C-21-8C-00-00-00
+  name: Panasonic India Private Ltd
+- high: 4C-24-98-FF-FF-FF
+  low: 4C-24-98-00-00-00
+  name: Texas Instruments
+- high: 4C-36-4E-FF-FF-FF
+  low: 4C-36-4E-00-00-00
+  name: Panasonic Corp Connected Solutions Co
+- high: 4C-3F-D3-FF-FF-FF
+  low: 4C-3F-D3-00-00-00
+  name: Texas Instruments
+- high: 4C-93-A6-2F-FF-FF
+  low: 4C-93-A6-20-00-00
+  name: Diehl Controls Nanjing Co, Ltd
+- high: 50-2C-C6-FF-FF-FF
+  low: 50-2C-C6-00-00-00
+  name: Gree Electric Appliances, Inc OF Zhuhai
+- high: 50-33-8B-FF-FF-FF
+  low: 50-33-8B-00-00-00
+  name: Texas Instruments
+- high: 50-51-A9-FF-FF-FF
+  low: 50-51-A9-00-00-00
+  name: Texas Instruments
+- high: 50-56-63-FF-FF-FF
+  low: 50-56-63-00-00-00
+  name: Texas Instruments
+- high: 50-65-83-FF-FF-FF
+  low: 50-65-83-00-00-00
+  name: Texas Instruments
+- high: 50-72-24-FF-FF-FF
+  low: 50-72-24-00-00-00
+  name: Texas Instruments
+- high: 50-8C-B1-FF-FF-FF
+  low: 50-8C-B1-00-00-00
+  name: Texas Instruments
+- high: 50-9F-3B-FF-FF-FF
+  low: 50-9F-3B-00-00-00
+  name: OI Electric Co, Ltd
+- high: 50-DE-19-7F-FF-FF
+  low: 50-DE-19-70-00-00
+  name: Tianjin Natianal Health Tech Co, Ltd
+- high: 50-F1-4A-FF-FF-FF
+  low: 50-F1-4A-00-00-00
+  name: Texas Instruments
+- high: 54-4A-16-FF-FF-FF
+  low: 54-4A-16-00-00-00
+  name: Texas Instruments
+- high: 54-6C-0E-FF-FF-FF
+  low: 54-6C-0E-00-00-00
+  name: Texas Instruments
+- high: 54-7D-CD-FF-FF-FF
+  low: 54-7D-CD-00-00-00
+  name: Texas Instruments
+- high: 54-CD-10-FF-FF-FF
+  low: 54-CD-10-00-00-00
+  name: Panasonic Mobile Communications Co, Ltd
+- high: 58-2F-42-FF-FF-FF
+  low: 58-2F-42-00-00-00
+  name: Universal Electric Corp
+- high: 58-48-49-7F-FF-FF
+  low: 58-48-49-70-00-00
+  name: Shandong Aotai Electric Co, Ltd
+- high: 58-52-8A-FF-FF-FF
+  low: 58-52-8A-00-00-00
+  name: Mitsubishi Electric Corp
+- high: 58-67-7F-FF-FF-FF
+  low: 58-67-7F-00-00-00
+  name: Clare Controls Inc
+- high: 58-7A-62-FF-FF-FF
+  low: 58-7A-62-00-00-00
+  name: Texas Instruments
+- high: 58-93-D8-FF-FF-FF
+  low: 58-93-D8-00-00-00
+  name: Texas Instruments
+- high: 58-EB-14-FF-FF-FF
+  low: 58-EB-14-00-00-00
+  name: Proteus Digital Health
+- high: 58-FC-DB-2F-FF-FF
+  low: 58-FC-DB-20-00-00
+  name: Beseye Cloud Security Co Ltd
+- high: 58-FC-DB-7F-FF-FF
+  low: 58-FC-DB-70-00-00
+  name: Prometheus Security Group Global, Inc
+- high: 5C-31-3E-FF-FF-FF
+  low: 5C-31-3E-00-00-00
+  name: Texas Instruments
+- high: 5C-34-00-FF-FF-FF
+  low: 5C-34-00-00-00-00
+  name: Hisense Electric Co, Ltd
+- high: 5C-36-B8-FF-FF-FF
+  low: 5C-36-B8-00-00-00
+  name: Tcl King Electrical Appliances (Huizhou) Co, Ltd
+- high: 5C-6B-32-FF-FF-FF
+  low: 5C-6B-32-00-00-00
+  name: Texas Instruments
+- high: 5C-6B-D7-FF-FF-FF
+  low: 5C-6B-D7-00-00-00
+  name: Foshan Viomi Electric Appliance Tech Co Ltd
+- high: 5C-85-7E-1F-FF-FF
+  low: 5C-85-7E-10-00-00
+  name: Sichuan C.H Control Tech Co, Ltd
+- high: 5C-88-16-FF-FF-FF
+  low: 5C-88-16-00-00-00
+  name: Rockwell Automation
+- high: 5C-F3-FC-FF-FF-FF
+  low: 5C-F3-FC-00-00-00
+  name: IBM Corp
+- high: 5C-F8-21-FF-FF-FF
+  low: 5C-F8-21-00-00-00
+  name: Texas Instruments
+- high: 60-39-1F-FF-FF-FF
+  low: 60-39-1F-00-00-00
+  name: ABB Ltd
+- high: 60-64-05-FF-FF-FF
+  low: 60-64-05-00-00-00
+  name: Texas Instruments
+- high: 60-77-71-FF-FF-FF
+  low: 60-77-71-00-00-00
+  name: Texas Instruments
+- high: 60-81-2B-FF-FF-FF
+  low: 60-81-2B-00-00-00
+  name: Astronics Custom Control Concepts
+- high: 60-98-66-FF-FF-FF
+  low: 60-98-66-00-00-00
+  name: Texas Instruments
+- high: 60-9A-A4-FF-FF-FF
+  low: 60-9A-A4-00-00-00
+  name: Gvi Security Inc
+- high: 60-B6-E1-FF-FF-FF
+  low: 60-B6-E1-00-00-00
+  name: Texas Instruments
+- high: 60-E8-5B-FF-FF-FF
+  low: 60-E8-5B-00-00-00
+  name: Texas Instruments
+- high: 64-31-39-1F-FF-FF
+  low: 64-31-39-10-00-00
+  name: Livongo Health
+- high: 64-33-DB-FF-FF-FF
+  low: 64-33-DB-00-00-00
+  name: Texas Instruments
+- high: 64-60-38-FF-FF-FF
+  low: 64-60-38-00-00-00
+  name: Hirschmann Automation and Control GmbH
+- high: 64-69-4E-FF-FF-FF
+  low: 64-69-4E-00-00-00
+  name: Texas Instruments
+- high: 64-76-57-FF-FF-FF
+  low: 64-76-57-00-00-00
+  name: Innovative Security Designs
+- high: 64-7B-D4-FF-FF-FF
+  low: 64-7B-D4-00-00-00
+  name: Texas Instruments
+- high: 64-80-8B-FF-FF-FF
+  low: 64-80-8B-00-00-00
+  name: vg controls, Inc
+- high: 64-88-FF-FF-FF-FF
+  low: 64-88-FF-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 64-9C-8E-FF-FF-FF
+  low: 64-9C-8E-00-00-00
+  name: Texas Instruments
+- high: 64-CF-D9-FF-FF-FF
+  low: 64-CF-D9-00-00-00
+  name: Texas Instruments
+- high: 64-EA-C5-FF-FF-FF
+  low: 64-EA-C5-00-00-00
+  name: SiboTech Automation Co, Ltd
+- high: 68-3E-02-FF-FF-FF
+  low: 68-3E-02-00-00-00
+  name: Siemens AG, Digital Factory, Motion Control System
+- high: 68-47-49-FF-FF-FF
+  low: 68-47-49-00-00-00
+  name: Texas Instruments
+- high: 68-69-CA-FF-FF-FF
+  low: 68-69-CA-00-00-00
+  name: Hitachi, Ltd
+- high: 68-9E-19-FF-FF-FF
+  low: 68-9E-19-00-00-00
+  name: Texas Instruments
+- high: 68-C9-0B-FF-FF-FF
+  low: 68-C9-0B-00-00-00
+  name: Texas Instruments
+- high: 6C-79-B8-FF-FF-FF
+  low: 6C-79-B8-00-00-00
+  name: Texas Instruments
+- high: 6C-83-66-FF-FF-FF
+  low: 6C-83-66-00-00-00
+  name: Nanjing Sac Power Grid Automation Co, Ltd
+- high: 6C-AE-8B-FF-FF-FF
+  low: 6C-AE-8B-00-00-00
+  name: IBM Corp
+- high: 6C-C3-74-FF-FF-FF
+  low: 6C-C3-74-00-00-00
+  name: Texas Instruments
+- high: 6C-EC-EB-FF-FF-FF
+  low: 6C-EC-EB-00-00-00
+  name: Texas Instruments
+- high: 6C-ED-51-FF-FF-FF
+  low: 6C-ED-51-00-00-00
+  name: Nexcontrol Co, Ltd
+- high: 70-01-36-FF-FF-FF
+  low: 70-01-36-00-00-00
+  name: Fatek Automation Corp
+- high: 70-58-12-FF-FF-FF
+  low: 70-58-12-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: 70-64-17-FF-FF-FF
+  low: 70-64-17-00-00-00
+  name: Orbis Tecnologia Electrica S.A.
+- high: 70-69-79-6F-FF-FF
+  low: 70-69-79-60-00-00
+  name: Beijing Security Union Information Tech Co, Ltd
+- high: 70-86-C1-FF-FF-FF
+  low: 70-86-C1-00-00-00
+  name: Texas Instruments
+- high: 70-B3-D5-01-6F-FF
+  low: 70-B3-D5-01-60-00
+  name: Guardian Controls International Ltd
+- high: 70-B3-D5-02-4F-FF
+  low: 70-B3-D5-02-40-00
+  name: G+D Mobile Security
+- high: 70-B3-D5-02-8F-FF
+  low: 70-B3-D5-02-80-00
+  name: AT-Automation Tech GmbH
+- high: 70-B3-D5-05-AF-FF
+  low: 70-B3-D5-05-A0-00
+  name: Uni Control System Sp. z o. o.
+- high: 70-B3-D5-07-EF-FF
+  low: 70-B3-D5-07-E0-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-08-0F-FF
+  low: 70-B3-D5-08-00-00
+  name: ABB
+- high: 70-B3-D5-0D-0F-FF
+  low: 70-B3-D5-0D-00-00
+  name: ProHound Controles Eirelli
+- high: 70-B3-D5-0D-5F-FF
+  low: 70-B3-D5-0D-50-00
+  name: Kahler Automation
+- high: 70-B3-D5-11-8F-FF
+  low: 70-B3-D5-11-80-00
+  name: Macromatic Industrial Controls, Inc
+- high: 70-B3-D5-15-3F-FF
+  low: 70-B3-D5-15-30-00
+  name: Schneider Electric Motion Usa
+- high: 70-B3-D5-16-DF-FF
+  low: 70-B3-D5-16-D0-00
+  name: BluB0X Security, Inc
+- high: 70-B3-D5-19-DF-FF
+  low: 70-B3-D5-19-D0-00
+  name: Automata GmbH & Co KG
+- high: 70-B3-D5-1A-BF-FF
+  low: 70-B3-D5-1A-B0-00
+  name: Access Control Systems Jsc
+- high: 70-B3-D5-1B-EF-FF
+  low: 70-B3-D5-1B-E0-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-1D-0F-FF
+  low: 70-B3-D5-1D-00-00
+  name: Shenzhen Invt Electric Co, Ltd
+- high: 70-B3-D5-1D-FF-FF
+  low: 70-B3-D5-1D-F0-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-1F-9F-FF
+  low: 70-B3-D5-1F-90-00
+  name: Automata GmbH & Co KG
+- high: 70-B3-D5-22-9F-FF
+  low: 70-B3-D5-22-90-00
+  name: Control Systems Srl
+- high: 70-B3-D5-26-1F-FF
+  low: 70-B3-D5-26-10-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-26-CF-FF
+  low: 70-B3-D5-26-C0-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-29-8F-FF
+  low: 70-B3-D5-29-80-00
+  name: Reflexion Medical
+- high: 70-B3-D5-2E-4F-FF
+  low: 70-B3-D5-2E-40-00
+  name: Schneider Electric Motion Usa
+- high: 70-B3-D5-2F-2F-FF
+  low: 70-B3-D5-2F-20-00
+  name: Health Care Originals, Inc
+- high: 70-B3-D5-2F-CF-FF
+  low: 70-B3-D5-2F-C0-00
+  name: Loanguard T/A SE Controls
+- high: 70-B3-D5-33-DF-FF
+  low: 70-B3-D5-33-D0-00
+  name: Schneider Electric Motion Usa
+- high: 70-B3-D5-34-5F-FF
+  low: 70-B3-D5-34-50-00
+  name: AT-Automation Tech GmbH
+- high: 70-B3-D5-39-EF-FF
+  low: 70-B3-D5-39-E0-00
+  name: Lanmark Controls Inc
+- high: 70-B3-D5-3A-BF-FF
+  low: 70-B3-D5-3A-B0-00
+  name: Camozzi Automation SpA
+- high: 70-B3-D5-3F-DF-FF
+  low: 70-B3-D5-3F-D0-00
+  name: Nara Controls Inc
+- high: 70-B3-D5-43-CF-FF
+  low: 70-B3-D5-43-C0-00
+  name: Scenario Automation
+- high: 70-B3-D5-4A-1F-FF
+  low: 70-B3-D5-4A-10-00
+  name: Herholdt Controls srl
+- high: 70-B3-D5-4C-3F-FF
+  low: 70-B3-D5-4C-30-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-4E-4F-FF
+  low: 70-B3-D5-4E-40-00
+  name: W.A. Benjamin Electric Co
+- high: 70-B3-D5-50-EF-FF
+  low: 70-B3-D5-50-E0-00
+  name: Micro Trend Automation Co, Ltd
+- high: 70-B3-D5-53-4F-FF
+  low: 70-B3-D5-53-40-00
+  name: Weihai Weigao Medical Imaging Tech Co, Ltd
+- high: 70-B3-D5-57-CF-FF
+  low: 70-B3-D5-57-C0-00
+  name: Automata GmbH & Co KG
+- high: 70-B3-D5-59-BF-FF
+  low: 70-B3-D5-59-B0-00
+  name: Automatizacion Y Conectividad SA DE CV
+- high: 70-B3-D5-5A-7F-FF
+  low: 70-B3-D5-5A-70-00
+  name: ABB S.p.A.
+- high: 70-B3-D5-5E-DF-FF
+  low: 70-B3-D5-5E-D0-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-60-DF-FF
+  low: 70-B3-D5-60-D0-00
+  name: Link Electric & Safety Control Co
+- high: 70-B3-D5-6A-2F-FF
+  low: 70-B3-D5-6A-20-00
+  name: Root Automation
+- high: 70-B3-D5-6B-CF-FF
+  low: 70-B3-D5-6B-C0-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-6C-BF-FF
+  low: 70-B3-D5-6C-B0-00
+  name: Najin automation
+- high: 70-B3-D5-6D-5F-FF
+  low: 70-B3-D5-6D-50-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-6E-0F-FF
+  low: 70-B3-D5-6E-00-00
+  name: ABB Spa - Dmpc
+- high: 70-B3-D5-70-8F-FF
+  low: 70-B3-D5-70-80-00
+  name: IBM Research GmbH
+- high: 70-B3-D5-70-CF-FF
+  low: 70-B3-D5-70-C0-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-71-0F-FF
+  low: 70-B3-D5-71-00-00
+  name: Guardian Controls International Ltd
+- high: 70-B3-D5-72-1F-FF
+  low: 70-B3-D5-72-10-00
+  name: Zoe Medical
+- high: 70-B3-D5-74-3F-FF
+  low: 70-B3-D5-74-30-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-79-7F-FF
+  low: 70-B3-D5-79-70-00
+  name: Mitsubishi Electric India Pvt. Ltd
+- high: 70-B3-D5-7A-4F-FF
+  low: 70-B3-D5-7A-40-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-7C-3F-FF
+  low: 70-B3-D5-7C-30-00
+  name: Flexim Security Oy
+- high: 70-B3-D5-7D-1F-FF
+  low: 70-B3-D5-7D-10-00
+  name: Schneider Electric Motion Usa
+- high: 70-B3-D5-7D-DF-FF
+  low: 70-B3-D5-7D-D0-00
+  name: Excel Medical Electronics Llc
+- high: 70-B3-D5-82-3F-FF
+  low: 70-B3-D5-82-30-00
+  name: SP Controls
+- high: 70-B3-D5-83-2F-FF
+  low: 70-B3-D5-83-20-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-89-1F-FF
+  low: 70-B3-D5-89-10-00
+  name: Neocontrol Soluções em Automação
+- high: 70-B3-D5-89-2F-FF
+  low: 70-B3-D5-89-20-00
+  name: ABB
+- high: 70-B3-D5-89-BF-FF
+  low: 70-B3-D5-89-B0-00
+  name: ControlWorks, Inc
+- high: 70-B3-D5-8B-4F-FF
+  low: 70-B3-D5-8B-40-00
+  name: Scenario Automation
+- high: 70-B3-D5-8C-DF-FF
+  low: 70-B3-D5-8C-D0-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-8D-3F-FF
+  low: 70-B3-D5-8D-30-00
+  name: Performance Controls, Inc
+- high: 70-B3-D5-8D-4F-FF
+  low: 70-B3-D5-8D-40-00
+  name: Guangdong Transtek Medical Electronics Co, Ltd
+- high: 70-B3-D5-8D-7F-FF
+  low: 70-B3-D5-8D-70-00
+  name: Schneider Electric Motion Usa
+- high: 70-B3-D5-92-BF-FF
+  low: 70-B3-D5-92-B0-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-92-DF-FF
+  low: 70-B3-D5-92-D0-00
+  name: Suzhou Wansong Electric Co, Ltd
+- high: 70-B3-D5-92-EF-FF
+  low: 70-B3-D5-92-E0-00
+  name: Medical Monitoring Center Ood
+- high: 70-B3-D5-95-7F-FF
+  low: 70-B3-D5-95-70-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-95-DF-FF
+  low: 70-B3-D5-95-D0-00
+  name: Giordano Controls Spa
+- high: 70-B3-D5-96-EF-FF
+  low: 70-B3-D5-96-E0-00
+  name: Myostat Motion Control Inc
+- high: 70-B3-D5-9A-7F-FF
+  low: 70-B3-D5-9A-70-00
+  name: Honeywell
+- high: 70-B3-D5-9B-3F-FF
+  low: 70-B3-D5-9B-30-00
+  name: K&J Schmittschneider AG
+- high: 70-B3-D5-9D-BF-FF
+  low: 70-B3-D5-9D-B0-00
+  name: Cas Medical Systems, Inc
+- high: 70-B3-D5-A1-BF-FF
+  low: 70-B3-D5-A1-B0-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-A3-2F-FF
+  low: 70-B3-D5-A3-20-00
+  name: Toughdog Security Systems
+- high: 70-B3-D5-AB-9F-FF
+  low: 70-B3-D5-AB-90-00
+  name: Dynamic Controls
+- high: 70-B3-D5-AC-CF-FF
+  low: 70-B3-D5-AC-C0-00
+  name: Schneider Electric Motion Usa
+- high: 70-B3-D5-B1-9F-FF
+  low: 70-B3-D5-B1-90-00
+  name: Brayden Automation Corp
+- high: 70-B3-D5-B2-FF-FF
+  low: 70-B3-D5-B2-F0-00
+  name: Hermann Automation GmbH
+- high: 70-B3-D5-B4-4F-FF
+  low: 70-B3-D5-B4-40-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-B6-8F-FF
+  low: 70-B3-D5-B6-80-00
+  name: S-Rain Control A/S
+- high: 70-B3-D5-B8-BF-FF
+  low: 70-B3-D5-B8-B0-00
+  name: Profound Medical Inc
+- high: 70-B3-D5-B9-4F-FF
+  low: 70-B3-D5-B9-40-00
+  name: Cygnetic Tech (Pty) Ltd
+- high: 70-B3-D5-B9-AF-FF
+  low: 70-B3-D5-B9-A0-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-BC-EF-FF
+  low: 70-B3-D5-BC-E0-00
+  name: Yawata Electric Industrial Co, Ltd
+- high: 70-B3-D5-BE-BF-FF
+  low: 70-B3-D5-BE-B0-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-C0-DF-FF
+  low: 70-B3-D5-C0-D0-00
+  name: Clarity Medical Pvt Ltd
+- high: 70-B3-D5-C0-FF-FF
+  low: 70-B3-D5-C0-F0-00
+  name: Honeywell Safety Products Usa, Inc
+- high: 70-B3-D5-C1-7F-FF
+  low: 70-B3-D5-C1-70-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-C4-7F-FF
+  low: 70-B3-D5-C4-70-00
+  name: ABB
+- high: 70-B3-D5-C6-BF-FF
+  low: 70-B3-D5-C6-B0-00
+  name: Herholdt Controls srl
+- high: 70-B3-D5-C7-AF-FF
+  low: 70-B3-D5-C7-A0-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-C9-8F-FF
+  low: 70-B3-D5-C9-80-00
+  name: Trust Automation
+- high: 70-B3-D5-CA-9F-FF
+  low: 70-B3-D5-CA-90-00
+  name: Nxcontrol system Co, Ltd
+- high: 70-B3-D5-CD-7F-FF
+  low: 70-B3-D5-CD-70-00
+  name: AutomationX GmbH
+- high: 70-B3-D5-CD-8F-FF
+  low: 70-B3-D5-CD-80-00
+  name: Nexus Electric S.A.
+- high: 70-B3-D5-CE-1F-FF
+  low: 70-B3-D5-CE-10-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 70-B3-D5-CF-9F-FF
+  low: 70-B3-D5-CF-90-00
+  name: Breas Medical AB
+- high: 70-B3-D5-DC-5F-FF
+  low: 70-B3-D5-DC-50-00
+  name: Excel Medical Electronics Llc
+- high: 70-B3-D5-DE-CF-FF
+  low: 70-B3-D5-DE-C0-00
+  name: Condev-Automation GmbH
+- high: 70-B3-D5-E0-BF-FF
+  low: 70-B3-D5-E0-B0-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-E1-EF-FF
+  low: 70-B3-D5-E1-E0-00
+  name: Umano Medical Inc
+- high: 70-B3-D5-E2-0F-FF
+  low: 70-B3-D5-E2-00-00
+  name: Signature Control Systems, Llc
+- high: 70-B3-D5-E4-FF-FF
+  low: 70-B3-D5-E4-F0-00
+  name: Rws Automation GmbH
+- high: 70-B3-D5-E6-3F-FF
+  low: 70-B3-D5-E6-30-00
+  name: Potomac Electric Corp
+- high: 70-B3-D5-E7-3F-FF
+  low: 70-B3-D5-E7-30-00
+  name: Zeus Control Systems Ltd
+- high: 70-B3-D5-E8-4F-FF
+  low: 70-B3-D5-E8-40-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 70-B3-D5-E8-8F-FF
+  low: 70-B3-D5-E8-80-00
+  name: Breas Medical AB
+- high: 70-B3-D5-ED-1F-FF
+  low: 70-B3-D5-ED-10-00
+  name: Przemyslowy Instytut Automatyki i Pomiarow
+- high: 70-B3-D5-ED-AF-FF
+  low: 70-B3-D5-ED-A0-00
+  name: Breas Medical AB
+- high: 70-B3-D5-F2-6F-FF
+  low: 70-B3-D5-F2-60-00
+  name: XJ Electric Co, Ltd
+- high: 70-B3-D5-F4-DF-FF
+  low: 70-B3-D5-F4-D0-00
+  name: Honeywell
+- high: 70-B3-D5-F5-DF-FF
+  low: 70-B3-D5-F5-D0-00
+  name: Potter Electric Signal Co Llc
+- high: 70-B3-D5-F7-0F-FF
+  low: 70-B3-D5-F7-00-00
+  name: Honeywell
+- high: 70-B3-D5-FD-2F-FF
+  low: 70-B3-D5-FD-20-00
+  name: Dalian Levear Electric Co, Ltd
+- high: 70-B3-D5-FD-FF-FF
+  low: 70-B3-D5-FD-F0-00
+  name: Nara Controls Inc
+- high: 70-B9-50-FF-FF-FF
+  low: 70-B9-50-00-00-00
+  name: Texas Instruments
+- high: 70-E5-6E-FF-FF-FF
+  low: 70-E5-6E-00-00-00
+  name: Texas Instruments
+- high: 70-F8-E7-6F-FF-FF
+  low: 70-F8-E7-60-00-00
+  name: Flexim Security Oy
+- high: 70-F8-E7-8F-FF-FF
+  low: 70-F8-E7-80-00-00
+  name: Eclipse Security
+- high: 70-FF-76-FF-FF-FF
+  low: 70-FF-76-00-00-00
+  name: Texas Instruments
+- high: 74-1A-E0-3F-FF-FF
+  low: 74-1A-E0-30-00-00
+  name: Philips Personal Health Solutions
+- high: 74-5B-C5-9F-FF-FF
+  low: 74-5B-C5-90-00-00
+  name: Haikou Frun Flash&Mcu Microcontrol Tech Development Co, Ltd
+- high: 74-99-75-FF-FF-FF
+  low: 74-99-75-00-00-00
+  name: IBM Corp
+- high: 74-D2-85-FF-FF-FF
+  low: 74-D2-85-00-00-00
+  name: Texas Instruments
+- high: 74-D6-EA-FF-FF-FF
+  low: 74-D6-EA-00-00-00
+  name: Texas Instruments
+- high: 74-D7-CA-FF-FF-FF
+  low: 74-D7-CA-00-00-00
+  name: Panasonic Corp Automotive
+- high: 74-DA-EA-FF-FF-FF
+  low: 74-DA-EA-00-00-00
+  name: Texas Instruments
+- high: 74-E1-82-FF-FF-FF
+  low: 74-E1-82-00-00-00
+  name: Texas Instruments
+- high: 74-F8-DB-DF-FF-FF
+  low: 74-F8-DB-D0-00-00
+  name: Simon Electric (China) Co, Ltd
+- high: 78-04-73-FF-FF-FF
+  low: 78-04-73-00-00-00
+  name: Texas Instruments
+- high: 78-61-7C-FF-FF-FF
+  low: 78-61-7C-00-00-00
+  name: Mitsumi Electric Co, Ltd
+- high: 78-A5-04-FF-FF-FF
+  low: 78-A5-04-00-00-00
+  name: Texas Instruments
+- high: 78-AB-60-FF-FF-FF
+  low: 78-AB-60-00-00-00
+  name: ABB Australia
+- high: 78-C5-E5-FF-FF-FF
+  low: 78-C5-E5-00-00-00
+  name: Texas Instruments
+- high: 78-DB-2F-FF-FF-FF
+  low: 78-DB-2F-00-00-00
+  name: Texas Instruments
+- high: 78-DE-E4-FF-FF-FF
+  low: 78-DE-E4-00-00-00
+  name: Texas Instruments
+- high: 7C-01-0A-FF-FF-FF
+  low: 7C-01-0A-00-00-00
+  name: Texas Instruments
+- high: 7C-16-0D-FF-FF-FF
+  low: 7C-16-0D-00-00-00
+  name: Saia Burgess Controls AG
+- high: 7C-38-66-FF-FF-FF
+  low: 7C-38-66-00-00-00
+  name: Texas Instruments
+- high: 7C-47-7C-8F-FF-FF
+  low: 7C-47-7C-80-00-00
+  name: Shenzhen Eunicum Electric Co, Ltd
+- high: 7C-66-9D-FF-FF-FF
+  low: 7C-66-9D-00-00-00
+  name: Texas Instruments
+- high: 7C-6F-06-FF-FF-FF
+  low: 7C-6F-06-00-00-00
+  name: Caterpillar Trimble Control Tech
+- high: 7C-70-BC-1F-FF-FF
+  low: 7C-70-BC-10-00-00
+  name: XD-GE Automation Co, Ltd
+- high: 7C-8E-E4-FF-FF-FF
+  low: 7C-8E-E4-00-00-00
+  name: Texas Instruments
+- high: 7C-94-B2-FF-FF-FF
+  low: 7C-94-B2-00-00-00
+  name: Philips Healthcare Pcci
+- high: 7C-EC-79-FF-FF-FF
+  low: 7C-EC-79-00-00-00
+  name: Texas Instruments
+- high: 80-30-DC-FF-FF-FF
+  low: 80-30-DC-00-00-00
+  name: Texas Instruments
+- high: 80-3B-2A-FF-FF-FF
+  low: 80-3B-2A-00-00-00
+  name: ABB Xiamen Low Voltage Equipment Co, Ltd
+- high: 80-6F-B0-FF-FF-FF
+  low: 80-6F-B0-00-00-00
+  name: Texas Instruments
+- high: 80-C5-01-FF-FF-FF
+  low: 80-C5-01-00-00-00
+  name: OctoGate it Security Systems GmbH
+- high: 80-F5-B5-FF-FF-FF
+  low: 80-F5-B5-00-00-00
+  name: Texas Instruments
+- high: 84-01-A7-FF-FF-FF
+  low: 84-01-A7-00-00-00
+  name: Greyware Automation Products, Inc
+- high: 84-2C-80-FF-FF-FF
+  low: 84-2C-80-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 84-39-BE-CF-FF-FF
+  low: 84-39-BE-C0-00-00
+  name: Edc Electronic Design Chemnitz GmbH
+- high: 84-7E-40-FF-FF-FF
+  low: 84-7E-40-00-00-00
+  name: Texas Instruments
+- high: 84-AC-FB-FF-FF-FF
+  low: 84-AC-FB-00-00-00
+  name: Crouzet Automatismes
+- high: 84-DB-9E-FF-FF-FF
+  low: 84-DB-9E-00-00-00
+  name: Pink Nectarine Health AB
+- high: 84-DD-20-FF-FF-FF
+  low: 84-DD-20-00-00-00
+  name: Texas Instruments
+- high: 84-DF-19-FF-FF-FF
+  low: 84-DF-19-00-00-00
+  name: Chuango Security Tech Corp
+- high: 84-EB-18-FF-FF-FF
+  low: 84-EB-18-00-00-00
+  name: Texas Instruments
+- high: 88-33-14-FF-FF-FF
+  low: 88-33-14-00-00-00
+  name: Texas Instruments
+- high: 88-35-C1-FF-FF-FF
+  low: 88-35-C1-00-00-00
+  name: OI Electric Co, Ltd
+- high: 88-3F-4A-FF-FF-FF
+  low: 88-3F-4A-00-00-00
+  name: Texas Instruments
+- high: 88-4A-EA-FF-FF-FF
+  low: 88-4A-EA-00-00-00
+  name: Texas Instruments
+- high: 88-C2-55-FF-FF-FF
+  low: 88-C2-55-00-00-00
+  name: Texas Instruments
+- high: 8C-14-7D-EF-FF-FF
+  low: 8C-14-7D-E0-00-00
+  name: Electrical & Automation Larsen & Toubro Ltd
+- high: 8C-1F-64-24-2F-FF
+  low: 8C-1F-64-24-20-00
+  name: Giordano Controls Spa
+- high: 8C-1F-64-7A-1F-FF
+  low: 8C-1F-64-7A-10-00
+  name: Guardian Controls International Ltd
+- high: 8C-1F-64-85-6F-FF
+  low: 8C-1F-64-85-60-00
+  name: Garten Automation
+- high: 8C-1F-64-92-DF-FF
+  low: 8C-1F-64-92-D0-00
+  name: Ivor Intelligent Electrical Appliance Co, Ltd
+- high: 8C-1F-64-A2-9F-FF
+  low: 8C-1F-64-A2-90-00
+  name: Ringtail Security
+- high: 8C-1F-64-AE-FF-FF
+  low: 8C-1F-64-AE-F0-00
+  name: Scenario Automation
+- high: 8C-1F-64-CF-3F-FF
+  low: 8C-1F-64-CF-30-00
+  name: ABB S.p.A.
+- high: 8C-1F-64-DB-DF-FF
+  low: 8C-1F-64-DB-D0-00
+  name: Giordano Controls Spa
+- high: 8C-1F-64-EA-CF-FF
+  low: 8C-1F-64-EA-C0-00
+  name: Miracle Healthcare, Inc
+- high: 8C-1F-64-F4-1F-FF
+  low: 8C-1F-64-F4-10-00
+  name: Automatizacion Y Conectividad SA DE CV
+- high: 8C-1F-64-F9-4F-FF
+  low: 8C-1F-64-F9-40-00
+  name: EA Elektroautomatik GmbH & Co KG
+- high: 8C-1F-64-FB-1F-FF
+  low: 8C-1F-64-FB-10-00
+  name: ABB
+- high: 8C-8B-83-FF-FF-FF
+  low: 8C-8B-83-00-00-00
+  name: Texas Instruments
+- high: 8C-91-09-FF-FF-FF
+  low: 8C-91-09-00-00-00
+  name: Toyoshima Electric Technoeogy(Suzhou) Co, Ltd
+- high: 8C-C1-21-FF-FF-FF
+  low: 8C-C1-21-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: 8C-F3-19-FF-FF-FF
+  low: 8C-F3-19-00-00-00
+  name: Siemens Industrial Automation Products Ltd Chengdu
+- high: 8C-F9-45-FF-FF-FF
+  low: 8C-F9-45-00-00-00
+  name: Power Automation pte Ltd
+- high: 90-31-CD-FF-FF-FF
+  low: 90-31-CD-00-00-00
+  name: Onyx Healthcare Inc
+- high: 90-4E-91-7F-FF-FF
+  low: 90-4E-91-70-00-00
+  name: IBM
+- high: 90-59-AF-FF-FF-FF
+  low: 90-59-AF-00-00-00
+  name: Texas Instruments
+- high: 90-70-65-FF-FF-FF
+  low: 90-70-65-00-00-00
+  name: Texas Instruments
+- high: 90-83-7A-FF-FF-FF
+  low: 90-83-7A-00-00-00
+  name: General Electric Water & Process Tech
+- high: 90-9A-77-FF-FF-FF
+  low: 90-9A-77-00-00-00
+  name: Texas Instruments
+- high: 90-D7-EB-FF-FF-FF
+  low: 90-D7-EB-00-00-00
+  name: Texas Instruments
+- high: 90-E2-02-FF-FF-FF
+  low: 90-E2-02-00-00-00
+  name: Texas Instruments
+- high: 94-24-B8-FF-FF-FF
+  low: 94-24-B8-00-00-00
+  name: Gree Electric Appliances, Inc OF Zhuhai
+- high: 94-88-54-FF-FF-FF
+  low: 94-88-54-00-00-00
+  name: Texas Instruments
+- high: 94-A9-A8-FF-FF-FF
+  low: 94-A9-A8-00-00-00
+  name: Texas Instruments
+- high: 94-CC-04-9F-FF-FF
+  low: 94-CC-04-90-00-00
+  name: Entec Electric & Electronic Co, Ltd
+- high: 94-E3-6D-FF-FF-FF
+  low: 94-E3-6D-00-00-00
+  name: Texas Instruments
+- high: 98-02-D8-7F-FF-FF
+  low: 98-02-D8-70-00-00
+  name: Ormazabal Protection&Automation
+- high: 98-02-D8-AF-FF-FF
+  low: 98-02-D8-A0-00-00
+  name: HySecurity
+- high: 98-06-37-5F-FF-FF
+  low: 98-06-37-50-00-00
+  name: GS Global Security Inc
+- high: 98-06-3A-FF-FF-FF
+  low: 98-06-3A-00-00-00
+  name: Home Control Singapore Pte Ltd
+- high: 98-07-2D-FF-FF-FF
+  low: 98-07-2D-00-00-00
+  name: Texas Instruments
+- high: 98-2F-3C-FF-FF-FF
+  low: 98-2F-3C-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: 98-59-45-FF-FF-FF
+  low: 98-59-45-00-00-00
+  name: Texas Instruments
+- high: 98-5D-AD-FF-FF-FF
+  low: 98-5D-AD-00-00-00
+  name: Texas Instruments
+- high: 98-6C-5C-FF-FF-FF
+  low: 98-6C-5C-00-00-00
+  name: Jiangxi Gosun Guard Security Co, Ltd
+- high: 98-7B-F3-FF-FF-FF
+  low: 98-7B-F3-00-00-00
+  name: Texas Instruments
+- high: 98-84-E3-FF-FF-FF
+  low: 98-84-E3-00-00-00
+  name: Texas Instruments
+- high: 98-AA-FC-3F-FF-FF
+  low: 98-AA-FC-30-00-00
+  name: Nexus Electrical(Jiaxing) Ltd
+- high: 98-AA-FC-8F-FF-FF
+  low: 98-AA-FC-80-00-00
+  name: Beijing Tiandi-Marco Electro-Hydraulic Control System Co Ltd
+- high: 98-BE-94-FF-FF-FF
+  low: 98-BE-94-00-00-00
+  name: IBM
+- high: 98-F0-7B-FF-FF-FF
+  low: 98-F0-7B-00-00-00
+  name: Texas Instruments
+- high: 98-F9-C7-0F-FF-FF
+  low: 98-F9-C7-00-00-00
+  name: Shenzhen Huntkey Electric Co, Ltd
+- high: 9C-1D-58-FF-FF-FF
+  low: 9C-1D-58-00-00-00
+  name: Texas Instruments
+- high: 9C-43-1E-AF-FF-FF
+  low: 9C-43-1E-A0-00-00
+  name: ST Access Control System Corp
+- high: 9C-69-B4-BF-FF-FF
+  low: 9C-69-B4-B0-00-00
+  name: Toughdog Security Systems
+- high: A0-02-4A-5F-FF-FF
+  low: A0-02-4A-50-00-00
+  name: Donguan Amsamotion Automation Tech Co, Ltd
+- high: A0-02-4A-BF-FF-FF
+  low: A0-02-4A-B0-00-00
+  name: Xi'an Yingsheng Electric Tech Co, Ltd
+- high: A0-28-33-AF-FF-FF
+  low: A0-28-33-A0-00-00
+  name: Medical Evolution Kft
+- high: A0-38-F8-FF-FF-FF
+  low: A0-38-F8-00-00-00
+  name: Oura Health Oy
+- high: A0-6C-65-FF-FF-FF
+  low: A0-6C-65-00-00-00
+  name: Texas Instruments
+- high: A0-B0-86-FF-FF-FF
+  low: A0-B0-86-00-00-00
+  name: Hirschmann Automation and Control GmbH
+- high: A0-E6-F8-FF-FF-FF
+  low: A0-E6-F8-00-00-00
+  name: Texas Instruments
+- high: A0-F2-17-FF-FF-FF
+  low: A0-F2-17-00-00-00
+  name: GE Medical System(China) Co, Ltd
+- high: A0-F6-FD-FF-FF-FF
+  low: A0-F6-FD-00-00-00
+  name: Texas Instruments
+- high: A4-06-E9-FF-FF-FF
+  low: A4-06-E9-00-00-00
+  name: Texas Instruments
+- high: A4-11-63-1F-FF-FF
+  low: A4-11-63-10-00-00
+  name: INTER CONTROL Hermann Köhler Elektrik GmbH & Co. KG
+- high: A4-34-F1-FF-FF-FF
+  low: A4-34-F1-00-00-00
+  name: Texas Instruments
+- high: A4-58-0F-8F-FF-FF
+  low: A4-58-0F-80-00-00
+  name: Air Liquide Medical Systems
+- high: A4-97-BB-FF-FF-FF
+  low: A4-97-BB-00-00-00
+  name: Hitachi Industrial Equipment Systems Co, Ltd
+- high: A4-D5-78-FF-FF-FF
+  low: A4-D5-78-00-00-00
+  name: Texas Instruments
+- high: A4-DA-32-FF-FF-FF
+  low: A4-DA-32-00-00-00
+  name: Texas Instruments
+- high: A4-DE-26-FF-FF-FF
+  low: A4-DE-26-00-00-00
+  name: Sumitomo Electric Industries, Ltd
+- high: A8-10-87-FF-FF-FF
+  low: A8-10-87-00-00-00
+  name: Texas Instruments
+- high: A8-13-74-FF-FF-FF
+  low: A8-13-74-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: A8-1B-6A-FF-FF-FF
+  low: A8-1B-6A-00-00-00
+  name: Texas Instruments
+- high: A8-63-F2-FF-FF-FF
+  low: A8-63-F2-00-00-00
+  name: Texas Instruments
+- high: A8-63-F2-FF-FF-FF
+  low: A8-63-F2-00-00-00
+  name: Texas Instruments
+- high: A8-82-00-FF-FF-FF
+  low: A8-82-00-00-00-00
+  name: Hisense Electric Co, Ltd
+- high: A8-97-DC-FF-FF-FF
+  low: A8-97-DC-00-00-00
+  name: IBM
+- high: A8-E2-C1-FF-FF-FF
+  low: A8-E2-C1-00-00-00
+  name: Texas Instruments
+- high: A8-E7-7D-FF-FF-FF
+  low: A8-E7-7D-00-00-00
+  name: Texas Instruments
+- high: AC-1F-0F-FF-FF-FF
+  low: AC-1F-0F-00-00-00
+  name: Texas Instruments
+- high: AC-4D-16-FF-FF-FF
+  low: AC-4D-16-00-00-00
+  name: Texas Instruments
+- high: B0-10-A0-FF-FF-FF
+  low: B0-10-A0-00-00-00
+  name: Texas Instruments
+- high: B0-45-45-FF-FF-FF
+  low: B0-45-45-00-00-00
+  name: Yacoub Automation GmbH
+- high: B0-7E-11-FF-FF-FF
+  low: B0-7E-11-00-00-00
+  name: Texas Instruments
+- high: B0-91-22-FF-FF-FF
+  low: B0-91-22-00-00-00
+  name: Texas Instruments
+- high: B0-B1-13-FF-FF-FF
+  low: B0-B1-13-00-00-00
+  name: Texas Instruments
+- high: B0-B4-48-FF-FF-FF
+  low: B0-B4-48-00-00-00
+  name: Texas Instruments
+- high: B0-C5-CA-6F-FF-FF
+  low: B0-C5-CA-60-00-00
+  name: SunTech Medical, Inc
+- high: B0-D5-CC-FF-FF-FF
+  low: B0-D5-CC-00-00-00
+  name: Texas Instruments
+- high: B0-D8-88-FF-FF-FF
+  low: B0-D8-88-00-00-00
+  name: Panasonic Corp Automotive
+- high: B4-10-7B-FF-FF-FF
+  low: B4-10-7B-00-00-00
+  name: Texas Instruments
+- high: B4-4C-C2-FF-FF-FF
+  low: B4-4C-C2-00-00-00
+  name: NR Electric Co, Ltd
+- high: B4-52-A9-FF-FF-FF
+  low: B4-52-A9-00-00-00
+  name: Texas Instruments
+- high: B4-60-77-FF-FF-FF
+  low: B4-60-77-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: B4-6D-35-FF-FF-FF
+  low: B4-6D-35-00-00-00
+  name: Dalian Seasky Automation Co;Ltd
+- high: B4-99-4C-FF-FF-FF
+  low: B4-99-4C-00-00-00
+  name: Texas Instruments
+- high: B4-9E-80-FF-FF-FF
+  low: B4-9E-80-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: B4-BC-7C-FF-FF-FF
+  low: B4-BC-7C-00-00-00
+  name: Texas Instruments
+- high: B4-CF-DB-FF-FF-FF
+  low: B4-CF-DB-00-00-00
+  name: Shenzhen Jiuzhou Electric Co, Ltd
+- high: B4-E9-A3-FF-FF-FF
+  low: B4-E9-A3-00-00-00
+  name: port industrial automation GmbH
+- high: B4-EC-F2-FF-FF-FF
+  low: B4-EC-F2-00-00-00
+  name: Shanghai Listent Medical Tech Co, Ltd
+- high: B4-EE-D4-FF-FF-FF
+  low: B4-EE-D4-00-00-00
+  name: Texas Instruments
+- high: B8-20-8E-FF-FF-FF
+  low: B8-20-8E-00-00-00
+  name: Panasonic Corp Connected Solutions Co
+- high: B8-80-4F-FF-FF-FF
+  low: B8-80-4F-00-00-00
+  name: Texas Instruments
+- high: B8-B7-7D-FF-FF-FF
+  low: B8-B7-7D-00-00-00
+  name: Guangdong Transtek Medical Electronics Co, Ltd
+- high: B8-FF-FE-FF-FF-FF
+  low: B8-FF-FE-00-00-00
+  name: Texas Instruments
+- high: BC-0D-A5-FF-FF-FF
+  low: BC-0D-A5-00-00-00
+  name: Texas Instruments
+- high: BC-6A-29-FF-FF-FF
+  low: BC-6A-29-00-00-00
+  name: Texas Instruments
+- high: BC-82-5D-FF-FF-FF
+  low: BC-82-5D-00-00-00
+  name: Mitsumi Electric Co, Ltd
+- high: C0-13-2B-FF-FF-FF
+  low: C0-13-2B-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: C0-39-37-FF-FF-FF
+  low: C0-39-37-00-00-00
+  name: Gree Electric Appliances, Inc OF Zhuhai
+- high: C0-9B-F4-2F-FF-FF
+  low: C0-9B-F4-20-00-00
+  name: Hitachi High-Tech Materials Corp
+- high: C0-C3-B6-FF-FF-FF
+  low: C0-C3-B6-00-00-00
+  name: Automatic Systems
+- high: C0-D3-91-2F-FF-FF
+  low: C0-D3-91-20-00-00
+  name: Hofon Automation Co, Ltd
+- high: C0-E4-22-FF-FF-FF
+  low: C0-E4-22-00-00-00
+  name: Texas Instruments
+- high: C4-49-BB-FF-FF-FF
+  low: C4-49-BB-00-00-00
+  name: Mitsumi Electric Co, Ltd
+- high: C4-64-E3-FF-FF-FF
+  low: C4-64-E3-00-00-00
+  name: Texas Instruments
+- high: C4-8A-5A-FF-FF-FF
+  low: C4-8A-5A-00-00-00
+  name: Jfcontrol
+- high: C4-95-4D-EF-FF-FF
+  low: C4-95-4D-E0-00-00
+  name: Canare Electric Co, Ltd
+- high: C4-BE-84-FF-FF-FF
+  low: C4-BE-84-00-00-00
+  name: Texas Instruments
+- high: C4-ED-BA-FF-FF-FF
+  low: C4-ED-BA-00-00-00
+  name: Texas Instruments
+- high: C4-F3-12-FF-FF-FF
+  low: C4-F3-12-00-00-00
+  name: Texas Instruments
+- high: C8-3E-99-FF-FF-FF
+  low: C8-3E-99-00-00-00
+  name: Texas Instruments
+- high: C8-8E-D1-BF-FF-FF
+  low: C8-8E-D1-B0-00-00
+  name: Advanced Micro Controls Inc
+- high: C8-A0-30-FF-FF-FF
+  low: C8-A0-30-00-00-00
+  name: Texas Instruments
+- high: C8-DF-84-FF-FF-FF
+  low: C8-DF-84-00-00-00
+  name: Texas Instruments
+- high: C8-F5-D6-1F-FF-FF
+  low: C8-F5-D6-10-00-00
+  name: Valeo Interior Controls (Shenzhen) Co, Ltd
+- high: C8-FD-19-FF-FF-FF
+  low: C8-FD-19-00-00-00
+  name: Texas Instruments
+- high: CC-1B-E0-CF-FF-FF
+  low: CC-1B-E0-C0-00-00
+  name: Guangzhou Southelectric Power Science Tech Development Co, Ltd
+- high: CC-33-31-FF-FF-FF
+  low: CC-33-31-00-00-00
+  name: Texas Instruments
+- high: CC-3B-3E-FF-FF-FF
+  low: CC-3B-3E-00-00-00
+  name: Lester Electrical
+- high: CC-4F-5C-4F-FF-FF
+  low: CC-4F-5C-40-00-00
+  name: Spark Biomedical
+- high: CC-78-AB-FF-FF-FF
+  low: CC-78-AB-00-00-00
+  name: Texas Instruments
+- high: CC-7E-E7-FF-FF-FF
+  low: CC-7E-E7-00-00-00
+  name: Panasonic Corp Avc Networks Co
+- high: CC-8C-E3-FF-FF-FF
+  low: CC-8C-E3-00-00-00
+  name: Texas Instruments
+- high: CC-A1-2B-FF-FF-FF
+  low: CC-A1-2B-00-00-00
+  name: Tcl King Electrical Appliances (Huizhou) Co, Ltd
+- high: CC-B3-AB-FF-FF-FF
+  low: CC-B3-AB-00-00-00
+  name: shenzhen Biocare Bio-Medical Equipment Co, Ltd
+- high: CC-EE-D9-FF-FF-FF
+  low: CC-EE-D9-00-00-00
+  name: Vahle Automation GmbH
+- high: D0-03-EB-FF-FF-FF
+  low: D0-03-EB-00-00-00
+  name: Texas Instruments
+- high: D0-07-90-FF-FF-FF
+  low: D0-07-90-00-00-00
+  name: Texas Instruments
+- high: D0-0A-AB-FF-FF-FF
+  low: D0-0A-AB-00-00-00
+  name: Yokogawa Digital Computer Corp
+- high: D0-14-11-AF-FF-FF
+  low: D0-14-11-A0-00-00
+  name: ABB Evi Spa
+- high: D0-2E-AB-FF-FF-FF
+  low: D0-2E-AB-00-00-00
+  name: Texas Instruments
+- high: D0-37-61-FF-FF-FF
+  low: D0-37-61-00-00-00
+  name: Texas Instruments
+- high: D0-39-72-FF-FF-FF
+  low: D0-39-72-00-00-00
+  name: Texas Instruments
+- high: D0-3D-52-FF-FF-FF
+  low: D0-3D-52-00-00-00
+  name: Ava Security Ltd
+- high: D0-54-75-FF-FF-FF
+  low: D0-54-75-00-00-00
+  name: Savi Controls
+- high: D0-5F-B8-FF-FF-FF
+  low: D0-5F-B8-00-00-00
+  name: Texas Instruments
+- high: D0-69-9E-FF-FF-FF
+  low: D0-69-9E-00-00-00
+  name: Luminex Lighting Control Equipment
+- high: D0-8C-B5-FF-FF-FF
+  low: D0-8C-B5-00-00-00
+  name: Texas Instruments
+- high: D0-A3-11-FF-FF-FF
+  low: D0-A3-11-00-00-00
+  name: Neuberger Gebäudeautomation GmbH
+- high: D0-B5-C2-FF-FF-FF
+  low: D0-B5-C2-00-00-00
+  name: Texas Instruments
+- high: D0-FF-50-FF-FF-FF
+  low: D0-FF-50-00-00-00
+  name: Texas Instruments
+- high: D4-2D-C5-FF-FF-FF
+  low: D4-2D-C5-00-00-00
+  name: Panasonic i-Pro Sensing Solutions Co, Ltd
+- high: D4-36-39-FF-FF-FF
+  low: D4-36-39-00-00-00
+  name: Texas Instruments
+- high: D4-7C-44-3F-FF-FF
+  low: D4-7C-44-30-00-00
+  name: Omron Sentech Co, Ltd
+- high: D4-94-A1-FF-FF-FF
+  low: D4-94-A1-00-00-00
+  name: Texas Instruments
+- high: D4-B8-FF-FF-FF-FF
+  low: D4-B8-FF-00-00-00
+  name: Home Control Singapore Pte Ltd
+- high: D4-BF-2D-FF-FF-FF
+  low: D4-BF-2D-00-00-00
+  name: SE Controls Asia Pacific Ltd
+- high: D4-F5-13-FF-FF-FF
+  low: D4-F5-13-00-00-00
+  name: Texas Instruments
+- high: D8-06-D1-FF-FF-FF
+  low: D8-06-D1-00-00-00
+  name: Honeywell Fire System (Shanghai) Co,. Ltd
+- high: D8-14-DF-FF-FF-FF
+  low: D8-14-DF-00-00-00
+  name: Tcl King Electrical Appliances (Huizhou) Co, Ltd
+- high: D8-24-77-FF-FF-FF
+  low: D8-24-77-00-00-00
+  name: Universal Electric Corp
+- high: D8-47-10-FF-FF-FF
+  low: D8-47-10-00-00-00
+  name: Sichuan Changhong Electric Ltd
+- high: D8-4A-87-FF-FF-FF
+  low: D8-4A-87-00-00-00
+  name: OI Electric Co, Ltd
+- high: D8-54-3A-FF-FF-FF
+  low: D8-54-3A-00-00-00
+  name: Texas Instruments
+- high: D8-71-4D-FF-FF-FF
+  low: D8-71-4D-00-00-00
+  name: Texas Instruments
+- high: D8-93-41-FF-FF-FF
+  low: D8-93-41-00-00-00
+  name: General Electric Global Research
+- high: D8-95-2F-FF-FF-FF
+  low: D8-95-2F-00-00-00
+  name: Texas Instruments
+- high: D8-A9-8B-FF-FF-FF
+  low: D8-A9-8B-00-00-00
+  name: Texas Instruments
+- high: D8-B1-2A-FF-FF-FF
+  low: D8-B1-2A-00-00-00
+  name: Panasonic Mobile Communications Co, Ltd
+- high: D8-D5-B9-FF-FF-FF
+  low: D8-D5-B9-00-00-00
+  name: Rainforest Automation, Inc
+- high: D8-DD-FD-FF-FF-FF
+  low: D8-DD-FD-00-00-00
+  name: Texas Instruments
+- high: DC-05-75-FF-FF-FF
+  low: DC-05-75-00-00-00
+  name: Siemens Energy Automation
+- high: DC-17-5A-FF-FF-FF
+  low: DC-17-5A-00-00-00
+  name: Hitachi High-Tech Corp
+- high: DC-37-52-FF-FF-FF
+  low: DC-37-52-00-00-00
+  name: GE
+- high: DC-B3-B4-FF-FF-FF
+  low: DC-B3-B4-00-00-00
+  name: Honeywell Environmental & Combustion Controls (Tianjin) Co, Ltd
+- high: DC-E5-33-5F-FF-FF
+  low: DC-E5-33-50-00-00
+  name: Controls Inc
+- high: E0-02-A5-FF-FF-FF
+  low: E0-02-A5-00-00-00
+  name: ABB Robotics
+- high: E0-34-E4-FF-FF-FF
+  low: E0-34-E4-00-00-00
+  name: Feit Electric Co, Inc
+- high: E0-58-9E-FF-FF-FF
+  low: E0-58-9E-00-00-00
+  name: Laerdal Medical
+- high: E0-62-34-FF-FF-FF
+  low: E0-62-34-00-00-00
+  name: Texas Instruments
+- high: E0-7D-EA-FF-FF-FF
+  low: E0-7D-EA-00-00-00
+  name: Texas Instruments
+- high: E0-84-F3-FF-FF-FF
+  low: E0-84-F3-00-00-00
+  name: High Grade Controls Corp
+- high: E0-C7-9D-FF-FF-FF
+  low: E0-C7-9D-00-00-00
+  name: Texas Instruments
+- high: E0-D7-BA-FF-FF-FF
+  low: E0-D7-BA-00-00-00
+  name: Texas Instruments
+- high: E0-DC-A0-FF-FF-FF
+  low: E0-DC-A0-00-00-00
+  name: Siemens Industrial Automation Products Ltd Chengdu
+- high: E0-E5-CF-FF-FF-FF
+  low: E0-E5-CF-00-00-00
+  name: Texas Instruments
+- high: E4-15-F6-FF-FF-FF
+  low: E4-15-F6-00-00-00
+  name: Texas Instruments
+- high: E4-1F-13-FF-FF-FF
+  low: E4-1F-13-00-00-00
+  name: IBM Corp
+- high: E4-38-F2-FF-FF-FF
+  low: E4-38-F2-00-00-00
+  name: Advantage Controls
+- high: E4-69-5A-FF-FF-FF
+  low: E4-69-5A-00-00-00
+  name: Dictum Health, Inc
+- high: E4-90-69-FF-FF-FF
+  low: E4-90-69-00-00-00
+  name: Rockwell Automation
+- high: E4-CE-70-FF-FF-FF
+  low: E4-CE-70-00-00-00
+  name: Health & Life Co, Ltd
+- high: E4-E1-12-FF-FF-FF
+  low: E4-E1-12-00-00-00
+  name: Texas Instruments
+- high: E8-6C-C7-9F-FF-FF
+  low: E8-6C-C7-90-00-00
+  name: Hangzhou Lanxum Security Tech Co, Ltd
+- high: E8-B4-70-4F-FF-FF
+  low: E8-B4-70-40-00-00
+  name: Yawata Electric Industrial Co, Ltd
+- high: E8-EB-11-FF-FF-FF
+  low: E8-EB-11-00-00-00
+  name: Texas Instruments
+- high: EC-11-27-FF-FF-FF
+  low: EC-11-27-00-00-00
+  name: Texas Instruments
+- high: EC-24-B8-FF-FF-FF
+  low: EC-24-B8-00-00-00
+  name: Texas Instruments
+- high: EC-74-BA-FF-FF-FF
+  low: EC-74-BA-00-00-00
+  name: Hirschmann Automation and Control GmbH
+- high: F0-0D-F5-FF-FF-FF
+  low: F0-0D-F5-00-00-00
+  name: Acoma Medical Industry Co,. Ltd
+- high: F0-45-DA-FF-FF-FF
+  low: F0-45-DA-00-00-00
+  name: Texas Instruments
+- high: F0-5E-CD-FF-FF-FF
+  low: F0-5E-CD-00-00-00
+  name: Texas Instruments
+- high: F0-81-AF-FF-FF-FF
+  low: F0-81-AF-00-00-00
+  name: Irz Automation Tech Ltd
+- high: F0-AB-54-FF-FF-FF
+  low: F0-AB-54-00-00-00
+  name: Mitsumi Electric Co, Ltd
+- high: F0-B5-D1-FF-FF-FF
+  low: F0-B5-D1-00-00-00
+  name: Texas Instruments
+- high: F0-C7-7F-FF-FF-FF
+  low: F0-C7-7F-00-00-00
+  name: Texas Instruments
+- high: F0-F8-F2-FF-FF-FF
+  low: F0-F8-F2-00-00-00
+  name: Texas Instruments
+- high: F4-0E-11-9F-FF-FF
+  low: F4-0E-11-90-00-00
+  name: Sterna Security
+- high: F4-54-33-FF-FF-FF
+  low: F4-54-33-00-00-00
+  name: Rockwell Automation
+- high: F4-5E-AB-FF-FF-FF
+  low: F4-5E-AB-00-00-00
+  name: Texas Instruments
+- high: F4-60-77-FF-FF-FF
+  low: F4-60-77-00-00-00
+  name: Texas Instruments
+- high: F4-69-D5-1F-FF-FF
+  low: F4-69-D5-10-00-00
+  name: Junchuang (Xiamen) Automation Tech Co, Ltd
+- high: F4-70-0C-AF-FF-FF
+  low: F4-70-0C-A0-00-00
+  name: Jinan Huake Electrical Device Co, Ltd
+- high: F4-84-4C-FF-FF-FF
+  low: F4-84-4C-00-00-00
+  name: Texas Instruments
+- high: F4-90-CB-CF-FF-FF
+  low: F4-90-CB-C0-00-00
+  name: Cheetah Medical
+- high: F4-99-AC-FF-FF-FF
+  low: F4-99-AC-00-00-00
+  name: Weber Schraubautomaten GmbH
+- high: F4-B8-5E-FF-FF-FF
+  low: F4-B8-5E-00-00-00
+  name: Texas Instruments
+- high: F4-E1-1E-FF-FF-FF
+  low: F4-E1-1E-00-00-00
+  name: Texas Instruments
+- high: F4-FC-32-FF-FF-FF
+  low: F4-FC-32-00-00-00
+  name: Texas Instruments
+- high: F8-02-78-5F-FF-FF
+  low: F8-02-78-50-00-00
+  name: Electric Objects
+- high: F8-30-02-FF-FF-FF
+  low: F8-30-02-00-00-00
+  name: Texas Instruments
+- high: F8-33-31-FF-FF-FF
+  low: F8-33-31-00-00-00
+  name: Texas Instruments
+- high: F8-36-9B-FF-FF-FF
+  low: F8-36-9B-00-00-00
+  name: Texas Instruments
+- high: F8-48-97-FF-FF-FF
+  low: F8-48-97-00-00-00
+  name: Hitachi, Ltd
+- high: F8-69-71-FF-FF-FF
+  low: F8-69-71-00-00-00
+  name: Seibu Electric Co,
+- high: F8-8A-5E-FF-FF-FF
+  low: F8-8A-5E-00-00-00
+  name: Texas Instruments
+- high: F8-B5-68-CF-FF-FF
+  low: F8-B5-68-C0-00-00
+  name: 3si Security Systems, Inc
+- high: FC-0F-4B-FF-FF-FF
+  low: FC-0F-4B-00-00-00
+  name: Texas Instruments
+- high: FC-45-C3-FF-FF-FF
+  low: FC-45-C3-00-00-00
+  name: Texas Instruments
+- high: FC-52-CE-FF-FF-FF
+  low: FC-52-CE-00-00-00
+  name: Control iD
+- high: FC-60-18-FF-FF-FF
+  low: FC-60-18-00-00-00
+  name: Zhejiang Kangtai Electric Co, Ltd
+- high: FC-69-47-FF-FF-FF
+  low: FC-69-47-00-00-00
+  name: Texas Instruments
+- high: FC-7F-56-FF-FF-FF
+  low: FC-7F-56-00-00-00
+  name: CoSyst Control Systems GmbH
+- high: FC-A8-9B-FF-FF-FF
+  low: FC-A8-9B-00-00-00
+  name: Texas Instruments
+- high: FC-CA-C4-FF-FF-FF
+  low: FC-CA-C4-00-00-00
+  name: LifeHealth, Llc
+- high: FC-CF-62-FF-FF-FF
+  low: FC-CF-62-00-00-00
+  name: IBM Corp
+- high: FC-FE-77-FF-FF-FF
+  low: FC-FE-77-00-00-00
+  name: Hitachi Reftechno, Inc
+

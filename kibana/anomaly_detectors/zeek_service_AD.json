@@ -3,7 +3,7 @@
   "description": "Detect anomalies based application protocol, aggregated by action and by result",
   "time_field": "firstPacket",
   "indices": [
-    "sessions2-*"
+    "arkime_sessions3-*"
   ],
   "category_field": [
     "zeek.service"

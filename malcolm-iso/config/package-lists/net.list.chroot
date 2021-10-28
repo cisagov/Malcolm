@@ -1,3 +1,5 @@
+apache2-utils
+ca-certificates
 curl
 ethtool
 htpdate

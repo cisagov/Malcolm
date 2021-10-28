@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Restart Malcolm
+Exec=tilix -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/control.py --restart"
+Comment=Restart Malcolm
+Terminal=false
+Type=Application
+Icon=redo
+Categories=Network;
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-restart.desktop

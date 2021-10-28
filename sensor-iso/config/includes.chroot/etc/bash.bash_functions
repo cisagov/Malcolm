@@ -40,6 +40,19 @@ function taildiff () {
   diff -bwBy --suppress-common-lines <(head -n $RIGHT_LINES "$LEFT_FILE") <(head -n $RIGHT_LINES "$RIGHT_FILE")
 }
 
+function dirdiff () {
+  if [ -d "$1" ] && [ -d "$2" ]; then
+    dir1="$1"
+    dir2="$2"
+    IFS=$'\n'
+    for file in $(grep -Ilsr -m 1 '.' "$dir1"); do
+      diff -q "$file" "${file/${dir1}/${dir2}}"
+    done
+  else
+    echo "Must specify two directories">&2
+  fi
+}
+
 function fs() {
   if du -b /dev/null > /dev/null 2>&1; then
     local arg=-sbh;
@@ -82,6 +95,36 @@ function calc () { python -c "from math import *; n = $1; print n; print '$'+hex
 
 function add () {
   awk '{s+=$1} END {print s}'
+}
+
+########################################################################
+# date/time
+########################################################################
+function dateu()
+{
+  if [ "$1" ]; then
+    echo $(date -u -d @$1);
+  else
+    echo "No UNIX time specified">&2
+  fi
+}
+
+function udate()
+{
+  if [ "$1" ]; then
+    date -u +%s -d "$1"
+  else
+    date -u +%s
+  fi
+}
+
+function sec2dhms() {
+  if [ "$1" ]; then
+    SECS="$1"
+    printf '%02d:%02d:%02d\n' $(($SECS/3600)) $(($SECS%3600/60)) $(($SECS%60))
+  else
+    echo "00:00:00"
+  fi
 }
 
 ########################################################################
@@ -144,6 +187,31 @@ _upto () {
 }
 complete -F _upto upto
 
+function encrypt_file() {
+  if [[ -n "$1" ]] && [[ -f "$1" ]]; then
+    openssl enc -aes-256-cbc -md sha512 -pbkdf2 -iter 1024 -salt -in "$1" -out "$1.enc" && \
+      [[ -f "$1.enc" ]] && \
+      ls -l "$1.enc" && \
+      rm -vi "$1"
+  else
+    echo "No file specified, or invalid/nonexistant file" >&2
+  fi
+}
+
+function decrypt_file() {
+  if [[ -n "$1" ]] && [[ -f "$1" ]]; then
+    OUT_FILE="$(echo "$1" | sed "s/\.enc$//")"
+    if [ "$1" = "$OUT_FILE" ]; then
+      OUT_FILE="$1.dec"
+    fi
+    openssl enc -aes-256-cbc -md sha512 -pbkdf2 -iter 1024 -salt -d -in "$1" -out "$OUT_FILE" && \
+      [[ -f "$OUT_FILE" ]] && \
+      ls -l "$OUT_FILE" && \
+      rm -vi "$1"
+  else
+    echo "No file specified, or invalid/nonexistant file" >&2
+  fi
+}
 
 ########################################################################
 # history
@@ -162,7 +230,9 @@ function auxer() {
   ps aux | grep -i "$(echo "$1" | sed "s/^\(.\)\(.*$\)/\[\1\]\2/")"
 }
 
-function psgrep() { ps axuf | grep -v grep | grep "$@" -i --color=auto; }
+function psgrep() {
+  ps axuf | grep -v grep | grep "$@" -i --color=auto;
+}
 
 function killtree() {
   if [ "$1" ]
@@ -191,6 +261,20 @@ function htopid () {
   htop -p $(pstree -p $PROCPID | perl -ne 'push @t, /\((\d+)\)/g; END { print join ",", @t }')
 }
 
+function pidstart () {
+  for PROC_PID in "$@"; do
+    PROC_START_DATE_STR="$(ps -q $PROC_PID -o lstart=)"
+    PROC_START_DATE_UNIX="$(date +%s -d "$PROC_START_DATE_STR")"
+    NOW_DATE_UNIX="$(date +%s)"
+    PROC_START_SECONDS_AGO=$((NOW_DATE_UNIX-PROC_START_DATE_UNIX))
+    PROC_START_AGO="$(sec2dhms $PROC_START_SECONDS_AGO)"
+    echo "$PROC_START_DATE_STR ($PROC_START_AGO ago)"
+  done
+}
+
+########################################################################
+# network
+########################################################################
 function lport () {
   if [ "$1" ]
   then
@@ -198,6 +282,16 @@ function lport () {
   else
     echo "No process specified">&2
   fi
+}
+
+function arps()
+{
+  /usr/sbin/arp -a | grep -v '^?' | cols 4 1 | sed "s/ /|/" | sed "s/$/|/"
+}
+
+function portping()
+{
+  python <<<"import socket; socket.setdefaulttimeout(1); socket.socket().connect(('$1', $2))" 2> /dev/null && echo OPEN || echo CLOSED;
 }
 
 ########################################################################
@@ -210,40 +304,19 @@ function aptsize() {
 }
 
 ########################################################################
-# date/time
-########################################################################
-function dateu()
-{
-  if [ "$1" ]
-  then
-    echo $(date -u -d @$1);
-  else
-    echo "No UNIX time specified">&2
-  fi
-}
-
-function udate()
-{
-  if [ "$1" ]
-  then
-    date -u +%s -d "$1"
-  else
-    date -u +%s
-  fi
-}
-
-function sec2dhms() {
-  declare -i SS="$1" D=$(( SS / 86400 )) H=$(( SS % 86400 / 3600 )) M=$(( SS % 3600 / 60 )) S=$(( SS % 60 )) [ "$D" -gt 0 ] && echo -n "${D}:" [ "$H" -gt 0 ] && printf "%02g:" "$H" printf "%02g:%02g\n" "$M" "$S"
-}
-
-########################################################################
 # system
 ########################################################################
 function ddisousb() {
   if [ "$1" ] && [[ -r "$1" ]] ; then
     if [ "$2" ] && [[ -r "$2" ]] ; then
-      echo "dd if=\"$1\" of=\"$2\" bs=4M status=progress oflag=sync"
-      dd if="$1" of="$2" bs=4M status=progress oflag=sync
+      DEV_DESC="$2 $(lsblk "$2" | sed -n 2p | awk '{ print $4 }') $(udevadm info --query=all -n "$2" | grep -P "(ID_VENDOR|ID_MODEL|ID_FS_LABEL|ID_BUS)=" | cols 2 | sed "s/.*=//" | tr '\n' ' ')"
+      DEV_DESC="$(sed -e 's/[[:space:]]*$//' <<<${DEV_DESC})"
+      read -p "This will overwrite $DEV_DESC, are you sure? " -n 1 -r
+      echo
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "dd if=\"$1\" of=\"$2\" bs=4M status=progress oflag=sync"
+        dd if="$1" of="$2" bs=4M status=progress oflag=sync
+      fi
     else
       echo "No destination device specified">&2
     fi

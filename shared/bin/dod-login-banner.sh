@@ -4,6 +4,8 @@
 #  V-56585 / SV-70845r1_rule
 # https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585
 
+grep -q boot=live /proc/cmdline && exit 0
+
 BANNER_FILE="$(mktemp)"
 
 cat << 'EOF' > "$BANNER_FILE"
@@ -16,6 +18,6 @@ By using this IS (which includes any device attached to this IS), you consent to
 -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
 EOF
 
-zenity --text-info --title "U.S. DoD Notice and Consent" --filename="$BANNER_FILE" || pkill -SIGTERM -f lxsession
+zenity --text-info --title "U.S. DoD Notice and Consent" --filename="$BANNER_FILE" || pkill -SIGTERM -f xfce4-session
 
 rm -f "$BANNER_FILE"

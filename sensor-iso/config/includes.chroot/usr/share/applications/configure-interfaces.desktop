@@ -1,10 +1,10 @@
 [Desktop Entry]
 Version=1.0
 Name=Configure Interfaces and Hostname
-Exec=/usr/bin/terminator --maximise -T "Configure Interfaces and Hostname" -x su -l -c /usr/local/bin/configure-interfaces.py
+Exec=/usr/bin/tilix --maximize -t "Configure Interfaces and Hostname" -e su -l -c /usr/local/bin/configure-interfaces.py
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Icon=network-wired.png
+Icon=network-wired
 Categories=Network;
 StartupNotify=true

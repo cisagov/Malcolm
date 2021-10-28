@@ -14,7 +14,7 @@ ENCODING="utf-8"
 # -i ip   (Elasticsearch ip)
 # -p port (Elasticsearch port)
 #
-# -w      (wait not only for "up" status, but also wait for actual sessions2-* logs to exist)
+# -w      (wait not only for "up" status, but also wait for actual arkime_sessions3-* logs to exist)
 
 ES_URL=
 WAIT_FOR_LOG_DATA=0
@@ -84,14 +84,14 @@ if (( $WAIT_FOR_LOG_DATA == 1 )); then
 
   echo "Waiting until Elasticsearch has logs..." >&2
 
-  # wait until at least one sessions2-* index exists
-  until (( $(curl -fs -H'Content-Type: application/json' -XGET "$ES_URL/_cat/indices/sessions2-*" 2>/dev/null | wc -l) > 0 )) ; do
+  # wait until at least one arkime_sessions3-* index exists
+  until (( $(curl -fs -H'Content-Type: application/json' -XGET "$ES_URL/_cat/indices/arkime_sessions3-*" 2>/dev/null | wc -l) > 0 )) ; do
     sleep 5
   done
   echo "Log indices exist." >&2
 
   # wait until at least one record with @timestamp exists
-  until curl -fs -H'Content-Type: application/json' -XPOST "$ES_URL/sessions2-*/_search" -d'{ "sort": { "@timestamp" : "desc" }, "size" : 1 }' >/dev/null 2>&1 ; do
+  until curl -fs -H'Content-Type: application/json' -XPOST "$ES_URL/arkime_sessions3-*/_search" -d'{ "sort": { "@timestamp" : "desc" }, "size" : 1 }' >/dev/null 2>&1 ; do
     sleep 5
   done
   echo "Logs exist." >&2
