@@ -143,7 +143,7 @@ EOF
 
 # tweak some auditd settings
 sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
-sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audisp/audisp-remote.conf
+sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
 
 # disable ntp for now, and disable servers, but it could be turned back on later
 systemctl disable ntp || true

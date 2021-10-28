@@ -20,8 +20,8 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
-ARG ARKIME_INDEX_PATTERN="sessions2-*"
-ARG ARKIME_INDEX_PATTERN_ID="sessions2-*"
+ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
+ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG CREATE_ES_ARKIME_SESSION_INDEX="true"
 ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
@@ -73,7 +73,7 @@ RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && 
     chown -R ${PUSER}:${PGROUP} /opt/kibana/dashboards /opt/maps /data/init /opt/kibana/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/kibana-create-moloch-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/elastic_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/kibana-create-arkime-sessions-index.sh\n0 10 * * * /data/kibana_index_refresh.py --template zeek_template\n*/20 * * * * /data/elastic_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $KIBANA_OFFLINE_REGION_MAPS_PORT
 

@@ -7,7 +7,7 @@ mkdir -p /opt
 git clone --depth 1 --recursive --single-branch https://github.com/hardenedlinux/STIG-4-Debian /opt/STIG-4-Debian
 git clone --depth 1 --recursive --single-branch https://github.com/hardenedlinux/harbian-audit /opt/harbian-audit
 git clone --depth 1 --recursive --single-branch https://github.com/ovh/debian-cis /opt/debian-cis
-sed -i "s#CIS_ROOT_DIR=.*#CIS_ROOT_DIR='/opt/harbian-audit'#" /opt/harbian-audit/debian/default.cfg
+sed -i "s#CIS_ROOT_DIR=.*#CIS_ROOT_DIR='/opt/harbian-audit'#" /opt/harbian-audit/etc/default.cfg
 sed -i "s#CIS_ROOT_DIR=.*#CIS_ROOT_DIR='/opt/debian-cis'#" /opt/debian-cis/debian/default
 # cp /opt/harbian-audit/debian/default.cfg /etc/default/cis-hardening
 # cp /opt/debian-cis/debian/default /etc/default/cis-hardening

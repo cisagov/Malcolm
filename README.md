@@ -141,21 +141,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                3.3.1               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.3.1               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          3.3.1               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           3.3.1               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          3.3.1               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  3.3.1               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               3.3.1               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         3.3.1               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             3.3.1               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          3.3.1               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           3.3.1               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           3.3.1               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          3.3.1               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          3.3.1               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  3.3.1               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -195,7 +195,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 Malcolm leverages the following excellent open source tools, among others.
 
 * [Arkime](https://arkime.com/) (formerly Moloch) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
-    * [moloch-capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
+    * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
 * [Elasticsearch](https://www.elastic.co/products/elasticsearch) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - a search and analytics engine for indexing and querying network traffic session metadata 
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
@@ -217,12 +217,13 @@ Malcolm leverages the following excellent open source tools, among others.
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
-    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
-    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
+    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
+    * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
+    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
-    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
+    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
     * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
@@ -273,15 +274,16 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Remote Desktop Protocol (RDP)|[🔗](https://en.wikipedia.org/wiki/Remote_Desktop_Protocol)|[🔗](https://docs.microsoft.com/en-us/windows/win32/termserv/remote-desktop-protocol?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/rdp/main.zeek.html#type-RDP::Info)|
 |Remote Framebuffer (RFB)|[🔗](https://en.wikipedia.org/wiki/RFB_protocol)|[🔗](https://tools.ietf.org/html/rfc6143)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/rfb/main.zeek.html#type-RFB::Info)|
 |S7comm / Connection Oriented Transport Protocol (COTP)|[🔗](https://wiki.wireshark.org/S7comm) [🔗](https://wiki.wireshark.org/COTP)|[🔗](https://support.industry.siemens.com/cs/document/26483647/what-properties-advantages-and-special-features-does-the-s7-protocol-offer-?dti=0&lc=en-WW) [🔗](https://www.ietf.org/rfc/rfc0905.txt)||[✓](https://github.com/amzn/zeek-plugin-s7comm/blob/master/scripts/main.zeek)|
-|Session Initiation Protocol (SIP)|[🔗](https://en.wikipedia.org/wiki/Session_Initiation_Protocol)|[🔗](https://tools.ietf.org/html/rfc3261)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/sip/main.zeek.html#type-SIP::Info)|
-|Server Message Block (SMB) / Common Internet File System (CIFS)|[🔗](https://en.wikipedia.org/wiki/Server_Message_Block)|[🔗](https://docs.microsoft.com/en-us/windows/win32/fileio/microsoft-smb-protocol-and-cifs-protocol-overview)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smb.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smb/main.zeek.html)|
-|Simple Mail Transfer Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc5321)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info)|
-|Simple Network Management Protocol|[🔗](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)|[🔗](https://tools.ietf.org/html/rfc2578)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/snmp/main.zeek.html#type-SNMP::Info)|
-|SOCKS|[🔗](https://en.wikipedia.org/wiki/SOCKS)|[🔗](https://tools.ietf.org/html/rfc1928)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/socks/main.zeek.html#type-SOCKS::Info)|
 |Secure Shell (SSH)|[🔗](https://en.wikipedia.org/wiki/Secure_Shell)|[🔗](https://tools.ietf.org/html/rfc4253)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/ssh.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssh/main.zeek.html#type-SSH::Info)|
 |Secure Sockets Layer (SSL) / Transport Layer Security (TLS)|[🔗](https://en.wikipedia.org/wiki/Transport_Layer_Security)|[🔗](https://tools.ietf.org/html/rfc5246)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ssl/main.zeek.html#type-SSL::Info)|
+|Session Initiation Protocol (SIP)|[🔗](https://en.wikipedia.org/wiki/Session_Initiation_Protocol)|[🔗](https://tools.ietf.org/html/rfc3261)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/sip/main.zeek.html#type-SIP::Info)|
+|Server Message Block (SMB) / Common Internet File System (CIFS)|[🔗](https://en.wikipedia.org/wiki/Server_Message_Block)|[🔗](https://docs.microsoft.com/en-us/windows/win32/fileio/microsoft-smb-protocol-and-cifs-protocol-overview)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smb.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smb/main.zeek.html)|
+|Simple Mail Transfer Protocol (SMTP)|[🔗](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc5321)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info)|
+|Simple Network Management Protocol (SNMP)|[🔗](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)|[🔗](https://tools.ietf.org/html/rfc2578)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/snmp/main.zeek.html#type-SNMP::Info)|
+|SOCKS|[🔗](https://en.wikipedia.org/wiki/SOCKS)|[🔗](https://tools.ietf.org/html/rfc1928)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/socks/main.zeek.html#type-SOCKS::Info)|
+|STUN (Session Traversal Utilities for NAT)|[🔗](https://en.wikipedia.org/wiki/STUN)|[🔗](https://datatracker.ietf.org/doc/html/rfc3489)|[✓](https://github.com/arkime/arkime/blob/main/capture/parsers/misc.c#L147)|[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/stun)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
-|Tabular Data Stream|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
+|Tabular Data Stream (TDS)|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
 |Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/main/zeek/config/login.zeek)|
 |TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/tftp/tftp.zeek)|
 |WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard/main.zeek)|
@@ -302,6 +304,9 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
 
+* `arkime` - code and configuration for the `arkime` container which processes PCAP files using `capture` and which serves the Viewer application
+* `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
+* `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
 * `elasticsearch` - an initially empty directory where the Elasticsearch database instance will reside
@@ -314,9 +319,6 @@ Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/m
 * `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](#ISO) for a minimal Debian-based Linux installation for running Malcolm
-* `moloch` - code and configuration for the `arkime` container which processes PCAP files using `moloch-capture` and which serves the Viewer application
-* `moloch-logs` - an initially empty directory to which the `arkime` container will write some debug log files
-* `moloch-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
@@ -924,7 +926,7 @@ The Arkime interface will be accessible over HTTPS on port 443 at the docker hos
 
 A stock installation of Arkime extracts all of its network connection ("session") metadata ("SPI" or "Session Profile Information") from full packet capture artifacts (PCAP files). Zeek (formerly Bro) generates similar session metadata, linking network events to sessions via a connection UID. Malcolm aims to facilitate analysis of Zeek logs by mapping values from Zeek logs to the Arkime session database schema for equivalent fields, and by creating new "native" Arkime database fields for all the other Zeek log values for which there is not currently an equivalent in Arkime:
 
-![Zeek log session record](./docs/images/screenshots/moloch_session_zeek.png)
+![Zeek log session record](./docs/images/screenshots/arkime_session_zeek.png)
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
@@ -932,7 +934,7 @@ One value of particular mention is **Zeek Log Type** (`zeek.logType` in Elastics
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
-![Zeek fields](./docs/images/screenshots/moloch_help_fields.png)
+![Zeek fields](./docs/images/screenshots/arkime_help_fields.png)
 
 The values of records created from Zeek logs can be expanded and viewed like any native Arkime session by clicking the plus **➕** icon to the left of the record in the Sessions view. However, note that when dealing with these Zeek records the full packet contents are not available, so buttons dealing with viewing and exporting PCAP information will not behave as they would for records from PCAP files. Other than that, Zeek records and their values are usable in Malcolm just like native PCAP session records.
 
@@ -940,15 +942,15 @@ The values of records created from Zeek logs can be expanded and viewed like any
 
 The Arkime interface displays both Zeek logs and Arkime sessions alongside each other. Using fields common to both data sources, one can [craft queries](#SearchCheatSheet) to filter results matching desired criteria.
 
-A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`communityId` and `zeek.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Arkime's `rootId` field.
+A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `zeek.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Arkime's `rootId` field.
 
 Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Arkime sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Arkime and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
 The `rootId` field is used by Arkime to link session records together when a particular session has too many packets to be represented by a single session. When normalizing Zeek logs to Arkime's schema, Malcolm piggybacks on `rootId` to store Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) to crossreference entries across Zeek log types. The connection UID is also stored in `zeek.uid`.
 
-Filtering on community ID OR'ed with zeek UID (e.g., `communityId == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Arkime sessions and Zeek logs generated by a particular network connection.
+Filtering on community ID OR'ed with zeek UID (e.g., `network.community_id == "1:r7tGG//fXP1P0+BXH3zXETCtEFI=" || rootId == "CQcoro2z6adgtGlk42"`) is an effective way to see both the Arkime sessions and Zeek logs generated by a particular network connection.
 
-![Correlating Arkime sessions and Zeek logs](./docs/images/screenshots/moloch_correlate_communityid_uid.png)
+![Correlating Arkime sessions and Zeek logs](./docs/images/screenshots/arkime_correlate_communityid_uid.png)
 
 ### <a name="ArkimeHelp"></a>Help
 
@@ -958,7 +960,7 @@ Click the icon of the owl 🦉 in the upper-left hand corner of to access the Ar
 
 The **Sessions** view provides low-level details of the sessions being investigated, whether they be Arkime sessions created from PCAP files or [Zeek logs mapped](#ArkimeZeek) to the Arkime session database schema.
 
-![Arkime's Sessions view](./docs/images/screenshots/moloch_sessions.png)
+![Arkime's Sessions view](./docs/images/screenshots/arkime_sessions.png)
 
 The **Sessions** view contains many controls for filtering the sessions displayed from all sessions down to sessions of interest:
 
@@ -967,7 +969,7 @@ The **Sessions** view contains many controls for filtering the sessions displaye
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
 * views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including several on the `zeek.logType` field. 
 
-![Malcolm views](./docs/images/screenshots/moloch_log_filter.png)
+![Malcolm views](./docs/images/screenshots/arkime_log_filter.png)
 
 * map: A global map can be expanded by clicking the globe **🌎** icon. This allows filtering sessions by IP-based geolocation when possible.
 
@@ -989,7 +991,7 @@ See also Arkime's usage documentation for more information on the [Sessions view
 
 Clicking the down arrow **▼** icon to the far right of the search bar presents a list of actions including **PCAP Export** (see Arkime's [sessions help](https://localhost/help#sessions) for information on the other actions).  When full PCAP sessions are displayed, the **PCAP Export** feature allows you to create a new PCAP file from the matching Arkime sessions, including controls for which sessions are included (open items, visible items, or all matching items) and whether or not to include linked segments. Click **Export PCAP** button to generate the PCAP, after which you'll be presented with a browser download dialog to save or open the file. Note that depending on the scope of the filters specified this might take a long time (or, possibly even time out).
 
-![Export PCAP](./docs/images/screenshots/moloch_export_pcap.png)
+![Export PCAP](./docs/images/screenshots/arkime_export_pcap.png)
 
 See the [issues](#Issues) section of this document for an error that can occur using this feature when Zeek log sessions are displayed.View
 
@@ -997,11 +999,11 @@ See the [issues](#Issues) section of this document for an error that can occur u
 
 Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (e.g., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Arkime and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
 
-![Arkime's SPIView](./docs/images/screenshots/moloch_spiview.png)
+![Arkime's SPIView](./docs/images/screenshots/arkime_spiview.png)
 
 Click the the plus **➕** icon to the right of a category to expand it. The values for specific fields are displayed by clicking the field description in the field list underneath the category name. The list of field names can be filtered by typing part of the field name in the *Search for fields to display in this category* text input. The **Load All** and **Unload All** buttons can be used to toggle display of all of the fields belonging to that category. Once displayed, a field's name or one of its values may be clicked to provide further actions for filtering or displaying that field or its values. Of particular interest may be the **Open [fieldname] SPI Graph** option when clicking on a field's name. This will open a new tab with the SPI Graph ([see below](#ArkimeSPIGraph)) populated with the field's top values.
 
-Note that because the SPIView page can potentially run many queries, SPIView limits the search domain to seven days (in other words, seven indices, as each index represents one day's worth of data). When using SPIView, you will have best results if you limit your search time frame to less than or equal to seven days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini](./etc/moloch/config.ini) and rebuilding the `malcolmnetsec/arkime` docker container.
+Note that because the SPIView page can potentially run many queries, SPIView limits the search domain to seven days (in other words, seven indices, as each index represents one day's worth of data). When using SPIView, you will have best results if you limit your search time frame to less than or equal to seven days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini](./etc/arkime/config.ini) and rebuilding the `malcolmnetsec/arkime` docker container.
 
 See also Arkime's usage documentation for more information on [SPIView](https://localhost/help#spiview).
 
@@ -1009,7 +1011,7 @@ See also Arkime's usage documentation for more information on [SPIView](https://
 
 Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **Graph** visualizes the occurrence of some field's top *n* values over time, and (optionally) geographically. This is particularly useful for identifying trends in a particular type of communication over time: traffic using a particular protocol when seen sparsely at regular intervals on that protocol's date histogram in the SPIGraph may indicate a connection check, polling, or beaconing (for example, see the `llmnr` protocol in the screenshot below).
 
-![Arkime's SPIGraph](./docs/images/screenshots/moloch_spigraph.png)
+![Arkime's SPIGraph](./docs/images/screenshots/arkime_spigraph.png)
 
 Controls can be found underneath the time bounding controls for selecting the field of interest, the number of elements to be displayed, the sort order, and a periodic refresh of the data.
 
@@ -1019,7 +1021,7 @@ See also Arkime's usage documentation for more information on [SPIGraph](https:/
 
 The **Connections** page presents network communications via a force-directed graph, making it easy to visualize logical relationships between network hosts.
 
-![Arkime's Connections graph](./docs/images/screenshots/moloch_connections.png)
+![Arkime's Connections graph](./docs/images/screenshots/arkime_connections.png)
 
 Controls are available for specifying the query size (where smaller values will execute more quickly but may only contain an incomplete representation of the top *n* sessions, and larger values may take longer to execute but will be more complete), which fields to use as the source and destination for node values, a minimum connections threshold, and the method for determining the "weight" of the link between two nodes. As is the case with most other visualizations in Arkime, the graph is interactive: clicking on a node or the link between two nodes can be used to modify query filters, and the nodes themselves may be repositioned by dragging and dropping them. A node's color indicates whether it communicated as a source/originator, a destination/responder, or both.
 
@@ -1048,15 +1050,15 @@ Clicking the **Create a packet search job** on the Hunt page will allow you to s
 
 Click the **➕ Create** button to begin the search. Arkime will scan the source PCAP files from which the sessions were created according to the search criteria. Note that whatever filters were specified when the hunt job is executed will apply to the hunt job as well; the number of sessions matching the current filters will be displayed above the hunt job parameters with text like "ⓘ Creating a new packet search job will search the packets of # sessions."
 
-![Hunt creation](./docs/images/screenshots/moloch_hunt_creation.png)
+![Hunt creation](./docs/images/screenshots/arkime_hunt_creation.png)
 
 Once a hunt job is submitted, it will be assigned a unique hunt ID (a long unique string of characters like `yuBHAGsBdljYmwGkbEMm`) and its progress will be updated periodically in the **Hunt Job Queue** with the execution percent complete, the number of matches found so far, and the other parameters with which the job was submitted. More details for the hunt job can be viewed by expanding its row with the plus **➕** icon on the left.
 
-![Hunt completed](./docs/images/screenshots/moloch_hunt_finished.png)
+![Hunt completed](./docs/images/screenshots/arkime_hunt_finished.png)
 
 Once the hunt job is complete (and a minute or so has passed, as the `huntId` must be added to the matching session records in the database), click the folder **📂** icon on the right side of the hunt job row to open a new [Sessions](#ArkimeSessions) tab with the search bar prepopulated to filter to sessions with packets matching the search criteria.
 
-![Hunt result sessions](./docs/images/screenshots/moloch_hunt_sessions.png)
+![Hunt result sessions](./docs/images/screenshots/arkime_hunt_sessions.png)
 
 From this list of filtered sessions you can expand session details and explore packet payloads which matched the hunt search criteria.
 
@@ -1070,15 +1072,15 @@ Arkime provides several other reports which show information about the state of 
 
 The **Files** list displays a list of PCAP files processed by Arkime, the date and time of the earliest packet in each file, and the file size:
 
-![Arkime's Files list](./docs/images/screenshots/moloch_files.png)
+![Arkime's Files list](./docs/images/screenshots/arkime_files.png)
 
 The **ES Indices** list (available under the **Stats** page) lists the Elasticsearch indices within which log data is contained:
 
-![Arkime's ES indices list](./docs/images/screenshots/moloch_es_stats.png)
+![Arkime's ES indices list](./docs/images/screenshots/arkime_es_stats.png)
 
 The **History** view provides a historical list of queries issues to Arkime and the details of those queries:
 
-![Arkime's History view](./docs/images/screenshots/moloch_history.png)
+![Arkime's History view](./docs/images/screenshots/arkime_history.png)
 
 See also Arkime's usage documentation for more information on the [Files list](https://localhost/help#files), [statistics](https://localhost/help#files), and [history](https://localhost/help#history).
 
@@ -1090,9 +1092,9 @@ The **Settings** page can be used to tweak Arkime preferences, defined additiona
 
 See Arkime's usage documentation for more information on [settings](https://localhost/help#settings).
 
-![Arkime general settings](./docs/images/screenshots/moloch_general_settings.png)
+![Arkime general settings](./docs/images/screenshots/arkime_general_settings.png)
 
-![Arkime custom view management](./docs/images/screenshots/moloch_view_settings.png)
+![Arkime custom view management](./docs/images/screenshots/arkime_view_settings.png)
 
 ## <a name="Kibana"></a>Kibana
 
@@ -1195,8 +1197,8 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 |---|:---:|:---:|:---:|
 | Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|`zeek.logType:*`|
 | Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|`NOT zeek.logType:*`|
-| Field matches a value |`port.dst == 22`|`dstPort:22`|`dstPort:22`|
-| Field does not match a value |`port.dst != 22`|`NOT dstPort:22`|`NOT dstPort:22`|
+| Field matches a value |`port.dst == 22`|`destination.port:22`|`destination.port:22`|
+| Field does not match a value |`port.dst != 22`|`NOT destination.port:22`|`NOT destination.port:22`|
 | Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|`tags:(external_source or external_destination)`|
 | Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|`http.statuscode >= 200 and http.statuscode <= 300`|
 | Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
@@ -1206,42 +1208,42 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
 | Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
-| IPv4 values |`ip == 0.0.0.0/0`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|`srcIp:"0.0.0.0/0" OR dstIp:"0.0.0.0/0"`|
-| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:srcIp AND NOT srcIp:"0.0.0.0/0") OR (_exists_:dstIp AND NOT dstIp:"0.0.0.0/0")`|`(srcIp:* and not srcIp:"0.0.0.0/0") or (dstIp:* and not dstIp:"0.0.0.0/0")`|
+| IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
+| IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|`zeek.destination_geo:* or zeek.source_geo:*`|
 | Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|`zeek.logType:notice`|
-| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`srcIp:"172.16.0.0/12"`|`srcIp:"172.16.0.0/12"`|
+| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
 
 When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
 
 As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying Elasticsearch schema. A complete list of these fields can be found in the Arkime help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
 
-Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `srcIp` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `srcIp` or `zeek.orig_h` in Kibana.
+Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `zeek.orig_h` in Kibana.
 
 The table below shows the mapping of some of these fields.
 
 | Field Description |Arkime Field Alias(es)|Arkime-mapped Zeek Field(s)|Zeek Field(s)|
 |---|:---:|:---:|:---:|
-| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`communityId`|`zeek.community_id`|
-| Destination IP |`ip.dst`|`dstIp`|`zeek.resp_h`|
-| Destination MAC |`mac.dst`|`dstMac`|`zeek.resp_l2_addr`|
-| Destination Port |`port.dst`|`dstPort`|`zeek.resp_p`|
+| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`network.community_id`|`zeek.community_id`|
+| Destination IP |`ip.dst`|`destination.ip`|`zeek.resp_h`|
+| Destination MAC |`mac.dst`|`destination.mac`|`zeek.resp_l2_addr`|
+| Destination Port |`port.dst`|`destination.port`|`zeek.resp_p`|
 | Duration |`session.length`|`length`|`zeek_conn.duration`|
 | First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
 | IP Protocol |`ip.protocol`|`ipProtocol`|`zeek.proto`|
 | Last Packet Time |`stoptime`|`lastPacket`||
 | MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`zeek.filetype`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
 | Protocol/Service |`protocols`|`protocol`|`zeek.proto`, `zeek.service`|
-| Request Bytes |`databytes.src`, `bytes.src`|`srcBytes`, `srcDataBytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
-| Request Packets |`packets.src`|`srcPackets`|`zeek_conn.orig_pkts`|
-| Response Bytes |`databytes.dst`, `bytes.dst`|`dstBytes`, `dstDataBytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
-| Response Packets |`packets.dst`|`dstPackets`|`zeek_con.resp_pkts`|
-| Source IP |`ip.src`|`srcIp`|`zeek.orig_h`|
-| Source MAC |`mac.src`|`srcMac`|`zeek.orig_l2_addr`|
-| Source Port |`port.src`|`srcPort`|`zeek.orig_p`|
-| Total Bytes |`databytes`, `bytes`|`totDataBytes`, `totBytes`||
-| Total Packets |`packets`|`totPackets`||
+| Request Bytes |`databytes.src`, `bytes.src`|`source.bytes`, `client.bytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
+| Request Packets |`packets.src`|`source.packets`|`zeek_conn.orig_pkts`|
+| Response Bytes |`databytes.dst`, `bytes.dst`|`destination.bytes`, `server.bytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
+| Response Packets |`packets.dst`|`destination.packets`|`zeek_con.resp_pkts`|
+| Source IP |`ip.src`|`source.ip`|`zeek.orig_h`|
+| Source MAC |`mac.src`|`source.mac`|`zeek.orig_l2_addr`|
+| Source Port |`port.src`|`source.port`|`zeek.orig_p`|
+| Total Bytes |`databytes`, `bytes`|`totDataBytes`, `network.bytes`||
+| Total Packets |`packets`|`network.packets`||
 | Username |`user`|`user`|`zeek.user`|
 | Zeek Connection UID|||`zeek.uid`|
 | Zeek File UID |||`zeek.fuid`|
@@ -1251,11 +1253,11 @@ In addition to the fields listed above, Arkime provides several special field al
 
 | Matches Any | Arkime Special Field Example | Kibana/Zeek Equivalent Example |
 |---|:---:|:---:|
-| IP Address | `ip == 192.168.0.1` | `srcIp:192.168.0.1 OR dstIp:192.168.0.1` |
-| Port | `port == [80, 443, 8080, 8443]` | `srcPort:(80 OR 443 OR 8080 OR 8443) OR dstPort:(80 OR 443 OR 8080 OR 8443)` |
+| IP Address | `ip == 192.168.0.1` | `source.ip:192.168.0.1 OR destination.ip:192.168.0.1` |
+| Port | `port == [80, 443, 8080, 8443]` | `source.port:(80 OR 443 OR 8080 OR 8443) OR destination.port:(80 OR 443 OR 8080 OR 8443)` |
 | Country (code) | `country == [RU,CN]` | `zeek.destination_geo.country_code2:(RU OR CN) OR zeek.source_geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
 | Country (name) | | `zeek.destination_geo.country_name:(Russia OR China) OR zeek.source_geo.country_name:(Russia OR China)` |
-| ASN | `asn == "*Mozilla*"` | `srcASN:*Mozilla* OR dstASN:*Mozilla* OR dns.ASN:*Mozilla*` |
+| ASN | `asn == "*Mozilla*"` | `source.as.full:*Mozilla* OR destination.as.full:*Mozilla* OR dns.ASN:*Mozilla*` |
 | Host | `host == www.microsoft.com` | `zeek_http.host:www.microsoft.com (or zeek_dhcp.host_name, zeek_dns.host, zeek_ntlm.host, smb.host, etc.)` |
 | Protocol (layers >= 4) | `protocols == tls` | `protocol:tls` |
 | User | `user == EXISTS! && user != anonymous` | `_exists_:user AND (NOT user:anonymous)` |
@@ -1356,7 +1358,7 @@ As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's sour
 
 If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if they contain different values, the tag `cross_segment` will be added to the log's `tags` field for convenient identification of cross-segment traffic. This traffic could be easily visualized using Arkime's **Connections** graph, by setting the **Src:** value to **Originating Network Segment** and the **Dst:** value to **Responding Network Segment**:
 
-![Cross-segment traffic in Connections](./docs/images/screenshots/moloch_connections_segments.png)
+![Cross-segment traffic in Connections](./docs/images/screenshots/arkime_connections_segments.png)
 
 #### <a name="NameMapUI"></a>Defining hostname and CIDR subnet names interface
 
@@ -1511,7 +1513,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-3.3.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-3.4.0.iso"
 …
 ```
 
@@ -1692,7 +1694,7 @@ Arkime has a nice feature that allows you to export PCAP files matching the filt
 
 Because some fields are created in Elasticsearch dynamically when Zeek logs are ingested by Logstash, they may not have been present when Kibana configures its index pattern field mapping during initialization. As such, those fields will not show up in Kibana visualizations until Kibana’s copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
 
-After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh Kibana’s field list by clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
+After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh Kibana’s field list by clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
 
 ![Refreshing Kibana's cached index pattern](./docs/images/screenshots/kibana_refresh_index.png)
 
@@ -1894,21 +1896,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                3.3.1               xxxxxxxxxxxx        39 hours ago        683MB
-malcolmnetsec/elasticsearch-od                      3.3.1               xxxxxxxxxxxx        40 hours ago        690MB
-malcolmnetsec/file-monitor                          3.3.1               xxxxxxxxxxxx        39 hours ago        470MB
-malcolmnetsec/file-upload                           3.3.1               xxxxxxxxxxxx        39 hours ago        199MB
-malcolmnetsec/filebeat-oss                          3.3.1               xxxxxxxxxxxx        39 hours ago        555MB
-malcolmnetsec/freq                                  3.3.1               xxxxxxxxxxxx        39 hours ago        390MB
-malcolmnetsec/htadmin                               3.3.1               xxxxxxxxxxxx        39 hours ago        180MB
-malcolmnetsec/kibana-helper                         3.3.1               xxxxxxxxxxxx        40 hours ago        141MB
-malcolmnetsec/kibana-od                             3.3.1               xxxxxxxxxxxx        40 hours ago        1.16GB
-malcolmnetsec/logstash-oss                          3.3.1               xxxxxxxxxxxx        39 hours ago        1.41GB
-malcolmnetsec/name-map-ui                           3.3.1               xxxxxxxxxxxx        39 hours ago        137MB
-malcolmnetsec/nginx-proxy                           3.3.1               xxxxxxxxxxxx        39 hours ago        120MB
-malcolmnetsec/pcap-capture                          3.3.1               xxxxxxxxxxxx        39 hours ago        111MB
-malcolmnetsec/pcap-monitor                          3.3.1               xxxxxxxxxxxx        39 hours ago        157MB
-malcolmnetsec/zeek                                  3.3.1               xxxxxxxxxxxx        39 hours ago        887MB
+malcolmnetsec/arkime                                3.4.0               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      3.4.0               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           3.4.0               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  3.4.0               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               3.4.0               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         3.4.0               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             3.4.0               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          3.4.0               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           3.4.0               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           3.4.0               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          3.4.0               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          3.4.0               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  3.4.0               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -2023,7 +2025,7 @@ After upgrading following one of the previous outlines, give Malcolm several min
 
 #### Loading new Kibana dashboards and visualizations
 
-Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `sessions2-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
+Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
 
 ## <a name="Footer"></a>Copyright
 

@@ -8,43 +8,32 @@ apt-get -y --purge remove \
   gdb \
   libc6-dbg \
   ninja-build \
-  $(dpkg --get-selections | grep -Pv "(^(dpkg|libclang|libfl|libgcc|libmaxminddb|libpcap|libssl|libyaml|llvm|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+  $(dpkg --get-selections | grep -Pv "(^(dpkg|libbroker|libc6|libcrypt|libdbus|libffi|libfl|libgcc|libmaxminddb|libncurses|libnsl|libobjc|libomp|libpcap|libssl|libstdc|libtinfo|libtirpc|libxml|libyaml|libz|linux-libc|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /var/spool/ccache
 
-
 # remove unwanted packages
-apt-get -y --purge remove bluez-firmware \
-                          cracklib-runtime \
-                          deluge \
-                          enchant \
-                          ffmpeg \
-                          gnome-accessibility-themes \
-                          gucharmap \
-                          libasound2-plugins \
-                          libcupsfilters1 \
-                          libcupsimage2 \
-                          libgphoto2-6 \
-                          libgphoto2-port12 \
-                          libx264* \
-                          libx265* \
-                          lintian \
-                          lxmusic \
-                          mailutils \
-                          mpv \
-                          pavucontrol \
-                          poppler-data \
-                          prelink \
-                          pulseaudio \
-                          python-wicd \
-                          smplayer \
-                          strace \
-                          wamerican \
-                          wicd \
-                          wicd-daemon \
-                          wicd-gtk \
-                          xdg-user-dirs \
-                          yelp \
-                          youtube-dl || true
+apt-get -y --purge remove \
+  bluez-firmware \
+  cracklib-runtime \
+  firmware-netronome \
+  firmware-qcom-soc \
+  gdb \
+  gnome-accessibility-themes \
+  libasound2-plugins \
+  libgphoto2-6 \
+  libgphoto2-port12 \
+  libx264* \
+  libx265* \
+  lintian \
+  network-manager* \
+  pavucontrol \
+  poppler-data \
+  pulseaudio \
+  strace \
+  tango-icon-theme \
+  wamerican \
+  xdg-user-dirs \
+  yelp || true
 
 apt-get -y autoremove
 apt-get clean
@@ -54,7 +43,6 @@ dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 
 # disable automatic running of some services (but don't abort if we fail)
 systemctl disable supervisor.service || true
-systemctl disable systemd-timesyncd.service || true
 systemctl disable ctrl-alt-del.target || true
 systemctl disable hddtemp.service || true
 systemctl disable apt-daily.service || true

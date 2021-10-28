@@ -71,12 +71,6 @@ export SPICY_ZKG_PROCESSES=1
 
 # install Zeek packages that install nicely using zkg
 ZKG_GITHUB_URLS=(
-  "https://github.com/0xl3x1/zeek-EternalSafety"
-  "https://github.com/0xxon/cve-2020-0601"
-  "https://github.com/0xxon/cve-2020-13777"
-  "https://github.com/amzn/zeek-plugin-profinet"
-  "https://github.com/amzn/zeek-plugin-s7comm"
-  "https://github.com/amzn/zeek-plugin-tds"
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap"
   "https://github.com/cisagov/icsnpp-dnp3"
@@ -86,37 +80,30 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/callstranger-detector"
   "https://github.com/corelight/CVE-2020-16898"
   "https://github.com/corelight/CVE-2021-31166"
-  "https://github.com/corelight/CVE-2021-38647|master"
+  "https://github.com/corelight/CVE-2021-41773"
   "https://github.com/corelight/pingback"
-  "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
-  "https://github.com/corelight/zeek-xor-exe-plugin|master"
-  "https://github.com/corelight/zerologon"
-  "https://github.com/cybera/zeek-sniffpass"
-  "https://github.com/J-Gras/zeek-af_packet-plugin"
   "https://github.com/mitre-attack/bzar"
-  "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|topic/zeek-4-compat"
+  "https://github.com/mmguero-dev/cve-2020-0601|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/cve-2020-13777|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/CVE-2021-38647|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/ripple20|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/spicy-analyzers|main"
+  "https://github.com/mmguero-dev/zeek-af_packet-plugin|master"
+  "https://github.com/mmguero-dev/zeek-EternalSafety|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/zeek-plugin-profinet|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/zeek-plugin-s7comm|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/zeek-plugin-tds|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/zeek-sniffpass|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/zeek-xor-exe-plugin|zeek-v4.1-compatibility"
+  "https://github.com/mmguero-dev/zerologon|zeek-v4.1-compatibility"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
-  "https://github.com/mmguero-dev/spicy-analyzers"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
   [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
-
-# TODO
-# https://github.com/zeek/spicy-analyzers
-# A collection of zeek-hosted spicy analyzers, some of which
-# "replace" the built-in zeek parsers for those protocols.
-# We need to compare the built-in ones, but use what we're used to until
-# we make the decision with eyes open. As of 2021/03/24, that list is:
-# - DHCP      - compare to Zeek DHCP
-# - DNS       - compare to Zeek DNS
-# - HTTP      - compare to Zeek HTTP
-# - IPSEC
-# - OpenVPN
-# - TFTP
-# - WireGuard

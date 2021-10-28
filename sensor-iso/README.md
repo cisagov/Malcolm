@@ -27,7 +27,7 @@ Hedgehog Linux is a Debian-based operating system built to
             * [Automatic file extraction and scanning](#ZeekFileExtraction)
         + [Forwarding](#ConfigForwarding)
             * [filebeat](#filebeat): Zeek log forwarding
-            * [moloch-capture](#moloch-capture): Arkime session forwarding
+            * [arkime-capture](#arkime-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
             * [auditbeat](#auditbeat): audit log forwarding
             * [filebeat-syslog](#syslogbeat): syslog forwarding
@@ -252,9 +252,9 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
-### <a name="moloch-capture"></a>moloch-capture: Arkime session forwarding
+### <a name="arkime-capture"></a>capture: Arkime session forwarding
 
-[moloch-capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/cisagov/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/cisagov/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
 First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication)), choose **None**.
 
@@ -262,7 +262,7 @@ First, select the Elasticsearch connection transport protocol, either **HTTPS** 
 
 Next, enter the **Elasticsearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an Elasticsearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
-![Elasticsearch host and port](./docs/images/moloch-capture-ip-port.png)
+![Elasticsearch host and port](./docs/images/arkime-capture-ip-port.png)
 
 You will be asked to enter authentication credentials for the sensor’s connections to the aggregator’s Elasticsearch API. After you’ve entered the username and the password, the sensor will attempt a test connection to Elasticsearch using the connection information provided.
 
@@ -270,11 +270,11 @@ You will be asked to enter authentication credentials for the sensor’s connect
 
 Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
 
-![PCAP retrieval ACL](./docs/images/malcolm_moloch_reachback_acl.png)
+![PCAP retrieval ACL](./docs/images/malcolm_arkime_reachback_acl.png)
 
-Finally, you’ll be given the opportunity to review the all of the moloch-capture forwrading options you’ve specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool’s welcome screen.
+Finally, you’ll be given the opportunity to review the all of the Arkime `capture` options you’ve specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool’s welcome screen.
 
-![moloch-capture settings confirmation](./docs/images/moloch_confirm.png) ![moloch-capture settings applied successfully](./docs/images/moloch_success.png)
+![capture settings confirmation](./docs/images/arkime_confirm.png) ![capture settings applied successfully](./docs/images/arkime_success.png)
 
 ### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
 
@@ -336,7 +336,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_ARKIME** – [moloch-capture](##moloch-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
@@ -344,7 +344,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * *AUTOSTART_TCPDUMP* – [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_ZEEK** – [Zeek](https://www.zeek.org/) traffic analysis engine
 
-Note that only one packet capture engine ([moloch-capture](https://molo.ch/), [netsniff-ng](http://netsniff-ng.org/), or [tcpdump](https://www.tcpdump.org/)) can be used.
+Note that only one packet capture engine ([capture](https://arkime.com/), [netsniff-ng](http://netsniff-ng.org/), or [tcpdump](https://www.tcpdump.org/)) can be used.
 
 ![Autostart services](./docs/images/autostarts.png)
 
@@ -370,8 +370,8 @@ beats:sensors                    RUNNING   pid 14484, uptime 8 days, 20:22:32
 beats:syslogbeat                 RUNNING   pid 14471, uptime 8 days, 20:22:32
 clamav:clamav-service            RUNNING   pid 14454, uptime 8 days, 20:22:32
 clamav:clamav-updates            RUNNING   pid 14450, uptime 8 days, 20:22:32
-moloch:moloch-capture            RUNNING   pid 14432, uptime 8 days, 20:22:32
-moloch:moloch-viewer             RUNNING   pid 14431, uptime 8 days, 20:22:32
+arkime:arkime-capture            RUNNING   pid 14432, uptime 8 days, 20:22:32
+arkime:arkime-viewer             RUNNING   pid 14431, uptime 8 days, 20:22:32
 netsniff:netsniff-enp8s0         STOPPED   Not started
 prune:prune-pcap                 RUNNING   pid 14446, uptime 8 days, 20:22:32
 prune:prune-zeek                 RUNNING   pid 14442, uptime 8 days, 20:22:32
@@ -416,7 +416,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-3.3.1.iso"
+Finished, created "/sensor-build/hedgehog-3.4.0.iso"
 …
 ```
 
@@ -649,7 +649,7 @@ user@otherbox's password:
 auditbeat-tweaked-7.6.2-amd64.deb                                               100%   13MB  49.3MB/s   00:00    
 filebeat-tweaked-7.6.2-amd64.deb                                                100%   13MB  65.9MB/s   00:00    
 metricbeat-tweaked-7.6.2-amd64.deb                                              100%   18MB  72.0MB/s   00:00    
-moloch_2.2.3-1_amd64.deb                                                        100%  113MB  32.2MB/s   00:03    
+arkime_2.2.3-1_amd64.deb                                                        100%  113MB  32.2MB/s   00:03    
 netsniff-ng_0.6.6-1_amd64.deb                                                   100%  330KB  52.1MB/s   00:00    
 packetbeat-tweaked-7.6.2-amd64.deb                                              100%   14MB  59.2MB/s   00:00    
 protologbeat                                                                    100%   56MB  38.1MB/s   00:01    
@@ -703,8 +703,8 @@ dpkg: warning: unable to delete old directory '/usr/share/filebeat/kibana/6/dash
 dpkg: warning: unable to delete old directory '/usr/share/filebeat/kibana/6': Directory not empty
 Preparing to unpack .../metricbeat-tweaked-7.6.2-amd64.deb ...
 Unpacking metricbeat (7.6.2) over (6.8.4) ...
-Preparing to unpack .../moloch_2.2.3-1_amd64.deb ...
-Unpacking moloch (2.2.3-1) over (2.0.1-1) ...
+Preparing to unpack .../arkime_2.2.3-1_amd64.deb ...
+Unpacking arkime (2.2.3-1) over (2.0.1-1) ...
 Preparing to unpack .../netsniff-ng_0.6.6-1_amd64.deb ...
 Unpacking netsniff-ng (0.6.6-1) over (0.6.6-1) ...
 Preparing to unpack .../packetbeat-tweaked-7.6.2-amd64.deb ...
@@ -720,8 +720,8 @@ Installing new version of [...]
 Setting up metricbeat (7.6.2) ...
 Installing new version of [...]
 [...]
-Setting up moloch (2.2.3-1) ...
-READ /data/moloch/README.txt and RUN /data/moloch/bin/Configure
+Setting up arkime (2.2.3-1) ...
+READ /opt/arkime/README.txt and RUN /opt/arkime/bin/Configure
 Setting up netsniff-ng (0.6.6-1) ...
 Setting up packetbeat (7.6.2) ...
 Installing new version of [...]
@@ -829,16 +829,16 @@ chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
-chown root:netdev /opt/moloch/bin/moloch-capture && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/moloch/bin/moloch-capture
+chown root:netdev /opt/arkime/bin/capture && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 
 ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
 ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
 ln -s -f /usr/sbin/tcpdump /usr/local/bin/
-ln -s -f /opt/moloch/bin/moloch-capture /usr/local/bin/
-ln -s -f /opt/moloch/bin/npm /usr/local/bin
-ln -s -f /opt/moloch/bin/node /usr/local/bin
-ln -s -f /opt/moloch/bin/npx /usr/local/bin
+ln -s -f /opt/arkime/bin/capture /usr/local/bin/
+ln -s -f /opt/arkime/bin/npm /usr/local/bin
+ln -s -f /opt/arkime/bin/node /usr/local/bin
+ln -s -f /opt/arkime/bin/npx /usr/local/bin
 ```
 
 example:
@@ -858,15 +858,15 @@ root@hedgehog:/tmp# chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
 >   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 root@hedgehog:/tmp# chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
-root@hedgehog:/tmp# chown root:netdev /opt/moloch/bin/moloch-capture && \
->   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/moloch/bin/moloch-capture
+root@hedgehog:/tmp# chown root:netdev /opt/arkime/bin/capture && \
+>   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 root@hedgehog:/tmp# ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /usr/sbin/tcpdump /usr/local/bin/
-root@hedgehog:/tmp# ln -s -f /opt/moloch/bin/moloch-capture /usr/local/bin/
-root@hedgehog:/tmp# ln -s -f /opt/moloch/bin/npm /usr/local/bin
-root@hedgehog:/tmp# ln -s -f /opt/moloch/bin/node /usr/local/bin
-root@hedgehog:/tmp# ln -s -f /opt/moloch/bin/npx /usr/local/bin
+root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/capture /usr/local/bin/
+root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/npm /usr/local/bin
+root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/node /usr/local/bin
+root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/npx /usr/local/bin
 ```
 
 20. Back up unprivileged user sensor-specific config and scripts:
@@ -942,7 +942,7 @@ Once the Hedgehog has come back up, check to make sure everything is working:
 * `/opt/sensor/sensor_ctl/status` should return `RUNNING` for the things you set to autorun (no `FATAL` errors)
 * `sensorwatch` should show current writes to Zeek log files and PCAP files (depending on your configuration)
 * `tail -f /opt/sensor/sensor_ctl/log/*` should show no egregious errors
-* `zeek --version`, `zeek -N local` and `moloch-capture --version` ought to run and print out version information as expected
+* `zeek --version`, `zeek -N local` and `capture --version` ought to run and print out version information as expected
 * if you are forwarding to a [Malcolm](https://github.com/cisagov/Malcolm) aggregator, you should start seeing data momentarily
     
 # <a name="Footer"></a>Copyright

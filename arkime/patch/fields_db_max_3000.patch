@@ -1,0 +1,52 @@
+diff --git a/capture/db.c b/capture/db.c
+index 2b050c22..9186aced 100644
+--- a/capture/db.c
++++ b/capture/db.c
+@@ -2312,7 +2312,7 @@ LOCAL void moloch_db_load_fields()
+     char                   key[100];
+     int                    key_len;
+ 
+-    key_len = snprintf(key, sizeof(key), "/%sfields/_search?size=3000", config.prefix);
++    key_len = snprintf(key, sizeof(key), "/%sfields/_search?size=%d", config.prefix, MOLOCH_FIELDS_DB_MAX);
+     unsigned char     *data = moloch_http_get(esServer, key, key_len, &data_len);
+ 
+     if (!data) {
+diff --git a/capture/moloch.h b/capture/moloch.h
+index 06a79110..1f4aa3fb 100644
+--- a/capture/moloch.h
++++ b/capture/moloch.h
+@@ -352,7 +352,7 @@ enum MolochRotate {
+  */
+ 
+ #define MOLOCH_FIELD_NOT_FOUND  -1
+-#define MOLOCH_FIELDS_DB_MAX 512
++#define MOLOCH_FIELDS_DB_MAX 3000
+ #define MOLOCH_FIELDS_CNT_MIN MOLOCH_FIELDS_DB_MAX
+ #define MOLOCH_FIELDS_CNT_MAX (MOLOCH_FIELDS_DB_MAX*2)
+ #define MOLOCH_FIELD_EXSPECIAL_START            (MOLOCH_FIELDS_CNT_MAX)
+diff --git a/capture/plugins/wise.c b/capture/plugins/wise.c
+index f311d743..eb4ba1e0 100644
+--- a/capture/plugins/wise.c
++++ b/capture/plugins/wise.c
+@@ -111,7 +111,7 @@ typedef struct wiseitem_head {
+     uint32_t              wil_count;
+ } WiseItemHead_t;
+ 
+-#define WISE_MAX_REQUEST_ITEMS 512
++#define WISE_MAX_REQUEST_ITEMS MOLOCH_FIELDS_DB_MAX
+ typedef struct wiserequest {
+     BSB          bsb;
+     WiseItem_t  *items[WISE_MAX_REQUEST_ITEMS];
+diff --git a/viewer/db.js b/viewer/db.js
+index 71470bb1..e3b79664 100644
+--- a/viewer/db.js
++++ b/viewer/db.js
+@@ -1902,7 +1902,7 @@ exports.sid2Index = function (id, options) {
+ };
+ 
+ exports.loadFields = async () => {
+-  return exports.search('fields', 'field', { size: 1000 });
++  return exports.search('fields', 'field', { size: 3000 });
+ };
+ 
+ exports.getIndices = async (startTime, stopTime, bounding, rotateIndex) => {

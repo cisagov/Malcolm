@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - README
+Exec=/opt/firefox/firefox https://localhost/readme
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=help-browser
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-readme.desktop

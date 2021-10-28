@@ -1,0 +1,3 @@
+include menu.cfg
+default vesamenu.c32
+prompt 0

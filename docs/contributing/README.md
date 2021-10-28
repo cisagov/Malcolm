@@ -34,7 +34,7 @@ The purpose of this document is to provide some direction for those willing to m
 
 ### Kibana plugins
 
-## <a name="Moloch"></a>Moloch
+## <a name="Arkime"></a>Arkime
 
 ### Adding new fields to WISE
 
