@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - v*
     paths:
       - 'pcap-capture/**'
       - 'Dockerfiles/pcap-capture.Dockerfile'
