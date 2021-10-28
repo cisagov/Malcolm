@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - Upload
+Exec=/opt/firefox/firefox https://localhost/upload/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=up
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-upload.desktop

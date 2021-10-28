@@ -57,7 +57,7 @@ class Constants:
   AUDITBEAT='auditbeat'
   HEATBEAT='heatbeat' # protologbeat to log temperature and other misc. stuff
   SYSLOGBEAT='filebeat-syslog' # another filebeat instance for syslog
-  ARKIMECAP='moloch-capture'
+  ARKIMECAP='arkime-capture'
 
   BEAT_DIR = {
     FILEBEAT : f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -114,7 +114,7 @@ class Constants:
   # specific to metricbeat
   BEAT_INTERVAL = "BEAT_INTERVAL"
 
-  # specific to moloch
+  # specific to arkime
   ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
 
   MSG_CONFIG_MODE = 'Configuration Mode'
@@ -695,7 +695,7 @@ def main():
           raise CancelledError
 
         if (fwd_mode == Constants.ARKIMECAP):
-          # forwarding configuration for moloch-capture
+          # forwarding configuration for arkime capture
 
           # get elasticsearch/kibana connection information from user
           elastic_config_dict = input_elasticsearch_connection_info(forwarder=fwd_mode,
@@ -703,13 +703,13 @@ def main():
                                                                     default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
                                                                     default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
                                                                     default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD])
-          moloch_elastic_config_dict = elastic_config_dict.copy()
-          # massage the data a bit for how moloch's going to want it in the control_vars.conf file
-          if Constants.BEAT_HTTP_USERNAME in moloch_elastic_config_dict.keys():
-            moloch_elastic_config_dict["ES_USERNAME"] = moloch_elastic_config_dict.pop(Constants.BEAT_HTTP_USERNAME)
-          if Constants.BEAT_HTTP_PASSWORD in moloch_elastic_config_dict.keys():
-            moloch_elastic_config_dict["ES_PASSWORD"] = aggressive_url_encode(moloch_elastic_config_dict.pop(Constants.BEAT_HTTP_PASSWORD))
-          moloch_elastic_config_dict = { k.replace('BEAT_', ''): v for k, v in moloch_elastic_config_dict.items() }
+          arkime_elastic_config_dict = elastic_config_dict.copy()
+          # massage the data a bit for how arkime's going to want it in the control_vars.conf file
+          if Constants.BEAT_HTTP_USERNAME in arkime_elastic_config_dict.keys():
+            arkime_elastic_config_dict["ES_USERNAME"] = arkime_elastic_config_dict.pop(Constants.BEAT_HTTP_USERNAME)
+          if Constants.BEAT_HTTP_PASSWORD in arkime_elastic_config_dict.keys():
+            arkime_elastic_config_dict["ES_PASSWORD"] = aggressive_url_encode(arkime_elastic_config_dict.pop(Constants.BEAT_HTTP_PASSWORD))
+          arkime_elastic_config_dict = { k.replace('BEAT_', ''): v for k, v in arkime_elastic_config_dict.items() }
 
           # get list of IP addresses allowed for packet payload retrieval
           lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
@@ -717,9 +717,9 @@ def main():
           code, lines = d.editbox_str("\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL)
           if code != Dialog.OK:
             raise CancelledError
-          moloch_elastic_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
+          arkime_elastic_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
 
-          list_results = sorted([f"{k}={v}" for k, v in moloch_elastic_config_dict.items() if ("PASSWORD" not in k) and (not k.startswith("#"))])
+          list_results = sorted([f"{k}={v}" for k, v in arkime_elastic_config_dict.items() if ("PASSWORD" not in k) and (not k.startswith("#"))])
 
           code = d.yesno(Constants.MSG_CONFIG_FORWARDING_CONFIRM.format(fwd_mode, "\n".join(list_results)),
                          yes_label="OK", no_label="Cancel")
@@ -729,13 +729,13 @@ def main():
           previous_config_values = elastic_config_dict.copy()
 
           # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-          elastic_values_re = re.compile(r"\b(" + '|'.join(list(moloch_elastic_config_dict.keys())) + r")\s*=\s*.*?$")
+          elastic_values_re = re.compile(r"\b(" + '|'.join(list(arkime_elastic_config_dict.keys())) + r")\s*=\s*.*?$")
           with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
             for line in file:
               line = line.rstrip("\n")
               elastic_key_match = elastic_values_re.search(line)
               if elastic_key_match is not None:
-                print(elastic_values_re.sub(r"\1=%s" % moloch_elastic_config_dict[elastic_key_match.group(1)], line))
+                print(elastic_values_re.sub(r"\1=%s" % arkime_elastic_config_dict[elastic_key_match.group(1)], line))
               else:
                 print(line)
 
