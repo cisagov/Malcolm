@@ -126,5 +126,6 @@ event zeek_init() &priority=-5 {
   redef FTP::default_capture_password = T;
   redef SOCKS::default_capture_password = T;
   redef SNIFFPASS::log_password_plaintext = T;
+  redef LDAP::default_capture_password = T;
 @endif
 redef SNIFFPASS::notice_log_enable = F;

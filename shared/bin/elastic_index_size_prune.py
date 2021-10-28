@@ -36,7 +36,7 @@ def main():
 
   parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=str2bool(os.getenv('ELASTICSEARCH_INDEX_SIZE_PRUNE_DEBUG', default='False')), help="Verbose output")
-  parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default=os.getenv('ELASTICSEARCH_INDEX_SIZE_PRUNE_INDEX', 'sessions2-*'), help='Index pattern')
+  parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default=os.getenv('ELASTICSEARCH_INDEX_SIZE_PRUNE_INDEX', 'arkime_sessions3-*'), help='Index pattern')
   parser.add_argument('-e', '--elastic', dest='elasticUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('ELASTICSEARCH_URL', 'http://elasticsearch:9200'), help='Elasticsearch URL')
   parser.add_argument('--node', dest='node', metavar='<str>', type=str, default=os.getenv('ELASTICSEARCH_INDEX_SIZE_PRUNE_NODE', ''), help='Node IDs or names')
   parser.add_argument('-l', '--limit', dest='limit', metavar='<str>', type=str, default=os.getenv('ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT', '0'), help='Index pattern size limit (e.g., 100gb, 25%, ...)')

@@ -26,7 +26,7 @@
 -a always,exit -F path=/bin/pumount -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/bin/su -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged-priv_change
 -a always,exit -F path=/bin/umount -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
--a always,exit -F path=/etc/audisp/audisp-remote.conf -F perm=wa -k config_file_change
+-a always,exit -F path=/etc/audit/audisp-remote.conf -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/audit/auditd.conf -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/default/grub -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/fstab -F perm=wa -k config_file_change

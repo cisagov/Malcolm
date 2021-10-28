@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Start Malcolm
+Exec=tilix -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/control.py --start"
+Comment=Start Malcolm
+Terminal=false
+Type=Application
+Icon=/usr/share/icons/hicolor/64x64/malcolm.png
+Categories=Network;
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-start.desktop
