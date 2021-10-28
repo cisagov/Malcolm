@@ -64,7 +64,7 @@
 #     yarn build --kibana-version "${ELASTIC_VERSION}" && \
 #     mv ./build/kbnSankeyVis-7.10.2.zip ./build/kbnSankeyVis.zip
 
-FROM opensearchproject/opensearch-dashboards:1.0.1
+FROM opensearchproject/opensearch-dashboards:1.1.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
