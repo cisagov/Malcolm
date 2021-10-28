@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Stop Malcolm
+Exec=tilix -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/control.py --stop"
+Comment=Stop Malcolm
+Terminal=false
+Type=Application
+Icon=exit
+Categories=Network;
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-stop.desktop

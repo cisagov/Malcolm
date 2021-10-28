@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - Arkime
+Exec=/opt/firefox/firefox https://localhost/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=/usr/share/icons/hicolor/128x128/arkime.png
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true

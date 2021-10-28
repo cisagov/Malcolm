@@ -4,7 +4,7 @@ FROM alpine:3.14
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/dashboards-helper'
@@ -20,8 +20,8 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
-ARG ARKIME_INDEX_PATTERN="sessions2-*"
-ARG ARKIME_INDEX_PATTERN_ID="sessions2-*"
+ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
+ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
 ARG OPENSEARCH_URL="http://opensearch:9200"
@@ -73,7 +73,7 @@ RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && 
     chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/create-moloch-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template zeek_template\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template zeek_template\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 

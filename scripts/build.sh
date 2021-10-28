@@ -23,7 +23,7 @@ elif $GREP -q Microsoft /proc/version && docker-compose.exe version >/dev/null 2
   DOCKER_BIN=docker.exe
 fi
 
-if [ "$1" ]; then
+if [[ -f "$1" ]]; then
   CONFIG_FILE="$1"
   DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN -f "$CONFIG_FILE""
   shift # use remainder of arguments for services
@@ -36,6 +36,13 @@ function filesize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
   $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
+}
+
+function dirsize_in_image() {
+  FILESPEC="$2"
+  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  KBYTES="$($DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1")"
+  echo $(($KBYTES * 1024))
 }
 
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
@@ -75,38 +82,26 @@ else
   MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 fi
 
-# for some debug branches this may be used to download artifacts from github
-if [ ${#GITHUB_OAUTH_TOKEN} -gt 1 ]; then
-  # prefer a local environment variable
-  GITHUB_TOKEN="$GITHUB_OAUTH_TOKEN"
-else
-  # nope
-  GITHUB_TOKEN="0"
-fi
-
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND build --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND build --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
-  "/var/lib/clamav/main.cld;file-monitor"
-  "/var/lib/clamav/daily.cvd;file-monitor"
-  "/var/lib/clamav/bytecode.cvd;file-monitor"
   "/var/www/upload/js/jquery.fileupload.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
   "/var/www/htadmin/index.php;htadmin"
   "/usr/share/logstash/config/oui-logstash.txt;logstash"
   "/etc/ip_protocol_numbers.yaml;logstash"
   "/etc/ja3.yaml;logstash"
-  "/data/moloch/etc/GeoLite2-ASN.mmdb;arkime"
-  "/data/moloch/etc/GeoLite2-Country.mmdb;arkime"
-  "/data/moloch/etc/ipv4-address-space.csv;arkime"
-  "/data/moloch/etc/oui.txt;arkime"
-  "/data/moloch/bin/moloch-capture;arkime"
+  "/opt/arkime/etc/GeoLite2-ASN.mmdb;arkime"
+  "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"
+  "/opt/arkime/etc/ipv4-address-space.csv;arkime"
+  "/opt/arkime/etc/oui.txt;arkime"
+  "/opt/arkime/bin/capture;arkime"
   "/var/www/html/list.min.js;name-map-ui"
   "/var/www/html/jquery.min.js;name-map-ui"
   "/opt/zeek/bin/zeek;zeek"
@@ -116,4 +111,14 @@ for i in ${FILES_IN_IMAGES[@]}; do
   FILE="$(echo "$i" | cut -d';' -f1)"
   IMAGE="$(echo "$i" | cut -d';' -f2)"
   (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
+done
+
+DIRS_IN_IMAGES=(
+  "/var/lib/clamav;file-monitor;200000000"
+)
+for i in ${DIRS_IN_IMAGES[@]}; do
+  DIR="$(echo "$i" | cut -d';' -f1)"
+  IMAGE="$(echo "$i" | cut -d';' -f2)"
+  MINSIZE="$(echo "$i" | cut -d';' -f3)"
+  (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
 done

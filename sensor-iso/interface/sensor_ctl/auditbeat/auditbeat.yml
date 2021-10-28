@@ -34,7 +34,7 @@ auditbeat.modules:
                   - equals:
                       auditd.summary.how: '/usr/sbin/netsniff-ng'
                   - equals:
-                      auditd.summary.how: '/opt/moloch/bin/moloch-capture'
+                      auditd.summary.how: '/opt/arkime/bin/capture'
           - and:
               - equals:
                   auditd.message_type: 'syscall'
@@ -65,7 +65,7 @@ auditbeat.modules:
                         - equals:
                             auditd.summary.how: '/usr/sbin/netsniff-ng'
                         - equals:
-                            auditd.summary.how: '/opt/moloch/bin/moloch-capture'
+                            auditd.summary.how: '/opt/arkime/bin/capture'
                 - and:
                     - or:
                         - equals:

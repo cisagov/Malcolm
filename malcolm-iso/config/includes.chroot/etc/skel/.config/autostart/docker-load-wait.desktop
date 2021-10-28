@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=docker-load-wait
+Comment=Prepare Malcolm Docker Images
+Exec=/usr/local/bin/docker-load-wait.sh
+Terminal=false
+Type=Application

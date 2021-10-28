@@ -1,8 +1,9 @@
 #!/bin/bash
 
 IMAGE_NAME=malcolm
+IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=buster
+IMAGE_DISTRIBUTION=bullseye
 
 BUILD_ERROR_CODE=1
 
@@ -51,43 +52,26 @@ if [ -d "$WORKDIR" ]; then
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
 
-  mkdir -p ./config/hooks/live
-  pushd ./config/hooks/live
-  ln -v -s -f /usr/share/live/build/hooks/live/* ./
-  popd >/dev/null 2>&1
-
-  mkdir -p ./config/hooks/normal
-  pushd ./config/hooks/normal
-  ln -v -s -f /usr/share/live/build/hooks/normal/* ./
-  rm -f ./0910-remove-apt-sources-lists
-  popd >/dev/null 2>&1
-
   chown -R root:root *
 
-  # put the date in the grub.cfg entries and configure installation options
-  sed -i "s/\(Install Malcolm Base\)/\1 $(date +'%Y-%m-%d %H:%M:%S')/g" ./config/includes.binary/boot/grub/grub.cfg
+  # configure installation options
+  YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+  [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
+  sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"Malcolm $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
 
-  # make sure we install the newer kernel, firmwares, and kernel headers
-  echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
-  echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.10=$(dpkg -s linux-kbuild-5.10 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-
-  # and make sure we remove the old stuff when it's all over
-  echo "#!/bin/sh" > ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "export LANG=C.UTF-8" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "apt-get -y --purge remove *4.19* || true" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "apt-get -y autoremove" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "apt-get clean" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  chmod +x ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
+  # make sure we install the firmwares, etc.
+  for PKG in firmware-linux \
+             firmware-linux-free \
+             firmware-linux-nonfree \
+             firmware-misc-nonfree \
+             firmware-amd-graphics \
+             firmware-iwlwifi \
+             firmware-atheros; do
+    echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
+  done
 
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
@@ -100,8 +84,8 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch/nodes/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch-backup/"
-  mkdir -p "$MALCOLM_DEST_DIR/moloch-raw/"
-  mkdir -p "$MALCOLM_DEST_DIR/moloch-logs/"
+  mkdir -p "$MALCOLM_DEST_DIR/arkime-raw/"
+  mkdir -p "$MALCOLM_DEST_DIR/arkime-logs/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/processed/"
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
@@ -110,8 +94,6 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/upload/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/processed/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/extract_files/"
-  YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" ./docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
-  [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
   cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
@@ -171,26 +153,35 @@ if [ -d "$WORKDIR" ]; then
   cp -v ./config/includes.chroot/usr/local/bin/preseed_partman_determine_disk.sh ./config/includes.installer/
 
   lb config \
-    --image-name "$IMAGE_NAME" \
-    --debian-installer live \
-    --debian-installer-gui false \
-    --debian-installer-distribution $IMAGE_DISTRIBUTION \
-    --distribution $IMAGE_DISTRIBUTION \
-    --linux-packages "linux-image-$(uname -r | sed 's/-amd64$//')" \
-    --architectures amd64 \
-    --binary-images iso-hybrid \
-    --bootloaders "syslinux,grub-efi" \
-    --memtest none \
-    --chroot-filesystem squashfs \
-    --backports true \
-    --security true \
-    --updates true \
-    --source false \
-    --apt-indices none \
+    --apt-indices false \
+    --apt-options "--yes --allow-downgrades --allow-remove-essential --allow-change-held-packages -oAcquire::Check-Valid-Until=false" \
+    --apt-secure true \
     --apt-source-archives false \
+    --architectures amd64 \
     --archive-areas 'main contrib non-free' \
-    --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
-    --apt-options "--allow-downgrades --allow-remove-essential --allow-change-held-packages --yes"
+    --backports true \
+    --binary-images iso-hybrid \
+    --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
+    --bootappend-live "boot=live components username=analyst nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
+    --chroot-filesystem squashfs \
+    --debian-installer live \
+    --debian-installer-distribution $IMAGE_DISTRIBUTION \
+    --debian-installer-gui false \
+    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
+    --distribution $IMAGE_DISTRIBUTION \
+    --image-name "$IMAGE_NAME" \
+    --iso-application "$IMAGE_NAME" \
+    --iso-publisher "$IMAGE_PUBLISHER" \
+    --iso-volume "$IMAGE_NAME $(date +'%Y-%m-%d %H:%M:%S')" \
+    --linux-flavours "amd64:amd64" \
+    --linux-packages "linux-image linux-headers" \
+    --memtest none \
+    --parent-archive-areas 'main contrib non-free' \
+    --parent-debian-installer-distribution $IMAGE_DISTRIBUTION \
+    --parent-distribution $IMAGE_DISTRIBUTION \
+    --security true \
+    --source false \
+    --updates true
 
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
   if [ -f "$IMAGE_NAME-amd64.hybrid.iso" ]; then

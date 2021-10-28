@@ -1,8 +1,9 @@
 #!/bin/bash
 
 IMAGE_NAME=hedgehog
+IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=buster
+IMAGE_DISTRIBUTION=bullseye
 
 BUILD_ERROR_CODE=1
 
@@ -41,21 +42,15 @@ if [ -d "$WORKDIR" ]; then
 
   mkdir -p ./config/packages.chroot/
 
-  mkdir -p ./config/hooks/live
-  pushd ./config/hooks/live
-  ln -v -s -f /usr/share/live/build/hooks/live/* ./
-  popd >/dev/null 2>&1
-
-  mkdir -p ./config/hooks/normal
-  pushd ./config/hooks/normal
-  ln -v -s -f /usr/share/live/build/hooks/normal/* ./
-  rm -f ./0910-remove-apt-sources-lists
-  popd >/dev/null 2>&1
-
   chown -R root:root *
 
-  # put the date in the grub.cfg entries and configure installation options
-  sed -i "s/\(Install Hedgehog Linux\)/\1 $(date +'%Y-%m-%d %H:%M:%S')/g" ./config/includes.binary/boot/grub/grub.cfg
+  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
+    SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
+    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
+  fi
+
+  # configure installation options
+  sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"Hedgehog Linux $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
@@ -75,24 +70,17 @@ if [ -d "$WORKDIR" ]; then
     chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
   fi
 
-  # make sure we install the newer kernel, firmwares, and kernel headers
-  echo "linux-image-$(uname -r)" > ./config/package-lists/kernel.list.chroot
-  echo "linux-headers-$(uname -r)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-compiler-gcc-8-x86=$(dpkg -s linux-compiler-gcc-8-x86 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "linux-kbuild-5.10=$(dpkg -s linux-kbuild-5.10 | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-linux=$(dpkg -s firmware-linux | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-linux-nonfree=$(dpkg -s firmware-linux-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-misc-nonfree=$(dpkg -s firmware-misc-nonfree | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-  echo "firmware-amd-graphics=$(dpkg -s firmware-amd-graphics | grep ^Version: | cut -d' ' -f2)" >> ./config/package-lists/kernel.list.chroot
-
-  # and make sure we remove the old stuff when it's all over
-  echo "#!/bin/sh" > ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "export LANG=C.UTF-8" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "apt-get -y --purge remove *4.19* || true" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "apt-get -y autoremove" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  echo "apt-get clean" >> ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
-  chmod +x ./config/hooks/normal/9999-remove-old-kernel-artifacts.hook.chroot
+  # make sure we install the firmwares, etc.
+  for PKG in firmware-linux \
+             firmware-linux-free \
+             firmware-linux-nonfree \
+             firmware-misc-nonfree \
+             firmware-amd-graphics \
+             firmware-iwlwifi \
+             firmware-atheros \
+             linux-headers-amd64; do
+    echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
+  done
 
   mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
 
@@ -109,11 +97,6 @@ if [ -d "$WORKDIR" ]; then
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
-  if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
-    SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
-    [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
-  fi
-
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""               > ./config/includes.chroot/opt/sensor/.os-info
   echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""          >> ./config/includes.chroot/opt/sensor/.os-info
@@ -125,8 +108,8 @@ if [ -d "$WORKDIR" ]; then
   echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
-  mkdir -p "$SCRIPT_PATH/moloch/etc"
-  pushd "$SCRIPT_PATH/moloch/etc"
+  mkdir -p "$SCRIPT_PATH/arkime/etc"
+  pushd "$SCRIPT_PATH/arkime/etc"
   MAXMIND_GEOIP_DB_LICENSE_KEY=""
   if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
     MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
@@ -143,10 +126,10 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/moloch/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/moloch:/build arkime-build:latest -o /build
-  cp "$SCRIPT_PATH/moloch"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv "$SCRIPT_PATH/moloch"/*.deb ./config/packages.chroot/
+  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
+  cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
 
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/
@@ -179,26 +162,35 @@ if [ -d "$WORKDIR" ]; then
   cp -v ./config/includes.chroot/usr/local/bin/preseed_partman_determine_disk.sh ./config/includes.installer/
 
   lb config \
-    --image-name "$IMAGE_NAME" \
-    --debian-installer live \
-    --debian-installer-gui false \
-    --debian-installer-distribution $IMAGE_DISTRIBUTION \
-    --distribution $IMAGE_DISTRIBUTION \
-    --linux-packages "linux-image-$(uname -r | sed 's/-amd64$//')" \
-    --architectures amd64 \
-    --binary-images iso-hybrid \
-    --bootloaders "syslinux,grub-efi" \
-    --memtest none \
-    --chroot-filesystem squashfs \
-    --backports true \
-    --security true \
-    --updates true \
-    --source false \
-    --apt-indices none \
+    --apt-indices false \
+    --apt-options "--yes --allow-downgrades --allow-remove-essential --allow-change-held-packages -oAcquire::Check-Valid-Until=false" \
+    --apt-secure true \
     --apt-source-archives false \
+    --architectures amd64 \
     --archive-areas 'main contrib non-free' \
-    --debootstrap-options "--include=apt-transport-https,gnupg,ca-certificates,openssl" \
-    --apt-options "--yes --allow-downgrades --allow-remove-essential --allow-change-held-packages"
+    --backports true \
+    --binary-images iso-hybrid \
+    --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
+    --bootappend-live "boot=live components username=sensor nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
+    --chroot-filesystem squashfs \
+    --debian-installer live \
+    --debian-installer-distribution $IMAGE_DISTRIBUTION \
+    --debian-installer-gui false \
+    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
+    --distribution $IMAGE_DISTRIBUTION \
+    --image-name "$IMAGE_NAME" \
+    --iso-application "$IMAGE_NAME" \
+    --iso-publisher "$IMAGE_PUBLISHER" \
+    --iso-volume "$IMAGE_NAME $(date +'%Y-%m-%d %H:%M:%S')" \
+    --linux-flavours "amd64:amd64" \
+    --linux-packages "linux-image linux-headers" \
+    --memtest none \
+    --parent-archive-areas 'main contrib non-free' \
+    --parent-debian-installer-distribution $IMAGE_DISTRIBUTION \
+    --parent-distribution $IMAGE_DISTRIBUTION \
+    --security true \
+    --source false \
+    --updates true
 
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
   if [ -f "$IMAGE_NAME-amd64.hybrid.iso" ]; then

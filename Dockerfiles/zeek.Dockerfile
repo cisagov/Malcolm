@@ -24,19 +24,15 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP true
 
 # for download and install
-ARG ZEEK_LTS=1
-ARG ZEEK_VERSION=4.0.4-0
-ARG SPICY_VERSION=1.2.1
+ARG ZEEK_LTS=
+ARG ZEEK_VERSION=4.1.1-0
+ARG SPICY_VERSION=1.3.0
 
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
 ENV SPICY_VERSION $SPICY_VERSION
 
 # for build
-ENV LLVM_VERSION "11"
-ENV CC "clang-${LLVM_VERSION}"
-ENV CXX "clang++-${LLVM_VERSION}"
-ENV ASM "clang-${LLVM_VERSION}"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
@@ -51,30 +47,21 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # build and install system packages, zeek, spicy and plugins
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
+      bison \
       ca-certificates \
+      ccache \
+      cmake \
       curl \
       file \
+      flex \
+      g++ \
+      gcc \
       git \
       gnupg2 \
       jq \
       less \
-      libcap2-bin \
-      moreutils \
-      procps \
-      psmisc \
-      vim-tiny && \
-    ( curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - ) && \
-    echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
-    echo "deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-${LLVM_VERSION} main" >> /etc/apt/sources.list && \
-    apt-get -q update && \
-    apt-get install -q -y --no-install-recommends \
-      bison \
-      ccache \
-      clang-${LLVM_VERSION} \
-      cmake \
-      flex \
       libatomic1 \
-      libclang-${LLVM_VERSION}-dev \
+      libcap2-bin \
       libfl-dev \
       libgoogle-perftools4 \
       libkrb5-3 \
@@ -86,19 +73,20 @@ RUN apt-get -q update && \
       libtcmalloc-minimal4 \
       libunwind8 \
       libzmq5 \
-      llvm-${LLVM_VERSION}-dev \
       locales-all \
       make \
+      moreutils \
       ninja-build \
+      procps \
+      psmisc \
       python3 \
       python3-git \
-      python3-pip \
       python3-semantic-version \
-      python3-setuptools \
-      python3-wheel \
+      python3-zmq \
       supervisor \
+      swig \
+      vim-tiny \
       zlib1g-dev && \
-    python3 -m pip install --no-cache-dir pyzmq && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
@@ -109,23 +97,24 @@ RUN apt-get -q update && \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
       dpkg -i ./*.deb && \
     mkdir -p /tmp/spicy-packages && \
       cd /tmp/spicy-packages && \
     curl -sSL --remote-name-all \
-      "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian10.deb" && \
+      "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb" && \
       dpkg -i ./*.deb && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
     zkg install --force --skiptests zeek/spicy-plugin && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
-    ( find "${ZEEK_DIR}"/lib -type d -name CMakeFiles -exec rm -rf "{}" \; 2>/dev/null || true ) && \
-    ( find "${ZEEK_DIR}"/var/lib/zkg -type d -name build -exec rm -rf "{}" \; 2>/dev/null || true ) && \
+    ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
     ( find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \; ) && \
     rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch && \
+    rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
     ( find "${ZEEK_DIR}/" "${SPICY_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
     mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/ && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/bin/spicyz \
@@ -141,7 +130,7 @@ RUN apt-get -q update && \
 
 # add configuration and scripts
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/
+ADD shared/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
@@ -150,11 +139,10 @@ ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
-# todo: Bro::LDAP is broken right now, disabled
 ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 19
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OPENVPN|ANALYZER_SPICY_IPSEC|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_LDAP_TCP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP_IP|ICSNPP::BSAP_SERIAL|ICSNPP::ENIP|Salesforce::GQUIC|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
-ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 15
-ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-31166/detect|hassh/hassh|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_LDAP_TCP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|Salesforce::GQUIC|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
+ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 17
+ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|hassh/hassh|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
@@ -168,7 +156,7 @@ RUN mkdir -p /tmp/logs && \
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
-    ln -sfr /usr/local/bin/pcap_moloch_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
+    ln -sfr /usr/local/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true

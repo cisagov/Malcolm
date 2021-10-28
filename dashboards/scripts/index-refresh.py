@@ -42,7 +42,7 @@ def main():
 
   parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
-  parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='sessions2-*', help='Index Pattern Name')
+  parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='arkime_sessions3-*', help='Index Pattern Name')
   parser.add_argument('-d', '--dashboards', dest='dashboardsUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'), help='Dashboards URL')
   parser.add_argument('-o', '--opensearch', dest='opensearchUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='Elasticsearch URL')
   parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
@@ -166,7 +166,7 @@ def main():
     #                "urlTemplates": [
     #                    null,
     #                    {
-    #                        "url": "/idkib2mol/zeek.orig_h == {{value}}",
+    #                        "url": "/idkib2ark/zeek.orig_h == {{value}}",
     #                        "label": "Arkime: zeek.orig_h == {{value}}"
     #                    }
     #                ]
@@ -178,11 +178,11 @@ def main():
     for field in getFieldsList:
       if field['name'][:1].isalpha():
 
-        # for Arkime to query by database field name, see moloch issue/PR 1461/1463
+        # for Arkime to query by database field name, see arkime issue/PR 1461/1463
         valQuote = '"' if field['type'] == 'string' else ''
         valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}
-        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2mol/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2ark/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplateValues['label'] = 'Arkime {}: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 

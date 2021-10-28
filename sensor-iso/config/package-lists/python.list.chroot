@@ -11,7 +11,6 @@ python3-psutil
 python3-pycryptodome
 python3-pyinotify
 python3-requests
-python3-scapy
 python3-semantic-version
 python3-setuptools
 python3-wheel

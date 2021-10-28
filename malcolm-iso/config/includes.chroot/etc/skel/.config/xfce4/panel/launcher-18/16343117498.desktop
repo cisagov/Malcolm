@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - User Management
+Exec=/opt/firefox/firefox https://localhost:488/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=config-users
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-users.desktop

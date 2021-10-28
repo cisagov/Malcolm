@@ -102,6 +102,7 @@ ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
+ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
 ADD logstash/supervisord.conf /etc/supervisord.conf
 

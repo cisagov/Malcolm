@@ -4,12 +4,8 @@
 
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
-export CC="clang-11"
-export CXX="clang++-11"
-export ASM="clang-11"
 
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   clamd \
-  debinterface==3.4.0 \
-  pyzmq
+  debinterface==3.4.0
