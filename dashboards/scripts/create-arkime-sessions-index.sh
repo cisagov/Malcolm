@@ -133,7 +133,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # Create anomaly detectors here
       for i in /opt/anomaly_detectors/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$ES_URL/_opendistro/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       echo "OpenSearch anomaly detectors creation complete!"
