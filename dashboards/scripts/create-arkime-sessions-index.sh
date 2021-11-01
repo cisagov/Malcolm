@@ -126,7 +126,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       echo "OpenSearch Dashboards saved objects import complete!"
 
       # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
-      /data/elastic_search_status.sh -w >/dev/null 2>&1
+      /data/opensearch_status.sh -w >/dev/null 2>&1
       sleep 60
 
       echo "Creating OpenSearch anomaly detectors..."
