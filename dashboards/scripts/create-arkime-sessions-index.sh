@@ -73,12 +73,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
 
         if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]]; then
-          # insert opendistro.index_state_management.policy_id into index template settings: will be
-<<<<<<< HEAD:dashboards/scripts/create-moloch-sessions-index.sh
-          # imported by create-moloch-sessions-index.sh
-=======
-          # imported by kibana-create-arkime-sessions-index.sh
->>>>>>> mmguero/development:dashboards/scripts/kibana-create-arkime-sessions-index.sh
+          # insert opendistro.index_state_management.policy_id into index template settings
           cat "$ZEEK_TEMPLATE_FILE_ORIG" | jq ".settings += {\"opendistro.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$ZEEK_TEMPLATE_FILE"
         fi
       fi
