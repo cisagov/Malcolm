@@ -31,7 +31,8 @@ class ZeekSource extends WISESource {
 
     // add right-clicks
     var allFields = [
-      "network.community_id",
+      "destination.hostname",
+      "destination.segment",
       "event.risk_score",
       "event.risk_score_norm",
       "event.severity",
@@ -40,11 +41,14 @@ class ZeekSource extends WISESource {
       "ip.protocol",
       "mac.dst",
       "mac.src",
+      "network.community_id",
       "node",
       "oui.dst",
       "oui.src",
       "protocols",
       "rootId",
+      "source.hostname",
+      "source.segment",
       "tags",
       "zeek.action",
       "zeek.community_id",
@@ -58,19 +62,15 @@ class ZeekSource extends WISESource {
       "zeek.fuid",
       "zeek.logType",
       "zeek.orig_h",
-      "zeek.orig_hostname",
       "zeek.orig_l2_addr",
       "zeek.orig_l2_oui",
       "zeek.orig_p",
-      "zeek.orig_segment",
       "zeek.password",
       "zeek.proto",
       "zeek.resp_h",
-      "zeek.resp_hostname",
       "zeek.resp_l2_addr",
       "zeek.resp_l2_oui",
       "zeek.resp_p",
-      "zeek.resp_segment",
       "zeek.result",
       "zeek.service",
       "zeek.service_version",
@@ -964,17 +964,17 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
       "      +arrayList(session.zeek, 'orig_l2_addr', 'Originating MAC', 'zeek.orig_l2_addr')\n" +
       "      +arrayList(session.zeek, 'orig_l2_oui', 'Originating OUI', 'zeek.orig_l2_oui')\n" +
-      "      +arrayList(session.zeek, 'orig_hostname', 'Originating Host Name', 'zeek.orig_hostname')\n" +
+      "      +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
       "      +arrayList(session.zeek, 'source_ip_reverse_dns', 'Originating Host rDNS', 'zeek.source_ip_reverse_dns')\n" +
-      "      +arrayList(session.zeek, 'orig_segment', 'Originating Network Segment', 'zeek.orig_segment')\n" +
+      "      +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
       "      +arrayList(session.zeek.source_geo, 'country_name', 'Originating GeoIP Country', 'zeek.source_geo.country_name')\n" +
       "      +arrayList(session.zeek.source_geo, 'city_name', 'Originating GeoIP City', 'zeek.source_geo.city_name')\n" +
       "      +arrayList(session.zeek, 'resp_h', 'Responding Host', 'zeek.resp_h')\n" +
       "      +arrayList(session.zeek, 'resp_l2_addr', 'Responding MAC', 'zeek.resp_l2_addr')\n" +
       "      +arrayList(session.zeek, 'resp_l2_oui', 'Responding OUI', 'zeek.resp_l2_oui')\n" +
-      "      +arrayList(session.zeek, 'resp_hostname', 'Responding Host Name', 'zeek.resp_hostname')\n" +
+      "      +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
       "      +arrayList(session.zeek, 'destination_ip_reverse_dns', 'Responding Host rDNS', 'zeek.destination_ip_reverse_dns')\n" +
-      "      +arrayList(session.zeek, 'resp_segment', 'Responding Network Segment', 'zeek.resp_segment')\n" +
+      "      +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
       "      +arrayList(session.zeek.destination_geo, 'country_name', 'Responding GeoIP Country', 'zeek.destination_geo.country_name')\n" +
       "      +arrayList(session.zeek.destination_geo, 'city_name', 'Responding GeoIP City', 'zeek.destination_geo.city_name')\n" +
       "      +arrayList(session.zeek, 'orig_p', 'Originating Port', 'zeek.orig_p')\n" +

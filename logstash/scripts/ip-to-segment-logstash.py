@@ -28,6 +28,9 @@ JSON_MAP_KEY_NAME = 'name'
 JSON_MAP_KEY_TAG = 'tag'
 JSON_MAP_KEY_TYPE = 'type'
 
+ORIGINATION_ECS_MAP = {'orig' : 'source',
+                       'resp' : 'destination'}
+
 ###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
@@ -236,14 +239,14 @@ def main():
               for source in ['orig', 'resp']:
                 filterId += 1
                 fieldName = "{}_h".format(source)
-                newFieldName = "{}_hostname".format(source)
+                newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[source], "hostname"]])
                 print("", file=outFile)
                 print('    if ([zeek][{}]) and ({}) {{ '.format(fieldName, ' or '.join(['([zeek][{}] == "{}")'.format(fieldName, ip) for ip in ipList])), file=outFile)
                 print('      mutate {{ id => "mutate_add_autogen_{}_ip_hostname_{}"'.format(source, filterId), file=outFile)
-                print('        add_field => {{ "[zeek][{}]" => "{}" }}'.format(newFieldName, hostName), file=outFile)
+                print('        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName), file=outFile)
                 print("      }", file=outFile)
                 print("    }", file=outFile)
-                addedFields.add("[zeek][{}]".format(newFieldName))
+                addedFields.add(newFieldName)
 
             # mac addresses mapped to hostname
             macList = list(set([a for a in addrList if a.startswith('_')]))
@@ -251,14 +254,14 @@ def main():
               for source in ['orig', 'resp']:
                 filterId += 1
                 fieldName = "{}_l2_addr".format(source)
-                newFieldName = "{}_hostname".format(source)
+                newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[source], "hostname"]])
                 print("", file=outFile)
                 print('    if ([zeek][{}]) and ({}) {{ '.format(fieldName, ' or '.join(['([zeek][{}] == "{}")'.format(fieldName, mac[1:]) for mac in macList])), file=outFile)
                 print('      mutate {{ id => "mutate_add_autogen_{}_mac_hostname_{}"'.format(source, filterId), file=outFile)
-                print('        add_field => {{ "[zeek][{}]" => "{}" }}'.format(newFieldName, hostName), file=outFile)
+                print('        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName), file=outFile)
                 print("      }", file=outFile)
                 print("    }", file=outFile)
-                addedFields.add("[zeek][{}]".format(newFieldName))
+                addedFields.add(newFieldName)
 
           # for the segment(s) to be checked, create two cidr filters, one for source IP and one for dest IP
           for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].iteritems():
@@ -267,16 +270,16 @@ def main():
               filterId += 1
               # ip addresses/ranges mapped to network segment names
               fieldName = "{}_h".format(source)
-              newFieldName = "{}_segment".format(source)
+              newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[source], "segment"]])
               print("", file=outFile)
               print("    if ([zeek][{}]) {{ cidr {{".format(fieldName), file=outFile)
               print('      id => "cidr_autogen_{}_segment_{}"'.format(source, filterId), file=outFile)
               print('      address => [ "%{{[zeek][{}]}}" ]'.format(fieldName), file=outFile)
               print('      network => [ {} ]'.format(', '.join('"{}"'.format(ip) for ip in ipList)), file=outFile)
               print('      add_tag => [ "{}" ]'.format(segmentName), file=outFile)
-              print('      add_field => {{ "[zeek][{}]" => "{}" }}'.format(newFieldName, segmentName), file=outFile)
+              print('      add_field => {{ "{}" => "{}" }}'.format(newFieldName, segmentName), file=outFile)
               print("    } }", file=outFile)
-              addedFields.add("[zeek][{}]".format(newFieldName))
+              addedFields.add("{}".format(newFieldName))
 
         finally:
           # if a tag name is specified, close the IF statement verifying the tag's presence
@@ -290,7 +293,7 @@ def main():
         print("", file=outFile)
         print('  # deduplicate any added fields', file=outFile)
         for field in list(itertools.product(['orig', 'resp'], ['hostname', 'segment'])):
-          newFieldName = "[zeek][{}_{}]".format(field[0], field[1])
+          newFieldName = newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[field[0]], "field[1]"]])
           if newFieldName in addedFields:
             print("", file=outFile)
             print('  if ({}) {{ '.format(newFieldName), file=outFile)
