@@ -409,6 +409,8 @@
           "destination.port",
           "zeek_ldap_search.message_id",
           "zeek.action",
+          "zeek_ldap_search.filters",
+          "zeek_ldap_search.attributes",
           "zeek_ldap_search.base_object",
           "zeek_ldap_search.result_count",
           "zeek.result",
