@@ -1,4 +1,4 @@
-name: iso-build-docker-wrap-push-ghcr
+name: sensor-iso-build-docker-wrap-push-ghcr
 
 on:
   push:
