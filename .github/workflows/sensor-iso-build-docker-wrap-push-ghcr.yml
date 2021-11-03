@@ -67,7 +67,6 @@ jobs:
         name: Extract Malcolm version
         shell: bash
         run: echo "##[set-output name=mversion;]$(grep -P "^\s+image:\s*malcolm" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
-        run:
         id: extract_malcolm_version
       -
         name: Build image
