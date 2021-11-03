@@ -1489,7 +1489,7 @@ Official downloads of the Malcolm installer ISO are not provided: however, it ca
 * [Vagrant](https://www.vagrantup.com/)
     - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
     - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
-    - [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box
+    - [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box
 
 The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
 
@@ -1497,7 +1497,7 @@ The build should work with either the [VirtualBox](https://www.virtualbox.org/) 
     - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
 * [libvirt](https://libvirt.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
-    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box to `libvirt` format
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box to `libvirt` format
 
 To perform a clean build the Malcolm installer ISO, navigate to your local Malcolm working copy and run:
 
