@@ -71,8 +71,8 @@ jobs:
       -
         name: Build image
         run: |
+          cp -r ./shared ./sensor-iso
           pushd ./sensor-iso
-          mkdir -p ./shared
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
           sudo /usr/bin/env bash ./build.sh
