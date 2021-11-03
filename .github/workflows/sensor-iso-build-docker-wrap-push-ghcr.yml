@@ -45,11 +45,14 @@ jobs:
                gettext \
                git \
                gnupg2 \
+               imagemagick \
                jq \
+               pandoc \
                po4a \
                rsync \
                software-properties-common \
                squashfs-tools \
+               virt-what \
                xorriso
             git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
             cd /tmp/live-build
