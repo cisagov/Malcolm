@@ -71,7 +71,7 @@ jobs:
       -
         name: Build image
         run: |
-          pushd sensor-iso
+          pushd ./sensor-iso
           mkdir -p ./shared
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
@@ -91,7 +91,7 @@ jobs:
         name: Build and push ISO image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: ./sensor-iso/docker/Dockerfile
+          context: ./sensor-iso
+          file: ./docker/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/hedgehog:${{ steps.extract_branch.outputs.branch }}
