@@ -56,9 +56,9 @@ RUN apt-get -q update && \
       chown -R ${DEFAULT_UID}:${DEFAULT_GID} /hedgehog && \
       chmod 750 /hedgehog
 
-ADD docker/supervisord.conf /etc/supervisord.conf
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} hedgehog-*.log /hedgehog/
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} hedgehog-*.iso /hedgehog/hedgehog.iso
+ADD sensor-iso/docker/supervisord.conf /etc/supervisord.conf
+ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} sensor-iso/hedgehog-*.log /hedgehog/
+ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} sensor-iso/hedgehog-*.iso /hedgehog/hedgehog.iso
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/sensor-iso/docs/logo/favicon.ico /hedgehog/favicon.ico
 
 EXPOSE $HTTP_SERVER_PORT
