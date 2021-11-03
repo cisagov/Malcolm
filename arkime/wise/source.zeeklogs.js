@@ -31,8 +31,13 @@ class ZeekSource extends WISESource {
 
     // add right-clicks
     var allFields = [
+      "destination.geo.city_name",
+      "destination.geo.country_name",
       "destination.hostname",
+      "destination.oui",
       "destination.segment",
+      "event.freq_score_v1",
+      "event.freq_score_v2",
       "event.risk_score",
       "event.risk_score_norm",
       "event.severity",
@@ -47,36 +52,35 @@ class ZeekSource extends WISESource {
       "oui.src",
       "protocols",
       "rootId",
+      "source.geo.city_name",
+      "source.geo.country_name",
       "source.hostname",
+      "source.oui",
       "source.segment",
+      "tls.client.ja3",
+      "tls.client.ja3_description",
+      "tls.server.ja3s",
+      "tls.server.ja3s_description",
       "tags",
       "zeek.action",
       "zeek.community_id",
-      "zeek.destination_geo.city_name",
-      "zeek.destination_geo.country_name",
-      "zeek.destination_ip_reverse_dns",
+      "destination.ip_reverse_dns",
       "zeek.filename",
       "zeek.filetype",
-      "zeek.freq_score_v1",
-      "zeek.freq_score_v2",
       "zeek.fuid",
       "zeek.logType",
       "zeek.orig_h",
       "zeek.orig_l2_addr",
-      "zeek.orig_l2_oui",
       "zeek.orig_p",
       "zeek.password",
       "zeek.proto",
       "zeek.resp_h",
       "zeek.resp_l2_addr",
-      "zeek.resp_l2_oui",
       "zeek.resp_p",
       "zeek.result",
       "zeek.service",
       "zeek.service_version",
-      "zeek.source_geo.city_name",
-      "zeek.source_geo.country_name",
-      "zeek.source_ip_reverse_dns",
+      "source.ip_reverse_dns",
       "zeek.ts",
       "zeek.uid",
       "zeek.user",
@@ -770,10 +774,6 @@ class ZeekSource extends WISESource {
       "zeek_ssl.issuer.ST",
       "zeek_ssl.issuer.title",
       "zeek_ssl.issuer_full",
-      "zeek_ssl.ja3",
-      "zeek_ssl.ja3_desc",
-      "zeek_ssl.ja3s",
-      "zeek_ssl.ja3s_desc",
       "zeek_ssl.last_alert",
       "zeek_ssl.next_protocol",
       "zeek_ssl.resumed",
@@ -959,24 +959,24 @@ class ZeekSource extends WISESource {
       "  if (session.zeek.orig_h || session.zeek.orig_p || session.zeek.orig_l2_addr || session.zeek.resp_h || " +
       "      session.zeek.resp_p || session.zeek.resp_l2_addr || session.zeek.proto || session.zeek.service || " +
       "      session.zeek.service_version || session.zeek.user_agent || session.zeek.user || session.zeek.password || " +
-      "      session.zeek.action || session.zeek.result || session.zeek.freq_score_v1 || session.zeek.freq_score_v2 )\n" +
+      "      session.zeek.action || session.zeek.result || session.event.freq_score_v1 || session.event.freq_score_v2 )\n" +
       "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
       "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
       "      +arrayList(session.zeek, 'orig_l2_addr', 'Originating MAC', 'zeek.orig_l2_addr')\n" +
-      "      +arrayList(session.zeek, 'orig_l2_oui', 'Originating OUI', 'zeek.orig_l2_oui')\n" +
+      "      +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
       "      +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
-      "      +arrayList(session.zeek, 'source_ip_reverse_dns', 'Originating Host rDNS', 'zeek.source_ip_reverse_dns')\n" +
+      "      +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
       "      +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
-      "      +arrayList(session.zeek.source_geo, 'country_name', 'Originating GeoIP Country', 'zeek.source_geo.country_name')\n" +
-      "      +arrayList(session.zeek.source_geo, 'city_name', 'Originating GeoIP City', 'zeek.source_geo.city_name')\n" +
+      "      +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
+      "      +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
       "      +arrayList(session.zeek, 'resp_h', 'Responding Host', 'zeek.resp_h')\n" +
       "      +arrayList(session.zeek, 'resp_l2_addr', 'Responding MAC', 'zeek.resp_l2_addr')\n" +
-      "      +arrayList(session.zeek, 'resp_l2_oui', 'Responding OUI', 'zeek.resp_l2_oui')\n" +
+      "      +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
       "      +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
-      "      +arrayList(session.zeek, 'destination_ip_reverse_dns', 'Responding Host rDNS', 'zeek.destination_ip_reverse_dns')\n" +
+      "      +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
       "      +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
-      "      +arrayList(session.zeek.destination_geo, 'country_name', 'Responding GeoIP Country', 'zeek.destination_geo.country_name')\n" +
-      "      +arrayList(session.zeek.destination_geo, 'city_name', 'Responding GeoIP City', 'zeek.destination_geo.city_name')\n" +
+      "      +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
+      "      +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
       "      +arrayList(session.zeek, 'orig_p', 'Originating Port', 'zeek.orig_p')\n" +
       "      +arrayList(session.zeek, 'resp_p', 'Responding Port', 'zeek.resp_p')\n" +
       "      +arrayList(session.zeek, 'proto', 'Protocol', 'zeek.proto')\n" +
@@ -987,8 +987,8 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.zeek, 'user', 'User', 'zeek.user')\n" +
       "      +arrayList(session.zeek, 'password', 'Password', 'zeek.password')\n" +
       "      +arrayList(session.zeek, 'user_agent', 'User Agent', 'zeek.user_agent')\n" +
-      "      +arrayList(session.zeek, 'freq_score_v1', 'Freq Score v1', 'zeek.freq_score_v1')\n" +
-      "      +arrayList(session.zeek, 'freq_score_v2', 'Freq Score v2', 'zeek.freq_score_v2')\n" +
+      "      +arrayList(session.event, 'freq_score_v1', 'Freq Score v1', 'event.freq_score_v1')\n" +
+      "      +arrayList(session.event, 'freq_score_v2', 'Freq Score v2', 'event.freq_score_v2')\n" +
       "      +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
       "      +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
       "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +

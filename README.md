@@ -1214,7 +1214,7 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
-| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|`zeek.destination_geo:* or zeek.source_geo:*`|
+| GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
 | Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|`zeek.logType:notice`|
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
@@ -1259,8 +1259,8 @@ In addition to the fields listed above, Arkime provides several special field al
 |---|:---:|:---:|
 | IP Address | `ip == 192.168.0.1` | `source.ip:192.168.0.1 OR destination.ip:192.168.0.1` |
 | Port | `port == [80, 443, 8080, 8443]` | `source.port:(80 OR 443 OR 8080 OR 8443) OR destination.port:(80 OR 443 OR 8080 OR 8443)` |
-| Country (code) | `country == [RU,CN]` | `zeek.destination_geo.country_code2:(RU OR CN) OR zeek.source_geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
-| Country (name) | | `zeek.destination_geo.country_name:(Russia OR China) OR zeek.source_geo.country_name:(Russia OR China)` |
+| Country (code) | `country == [RU,CN]` | `destination.geo.country_code2:(RU OR CN) OR source.geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
+| Country (name) | | `destination.geo.country_name:(Russia OR China) OR source.geo.country_name:(Russia OR China)` |
 | ASN | `asn == "*Mozilla*"` | `source.as.full:*Mozilla* OR destination.as.full:*Mozilla* OR dns.ASN:*Mozilla*` |
 | Host | `host == www.microsoft.com` | `zeek_http.host:www.microsoft.com (or zeek_dhcp.host_name, zeek_dns.host, zeek_ntlm.host, smb.host, etc.)` |
 | Protocol (layers >= 4) | `protocols == tls` | `protocol:tls` |
