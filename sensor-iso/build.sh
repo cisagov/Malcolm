@@ -126,17 +126,18 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
-  cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
+  # TODO: uncomment these once I figure ISO build out
+  # bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
+  # docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
+  # cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  # mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
 
   # clone and build custom protologbeat from github for logging temperature, etc.
-  mkdir -p ./config/includes.chroot/usr/local/bin/
-  bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_7_10_2_compat"
-  cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
+  # mkdir -p ./config/includes.chroot/usr/local/bin/
+  # bash "$SCRIPT_PATH/beats/build-docker-image.sh"
+  # bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_7_10_2_compat"
+  # cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  # mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"
