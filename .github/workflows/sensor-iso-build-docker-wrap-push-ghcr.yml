@@ -65,7 +65,6 @@ jobs:
             cd /tmp/live-build
             dpkg-buildpackage -b -uc -us
             sudo dpkg -i /tmp/live-build*.deb
-            docker pull tianon/qemu:native
       -
         name: Checkout
         uses: actions/checkout@v2
