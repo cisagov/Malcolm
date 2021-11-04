@@ -85,7 +85,13 @@ jobs:
           pushd ./sensor-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
+          echo "cutting this down for build testing, remove this line once it's working"
+          rm -f ./config/hooks/normal/* ./config/package-lists/*
+          cat /etc/resolv.conf
+          curl http://example.org
           sudo /usr/bin/env bash ./build.sh
+          cat /etc/resolv.conf
+          curl http://example.org
           popd
       -
         name: ghcr.io login
