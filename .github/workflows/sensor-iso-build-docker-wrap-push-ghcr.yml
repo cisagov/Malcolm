@@ -36,6 +36,36 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       -
+        name: Build environment setup
+        run: |
+          sudo apt-get -q update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -t focal-backports --no-install-recommends -y -q \
+               apt-transport-https \
+               bc \
+               build-essential \
+               ca-certificates \
+               curl \
+               debhelper-compat \
+               debian-archive-keyring \
+               debootstrap \
+               genisoimage \
+               gettext \
+               git \
+               gnupg2 \
+               imagemagick \
+               jq \
+               pandoc \
+               po4a \
+               rsync \
+               software-properties-common \
+               squashfs-tools \
+               virt-what \
+               xorriso
+            git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
+            cd /tmp/live-build
+            dpkg-buildpackage -b -uc -us
+            sudo dpkg -i /tmp/live-build*.deb
+      -
         name: Checkout
         uses: actions/checkout@v2
       -
@@ -55,9 +85,9 @@ jobs:
           pushd ./sensor-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
-          echo "cutting this down for build testing, remove this line once it's working"
-          echo 'sudo /usr/bin/env bash ./build.sh' | tee hedgehog-1.0.0.iso
-          echo 'a log file' | tee hedgehog-1.0.0-build.log
+          sudo /usr/bin/env bash ./build.sh
+          rm -rf ./shared/
+          chmod 777 ./hedgehog-*.*
           popd
       -
         name: ghcr.io login
@@ -66,12 +96,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: What files are available
-        run: |
-          pwd
-          ls -l ./
-          ls -l ./sensor-iso/
       -
         name: Build and push ISO image
         uses: docker/build-push-action@v2
