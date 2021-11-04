@@ -30,7 +30,10 @@ jobs:
           all_but_latest: true
           access_token: ${{ secrets.GITHUB_TOKEN }}
       -
-        name: Docker build setup
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       -
         name: Build environment setup
@@ -62,6 +65,7 @@ jobs:
             cd /tmp/live-build
             dpkg-buildpackage -b -uc -us
             sudo dpkg -i /tmp/live-build*.deb
+            docker pull tianon/qemu:native
       -
         name: Checkout
         uses: actions/checkout@v2
