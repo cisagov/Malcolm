@@ -1,15 +1,15 @@
 name: sensor-iso-build-docker-wrap-push-ghcr
 
 on:
-  push:
-    branches:
-      - main
-      - development
-    paths:
-      - 'sensor-iso/**'
-      - 'shared/bin/*'
+  # push:
+  #   branches:
+  #     - main
+  #     - development
+  #   paths:
+  #     - 'sensor-iso/**'
+  #     - 'shared/bin/*'
   workflow_dispatch:
-  repository_dispatch:
+  # repository_dispatch:
 
 jobs:
   build:
