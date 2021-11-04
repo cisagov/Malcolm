@@ -101,6 +101,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
+        name: What files are available
+        run: |
+          pwd
+          ls -l
+      -
         name: Build and push ISO image
         uses: docker/build-push-action@v2
         with:
