@@ -17,5 +17,5 @@ ENV QEMU_CPU $QEMU_CPU
 ENV QEMU_RAM $QEMU_RAM
 
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/sensor-iso/docs/logo/favicon.ico /image/favicon.ico
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} sensor-iso/hedgehog-*.log /image/
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} sensor-iso/hedgehog-*.iso /image/live.iso
+ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} hedgehog-*.log /image/
+ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} hedgehog-*.iso /image/live.iso
