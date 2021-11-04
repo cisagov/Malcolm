@@ -58,17 +58,17 @@ if [ -d "$WORKDIR" ]; then
   sed -i "s@\(/etc/capture_storage_format\)@\1.none@g" ./config/includes.binary/install/preseed_minimal.cfg
 
   # create a hook for installing Python packages required by interface
-  if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
-    echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    while read LINE; do
-      echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    done <"$SCRIPT_PATH/interface/requirements.txt"
-    echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  fi
+  # if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
+  #   echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   while read LINE; do
+  #     echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   done <"$SCRIPT_PATH/interface/requirements.txt"
+  #   echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  # fi
 
   # make sure we install the firmwares, etc.
   for PKG in firmware-linux \
