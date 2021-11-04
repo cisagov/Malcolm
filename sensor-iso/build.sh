@@ -57,32 +57,34 @@ if [ -d "$WORKDIR" ]; then
   sed -i "s@\(/etc/capture_storage_format\)@\1.crypt@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
   sed -i "s@\(/etc/capture_storage_format\)@\1.none@g" ./config/includes.binary/install/preseed_minimal.cfg
 
-  # create a hook for installing Python packages required by interface
-  if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
-    echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    while read LINE; do
-      echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    done <"$SCRIPT_PATH/interface/requirements.txt"
-    echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  fi
+  # TODO: uncomment these once I figure ISO build out
 
-  # make sure we install the firmwares, etc.
-  for PKG in firmware-linux \
-             firmware-linux-free \
-             firmware-linux-nonfree \
-             firmware-misc-nonfree \
-             firmware-amd-graphics \
-             firmware-iwlwifi \
-             firmware-atheros \
-             linux-headers-amd64; do
-    echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
-  done
+  # # create a hook for installing Python packages required by interface
+  # if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
+  #   echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   while read LINE; do
+  #     echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   done <"$SCRIPT_PATH/interface/requirements.txt"
+  #   echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  #   chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  # fi
 
-  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
+  # # make sure we install the firmwares, etc.
+  # for PKG in firmware-linux \
+  #            firmware-linux-free \
+  #            firmware-linux-nonfree \
+  #            firmware-misc-nonfree \
+  #            firmware-amd-graphics \
+  #            firmware-iwlwifi \
+  #            firmware-atheros \
+  #            linux-headers-amd64; do
+  #   echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
+  # done
+
+  # mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
 
   # copy the interface code into place for the resultant image
   mkdir -p ./config/includes.chroot/opt
