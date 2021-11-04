@@ -87,7 +87,7 @@ jobs:
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
           sudo /usr/bin/env bash ./build.sh
           rm -rf ./shared/
-          chmod 777 ./hedgehog-*.*
+          sudo chmod 644 ./hedgehog-*.*
           popd
       -
         name: ghcr.io login
