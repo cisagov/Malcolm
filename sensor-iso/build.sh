@@ -58,17 +58,17 @@ if [ -d "$WORKDIR" ]; then
   sed -i "s@\(/etc/capture_storage_format\)@\1.none@g" ./config/includes.binary/install/preseed_minimal.cfg
 
   # create a hook for installing Python packages required by interface
-  # if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
-  #   echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  #   echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  #   echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  #   echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  #   while read LINE; do
-  #     echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  #   done <"$SCRIPT_PATH/interface/requirements.txt"
-  #   echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  #   chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-  # fi
+  if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
+    echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    while read LINE; do
+      echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    done <"$SCRIPT_PATH/interface/requirements.txt"
+    echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  fi
 
   # make sure we install the firmwares, etc.
   for PKG in firmware-linux \
@@ -125,18 +125,18 @@ if [ -d "$WORKDIR" ]; then
   curl -s -S -L -o oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
   popd >/dev/null 2>&1
 
-  # # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  # bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
-  # docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
-  # cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  # mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
+  # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
+  cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
 
-  # # clone and build custom protologbeat from github for logging temperature, etc.
-  # mkdir -p ./config/includes.chroot/usr/local/bin/
-  # bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  # bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_7_10_2_compat"
-  # cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  # mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
+  # clone and build custom protologbeat from github for logging temperature, etc.
+  mkdir -p ./config/includes.chroot/usr/local/bin/
+  bash "$SCRIPT_PATH/beats/build-docker-image.sh"
+  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_7_10_2_compat"
+  cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 
   # format and copy documentation
   pushd "$SCRIPT_PATH/"
