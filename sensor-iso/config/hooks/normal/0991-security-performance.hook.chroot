@@ -67,85 +67,87 @@ net.ipv6.conf.default.disable_ipv6=1
 net.ipv6.conf.lo.disable_ipv6=1
 EOF
 
-# password requirement hardening
-sed -i -e 's/[[:space:]]*nullok[[:alnum:]_]*//g' /etc/pam.d/common-auth
-sed -i -r "s/(pam_faildelay.so.*delay)[[:space:]]*=[[:space:]]*[[:digit:]]+/\1=4000000/g" /etc/pam.d/login
-sed -i -r "s/([[:space:]]*session[[:space:]]*)[[:alnum:]_]*([[:space:]]*pam_lastlog.so[[:space:]]*)/\1required\2\tshowfailed/g" /etc/pam.d/login
-sed -i "s/^[[:space:]]*password[[:space:]]*requisite[[:space:]]*pam_pwquality\.so.*/password requisite pam_pwquality.so retry=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 difok=8 minclass=4 maxrepeat=2 maxclassrepeat=4 minlen=15/g" /etc/pam.d/common-password
+# TODO: searching for an issue with the build in github actions
 
-# enable cryptsetup support on boot
-sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
+# # password requirement hardening
+# sed -i -e 's/[[:space:]]*nullok[[:alnum:]_]*//g' /etc/pam.d/common-auth
+# sed -i -r "s/(pam_faildelay.so.*delay)[[:space:]]*=[[:space:]]*[[:digit:]]+/\1=4000000/g" /etc/pam.d/login
+# sed -i -r "s/([[:space:]]*session[[:space:]]*)[[:alnum:]_]*([[:space:]]*pam_lastlog.so[[:space:]]*)/\1required\2\tshowfailed/g" /etc/pam.d/login
+# sed -i "s/^[[:space:]]*password[[:space:]]*requisite[[:space:]]*pam_pwquality\.so.*/password requisite pam_pwquality.so retry=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 difok=8 minclass=4 maxrepeat=2 maxclassrepeat=4 minlen=15/g" /etc/pam.d/common-password
 
-# enable guests to mount vmware/etc. fuse-based mounts with allow_other
-sed -i "s/#user_allow_other.*/user_allow_other/" /etc/fuse.conf
+# # enable cryptsetup support on boot
+# sed -i "s/#CRYPTSETUP=.*/CRYPTSETUP=y/" /etc/cryptsetup-initramfs/conf-hook
 
-# some permissions
-find /etc/audit -type d -exec chmod 750 "{}" \;
-find /etc/audit -type f -exec chmod 640 "{}" \;
-chmod 600 /etc/ssh/sshd_config
+# # enable guests to mount vmware/etc. fuse-based mounts with allow_other
+# sed -i "s/#user_allow_other.*/user_allow_other/" /etc/fuse.conf
 
-# set DIR_MODE to 750 for new users
-sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
+# # some permissions
+# find /etc/audit -type d -exec chmod 750 "{}" \;
+# find /etc/audit -type f -exec chmod 640 "{}" \;
+# chmod 600 /etc/ssh/sshd_config
 
-# new directories default to 750, new files to 640
-echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
-echo "umask 077" >> /etc/profile
-echo "export UMASK=077" >> /etc/profile
+# # set DIR_MODE to 750 for new users
+# sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
 
-# enable cron logging
-sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
+# # new directories default to 750, new files to 640
+# echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
+# echo "umask 077" >> /etc/profile
+# echo "export UMASK=077" >> /etc/profile
 
-# enable rsyslog forwarding to localhost:9514 over UDP (for filebeat syslog input)
-echo >> /etc/rsyslog.conf
-echo '*.* @127.0.0.1:9514' >> /etc/rsyslog.conf
-echo >> /etc/rsyslog.conf
+# # enable cron logging
+# sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
 
-# put sudoers log into its own logfile
-awk 'FNR==NR{ if (/^Defaults/) p=NR; next} 1; FNR==p{ print "Defaults\t!syslog\nDefaults\tlogfile=/var/log/sudo.log" }' /etc/sudoers /etc/sudoers > /tmp/newsudoers
-mv /tmp/newsudoers /etc/sudoers && chmod 440 /etc/sudoers
-cat << 'EOF' > /etc/logrotate.d/sudoers
-/var/log/sudo.log
-{
-  weekly
-  missingok
-  rotate 4
-  compress
-  delaycompress
-  copytruncate
-  minsize 100k
-}
-EOF
+# # enable rsyslog forwarding to localhost:9514 over UDP (for filebeat syslog input)
+# echo >> /etc/rsyslog.conf
+# echo '*.* @127.0.0.1:9514' >> /etc/rsyslog.conf
+# echo >> /etc/rsyslog.conf
 
-# tweak some auditd settings
-sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
-sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
+# # put sudoers log into its own logfile
+# awk 'FNR==NR{ if (/^Defaults/) p=NR; next} 1; FNR==p{ print "Defaults\t!syslog\nDefaults\tlogfile=/var/log/sudo.log" }' /etc/sudoers /etc/sudoers > /tmp/newsudoers
+# mv /tmp/newsudoers /etc/sudoers && chmod 440 /etc/sudoers
+# cat << 'EOF' > /etc/logrotate.d/sudoers
+# /var/log/sudo.log
+# {
+#   weekly
+#   missingok
+#   rotate 4
+#   compress
+#   delaycompress
+#   copytruncate
+#   minsize 100k
+# }
+# EOF
 
-# tweak some apparmor settings (allow clamd to scan)
-[[ -e /etc/apparmor.d/local/usr.sbin.clamd ]] && ln -srf /etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/disable/
+# # tweak some auditd settings
+# sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
+# sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
 
-# disable ntp for now, and disable servers, but it could be turned back on later
-systemctl disable ntp || true
-sed -i "s/^\(pool \)/# \1/" /etc/ntp.conf
-sed -i "s/^\(restrict -6\)/# \1/" /etc/ntp.conf
-sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
-sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
-usermod -d /var/lib/ntp ntp
+# # tweak some apparmor settings (allow clamd to scan)
+# [[ -e /etc/apparmor.d/local/usr.sbin.clamd ]] && ln -srf /etc/apparmor.d/local/usr.sbin.clamd /etc/apparmor.d/disable/
 
-# disable htpdate service, we're going to use cron instead
-systemctl disable htpdate || true
-sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
-sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
+# # disable ntp for now, and disable servers, but it could be turned back on later
+# systemctl disable ntp || true
+# sed -i "s/^\(pool \)/# \1/" /etc/ntp.conf
+# sed -i "s/^\(restrict -6\)/# \1/" /etc/ntp.conf
+# sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
+# sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
+# usermod -d /var/lib/ntp ntp
 
-# remove identifying operating system information
-truncate -s 0 /etc/motd
-sed -i "s/Debian/Hedgehog/g" /etc/issue
-sed -i "s/Debian/Hedgehog/g" /etc/issue.net
+# # disable htpdate service, we're going to use cron instead
+# systemctl disable htpdate || true
+# sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
+# sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 
-# set up /etc/os-release information (override values in /etc/os-release with custom values)
-if [[ -f /opt/sensor/.os-info ]]; then
-  awk '
-    BEGIN {FS = OFS = "="}
-    {v1[$1] = $2}
-    END {for (key in v1) {print key, v1[key]}}
-  ' /etc/os-release /opt/sensor/.os-info | sort | sponge /etc/os-release
-fi
+# # remove identifying operating system information
+# truncate -s 0 /etc/motd
+# sed -i "s/Debian/Hedgehog/g" /etc/issue
+# sed -i "s/Debian/Hedgehog/g" /etc/issue.net
+
+# # set up /etc/os-release information (override values in /etc/os-release with custom values)
+# if [[ -f /opt/sensor/.os-info ]]; then
+#   awk '
+#     BEGIN {FS = OFS = "="}
+#     {v1[$1] = $2}
+#     END {for (key in v1) {print key, v1[key]}}
+#   ' /etc/os-release /opt/sensor/.os-info | sort | sponge /etc/os-release
+# fi
