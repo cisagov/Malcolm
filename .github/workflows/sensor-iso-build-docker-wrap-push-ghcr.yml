@@ -88,8 +88,6 @@ jobs:
           rm -f ./config/hooks/normal/0168-firefox-install.hook.chroot
           rm -f ./config/hooks/normal/0169-pip-installs.hook.chroot
           rm -f ./config/hooks/normal/0900-setup-rc-local.hook.chroot
-          rm -f ./config/hooks/normal/0910-sensor-build.hook.chroot
-          rm -f ./config/hooks/normal/0911-get-stig-scripts.hook.chroot
           sudo /usr/bin/env bash ./build.sh
           rm -rf ./shared/
           sudo chmod 644 ./hedgehog-*.*
