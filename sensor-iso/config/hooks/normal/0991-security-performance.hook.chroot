@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-configure firewall
+# configure firewall
 sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
 /usr/sbin/ufw --force enable
 /usr/sbin/ufw default deny incoming
