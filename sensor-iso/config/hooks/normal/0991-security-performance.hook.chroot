@@ -10,11 +10,12 @@ sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
 UFW_ALLOW_RULES=(
   ntp
   ssh
-  dns
 )
 for i in ${UFW_ALLOW_RULES[@]}; do
   ufw allow "$i"
 done
+# will re-enable on boot
+/usr/sbin/ufw --force disable
 
 # performance parameters for networking, disk, etc.
 cat << 'EOF' >> /etc/sysctl.conf
