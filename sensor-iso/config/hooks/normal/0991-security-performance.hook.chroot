@@ -2,20 +2,19 @@
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# TODO: searching for an issue with the build in github actions
-
-# configure firewall
-# sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
-# /usr/sbin/ufw --force enable
-# /usr/sbin/ufw default deny incoming
-# /usr/sbin/ufw default allow outgoing
-# UFW_ALLOW_RULES=(
-#   ntp
-#   ssh
-# )
-# for i in ${UFW_ALLOW_RULES[@]}; do
-#   ufw allow "$i"
-# done
+configure firewall
+sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
+/usr/sbin/ufw --force enable
+/usr/sbin/ufw default deny incoming
+/usr/sbin/ufw default allow outgoing
+UFW_ALLOW_RULES=(
+  ntp
+  ssh
+  dns
+)
+for i in ${UFW_ALLOW_RULES[@]}; do
+  ufw allow "$i"
+done
 
 # performance parameters for networking, disk, etc.
 cat << 'EOF' >> /etc/sysctl.conf
