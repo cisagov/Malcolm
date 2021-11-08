@@ -35,19 +35,6 @@ def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
 ###################################################################################################
-# recursively convert unicode strings to utf-8 strings
-def byteify(input):
-  if isinstance(input, dict):
-    return {byteify(key): byteify(value)
-      for key, value in input.iteritems()}
-  elif isinstance(input, list):
-    return [byteify(element) for element in input]
-  elif isinstance(input, unicode):
-    return input.encode('utf-8')
-  else:
-    return input
-
-###################################################################################################
 # main
 def main():
 
@@ -82,7 +69,7 @@ def main():
     try:
       tmpMixedEntries = json.load(open(inFile, 'r'))
       if isinstance(tmpMixedEntries, list):
-        mixedEntries.extend(byteify(tmpMixedEntries));
+        mixedEntries.extend(tmpMixedEntries);
     except:
       pass
 
@@ -124,7 +111,7 @@ def main():
           networkList = []
           for ip in ''.join(values[0].split()).split(','):
             try:
-              networkList.append(str(ipaddress.ip_network(unicode(ip))).lower() if ('/' in ip) else str(ipaddress.ip_address(unicode(ip))).lower())
+              networkList.append(str(ipaddress.ip_network(ip)).lower() if ('/' in ip) else str(ipaddress.ip_address(ip)).lower())
             except ValueError:
               eprint('"{}" is not a valid IP address, ignoring'.format(ip))
           segmentName = values[1]
@@ -157,7 +144,7 @@ def main():
           for addr in ''.join(values[0].split()).split(','):
             try:
               # see if it's an IP address
-              addressList.append(str(ipaddress.ip_address(unicode(addr))).lower())
+              addressList.append(str(ipaddress.ip_address(addr)).lower())
             except ValueError:
               # see if it's a MAC address
               if re.match(macAddrRegex, addr):
@@ -195,7 +182,7 @@ def main():
             if (entry[JSON_MAP_KEY_TYPE] == JSON_MAP_TYPE_SEGMENT):
               # potentially interpret address as a CIDR-formatted subnet
               try:
-                networkList.append(str(ipaddress.ip_network(unicode(addr))).lower() if ('/' in addr) else str(ipaddress.ip_address(unicode(addr))).lower())
+                networkList.append(str(ipaddress.ip_network(addr)).lower() if ('/' in addr) else str(ipaddress.ip_address(addr)).lower())
               except ValueError:
                 eprint('"{}" is not a valid IP address, ignoring'.format(addr))
 
@@ -203,7 +190,7 @@ def main():
               # should be an IP or MAC address
               try:
                 # see if it's an IP address
-                addressList.append(str(ipaddress.ip_address(unicode(addr))).lower())
+                addressList.append(str(ipaddress.ip_address(addr)).lower())
               except ValueError:
                 # see if it's a MAC address
                 if re.match(macAddrRegex, addr):
@@ -220,7 +207,7 @@ def main():
 
       # go through the lists of segments/hosts, which will now be organized by required tag first, then
       # segment/host name, then the list of addresses
-      for tag, nameMaps in tagListMap.iteritems():
+      for tag, nameMaps in tagListMap.items():
         print("", file=outFile)
 
         # if a tag name is specified, print the IF statement verifying the tag's presence
@@ -229,7 +216,7 @@ def main():
         try:
 
           # for the host names(s) to be checked, create two filters, one for source IP|MAC and one for dest IP|MAC
-          for hostName, addrList in nameMaps[HOST_LIST_IDX].iteritems():
+          for hostName, addrList in nameMaps[HOST_LIST_IDX].items():
 
             # ip addresses mapped to hostname
             ipList = list(set([a for a in addrList if not a.startswith('_')]))
@@ -262,7 +249,7 @@ def main():
                 addedFields.add(newFieldName)
 
           # for the segment(s) to be checked, create two cidr filters, one for source IP and one for dest IP
-          for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].iteritems():
+          for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].items():
             ipList = list(set(ipList))
             for source in ['orig', 'resp']:
               filterId += 1
