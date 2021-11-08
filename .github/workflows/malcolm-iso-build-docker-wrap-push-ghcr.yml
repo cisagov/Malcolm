@@ -86,10 +86,14 @@ jobs:
       -
         name: Build image
         run: |
-          DESTNAMEIMAGES=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_short_hash.outputs.hash }}_images.tar.gz
-          docker save $(grep image: docker-compose.yml | awk '{print $2}' | sed "s@^\(malcolmnetsec\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/") | gzip > "$DESTNAMEIMAGES"
+          IMAGES=( $(grep image: docker-compose.yml | awk '{print $2}' | sed "s@^\(malcolmnetsec\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/") )
+          for IMAGE in "${IMAGES[@]}"; do
+            docker pull "$IMAGE"
+          done
+          DEST_IMAGES_TGZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_short_hash.outputs.hash }}_images.tar.gz
+          docker save "${IMAGES[@]}" | gzip > "$DEST_IMAGES_TGZ"
           pushd ./malcolm-iso
-          sudo /usr/bin/env bash ./build.sh -d "$DESTNAMEIMAGES"
+          sudo /usr/bin/env bash ./build.sh -d "$DEST_IMAGES_TGZ"
           rm -rf ./shared/
           sudo chmod 644 ./malcolm-*.*
           popd
