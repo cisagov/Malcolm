@@ -74,6 +74,11 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
       -
+        name: Extract short hash
+        shell: bash
+        run: echo "##[set-output name=hash;]$(git rev-parse --short $GITHUB_SHA)"
+        id: extract_short_hash
+      -
         name: Extract Malcolm version
         shell: bash
         run: echo "##[set-output name=mversion;]$(grep -P "^\s+image:\s*malcolm" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
@@ -81,8 +86,10 @@ jobs:
       -
         name: Build image
         run: |
+          DESTNAMEIMAGES=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_short_hash.outputs.hash }}_images.tar.gz
+          docker save $(grep image: docker-compose.yml | awk '{print $2}' | sed "s@^\(malcolmnetsec\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/") | gzip > "$DESTNAMEIMAGES"
           pushd ./malcolm-iso
-          sudo /usr/bin/env bash ./build.sh
+          sudo /usr/bin/env bash ./build.sh -d "$DESTNAMEIMAGES"
           rm -rf ./shared/
           sudo chmod 644 ./malcolm-*.*
           popd
