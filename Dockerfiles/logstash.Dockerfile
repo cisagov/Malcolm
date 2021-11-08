@@ -81,9 +81,9 @@ COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y curl gettext python-setuptools python-pip python-requests python-yaml openssl && \
+    yum install -y curl gettext python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
-    pip install py2-ipaddress supervisor && \
+    pip3 install ipaddress supervisor pyyaml && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                             logstash-filter-json logstash-filter-prune logstash-filter-http \
                             logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
@@ -110,7 +110,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     chown --silent -R ${PUSER}:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue && \
     curl -sSL -o /usr/share/logstash/config/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf" && \
       ( awk -F '\t' '{gsub(":", "", $1); if (length($1) == 6) {if ($3) {print $1"\t"$3} else if ($2) {print $1"\t"$2}}}' /usr/share/logstash/config/oui.txt > /usr/share/logstash/config/oui-logstash.txt) && \
-      python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
+      python3 /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
 
 # As the keystore is encapsulated in logstash, this isn't really necessary. It's included
 # here just to suppress the prompt when creating the keystore. If you're concerned about it
@@ -126,7 +126,7 @@ EXPOSE 9600
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

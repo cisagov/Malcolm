@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-from __future__ import print_function
 
 import argparse
 import datetime
@@ -19,15 +17,11 @@ from collections import defaultdict
 
 ###################################################################################################
 debug = False
-PY3 = (sys.version_info.major >= 3)
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 
 ###################################################################################################
-if not PY3:
-  if hasattr(__builtins__, 'raw_input'): input = raw_input
-
 try:
   FileNotFoundError
 except NameError:
@@ -93,10 +87,7 @@ def main():
         tmpMap.update(json.loads(fingerprint))
         for key in keys:
           values.append('-'.join([str(int(x, 0)) for x in tmpMap[key].split()]))
-        if PY3:
-          ja3Map[hashlib.md5(','.join(values).encode()).hexdigest()].extend(tmpMap['desc'].strip('"').strip("'").split(' / '))
-        else:
-          ja3Map[hashlib.md5(','.join(values)).hexdigest()].extend(tmpMap['desc'].strip('"').strip("'").split(' / '))
+        ja3Map[hashlib.md5(','.join(values).encode()).hexdigest()].extend(tmpMap['desc'].strip('"').strip("'").split(' / '))
       except Exception as e:
         eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
   except Exception as e:
@@ -147,10 +138,7 @@ def main():
       finalMap[k] = list(set([element.strip('"').strip("'").strip() for element in v]))
 
   with open(args.output, 'w+') as outfile:
-    if PY3:
-      yaml.dump(finalMap, outfile)
-    else:
-      yaml.safe_dump(finalMap, outfile, default_flow_style=False)
+    yaml.dump(finalMap, outfile)
 
 if __name__ == '__main__':
   main()

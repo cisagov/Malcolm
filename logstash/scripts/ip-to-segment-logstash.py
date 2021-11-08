@@ -1,9 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-
-from __future__ import print_function
 
 import sys
 import os
