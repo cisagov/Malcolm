@@ -26,9 +26,6 @@ JSON_MAP_KEY_NAME = 'name'
 JSON_MAP_KEY_TAG = 'tag'
 JSON_MAP_KEY_TYPE = 'type'
 
-ORIGINATION_ECS_MAP = {'orig' : 'source',
-                       'resp' : 'destination'}
-
 ###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
@@ -221,12 +218,11 @@ def main():
             # ip addresses mapped to hostname
             ipList = list(set([a for a in addrList if not a.startswith('_')]))
             if (len(ipList) >= 1):
-              for source in ['orig', 'resp']:
+              for source in ['source', 'destination']:
                 filterId += 1
-                fieldName = "{}_h".format(source)
-                newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[source], "hostname"]])
+                newFieldName = "".join([f"[{x}]" for x in [source, "hostname"]])
                 print("", file=outFile)
-                print('    if ([zeek][{}]) and ({}) {{ '.format(fieldName, ' or '.join(['([zeek][{}] == "{}")'.format(fieldName, ip) for ip in ipList])), file=outFile)
+                print('    if ([{}][ip]) and ({}) {{ '.format(source, ' or '.join(['([{}][ip] == "{}")'.format(source, ip) for ip in ipList])), file=outFile)
                 print('      mutate {{ id => "mutate_add_autogen_{}_ip_hostname_{}"'.format(source, filterId), file=outFile)
                 print('        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName), file=outFile)
                 print("      }", file=outFile)
@@ -236,12 +232,11 @@ def main():
             # mac addresses mapped to hostname
             macList = list(set([a for a in addrList if a.startswith('_')]))
             if (len(macList) >= 1):
-              for source in ['orig', 'resp']:
+              for source in ['source', 'destination']:
                 filterId += 1
-                fieldName = "{}_l2_addr".format(source)
-                newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[source], "hostname"]])
+                newFieldName = "".join([f"[{x}]" for x in [source, "hostname"]])
                 print("", file=outFile)
-                print('    if ([zeek][{}]) and ({}) {{ '.format(fieldName, ' or '.join(['([zeek][{}] == "{}")'.format(fieldName, mac[1:]) for mac in macList])), file=outFile)
+                print('    if ([{}][mac]) and ({}) {{ '.format(source, ' or '.join(['([{}][mac] == "{}")'.format(source, mac[1:]) for mac in macList])), file=outFile)
                 print('      mutate {{ id => "mutate_add_autogen_{}_mac_hostname_{}"'.format(source, filterId), file=outFile)
                 print('        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName), file=outFile)
                 print("      }", file=outFile)
@@ -251,15 +246,14 @@ def main():
           # for the segment(s) to be checked, create two cidr filters, one for source IP and one for dest IP
           for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].items():
             ipList = list(set(ipList))
-            for source in ['orig', 'resp']:
+            for source in ['source', 'destination']:
               filterId += 1
               # ip addresses/ranges mapped to network segment names
-              fieldName = "{}_h".format(source)
-              newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[source], "segment"]])
+              newFieldName = "".join([f"[{x}]" for x in [source, "segment"]])
               print("", file=outFile)
-              print("    if ([zeek][{}]) {{ cidr {{".format(fieldName), file=outFile)
+              print("    if ([{}][ip]) {{ cidr {{".format(source), file=outFile)
               print('      id => "cidr_autogen_{}_segment_{}"'.format(source, filterId), file=outFile)
-              print('      address => [ "%{{[zeek][{}]}}" ]'.format(fieldName), file=outFile)
+              print('      address => [ "%{{[{}][ip]}}" ]'.format(source), file=outFile)
               print('      network => [ {} ]'.format(', '.join('"{}"'.format(ip) for ip in ipList)), file=outFile)
               print('      add_tag => [ "{}" ]'.format(segmentName), file=outFile)
               print('      add_field => {{ "{}" => "{}" }}'.format(newFieldName, segmentName), file=outFile)
@@ -277,8 +271,8 @@ def main():
       if addedFields:
         print("", file=outFile)
         print('  # deduplicate any added fields', file=outFile)
-        for field in list(itertools.product(['orig', 'resp'], ['hostname', 'segment'])):
-          newFieldName = newFieldName = "".join([f"[{x}]" for x in [ORIGINATION_ECS_MAP[field[0]], "field[1]"]])
+        for field in list(itertools.product(['source', 'destination'], ['hostname', 'segment'])):
+          newFieldName = newFieldName = "".join([f"[{x}]" for x in [field[0], "field[1]"]])
           if newFieldName in addedFields:
             print("", file=outFile)
             print('  if ({}) {{ '.format(newFieldName), file=outFile)
