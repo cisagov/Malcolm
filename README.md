@@ -934,7 +934,7 @@ A stock installation of Arkime extracts all of its network connection ("session"
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
-One value of particular mention is **Zeek Log Type** (`zeek.logType` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `zeek.logType == conn`, or restricted to records from `weird.log` by searching `zeek.logType == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `zeek.logType == EXISTS!`. On the other hand, to exclude Zeek logs and only view records from PCAP files, use `zeek.logType != EXISTS!`. 
+One value of particular mention is **Zeek Log Type** (`event.dataset` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view records from PCAP files, use `event.dataset != EXISTS!`. 
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
@@ -946,7 +946,7 @@ The values of records created from Zeek logs can be expanded and viewed like any
 
 The Arkime interface displays both Zeek logs and Arkime sessions alongside each other. Using fields common to both data sources, one can [craft queries](#SearchCheatSheet) to filter results matching desired criteria.
 
-A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `zeek.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Arkime's `rootId` field.
+A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `network.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Arkime's `rootId` field.
 
 Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Arkime sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Arkime and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
@@ -971,7 +971,7 @@ The **Sessions** view contains many controls for filtering the sessions displaye
 * [search bar](https://localhost/help#search): Indicated by the magnifying glass **🔍** icon, the search bar allows defining filters on session/log metadata
 * [time bounding](https://localhost/help#timebounding) controls: The **🕘**, **Start**, **End**, **Bounding**, and **Interval** fields, and the **date histogram** can be used to visually zoom and pan the time range being examined.
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
-* views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including several on the `zeek.logType` field. 
+* views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including filtering on the `event.dataset` field. 
 
 ![Malcolm views](./docs/images/screenshots/arkime_log_filter.png)
 
@@ -1199,8 +1199,8 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 
 | | [Arkime Search String](https://localhost/help#search) | [Kibana Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [Kibana Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
 |---|:---:|:---:|:---:|
-| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|`zeek.logType:*`|
-| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|`NOT zeek.logType:*`|
+| Field exists |`event.dataset == EXISTS!`|`_exists_:event.dataset`|`event.dataset:*`|
+| Field does not exist |`event.dataset != EXISTS!`|`NOT _exists_:event.dataset`|`NOT event.dataset:*`|
 | Field matches a value |`port.dst == 22`|`destination.port:22`|`destination.port:22`|
 | Field does not match a value |`port.dst != 22`|`NOT destination.port:22`|`NOT destination.port:22`|
 | Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|`tags:(external_source or external_destination)`|
@@ -1215,7 +1215,7 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
-| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|`zeek.logType:notice`|
+| Zeek log type |`event.dataset == notice`|`event.dataset:notice`|`event.dataset:notice`|
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
 
@@ -1223,35 +1223,35 @@ When building complex queries, it is **strongly recommended** that you enclose s
 
 As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying Elasticsearch schema. A complete list of these fields can be found in the Arkime help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
 
-Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `zeek.orig_h` in Kibana.
+Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `source.ip` in Kibana.
 
 The table below shows the mapping of some of these fields.
 
 | Field Description |Arkime Field Alias(es)|Arkime-mapped Zeek Field(s)|Zeek Field(s)|
 |---|:---:|:---:|:---:|
-| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`network.community_id`|`zeek.community_id`|
-| Destination IP |`ip.dst`|`destination.ip`|`zeek.resp_h`|
-| Destination MAC |`mac.dst`|`destination.mac`|`zeek.resp_l2_addr`|
-| Destination Port |`port.dst`|`destination.port`|`zeek.resp_p`|
+| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`network.community_id`|`network.community_id`|
+| Destination IP |`ip.dst`|`destination.ip`|`destination.ip`|
+| Destination MAC |`mac.dst`|`destination.mac`|`destination.mac`|
+| Destination Port |`port.dst`|`destination.port`|`destination.port`|
 | Duration |`session.length`|`length`|`zeek_conn.duration`|
 | First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
-| IP Protocol |`ip.protocol`|`ipProtocol`|`zeek.proto`|
+| IP Protocol |`ip.protocol`|`ipProtocol`|`network.transport`|
 | Last Packet Time |`stoptime`|`lastPacket`||
-| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`zeek.filetype`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
-| Protocol/Service |`protocols`|`protocol`|`zeek.proto`, `zeek.service`|
+| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`file.mime_type`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
+| Protocol/Service |`protocols`|`protocol`|`network.transport`, `network.protocol`|
 | Request Bytes |`databytes.src`, `bytes.src`|`source.bytes`, `client.bytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
 | Request Packets |`packets.src`|`source.packets`|`zeek_conn.orig_pkts`|
 | Response Bytes |`databytes.dst`, `bytes.dst`|`destination.bytes`, `server.bytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
 | Response Packets |`packets.dst`|`destination.packets`|`zeek_con.resp_pkts`|
-| Source IP |`ip.src`|`source.ip`|`zeek.orig_h`|
-| Source MAC |`mac.src`|`source.mac`|`zeek.orig_l2_addr`|
-| Source Port |`port.src`|`source.port`|`zeek.orig_p`|
+| Source IP |`ip.src`|`source.ip`|`source.ip`|
+| Source MAC |`mac.src`|`source.mac`|`source.mac`|
+| Source Port |`port.src`|`source.port`|`source.port`|
 | Total Bytes |`databytes`, `bytes`|`totDataBytes`, `network.bytes`||
 | Total Packets |`packets`|`network.packets`||
 | Username |`user`|`user`|`related.user`|
 | Zeek Connection UID|||`zeek.uid`|
 | Zeek File UID |||`zeek.fuid`|
-| Zeek Log Type |||`zeek.logType`|
+| Zeek Log Type |||`event.dataset`|
 
 In addition to the fields listed above, Arkime provides several special field aliases for matching any field of a particular type. While these aliases do not exist in Kibana *per se*, they can be approximated as illustrated below.
 
@@ -1326,7 +1326,7 @@ Each non-comment line (not beginning with a `#`), defines an address-to-name map
 ```
 Each line consists of three `|`-separated fields: address(es), hostname, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
-As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP and MAC address fields (`zeek.orig_h`, `zeek.resp_h`, `zeek.orig_l2_addr`, and `zeek.resp_l2_addr`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `source.hostname` or `destination.hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
+As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP and MAC address fields (`source.ip`, `destination.ip`, `source.mac`, and `destination.mac`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `source.hostname` or `destination.hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
 
 `source.hostname` and `destination.hostname` may each contain multiple values. For example, if both a host's source IP address and source MAC address were matched by two different lines, `source.hostname` would contain the hostname values from both matching lines.
 
@@ -1356,9 +1356,9 @@ Each non-comment line (not beginning with a `#`), defines an subnet-to-name mapp
 ```
 Each line consists of three `|`-separated fields: CIDR-formatted subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
-As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`zeek.orig_h` and `zeek.resp_h`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `source.segment` or `destination.segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
+As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`source.ip` and `destination.ip`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `source.segment` or `destination.segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
 
-`source.segment` and `destination.segment` may each contain multiple values. For example, if `cidr-map.txt` specifies multiple overlapping subnets on different lines, `source.segment` would contain the hostname values from both matching lines if `zeek.orig_h` belonged to both subnets.
+`source.segment` and `destination.segment` may each contain multiple values. For example, if `cidr-map.txt` specifies multiple overlapping subnets on different lines, `source.segment` would contain the hostname values from both matching lines if `source.ip` belonged to both subnets.
 
 If both `source.segment` and `destination.segment` are added to a log, and if they contain different values, the tag `cross_segment` will be added to the log's `tags` field for convenient identification of cross-segment traffic. This traffic could be easily visualized using Arkime's **Connections** graph, by setting the **Src:** value to **Originating Network Segment** and the **Dst:** value to **Responding Network Segment**:
 
@@ -1427,7 +1427,7 @@ These categories' severity scores can be customized by editing `logstash/maps/ma
 
 * Each category can be assigned a number between `1` and `100` for severity scoring.
 * Any category may be disabled by assigning it a score of `0`.
-* A severity score can be assigned for any [supported protocol](#Protocols) by adding an entry with the key formatted like `"PROTOCOL_XYZ"`, where `XYZ` is the uppercased value of the protocol as stored in the `zeek.service` field. For example, to assign a score of `40` to Zeek logs generated for SSH traffic, you could add the following line to `malcolm_severity.yaml`:
+* A severity score can be assigned for any [supported protocol](#Protocols) by adding an entry with the key formatted like `"PROTOCOL_XYZ"`, where `XYZ` is the uppercased value of the protocol as stored in the `network.protocol` field. For example, to assign a score of `40` to Zeek logs generated for SSH traffic, you could add the following line to `malcolm_severity.yaml`:
 
 ```
 "PROTOCOL_SSH": 40

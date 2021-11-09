@@ -155,7 +155,7 @@ def main():
     #
     # fieldFormatMap is
     #    {
-    #        "zeek.orig_h": {
+    #        "source.ip": {
     #            "id": "drilldown",
     #            "params": {
     #                "parsedUrl": {
@@ -166,8 +166,8 @@ def main():
     #                "urlTemplates": [
     #                    null,
     #                    {
-    #                        "url": "/idkib2ark/zeek.orig_h == {{value}}",
-    #                        "label": "Arkime: zeek.orig_h == {{value}}"
+    #                        "url": "/idkib2ark/source.ip == {{value}}",
+    #                        "label": "Arkime: source.ip == {{value}}"
     #                    }
     #                ]
     #            }

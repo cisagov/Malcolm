@@ -34,57 +34,57 @@ class ZeekSource extends WISESource {
       "destination.geo.city_name",
       "destination.geo.country_name",
       "destination.hostname",
+      "destination.ip",
+      "destination.ip_reverse_dns",
+      "destination.mac",
       "destination.oui",
+      "destination.port",
       "destination.segment",
+      "event.action",
+      "event.dataset",
       "event.freq_score_v1",
       "event.freq_score_v2",
+      "event.result",
       "event.risk_score",
       "event.risk_score_norm",
       "event.severity",
       "event.severity_tags",
+      "file.mime_type",
       "host.name",
       "ip.protocol",
       "mac.dst",
       "mac.src",
       "network.community_id",
+      "network.community_id",
+      "network.protocol",
+      "network.protocol_version",
+      "network.transport",
       "node",
       "oui.dst",
       "oui.src",
       "protocols",
+      "related.password",
+      "related.user",
       "rootId",
       "source.geo.city_name",
       "source.geo.country_name",
       "source.hostname",
+      "source.ip",
+      "source.ip_reverse_dns",
+      "source.mac",
       "source.oui",
+      "source.port",
       "source.segment",
+      "tags",
       "tls.client.ja3",
       "tls.client.ja3_description",
       "tls.server.ja3s",
       "tls.server.ja3s_description",
-      "tags",
       "user_agent.original",
-      "event.action",
-      "zeek.community_id",
-      "destination.ip_reverse_dns",
       "zeek.filename",
-      "zeek.filetype",
       "zeek.fuid",
-      "zeek.logType",
-      "zeek.orig_h",
-      "zeek.orig_l2_addr",
-      "zeek.orig_p",
-      "related.password",
-      "zeek.proto",
-      "zeek.resp_h",
-      "zeek.resp_l2_addr",
-      "zeek.resp_p",
-      "event.result",
-      "zeek.service",
-      "zeek.service_version",
-      "source.ip_reverse_dns",
       "zeek.ts",
       "zeek.uid",
-      "related.user",
       "zeek_bacnet.bvlc_function",
       "zeek_bacnet.invoke_id",
       "zeek_bacnet.pdu_service",
@@ -891,11 +891,11 @@ class ZeekSource extends WISESource {
     var allFieldsStr = allFields.join(',');
 
     // add URL link for assigned transport protocol numbers
-    var protoFieldsStr = allFields.filter(value => /^(network\.transport|zeek.proto|ip\.protocol)$/i.test(value)).join(',');
+    var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_proto",  {name:"Protocol Registry", url:'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields:protoFieldsStr});
 
     // add right-click for searching IANA for services
-    var serviceFieldsStr = allFields.filter(value => /^(zeek\.service|protocols?|network\.protocol)$/i.test(value)).join(',');
+    var serviceFieldsStr = allFields.filter(value => /^(protocols?|network\.protocol)$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_service",  {name:"Service Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:serviceFieldsStr});
 
     // add right-click for searching VirusTotal for other IP addresses
@@ -921,7 +921,7 @@ class ZeekSource extends WISESource {
     this.api.addValueAction("malcolm_websearch_asn",  {name:"ARIN ASN", url:'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields:asnFieldsStr});
 
     // add right-click for searching mime/media/content types
-    var mimeFieldsStr = allFields.filter(value => /(^zeek\.filetype$|mime[_\.-]?type)/i.test(value)).join(',');
+    var mimeFieldsStr = allFields.filter(value => /mime[_\.-]?type/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
 
     // add right-click for extracted/quarantined files from zeek
@@ -951,37 +951,37 @@ class ZeekSource extends WISESource {
       "  div.sessionDetailMeta.bold Zeek Common Fields\n" +
       "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
       "    +arrayList(session.zeek, 'uid', 'Zeek Connection ID', 'zeek.uid')\n" +
-      "    +arrayList(session.zeek, 'community_id', 'Zeek Connection Community ID', 'zeek.community_id')\n" +
-      "    +arrayList(session.zeek, 'logType', 'Zeek Log Type', 'zeek.logType')\n" +
+      "    +arrayList(session.network, 'community_id', 'Zeek Connection Community ID', 'network.community_id')\n" +
+      "    +arrayList(session.event, 'dataset', 'Zeek Log Type', 'event.dataset')\n" +
       "    +arrayList(session.host, 'name', 'Zeek Node', 'host.name')\n" +
 
       // basic connection information
-      "  if (session.zeek.orig_h || session.zeek.orig_p || session.zeek.orig_l2_addr || session.zeek.resp_h || " +
-      "      session.zeek.resp_p || session.zeek.resp_l2_addr || session.zeek.proto || session.zeek.service || " +
-      "      session.zeek.service_version || session.user_agent.original || session.related.user || session.related.password || " +
+      "  if (session.source.ip || session.source.port || session.source.mac || session.destination.ip || " +
+      "      session.destination.port || session.destination.mac || session.network.transport || session.network.protocol || " +
+      "      session.network.protocol_version || session.user_agent.original || session.related.user || session.related.password || " +
       "      session.event.action || session.event.result || session.event.freq_score_v1 || session.event.freq_score_v2 )\n" +
       "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
-      "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
-      "      +arrayList(session.zeek, 'orig_l2_addr', 'Originating MAC', 'zeek.orig_l2_addr')\n" +
+      "      +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
+      "      +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
       "      +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
       "      +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
       "      +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
       "      +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
       "      +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
       "      +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
-      "      +arrayList(session.zeek, 'resp_h', 'Responding Host', 'zeek.resp_h')\n" +
-      "      +arrayList(session.zeek, 'resp_l2_addr', 'Responding MAC', 'zeek.resp_l2_addr')\n" +
+      "      +arrayList(session.destination, 'ip', 'Responding Host', 'destination.ip')\n" +
+      "      +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
       "      +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
       "      +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
       "      +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
       "      +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
       "      +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
       "      +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
-      "      +arrayList(session.zeek, 'orig_p', 'Originating Port', 'zeek.orig_p')\n" +
-      "      +arrayList(session.zeek, 'resp_p', 'Responding Port', 'zeek.resp_p')\n" +
-      "      +arrayList(session.zeek, 'proto', 'Protocol', 'zeek.proto')\n" +
-      "      +arrayList(session.zeek, 'service', 'Service', 'zeek.service')\n" +
-      "      +arrayList(session.zeek, 'service_version', 'Service Version', 'zeek.service_version')\n" +
+      "      +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
+      "      +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
+      "      +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
+      "      +arrayList(session.network, 'service', 'Service', 'network.protocol')\n" +
+      "      +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
       "      +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
       "      +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
       "      +arrayList(session.related, 'user', 'User', 'related.user')\n" +
@@ -994,11 +994,11 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
       // file information
-      "  if (session.zeek.fuid || session.zeek.filename || session.zeek.filetype)\n" +
+      "  if (session.zeek.fuid || session.zeek.filename || session.file.mime_type)\n" +
       "    dl.sessionDetailMeta(suffix=\"File IDs\")\n" +
       "      +arrayList(session.zeek, 'fuid', 'File ID', 'zeek.fuid')\n" +
       "      +arrayList(session.zeek, 'filename', 'File Name', 'zeek.filename')\n" +
-      "      +arrayList(session.zeek, 'filetype', 'File Magic', 'zeek.filetype')\n" +
+      "      +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
 
       // ####################################################################
       "  br\n");

@@ -6,7 +6,7 @@
     "arkime_sessions3-*"
   ],
   "category_field": [
-    "zeek.service"
+    "network.protocol"
   ],
   "feature_attributes": [
     {
@@ -37,7 +37,7 @@
       "filter": [
         {
           "exists": {
-            "field": "zeek.service",
+            "field": "network.protocol",
             "boost": 1
           }
         },
