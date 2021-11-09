@@ -98,7 +98,7 @@
         "tls.version_protocol": { "type": "keyword" },
         "user_agent.original": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
         "zeekLogDocId": { "type": "keyword" },
-        "zeek.filename": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "file.path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.fuid": { "type": "keyword" },
         "zeek.ts": { "type": "date" },
         "zeek.uid": { "type": "keyword" },

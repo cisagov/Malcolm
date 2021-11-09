@@ -50,6 +50,7 @@ class ZeekSource extends WISESource {
       "event.severity",
       "event.severity_tags",
       "file.mime_type",
+      "file.path",
       "host.name",
       "ip.protocol",
       "mac.dst",
@@ -81,7 +82,6 @@ class ZeekSource extends WISESource {
       "tls.server.ja3s",
       "tls.server.ja3s_description",
       "user_agent.original",
-      "zeek.filename",
       "zeek.fuid",
       "zeek.ts",
       "zeek.uid",
@@ -994,10 +994,10 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
       // file information
-      "  if (session.zeek.fuid || session.zeek.filename || session.file.mime_type)\n" +
+      "  if (session.zeek.fuid || session.file.path || session.file.mime_type)\n" +
       "    dl.sessionDetailMeta(suffix=\"File IDs\")\n" +
       "      +arrayList(session.zeek, 'fuid', 'File ID', 'zeek.fuid')\n" +
-      "      +arrayList(session.zeek, 'filename', 'File Name', 'zeek.filename')\n" +
+      "      +arrayList(session.file, 'path', 'File Name', 'file.path')\n" +
       "      +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
 
       // ####################################################################
