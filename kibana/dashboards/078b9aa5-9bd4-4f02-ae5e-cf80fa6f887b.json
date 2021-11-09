@@ -289,7 +289,7 @@
       "updated_at": "2021-02-10T21:24:07.693Z",
       "version": "Wzg4LDFd",
       "attributes": {
-        "visState": "{\"title\":\"FTP - Username\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.user\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Username\"}}],\"listeners\":{}}",
+        "visState": "{\"title\":\"FTP - Username\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"related.user\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Username\"}}],\"listeners\":{}}",
         "description": "",
         "title": "FTP - Username",
         "uiStateJSON": "{\n  \"vis\": {\n    \"params\": {\n      \"sort\": {\n        \"columnIndex\": null,\n        \"direction\": null\n      }\n    }\n  }\n}",

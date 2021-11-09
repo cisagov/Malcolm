@@ -1208,7 +1208,7 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
 | Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|`http.statuscode >= 200 and http.statuscode < 300`|
 | Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|`tags:(external_source or external_destination) and http.statuscode:401`|
-| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|`zeek_ftp.password:* or zeek_http.password:* or zeek.user:"anonymous"`|
+| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR related.user:"anonymous"`|`zeek_ftp.password:* or zeek_http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
 | Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
@@ -1248,7 +1248,7 @@ The table below shows the mapping of some of these fields.
 | Source Port |`port.src`|`source.port`|`zeek.orig_p`|
 | Total Bytes |`databytes`, `bytes`|`totDataBytes`, `network.bytes`||
 | Total Packets |`packets`|`network.packets`||
-| Username |`user`|`user`|`zeek.user`|
+| Username |`user`|`user`|`related.user`|
 | Zeek Connection UID|||`zeek.uid`|
 | Zeek File UID |||`zeek.fuid`|
 | Zeek Log Type |||`zeek.logType`|
