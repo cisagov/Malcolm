@@ -63,7 +63,7 @@ class ZeekSource extends WISESource {
       "tls.server.ja3s_description",
       "tags",
       "user_agent.original",
-      "zeek.action",
+      "event.action",
       "zeek.community_id",
       "destination.ip_reverse_dns",
       "zeek.filename",
@@ -78,7 +78,7 @@ class ZeekSource extends WISESource {
       "zeek.resp_h",
       "zeek.resp_l2_addr",
       "zeek.resp_p",
-      "zeek.result",
+      "event.result",
       "zeek.service",
       "zeek.service_version",
       "source.ip_reverse_dns",
@@ -959,7 +959,7 @@ class ZeekSource extends WISESource {
       "  if (session.zeek.orig_h || session.zeek.orig_p || session.zeek.orig_l2_addr || session.zeek.resp_h || " +
       "      session.zeek.resp_p || session.zeek.resp_l2_addr || session.zeek.proto || session.zeek.service || " +
       "      session.zeek.service_version || session.user_agent.original || session.related.user || session.related.password || " +
-      "      session.zeek.action || session.zeek.result || session.event.freq_score_v1 || session.event.freq_score_v2 )\n" +
+      "      session.event.action || session.event.result || session.event.freq_score_v1 || session.event.freq_score_v2 )\n" +
       "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
       "      +arrayList(session.zeek, 'orig_h', 'Originating Host', 'zeek.orig_h')\n" +
       "      +arrayList(session.zeek, 'orig_l2_addr', 'Originating MAC', 'zeek.orig_l2_addr')\n" +
@@ -982,8 +982,8 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.zeek, 'proto', 'Protocol', 'zeek.proto')\n" +
       "      +arrayList(session.zeek, 'service', 'Service', 'zeek.service')\n" +
       "      +arrayList(session.zeek, 'service_version', 'Service Version', 'zeek.service_version')\n" +
-      "      +arrayList(session.zeek, 'action', 'Action', 'zeek.action')\n" +
-      "      +arrayList(session.zeek, 'result', 'Result', 'zeek.result')\n" +
+      "      +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
+      "      +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
       "      +arrayList(session.related, 'user', 'User', 'related.user')\n" +
       "      +arrayList(session.related, 'password', 'Password', 'related.password')\n" +
       "      +arrayList(session.user_agent, 'original', 'User Agent', 'user_agent.original')\n" +

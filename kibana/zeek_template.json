@@ -85,7 +85,7 @@
         "related.user": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
 
         "zeekLogDocId": { "type": "keyword" },
-        "zeek.action": { "type": "keyword" },
+        "event.action": { "type": "keyword" },
         "zeek.community_id": { "type": "keyword" },
         "zeek.filename": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.filetype": { "type": "keyword" },
@@ -99,7 +99,7 @@
         "zeek.resp_h": { "type": "ip" },
         "zeek.resp_l2_addr": { "type": "keyword" },
         "zeek.resp_p": { "type": "integer" },
-        "zeek.result": { "type": "keyword" },
+        "event.result": { "type": "keyword" },
         "zeek.service": { "type": "keyword" },
         "zeek.service_version": { "type": "keyword" },
         "zeek.ts": { "type": "date" },

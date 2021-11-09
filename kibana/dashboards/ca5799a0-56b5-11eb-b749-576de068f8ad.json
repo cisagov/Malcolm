@@ -448,8 +448,8 @@
         "columns": [
           "zeek.logType",
           "zeek.service",
-          "zeek.action",
-          "zeek.result",
+          "event.action",
+          "event.result",
           "source.ip",
           "destination.ip",
           "destination.port",

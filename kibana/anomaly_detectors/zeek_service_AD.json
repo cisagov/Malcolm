@@ -10,12 +10,12 @@
   ],
   "feature_attributes": [
     {
-      "feature_name": "zeek_action",
+      "feature_name": "event_action",
       "feature_enabled": true,
       "aggregation_query": {
-        "zeek_action": {
+        "event_action": {
           "value_count": {
-            "field": "zeek.action"
+            "field": "event.action"
           }
         }
       }
@@ -26,7 +26,7 @@
       "aggregation_query": {
         "zeek_result": {
           "value_count": {
-            "field": "zeek.result"
+            "field": "event.result"
           }
         }
       }
@@ -43,13 +43,13 @@
         },
         {
           "exists": {
-            "field": "zeek.action",
+            "field": "event.action",
             "boost": 1
           }
         },
         {
           "exists": {
-            "field": "zeek.result",
+            "field": "event.result",
             "boost": 1
           }
         }
