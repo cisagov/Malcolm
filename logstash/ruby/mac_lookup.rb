@@ -44,7 +44,7 @@ def filter(event)
   _names = _names.uniq
   if _names.length > 1
     event.set("#{@target}", _names)
-  elsif if _names.length > 0
+  elsif _names.length > 0
     event.set("#{@target}", _names.first)
   end
 
