@@ -41,7 +41,12 @@ def filter(event)
     end
   end
 
-  event.set("#{@target}", _names.uniq) unless _names.empty?
+  _names = _names.uniq
+  if _names.length > 1
+    event.set("#{@target}", _names)
+  elsif if _names.length > 0
+    event.set("#{@target}", _names.first)
+  end
 
   [event]
 end
