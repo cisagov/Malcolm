@@ -101,8 +101,8 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek_tds_rpc.procedure_name",
-          "zeek_tds_rpc.parameter",
+          "zeek.tds_rpc.procedure_name",
+          "zeek.tds_rpc.parameter",
           "zeek.uid"
         ],
         "sort": [
@@ -197,7 +197,7 @@
       "version": "WzM1NywxXQ==",
       "attributes": {
         "title": "Tabular Data Stream - RPC Procedure",
-        "visState": "{\"title\":\"Tabular Data Stream - RPC Procedure\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_tds_rpc.procedure_name\",\"size\":200,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Procedure\"}}]}",
+        "visState": "{\"title\":\"Tabular Data Stream - RPC Procedure\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.tds_rpc.procedure_name\",\"size\":200,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Procedure\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,

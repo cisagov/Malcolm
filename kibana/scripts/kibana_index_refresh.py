@@ -214,14 +214,14 @@ def main():
           drilldownInfoParamsUrlTemplateValues['label'] = 'Port Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
-        elif re.search(r'^(zeek\.service|protocol?|network\.protocol)$', field['name'], re.IGNORECASE) is not None:
+        elif re.search(r'^(protocol?|network\.protocol)$', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching IANA for services
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
           drilldownInfoParamsUrlTemplateValues['label'] = 'Service Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
-        elif re.search(r'^(network\.transport|zeek\.proto|ipProtocol)$', field['name'], re.IGNORECASE) is not None:
+        elif re.search(r'^(network\.transport|ipProtocol)$', field['name'], re.IGNORECASE) is not None:
           # add URL link for assigned transport protocol numbers
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml'
@@ -235,7 +235,7 @@ def main():
           drilldownInfoParamsUrlTemplateValues['label'] = 'ARIN ASN: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
-        elif re.search(r'(^zeek\.filetype$|mime[_\.-]?type)', field['name'], re.IGNORECASE) is not None:
+        elif re.search(r'mime[_\.-]?type', field['name'], re.IGNORECASE) is not None:
           # add drilldown for searching mime/media/content types
           # TODO: '/' in URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
           drilldownInfoParamsUrlTemplateValues = {}
@@ -243,7 +243,7 @@ def main():
           drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'
           drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
-        elif re.search(r'(^zeek_files\.extracted$)', field['name'], re.IGNORECASE) is not None:
+        elif re.search(r'(^zeek\.files\.extracted$)', field['name'], re.IGNORECASE) is not None:
           # add download for extracted/quarantined zeek files
           drilldownInfoParamsUrlTemplateValues = {}
           drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/quarantine/{{value}}'

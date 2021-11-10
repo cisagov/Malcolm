@@ -1208,10 +1208,10 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
 | Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|`http.statuscode >= 200 and http.statuscode < 300`|
 | Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|`tags:(external_source or external_destination) and http.statuscode:401`|
-| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR related.user:"anonymous"`|`zeek_ftp.password:* or zeek_http.password:* or related.user:"anonymous"`|
+| Match any search terms (OR) |`(zeek.ftp.password == EXISTS!) || (zeek.http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek.ftp.password OR _exists_:zeek.http.password OR related.user:"anonymous"`|`zeek.ftp.password:* or zeek.http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
@@ -1233,16 +1233,16 @@ The table below shows the mapping of some of these fields.
 | Destination IP |`ip.dst`|`destination.ip`|`destination.ip`|
 | Destination MAC |`mac.dst`|`destination.mac`|`destination.mac`|
 | Destination Port |`port.dst`|`destination.port`|`destination.port`|
-| Duration |`session.length`|`length`|`zeek_conn.duration`|
+| Duration |`session.length`|`length`|`zeek.conn.duration`|
 | First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
 | IP Protocol |`ip.protocol`|`ipProtocol`|`network.transport`|
 | Last Packet Time |`stoptime`|`lastPacket`||
-| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`file.mime_type`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
+| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`file.mime_type`, `zeek.files.mime_type`, `zeek.ftp.mime_type`, `zeek.http.orig_mime_types`, `zeek.http.resp_mime_types`, `zeek.irc.dcc_mime_type`|
 | Protocol/Service |`protocols`|`protocol`|`network.transport`, `network.protocol`|
-| Request Bytes |`databytes.src`, `bytes.src`|`source.bytes`, `client.bytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
-| Request Packets |`packets.src`|`source.packets`|`zeek_conn.orig_pkts`|
-| Response Bytes |`databytes.dst`, `bytes.dst`|`destination.bytes`, `server.bytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
-| Response Packets |`packets.dst`|`destination.packets`|`zeek_con.resp_pkts`|
+| Request Bytes |`databytes.src`, `bytes.src`|`source.bytes`, `client.bytes`|`zeek.conn.orig_bytes`, `zeek.conn.orig_ip_bytes`|
+| Request Packets |`packets.src`|`source.packets`|`zeek.conn.orig_pkts`|
+| Response Bytes |`databytes.dst`, `bytes.dst`|`destination.bytes`, `server.bytes`|`zeek.conn.resp_bytes`, `zeek.conn.resp_ip_bytes`|
+| Response Packets |`packets.dst`|`destination.packets`|`zeek.con.resp_pkts`|
 | Source IP |`ip.src`|`source.ip`|`source.ip`|
 | Source MAC |`mac.src`|`source.mac`|`source.mac`|
 | Source Port |`port.src`|`source.port`|`source.port`|
@@ -1262,7 +1262,7 @@ In addition to the fields listed above, Arkime provides several special field al
 | Country (code) | `country == [RU,CN]` | `destination.geo.country_code2:(RU OR CN) OR source.geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
 | Country (name) | | `destination.geo.country_name:(Russia OR China) OR source.geo.country_name:(Russia OR China)` |
 | ASN | `asn == "*Mozilla*"` | `source.as.full:*Mozilla* OR destination.as.full:*Mozilla* OR dns.ASN:*Mozilla*` |
-| Host | `host == www.microsoft.com` | `zeek_http.host:www.microsoft.com (or zeek_dhcp.host_name, zeek_dns.host, zeek_ntlm.host, smb.host, etc.)` |
+| Host | `host == www.microsoft.com` | `zeek.http.host:www.microsoft.com (or zeek.dhcp.host_name, zeek.dns.host, zeek.ntlm.host, smb.host, etc.)` |
 | Protocol (layers >= 4) | `protocols == tls` | `protocol:tls` |
 | User | `user == EXISTS! && user != anonymous` | `_exists_:user AND (NOT user:anonymous)` |
 

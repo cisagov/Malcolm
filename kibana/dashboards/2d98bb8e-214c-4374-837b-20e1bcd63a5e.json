@@ -260,7 +260,7 @@
       "version": "WzMzNSwxXQ==",
       "attributes": {
         "title": "DHCP - IP to MAC Assignment",
-        "visState": "{\"title\":\"DHCP - IP to MAC Assignment\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dhcp.assigned_ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Assigned IP Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dhcp.mac\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"MAC Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Source IP Address\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Destination IP Address\"}}]}",
+        "visState": "{\"title\":\"DHCP - IP to MAC Assignment\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.assigned_ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Assigned IP Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.mac\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"MAC Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Source IP Address\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Destination IP Address\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
         "version": 1,
@@ -290,7 +290,7 @@
       "version": "WzMzNiwxXQ==",
       "attributes": {
         "title": "DHCP - Client Software",
-        "visState": "{\"title\":\"DHCP - Client Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}],\"splitColumn\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Server Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dhcp.client_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Client Software\"}}]}",
+        "visState": "{\"title\":\"DHCP - Client Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}],\"splitColumn\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Server Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.client_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Client Software\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
         "version": 1,
@@ -320,7 +320,7 @@
       "version": "WzMzNywxXQ==",
       "attributes": {
         "title": "DHCP - Server Software",
-        "visState": "{\"title\":\"DHCP - Server Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dhcp.server_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Server Software\"}}]}",
+        "visState": "{\"title\":\"DHCP - Server Software\",\"type\":\"table\",\"params\":{\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Client Software\",\"aggType\":\"terms\"}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dhcp.server_software\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Server Software\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
         "version": 1,
@@ -353,14 +353,14 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "zeek_dhcp.mac",
-          "zeek_dhcp.assigned_ip",
+          "zeek.dhcp.mac",
+          "zeek.dhcp.assigned_ip",
           "destination.ip",
-          "zeek_dhcp.host_name",
-          "zeek_dhcp.domain",
-          "zeek_dhcp.msg_types",
-          "zeek_dhcp.client_software",
-          "zeek_dhcp.server_software",
+          "zeek.dhcp.host_name",
+          "zeek.dhcp.domain",
+          "zeek.dhcp.msg_types",
+          "zeek.dhcp.client_software",
+          "zeek.dhcp.server_software",
           "zeek.uid"
         ],
         "sort": [

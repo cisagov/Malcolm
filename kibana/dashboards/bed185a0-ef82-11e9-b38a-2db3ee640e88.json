@@ -102,7 +102,7 @@
           "destination.ip",
           "destination.port",
           "event.dataset",
-          "zeek_tds.command",
+          "zeek.tds.command",
           "zeek.uid"
         ],
         "sort": [
@@ -197,7 +197,7 @@
       "version": "WzM2MTAsMV0=",
       "attributes": {
         "title": "Tabular Data Stream - Command",
-        "visState": "{\"title\":\"Tabular Data Stream - Command\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek_tds.command\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Command\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "visState": "{\"title\":\"Tabular Data Stream - Command\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.tds.command\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Command\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "",
         "version": 1,
@@ -293,7 +293,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek_tds.command",
+          "zeek.tds.command",
           "zeek.uid"
         ],
         "sort": [

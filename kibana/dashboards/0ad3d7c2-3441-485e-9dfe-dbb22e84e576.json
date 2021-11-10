@@ -224,7 +224,7 @@
       "version": "WzExNSwxXQ==",
       "attributes": {
         "title": "DNS - Queries",
-        "visState": "{\"title\":\"DNS - Queries\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek_dns.query\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Query\"}}]}",
+        "visState": "{\"title\":\"DNS - Queries\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dns.query\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Query\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "",
         "version": 1,
@@ -405,8 +405,8 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "zeek_dns.query",
-          "zeek_dns.answers",
+          "zeek.dns.query",
+          "zeek.dns.answers",
           "zeek.uid"
         ],
         "sort": [
