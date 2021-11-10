@@ -94,7 +94,6 @@ FILES_IN_IMAGES=(
   "/var/www/upload/js/jquery.fileupload.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
   "/var/www/htadmin/index.php;htadmin"
-  "/usr/share/logstash/config/oui-logstash.txt;logstash"
   "/etc/ip_protocol_numbers.yaml;logstash"
   "/etc/ja3.yaml;logstash"
   "/etc/vendor_macs.yaml;logstash"
