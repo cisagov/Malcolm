@@ -2033,6 +2033,10 @@ After upgrading following one of the previous outlines, give Malcolm several min
 
 Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
 
+### Major releases
+
+The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
+
 ## <a name="Forks"></a>Forks
 
 [CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
