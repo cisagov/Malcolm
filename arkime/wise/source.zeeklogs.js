@@ -994,7 +994,7 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
       // file information
-      "  if (session.zeek.fuid || session.file.path || session.file.mime_type)\n" +
+      "  if (session.zeek.fuid || (session.file && (session.file.path || session.file.mime_type)))\n" +
       "    dl.sessionDetailMeta(suffix=\"File IDs\")\n" +
       "      +arrayList(session.zeek, 'fuid', 'File ID', 'zeek.fuid')\n" +
       "      +arrayList(session.file, 'path', 'File Name', 'file.path')\n" +

@@ -132,6 +132,8 @@ def main():
   except Exception as e:
     eprint('"{}" raised for "{}"'.format(str(e), fingerprint))
 
+  # todo: https://sslbl.abuse.ch/ja3-fingerprints/
+
   finalMap = dict()
   for k, v in ja3Map.items():
     if (len(k) == 32) and all(c in string.hexdigits for c in k):
