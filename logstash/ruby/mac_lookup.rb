@@ -6,21 +6,21 @@ def register(params)
   @source = params["source"]
   @target = params["target"]
   if File.exist?(params["map_path"])
-    @macmap = Hash.new
+    @macarray = Array.new
     YAML.load(File.read(params["map_path"])).each do |mac|
-      _low = mac_string_to_integer(mac['low'])
-      _high = mac_string_to_integer(mac['high'])
-      @macmap[(_low.._high)] = mac['name']
+      @macarray.push([mac_string_to_integer(mac['low']), mac_string_to_integer(mac['high']), mac['name']])
     end
+    # Array.bsearch only works on a sorted array
+    @macarray.sort_by! { |k| [k[0], k[1]]}
   else
-    @macmap = nil
+    @macarray = nil
   end
   @macregex = Regexp.new(/\A([0-9a-fA-F]{2}[-:.]){5}([0-9a-fA-F]{2})\z/)
 end
 
 def filter(event)
   _mac = event.get("#{@source}")
-  if _mac.nil? or @macmap.nil?
+  if _mac.nil? or @macarray.nil?
     return [event]
   end
 
@@ -29,14 +29,16 @@ def filter(event)
   case _mac
   when String
     if @macregex.match?(_mac)
-      _name = @macmap.find{|key, value| key === mac_string_to_integer(_mac)}&.[](1)
-      _names.push(_name) unless _name.nil?
+      _macint = mac_string_to_integer(_mac)
+      _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+      _names.push(_vendor[2]) unless _vendor.nil?
     end
   when Array
     _mac.each do |_addr|
       if @macregex.match?(_addr)
-        _name = @macmap.find{|key, value| key === mac_string_to_integer(_addr)}&.[](1)
-        _names.push(_name) unless _name.nil?
+        _macint = mac_string_to_integer(_addr)
+        _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+        _names.push(_vendor[2]) unless _vendor.nil?
       end
     end
   end
