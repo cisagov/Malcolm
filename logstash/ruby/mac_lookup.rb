@@ -15,6 +15,7 @@ def register(params)
   else
     @macmap = nil
   end
+  @macregex = Regexp.new(/\A([0-9a-fA-F]{2}[-:.]){5}([0-9a-fA-F]{2})\z/)
 end
 
 def filter(event)
@@ -23,11 +24,25 @@ def filter(event)
     return [event]
   end
 
-  if /\A([0-9a-fA-F]{2}[-:.]){5}([0-9a-fA-F]{2})\z/.match?(_mac)
-    _macint = mac_string_to_integer(_mac)
-    _name = @macmap.find{|key, value| key === _macint}&.[](1)
-    event.set("#{@target}", _name) unless _name.nil?
+  _names = Array.new
+
+  case _mac
+  when String
+    if @macregex.match?(_mac)
+      _name = @macmap.find{|key, value| key === mac_string_to_integer(_mac)}&.[](1)
+      _newVals.push(_name) unless _name.nil?
+    end
+  when Array
+    _mac.each do |_addr|
+      if @macregex.match?(_addr)
+        _name = @macmap.find{|key, value| key === mac_string_to_integer(_addr)}&.[](1)
+        _newVals.push(_name) unless _name.nil?
+      end
+    end
   end
+
+  event.set("#{@target}", _names.uniq) unless _names.empty?
+
   [event]
 end
 

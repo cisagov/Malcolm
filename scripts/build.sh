@@ -97,6 +97,7 @@ FILES_IN_IMAGES=(
   "/usr/share/logstash/config/oui-logstash.txt;logstash"
   "/etc/ip_protocol_numbers.yaml;logstash"
   "/etc/ja3.yaml;logstash"
+  "/etc/vendor_macs.yaml;logstash"
   "/opt/arkime/etc/GeoLite2-ASN.mmdb;arkime"
   "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"
   "/opt/arkime/etc/ipv4-address-space.csv;arkime"
