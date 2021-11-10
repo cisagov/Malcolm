@@ -30,13 +30,13 @@ def filter(event)
   when String
     if @macregex.match?(_mac)
       _name = @macmap.find{|key, value| key === mac_string_to_integer(_mac)}&.[](1)
-      _newVals.push(_name) unless _name.nil?
+      _names.push(_name) unless _name.nil?
     end
   when Array
     _mac.each do |_addr|
       if @macregex.match?(_addr)
         _name = @macmap.find{|key, value| key === mac_string_to_integer(_addr)}&.[](1)
-        _newVals.push(_name) unless _name.nil?
+        _names.push(_name) unless _name.nil?
       end
     end
   end
