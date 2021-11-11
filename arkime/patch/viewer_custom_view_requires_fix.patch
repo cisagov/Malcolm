@@ -1,0 +1,13 @@
+diff --git a/viewer/viewer.js b/viewer/viewer.js
+index 5b19521b..340638ea 100755
+--- a/viewer/viewer.js
++++ b/viewer/viewer.js
+@@ -310,7 +310,7 @@ function parseCustomView (key, input) {
+     if (!info) {
+       continue;
+     }
+-    const parts = ViewerUtils.splitRemain(info.dbField, '.', 1);
++    const parts = info.dbField.split(/\.(?=[^\.]+$)/);
+     if (parts.length === 1) {
+       output += `      +arrayList(session, '${parts[0]}', '${info.friendlyName}', '${field}')\n`;
+     } else {
