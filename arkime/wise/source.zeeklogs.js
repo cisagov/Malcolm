@@ -41,6 +41,7 @@ class ZeekSource extends WISESource {
       "destination.port",
       "destination.segment",
       "event.action",
+      "event.provider",
       "event.dataset",
       "event.freq_score_v1",
       "event.freq_score_v2",

@@ -934,7 +934,7 @@ A stock installation of Arkime extracts all of its network connection ("session"
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
-One value of particular mention is **Zeek Log Type** (`event.dataset` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view records from PCAP files, use `event.dataset != EXISTS!`. 
+One value of particular mention is **Zeek Log Type** (`event.dataset` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view Arkime Sessions, use `fileId != EXISTS!`. 
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
@@ -1066,7 +1066,7 @@ Once the hunt job is complete (and a minute or so has passed, as the `huntId` mu
 
 From this list of filtered sessions you can expand session details and explore packet payloads which matched the hunt search criteria.
 
-The hunt feature is available only for sessions created from full packet capture data, not Zeek logs. This being the case, it is a good idea to click the eyeball **👁** icon and select the **PCAP Files** view to exclude Zeek logs from candidate sessions prior to using the hunt feature.
+The hunt feature is available only for sessions created from full packet capture data, not Zeek logs. This being the case, it is a good idea to click the eyeball **👁** icon and select the **Arkime Sessions** view to exclude Zeek logs from candidate sessions prior to using the hunt feature.
 
 See also Arkime's usage documentation for more information on the [hunt feature](https://localhost/help#hunt).
 
