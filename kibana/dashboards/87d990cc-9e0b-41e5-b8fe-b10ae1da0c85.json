@@ -181,7 +181,8 @@
           "source.ip",
           "zeek.software.software_type",
           "zeek.software.name",
-          "zeek.software.unparsed_version"
+          "zeek.software.unparsed_version",
+          "url.full"
         ],
         "sort": [
           [
