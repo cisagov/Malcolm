@@ -1083,7 +1083,7 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "      +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
       "      +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
-      "      +arrayList(session.network, 'service', 'Service', 'network.protocol')\n" +
+      "      +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
       "      +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
       "      +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
       "      +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
