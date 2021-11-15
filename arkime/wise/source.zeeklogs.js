@@ -1092,6 +1092,8 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
       "    +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
       "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
+      "    +arrayList(session.file, 'path', 'File Path', 'file.path')\n" +
+      "    +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
 
       // ####################################################################
       "  br\n");
