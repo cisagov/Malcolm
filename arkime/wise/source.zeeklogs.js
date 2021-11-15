@@ -1053,49 +1053,46 @@ class MalcolmSource extends WISESource {
       // id information
       "  div.sessionDetailMeta.bold Malcolm Common Fields\n" +
       "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
-      "    +arrayList(session, 'malcolmDocId', 'Malcolm Log ID', 'malcolmDocId')\n" +
+      "    +arrayList(session.event, 'id', 'Log ID', 'event.id')\n" +
       "    +arrayList(session.network, 'community_id', 'Connection Community ID', 'network.community_id')\n" +
-      "    +arrayList(session.event, 'provider', 'Malcolm Data Source', 'event.provider')\n" +
       "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +
+      "    +arrayList(session.event, 'provider', 'Malcolm Data Source', 'event.provider')\n" +
       "    +arrayList(session.host, 'name', 'Malcolm Node', 'host.name')\n" +
+      "    +arrayList(session, 'malcolmDocId', 'Malcolm Log ID', 'malcolmDocId')\n" +
 
       // basic connection information
-      "  if (session.source.ip || session.source.port || session.source.mac || session.destination.ip || " +
-      "      session.destination.port || session.destination.mac || session.network.transport || session.network.protocol || " +
-      "      session.network.protocol_version || session.user_agent.original || session.related.user || session.related.password || " +
-      "      session.event.action || session.event.result || session.event.freq_score_v1 || session.event.freq_score_v2 )\n" +
-      "    dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
-      "      +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
-      "      +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
-      "      +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
-      "      +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
-      "      +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
-      "      +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
-      "      +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
-      "      +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
-      "      +arrayList(session.destination, 'ip', 'Responding Host', 'destination.ip')\n" +
-      "      +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
-      "      +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
-      "      +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
-      "      +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
-      "      +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
-      "      +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
-      "      +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
-      "      +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
-      "      +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
-      "      +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
-      "      +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
-      "      +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
-      "      +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
-      "      +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
-      "      +arrayList(session.related, 'user', 'User', 'related.user')\n" +
-      "      +arrayList(session.related, 'password', 'Password', 'related.password')\n" +
-      "      +arrayList(session.user_agent, 'original', 'User Agent', 'user_agent.original')\n" +
-      "      +arrayList(session.event, 'freq_score_v1', 'Freq Score v1', 'event.freq_score_v1')\n" +
-      "      +arrayList(session.event, 'freq_score_v2', 'Freq Score v2', 'event.freq_score_v2')\n" +
-      "      +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
-      "      +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
-      "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
+      "  dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
+      "    +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
+      "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
+      "    +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
+      "    +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
+      "    +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
+      "    +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
+      "    +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
+      "    +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
+      "    +arrayList(session.destination, 'ip', 'Responding Host', 'destination.ip')\n" +
+      "    +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
+      "    +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
+      "    +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
+      "    +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
+      "    +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
+      "    +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
+      "    +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
+      "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
+      "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
+      "    +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
+      "    +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
+      "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
+      "    +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
+      "    +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
+      "    +arrayList(session.related, 'user', 'User', 'related.user')\n" +
+      "    +arrayList(session.related, 'password', 'Password', 'related.password')\n" +
+      "    +arrayList(session.user_agent, 'original', 'User Agent', 'user_agent.original')\n" +
+      "    +arrayList(session.event, 'freq_score_v1', 'Freq Score v1', 'event.freq_score_v1')\n" +
+      "    +arrayList(session.event, 'freq_score_v2', 'Freq Score v2', 'event.freq_score_v2')\n" +
+      "    +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
+      "    +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
+      "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
       // ####################################################################
       "  br\n");
