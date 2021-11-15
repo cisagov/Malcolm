@@ -658,8 +658,7 @@
           "destination.ip",
           "zeek.files.source",
           "zeek.files.mime_type",
-          "event.id",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [

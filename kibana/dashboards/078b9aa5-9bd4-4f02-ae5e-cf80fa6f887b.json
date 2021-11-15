@@ -357,8 +357,7 @@
           "destination.ip",
           "zeek.ftp.command",
           "zeek.ftp.reply_msg",
-          "event.id",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [

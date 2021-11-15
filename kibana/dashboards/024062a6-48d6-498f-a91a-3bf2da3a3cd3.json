@@ -546,7 +546,7 @@
           "zeek.ocsp.revokereason",
           "zeek.ocsp.revoketime",
           "zeek.ocsp.serialNumber",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,

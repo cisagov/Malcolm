@@ -324,7 +324,7 @@
         "hits": 0,
         "columns": [
           "zeek.signatures.signature_id",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [
@@ -364,7 +364,7 @@
           "zeek.pe.machine",
           "zeek.pe.os",
           "zeek.pe.subsystem",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [

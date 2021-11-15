@@ -155,7 +155,7 @@
           "zeek.signatures.note",
           "zeek.signatures.signature_id",
           "zeek.signatures.signature_count",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [

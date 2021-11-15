@@ -638,8 +638,7 @@
           "zeek.http.host",
           "zeek.http.method",
           "zeek.http.status_msg",
-          "event.id",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [

@@ -493,7 +493,7 @@
           "zeek.signatures.note",
           "zeek.signatures.signature_id",
           "zeek.signatures.signature_count",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [
           [
@@ -621,7 +621,7 @@
           "zeek.ocsp.revokereason",
           "zeek.ocsp.revoketime",
           "zeek.ocsp.serialNumber",
-          "zeek.fuid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,
