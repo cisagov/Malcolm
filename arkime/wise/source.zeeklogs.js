@@ -3,28 +3,28 @@
 const WISESource = require('./wiseSource.js');
 
 //////////////////////////////////////////////////////////////////////////////////
-// Arkime WISE Data Source definition for Zeek logs.
+// Arkime WISE Data Source definition for Malcolm data sources.
 //
 // Part of Malcolm (https://github.com/idaholab/malcolm)
 //
-// Data may be populated with Malcolm's Zeek Logstash filters:
-//   (particularly https://raw.githubusercontent.com/idaholab/Malcolm/main/logstash/pipeline-main/11_zeek_logs.conf)
+// Data may be populated with Malcolm's Logstash filters:
+//   (https://github.com/idaholab/Malcolm/tree/main/logstash/pipelines)
 //
 // Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 // see https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 
-class ZeekSource extends WISESource {
+class MalcolmSource extends WISESource {
   // ----------------------------------------------------------------------------
   constructor (api, section) {
     super(api, section, { dontCache: true });
 
-    this.api.addSource('zeek', this, []);
+    this.api.addSource('malcolm', this, []);
 
     // there are several files where the definitions of fields live: make sure to keep them in sync
-    // - source.zeeklogs.js (this file)
+    // - source.malcolm.js (this file)
     // - Arkime's config.ini
-    // - Kibana's zeek_template.json
+    // - Kibana's malcolm_template.json
 
     // todo: look at expressions for things that have parents (tunnelling, parent files, etc.)
     // todo: look at IP types and use ipPrint?
@@ -989,7 +989,7 @@ class ZeekSource extends WISESource {
       "zeek.x509.san_email",
       "zeek.x509.san_ip",
       "zeek.x509.san_uri",
-      "zeekLogDocId"
+      "malcolmDocId"
     ];
     var allFieldsStr = allFields.join(',');
 
@@ -1042,21 +1042,22 @@ class ZeekSource extends WISESource {
     this.api.addValueAction("malcolm_kibana_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});
     this.api.addValueAction("malcolm_kibana_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
     this.api.addValueAction("malcolm_kibana_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
-    this.api.addValueAction("malcolm_kibana_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
+    this.api.addValueAction("malcolm_kibana_fields",       {name:filterLabel, url:filterUrl, fields:allFieldsStr});
 
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});
 
-    this.api.addView("zeek_common",
-      "if (session.zeek)\n" +
+    this.api.addView("malcolm_common",
+      "if (malcolmDocId)\n" +
 
       // id information
-      "  div.sessionDetailMeta.bold Zeek Common Fields\n" +
+      "  div.sessionDetailMeta.bold Malcolm Common Fields\n" +
       "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
-      "    +arrayList(session.zeek, 'uid', 'Zeek Connection ID', 'zeek.uid')\n" +
-      "    +arrayList(session.network, 'community_id', 'Zeek Connection Community ID', 'network.community_id')\n" +
-      "    +arrayList(session.event, 'dataset', 'Zeek Log Type', 'event.dataset')\n" +
-      "    +arrayList(session.host, 'name', 'Zeek Node', 'host.name')\n" +
+      "    +arrayList(session, 'malcolmDocId', 'Malcolm Log ID', 'malcolmDocId')\n" +
+      "    +arrayList(session.network, 'community_id', 'Connection Community ID', 'network.community_id')\n" +
+      "    +arrayList(session.event, 'provider', 'Malcolm Data Source', 'event.provider')\n" +
+      "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +
+      "    +arrayList(session.host, 'name', 'Malcolm Node', 'host.name')\n" +
 
       // basic connection information
       "  if (session.source.ip || session.source.port || session.source.mac || session.destination.ip || " +
@@ -1096,31 +1097,23 @@ class ZeekSource extends WISESource {
       "      +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
       "      +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
 
-      // file information
-      "  if (session.zeek.fuid || (session.file && (session.file.path || session.file.mime_type)))\n" +
-      "    dl.sessionDetailMeta(suffix=\"File IDs\")\n" +
-      "      +arrayList(session.zeek, 'fuid', 'File ID', 'zeek.fuid')\n" +
-      "      +arrayList(session.file, 'path', 'File Name', 'file.path')\n" +
-      "      +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
-
       // ####################################################################
       "  br\n");
-
   }
 }
 
 // ----------------------------------------------------------------------------
 exports.initSource = function (api) {
-  api.addSourceConfigDef('zeek', {
+  api.addSourceConfigDef('malcolm', {
     singleton: true,
-    name: 'zeek',
-    description: 'Zeek log fields for Arkime as part of Malcolm',
-    link: 'https://github.com/idaholab/malcolm#ArkimeZeek',
+    name: 'malcolm',
+    description: 'Log fields for Arkime as part of Malcolm',
+    link: 'https://github.com/idaholab/malcolm',
     types: [],
     cacheable: false,
     displayable: true,
     fields: []
   });
 
-  return new ZeekSource(api, 'zeek');
+  return new MalcolmSource(api, 'malcolm');
 };

@@ -9,6 +9,7 @@
   "mappings": {
     "session": {
       "properties": {
+        "malcolmDocId": { "type": "keyword" },
         "client.domain": { "type": "keyword" },
         "destination.domain": { "type": "keyword" },
         "destination.geo.city_name": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text" } } },
@@ -991,8 +992,7 @@
         "zeek.x509.san_dns": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.x509.san_email": { "type": "keyword" },
         "zeek.x509.san_ip": { "type": "ip" },
-        "zeek.x509.san_uri": { "type": "keyword", "ignore_above": 16384, "fields": { "text": { "type": "text" } } },
-        "zeekLogDocId": { "type": "keyword" }
+        "zeek.x509.san_uri": { "type": "keyword", "ignore_above": 16384, "fields": { "text": { "type": "text" } } }
       }
     }
   }
