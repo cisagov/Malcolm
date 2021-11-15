@@ -31,6 +31,7 @@ class MalcolmSource extends WISESource {
 
     // add right-clicks
     var allFields = [
+      "malcolmDocId",
       "client.bytes",
       "client.domain",
       "destination.as.full",
@@ -988,8 +989,7 @@ class MalcolmSource extends WISESource {
       "zeek.x509.san_dns",
       "zeek.x509.san_email",
       "zeek.x509.san_ip",
-      "zeek.x509.san_uri",
-      "malcolmDocId"
+      "zeek.x509.san_uri"
     ];
     var allFieldsStr = allFields.join(',');
 
@@ -1048,7 +1048,7 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});
 
     this.api.addView("malcolm_common",
-      "if (malcolmDocId)\n" +
+      "if (session.malcolmDocId)\n" +
 
       // id information
       "  div.sessionDetailMeta.bold Malcolm Common Fields\n" +
