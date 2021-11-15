@@ -21,10 +21,10 @@
       }
     },
     {
-      "feature_name": "zeek_result",
+      "feature_name": "event_result",
       "feature_enabled": true,
       "aggregation_query": {
-        "zeek_result": {
+        "event_result": {
           "value_count": {
             "field": "event.result"
           }
