@@ -290,7 +290,7 @@
           "user",
           "zeek.login.client_user",
           "zeek.login.success",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

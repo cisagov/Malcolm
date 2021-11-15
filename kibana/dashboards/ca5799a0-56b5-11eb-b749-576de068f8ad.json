@@ -334,7 +334,7 @@
           "zeek.bsap_ip_rdb.app_func_code",
           "zeek.bsap_ip_rdb.func_code",
           "zeek.bsap_ip_rdb.node_status",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -379,7 +379,7 @@
           "zeek.bsap_serial_header.dfun",
           "zeek.bsap_serial_rdb.func_code",
           "zeek.bsap_serial_header.nsb",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -453,7 +453,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

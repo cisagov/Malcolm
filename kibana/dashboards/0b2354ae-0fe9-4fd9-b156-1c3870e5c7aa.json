@@ -499,7 +499,7 @@
           "zeek.sip.method",
           "zeek.sip.content_type",
           "zeek.sip.status_msg",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

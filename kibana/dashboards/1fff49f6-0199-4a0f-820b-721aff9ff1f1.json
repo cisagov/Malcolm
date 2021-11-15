@@ -358,7 +358,7 @@
           "destination.ip",
           "destination.port",
           "zeek.weird.name",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

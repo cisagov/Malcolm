@@ -188,7 +188,7 @@
           "zeek.profinet.operation_type",
           "zeek.profinet.index",
           "zeek.profinet_dce_rpc.operation",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -412,7 +412,7 @@
           "zeek.profinet.block_version",
           "zeek.profinet.operation_type",
           "zeek.profinet.index",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -455,7 +455,7 @@
           "destination.port",
           "zeek.profinet_dce_rpc.version",
           "zeek.profinet_dce_rpc.operation",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

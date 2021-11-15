@@ -396,7 +396,7 @@
           "zeek.rdp.security_protocol",
           "zeek.rdp.encryption_method",
           "zeek.rdp.result",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

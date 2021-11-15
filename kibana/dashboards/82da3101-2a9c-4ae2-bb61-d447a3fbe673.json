@@ -499,7 +499,7 @@
           "zeek.kerberos.request_type",
           "zeek.kerberos.success",
           "zeek.kerberos.error_msg",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

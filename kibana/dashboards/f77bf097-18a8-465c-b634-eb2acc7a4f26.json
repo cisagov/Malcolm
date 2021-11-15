@@ -465,7 +465,7 @@
           "zeek.rfb.authentication_method",
           "zeek.rfb.auth",
           "zeek.rfb.share_flag",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

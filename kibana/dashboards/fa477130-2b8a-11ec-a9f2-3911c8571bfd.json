@@ -436,7 +436,7 @@
           "zeek.stun.method",
           "zeek.stun.class",
           "zeek.stun.attr_type",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,
@@ -476,7 +476,7 @@
           "zeek.stun_nat.wan_addr",
           "zeek.stun_nat.wan_port",
           "zeek.stun_nat.lan_addr",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,
@@ -515,7 +515,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

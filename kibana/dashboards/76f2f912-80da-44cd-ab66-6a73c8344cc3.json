@@ -324,7 +324,7 @@
           "zeek.irc.nick",
           "zeek.irc.command",
           "zeek.irc.value",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

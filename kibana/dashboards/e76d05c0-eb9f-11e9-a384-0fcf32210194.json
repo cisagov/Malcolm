@@ -365,7 +365,7 @@
           "destination.ip",
           "zeek.s7comm.rosctr",
           "zeek.s7comm.parameter",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -407,7 +407,7 @@
           "destination.ip",
           "destination.port",
           "zeek.iso_cotp.pdu_type",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -450,7 +450,7 @@
           "zeek.s7comm.parameter",
           "zeek.s7comm.data_info",
           "zeek.s7comm.rosctr",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

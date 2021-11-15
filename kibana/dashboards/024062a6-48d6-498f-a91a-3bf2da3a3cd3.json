@@ -583,7 +583,7 @@
           "zeek.notice.msg",
           "source.ip",
           "destination.ip",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

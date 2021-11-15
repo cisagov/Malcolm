@@ -429,7 +429,7 @@
           "destination.port",
           "zeek.dce_rpc.operation",
           "zeek.dce_rpc.endpoint",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -108,7 +108,7 @@
           "destination.port",
           "zeek.tds_sql_batch.header_type",
           "zeek.tds_sql_batch.query",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

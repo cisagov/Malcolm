@@ -361,7 +361,7 @@
           "zeek.dhcp.msg_types",
           "zeek.dhcp.client_software",
           "zeek.dhcp.server_software",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

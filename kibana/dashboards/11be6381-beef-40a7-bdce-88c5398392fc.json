@@ -324,7 +324,7 @@
           "destination.port",
           "zeek.tunnel.action",
           "zeek.tunnel.tunnel_type",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

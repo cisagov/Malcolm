@@ -148,7 +148,7 @@
           "destination.ip",
           "quic.host",
           "quic.version",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

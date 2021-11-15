@@ -103,7 +103,7 @@
           "destination.port",
           "zeek.tds_rpc.procedure_name",
           "zeek.tds_rpc.parameter",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

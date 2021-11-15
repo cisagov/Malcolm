@@ -359,7 +359,7 @@
           "zeek.snmp.version",
           "event.action",
           "zeek.snmp.community",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

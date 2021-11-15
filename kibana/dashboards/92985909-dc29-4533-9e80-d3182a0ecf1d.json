@@ -359,7 +359,7 @@
           "zeek.syslog.severity",
           "zeek.syslog.facility",
           "zeek.syslog.message",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

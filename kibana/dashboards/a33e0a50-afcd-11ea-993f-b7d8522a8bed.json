@@ -285,7 +285,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

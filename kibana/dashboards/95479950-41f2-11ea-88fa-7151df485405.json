@@ -453,7 +453,7 @@
           "zeek.notice.msg",
           "source.ip",
           "destination.ip",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -537,7 +537,7 @@
           "destination.ip",
           "destination.port",
           "network.bytes",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -578,7 +578,7 @@
           "destination.ip",
           "zeek.dns.query",
           "zeek.dns.answers",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -494,7 +494,7 @@
           "zeek.enip.options",
           "zeek.enip.sender_context",
           "zeek.enip.session_handle",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -536,7 +536,7 @@
           "zeek.cip_io.connection_id",
           "zeek.cip_io.sequence_number",
           "zeek.cip_io.data_length",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

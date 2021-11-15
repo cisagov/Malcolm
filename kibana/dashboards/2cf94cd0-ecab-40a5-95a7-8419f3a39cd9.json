@@ -497,7 +497,7 @@
           "destination.ip",
           "zeek.dns.query",
           "zeek.dns.answers",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -946,7 +946,7 @@ The values of records created from Zeek logs can be expanded and viewed like any
 
 The Arkime interface displays both Zeek logs and Arkime sessions alongside each other. Using fields common to both data sources, one can [craft queries](#SearchCheatSheet) to filter results matching desired criteria.
 
-A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `network.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Arkime's `rootId` field.
+A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `network.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to both Arkime's `rootId` field and the [ECS](https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-id) `event.id` field.
 
 Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Arkime sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Arkime and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
@@ -1249,8 +1249,8 @@ The table below shows the mapping of some of these fields.
 | Total Bytes |`databytes`, `bytes`|`totDataBytes`, `network.bytes`||
 | Total Packets |`packets`|`network.packets`||
 | Username |`user`|`user`|`related.user`|
-| Zeek Connection UID|||`zeek.uid`|
-| Zeek File UID |||`zeek.fuid`|
+| Zeek Connection UID|||`zeek.uid`, `event.id`|
+| Zeek File UID |||`zeek.fuid`, `event.id`|
 | Zeek Log Type |||`event.dataset`|
 
 In addition to the fields listed above, Arkime provides several special field aliases for matching any field of a particular type. While these aliases do not exist in Kibana *per se*, they can be approximated as illustrated below.

@@ -326,7 +326,7 @@
           "file.path",
           "event.action",
           "event.result",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

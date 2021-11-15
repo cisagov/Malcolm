@@ -360,7 +360,7 @@
           "zeek.radius.mac",
           "zeek.radius.framed_addr",
           "zeek.radius.result",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

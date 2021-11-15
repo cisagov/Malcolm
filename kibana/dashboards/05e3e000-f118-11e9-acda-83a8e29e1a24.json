@@ -157,7 +157,7 @@
           "zeek.ldap.object",
           "zeek.ldap.argument",
           "event.result",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -413,7 +413,7 @@
           "zeek.ldap_search.filter",
           "zeek.ldap_search.result_count",
           "event.result",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,
@@ -452,7 +452,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

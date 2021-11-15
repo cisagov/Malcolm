@@ -394,7 +394,7 @@
           "destination.port",
           "event.action",
           "event.result",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -438,7 +438,7 @@
           "destination.ip",
           "destination.port",
           "network.bytes",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -479,7 +479,7 @@
           "destination.ip",
           "zeek.files.source",
           "zeek.files.mime_type",
-          "zeek.uid",
+          "event.id",
           "zeek.fuid"
         ],
         "sort": [

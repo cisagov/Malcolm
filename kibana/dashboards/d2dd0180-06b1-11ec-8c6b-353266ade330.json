@@ -536,7 +536,7 @@
           "event.result",
           "event.severity",
           "event.severity_tags",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,
@@ -575,7 +575,7 @@
           "source.ip",
           "destination.ip",
           "destination.port",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -617,7 +617,7 @@
           "zeek.notice.msg",
           "source.ip",
           "destination.ip",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -658,7 +658,7 @@
           "destination.ip",
           "zeek.files.source",
           "zeek.files.mime_type",
-          "zeek.uid",
+          "event.id",
           "zeek.fuid"
         ],
         "sort": [

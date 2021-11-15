@@ -499,7 +499,7 @@
           "destination.port",
           "zeek.smtp.mailfrom",
           "user_agent.original",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -182,7 +182,7 @@
           "destination.ip",
           "destination.port",
           "network.bytes",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

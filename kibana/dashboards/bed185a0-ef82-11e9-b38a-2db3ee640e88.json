@@ -103,7 +103,7 @@
           "destination.port",
           "event.dataset",
           "zeek.tds.command",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -294,7 +294,7 @@
           "destination.ip",
           "destination.port",
           "zeek.tds.command",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

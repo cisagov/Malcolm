@@ -641,7 +641,7 @@
           "zeek.ssl.validation_status",
           "zeek.ssl.ssl_history",
           "zeek.ssl.sni_matches_cert",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -683,7 +683,7 @@
           "zeek.notice.msg",
           "source.ip",
           "destination.ip",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

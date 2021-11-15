@@ -402,7 +402,7 @@
           "zeek.dnp3.fc_request",
           "zeek.dnp3.fc_reply",
           "zeek.dnp3.iin_flags",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

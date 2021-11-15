@@ -178,7 +178,7 @@
           "destination.port",
           "zeek.modbus.func",
           "zeek.modbus.exception",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -651,7 +651,7 @@
           "destination.port",
           "zeek.modbus.func",
           "zeek.modbus.exception",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -690,7 +690,7 @@
         "columns": [
           "source.ip",
           "zeek.known_modbus.device_type",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -120,7 +120,7 @@
           "zeek.ntp.mode_str",
           "zeek.ntp.org_time",
           "zeek.ntp.xmt_time",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -464,7 +464,7 @@
           "destination.port",
           "network.protocol_version",
           "event.action",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -506,7 +506,7 @@
           "zeek.notice.msg",
           "source.ip",
           "destination.ip",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [

@@ -318,7 +318,7 @@
           "source.port",
           "destination.ip",
           "destination.port",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [],
         "version": 1,

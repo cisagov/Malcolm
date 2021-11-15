@@ -465,7 +465,7 @@
           "zeek.ssh.sshka",
           "zeek.ssh.cipher_alg",
           "zeek.ssh.mac_alg",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
