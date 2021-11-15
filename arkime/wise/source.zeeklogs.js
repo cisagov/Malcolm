@@ -1058,7 +1058,6 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +
       "    +arrayList(session.event, 'provider', 'Malcolm Data Source', 'event.provider')\n" +
       "    +arrayList(session.host, 'name', 'Malcolm Node', 'host.name')\n" +
-      "    +arrayList(session, 'malcolmDocId', 'Malcolm Log ID', 'malcolmDocId')\n" +
 
       // basic connection information
       "  dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
