@@ -1079,6 +1079,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
       "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
+      "    +arrayList(session.related, 'ip', 'Related IP', 'related.ip')\n" +
       "    +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
       "    +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
       "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
@@ -1094,6 +1095,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
       "    +arrayList(session.file, 'path', 'File Path', 'file.path')\n" +
       "    +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
+      "    +arrayList(session.related, 'hash', 'Related Hash', 'related.hash')\n" +
 
       // ####################################################################
       "  br\n");
