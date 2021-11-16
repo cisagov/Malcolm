@@ -474,10 +474,10 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "zeek.files.tx_hosts",
+          "source.ip",
           "destination.ip",
           "zeek.files.source",
-          "zeek.files.mime_type",
+          "file.mime_type",
           "event.id"
         ],
         "sort": [
