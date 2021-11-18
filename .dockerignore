@@ -12,8 +12,6 @@
 **/malcolm_*images.tar.gz
 docker-compose*yml
 Dockerfiles
-elasticsearch
-elasticsearch-backup
 opensearch
 opensearch-backup
 malcolm-iso
