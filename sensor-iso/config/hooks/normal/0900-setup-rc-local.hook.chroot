@@ -24,6 +24,9 @@ fi
 # other sensor-specific initialization prior to starting capture/forwarding jobs
 /usr/local/bin/sensor-init.sh
 
+# enable firewall
+/usr/sbin/ufw --force enable
+
 # run supervisor of capture-related services as non-privileged user
 if [ -f /opt/sensor/sensor_ctl/supervisor.sh ]; then
   ( getent passwd 1000 >/dev/null 2>&1 ) && sudo -H -u '#1000' /opt/sensor/sensor_ctl/supervisor.sh

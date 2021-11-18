@@ -104,8 +104,8 @@ if [ -d "$WORKDIR" ]; then
   echo "ID_LIKE=\"debian\""                                             >> ./config/includes.chroot/opt/sensor/.os-info
   echo "HOME_URL=\"https://malcolm.fyi\""                               >> ./config/includes.chroot/opt/sensor/.os-info
   echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""            >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "SUPPORT_URL=\"https://github.com/cisagov\""                     >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""   >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=\"https://github.com/cisagov\""                    >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
@@ -176,7 +176,7 @@ if [ -d "$WORKDIR" ]; then
     --debian-installer live \
     --debian-installer-distribution $IMAGE_DISTRIBUTION \
     --debian-installer-gui false \
-    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
+    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,debian-archive-keyring,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
     --distribution $IMAGE_DISTRIBUTION \
     --image-name "$IMAGE_NAME" \
     --iso-application "$IMAGE_NAME" \

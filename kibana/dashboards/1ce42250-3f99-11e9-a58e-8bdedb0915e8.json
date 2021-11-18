@@ -110,7 +110,7 @@
       "version": "Wzg1NCwxXQ==",
       "attributes": {
         "title": "Connections - Protocol Filters",
-        "visState": "{\"title\":\"Connections - Protocol Filters\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1581606976709\",\"fieldName\":\"network.type\",\"parent\":\"\",\"label\":\"Network Layer\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1581606723028\",\"fieldName\":\"zeek.proto\",\"parent\":\"\",\"label\":\"Protocol\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"},{\"id\":\"1581606665268\",\"fieldName\":\"zeek.service\",\"parent\":\"\",\"label\":\"Service\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_2_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+        "visState": "{\"title\":\"Connections - Protocol Filters\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1581606976709\",\"fieldName\":\"network.type\",\"parent\":\"\",\"label\":\"Network Layer\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1581606723028\",\"fieldName\":\"network.transport\",\"parent\":\"\",\"label\":\"Protocol\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"},{\"id\":\"1581606665268\",\"fieldName\":\"network.protocol\",\"parent\":\"\",\"label\":\"Service\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_2_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -175,14 +175,14 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "zeek.proto",
-          "zeek.service",
+          "network.transport",
+          "network.protocol",
           "source.ip",
           "source.port",
           "destination.ip",
           "destination.port",
           "network.bytes",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -192,7 +192,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

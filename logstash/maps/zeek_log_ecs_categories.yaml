@@ -48,7 +48,6 @@
 "modbus_detailed": ["ot", "network"]
 "modbus_mask_write_register": ["ot", "network"]
 "modbus_read_write_multiple_registers": ["ot", "network"]
-"modbus_register_change": ["ot", "network"]
 "mqtt_connect": ["network"]
 "mqtt_publish": ["network"]
 "mqtt_subscribe": ["network"]
