@@ -76,7 +76,7 @@ RUN apt-get -q update && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     sed -i 's/v-if.*password.*"/v-if="false"/g' ./viewer/vueapp/src/components/settings/Settings.vue && \
     rm -rf ./viewer/vueapp/src/components/upload && \
-    sed -i "s/^\(ARKIME_LOCALOPENSEARCH=\).*/\1"$ARKIME_LOCALOPENSEARCH"/" ./release/Configure && \
+    sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
     ./easybutton-build.sh && \
     npm -g config set user root && \
