@@ -142,21 +142,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.0               xxxxxxxxxxxx        39 hours ago        826MB
-malcolmnetsec/elasticsearch-od                      4.0.0               xxxxxxxxxxxx        40 hours ago        1.42GB
-malcolmnetsec/file-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        603MB
-malcolmnetsec/file-upload                           4.0.0               xxxxxxxxxxxx        39 hours ago        605MB
-malcolmnetsec/filebeat-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        266MB
-malcolmnetsec/freq                                  4.0.0               xxxxxxxxxxxx        39 hours ago        151MB
-malcolmnetsec/htadmin                               4.0.0               xxxxxxxxxxxx        39 hours ago        262MB
-malcolmnetsec/kibana-helper                         4.0.0               xxxxxxxxxxxx        40 hours ago        153MB
-malcolmnetsec/kibana-od                             4.0.0               xxxxxxxxxxxx        40 hours ago        1.35GB
-malcolmnetsec/logstash-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        1.36GB
-malcolmnetsec/name-map-ui                           4.0.0               xxxxxxxxxxxx        39 hours ago        142MB
-malcolmnetsec/nginx-proxy                           4.0.0               xxxxxxxxxxxx        39 hours ago        116MB
-malcolmnetsec/pcap-capture                          4.0.0               xxxxxxxxxxxx        39 hours ago        121MB
-malcolmnetsec/pcap-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        221MB
-malcolmnetsec/zeek                                  4.0.0               xxxxxxxxxxxx        39 hours ago        926MB
+malcolmnetsec/arkime                                4.0.1               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      4.0.1               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           4.0.1               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  4.0.1               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               4.0.1               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         4.0.1               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             4.0.1               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           4.0.1               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           4.0.1               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          4.0.1               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  4.0.1               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1339,7 +1339,7 @@ The `cidr-map.txt` file in the Malcolm installation directory can be used to def
 #
 # where:
 #   IP(s): comma-separated list of CIDR-formatted network IP addresses
-#          e.g., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
+#          e.g., 10.0.0.0/8, 169.254.0.1/16, 172.16.10.41
 #
 #   segment name: segment name to be assigned when event IP address(es) match
 #
@@ -1517,7 +1517,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.1.iso"
 …
 ```
 
@@ -1902,21 +1902,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.0               xxxxxxxxxxxx        39 hours ago        826MB
-malcolmnetsec/elasticsearch-od                      4.0.0               xxxxxxxxxxxx        40 hours ago        1.42GB
-malcolmnetsec/file-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        603MB
-malcolmnetsec/file-upload                           4.0.0               xxxxxxxxxxxx        39 hours ago        605MB
-malcolmnetsec/filebeat-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        266MB
-malcolmnetsec/freq                                  4.0.0               xxxxxxxxxxxx        39 hours ago        151MB
-malcolmnetsec/htadmin                               4.0.0               xxxxxxxxxxxx        39 hours ago        262MB
-malcolmnetsec/kibana-helper                         4.0.0               xxxxxxxxxxxx        40 hours ago        153MB
-malcolmnetsec/kibana-od                             4.0.0               xxxxxxxxxxxx        40 hours ago        1.35GB
-malcolmnetsec/logstash-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        1.36GB
-malcolmnetsec/name-map-ui                           4.0.0               xxxxxxxxxxxx        39 hours ago        142MB
-malcolmnetsec/nginx-proxy                           4.0.0               xxxxxxxxxxxx        39 hours ago        116MB
-malcolmnetsec/pcap-capture                          4.0.0               xxxxxxxxxxxx        39 hours ago        121MB
-malcolmnetsec/pcap-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        221MB
-malcolmnetsec/zeek                                  4.0.0               xxxxxxxxxxxx        39 hours ago        926MB
+malcolmnetsec/arkime                                4.0.1               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      4.0.1               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           4.0.1               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  4.0.1               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               4.0.1               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         4.0.1               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             4.0.1               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           4.0.1               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           4.0.1               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          4.0.1               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  4.0.1               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -2035,7 +2035,7 @@ Once the upgraded instance Malcolm has started up, you'll probably want to impor
 
 ### Major releases
 
-The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
+The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.1), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
 
 ## <a name="Forks"></a>Forks
 
