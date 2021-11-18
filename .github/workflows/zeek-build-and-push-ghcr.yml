@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - development
     paths:
       - 'zeek/**'
       - 'Dockerfiles/zeek.Dockerfile'

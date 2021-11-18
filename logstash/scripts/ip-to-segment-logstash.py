@@ -1,9 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-
-from __future__ import print_function
 
 import sys
 import os
@@ -32,19 +30,6 @@ JSON_MAP_KEY_TYPE = 'type'
 # print to stderr
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
-
-###################################################################################################
-# recursively convert unicode strings to utf-8 strings
-def byteify(input):
-  if isinstance(input, dict):
-    return {byteify(key): byteify(value)
-      for key, value in input.iteritems()}
-  elif isinstance(input, list):
-    return [byteify(element) for element in input]
-  elif isinstance(input, unicode):
-    return input.encode('utf-8')
-  else:
-    return input
 
 ###################################################################################################
 # main
@@ -81,7 +66,7 @@ def main():
     try:
       tmpMixedEntries = json.load(open(inFile, 'r'))
       if isinstance(tmpMixedEntries, list):
-        mixedEntries.extend(byteify(tmpMixedEntries));
+        mixedEntries.extend(tmpMixedEntries);
     except:
       pass
 
@@ -123,7 +108,7 @@ def main():
           networkList = []
           for ip in ''.join(values[0].split()).split(','):
             try:
-              networkList.append(str(ipaddress.ip_network(unicode(ip))).lower() if ('/' in ip) else str(ipaddress.ip_address(unicode(ip))).lower())
+              networkList.append(str(ipaddress.ip_network(ip)).lower() if ('/' in ip) else str(ipaddress.ip_address(ip)).lower())
             except ValueError:
               eprint('"{}" is not a valid IP address, ignoring'.format(ip))
           segmentName = values[1]
@@ -156,7 +141,7 @@ def main():
           for addr in ''.join(values[0].split()).split(','):
             try:
               # see if it's an IP address
-              addressList.append(str(ipaddress.ip_address(unicode(addr))).lower())
+              addressList.append(str(ipaddress.ip_address(addr)).lower())
             except ValueError:
               # see if it's a MAC address
               if re.match(macAddrRegex, addr):
@@ -194,7 +179,7 @@ def main():
             if (entry[JSON_MAP_KEY_TYPE] == JSON_MAP_TYPE_SEGMENT):
               # potentially interpret address as a CIDR-formatted subnet
               try:
-                networkList.append(str(ipaddress.ip_network(unicode(addr))).lower() if ('/' in addr) else str(ipaddress.ip_address(unicode(addr))).lower())
+                networkList.append(str(ipaddress.ip_network(addr)).lower() if ('/' in addr) else str(ipaddress.ip_address(addr)).lower())
               except ValueError:
                 eprint('"{}" is not a valid IP address, ignoring'.format(addr))
 
@@ -202,7 +187,7 @@ def main():
               # should be an IP or MAC address
               try:
                 # see if it's an IP address
-                addressList.append(str(ipaddress.ip_address(unicode(addr))).lower())
+                addressList.append(str(ipaddress.ip_address(addr)).lower())
               except ValueError:
                 # see if it's a MAC address
                 if re.match(macAddrRegex, addr):
@@ -219,7 +204,7 @@ def main():
 
       # go through the lists of segments/hosts, which will now be organized by required tag first, then
       # segment/host name, then the list of addresses
-      for tag, nameMaps in tagListMap.iteritems():
+      for tag, nameMaps in tagListMap.items():
         print("", file=outFile)
 
         # if a tag name is specified, print the IF statement verifying the tag's presence
@@ -228,55 +213,52 @@ def main():
         try:
 
           # for the host names(s) to be checked, create two filters, one for source IP|MAC and one for dest IP|MAC
-          for hostName, addrList in nameMaps[HOST_LIST_IDX].iteritems():
+          for hostName, addrList in nameMaps[HOST_LIST_IDX].items():
 
             # ip addresses mapped to hostname
             ipList = list(set([a for a in addrList if not a.startswith('_')]))
             if (len(ipList) >= 1):
-              for source in ['orig', 'resp']:
+              for source in ['source', 'destination']:
                 filterId += 1
-                fieldName = "{}_h".format(source)
-                newFieldName = "{}_hostname".format(source)
+                newFieldName = "".join([f"[{x}]" for x in [source, "hostname"]])
                 print("", file=outFile)
-                print('    if ([zeek][{}]) and ({}) {{ '.format(fieldName, ' or '.join(['([zeek][{}] == "{}")'.format(fieldName, ip) for ip in ipList])), file=outFile)
+                print('    if ([{}][ip]) and ({}) {{ '.format(source, ' or '.join(['([{}][ip] == "{}")'.format(source, ip) for ip in ipList])), file=outFile)
                 print('      mutate {{ id => "mutate_add_autogen_{}_ip_hostname_{}"'.format(source, filterId), file=outFile)
-                print('        add_field => {{ "[zeek][{}]" => "{}" }}'.format(newFieldName, hostName), file=outFile)
+                print('        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName), file=outFile)
                 print("      }", file=outFile)
                 print("    }", file=outFile)
-                addedFields.add("[zeek][{}]".format(newFieldName))
+                addedFields.add(newFieldName)
 
             # mac addresses mapped to hostname
             macList = list(set([a for a in addrList if a.startswith('_')]))
             if (len(macList) >= 1):
-              for source in ['orig', 'resp']:
+              for source in ['source', 'destination']:
                 filterId += 1
-                fieldName = "{}_l2_addr".format(source)
-                newFieldName = "{}_hostname".format(source)
+                newFieldName = "".join([f"[{x}]" for x in [source, "hostname"]])
                 print("", file=outFile)
-                print('    if ([zeek][{}]) and ({}) {{ '.format(fieldName, ' or '.join(['([zeek][{}] == "{}")'.format(fieldName, mac[1:]) for mac in macList])), file=outFile)
+                print('    if ([{}][mac]) and ({}) {{ '.format(source, ' or '.join(['([{}][mac] == "{}")'.format(source, mac[1:]) for mac in macList])), file=outFile)
                 print('      mutate {{ id => "mutate_add_autogen_{}_mac_hostname_{}"'.format(source, filterId), file=outFile)
-                print('        add_field => {{ "[zeek][{}]" => "{}" }}'.format(newFieldName, hostName), file=outFile)
+                print('        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName), file=outFile)
                 print("      }", file=outFile)
                 print("    }", file=outFile)
-                addedFields.add("[zeek][{}]".format(newFieldName))
+                addedFields.add(newFieldName)
 
           # for the segment(s) to be checked, create two cidr filters, one for source IP and one for dest IP
-          for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].iteritems():
+          for segmentName, ipList in nameMaps[SEGMENT_LIST_IDX].items():
             ipList = list(set(ipList))
-            for source in ['orig', 'resp']:
+            for source in ['source', 'destination']:
               filterId += 1
               # ip addresses/ranges mapped to network segment names
-              fieldName = "{}_h".format(source)
-              newFieldName = "{}_segment".format(source)
+              newFieldName = "".join([f"[{x}]" for x in [source, "segment"]])
               print("", file=outFile)
-              print("    if ([zeek][{}]) {{ cidr {{".format(fieldName), file=outFile)
+              print("    if ([{}][ip]) {{ cidr {{".format(source), file=outFile)
               print('      id => "cidr_autogen_{}_segment_{}"'.format(source, filterId), file=outFile)
-              print('      address => [ "%{{[zeek][{}]}}" ]'.format(fieldName), file=outFile)
+              print('      address => [ "%{{[{}][ip]}}" ]'.format(source), file=outFile)
               print('      network => [ {} ]'.format(', '.join('"{}"'.format(ip) for ip in ipList)), file=outFile)
               print('      add_tag => [ "{}" ]'.format(segmentName), file=outFile)
-              print('      add_field => {{ "[zeek][{}]" => "{}" }}'.format(newFieldName, segmentName), file=outFile)
+              print('      add_field => {{ "{}" => "{}" }}'.format(newFieldName, segmentName), file=outFile)
               print("    } }", file=outFile)
-              addedFields.add("[zeek][{}]".format(newFieldName))
+              addedFields.add("{}".format(newFieldName))
 
         finally:
           # if a tag name is specified, close the IF statement verifying the tag's presence
@@ -289,8 +271,8 @@ def main():
       if addedFields:
         print("", file=outFile)
         print('  # deduplicate any added fields', file=outFile)
-        for field in list(itertools.product(['orig', 'resp'], ['hostname', 'segment'])):
-          newFieldName = "[zeek][{}_{}]".format(field[0], field[1])
+        for field in list(itertools.product(['source', 'destination'], ['hostname', 'segment'])):
+          newFieldName = newFieldName = "".join([f"[{x}]" for x in [field[0], "field[1]"]])
           if newFieldName in addedFields:
             print("", file=outFile)
             print('  if ({}) {{ '.format(newFieldName), file=outFile)
