@@ -5,11 +5,11 @@ server.name: dashboards
 server.host: "0"
 server.basePath: "/dashboards"
 server.rewriteBasePath: true
-elasticsearch.hosts: ["${OPENSEARCH_URL}"]
-elasticsearch.requestTimeout: 180000
+opensearch.hosts: ["${OPENSEARCH_URL}"]
+opensearch.requestTimeout: 180000
 opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
-# offline region map
+# offline region map TODO: is this still applicable here with kibana?
 map.regionmap:
   includeElasticMapsService: false
   layers:

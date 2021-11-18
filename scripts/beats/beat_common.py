@@ -52,11 +52,11 @@ BEAT_OS_PROTOCOL = "BEAT_OS_PROTOCOL"
 BEAT_OS_SSL_VERIFY = "BEAT_OS_SSL_VERIFY"
 BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
 BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
-BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
-BEAT_KIBANA_DASHBOARDS_PATH = "BEAT_KIBANA_DASHBOARDS_PATH"
+BEAT_DASHBOARDS_ENABLED = "BEAT_DASHBOARDS_ENABLED"
+BEAT_DASHBOARDS_PATH = "BEAT_DASHBOARDS_PATH"
 BEAT_DASHBOARDS_HOST = "BEAT_DASHBOARDS_HOST"
-BEAT_KIBANA_PROTOCOL = "BEAT_KIBANA_PROTOCOL"
-BEAT_KIBANA_SSL_VERIFY = "BEAT_KIBANA_SSL_VERIFY"
+BEAT_DASHBOARDS_PROTOCOL = "BEAT_DASHBOARDS_PROTOCOL"
+BEAT_DASHBOARDS_SSL_VERIFY = "BEAT_DASHBOARDS_SSL_VERIFY"
 
 BEAT_YML_TEMPLATE = """
 #================================ General ======================================
@@ -80,16 +80,16 @@ setup.template.settings:
   index.number_of_replicas: 0
 
 #============================== Dashboards =====================================
-setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
-setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+setup.dashboards.enabled: "${BEAT_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
   host: "${BEAT_DASHBOARDS_HOST}"
-  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  protocol: "${BEAT_DASHBOARDS_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+  ssl.verification_mode: "${BEAT_DASHBOARDS_SSL_VERIFY}"
 
 #================================ Logging ======================================
 logging.metrics.enabled: false
@@ -250,11 +250,11 @@ class Beatbox(object):
                      BEAT_OS_SSL_VERIFY,
                      BEAT_HTTP_PASSWORD,
                      BEAT_HTTP_USERNAME,
-                     BEAT_KIBANA_DASHBOARDS_ENABLED,
-                     BEAT_KIBANA_DASHBOARDS_PATH,
+                     BEAT_DASHBOARDS_ENABLED,
+                     BEAT_DASHBOARDS_PATH,
                      BEAT_DASHBOARDS_HOST,
-                     BEAT_KIBANA_PROTOCOL,
-                     BEAT_KIBANA_SSL_VERIFY]:
+                     BEAT_DASHBOARDS_PROTOCOL,
+                     BEAT_DASHBOARDS_SSL_VERIFY]:
       self.keystoreItems[initItem] = ''
       self.keystorePath = None
 
@@ -353,14 +353,14 @@ class Beatbox(object):
 
       #  configure kibana dashboards
       if YesOrNo("Configure {} Kibana dashboards?".format(self.beatName), default=True, acceptDefault=self.acceptDefaults):
-        self.keystoreItems[BEAT_KIBANA_DASHBOARDS_ENABLED] = 'true'
+        self.keystoreItems[BEAT_DASHBOARDS_ENABLED] = 'true'
 
         # kibana dashboards
         tmpVal, tmpDefault = '', self.defaultKibanaDashboardDir
         while (len(tmpVal) == 0):
           tmpVal = AskForString("Enter directory containing Kibana dashboards [{}]".format(tmpDefault), default=tmpDefault, acceptDefault=self.acceptDefaults)
           if (len(tmpVal) == 0): tmpVal = tmpDefault
-        self.keystoreItems[BEAT_KIBANA_DASHBOARDS_PATH] = tmpVal
+        self.keystoreItems[BEAT_DASHBOARDS_PATH] = tmpVal
 
     # username
     tmpVal, tmpDefault = '', ''

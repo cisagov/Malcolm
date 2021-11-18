@@ -34,16 +34,16 @@ output.elasticsearch:
   template.versions.2x.enabled: false
 
 #============================== Dashboards =====================================
-setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
-setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+setup.dashboards.enabled: "${BEAT_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
   host: "${BEAT_DASHBOARDS_HOST}:${BEAT_DASHBOARDS_PORT}"
-  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  protocol: "${BEAT_DASHBOARDS_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+  ssl.verification_mode: "${BEAT_DASHBOARDS_SSL_VERIFY}"
 
 #================================ Logging ======================================
 logging.metrics.enabled: false

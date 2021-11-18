@@ -34,7 +34,7 @@ INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
-  # give Elasticsearch time to start before configuring dashboards
+  # give OpenSearch time to start before configuring dashboards
   /data/opensearch_status.sh >/dev/null 2>&1
 
   # is the Dashboards process server up and responding to requests?
@@ -43,7 +43,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     # have we not not already created the index pattern?
     if ! curl -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
 
-      echo "Elasticsearch is running! Setting up index management policies..."
+      echo "OpenSearch is running! Setting up index management policies..."
 
       # register the repo location for opensearch snapshots
       /data/register-opensearch-snapshot-repo.sh
@@ -69,12 +69,12 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       if [[ -f "$INDEX_POLICY_FILE" ]]; then
         # make API call to define index management policy
-        # https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/#create-policy
-        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
+        # https://opensearch.org/docs/latest/im-plugin/ism/api/#create-policy
+        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_plugins/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
 
         if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]]; then
-          # insert opendistro.index_state_management.policy_id into index template settings
-          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".settings += {\"opendistro.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
+          # insert OpenSearch ISM stuff into index template settings
+          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".settings += {\"index.plugins.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
         fi
       fi
 
@@ -133,7 +133,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # Create anomaly detectors here
       for i in /opt/anomaly_detectors/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       echo "OpenSearch anomaly detectors creation complete!"

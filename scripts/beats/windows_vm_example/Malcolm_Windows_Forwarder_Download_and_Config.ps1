@@ -68,16 +68,16 @@ setup.template.settings:
   index.number_of_replicas: 0
 
 #============================== Dashboards =====================================
-setup.dashboards.enabled: "${BEAT_KIBANA_DASHBOARDS_ENABLED}"
-setup.dashboards.directory: "${BEAT_KIBANA_DASHBOARDS_PATH}"
+setup.dashboards.enabled: "${BEAT_DASHBOARDS_ENABLED}"
+setup.dashboards.directory: "${BEAT_DASHBOARDS_PATH}"
 
 #============================== Kibana =====================================
 setup.kibana:
   host: "${BEAT_DASHBOARDS_HOST}"
-  protocol: "${BEAT_KIBANA_PROTOCOL}"
+  protocol: "${BEAT_DASHBOARDS_PROTOCOL}"
   username: "${BEAT_HTTP_USERNAME}"
   password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_KIBANA_SSL_VERIFY}"
+  ssl.verification_mode: "${BEAT_DASHBOARDS_SSL_VERIFY}"
 
 #================================ Logging ======================================
 logging.metrics.enabled: false
@@ -139,11 +139,11 @@ function Configure-Beat {
   $es_pass = ([Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($es_pass))).Trim()
 
   Run-Beat-Command $beat @("keystore","add","BEAT_OS_PROTOCOL","--stdin","--force") "https"
-  Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_PROTOCOL","--stdin","--force") "https"
+  Run-Beat-Command $beat @("keystore","add","BEAT_DASHBOARDS_PROTOCOL","--stdin","--force") "https"
   Run-Beat-Command $beat @("keystore","add","BEAT_OS_SSL_VERIFY","--stdin","--force") "none"
-  Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_SSL_VERIFY","--stdin","--force") "none"
-  Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_DASHBOARDS_ENABLED","--stdin","--force") "true"
-  Run-Beat-Command $beat @("keystore","add","BEAT_KIBANA_DASHBOARDS_PATH","--stdin","--force") "C:\\Program Files\\$beat\\kibana"
+  Run-Beat-Command $beat @("keystore","add","BEAT_DASHBOARDS_SSL_VERIFY","--stdin","--force") "none"
+  Run-Beat-Command $beat @("keystore","add","BEAT_DASHBOARDS_ENABLED","--stdin","--force") "true"
+  Run-Beat-Command $beat @("keystore","add","BEAT_DASHBOARDS_PATH","--stdin","--force") "C:\\Program Files\\$beat\\kibana"
   Run-Beat-Command $beat @("keystore","add","BEAT_OS_HOST","--stdin","--force") "$es_host"
   Run-Beat-Command $beat @("keystore","add","BEAT_DASHBOARDS_HOST","--stdin","--force") "$kb_host"
   Run-Beat-Command $beat @("keystore","add","BEAT_HTTP_USERNAME","--stdin","--force") "$es_user"

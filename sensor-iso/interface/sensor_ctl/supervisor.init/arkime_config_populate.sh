@@ -16,14 +16,14 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "$ARKIME_CONFIG_FILE"
   fi
 
-  # stick elasticsearch connection information in arkime config file
-  if [[ -n $ES_PROTOCOL ]] && [[ -n $OS_HOST ]]; then
+  # stick OpenSearch connection information in arkime config file
+  if [[ -n $OS_PROTOCOL ]] && [[ -n $OS_HOST ]]; then
 
-    # build elasticsearch URL for moloch-capture
-    ARKIME_OPENSEARCH="${ES_PROTOCOL}://"
+    # build OpenSearch URL for moloch-capture
+    ARKIME_OPENSEARCH="${OS_PROTOCOL}://"
 
-    if [[ -n $ES_USERNAME ]] && [[ -n $ES_PASSWORD ]]; then
-      ARKIME_OPENSEARCH+="${ES_USERNAME}:${ES_PASSWORD}@"
+    if [[ -n $OS_USERNAME ]] && [[ -n $OS_PASSWORD ]]; then
+      ARKIME_OPENSEARCH+="${OS_USERNAME}:${OS_PASSWORD}@"
     fi
 
     ARKIME_OPENSEARCH+="${OS_HOST}"
@@ -39,7 +39,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   fi
 
   # if SSL certificate verification is turned off, supply the --insecure flag
-  if [[ -n $ES_SSL_VERIFY ]] && [ "$ES_SSL_VERIFY" = none ]; then
+  if [[ -n $OS_SSL_VERIFY ]] && [ "$OS_SSL_VERIFY" = none ]; then
     export ARKIME_HTTPS_FLAG="--insecure"
   fi
 

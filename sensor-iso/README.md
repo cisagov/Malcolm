@@ -149,7 +149,7 @@ If you select static, you will be prompted to enter the IP address, netmask, and
 
 ![Static IP configuration](./docs/images/iface_static.png)
 
-In either case, upon selecting **OK** the network interface will be brought down, configured, and brought back up, and the result of the operation will be displayed. You may choose **Quit** upon returning to the configuration tool’s welcome screen.
+In either case, upon selecting **OK** the network interface will be brought down, configured, and brought back up, and the result of the operation will be displayed. You may choose **Quit** upon returning to the configuration tool's welcome screen.
 
 ### <a name="ConfigTime"></a>Time synchronization
 
@@ -185,7 +185,7 @@ Upon choosing the capture interfaces and selecting OK, you may optionally provid
 
 ![Specify capture filters](./docs/images/capture_filter.png)
 
-Next you must specify the paths where captured PCAP files and Zeek logs will be stored locally on the sensor. If the installation worked as expected, these paths should be prepopulated to reflect paths on the volumes formatted at install time for the purpose storing these artifacts. Usually these paths will exist on separate storage volumes. Enabling the PCAP and Zeek log pruning autostart services (see the section on autostart services below) will enable monitoring of these paths to ensure that their contents do not consume more than 90% of their respective volumes’ space. Choose **OK** to continue.
+Next you must specify the paths where captured PCAP files and Zeek logs will be stored locally on the sensor. If the installation worked as expected, these paths should be prepopulated to reflect paths on the volumes formatted at install time for the purpose storing these artifacts. Usually these paths will exist on separate storage volumes. Enabling the PCAP and Zeek log pruning autostart services (see the section on autostart services below) will enable monitoring of these paths to ensure that their contents do not consume more than 90% of their respective volumes' space. Choose **OK** to continue.
 
 ![Specify capture paths](./docs/images/capture_paths.png)
 
@@ -210,7 +210,7 @@ You'll be prompted to specify which engine(s) to use to analyze extracted files.
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, select **ZEEK_FILE_SCAN_YARA** when specifying scanners for Zeek-carved files
 * scanning portable executable (PE) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, select **ZEEK_FILE_SCAN_CAPA** when specifying scanners for Zeek-carved files
 
-Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [Kibana](https://github.com/idaholab/Malcolm#KibanaVisualizations) when forwarded to Malcolm.
+Files which are flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [OpenSearch Dashboards](https://github.com/idaholab/Malcolm#DashboardsVisualizations) when forwarded to Malcolm.
 
 ![File quarantine](./docs/images/file_quarantine.png)
 
@@ -220,7 +220,7 @@ Finally, you will then be presented with the list of configuration variables tha
 
 ### <a name="ConfigForwarding"></a>Forwarding
 
-Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/idaholab/Malcolm) or another [Elastic Stack](https://www.elastic.co/products/)-based server.
+Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm](https://github.com/idaholab/Malcolm).
 
 ![Configure forwarders](./docs/images/forwarder_config.png)
 
@@ -228,7 +228,7 @@ There are five forwarder services used on the sensor, each for forwarding a diff
 
 ### <a name="filebeat"></a>filebeat: Zeek log forwarding
 
-[Filebeat](https://www.elastic.co/products/beats/filebeat) is used to forward [Zeek](https://www.zeek.org/) logs to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database.
+[Filebeat](https://www.elastic.co/products/beats/filebeat) is used to forward [Zeek](https://www.zeek.org/) logs to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database.
 
 To configure filebeat, first provide the log path (the same path previously configured for Zeek log file generation). You must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
@@ -248,81 +248,81 @@ The last step for SSL-encrypted Zeek log forwarding is to specify the SSL certif
 
 The Logstash instance receiving the events must be similarly configured with matching SSL certificate and key files. Under Malcolm, the `BEATS_SSL` variable must be set to true in Malcolm's `docker-compose.yml` file and the SSL files must exist in the `logstash/certs/` subdirectory of the Malcolm installation.
 
-Once you have specified all of the filebeat parameters, you will be presented with a summary of the settings related to the forwarding of these logs. Selecting **OK** will cause the parameters to be written to filebeat’s configuration keystore under `/opt/sensor/sensor_ctl/filebeat` and you will be returned to the configuration tool’s welcome screen.
+Once you have specified all of the filebeat parameters, you will be presented with a summary of the settings related to the forwarding of these logs. Selecting **OK** will cause the parameters to be written to filebeat's configuration keystore under `/opt/sensor/sensor_ctl/filebeat` and you will be returned to the configuration tool's welcome screen.
 
 ![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
 ### <a name="arkime-capture"></a>capture: Arkime session forwarding
 
-[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) database so that it can be viewed in [Arkime viewer](https://molo.ch/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/idaholab/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [OpenSearch](https://opensearch.org/) database so that it can be viewed in [Arkime viewer](https://arkime.com/), whether standalone or as part of a [Malcolm](https://github.com/idaholab/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/idaholab/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
-First, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication)), choose **None**.
+First, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication)), choose **None**.
 
-![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
+![OpenSearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![OpenSearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
-Next, enter the **Elasticsearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an Elasticsearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an OpenSearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
-![Elasticsearch host and port](./docs/images/arkime-capture-ip-port.png)
+![OpenSearch host and port](./docs/images/arkime-capture-ip-port.png)
 
-You will be asked to enter authentication credentials for the sensor’s connections to the aggregator’s Elasticsearch API. After you’ve entered the username and the password, the sensor will attempt a test connection to Elasticsearch using the connection information provided.
+You will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch API. After you've entered the username and the password, the sensor will attempt a test connection to OpenSearch using the connection information provided.
 
-![Elasticsearch username](./docs/images/elasticsearch-username.png) ![Elasticsearch password](./docs/images/elasticsearch_password.png) ![Successful Elasticsearch connection](./docs/images/metricbeat_elasticsearch_success.png)
+![OpenSearch username](./docs/images/elasticsearch-username.png) ![OpenSearch password](./docs/images/elasticsearch_password.png) ![Successful OpenSearch connection](./docs/images/metricbeat_elasticsearch_success.png)
 
 Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
 
 ![PCAP retrieval ACL](./docs/images/malcolm_arkime_reachback_acl.png)
 
-Finally, you’ll be given the opportunity to review the all of the Arkime `capture` options you’ve specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool’s welcome screen.
+Finally, you'll be given the opportunity to review the all of the Arkime `capture` options you've specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool's welcome screen.
 
 ![capture settings confirmation](./docs/images/arkime_confirm.png) ![capture settings applied successfully](./docs/images/arkime_success.png)
 
 ### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
 
-The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an Elasticsearch database using a RESTful API using HTTP/HTTPS as the transport protocol. Select **metricbeat** from the forwarding configuration mode options.
+The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an OpenSearch database using a RESTful API using HTTP/HTTPS as the transport protocol. Select **metricbeat** from the forwarding configuration mode options.
 
 Metricbeat gathers system resource metrics at an interval you specify. The default interval is 30 seconds, but it can be set to any value between 1 and 60 seconds.
 
 ![Metricbeat interval](./docs/images/metricbeat_interval.png)
 
-Next, select the Elasticsearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
+Next, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
 
-![Elasticsearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![Elasticsearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
+![OpenSearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![OpenSearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
 
-Next, enter the **Elasticsearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an Elasticsearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an OpenSearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
-![Elasticsearch host and port](./docs/images/metricbeat_elastic_host.png)
+![OpenSearch host and port](./docs/images/metricbeat_elastic_host.png)
 
-Next, you will be asked if you wish to configure **Kibana** connectivity. [Kibana](https://www.elastic.co/products/kibana) is the Elastic Stack’s data visualization tool. If you choose **Yes** and proceed to configure Kibana connectivity, metricbeat will create custom search indexes, visualizations, and dashboards for Kibana to display the sensor’s resource metrics.
+Next, you will be asked if you wish to configure **OpenSearch Dashboards** connectivity. [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) is an open source general-purpose data visualization tool for OpenSearch. If you choose **Yes** and proceed to configure Dashboards connectivity, metricbeat will create custom search indexes, visualizations, and dashboards for Dashboards to display the sensor's resource metrics.
 
-You will be prompted to specify the **connection protocol** and (for HTTPS) **SSL verification** for Kibana. These values should probably be the same ones you chose for Elasticsearch. You will also be prompted for the **Kibana host** IP address and **port**. The IP address will probably be the same one you specified for Elasticsearch. The default Kibana port is 5601.
+You will be prompted to specify the **connection protocol** and (for HTTPS) **SSL verification** for Dashboards. These values should probably be the same ones you chose for OpenSearch. You will also be prompted for the **Dashboards host** IP address and **port**. The IP address will probably be the same one you specified for OpenSearch. The default Dashboards port is 5601.
 
-The final settings required to configure Kibana are whether or not to configure **Kibana dashboards** and the local directory on the sensor containing the dashboards to be imported. The default values are probably what you want.
+The final settings required to configure Dashboards are whether or not to configure **OpenSearch Dashboards** and the local directory on the sensor containing the dashboards to be imported. The default values are probably what you want.
 
-Finally, you will be asked to enter authentication credentials for the sensor’s connections to the aggregator’s Elasticsearch and Kibana APIs.
+Finally, you will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch and Dashboards APIs.
 
-After you’ve entered the username and the password, the sensor will attempt test connections to the Elasticsearch and Kibana APIs using the connection information provided.
+After you've entered the username and the password, the sensor will attempt test connections to the OpenSearch and Dashboards APIs using the connection information provided.
 
-![Elasticsearch/Kibana username](./docs/images/metricbeat_elastic_username.png) ![Elasticsearch/Kibana password](./docs/images/metricbeat_elastic_password.png) ![Successful Elasticsearch connection](./docs/images/metricbeat_elasticsearch_success.png) ![Successful Kibana connection](./docs/images/metricbeat_kibana_success.png)
+![OpenSearch/Dashboards username](./docs/images/metricbeat_elastic_username.png) ![OpenSearch/Dashboards password](./docs/images/metricbeat_elastic_password.png) ![Successful OpenSearch connection](./docs/images/metricbeat_elasticsearch_success.png) ![Successful Dashboards connection](./docs/images/metricbeat_kibana_success.png)
 
-Finally, you’ll be given the opportunity to review the all of the metricbeat options you’ve specified. Selecting **OK** will cause the parameters to be written to metricbeat’s configuration keystore under `/opt/sensor/sensor_ctl/metricbeat` and you will be returned to the configuration tool’s welcome screen.
+Finally, you'll be given the opportunity to review the all of the metricbeat options you've specified. Selecting **OK** will cause the parameters to be written to metricbeat's configuration keystore under `/opt/sensor/sensor_ctl/metricbeat` and you will be returned to the configuration tool's welcome screen.
 
 ![Metricbeat settings confirmation](./docs/images/metricbeat_confirm.png) ![Metricbeat settings applied successfully](./docs/images/metricbeat_success.png)
 
 ### <a name="auditbeat"></a>auditbeat: audit log forwarding
 
-The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to forward auditd logs, process and socket statistics, and sensor system file integrity information to an Elasticsearch database. Its configuration is almost identical to that of metricbeat in the previous section. Select **auditbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to forward auditd logs, process and socket statistics, and sensor system file integrity information to an OpenSearch database. Its configuration is almost identical to that of metricbeat in the previous section. Select **auditbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
 The sensor implements STIG (Security Technical Implementation Guidelines) rules according to DISA RHEL 7 STIG V1 R1, ported to a Debian 9 base platform. Enabling audit log forwarding via auditbeat is required to satisfy the requirements regarding forwarding audit logs to a remote log server as defined in that specification.
 
 ### <a name="syslogbeat"></a>filebeat-syslog: syslog forwarding
 
-The sensor uses [filebeat’s syslog input](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) to forward the sensor’s system logs to an Elasticsearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **filebeat-syslog** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+The sensor uses [filebeat's syslog input](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) to forward the sensor's system logs to an OpenSearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **filebeat-syslog** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
 Enabling syslog forwarding via filebeat is required to satisfy the STIG requirements regarding sending system logs to a remote log server as defined in that specification.
 
 ### <a name="heatbeat"></a>heatbeat: temperature forwarding
 
-The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an Elasticsearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **heatbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **heatbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
 ### <a name="ConfigAutostart"></a>Autostart services
 
@@ -336,7 +336,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
 * **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into Elasticsearch for viewing in [Arkime](https://molo.ch/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
@@ -358,7 +358,7 @@ After you have completed configuring the sensor it is recommended that you reboo
 /opt/sensor/sensor_ctl/shutdown && sleep 10 && /opt/sensor/sensor_ctl/supervisor.sh
 ```
 
-This will cause the sensor services controller to stop, wait a few seconds, and restart. You can check the status of the sensor’s processes by choosing **Sensor Status** from the sensor’s kiosk mode, double-clicking the **Sensor Service Status** desktop icon, or running `/opt/sensor/sensor_ctl/status` from the command line:
+This will cause the sensor services controller to stop, wait a few seconds, and restart. You can check the status of the sensor's processes by choosing **Sensor Status** from the sensor's kiosk mode, double-clicking the **Sensor Service Status** desktop icon, or running `/opt/sensor/sensor_ctl/status` from the command line:
 
 ```
 $ /opt/sensor/sensor_ctl/status 
@@ -424,7 +424,7 @@ Alternately, if you have forked Malcolm on GitHub, [workflow files](../.github/w
 
 # <a name="ConfigSSH"></a>Appendix B - Configuring SSH access
 
-SSH access to the sensor’s non-privileged sensor account is only available using secure key-based authentication which can be enabled by adding a public SSH key to the **/home/sensor/.ssh/authorized_keys** file as illustrated below:
+SSH access to the sensor's non-privileged sensor account is only available using secure key-based authentication which can be enabled by adding a public SSH key to the **/home/sensor/.ssh/authorized_keys** file as illustrated below:
 
 ```
 sensor@sensor:~$ mkdir -p ~/.ssh
@@ -446,7 +446,7 @@ SSH access should only be configured when necessary.
 
 Should the sensor not function as expected, first try rebooting the device. If the behavior continues, here are a few things that may help you diagnose the problem (items which may require Linux command line use are marked with **†**)
 
-* Stop / start services – Using the sensor’s kiosk mode, attempt a **Services Stop** followed by a **Services Start**, then check **Sensor Status** to see which service(s) may not be running correctly.
+* Stop / start services – Using the sensor's kiosk mode, attempt a **Services Stop** followed by a **Services Start**, then check **Sensor Status** to see which service(s) may not be running correctly.
 * Sensor configuration file – See `/opt/sensor/sensor_ctl/control_vars.conf` for sensor service settings. It is not recommended to manually edit this file unless you are sure of what you are doing.
 * Sensor control scripts – There are scripts under ``/opt/sensor/sensor_ctl/`` to control sensor services (eg., `shutdown`, `start`, `status`, `stop`, etc.)
 * Sensor debug logs – Log files under `/opt/sensor/sensor_ctl/log/` may contain clues to processes that are not working correctly. If you can determine which service is failing, you can attempt to reconfigure it using the instructions in the Configure Capture and Forwarding section of this document.
@@ -481,8 +481,8 @@ Hedgehog Linux claims the following exceptions to STIG compliance:
 | 12 | [SV-86607r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71983) | USB mass storage must be disabled. | The ability to copy data captured by the sensor to a mounted USB mass storage device is a requirement of the system. |
 | 13 | [SV-86609r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71985) | File system automounter must be disabled unless required. | The ability to copy data captured by the sensor to a mounted USB mass storage device is a requirement of the system. |
 | 14 | [SV-86705r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72081) | The operating system must shut down upon audit processing failure, unless availability is an overriding concern. If availability is a concern, the system must alert the designated staff (System Administrator [SA] and Information System Security Officer [ISSO] at a minimum) in the event of an audit processing failure. | As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. |
-| 15 | [SV-86713r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72089) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the Elasticsearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
-| 16 | [SV-86715r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72093) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer (ISSO) (at a minimum) when the threshold for the repository maximum audit record storage capacity is reached. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the Elasticsearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
+| 15 | [SV-86713r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72089) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
+| 16 | [SV-86715r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72093) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer (ISSO) (at a minimum) when the threshold for the repository maximum audit record storage capacity is reached. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
 | 17 | [SV-86837r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/2016-12-16/finding/V-38666) | The system must use and update a DoD-approved virus scan program. | As this is a network traffic capture appliance rather than an end-user device and will not be internet-connected, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
 | 18 | [SV-86839r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72215) | The system must update the virus scan program every seven days or more frequently. | As this is a network traffic capture appliance rather than an end-user device and will not be internet-connected, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
 | 19 | [SV-86847r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72223) | All network connections associated with a communication session must be terminated at the end of the session or after 10 minutes of inactivity from the user at a command prompt, except to fulfill documented and validated mission requirements. | The sensor may be controlled from the command line in a manual capture scenario, so timing out a session based on command prompt inactivity would be inadvisable. | 
@@ -515,10 +515,10 @@ Please review the notes for these additional rules. While not claiming an except
 | 5 | [SV-86597r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71973) | A file integrity tool must verify the baseline operating system configuration at least weekly. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` specified for use in the RHEL STIG. |
 | 6 | [SV-86697r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72073) | The file integrity tool must use FIPS 140-2 approved cryptographic hashes for validating file contents and directories. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` specified for use in the RHEL STIG. Auditbeat uses SHA1 which is FIPS 140-2 approved. |
 | 7 | [SV-86623r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71999) | Vendor packaged system security patches and updates must be installed and up to date. | When the Hedgehog Linux sensor appliance software is built, all of the latest applicable security patches and updates are included in it. How future updates are to be handled is still in design. |
-| 8 | [SV-86707r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72083) | The operating system must off-load audit records onto a different system or media from the system being audited. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an Elasticsearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
-| 9 | [SV-86709r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72085) | The operating system must encrypt the transfer of audit records off-loaded onto a different system or media from the system being audited. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads (via an encrypted channel) audit records to an Elasticsearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
-| 10 | [SV-86833r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72209) | The system must send rsyslog output to a log aggregation server. | Syslogs are forwarded to an Elasticsearch database running on another system via [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-syslog.html), though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
-| 11 | [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an Elasticsearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). Local logs are generated when this network connection is broken, and it resumes automatically. |
+| 8 | [SV-86707r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72083) | The operating system must off-load audit records onto a different system or media from the system being audited. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
+| 9 | [SV-86709r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72085) | The operating system must encrypt the transfer of audit records off-loaded onto a different system or media from the system being audited. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads (via an encrypted channel) audit records to an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
+| 10 | [SV-86833r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72209) | The system must send rsyslog output to a log aggregation server. | Syslogs are forwarded to an OpenSearch database running on another system via [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-syslog.html), though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
+| 11 | [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). Local logs are generated when this network connection is broken, and it resumes automatically. |
 | 12 | [SV-86691r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72067) | The operating system must implement NIST FIPS-validated cryptography for the following: to provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Hedgehog Linux does use FIPS-compatible libraries for cryptographic functions. However, the kernel parameter being checked by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is incompatible with some of the systems initialization scripts.|
 
 In addition, DISA STIG rules SV-86663r1, SV-86695r2, SV-86759r3, SV-86761r3, SV-86763r3, SV-86765r3, SV-86595r1, and SV-86615r2 relate to the SELinux kernel which is not used in Hedgehog Linux, and are thus skipped.
@@ -565,7 +565,7 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - Hedgehog Linux **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
 
-**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. Because Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications about its status are sent in system logs forwarded to the Elasticsearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an Elasticsearch database on another system, though this is not detected by the [CIS benchmark compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening). Local logs are generated when the network connection is broken, and it resumes automatically. Syslog messages are also similarly forwarded.
+**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. Because Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications about its status are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [CIS benchmark compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening). Local logs are generated when the network connection is broken, and it resumes automatically. Syslog messages are also similarly forwarded.
 
 **8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` utility.
 

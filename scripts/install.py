@@ -481,7 +481,7 @@ class Installer(object):
           elif 'PCAP_IFACE' in line:
             # capture interface(s)
             line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
-          elif 'OS_JAVA_OPTS' in line:
+          elif 'OPENSEARCH_JAVA_OPTS' in line:
             # OpenSearch memory allowance
             line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
           elif 'LS_JAVA_OPTS' in line:

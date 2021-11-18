@@ -5,7 +5,7 @@
 
 ###################################################################################################
 # Process queued files reported by pcap_watcher.py, using either arkime's capture or zeek to process
-# them for session creation and logging into the Elasticsearch database
+# them for session creation and logging into the OpenSearch database
 #
 # Run the script with --help for options
 ###################################################################################################

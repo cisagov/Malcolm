@@ -729,21 +729,21 @@ def authSetup(wipe=False):
 
     # create logstash keystore file, don't complain if it already exists, and set the keystore items
     keystore_op('logstash', False, 'create', stdin='N')
-    keystore_op('logstash', False, 'remove', 'ES_EXTERNAL_USER', '--force')
-    keystore_op('logstash', False, 'add', 'ES_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
-    keystore_op('logstash', False, 'remove', 'ES_EXTERNAL_PASSWORD', '--force')
-    keystore_op('logstash', False, 'add', 'ES_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
+    keystore_op('logstash', False, 'remove', 'OS_EXTERNAL_USER', '--force')
+    keystore_op('logstash', False, 'add', 'OS_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
+    keystore_op('logstash', False, 'remove', 'OS_EXTERNAL_PASSWORD', '--force')
+    keystore_op('logstash', False, 'add', 'OS_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
     success, results = keystore_op('logstash', False, 'list')
     results = [x.upper() for x in results if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE')) and (not x.upper().startswith('USING BUNDLED JDK'))]
-    if success and ('ES_EXTERNAL_USER' in results) and ('ES_EXTERNAL_PASSWORD' in results):
+    if success and ('OS_EXTERNAL_USER' in results) and ('OS_EXTERNAL_PASSWORD' in results):
       eprint(f"External OpenSearch instance variables stored: {', '.join(results)}")
     else:
       eprint("Failed to store external OpenSearch instance variables:\n")
       eprint("\n".join(results))
 
   # OpenSearch authenticate sender account credentials
-  # https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account
-  if YesOrNo('Store username/password for email alert sender account (see https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account)', default=False):
+  # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account
+  if YesOrNo('Store username/password for email alert sender account (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account)', default=False):
 
     # prompt username and password
     emailPassword = None
@@ -759,8 +759,8 @@ def authSetup(wipe=False):
       eprint("Passwords do not match")
 
     # create OpenSearch keystore file, don't complain if it already exists, and set the keystore items
-    usernameKey = f'opendistro.alerting.destination.email.{emailSender}.username'
-    passwordKey = f'opendistro.alerting.destination.email.{emailSender}.password'
+    usernameKey = f'plugins.alerting.destination.email.{emailSender}.username'
+    passwordKey = f'plugins.alerting.destination.email.{emailSender}.password'
 
     keystore_op('opensearch', True, 'create', stdin='N')
     keystore_op('opensearch', True, 'remove', usernameKey)

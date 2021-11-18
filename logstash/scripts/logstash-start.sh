@@ -28,7 +28,7 @@ ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 # the name of the pipeline(s) to which input will send logs for parsing (comma-separated list, no quotes)
 PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse"}
 
-# pipeline addresses for forwarding from Logstash to Elasticsearch (both "internal" and "external" pipelines)
+# pipeline addresses for forwarding from Logstash to OpenSearch (both "internal" and "external" pipelines)
 export OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-es"}
 export OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL:-"external-es"}
 OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES:-"$OPENSEARCH_PIPELINE_ADDRESS_INTERNAL,$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL"}
@@ -53,7 +53,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
   xargs -0 -n 1 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   PIPELINE_ADDRESS_NAME="$(cat "{}"/*.conf | sed -e "s/:[\}]*.*\(}\)/\1/" | envsubst | grep -P "\baddress\s*=>" | awk "{print \$3}" | sed "s/[\"'']//g" | head -n 1)"
-  if [[ -n "$ES_EXTERNAL_HOSTS" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
+  if [[ -n "$OS_EXTERNAL_HOSTS" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
     echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
     echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
     cat "{}"/"$PIPELINE_EXTRA_CONF_FILE" 2>/dev/null   >> "$PIPELINES_CFG"
@@ -67,12 +67,12 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
 rm -f "$NETWORK_MAP_OUTPUT_FILTER"
 /usr/local/bin/ip-to-segment-logstash.py --mixed "$INPUT_MIXED_MAP" --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
-if [[ -z "$ES_EXTERNAL_HOSTS" ]]; then
+if [[ -z "$OS_EXTERNAL_HOSTS" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output
   OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES="$(echo "$OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES" | sed "s/,[[:blank:]]*$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL//")"
 fi
 
-# insert quotes around the elasticsearch parsing and output pipeline list
+# insert quotes around the OpenSearch parsing and output pipeline list
 MALCOLM_PARSE_PIPELINE_ADDRESSES=$(printf '"%s"\n' "${PARSE_PIPELINE_ADDRESSES//,/\",\"}")
 MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
 

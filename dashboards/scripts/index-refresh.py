@@ -12,7 +12,7 @@ GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
 GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
 PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
-ES_GET_TEMPLATE_URI = '_template'
+OS_GET_TEMPLATE_URI = '_template'
 
 ###################################################################################################
 debug = False
@@ -44,8 +44,8 @@ def main():
   parser.add_argument('-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output")
   parser.add_argument('-i', '--index', dest='index', metavar='<str>', type=str, default='arkime_sessions3-*', help='Index Pattern Name')
   parser.add_argument('-d', '--dashboards', dest='dashboardsUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'), help='Dashboards URL')
-  parser.add_argument('-o', '--opensearch', dest='opensearchUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='Elasticsearch URL')
-  parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='Elasticsearch template to merge')
+  parser.add_argument('-o', '--opensearch', dest='opensearchUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='OpenSearch URL')
+  parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='OpenSearch template to merge')
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
   try:
     parser.error = parser.exit
@@ -74,7 +74,7 @@ def main():
   opensearchInfo = statusInfoResponse.json()
   opensearchVersion = statusInfo['version']['number']
   if debug:
-    eprint('Elasticsearch version is {}'.format(opensearchVersion))
+    eprint('OpenSearch version is {}'.format(opensearchVersion))
 
   # find the ID of the index name (probably will be the same as the name)
   getIndexInfoResponse = requests.get(
@@ -106,7 +106,7 @@ def main():
       try:
 
         # request template from OpenSearch and pull the mappings/properties (field list) out
-        getTemplateResponse = requests.get('{}/{}/{}'.format(args.opensearchUrl, ES_GET_TEMPLATE_URI, args.template))
+        getTemplateResponse = requests.get('{}/{}/{}'.format(args.opensearchUrl, OS_GET_TEMPLATE_URI, args.template))
         getTemplateResponse.raise_for_status()
         getTemplateInfo = getTemplateResponse.json()[args.template]['mappings']['properties']
 

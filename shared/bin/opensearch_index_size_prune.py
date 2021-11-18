@@ -112,7 +112,7 @@ def main():
     #         "disk.percent": "7",
     #         "host": "172.22.2.3",
     #         "ip": "172.22.2.3",
-    #         "node": "elasticsearch"
+    #         "node": "opensearch"
     #     },
     #     ...
     # ]
