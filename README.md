@@ -122,13 +122,42 @@ You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
-TODO
+Pulling arkime            ... done
+Pulling dashboards        ... done
+Pulling dashboards-helper ... done
+Pulling file-monitor      ... done
+Pulling filebeat          ... done
+Pulling freq              ... done
+Pulling htadmin           ... done
+Pulling logstash          ... done
+Pulling name-map-ui       ... done
+Pulling nginx-proxy       ... done
+Pulling opensearch        ... done
+Pulling pcap-capture      ... done
+Pulling pcap-monitor      ... done
+Pulling upload            ... done
+Pulling zeek              ... done
 ```
 
 You can then observe that the images have been retrieved by running `docker images`:
 ```
 $ docker images
-TODO
+REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+malcolmnetsec/arkime                                           5.0.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards-helper                                5.0.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/opensearch-dashboards                            5.0.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/pcap-capture                                     5.0.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1848,31 +1877,56 @@ Store username/password for email alert sender account (y/N):
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
-TODO
+Pulling arkime            ... done
+Pulling dashboards        ... done
+Pulling dashboards-helper ... done
+Pulling file-monitor      ... done
+Pulling filebeat          ... done
+Pulling freq              ... done
+Pulling htadmin           ... done
+Pulling logstash          ... done
+Pulling name-map-ui       ... done
+Pulling nginx-proxy       ... done
+Pulling opensearch        ... done
+Pulling pcap-capture      ... done
+Pulling pcap-monitor      ... done
+Pulling upload            ... done
+Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
-REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-TODO
+REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+malcolmnetsec/arkime                                           5.0.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards-helper                                5.0.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/opensearch-dashboards                            5.0.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/pcap-capture                                     5.0.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
 ```
 user@host:~/Malcolm$ ./scripts/start
-Creating network "malcolm_default" with the default driver
-TODO
-
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
   - Arkime: https://localhost/
   - OpenSearch Dashboards: https://localhost/dashboards/
-  - PCAP Upload (web): https://localhost/upload/
-  - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+  - PCAP upload (web): https://localhost/upload/
+  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_opensearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_dashboards_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_arkime_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
 …
 ```
 
