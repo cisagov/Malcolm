@@ -128,4 +128,5 @@ event zeek_init() &priority=-5 {
   redef SNIFFPASS::log_password_plaintext = T;
   redef LDAP::default_capture_password = T;
 @endif
+redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;

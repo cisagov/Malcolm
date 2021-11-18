@@ -192,6 +192,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
     * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
+    * Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
     * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
@@ -340,6 +341,8 @@ TODO:
 * `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
+
+Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern.
 
 ## <a name="Packager"></a>Pre-Packaged installation files
 
@@ -906,7 +909,7 @@ A stock installation of Arkime extracts all of its network connection ("session"
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
-One value of particular mention is **Zeek Log Type** (`zeek.logType` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `zeek.logType == conn`, or restricted to records from `weird.log` by searching `zeek.logType == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `zeek.logType == EXISTS!`. On the other hand, to exclude Zeek logs and only view records from PCAP files, use `zeek.logType != EXISTS!`. 
+One value of particular mention is **Zeek Log Type** (`event.dataset` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view Arkime Sessions, use `fileId != EXISTS!`. 
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
@@ -918,7 +921,7 @@ The values of records created from Zeek logs can be expanded and viewed like any
 
 The Arkime interface displays both Zeek logs and Arkime sessions alongside each other. Using fields common to both data sources, one can [craft queries](#SearchCheatSheet) to filter results matching desired criteria.
 
-A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `zeek.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to Arkime's `rootId` field.
+A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `network.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to both Arkime's `rootId` field and the [ECS](https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-id) `event.id` field.
 
 Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Arkime sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Arkime and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
@@ -943,7 +946,7 @@ The **Sessions** view contains many controls for filtering the sessions displaye
 * [search bar](https://localhost/help#search): Indicated by the magnifying glass **🔍** icon, the search bar allows defining filters on session/log metadata
 * [time bounding](https://localhost/help#timebounding) controls: The **🕘**, **Start**, **End**, **Bounding**, and **Interval** fields, and the **date histogram** can be used to visually zoom and pan the time range being examined.
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
-* views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including several on the `zeek.logType` field. 
+* views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including filtering on the `event.dataset` field. 
 
 ![Malcolm views](./docs/images/screenshots/arkime_log_filter.png)
 
@@ -1038,7 +1041,7 @@ Once the hunt job is complete (and a minute or so has passed, as the `huntId` mu
 
 From this list of filtered sessions you can expand session details and explore packet payloads which matched the hunt search criteria.
 
-The hunt feature is available only for sessions created from full packet capture data, not Zeek logs. This being the case, it is a good idea to click the eyeball **👁** icon and select the **PCAP Files** view to exclude Zeek logs from candidate sessions prior to using the hunt feature.
+The hunt feature is available only for sessions created from full packet capture data, not Zeek logs. This being the case, it is a good idea to click the eyeball **👁** icon and select the **Arkime Sessions** view to exclude Zeek logs from candidate sessions prior to using the hunt feature.
 
 See also Arkime's usage documentation for more information on the [hunt feature](https://localhost/help#hunt).
 
@@ -1171,8 +1174,8 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 
 | | [Arkime Search String](https://localhost/help#search) | [Kibana Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [Kibana Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
 |---|:---:|:---:|:---:|
-| Field exists |`zeek.logType == EXISTS!`|`_exists_:zeek.logType`|`zeek.logType:*`|
-| Field does not exist |`zeek.logType != EXISTS!`|`NOT _exists_:zeek.logType`|`NOT zeek.logType:*`|
+| Field exists |`event.dataset == EXISTS!`|`_exists_:event.dataset`|`event.dataset:*`|
+| Field does not exist |`event.dataset != EXISTS!`|`NOT _exists_:event.dataset`|`NOT event.dataset:*`|
 | Field matches a value |`port.dst == 22`|`destination.port:22`|`destination.port:22`|
 | Field does not match a value |`port.dst != 22`|`NOT destination.port:22`|`NOT destination.port:22`|
 | Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|`tags:(external_source or external_destination)`|
@@ -1180,14 +1183,14 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
 | Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|`http.statuscode >= 200 and http.statuscode < 300`|
 | Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|`tags:(external_source or external_destination) and http.statuscode:401`|
-| Match any search terms (OR) |`(zeek_ftp.password == EXISTS!) || (zeek_http.password == EXISTS!) || (zeek.user == "anonymous")`|`_exists_:zeek_ftp.password OR _exists_:zeek_http.password OR zeek.user:"anonymous"`|`zeek_ftp.password:* or zeek_http.password:* or zeek.user:"anonymous"`|
+| Match any search terms (OR) |`(zeek.ftp.password == EXISTS!) || (zeek.http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek.ftp.password OR _exists_:zeek.http.password OR related.user:"anonymous"`|`zeek.ftp.password:* or zeek.http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek_http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
-| GeoIP information available |`country == EXISTS!`|`_exists_:zeek.destination_geo OR _exists_:zeek.source_geo`|`zeek.destination_geo:* or zeek.source_geo:*`|
-| Zeek log type |`zeek.logType == notice`|`zeek.logType:notice`|`zeek.logType:notice`|
+| GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
+| Zeek log type |`event.dataset == notice`|`event.dataset:notice`|`event.dataset:notice`|
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
 
@@ -1195,35 +1198,35 @@ When building complex queries, it is **strongly recommended** that you enclose s
 
 As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying Elasticsearch schema. A complete list of these fields can be found in the Arkime help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
 
-Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `zeek.orig_h` in Kibana.
+Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `source.ip` in Kibana.
 
 The table below shows the mapping of some of these fields.
 
 | Field Description |Arkime Field Alias(es)|Arkime-mapped Zeek Field(s)|Zeek Field(s)|
 |---|:---:|:---:|:---:|
-| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`network.community_id`|`zeek.community_id`|
-| Destination IP |`ip.dst`|`destination.ip`|`zeek.resp_h`|
-| Destination MAC |`mac.dst`|`destination.mac`|`zeek.resp_l2_addr`|
-| Destination Port |`port.dst`|`destination.port`|`zeek.resp_p`|
-| Duration |`session.length`|`length`|`zeek_conn.duration`|
+| [Community ID](https://github.com/corelight/community-id-spec) Flow Hash ||`network.community_id`|`network.community_id`|
+| Destination IP |`ip.dst`|`destination.ip`|`destination.ip`|
+| Destination MAC |`mac.dst`|`destination.mac`|`destination.mac`|
+| Destination Port |`port.dst`|`destination.port`|`destination.port`|
+| Duration |`session.length`|`length`|`zeek.conn.duration`|
 | First Packet Time |`starttime`|`firstPacket`|`zeek.ts`, `@timestamp`|
-| IP Protocol |`ip.protocol`|`ipProtocol`|`zeek.proto`|
+| IP Protocol |`ip.protocol`|`ipProtocol`|`network.transport`|
 | Last Packet Time |`stoptime`|`lastPacket`||
-| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`zeek.filetype`, `zeek_files.mime_type`, `zeek_ftp.mime_type`, `zeek_http.orig_mime_types`, `zeek_http.resp_mime_types`, `zeek_irc.dcc_mime_type`|
-| Protocol/Service |`protocols`|`protocol`|`zeek.proto`, `zeek.service`|
-| Request Bytes |`databytes.src`, `bytes.src`|`source.bytes`, `client.bytes`|`zeek_conn.orig_bytes`, `zeek_conn.orig_ip_bytes`|
-| Request Packets |`packets.src`|`source.packets`|`zeek_conn.orig_pkts`|
-| Response Bytes |`databytes.dst`, `bytes.dst`|`destination.bytes`, `server.bytes`|`zeek_conn.resp_bytes`, `zeek_conn.resp_ip_bytes`|
-| Response Packets |`packets.dst`|`destination.packets`|`zeek_con.resp_pkts`|
-| Source IP |`ip.src`|`source.ip`|`zeek.orig_h`|
-| Source MAC |`mac.src`|`source.mac`|`zeek.orig_l2_addr`|
-| Source Port |`port.src`|`source.port`|`zeek.orig_p`|
+| MIME Type |`email.bodymagic`, `http.bodymagic`|`http.bodyMagic`|`file.mime_type`, `zeek.files.mime_type`, `zeek.ftp.mime_type`, `zeek.http.orig_mime_types`, `zeek.http.resp_mime_types`, `zeek.irc.dcc_mime_type`|
+| Protocol/Service |`protocols`|`protocol`|`network.transport`, `network.protocol`|
+| Request Bytes |`databytes.src`, `bytes.src`|`source.bytes`, `client.bytes`|`zeek.conn.orig_bytes`, `zeek.conn.orig_ip_bytes`|
+| Request Packets |`packets.src`|`source.packets`|`zeek.conn.orig_pkts`|
+| Response Bytes |`databytes.dst`, `bytes.dst`|`destination.bytes`, `server.bytes`|`zeek.conn.resp_bytes`, `zeek.conn.resp_ip_bytes`|
+| Response Packets |`packets.dst`|`destination.packets`|`zeek.con.resp_pkts`|
+| Source IP |`ip.src`|`source.ip`|`source.ip`|
+| Source MAC |`mac.src`|`source.mac`|`source.mac`|
+| Source Port |`port.src`|`source.port`|`source.port`|
 | Total Bytes |`databytes`, `bytes`|`totDataBytes`, `network.bytes`||
 | Total Packets |`packets`|`network.packets`||
-| Username |`user`|`user`|`zeek.user`|
-| Zeek Connection UID|||`zeek.uid`|
-| Zeek File UID |||`zeek.fuid`|
-| Zeek Log Type |||`zeek.logType`|
+| Username |`user`|`user`|`related.user`|
+| Zeek Connection UID|||`zeek.uid`, `event.id`|
+| Zeek File UID |||`zeek.fuid`, `event.id`|
+| Zeek Log Type |||`event.dataset`|
 
 In addition to the fields listed above, Arkime provides several special field aliases for matching any field of a particular type. While these aliases do not exist in Kibana *per se*, they can be approximated as illustrated below.
 
@@ -1231,10 +1234,10 @@ In addition to the fields listed above, Arkime provides several special field al
 |---|:---:|:---:|
 | IP Address | `ip == 192.168.0.1` | `source.ip:192.168.0.1 OR destination.ip:192.168.0.1` |
 | Port | `port == [80, 443, 8080, 8443]` | `source.port:(80 OR 443 OR 8080 OR 8443) OR destination.port:(80 OR 443 OR 8080 OR 8443)` |
-| Country (code) | `country == [RU,CN]` | `zeek.destination_geo.country_code2:(RU OR CN) OR zeek.source_geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
-| Country (name) | | `zeek.destination_geo.country_name:(Russia OR China) OR zeek.source_geo.country_name:(Russia OR China)` |
+| Country (code) | `country == [RU,CN]` | `destination.geo.country_code2:(RU OR CN) OR source.geo.country_code2:(RU OR CN) OR dns.GEO:(RU OR CN)` |
+| Country (name) | | `destination.geo.country_name:(Russia OR China) OR source.geo.country_name:(Russia OR China)` |
 | ASN | `asn == "*Mozilla*"` | `source.as.full:*Mozilla* OR destination.as.full:*Mozilla* OR dns.ASN:*Mozilla*` |
-| Host | `host == www.microsoft.com` | `zeek_http.host:www.microsoft.com (or zeek_dhcp.host_name, zeek_dns.host, zeek_ntlm.host, smb.host, etc.)` |
+| Host | `host == www.microsoft.com` | `zeek.http.host:www.microsoft.com (or zeek.dhcp.host_name, zeek.dns.host, zeek.ntlm.host, smb.host, etc.)` |
 | Protocol (layers >= 4) | `protocols == tls` | `protocol:tls` |
 | User | `user == EXISTS! && user != anonymous` | `_exists_:user AND (NOT user:anonymous)` |
 
@@ -1298,9 +1301,9 @@ Each non-comment line (not beginning with a `#`), defines an address-to-name map
 ```
 Each line consists of three `|`-separated fields: address(es), hostname, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
-As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP and MAC address fields (`zeek.orig_h`, `zeek.resp_h`, `zeek.orig_l2_addr`, and `zeek.resp_l2_addr`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `zeek.orig_hostname` or `zeek.resp_hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
+As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP and MAC address fields (`source.ip`, `destination.ip`, `source.mac`, and `destination.mac`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `source.hostname` or `destination.hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
 
-`zeek.orig_hostname` and `zeek.resp_hostname` may each contain multiple values. For example, if both a host's source IP address and source MAC address were matched by two different lines, `zeek.orig_hostname` would contain the hostname values from both matching lines.
+`source.hostname` and `destination.hostname` may each contain multiple values. For example, if both a host's source IP address and source MAC address were matched by two different lines, `source.hostname` would contain the hostname values from both matching lines.
 
 #### <a name="SegmentNaming"></a>CIDR subnet to network segment name mapping via `cidr-map.txt`
 
@@ -1328,11 +1331,11 @@ Each non-comment line (not beginning with a `#`), defines an subnet-to-name mapp
 ```
 Each line consists of three `|`-separated fields: CIDR-formatted subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
-As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`zeek.orig_h` and `zeek.resp_h`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `zeek.orig_segment` or `zeek.resp_segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
+As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`source.ip` and `destination.ip`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `source.segment` or `destination.segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
 
-`zeek.orig_segment` and `zeek.resp_segment` may each contain multiple values. For example, if `cidr-map.txt` specifies multiple overlapping subnets on different lines, `zeek.orig_segment` would contain the hostname values from both matching lines if `zeek.orig_h` belonged to both subnets.
+`source.segment` and `destination.segment` may each contain multiple values. For example, if `cidr-map.txt` specifies multiple overlapping subnets on different lines, `source.segment` would contain the hostname values from both matching lines if `source.ip` belonged to both subnets.
 
-If both `zeek.orig_segment` and `zeek.resp_segment` are added to a log, and if they contain different values, the tag `cross_segment` will be added to the log's `tags` field for convenient identification of cross-segment traffic. This traffic could be easily visualized using Arkime's **Connections** graph, by setting the **Src:** value to **Originating Network Segment** and the **Dst:** value to **Responding Network Segment**:
+If both `source.segment` and `destination.segment` are added to a log, and if they contain different values, the tag `cross_segment` will be added to the log's `tags` field for convenient identification of cross-segment traffic. This traffic could be easily visualized using Arkime's **Connections** graph, by setting the **Src:** value to **Originating Network Segment** and the **Dst:** value to **Responding Network Segment**:
 
 ![Cross-segment traffic in Connections](./docs/images/screenshots/arkime_connections_segments.png)
 
@@ -1399,7 +1402,7 @@ These categories' severity scores can be customized by editing `logstash/maps/ma
 
 * Each category can be assigned a number between `1` and `100` for severity scoring.
 * Any category may be disabled by assigning it a score of `0`.
-* A severity score can be assigned for any [supported protocol](#Protocols) by adding an entry with the key formatted like `"PROTOCOL_XYZ"`, where `XYZ` is the uppercased value of the protocol as stored in the `zeek.service` field. For example, to assign a score of `40` to Zeek logs generated for SSH traffic, you could add the following line to `malcolm_severity.yaml`:
+* A severity score can be assigned for any [supported protocol](#Protocols) by adding an entry with the key formatted like `"PROTOCOL_XYZ"`, where `XYZ` is the uppercased value of the protocol as stored in the `network.protocol` field. For example, to assign a score of `40` to Zeek logs generated for SSH traffic, you could add the following line to `malcolm_severity.yaml`:
 
 ```
 "PROTOCOL_SSH": 40
@@ -1465,7 +1468,7 @@ Official downloads of the Malcolm installer ISO are not provided: however, it ca
 * [Vagrant](https://www.vagrantup.com/)
     - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
     - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
-    - [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box
+    - [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box
 
 The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
 
@@ -1473,7 +1476,7 @@ The build should work with either the [VirtualBox](https://www.virtualbox.org/) 
     - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
 * [libvirt](https://libvirt.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
-    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-10`](https://app.vagrantup.com/bento/boxes/debian-10) Vagrant box to `libvirt` format
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box to `libvirt` format
 
 To perform a clean build the Malcolm installer ISO, navigate to your local Malcolm working copy and run:
 
@@ -1501,6 +1504,8 @@ $ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_image
 ```
 
 A system installed from the resulting ISO will load the Malcolm Docker images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
+
+Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs, specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`](./.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. You'll need to run the workflows to build and push your fork's Malcolm docker images before building the ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
 
 ### <a name="ISOInstallation"></a>Installation
 
@@ -1962,6 +1967,10 @@ After upgrading following one of the previous outlines, give Malcolm several min
 #### Loading new Kibana dashboards and visualizations
 
 Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
+
+### Major releases
+
+The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
 
 ## <a name="Forks"></a>Forks
 

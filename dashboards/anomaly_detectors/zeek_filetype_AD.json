@@ -1,5 +1,5 @@
 {
-  "name": "zeek_filetype_AD",
+  "name": "file_mime_type_AD",
   "description": "Detect anomalies based on transferred file type",
   "time_field": "firstPacket",
   "indices": [
@@ -7,12 +7,12 @@
   ],
   "feature_attributes": [
     {
-      "feature_name": "zeek_filetype",
+      "feature_name": "file_mime_type",
       "feature_enabled": true,
       "aggregation_query": {
-        "zeek_filetype": {
+        "file_mime_type": {
           "value_count": {
-            "field": "zeek.filetype"
+            "field": "file.mime_type"
           }
         }
       }
@@ -23,7 +23,7 @@
       "filter": [
         {
           "exists": {
-            "field": "zeek.filetype",
+            "field": "file.mime_type",
             "boost": 1
           }
         }

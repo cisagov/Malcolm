@@ -1,47 +1,6 @@
-FROM amazonlinux:2 AS build
+FROM docker.elastic.co/logstash/logstash-oss:7.10.2
 
 # Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
-
-RUN amazon-linux-extras install -y epel && \
-    yum install -y \
-      autoconf \
-      automake \
-      bison \
-      bzip2 \
-      curl \
-      gcc-c++ \
-      glibc-devel \
-      glibc-headers \
-      java-latest-openjdk-devel \
-      libffi-devel \
-      libtool \
-      libyaml-devel \
-      make \
-      openssl-devel \
-      patch \
-      procps \
-      readline-devel \
-      tar \
-      wget \
-      which \
-      zlib-devel
-
-RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -" && \
-    /bin/bash -lc "command curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -" && \
-    /bin/bash -lc "curl -L get.rvm.io | bash -s stable" && \
-    /bin/bash -lc "rvm autolibs fail" && \
-    /bin/bash -lc "rvm install jruby-9.2.17.0" && \
-    /bin/bash -lc "rvm use jruby-9.2.17.0 --default" && \
-    /bin/bash -lc "gem install bundler --no-document"
-
-ENV OUIFILTER_URL "https://codeload.github.com/mmguero-dev/logstash-filter-ieee_oui/tar.gz/master"
-
-RUN cd /opt && \
-    mkdir -p ./logstash-filter-ieee_oui && \
-    curl -sSL "$OUIFILTER_URL" | tar xzvf - -C ./logstash-filter-ieee_oui --strip-components 1 && \
-    /bin/bash -lc "export JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-ieee_oui && ( bundle install || bundle install ) && gem build logstash-filter-ieee_oui.gemspec && bundle info logstash-filter-ieee_oui"
-
-FROM docker.elastic.co/logstash/logstash-oss:7.10.2
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -79,24 +38,20 @@ ENV JAVA_HOME=/usr/share/logstash/jdk
 
 USER root
 
-COPY --from=build /opt/logstash-filter-ieee_oui /opt/logstash-filter-ieee_oui
-ADD "https://rubygems.org/downloads/logstash-output-opensearch-$LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION-java.gem" /opt/"logstash-output-opensearch-$LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION-java.gem"
-
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y curl gettext python-setuptools python-pip python-requests python-yaml openssl && \
+    yum install -y curl gettext python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
-    pip install py2-ipaddress supervisor && \
+    pip3 install ipaddress supervisor manuf pyyaml && \
     logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                             logstash-filter-json logstash-filter-prune logstash-filter-http \
                             logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                             logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                             logstash-input-beats logstash-output-elasticsearch && \
-    logstash-plugin install /opt/logstash-filter-ieee_oui/logstash-filter-ieee_oui-1.0.6.gem && \
-    logstash-plugin install /opt/"logstash-output-opensearch-$LOGSTASH_OUTPUT_OPENSEARCH_PLUGIN_VERSION-java.gem" && \
-    rm -rf /opt/logstash-filter-ieee_oui /root/.cache /root/.gem /root/.bundle
+    rm -rf /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD shared/bin/manuf-oui-parse.py /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
@@ -112,9 +67,11 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
     chown --silent -R ${PUSER}:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue && \
-    curl -sSL -o /usr/share/logstash/config/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf" && \
-      ( awk -F '\t' '{gsub(":", "", $1); if (length($1) == 6) {if ($3) {print $1"\t"$3} else if ($2) {print $1"\t"$2}}}' /usr/share/logstash/config/oui.txt > /usr/share/logstash/config/oui-logstash.txt) && \
-      python /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml
+    echo "Retrieving and parsing Wireshark manufacturer database..." && \
+    python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
+    echo "Retrieving JA3 fingerprint lists..." && \
+    python3 /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml && \
+    echo "Complete."
 
 # As the keystore is encapsulated in logstash, this isn't really necessary. It's included
 # here just to suppress the prompt when creating the keystore. If you're concerned about it
@@ -130,7 +87,7 @@ EXPOSE 9600
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

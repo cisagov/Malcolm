@@ -27,8 +27,8 @@ INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 
 INDEX_POLICY_FILE="/data/init/index-management-policy.json"
 INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
-ZEEK_TEMPLATE_FILE="/data/init/zeek_template.json"
-ZEEK_TEMPLATE_FILE_ORIG="/data/zeek_template.json"
+MALCOLM_TEMPLATE_FILE="/data/init/malcolm_template.json"
+MALCOLM_TEMPLATE_FILE_ORIG="/data/malcolm_template.json"
 INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 
 # is the argument to automatically create this index enabled?
@@ -48,7 +48,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       # register the repo location for opensearch snapshots
       /data/register-opensearch-snapshot-repo.sh
 
-      # tweak the sessions template (arkime_sessions3-* zeek template file) to use the index management policy
+      # tweak the sessions template (arkime_sessions3-* template file) to use the index management policy
       if [[ -f "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
         # user has provided a file for index management, use it
         cp "$INDEX_POLICY_FILE_HOST" "$INDEX_POLICY_FILE"
@@ -72,21 +72,21 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         # https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/#create-policy
         curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
 
-        if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]]; then
+        if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]]; then
           # insert opendistro.index_state_management.policy_id into index template settings
-          cat "$ZEEK_TEMPLATE_FILE_ORIG" | jq ".settings += {\"opendistro.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$ZEEK_TEMPLATE_FILE"
+          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".settings += {\"opendistro.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
         fi
       fi
 
-      echo "Importing zeek_template..."
+      echo "Importing malcolm_template..."
 
-      if [[ -f "$ZEEK_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$ZEEK_TEMPLATE_FILE" ]]; then
-        cp "$ZEEK_TEMPLATE_FILE_ORIG" "$ZEEK_TEMPLATE_FILE"
+      if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
+        cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
       fi
 
-      # load zeek_template containing zeek field type mappings (merged from /data/zeek_template.json to /data/init/zeek_template.json in dashboard-helpers on startup)
+      # load malcolm_template containing malcolm data source field type mappings (merged from /data/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
       curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
-        "$OS_URL/_template/zeek_template?include_type_name=true" -d "@$ZEEK_TEMPLATE_FILE" 2>&1
+        "$OS_URL/_template/malcolm_template?include_type_name=true" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
 
       echo "Importing index pattern..."
 

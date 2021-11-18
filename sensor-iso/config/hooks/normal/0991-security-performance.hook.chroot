@@ -14,6 +14,8 @@ UFW_ALLOW_RULES=(
 for i in ${UFW_ALLOW_RULES[@]}; do
   ufw allow "$i"
 done
+# will re-enable on boot
+/usr/sbin/ufw --force disable
 
 # performance parameters for networking, disk, etc.
 cat << 'EOF' >> /etc/sysctl.conf
