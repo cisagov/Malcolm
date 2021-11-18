@@ -1492,7 +1492,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.0.iso"
 …
 ```
 
@@ -1970,7 +1970,7 @@ Once the upgraded instance Malcolm has started up, you'll probably want to impor
 
 ### Major releases
 
-The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
+The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v5.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
 
 ## <a name="Forks"></a>Forks
 
