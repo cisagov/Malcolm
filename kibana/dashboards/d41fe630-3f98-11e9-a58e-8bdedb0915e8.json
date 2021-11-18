@@ -80,7 +80,7 @@
       "version": "WzgwNCwxXQ==",
       "attributes": {
         "title": "Connections - Source - Originator Bytes (region map)",
-        "visState": "{\"title\":\"Connections - Source - Originator Bytes (region map)\",\"type\":\"region_map\",\"params\":{\"addTooltip\":true,\"colorSchema\":\"Green to Red\",\"emsHotLink\":null,\"isDisplayWarning\":false,\"legendPosition\":\"bottomright\",\"mapCenter\":[0,0],\"mapZoom\":2,\"outlineWeight\":1,\"selectedJoinField\":{\"description\":\"Country Code\",\"name\":\"ISO_A2\"},\"selectedLayer\":{\"attribution\":\"https://exploratory.io/maps\",\"fields\":[{\"description\":\"Country Code\",\"name\":\"ISO_A2\"},{\"description\":\"Country Code2\",\"name\":\"WB_A2\"},{\"description\":\"Country Name\",\"name\":\"NAME\"}],\"format\":{\"type\":\"geojson\"},\"isEMS\":false,\"layerId\":\"self_hosted.World (offline)\",\"meta\":{\"feature_collection_path\":\"data\"},\"name\":\"World (offline)\",\"url\":\"/world.geojson\"},\"showAllShapes\":true,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"selectedTmsLayer\":{\"origin\":\"elastic_maps_service\",\"id\":\"road_map\",\"minZoom\":0,\"maxZoom\":10,\"attribution\":\"<a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap contributors</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://openmaptiles.org\\\">OpenMapTiles</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.maptiler.com\\\">MapTiler</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a>\"}},\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Originator Bytes\",\"aggType\":\"cardinality\"},\"bucket\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Originator Country\",\"aggType\":\"terms\"}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"zeek_conn.orig_bytes\",\"customLabel\":\"Originator Bytes\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"source.geo.country_iso_code\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Originator Country\"}}]}",
+        "visState": "{\"title\":\"Connections - Source - Originator Bytes (region map)\",\"type\":\"region_map\",\"params\":{\"addTooltip\":true,\"colorSchema\":\"Green to Red\",\"emsHotLink\":null,\"isDisplayWarning\":false,\"legendPosition\":\"bottomright\",\"mapCenter\":[0,0],\"mapZoom\":2,\"outlineWeight\":1,\"selectedJoinField\":{\"description\":\"Country Code\",\"name\":\"ISO_A2\"},\"selectedLayer\":{\"attribution\":\"https://exploratory.io/maps\",\"fields\":[{\"description\":\"Country Code\",\"name\":\"ISO_A2\"},{\"description\":\"Country Code2\",\"name\":\"WB_A2\"},{\"description\":\"Country Name\",\"name\":\"NAME\"}],\"format\":{\"type\":\"geojson\"},\"isEMS\":false,\"layerId\":\"self_hosted.World (offline)\",\"meta\":{\"feature_collection_path\":\"data\"},\"name\":\"World (offline)\",\"url\":\"/world.geojson\"},\"showAllShapes\":true,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"selectedTmsLayer\":{\"origin\":\"elastic_maps_service\",\"id\":\"road_map\",\"minZoom\":0,\"maxZoom\":10,\"attribution\":\"<a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap contributors</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://openmaptiles.org\\\">OpenMapTiles</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.maptiler.com\\\">MapTiler</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a>\"}},\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Originator Bytes\",\"aggType\":\"cardinality\"},\"bucket\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Originator Country\",\"aggType\":\"terms\"}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"zeek.conn.orig_bytes\",\"customLabel\":\"Originator Bytes\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"source.geo.country_iso_code\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Originator Country\"}}]}",
         "uiStateJSON": "{\"mapCenter\":[37.73168660636539,16.171875000000004],\"mapZoom\":3}",
         "description": "",
         "version": 1,
@@ -110,7 +110,7 @@
       "version": "Wzg1NCwxXQ==",
       "attributes": {
         "title": "Connections - Protocol Filters",
-        "visState": "{\"title\":\"Connections - Protocol Filters\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1581606976709\",\"fieldName\":\"network.type\",\"parent\":\"\",\"label\":\"Network Layer\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1581606723028\",\"fieldName\":\"zeek.proto\",\"parent\":\"\",\"label\":\"Protocol\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"},{\"id\":\"1581606665268\",\"fieldName\":\"zeek.service\",\"parent\":\"\",\"label\":\"Service\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_2_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+        "visState": "{\"title\":\"Connections - Protocol Filters\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1581606976709\",\"fieldName\":\"network.type\",\"parent\":\"\",\"label\":\"Network Layer\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"},{\"id\":\"1581606723028\",\"fieldName\":\"network.transport\",\"parent\":\"\",\"label\":\"Protocol\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_1_index_pattern\"},{\"id\":\"1581606665268\",\"fieldName\":\"network.protocol\",\"parent\":\"\",\"label\":\"Service\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_2_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -175,14 +175,14 @@
         "description": "",
         "hits": 0,
         "columns": [
-          "zeek.proto",
-          "zeek.service",
+          "network.transport",
+          "network.protocol",
           "source.ip",
           "source.port",
           "destination.ip",
           "destination.port",
           "network.bytes",
-          "zeek.uid"
+          "event.id"
         ],
         "sort": [
           [
@@ -192,7 +192,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"zeek.logType:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

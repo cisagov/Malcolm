@@ -6,27 +6,27 @@
     "arkime_sessions3-*"
   ],
   "category_field": [
-    "zeek.service"
+    "network.protocol"
   ],
   "feature_attributes": [
     {
-      "feature_name": "zeek_action",
+      "feature_name": "event_action",
       "feature_enabled": true,
       "aggregation_query": {
-        "zeek_action": {
+        "event_action": {
           "value_count": {
-            "field": "zeek.action"
+            "field": "event.action"
           }
         }
       }
     },
     {
-      "feature_name": "zeek_result",
+      "feature_name": "event_result",
       "feature_enabled": true,
       "aggregation_query": {
-        "zeek_result": {
+        "event_result": {
           "value_count": {
-            "field": "zeek.result"
+            "field": "event.result"
           }
         }
       }
@@ -37,19 +37,19 @@
       "filter": [
         {
           "exists": {
-            "field": "zeek.service",
+            "field": "network.protocol",
             "boost": 1
           }
         },
         {
           "exists": {
-            "field": "zeek.action",
+            "field": "event.action",
             "boost": 1
           }
         },
         {
           "exists": {
-            "field": "zeek.result",
+            "field": "event.result",
             "boost": 1
           }
         }

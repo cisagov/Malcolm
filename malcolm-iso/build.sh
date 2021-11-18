@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=malcolm
-IMAGE_PUBLISHER=cisagov
+IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bullseye
 
@@ -167,7 +167,7 @@ if [ -d "$WORKDIR" ]; then
     --debian-installer live \
     --debian-installer-distribution $IMAGE_DISTRIBUTION \
     --debian-installer-gui false \
-    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
+    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,debian-archive-keyring,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
     --distribution $IMAGE_DISTRIBUTION \
     --image-name "$IMAGE_NAME" \
     --iso-application "$IMAGE_NAME" \

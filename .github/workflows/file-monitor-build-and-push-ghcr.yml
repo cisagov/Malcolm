@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - development
     paths:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'

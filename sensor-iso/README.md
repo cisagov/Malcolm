@@ -416,9 +416,11 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-3.4.0.iso"
+Finished, created "/sensor-build/hedgehog-4.0.0.iso"
 …
 ```
+
+Alternately, if you have forked Malcolm on GitHub, [workflow files](../.github/workflows/) are provided which contain instructions for GitHub to build the docker images and Hedgehog and [Malcolm](https://github.com/cisagov/Malcolm) installer ISOs, specifically [`sensor-iso-build-docker-wrap-push-ghcr.yml`](../.github/workflows/sensor-iso-build-docker-wrap-push-ghcr.yml) for the Hedgehog ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
 
 # <a name="ConfigSSH"></a>Appendix B - Configuring SSH access
 
