@@ -20,22 +20,22 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   if [[ -n $OS_PROTOCOL ]] && [[ -n $OS_HOST ]]; then
 
     # build OpenSearch URL for moloch-capture
-    ARKIME_OPENSEARCH="${OS_PROTOCOL}://"
+    ARKIME_ELASTICSEARCH="${OS_PROTOCOL}://"
 
     if [[ -n $OS_USERNAME ]] && [[ -n $OS_PASSWORD ]]; then
-      ARKIME_OPENSEARCH+="${OS_USERNAME}:${OS_PASSWORD}@"
+      ARKIME_ELASTICSEARCH+="${OS_USERNAME}:${OS_PASSWORD}@"
     fi
 
-    ARKIME_OPENSEARCH+="${OS_HOST}"
+    ARKIME_ELASTICSEARCH+="${OS_HOST}"
 
     if [[ -n $OS_PORT ]]; then
-      ARKIME_OPENSEARCH+=":${OS_PORT}"
+      ARKIME_ELASTICSEARCH+=":${OS_PORT}"
     else
-      ARKIME_OPENSEARCH+=":9200"
+      ARKIME_ELASTICSEARCH+=":9200"
     fi
 
     # place the URL in the config file
-    sed -r -i "s|(elasticsearch)\s*=\s*.*|\1=$ARKIME_OPENSEARCH|" "$ARKIME_CONFIG_FILE"
+    sed -r -i "s|(elasticsearch)\s*=\s*.*|\1=$ARKIME_ELASTICSEARCH|" "$ARKIME_CONFIG_FILE"
   fi
 
   # if SSL certificate verification is turned off, supply the --insecure flag

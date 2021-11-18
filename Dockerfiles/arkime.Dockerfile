@@ -126,7 +126,7 @@ ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 # Declare envs vars for each arg
 ENV OS_HOST $OS_HOST
 ENV OS_PORT $OS_PORT
-ENV ARKIME_OPENSEARCH "http://"$OS_HOST":"$OS_PORT
+ENV ARKIME_ELASTICSEARCH "http://"$OS_HOST":"$OS_PORT
 ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
