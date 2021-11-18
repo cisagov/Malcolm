@@ -1,12 +1,14 @@
-name: elasticsearch-build-and-push-ghcr
+name: dashboards-build-and-push-ghcr
 
 on:
   push:
     branches:
       - main
       - development
+      - opensearch
     paths:
-      - 'Dockerfiles/elasticsearch.Dockerfile'
+      - 'dashboards/**'
+      - 'Dockerfiles/dashboards.Dockerfile'
       - 'shared/bin/*'
   workflow_dispatch:
   repository_dispatch:
@@ -52,6 +54,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfiles/elasticsearch.Dockerfile
+          file: ./Dockerfiles/dashboards.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/elasticsearch-od:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/dashboards:${{ steps.extract_branch.outputs.branch }}

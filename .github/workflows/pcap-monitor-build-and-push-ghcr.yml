@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - opensearch
     paths:
       - 'pcap-monitor/**'
       - 'Dockerfiles/pcap-monitor.Dockerfile'

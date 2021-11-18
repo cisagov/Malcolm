@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - opensearch
     paths:
       - 'freq-server/**'
       - 'Dockerfiles/freq.Dockerfile'

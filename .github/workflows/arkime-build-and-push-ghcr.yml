@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - opensearch
     paths:
       - 'arkime/**'
       - 'Dockerfiles/arkime.Dockerfile'

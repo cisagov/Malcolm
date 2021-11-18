@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - opensearch
     paths:
       - 'file-upload/**'
       - 'Dockerfiles/file-upload.Dockerfile'

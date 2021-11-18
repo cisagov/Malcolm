@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - opensearch
     paths:
       - 'zeek/**'
       - 'Dockerfiles/zeek.Dockerfile'

@@ -1,13 +1,13 @@
-name: kibana-helper-build-and-push-ghcr
+name: opensearch-build-and-push-ghcr
 
 on:
   push:
     branches:
       - main
       - development
+      - opensearch
     paths:
-      - 'kibana/**'
-      - 'Dockerfiles/kibana-helper.Dockerfile'
+      - 'Dockerfiles/opensearch.Dockerfile'
       - 'shared/bin/*'
   workflow_dispatch:
   repository_dispatch:
@@ -53,6 +53,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfiles/kibana-helper.Dockerfile
+          file: ./Dockerfiles/opensearch.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/kibana-helper:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/opensearch:${{ steps.extract_branch.outputs.branch }}
