@@ -2039,11 +2039,7 @@ The Malcolm project uses [semantic versioning](https://semver.org/) when choosin
 
 ## <a name="Forks"></a>Forks
 
-[CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
-
-## <a name="Forks"></a>Forks
-
-[CISA](https://www.cisa.gov/) maintains the original source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
+[CISA](https://www.cisa.gov/) maintains the upstream source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
 
 ## <a name="Footer"></a>Copyright
 
