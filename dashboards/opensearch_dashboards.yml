@@ -9,9 +9,8 @@ opensearch.hosts: ["${OPENSEARCH_URL}"]
 opensearch.requestTimeout: 180000
 opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
-# offline region map TODO: is this still applicable here with kibana?
 map.regionmap:
-  includeElasticMapsService: false
+  includeOpenSearchMapsService: false
   layers:
      - name: "World (offline)"
        url: "/world.geojson"

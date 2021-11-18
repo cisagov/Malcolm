@@ -56,6 +56,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
   if [[ -n "$OS_EXTERNAL_HOSTS" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
     echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
     echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
+    echo "  pipeline.ecs_compatibility: disabled"      >> "$PIPELINES_CFG"
     cat "{}"/"$PIPELINE_EXTRA_CONF_FILE" 2>/dev/null   >> "$PIPELINES_CFG"
     rm -f "{}"/"$PIPELINE_EXTRA_CONF_FILE"
     echo                                               >> "$PIPELINES_CFG"
