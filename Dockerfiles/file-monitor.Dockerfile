@@ -83,7 +83,7 @@ ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
 ENV YARA_VERSION "4.1.3"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
-ENV YARA_RULOS_URL "https://github.com/Neo23x0/signature-base"
+ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
 ENV YARA_RULES_DIR "/yara-rules"
 ENV YARA_RULES_SRC_DIR "$SRC_BASE_DIR/signature-base"
 ENV CAPA_VERSION "3.0.3"
@@ -156,7 +156,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       make install && \
     rm -rf "${SRC_BASE_DIR}"/yara* && \
     cd /tmp && \
-      git clone --depth 1 --single-branch "${YARA_RULOS_URL}" "${YARA_RULES_SRC_DIR}" && \
+      git clone --depth 1 --single-branch "${YARA_RULES_URL}" "${YARA_RULES_SRC_DIR}" && \
       mkdir -p "${YARA_RULES_DIR}" && \
       ln -f -s -r "${YARA_RULES_SRC_DIR}"/yara/* "${YARA_RULES_SRC_DIR}"/vendor/yara/* "${YARA_RULES_DIR}"/ && \
     cd /tmp && \
