@@ -30,6 +30,7 @@ INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
 MALCOLM_TEMPLATE_FILE="/data/init/malcolm_template.json"
 MALCOLM_TEMPLATE_FILE_ORIG="/data/malcolm_template.json"
 INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
+DEFAULT_DASHBOARD=${OPENSEARCH_DEFAULT_DASHBOARD:-"0ad3d7c2-3441-485e-9dfe-dbb22e84e576"}
 
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
@@ -112,6 +113,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # set dark theme
       curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/theme:darkMode" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+
+      # set default dashboard
+      curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/defaultRoute" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}"
 
       # set default query time range
       curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d \
