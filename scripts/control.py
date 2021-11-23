@@ -246,36 +246,39 @@ def logs():
   ignoreRegEx = re.compile(r"""
     .+(
         deprecated
-      | DEPRECATION
-      | eshealth
-      | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
-      | update_mapping
-      | throttling\s+index
-      | executing\s+attempt_(transition|set_replica_count)\s+for
-      | but\s+there\s+are\s+no\s+living\s+connections
-      | saved_objects
-      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/es)
-      | retry\.go.+(send\s+unwait|done$)
-      | scheduling\s+job\s*id.+opendistro-ism
-      | descheduling\s+job\s*id
-      | updating\s+number_of_replicas
-      | running\s+full\s+sweep
+      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
-      | \b(d|es)?stats\.json
+      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/es)
       | /_ns_/nstest\.html
-      | esindices/list
+      | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
+      | \b(d|es)?stats\.json
+      | \b1.+GET\s+/\s+.+401.+curl
       | _cat/indices
-      | use_field_mapping
-      | reaped\s+unknown\s+pid
-      | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+      | but\s+there\s+are\s+no\s+living\s+connections
+      | curl.+localhost.+GET\s+/api/status\s+200
+      | DEPRECATION
+      | descheduling\s+job\s*id
+      | eshealth
+      | esindices/list
+      | executing\s+attempt_(transition|set_replica_count)\s+for
       | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
       | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
-      | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
-      | curl.+localhost.+GET\s+/api/status\s+200
-      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
-      | \b1.+GET\s+/\s+.+401.+curl
+      | POST\s+HTTP/[\d\.].+\b200\b
+      | reaped\s+unknown\s+pid
+      | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
+      | retry\.go.+(send\s+unwait|done$)
+      | running\s+full\s+sweep
+      | saved_objects
+      | scheduling\s+job\s*id.+opendistro-ism
+      | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+      | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
+      | throttling\s+index
+      | update_mapping
+      | updating\s+number_of_replicas
+      | use_field_mapping
+      | Using\s+geoip\s+database
     )
   """, re.VERBOSE | re.IGNORECASE)
 
