@@ -9,6 +9,16 @@ opensearch.hosts: ["${OPENSEARCH_URL}"]
 opensearch.requestTimeout: 180000
 opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
+opensearchDashboards.branding:
+  logo:
+    defaultUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/logo/Malcolm_banner.png"
+    darkModeUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/logo/Malcolm_outline_banner_dark.png"
+  mark:
+    defaultUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/icon/icon.png"
+    darkModeUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/icon/icon_dark.png"
+  faviconUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/favicon/facebook.png"
+  applicationTitle: "Malcolm Dashboards"
+
 map.regionmap:
   includeOpenSearchMapsService: false
   layers:
