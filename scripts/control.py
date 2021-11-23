@@ -254,6 +254,7 @@ def logs():
       | \b(d|es)?stats\.json
       | \b1.+GET\s+/\s+.+401.+curl
       | _cat/indices
+      | branding.*config\s+is\s+not\s+found\s+or\s+invalid
       | but\s+there\s+are\s+no\s+living\s+connections
       | curl.+localhost.+GET\s+/api/status\s+200
       | DEPRECATION

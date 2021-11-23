@@ -11,12 +11,12 @@ opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
 
 opensearchDashboards.branding:
   logo:
-    defaultUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/logo/Malcolm_banner.png"
-    darkModeUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/logo/Malcolm_outline_banner_dark.png"
+    defaultUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/logo/Malcolm_banner.png"
+    darkModeUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/logo/Malcolm_outline_banner_dark.png"
   mark:
-    defaultUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/icon/icon.png"
-    darkModeUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/icon/icon_dark.png"
-  faviconUrl: "https://github.com/mmguero-dev/Malcolm/raw/opensearch/docs/images/favicon/facebook.png"
+    defaultUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/icon/icon.png"
+    darkModeUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/icon/icon_dark.png"
+  faviconUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/favicon/facebook.png"
   applicationTitle: "Malcolm Dashboards"
 
 map.regionmap:
