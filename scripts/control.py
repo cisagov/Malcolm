@@ -248,7 +248,7 @@ def logs():
         deprecated
       | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
-      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/es)
+      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
       | /_ns_/nstest\.html
       | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
       | \b(d|es)?stats\.json
