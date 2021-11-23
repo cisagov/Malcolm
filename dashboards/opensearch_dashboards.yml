@@ -8,9 +8,6 @@ server.rewriteBasePath: true
 opensearch.hosts: ["${OPENSEARCH_URL}"]
 opensearch.requestTimeout: 180000
 opensearchDashboards.defaultAppId: "dashboard/${OPENSEARCH_DEFAULT_DASHBOARD}"
-opensearch.ssl.verificationMode: none
-opensearch.requestHeadersWhitelist: [ ]
-opensearch_security.cookie.secure: false
 
 map.regionmap:
   includeOpenSearchMapsService: false

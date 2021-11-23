@@ -23,53 +23,23 @@ ENV TERM xterm
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
-
-ARG DISABLE_SECURITY_PLUGIN=true
-ENV DISABLE_SECURITY_PLUGIN $DISABLE_SECURITY_PLUGIN
-
 ENV JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
 
-RUN echo -e 'cluster.name: "docker-cluster"\n\
-network.host: 0.0.0.0\n\
-\n\
-# Malcolm handles security and authentication via reverse proxy.
-# This, plus the DISABLE_SECURITY_PLUGIN environment variable
-# should hopefully do the trick to disable the OpenSearch security plugin.
-plugins.security.disabled: true\n\
-plugins.security.ssl.transport.pemcert_filepath: /usr/share/opensearch/config/dummycerts/server.crt\n\
-plugins.security.ssl.transport.pemkey_filepath: /usr/share/opensearch/config/dummycerts/server.key\n\
-plugins.security.ssl.transport.pemtrustedcas_filepath: /usr/share/opensearch/config/dummycerts/ca.crt\n\
-plugins.security.ssl.transport.enforce_hostname_verification: false\n\
-plugins.security.ssl.http.enabled: false\n\
-plugins.security.ssl.http.pemcert_filepath: /usr/share/opensearch/config/dummycerts/server.crt\n\
-plugins.security.ssl.http.pemkey_filepath: /usr/share/opensearch/config/dummycerts/server.key\n\
-plugins.security.ssl.http.pemtrustedcas_filepath: /usr/share/opensearch/config/dummycerts/ca.crt\n\
-plugins.security.allow_unsafe_democertificates: true\n\
-plugins.security.allow_default_init_securityindex: true\n\
-plugins.security.authcz.admin_dn:\n\
-  - CN=malcolm,OU=client,O=client,L=dummy,C=us\n\
-plugins.security.audit.type: internal_opensearch\n\
-plugins.security.enable_snapshot_restore_privilege: true\n\
-plugins.security.check_snapshot_restore_write_privileges: true\n\
-plugins.security.restapi.roles_enabled: ["all_access", "security_rest_api_access"]\n\
-plugins.security.system_indices.enabled: true\n\
-plugins.security.system_indices.indices: [".opendistro-alerting-config", ".opendistro-alerting-alert*", ".opendistro-anomaly-results*", ".opendistro-anomaly-detector*", ".opendistro-anomaly-checkpoints", ".opendistro-anomaly-detection-state", ".opendistro-reports-*", ".opendistro-notifications-*", ".opendistro-notebooks", ".opendistro-asynchronous-search-response*"]'\
-> /usr/share/opensearch/config/opensearch.yml
+# Malcolm manages authentication and encryption via NGINX reverse proxy
+RUN yum install -y openssl util-linux  && \
+  /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security && \
+  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/opensearch/config/opensearch.yml && \
+  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml && \
+  sed -i "s/user=1000\b/user=%(ENV_PUID)s/g" /usr/share/opensearch/plugins/opensearch-performance-analyzer/pa_config/supervisord.conf && \
+  sed -i "s/user=1000\b/user=%(ENV_PUID)s/g" /usr/share/opensearch/performance-analyzer-rca/pa_config/supervisord.conf && \
+  sed -i '/[^#].*\$OPENSEARCH_HOME\/bin\/opensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
+
 
 # just used for initial keystore creation
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
-ADD shared/bin/self_signed_key_gen.sh /usr/local/bin/
-
-RUN yum install -y openssl util-linux  && \
-  /usr/local/bin/self_signed_key_gen.sh /usr/share/opensearch/config/dummycerts >/dev/null 2>&1 && \
-  find /usr/share/opensearch/config/dummycerts/ -type f ! \( -name server.crt -o -name server.key -o -name ca.crt \) -delete && \
-  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /usr/share/opensearch/config/dummycerts && \
-  sed -i "s/user=1000\b/user=%(ENV_PUID)s/g" /usr/share/opensearch/plugins/opensearch-performance-analyzer/pa_config/supervisord.conf && \
-  sed -i "s/user=1000\b/user=%(ENV_PUID)s/g" /usr/share/opensearch/performance-analyzer-rca/pa_config/supervisord.conf && \
-  sed -i '/[^#].*OPENSEARCH_HOME\/bin\/opensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

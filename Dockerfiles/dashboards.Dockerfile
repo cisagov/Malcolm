@@ -95,8 +95,6 @@ ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG OPENSEARCH_DEFAULT_DASHBOARD="0ad3d7c2-3441-485e-9dfe-dbb22e84e576"
 ARG NODE_OPTIONS="--max_old_space_size=4096"
-# Malcolm handles security and authentication via reverse proxy.
-ARG DISABLE_SECURITY_DASHBOARDS_PLUGIN="true"
 
 ENV CREATE_OS_ARKIME_SESSION_INDEX $CREATE_OS_ARKIME_SESSION_INDEX
 ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
@@ -109,7 +107,6 @@ ENV PATH="/data:${PATH}"
 ENV OPENSEARCH_URL $OPENSEARCH_URL
 ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
 ENV NODE_OPTIONS $NODE_OPTIONS
-ENV DISABLE_SECURITY_DASHBOARDS_PLUGIN $DISABLE_SECURITY_DASHBOARDS_PLUGIN
 
 USER root
 
@@ -117,6 +114,8 @@ COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnS
 
 RUN yum install -y curl psmisc util-linux zip unzip && \
     usermod -a -G tty ${PUSER} && \
+    # Malcolm manages authentication and encryption via NGINX reverse proxy
+    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     yum clean all && \
