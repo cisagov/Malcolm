@@ -26,9 +26,9 @@ INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 
 OTHER_INDEX_PATTERNS=(
-  "filebeat-*;filebeat-*;@timestamp",
-  "metricbeat-*;metricbeat-*;@timestamp",
-  "auditbeat-*;auditbeat-*;@timestamp",
+  "filebeat-*;filebeat-*;@timestamp"
+  "metricbeat-*;metricbeat-*;@timestamp"
+  "auditbeat-*;auditbeat-*;@timestamp"
   "packetbeat-*;packetbeat-*;@timestamp"
 )
 
