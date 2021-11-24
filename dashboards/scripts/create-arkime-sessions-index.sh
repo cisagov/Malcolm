@@ -25,6 +25,13 @@ INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 
+OTHER_INDEX_PATTERNS=(
+  "filebeat-*;filebeat-*;@timestamp",
+  "metricbeat-*;metricbeat-*;@timestamp",
+  "auditbeat-*;auditbeat-*;@timestamp",
+  "packetbeat-*;packetbeat-*;@timestamp"
+)
+
 INDEX_POLICY_FILE="/data/init/index-management-policy.json"
 INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
 MALCOLM_TEMPLATE_FILE="/data/init/malcolm_template.json"
@@ -103,6 +110,16 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       curl -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
         "$DASHB_URL/api/opensearch-dashboards/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
+
+      echo "Creating other index patterns..."
+      for i in ${OTHER_INDEX_PATTERNS[@]}; do
+        IDX_ID="$(echo "$i" | cut -d';' -f1)"
+        IDX_NAME="$(echo "$i" | cut -d';' -f2)"
+        IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f2)"
+        curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
+          "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
+          -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1
+      done
 
       echo "Importing OpenSearch Dashboards saved objects..."
 
