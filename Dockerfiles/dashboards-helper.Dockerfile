@@ -50,6 +50,14 @@ ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ADD dashboards/dashboards /opt/dashboards
+# At the moment Beats won't import dashboards into OpenSearch dashboards
+# (see opensearch-project/OpenSearch-Dashboards#656 and
+# opensearch-project/OpenSearch-Dashboards#831), although the templates/index
+# patterns work ok. As such, we're going to manually add the dashboards we care about to
+# /opt/dashboards/beats and load them when the container starts up.
+ADD sensor-iso/config/includes.chroot/usr/share/filebeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
+ADD sensor-iso/config/includes.chroot/usr/share/auditbeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
+ADD sensor-iso/config/includes.chroot/usr/share/protologbeat/kibana/7/dashboard/*.json /opt/dashboards/beats
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/

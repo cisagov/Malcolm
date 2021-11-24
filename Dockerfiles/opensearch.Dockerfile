@@ -27,10 +27,11 @@ ENV JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
 
-# Malcolm manages authentication and encryption via NGINX reverse proxy
+# Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
+# override_main_response_version - https://opensearch.org/docs/latest/clients/agents-and-ingestion-tools/index/#compatibility-matrices
 RUN yum install -y openssl util-linux  && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security && \
-  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0' > /usr/share/opensearch/config/opensearch.yml && \
+  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\ncompatibility.override_main_response_version: true' > /usr/share/opensearch/config/opensearch.yml && \
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/user=1000\b/user=%(ENV_PUID)s/g" /usr/share/opensearch/plugins/opensearch-performance-analyzer/pa_config/supervisord.conf && \
   sed -i "s/user=1000\b/user=%(ENV_PUID)s/g" /usr/share/opensearch/performance-analyzer-rca/pa_config/supervisord.conf && \

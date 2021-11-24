@@ -28,10 +28,12 @@ setup.template.settings:
   index.number_of_replicas: 0
 
 #============================== Dashboards =====================================
-setup.dashboards.enabled: true
+# "setup.dashboards.enabled: false" now because Beats won't import dashboards
+# into OpenSearch dashboards (see opensearch-project/OpenSearch-Dashboards#656
+# and opensearch-project/OpenSearch-Dashboards#831). setup.template.enabled
+# seems to be okay, however.
+setup.dashboards.enabled: false
 setup.dashboards.directory: "/usr/share/filebeat/kibana"
-
-#============================== Dashboards ======================================
 setup.kibana:
   host: "dashboards:5601"
   path: "/dashboards"

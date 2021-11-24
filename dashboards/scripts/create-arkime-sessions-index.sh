@@ -110,6 +110,13 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       for i in /opt/dashboards/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
+      # At the moment Beats won't import dashboards into OpenSearch dashboards
+      # (see opensearch-project/OpenSearch-Dashboards#656 and
+      # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
+      # manually add load those dashboards in /opt/dashboards/beats as well.
+      for i in /opt/dashboards/beats/*.json; do
+        curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+      done
 
       # set dark theme
       curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/theme:darkMode" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
