@@ -1,5 +1,5 @@
 {
-  "name": "malcolm_init_dummy_AD",
+  "name": "malcolm_init_dummy",
   "description": "A dummy detector to force opensearch anomaly detection index creation",
   "time_field": "timestamp",
   "indices": [

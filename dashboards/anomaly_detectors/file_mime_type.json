@@ -1,5 +1,5 @@
 {
-  "name": "file_mime_type_AD",
+  "name": "file_mime_type",
   "description": "Detect anomalies based on transferred file type",
   "time_field": "firstPacket",
   "indices": [

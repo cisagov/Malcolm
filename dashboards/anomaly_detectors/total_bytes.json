@@ -1,5 +1,5 @@
 {
-  "name": "total_bytes_AD",
+  "name": "total_bytes",
   "description": "Detect anomalies based on total bytes, summed",
   "time_field": "firstPacket",
   "indices": [

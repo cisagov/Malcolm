@@ -1,5 +1,5 @@
 {
-  "name": "zeek_service_AD",
+  "name": "network_protocol",
   "description": "Detect anomalies based application protocol, aggregated by action and by result",
   "time_field": "firstPacket",
   "indices": [
