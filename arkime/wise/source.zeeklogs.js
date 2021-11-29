@@ -1041,9 +1041,9 @@ class MalcolmSource extends WISESource {
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
-    var filterUrl = "idark2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
+    var filterUrl = "idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
-    this.api.addValueAction("malcolm_dashboards_cat_ip",       {name:filterLabel, url:"idark2kib/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
+    this.api.addValueAction("malcolm_dashboards_cat_ip",       {name:filterLabel, url:"idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
     this.api.addValueAction("malcolm_dashboards_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
     this.api.addValueAction("malcolm_dashboards_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
     this.api.addValueAction("malcolm_dashboards_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});

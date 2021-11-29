@@ -5,7 +5,7 @@ server.name: dashboards
 server.host: "0"
 server.basePath: "/dashboards"
 server.rewriteBasePath: true
-server.maxPayload: 8388608
+server.maxPayloadBytes: 8388608
 opensearch.hosts: ["${OPENSEARCH_URL}"]
 opensearch.requestTimeout: 180000
 

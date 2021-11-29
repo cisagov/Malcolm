@@ -166,7 +166,7 @@ def main():
     #                "urlTemplates": [
     #                    null,
     #                    {
-    #                        "url": "/idkib2ark/source.ip == {{value}}",
+    #                        "url": "/iddash2ark/source.ip == {{value}}",
     #                        "label": "Arkime: source.ip == {{value}}"
     #                    }
     #                ]
@@ -182,7 +182,7 @@ def main():
         valQuote = '"' if field['type'] == 'string' else ''
         valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
         drilldownInfoParamsUrlTemplateValues = {}
-        drilldownInfoParamsUrlTemplateValues['url'] = '/idkib2ark/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
+        drilldownInfoParamsUrlTemplateValues['url'] = '/iddash2ark/{}{} == {}{{{{value}}}}{}'.format(valDbPrefix, field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplateValues['label'] = 'Arkime {}: {}{{{{value}}}}{}'.format(field['name'], valQuote, valQuote)
         drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
 
