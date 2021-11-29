@@ -164,6 +164,21 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
+      # trigger a start/stop for one of the detectors to make sure the .opendistro-anomaly-detection-state index gets created
+      set +e
+      DETECTOR_ID=""
+      SEARCH_INDEX_ID="$(echo "$INDEX_PATTERN_ID" | sed "s/-\*$/*/")"
+      until [[ -n "$DETECTOR_ID" ]]; do
+        sleep 5
+        DETECTOR_ID="$(curl -L --fail --silent --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/_search" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{ \"query\": { \"wildcard\": { \"indices\": { \"value\": \"$SEARCH_INDEX_ID\" } } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
+      done
+      set -e
+      if [[ -n "$DETECTOR_ID" ]]; then
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DETECTOR_ID/_start" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+        sleep 10
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DETECTOR_ID/_stop" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+      fi
+
       echo "OpenSearch anomaly detectors creation complete!"
 
     fi
