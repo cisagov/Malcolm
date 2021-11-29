@@ -24,6 +24,7 @@ fi
 INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
+DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy_AD"}
 
 OTHER_INDEX_PATTERNS=(
   "filebeat-*;filebeat-*;@timestamp"
@@ -164,19 +165,25 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
-      # trigger a start/stop for one of the detectors to make sure the .opendistro-anomaly-detection-state index gets created
+      # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
+      # see:
+      # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/109
+      # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/155
+      # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/156
+      # - https://discuss.opendistrocommunity.dev/t/errors-opening-anomaly-detection-plugin-for-dashboards-after-creation-via-api/7711
       set +e
-      DETECTOR_ID=""
-      SEARCH_INDEX_ID="$(echo "$INDEX_PATTERN_ID" | sed "s/-\*$/*/")"
-      until [[ -n "$DETECTOR_ID" ]]; do
+      DUMMY_DETECTOR_ID=""
+      until [[ -n "$DUMMY_DETECTOR_ID" ]]; do
         sleep 5
-        DETECTOR_ID="$(curl -L --fail --silent --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/_search" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{ \"query\": { \"wildcard\": { \"indices\": { \"value\": \"$SEARCH_INDEX_ID\" } } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
+        DUMMY_DETECTOR_ID="$(curl -L --fail --silent --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/_search" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
       done
       set -e
-      if [[ -n "$DETECTOR_ID" ]]; then
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DETECTOR_ID/_start" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+      if [[ -n "$DUMMY_DETECTOR_ID" ]]; then
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_start" -H 'osd-xsrf:true' -H 'Content-type:application/json'
         sleep 10
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DETECTOR_ID/_stop" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_stop" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+        sleep 10
+        curl -L --silent --output /dev/null --show-error -XDELETE "$OS_URL/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID" -H 'osd-xsrf:true' -H 'Content-type:application/json'
       fi
 
       echo "OpenSearch anomaly detectors creation complete!"

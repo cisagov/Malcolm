@@ -1,0 +1,48 @@
+{
+  "name": "malcolm_init_dummy_AD",
+  "description": "A dummy detector to force opensearch anomaly detection index creation",
+  "time_field": "timestamp",
+  "indices": [
+    "arkime_sessions3-*"
+  ],
+  "feature_attributes": [
+    {
+      "feature_name": "event_provider",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "event_provider": {
+          "value_count": {
+            "field": "event.provider"
+          }
+        }
+      }
+    }
+  ],
+  "filter_query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "event.provider",
+            "boost": 1
+          }
+        }
+      ],
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "detection_interval": {
+    "period": {
+      "interval": 30,
+      "unit": "Minutes"
+    }
+  },
+  "window_delay": {
+    "period": {
+      "interval": 10,
+      "unit": "Minutes"
+    }
+  },
+  "result_index": "opensearch-ad-plugin-result-dummy"
+}
