@@ -144,6 +144,7 @@ You can then observe that the images have been retrieved by running `docker imag
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
 malcolmnetsec/arkime                                           5.0.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.0           xxxxxxxxxxxx   2 days ago   970MB
 malcolmnetsec/dashboards-helper                                5.0.0           xxxxxxxxxxxx   2 days ago   154MB
 malcolmnetsec/filebeat-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   621MB
 malcolmnetsec/file-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   586MB
@@ -154,7 +155,6 @@ malcolmnetsec/logstash-oss                                     5.0.0           x
 malcolmnetsec/name-map-ui                                      5.0.0           xxxxxxxxxxxx   2 days ago   142MB
 malcolmnetsec/nginx-proxy                                      5.0.0           xxxxxxxxxxxx   2 days ago   117MB
 malcolmnetsec/opensearch                                       5.0.0           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/opensearch-dashboards                            5.0.0           xxxxxxxxxxxx   2 days ago   970MB
 malcolmnetsec/pcap-capture                                     5.0.0           xxxxxxxxxxxx   2 days ago   122MB
 malcolmnetsec/pcap-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   214MB
 malcolmnetsec/zeek                                             5.0.0           xxxxxxxxxxxx   2 days ago   938MB
@@ -353,6 +353,7 @@ $ ./scripts/build.sh
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
 * `malcolmnetsec/arkime` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/dashboards-helper` (based on `alpine:3.14`)
 * `malcolmnetsec/file-monitor` (based on `debian:bullseye-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:bullseye-slim`)
@@ -362,7 +363,6 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
 * `malcolmnetsec/name-map-ui` (based on `alpine:3.14`)
 * `malcolmnetsec/nginx-proxy` (based on `alpine:3.14`)
-* `malcolmnetsec/opensearch-dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
 * `malcolmnetsec/pcap-capture` (based on `debian:bullseye-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:bullseye-slim`)
@@ -1896,6 +1896,7 @@ Pulling zeek              ... done
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
 malcolmnetsec/arkime                                           5.0.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.0           xxxxxxxxxxxx   2 days ago   970MB
 malcolmnetsec/dashboards-helper                                5.0.0           xxxxxxxxxxxx   2 days ago   154MB
 malcolmnetsec/filebeat-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   621MB
 malcolmnetsec/file-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   586MB
@@ -1906,7 +1907,6 @@ malcolmnetsec/logstash-oss                                     5.0.0           x
 malcolmnetsec/name-map-ui                                      5.0.0           xxxxxxxxxxxx   2 days ago   142MB
 malcolmnetsec/nginx-proxy                                      5.0.0           xxxxxxxxxxxx   2 days ago   117MB
 malcolmnetsec/opensearch                                       5.0.0           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/opensearch-dashboards                            5.0.0           xxxxxxxxxxxx   2 days ago   970MB
 malcolmnetsec/pcap-capture                                     5.0.0           xxxxxxxxxxxx   2 days ago   122MB
 malcolmnetsec/pcap-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   214MB
 malcolmnetsec/zeek                                             5.0.0           xxxxxxxxxxxx   2 days ago   938MB

@@ -9,8 +9,8 @@ ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
 ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "opensearch-dashboards"
-ENV PGROUP "opensearch-dashboards"
+ENV PUSER "dashboarder"
+ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
@@ -27,7 +27,7 @@ USER root
 RUN amazon-linux-extras install -y epel && \
     yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
-    adduser -u ${DEFAULT_UID} -d /home/opensearch-dashboards -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
+    adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
     mkdir -p /usr/share && \
     git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "${OPENSEARCH_VERSION}" https://github.com/opensearch-project/OpenSearch /usr/share/opensearch && \
     git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "${OPENSEARCH_DASHBOARDS_VERSION}" https://github.com/opensearch-project/OpenSearch-Dashboards /usr/share/opensearch-dashboards && \
@@ -39,10 +39,10 @@ USER ${PUSER}
 
 # use nodenv (https://github.com/nodenv/nodenv) to manage nodejs/yarn
 
-ENV PATH "/home/opensearch-dashboards/.nodenv/bin:${PATH}"
+ENV PATH "/home/${PUSER}/.nodenv/bin:${PATH}"
 
-RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodules https://github.com/nodenv/nodenv.git /home/opensearch-dashboards/.nodenv && \
-    cd /home/opensearch-dashboards/.nodenv && \
+RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodules https://github.com/nodenv/nodenv.git /home/${PUSER}/.nodenv && \
+    cd /home/${PUSER}/.nodenv && \
     ./src/configure && \
     make -C src && \
     cd /tmp && \

@@ -202,7 +202,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/opensearch-dashboards:5.0.0
+    image: malcolmnetsec/dashboards:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
