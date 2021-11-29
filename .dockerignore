@@ -10,6 +10,7 @@
 **/.ldap_config_defaults
 **/htpasswd
 **/malcolm_*images.tar.gz
+.trigger_workflow_build
 docker-compose*yml
 Dockerfiles
 opensearch
