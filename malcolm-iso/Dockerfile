@@ -16,6 +16,6 @@ ARG QEMU_RAM=4096
 ENV QEMU_CPU $QEMU_CPU
 ENV QEMU_RAM $QEMU_RAM
 
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/docs/images/icon/favicon.ico /image/favicon.ico
+ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/icon/favicon.ico /image/favicon.ico
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} malcolm-*.log /image/
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} malcolm-*.iso /image/live.iso

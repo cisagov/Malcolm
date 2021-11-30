@@ -12,7 +12,6 @@ global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == "") ? 
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
-global disable_spicy_facefish = (getenv("ZEEK_DISABLE_SPICY_FACEFISH") == "") ? F : T;
 global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == "") ? F : T;
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == "") ? F : T;
 global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == "") ? F : T;
@@ -79,9 +78,6 @@ event zeek_init() &priority=-5 {
   }
   if (disable_spicy_dns) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DNS);
-  }
-  if (disable_spicy_facefish) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_FACEFISH_ROOTKIT);
   }
   if (disable_spicy_http) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HTTP);
