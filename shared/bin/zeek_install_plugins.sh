@@ -85,6 +85,11 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/pingback"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
+  "https://github.com/corelight/zeek-spicy-ipsec"
+  "https://github.com/corelight/zeek-spicy-openvpn"
+  "https://github.com/corelight/zeek-spicy-ospf"
+  "https://github.com/corelight/zeek-spicy-stun"
+  "https://github.com/corelight/zeek-spicy-wireguard"
   "https://github.com/corelight/zerologon"
   "https://github.com/mitre-attack/bzar"
   "https://github.com/mmguero-dev/cve-2020-0601|zeek-v4.1-compatibility"
@@ -103,6 +108,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
+  "https://github.com/zeek/spicy-ldap"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"

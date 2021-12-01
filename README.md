@@ -141,21 +141,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.0               xxxxxxxxxxxx        39 hours ago        826MB
-malcolmnetsec/elasticsearch-od                      4.0.0               xxxxxxxxxxxx        40 hours ago        1.42GB
-malcolmnetsec/file-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        603MB
-malcolmnetsec/file-upload                           4.0.0               xxxxxxxxxxxx        39 hours ago        605MB
-malcolmnetsec/filebeat-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        266MB
-malcolmnetsec/freq                                  4.0.0               xxxxxxxxxxxx        39 hours ago        151MB
-malcolmnetsec/htadmin                               4.0.0               xxxxxxxxxxxx        39 hours ago        262MB
-malcolmnetsec/kibana-helper                         4.0.0               xxxxxxxxxxxx        40 hours ago        153MB
-malcolmnetsec/kibana-od                             4.0.0               xxxxxxxxxxxx        40 hours ago        1.35GB
-malcolmnetsec/logstash-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        1.36GB
-malcolmnetsec/name-map-ui                           4.0.0               xxxxxxxxxxxx        39 hours ago        142MB
-malcolmnetsec/nginx-proxy                           4.0.0               xxxxxxxxxxxx        39 hours ago        116MB
-malcolmnetsec/pcap-capture                          4.0.0               xxxxxxxxxxxx        39 hours ago        121MB
-malcolmnetsec/pcap-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        221MB
-malcolmnetsec/zeek                                  4.0.0               xxxxxxxxxxxx        39 hours ago        926MB
+malcolmnetsec/arkime                                4.0.1               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      4.0.1               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           4.0.1               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  4.0.1               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               4.0.1               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         4.0.1               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             4.0.1               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           4.0.1               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           4.0.1               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          4.0.1               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  4.0.1               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -258,9 +258,9 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |FTP (File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc959)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ftp/info.zeek.html#type-FTP::Info)|
 |Google Quick UDP Internet Connections (gQUIC)|[🔗](https://en.wikipedia.org/wiki/QUIC#Google_QUIC_(gQUIC))|[🔗](https://www.chromium.org/quic)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/quic.c)|[✓](https://github.com/salesforce/GQUIC_Protocol_Analyzer/blob/master/scripts/Salesforce/GQUIC/main.bro)|
 |Hypertext Transfer Protocol (HTTP)|[🔗](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc7230)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/http.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/http/main.zeek.html#type-HTTP::Info)|
-|IPsec|[🔗](https://en.wikipedia.org/wiki/IPsec)|[🔗](https://zeek.org/2021/04/20/zeeks-ipsec-protocol-analyzer/)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/ipsec/main.zeek)|
+|IPsec|[🔗](https://en.wikipedia.org/wiki/IPsec)|[🔗](https://zeek.org/2021/04/20/zeeks-ipsec-protocol-analyzer/)||[✓](https://github.com/corelight/zeek-spicy-ipsec)|
 |Internet Relay Chat (IRC)|[🔗](https://en.wikipedia.org/wiki/Internet_Relay_Chat)|[🔗](https://tools.ietf.org/html/rfc1459)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/irc.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/irc/main.zeek.html#type-IRC::Info)|
-|Lightweight Directory Access Protocol (LDAP)|[🔗](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol)|[🔗](https://tools.ietf.org/html/rfc4511)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/ldap.c)|[✓](https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/ldap/ldap.zeek)|
+|Lightweight Directory Access Protocol (LDAP)|[🔗](https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol)|[🔗](https://tools.ietf.org/html/rfc4511)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/ldap.c)|[✓](https://github.com/zeek/spicy-ldap)|
 |Kerberos|[🔗](https://en.wikipedia.org/wiki/Kerberos_(protocol))|[🔗](https://tools.ietf.org/html/rfc4120)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/krb5.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/krb/main.zeek.html#type-KRB::Info)|
 |Modbus|[🔗](https://en.wikipedia.org/wiki/Modbus)|[🔗](http://www.modbus.org/)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/modbus/main.zeek.html#type-Modbus::Info)[✓](https://github.com/cisagov/icsnpp-modbus)|
 |MQ Telemetry Transport (MQTT)|[🔗](https://en.wikipedia.org/wiki/MQTT)|[🔗](https://mqtt.org/)||[✓](https://docs.zeek.org/en/stable/scripts/policy/protocols/mqtt/main.zeek.html)|
@@ -268,7 +268,8 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |NT Lan Manager (NTLM)|[🔗](https://en.wikipedia.org/wiki/NT_LAN_Manager)|[🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b38c36ed-2804-4868-a9ff-8dd3182128e4?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ntlm/main.zeek.html#type-NTLM::Info)|
 |Network Time Protocol (NTP)|[🔗](https://en.wikipedia.org/wiki/Network_Time_Protocol)|[🔗](http://www.ntp.org)||[✓](https://docs.zeek.org/en/latest/scripts/base/protocols/ntp/main.zeek.html#type-NTP::Info)|
 |Oracle|[🔗](https://en.wikipedia.org/wiki/Oracle_Net_Services)|[🔗](https://docs.oracle.com/cd/E11882_01/network.112/e41945/layers.htm#NETAG004)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/oracle.c)||
-|OpenVPN|[🔗](https://en.wikipedia.org/wiki/OpenVPN)|[🔗](https://openvpn.net/community-resources/openvpn-protocol/)[🔗](https://zeek.org/2021/03/16/a-zeek-openvpn-protocol-analyzer/)||[✓](https://github.com/mmguero-dev/spicy-analyzers/blob/main/analyzer/protocol/openvpn/main.zeek)|
+|Open Shortest Path First (OSPF)|[🔗](https://en.wikipedia.org/wiki/Open_Shortest_Path_First)|[🔗](https://datatracker.ietf.org/wg/ospf/charter/)[🔗](https://datatracker.ietf.org/doc/html/rfc2328)[🔗](https://datatracker.ietf.org/doc/html/rfc5340)||[✓](https://github.com/corelight/zeek-spicy-ospf)|
+|OpenVPN|[🔗](https://en.wikipedia.org/wiki/OpenVPN)|[🔗](https://openvpn.net/community-resources/openvpn-protocol/)[🔗](https://zeek.org/2021/03/16/a-zeek-openvpn-protocol-analyzer/)||[✓](https://github.com/corelight/zeek-spicy-openvpn)|
 |PostgreSQL|[🔗](https://en.wikipedia.org/wiki/PostgreSQL)|[🔗](https://www.postgresql.org/)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/postgresql.c)||
 |Process Field Net (PROFINET)|[🔗](https://en.wikipedia.org/wiki/PROFINET)|[🔗](https://us.profinet.com/technology/profinet/)||[✓](https://github.com/amzn/zeek-plugin-profinet/blob/master/scripts/main.zeek)|
 |Remote Authentication Dial-In User Service (RADIUS)|[🔗](https://en.wikipedia.org/wiki/RADIUS)|[🔗](https://tools.ietf.org/html/rfc2865)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/radius.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/radius/main.zeek.html#type-RADIUS::Info)|
@@ -282,12 +283,12 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |Simple Mail Transfer Protocol (SMTP)|[🔗](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc5321)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/smtp/main.zeek.html#type-SMTP::Info)|
 |Simple Network Management Protocol (SNMP)|[🔗](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol)|[🔗](https://tools.ietf.org/html/rfc2578)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/smtp.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/snmp/main.zeek.html#type-SNMP::Info)|
 |SOCKS|[🔗](https://en.wikipedia.org/wiki/SOCKS)|[🔗](https://tools.ietf.org/html/rfc1928)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/socks.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/socks/main.zeek.html#type-SOCKS::Info)|
-|STUN (Session Traversal Utilities for NAT)|[🔗](https://en.wikipedia.org/wiki/STUN)|[🔗](https://datatracker.ietf.org/doc/html/rfc3489)|[✓](https://github.com/arkime/arkime/blob/main/capture/parsers/misc.c#L147)|[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/stun)|
+|STUN (Session Traversal Utilities for NAT)|[🔗](https://en.wikipedia.org/wiki/STUN)|[🔗](https://datatracker.ietf.org/doc/html/rfc3489)|[✓](https://github.com/arkime/arkime/blob/main/capture/parsers/misc.c#L147)|[✓](https://github.com/corelight/zeek-spicy-stun)|
 |Syslog|[🔗](https://en.wikipedia.org/wiki/Syslog)|[🔗](https://tools.ietf.org/html/rfc5424)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tls.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/syslog/main.zeek.html#type-Syslog::Info)|
 |Tabular Data Stream (TDS)|[🔗](https://en.wikipedia.org/wiki/Tabular_Data_Stream)|[🔗](https://www.freetds.org/tds.html) [🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/b46a581a-39de-4745-b076-ec4dbb7d13ec)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/tds.c)|[✓](https://github.com/amzn/zeek-plugin-tds/blob/master/scripts/main.zeek)|
 |Telnet / remote shell (rsh) / remote login (rlogin)|[🔗](https://en.wikipedia.org/wiki/Telnet)[🔗](https://en.wikipedia.org/wiki/Berkeley_r-commands)|[🔗](https://tools.ietf.org/html/rfc854)[🔗](https://tools.ietf.org/html/rfc1282)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/misc.c#L336)|[✓](https://docs.zeek.org/en/current/scripts/base/bif/plugins/Zeek_Login.events.bif.zeek.html)[❋](https://github.com/cisagov/Malcolm/blob/main/zeek/config/login.zeek)|
 |TFTP (Trivial File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/Trivial_File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc1350)||[✓](https://github.com/zeek/spicy-analyzers/blob/main/analyzer/protocol/tftp/tftp.zeek)|
-|WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/zeek/spicy-analyzers/tree/main/analyzer/protocol/wireguard/main.zeek)|
+|WireGuard|[🔗](https://en.wikipedia.org/wiki/WireGuard)|[🔗](https://www.wireguard.com/protocol/)[🔗](https://www.wireguard.com/papers/wireguard.pdf)||[✓](https://github.com/corelight/zeek-spicy-wireguard)|
 |various tunnel protocols (e.g., GTP, GRE, Teredo, AYIYA, IP-in-IP, etc.)|[🔗](https://en.wikipedia.org/wiki/Tunneling_protocol)||[✓](https://github.com/arkime/arkime/blob/master/capture/packet.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/frameworks/tunnels/main.zeek.html#type-Tunnel::Info)|
 
 Additionally, Zeek is able to detect and, where possible, log the type, vendor and version of [various](https://docs.zeek.org/en/stable/scripts/base/frameworks/software/main.zeek.html#type-Software::Type) other [software protocols](https://en.wikipedia.org/wiki/Application_layer).
@@ -686,39 +687,18 @@ After making these changes, right click on the Docker 🐋 icon in the system tr
 
 #### <a name="HostSystemConfigWindowsDocker"></a>Installing and configuring Docker Desktop for Windows
 
-Installing and configuring Docker to run under Windows must be done manually, rather than through the `install.py` script as is done for Linux and macOS.
+Installing and configuring [Docker to run under Windows](https://docs.docker.com/desktop/windows/wsl/) must be done manually, rather than through the `install.py` script as is done for Linux and macOS.
 
-1. In order to be able to configure Docker volume mounts correctly, you should be running [Windows 10, version 1803](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-1803) or higher.
-1. The control scripts in the `scripts/` directory are written for Python 3. They also rely on a few other utilities such as OpenSSL and htpasswd. The easiest way to run these tools in Windows is using the [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL) (however, they may also be installed and configured manually: [Python 3](https://www.python.org/downloads/windows); [OpenSSL](https://wiki.openssl.org/index.php/Binaries); [htpasswd](https://httpd.apache.org/docs/current/platform/windows.html#down), download the `httpd….zip` file and extract `htpasswd.exe` from the `Apache…\bin\` directory). To install WSL, run the following command in PowerShell as Administrator:
-    + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
-1. Install the [Linux distribution of your choice](https://docs.microsoft.com/en-us/windows/wsl/install-win10#install-your-linux-distribution-of-choice) in WSL. These instructions have been tested using Debian, but will probably work with other distributions as well.
-1. Run the following commands in PowerShell as Administrator to enable required Windows features:
-    + `Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All`
-    + `Enable-WindowsOptionalFeature -Online -FeatureName Containers –All`
-1. If you have not yet done so after enabling the Windows features, reboot.
-1. Install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows) either by downloading the installer from the official Docker site or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop).
-1. Run **Docker Desktop**, click the **Settings** option in the Docker system tray menu and make the following adjustments:
-    + **General**
-        * Ensure *Start Docker Desktop when you log in* is checked.
-    + **Shared Drives**
-        * Mark the drive onto which Malcolm is installed as *Shared* (e.g., check *Shared* for drive *C*).
-    + **Advanced**
-        + Increase *CPUs* to as many as you're comfortable with (at least *4* is best).
-        + Increase *Memory* to as much as you're comfortable with (at least *16* is recommended, no fewer than *10*).
-        + Increase *Disk image max size* to however much space you want Malcolm to have available to it (ideally at least several hundred gigabytes), and change the *Disk image location* if needed to accommodate it.
-1. Make sure Docker applies/restarts (or just reboot), then go back in and check the **Advanced** settings to make sure things stick.
-1. To ensure Docker volume mounts work correctly when using WSL, WSL needs to be configured to mount at `/` instead of at `/mnt`. Inside your WSL Bash shell, run the following command to write `/etc/wsl.conf` to specify the WSL mount point:
-    + `echo -e '[automount]\nroot = /\noptions = "metadata"' | sudo tee /etc/wsl.conf`
-1. Reboot.
-1. Run `docker info` in PowerShell to make sure Docker is running.
-1. Open a shell in your WSL distribution and run `docker.exe info` to make sure Docker is accessible from within WSL.
-    + Previous versions of WSL required the native Linux `docker` command-line client to interact with the Windows Desktop Docker server. Recent improvements to WSL allow the Windows executables `docker-compose.exe` and `docker.exe` to be run seamlessly in WSL. Malcolm's control scripts detect this scenario.
+1. Be running Windows 10, version 1903 or higher
+1. Prepare your system and [install WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and a Linux distribution by running `wsl --install -d Debian` in PowerShell as Administrator (these instructions are tested with Debian, but may work with other distributions)
+1. Install Docker Desktop for Windows either by downloading the installer from the [official Docker site](https://hub.docker.com/editions/community/docker-ce-desktop-windows) or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop).
+1. Follow the [Docker Desktop WSL 2 backend](https://docs.docker.com/desktop/windows/wsl/) instructions to finish configuration and review best practices
+1. Reboot
+1. Open the WSL distribution's terminal and run run `docker info` to make sure Docker is running
 
 #### <a name="HostSystemConfigWindowsMalcolm"></a>Finish Malcolm's configuration
 
-Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) (in WSL it will probably be something like `sudo ./scripts/install.py --configure`) to finish configuration of the local Malcolm installation.
-
-The control scripts outlined in the [Running Malcolm](#Running) section may not be symlinked correctly under Windows. Rather than running `./scripts/start`, `./scripts/stop`, etc., you can run `./scripts/control.py --start`, `./scripts/control.py --stop`, etc. to the same effect.
+Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](#ConfigAndTuning) to finish configuration of the local Malcolm installation. Malcolm will be controlled and run from within your WSL distribution's terminal environment.
 
 ## <a name="Running"></a>Running Malcolm
 
@@ -1516,7 +1496,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.1.iso"
 …
 ```
 
@@ -1901,21 +1881,21 @@ Pulling zeek          ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.0               xxxxxxxxxxxx        39 hours ago        826MB
-malcolmnetsec/elasticsearch-od                      4.0.0               xxxxxxxxxxxx        40 hours ago        1.42GB
-malcolmnetsec/file-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        603MB
-malcolmnetsec/file-upload                           4.0.0               xxxxxxxxxxxx        39 hours ago        605MB
-malcolmnetsec/filebeat-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        266MB
-malcolmnetsec/freq                                  4.0.0               xxxxxxxxxxxx        39 hours ago        151MB
-malcolmnetsec/htadmin                               4.0.0               xxxxxxxxxxxx        39 hours ago        262MB
-malcolmnetsec/kibana-helper                         4.0.0               xxxxxxxxxxxx        40 hours ago        153MB
-malcolmnetsec/kibana-od                             4.0.0               xxxxxxxxxxxx        40 hours ago        1.35GB
-malcolmnetsec/logstash-oss                          4.0.0               xxxxxxxxxxxx        39 hours ago        1.36GB
-malcolmnetsec/name-map-ui                           4.0.0               xxxxxxxxxxxx        39 hours ago        142MB
-malcolmnetsec/nginx-proxy                           4.0.0               xxxxxxxxxxxx        39 hours ago        116MB
-malcolmnetsec/pcap-capture                          4.0.0               xxxxxxxxxxxx        39 hours ago        121MB
-malcolmnetsec/pcap-monitor                          4.0.0               xxxxxxxxxxxx        39 hours ago        221MB
-malcolmnetsec/zeek                                  4.0.0               xxxxxxxxxxxx        39 hours ago        926MB
+malcolmnetsec/arkime                                4.0.1               xxxxxxxxxxxx        39 hours ago        826MB
+malcolmnetsec/elasticsearch-od                      4.0.1               xxxxxxxxxxxx        40 hours ago        1.42GB
+malcolmnetsec/file-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        603MB
+malcolmnetsec/file-upload                           4.0.1               xxxxxxxxxxxx        39 hours ago        605MB
+malcolmnetsec/filebeat-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        266MB
+malcolmnetsec/freq                                  4.0.1               xxxxxxxxxxxx        39 hours ago        151MB
+malcolmnetsec/htadmin                               4.0.1               xxxxxxxxxxxx        39 hours ago        262MB
+malcolmnetsec/kibana-helper                         4.0.1               xxxxxxxxxxxx        40 hours ago        153MB
+malcolmnetsec/kibana-od                             4.0.1               xxxxxxxxxxxx        40 hours ago        1.35GB
+malcolmnetsec/logstash-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        1.36GB
+malcolmnetsec/name-map-ui                           4.0.1               xxxxxxxxxxxx        39 hours ago        142MB
+malcolmnetsec/nginx-proxy                           4.0.1               xxxxxxxxxxxx        39 hours ago        116MB
+malcolmnetsec/pcap-capture                          4.0.1               xxxxxxxxxxxx        39 hours ago        121MB
+malcolmnetsec/pcap-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        221MB
+malcolmnetsec/zeek                                  4.0.1               xxxxxxxxxxxx        39 hours ago        926MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -2034,7 +2014,7 @@ Once the upgraded instance Malcolm has started up, you'll probably want to impor
 
 ### Major releases
 
-The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
+The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.1), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
 
 ## <a name="Footer"></a>Copyright
 
