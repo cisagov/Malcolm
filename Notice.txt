@@ -1,4 +1,4 @@
-This project contains code from Idaho National Laboratory's Malcolm Project
+This project contains code from the Cybersecurity and Infrastructure Security Agency's Malcolm Project
 
 https://github.com/cisagov/Malcolm
 
