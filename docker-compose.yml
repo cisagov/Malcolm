@@ -67,7 +67,6 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_BEST_GUESS_ICS : 'true'
   ZEEK_DISABLE_SPICY_DHCP : 'true'
   ZEEK_DISABLE_SPICY_DNS : 'true'
-  ZEEK_DISABLE_SPICY_FACEFISH : ''
   ZEEK_DISABLE_SPICY_HTTP : 'true'
   ZEEK_DISABLE_SPICY_IPSEC : ''
   ZEEK_DISABLE_SPICY_LDAP : ''
@@ -131,7 +130,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-od:4.0.0
+    image: malcolmnetsec/elasticsearch-od:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -171,7 +170,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana-helper.Dockerfile
-    image: malcolmnetsec/kibana-helper:4.0.0
+    image: malcolmnetsec/kibana-helper:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -202,7 +201,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-od:4.0.0
+    image: malcolmnetsec/kibana-od:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -226,7 +225,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:4.0.0
+    image: malcolmnetsec/logstash-oss:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -266,7 +265,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:4.0.0
+    image: malcolmnetsec/filebeat-oss:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -307,7 +306,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:4.0.0
+    image: malcolmnetsec/arkime:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -352,7 +351,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:4.0.0
+    image: malcolmnetsec/zeek:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -382,7 +381,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:4.0.0
+    image: malcolmnetsec/file-monitor:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -408,7 +407,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:4.0.0
+    image: malcolmnetsec/pcap-capture:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -431,7 +430,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:4.0.0
+    image: malcolmnetsec/pcap-monitor:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -457,7 +456,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:4.0.0
+    image: malcolmnetsec/file-upload:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -483,7 +482,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:4.0.0
+    image: malcolmnetsec/htadmin:4.0.1
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -508,7 +507,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:4.0.0
+    image: malcolmnetsec/freq:4.0.1
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -529,7 +528,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:4.0.0
+    image: malcolmnetsec/name-map-ui:4.0.1
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -556,7 +555,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:4.0.0
+    image: malcolmnetsec/nginx-proxy:4.0.1
     restart: "no"
     stdin_open: false
     tty: true
