@@ -1,4 +1,4 @@
-This project contains code from Idaho National Laboratory's Malcolm Project
+This project contains code from the Idaho National Laboratory's Malcolm Project
 
 https://github.com/idaholab/Malcolm
 

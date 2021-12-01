@@ -1319,7 +1319,7 @@ The `cidr-map.txt` file in the Malcolm installation directory can be used to def
 #
 # where:
 #   IP(s): comma-separated list of CIDR-formatted network IP addresses
-#          e.g., 10.0.0.0/8, 169.254.0.1/16, 172.16.10.41
+#          e.g., 10.0.0.0/8, 169.254.0.0/16, 172.16.10.41
 #
 #   segment name: segment name to be assigned when event IP address(es) match
 #
