@@ -1024,7 +1024,7 @@ class LinuxInstaller(Installer):
           echoNewLineJoin = '\\n'
           err, out = self.run_process(['bash',
                                        '-c',
-                                       f"mkdir -p {os.path.dirname(config.filename)} && echo -n -e '{echoNewLineJoin}{echoNewLineJoin.join(config.lines)}{echoNewLineJoin} >> '{config.filename}'"], privileged=True)
+                                       f"mkdir -p {os.path.dirname(config.filename)} && echo -n -e '{echoNewLineJoin}{echoNewLineJoin.join(config.lines)}{echoNewLineJoin}' >> '{config.filename}'"], privileged=True)
 
 ###################################################################################################
 class MacInstaller(Installer):
