@@ -1098,15 +1098,15 @@ The **Discover** view enables you to view events on a record-by-record basis (si
 
 #### <a name="DiscoverGallery"></a>Screenshots
 
-![Discover view](./docs/images/screenshots/kibana_discover.png)
+![Discover view](./docs/images/screenshots/dashboards_discover.png)
 
-![Viewing the details of a session in Discover](./docs/images/screenshots/kibana_discover_table.png)
+![Viewing the details of a session in Discover](./docs/images/screenshots/dashboards_discover_table.png)
 
-![Filtering by tags to display only sessions with public IP addresses](./docs/images/screenshots/kibana_add_filter.png)
+![Filtering by tags to display only sessions with public IP addresses](./docs/images/screenshots/dashboards_add_filter.png)
 
-![Changing the fields displayed in Discover](./docs/images/screenshots/kibana_fields_list.png)
+![Changing the fields displayed in Discover](./docs/images/screenshots/dashboards_fields_list.png)
 
-![Opening a previously-saved search](./docs/images/screenshots/kibana_open_search.png)
+![Opening a previously-saved search](./docs/images/screenshots/dashboards_open_search.png)
 
 ### <a name="DashboardsVisualizations"></a>Visualizations and dashboards
 
@@ -1118,41 +1118,45 @@ Many of Malcolm's prebuilt visualizations for Zeek logs were originally inspired
 
 ##### <a name="PrebuiltVisualizationsGallery"></a>Screenshots
 
-![The Connections dashboard displays information about the "top talkers" across all types of sessions](./docs/images/screenshots/kibana_connections.png)
+![The Security Overview highlights security-related network events](./docs/images/screenshots/dashboards_security_overview.png)
 
-![The HTTP dashboard displays important details about HTTP traffic](./docs/images/screenshots/kibana_http.png)
+![The ICS/IoT Security Overview dashboard displays information about ICS and IoT network traffic](./docs/images/screenshots/dashboards_ics_iot_security_overview.png)
 
-![There are several Connections visualizations using locations from GeoIP lookups](./docs/images/screenshots/kibana_latlon_map.png)
+![The Connections dashboard displays information about the "top talkers" across all types of sessions](./docs/images/screenshots/dashboards_connections.png)
 
-![OpenSearch Dashboards includes both coordinate and region map types](./docs/images/screenshots/kibana_region_map.png)
+![The HTTP dashboard displays important details about HTTP traffic](./docs/images/screenshots/dashboards_http.png)
 
-![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/kibana_notices.png)
+![There are several Connections visualizations using locations from GeoIP lookups](./docs/images/screenshots/dashboards_latlon_map.png)
 
-![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/kibana_signatures.png)
+![OpenSearch Dashboards includes both coordinate and region map types](./docs/images/screenshots/dashboards_region_map.png)
 
-![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/kibana_software.png)
+![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/dashboards_notices.png)
 
-![The PE (portable executables) dashboard displays information about executable files transferred over the network](./docs/images/screenshots/kibana_portable_executables.png)
+![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/dashboards_signatures.png)
 
-![The SMTP dashboard highlights details about SMTP traffic](./docs/images/screenshots/kibana_smtp.png)
+![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/dashboards_software.png)
 
-![The SSL dashboard displays information about SSL versions, certificates, and TLS JA3 fingerprints](./docs/images/screenshots/kibana_ssl.png)
+![The PE (portable executables) dashboard displays information about executable files transferred over the network](./docs/images/screenshots/dashboards_portable_executables.png)
 
-![The files dashboard displays metrics about the files transferred over the network](./docs/images/screenshots/kibana_files_source.png)
+![The SMTP dashboard highlights details about SMTP traffic](./docs/images/screenshots/dashboards_smtp.png)
 
-![This dashboard provides insight into DNP3 (Distributed Network Protocol), a protocol used commonly in electric and water utilities](./docs/images/screenshots/kibana_dnp3.png)
+![The SSL dashboard displays information about SSL versions, certificates, and TLS JA3 fingerprints](./docs/images/screenshots/dashboards_ssl.png)
 
-![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/kibana_modbus.png)
+![The files dashboard displays metrics about the files transferred over the network](./docs/images/screenshots/dashboards_files_source.png)
 
-![BACnet is a communications protocol for Building Automation and Control (BAC) networks](./docs/images/screenshots/kibana_bacnet.png)
+![This dashboard provides insight into DNP3 (Distributed Network Protocol), a protocol used commonly in electric and water utilities](./docs/images/screenshots/dashboards_dnp3.png)
 
-![EtherNet/IP is an industrial network protocol that adapts the Common Industrial Protocol to standard Ethernet](./docs/images/screenshots/kibana_ethernetip.png)
+![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/dashboards_modbus.png)
 
-![MQTT is a lightweight publish-subscribe network protocol that transports messages between devices](./docs/images/screenshots/kibana_mqtt.png)
+![BACnet is a communications protocol for Building Automation and Control (BAC) networks](./docs/images/screenshots/dashboards_bacnet.png)
 
-![PROFINET is an industry technical standard for data communication over Industrial Ethernet](./docs/images/screenshots/kibana_profinet.png)
+![EtherCAT is an Ethernet-based fieldbus system](./docs/images/screenshots/dashboards_ecat.png)
 
-![S7comm is a Siemens proprietary protocol that runs between programmable logic controllers (PLCs) of the Siemens family](./docs/images/screenshots/kibana_s7comm.png)
+![EtherNet/IP is an industrial network protocol that adapts the Common Industrial Protocol to standard Ethernet](./docs/images/screenshots/dashboards_ethernetip.png)
+
+![PROFINET is an industry technical standard for data communication over Industrial Ethernet](./docs/images/screenshots/dashboards_profinet.png)
+
+![S7comm is a Siemens proprietary protocol that runs between programmable logic controllers (PLCs) of the Siemens family](./docs/images/screenshots/dashboards_s7comm.png)
 
 #### <a name="BuildDashboard"></a>Building your own visualizations and dashboards
 
@@ -1160,10 +1164,11 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/7.10
 
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/)
 * [Kibana Dashboards](https://www.elastic.co/guide/en/kibana/7.10/dashboard.html)
+* [TimeLine](https://www.elastic.co/guide/en/kibana/7.12/timelion.html)
 
 ##### <a name="NewVisualizationsGallery"></a>Screenshots
 
-![OpenSearch dashboards boasts many types of visualizations for displaying your data](./docs/images/screenshots/kibana_new_visualization.png)
+![OpenSearch dashboards boasts many types of visualizations for displaying your data](./docs/images/screenshots/dashboards_new_visualization.png)
 
 ## <a name="SearchCheatSheet"></a>Search Queries in Arkime and OpenSearch Dashboards
 
@@ -1393,6 +1398,8 @@ As this [feature](https://github.com/idaholab/Malcolm/issues/19) is improved it'
 
 When a Zeek log satisfies more than one of these conditions its severity scores will be summed, with a maximum score of `100`. A Zeek log's severity score is indexed in the `event.severity` field and the conditions which contributed to its score are indexed in `event.severity_tags`.
 
+![The Severity dashboard](./docs/images/screenshots/dashboards_severity.png)
+
 #### <a name="SeverityConfig"></a>Customizing event severity scoring
 
 These categories' severity scores can be customized by editing `logstash/maps/malcolm_severity.yaml`:
@@ -1445,6 +1452,8 @@ There are many ICS (industrial control systems) protocols. While Malcolm's colle
 In an effort to help identify more ICS traffic, Malcolm can use "buest guess" method based on transport protocol (e.g., TCP or UDP) and port(s) to categorize potential traffic communicating over some ICS protocols without full parser support. This feature involves a [mapping table](https://github.com/idaholab/Malcolm/blob/master/zeek/config/guess_ics_map.txt) and a [Zeek script](https://github.com/idaholab/Malcolm/blob/master/zeek/config/guess.zeek) to look up the transport protocol and destination and/or source port to make a best guess at whether a connection belongs to one of those protocols. These potential ICS communications are categorized by vendor where possible.
 
 Naturally, these lookups could produce false positives, so these connections are displayed in their own dashboard (the **Best Guess** dashboard found under the **ICS** section of Malcolm's [OpenSearch Dashboards](#DashboardsVisualizations) navigation pane). Values such as IP addresses, ports, or UID can be used to [pivot to other dashboards](#ZeekArkimeFlowCorrelation) to investigate further.
+
+![](./docs/images/screenshots/dashboards_bestguess.png)
 
 This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
 
@@ -1674,7 +1683,7 @@ Because some fields are created in OpenSearch dynamically when Zeek logs are ing
 
 After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
 
-![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/kibana_refresh_index.png)
+![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
 
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
 
