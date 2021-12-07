@@ -71,8 +71,8 @@ def main():
     eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
 
   opensearchInfoResponse = requests.get(args.opensearchUrl)
-  opensearchInfo = statusInfoResponse.json()
-  opensearchVersion = statusInfo['version']['number']
+  opensearchInfo = opensearchInfoResponse.json()
+  opensearchVersion = opensearchInfo['version']['number']
   if debug:
     eprint('OpenSearch version is {}'.format(opensearchVersion))
 

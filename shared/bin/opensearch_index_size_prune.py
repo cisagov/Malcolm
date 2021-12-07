@@ -151,7 +151,6 @@ def main():
                                   params={'format':'json',
                                           'h':'i,id,status,health,rep,creation.date,pri.store.size,store.size'})
     osInfo = sorted(osInfoResponse.json(), key=lambda k: k['i' if args.nameSorted else 'creation.date'])
-    totalIndices = len(osInfo)
 
     # determine how many megabytes need to be deleted and which of the oldest indices will cover that
     indicesToDelete = []
