@@ -127,7 +127,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   opensearch:
-    image: malcolmnetsec/opensearch:5.0.0
+    image: malcolmnetsec/opensearch:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -164,7 +164,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: malcolmnetsec/dashboards-helper:5.0.0
+    image: malcolmnetsec/dashboards-helper:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -192,7 +192,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: malcolmnetsec/dashboards:5.0.0
+    image: malcolmnetsec/dashboards:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -213,7 +213,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:5.0.0
+    image: malcolmnetsec/logstash-oss:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -248,7 +248,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:5.0.0
+    image: malcolmnetsec/filebeat-oss:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -285,7 +285,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:5.0.0
+    image: malcolmnetsec/arkime:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -324,7 +324,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:5.0.0
+    image: malcolmnetsec/zeek:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -350,7 +350,7 @@ services:
       retries: 3
       start_period: 60s
   file-monitor:
-    image: malcolmnetsec/file-monitor:5.0.0
+    image: malcolmnetsec/file-monitor:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -373,7 +373,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:5.0.0
+    image: malcolmnetsec/pcap-capture:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -393,7 +393,7 @@ services:
     volumes:
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:5.0.0
+    image: malcolmnetsec/pcap-monitor:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -416,7 +416,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:5.0.0
+    image: malcolmnetsec/file-upload:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -442,7 +442,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:5.0.0
+    image: malcolmnetsec/htadmin:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -464,7 +464,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:5.0.0
+    image: malcolmnetsec/freq:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -482,7 +482,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:5.0.0
+    image: malcolmnetsec/name-map-ui:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -503,7 +503,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:5.0.0
+    image: malcolmnetsec/nginx-proxy:5.0.1
     restart: "no"
     stdin_open: false
     tty: true
