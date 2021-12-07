@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 export ARKIME_HTTPS_FLAG=""
 
@@ -16,20 +16,20 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "$ARKIME_CONFIG_FILE"
   fi
 
-  # stick elasticsearch connection information in arkime config file
-  if [[ -n $ES_PROTOCOL ]] && [[ -n $ES_HOST ]]; then
+  # stick OpenSearch connection information in arkime config file
+  if [[ -n $OS_PROTOCOL ]] && [[ -n $OS_HOST ]]; then
 
-    # build elasticsearch URL for capture
-    ARKIME_ELASTICSEARCH="${ES_PROTOCOL}://"
+    # build OpenSearch URL for moloch-capture
+    ARKIME_ELASTICSEARCH="${OS_PROTOCOL}://"
 
-    if [[ -n $ES_USERNAME ]] && [[ -n $ES_PASSWORD ]]; then
-      ARKIME_ELASTICSEARCH+="${ES_USERNAME}:${ES_PASSWORD}@"
+    if [[ -n $OS_USERNAME ]] && [[ -n $OS_PASSWORD ]]; then
+      ARKIME_ELASTICSEARCH+="${OS_USERNAME}:${OS_PASSWORD}@"
     fi
 
-    ARKIME_ELASTICSEARCH+="${ES_HOST}"
+    ARKIME_ELASTICSEARCH+="${OS_HOST}"
 
-    if [[ -n $ES_PORT ]]; then
-      ARKIME_ELASTICSEARCH+=":${ES_PORT}"
+    if [[ -n $OS_PORT ]]; then
+      ARKIME_ELASTICSEARCH+=":${OS_PORT}"
     else
       ARKIME_ELASTICSEARCH+=":9200"
     fi
@@ -39,7 +39,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   fi
 
   # if SSL certificate verification is turned off, supply the --insecure flag
-  if [[ -n $ES_SSL_VERIFY ]] && [ "$ES_SSL_VERIFY" = none ]; then
+  if [[ -n $OS_SSL_VERIFY ]] && [ "$OS_SSL_VERIFY" = none ]; then
     export ARKIME_HTTPS_FLAG="--insecure"
   fi
 

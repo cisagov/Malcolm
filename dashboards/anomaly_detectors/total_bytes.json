@@ -1,0 +1,47 @@
+{
+  "name": "total_bytes",
+  "description": "Detect anomalies based on total bytes, summed",
+  "time_field": "firstPacket",
+  "indices": [
+    "arkime_sessions3-*"
+  ],
+  "feature_attributes": [
+    {
+      "feature_name": "total_bytes",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "total_bytes": {
+          "sum": {
+            "field": "network.bytes"
+          }
+        }
+      }
+    }
+  ],
+  "filter_query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "network.bytes",
+            "boost": 1
+          }
+        }
+      ],
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "detection_interval": {
+    "period": {
+      "interval": 10,
+      "unit": "Minutes"
+    }
+  },
+  "window_delay": {
+    "period": {
+      "interval": 1,
+      "unit": "Minutes"
+    }
+  }
+}

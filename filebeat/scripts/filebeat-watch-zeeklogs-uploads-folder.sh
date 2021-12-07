@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
 PROCESS_DIR=${FILEBEAT_ZEEK_DIR:-/data/zeek/}

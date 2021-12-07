@@ -4,7 +4,7 @@ https://github.com/idaholab/Malcolm
 
 See License.txt for license terms.
 
-Malcolm is Copyright (c) 2021 Battelle Energy Alliance, LLC, and is developed
+Malcolm is Copyright (c) 2022 Battelle Energy Alliance, LLC, and is developed
 and released through the cooperation of the Cybersecurity and Infrastructure
 Security Agency of the U.S. Department of Homeland Security. All rights reserved.
 

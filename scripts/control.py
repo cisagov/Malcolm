@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
 import errno
@@ -64,7 +64,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
   err = -1
   results = []
 
-  # the elastic containers all follow the same naming pattern for these executables
+  # the opensearch containers all follow the same naming pattern for these executables
   keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
 
   # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
@@ -246,36 +246,40 @@ def logs():
   ignoreRegEx = re.compile(r"""
     .+(
         deprecated
-      | DEPRECATION
-      | eshealth
-      | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
-      | update_mapping
-      | throttling\s+index
-      | executing\s+attempt_(transition|set_replica_count)\s+for
-      | but\s+there\s+are\s+no\s+living\s+connections
-      | saved_objects
-      | /kibana/(api/ui_metric/report|internal/search/es)
-      | retry\.go.+(send\s+unwait|done$)
-      | scheduling\s+job\s*id.+opendistro-ism
-      | descheduling\s+job\s*id
-      | updating\s+number_of_replicas
-      | running\s+full\s+sweep
+      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
-      | \b(d|es)?stats\.json
+      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
       | /_ns_/nstest\.html
-      | esindices/list
+      | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
+      | \b(d|es)?stats\.json
+      | \b1.+GET\s+/\s+.+401.+curl
       | _cat/indices
-      | use_field_mapping
-      | reaped\s+unknown\s+pid
-      | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+      | branding.*config\s+is\s+not\s+found\s+or\s+invalid
+      | but\s+there\s+are\s+no\s+living\s+connections
+      | curl.+localhost.+GET\s+/api/status\s+200
+      | DEPRECATION
+      | descheduling\s+job\s*id
+      | eshealth
+      | esindices/list
+      | executing\s+attempt_(transition|set_replica_count)\s+for
       | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
       | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
-      | POST\s+HTTP/[\d\.].+\b200\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
-      | curl.+localhost.+GET\s+/api/status\s+200
-      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
-      | \b1.+GET\s+/\s+.+401.+curl
+      | POST\s+HTTP/[\d\.].+\b200\b
+      | reaped\s+unknown\s+pid
+      | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
+      | retry\.go.+(send\s+unwait|done$)
+      | running\s+full\s+sweep
+      | saved_objects
+      | scheduling\s+job\s*id.+opendistro-ism
+      | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+      | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
+      | throttling\s+index
+      | update_mapping
+      | updating\s+number_of_replicas
+      | use_field_mapping
+      | Using\s+geoip\s+database
     )
   """, re.VERBOSE | re.IGNORECASE)
 
@@ -343,8 +347,8 @@ def logs():
               # standardize and print the JSON output
               print(f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}")
 
-          elif ('kibana' in serviceStr):
-            # this is an output line from kibana, let's clean it up a bit: remove some clutter for the display
+          elif ('dashboards' in serviceStr):
+            # this is an output line from dashboards, let's clean it up a bit: remove some clutter for the display
             for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
               outputJson.pop(noisyKey, None)
 
@@ -374,8 +378,8 @@ def stop(wipe=False):
   osEnv['TMPDIR'] = MalcolmTmpPath
 
   if wipe:
-    # attempt to DELETE _template/malcolm_template in Elasticsearch
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$ES_HOST:$ES_PORT/_template/malcolm_template"'], env=osEnv, debug=args.debug)
+    # attempt to DELETE _template/malcolm_template in OpenSearch
+    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'exec', 'arkime', 'bash', '-c', 'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_template/malcolm_template"'], env=osEnv, debug=args.debug)
 
   # if stop.sh is being called with wipe.sh (after the docker-compose file)
   # then also remove named and anonymous volumes (not external volumes, of course)
@@ -388,11 +392,11 @@ def stop(wipe=False):
     exit(err)
 
   if wipe:
-    # delete elasticsearch database
-    shutil.rmtree(os.path.join(MalcolmPath, 'elasticsearch/nodes'), ignore_errors=True)
+    # delete OpenSearch database
+    shutil.rmtree(os.path.join(MalcolmPath, 'opensearch/nodes'), ignore_errors=True)
 
     # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
-    for dataDir in ['elasticsearch-backup', 'zeek-logs', 'arkime-logs', 'pcap', 'arkime-raw']:
+    for dataDir in ['opensearch-backup', 'zeek-logs', 'arkime-logs', 'pcap', 'arkime-raw']:
       for root, dirnames, filenames in os.walk(os.path.join(MalcolmPath, dataDir), topdown=True, onerror=None):
         for file in filenames:
           fileSpec = os.path.join(root, file)
@@ -403,7 +407,7 @@ def stop(wipe=False):
               pass
 
     # clean up empty directories
-    for dataDir in [os.path.join('elasticsearch-backup', 'logs'), os.path.join('zeek-logs', 'processed'), os.path.join('zeek-logs', 'current')]:
+    for dataDir in [os.path.join('opensearch-backup', 'logs'), os.path.join('zeek-logs', 'processed'), os.path.join('zeek-logs', 'current')]:
       RemoveEmptyFolders(dataDir, removeRoot=False)
 
     eprint("Malcolm has been stopped and its data cleared\n")
@@ -426,9 +430,9 @@ def start():
   # touch the metadata file
   open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
-  # if the elasticsearch and logstash keystore don't exist exist, create empty ones
-  if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('elasticsearch', 'elasticsearch.keystore'))):
-    keystore_op('elasticsearch', True, 'create')
+  # if the OpenSearch and Logstash keystore don't exist exist, create empty ones
+  if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore'))):
+    keystore_op('opensearch', True, 'create')
   if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('logstash', os.path.join('certs', 'logstash.keystore')))):
     keystore_op('logstash', True, 'create')
 
@@ -443,8 +447,8 @@ def start():
     os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
 
   # make sure some directories exist before we start
-  for path in [os.path.join(MalcolmPath, 'elasticsearch'),
-               os.path.join(MalcolmPath, 'elasticsearch-backup'),
+  for path in [os.path.join(MalcolmPath, 'opensearch'),
+               os.path.join(MalcolmPath, 'opensearch-backup'),
                os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
                os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
                os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
@@ -473,7 +477,7 @@ def start():
     eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")
     eprint("------------------------------------------------------------------------------")
     eprint("  - Arkime: https://localhost/")
-    eprint("  - Kibana: https://localhost/kibana/")
+    eprint("  - OpenSearch Dashboards: https://localhost/dashboards/")
     eprint("  - PCAP upload (web): https://localhost/upload/")
     eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
     eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/\n")
@@ -713,12 +717,12 @@ def authSetup(wipe=False):
           os.remove(oldfile)
 
   # create and populate keystore for remote
-  if YesOrNo('Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance', default=False):
+  if YesOrNo('Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance', default=False):
 
     # prompt username and password
     esPassword = None
     esPasswordConfirm = None
-    esUsername = AskForString("External Elasticsearch username")
+    esUsername = AskForString("External OpenSearch username")
 
     while True:
       esPassword = AskForPassword(f"{esUsername} password: ")
@@ -729,26 +733,26 @@ def authSetup(wipe=False):
 
     # create logstash keystore file, don't complain if it already exists, and set the keystore items
     keystore_op('logstash', False, 'create', stdin='N')
-    keystore_op('logstash', False, 'remove', 'ES_EXTERNAL_USER', '--force')
-    keystore_op('logstash', False, 'add', 'ES_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
-    keystore_op('logstash', False, 'remove', 'ES_EXTERNAL_PASSWORD', '--force')
-    keystore_op('logstash', False, 'add', 'ES_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
+    keystore_op('logstash', False, 'remove', 'OS_EXTERNAL_USER', '--force')
+    keystore_op('logstash', False, 'add', 'OS_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
+    keystore_op('logstash', False, 'remove', 'OS_EXTERNAL_PASSWORD', '--force')
+    keystore_op('logstash', False, 'add', 'OS_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
     success, results = keystore_op('logstash', False, 'list')
     results = [x.upper() for x in results if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE')) and (not x.upper().startswith('USING BUNDLED JDK'))]
-    if success and ('ES_EXTERNAL_USER' in results) and ('ES_EXTERNAL_PASSWORD' in results):
-      eprint(f"External Elasticsearch instance variables stored: {', '.join(results)}")
+    if success and ('OS_EXTERNAL_USER' in results) and ('OS_EXTERNAL_PASSWORD' in results):
+      eprint(f"External OpenSearch instance variables stored: {', '.join(results)}")
     else:
-      eprint("Failed to store external Elasticsearch instance variables:\n")
+      eprint("Failed to store external OpenSearch instance variables:\n")
       eprint("\n".join(results))
 
-  # Open Distro for Elasticsearch authenticate sender account credentials
-  # https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account
-  if YesOrNo('Store username/password for email alert sender account (see https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account)', default=False):
+  # OpenSearch authenticate sender account credentials
+  # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account
+  if YesOrNo('Store username/password for email alert sender account (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account)', default=False):
 
     # prompt username and password
     emailPassword = None
     emailPasswordConfirm = None
-    emailSender = AskForString("Open Distro alerting email sender name")
+    emailSender = AskForString("OpenSearch alerting email sender name")
     emailUsername = AskForString("Email account username")
 
     while True:
@@ -758,16 +762,16 @@ def authSetup(wipe=False):
         break
       eprint("Passwords do not match")
 
-    # create elasticsearch keystore file, don't complain if it already exists, and set the keystore items
-    usernameKey = f'opendistro.alerting.destination.email.{emailSender}.username'
-    passwordKey = f'opendistro.alerting.destination.email.{emailSender}.password'
+    # create OpenSearch keystore file, don't complain if it already exists, and set the keystore items
+    usernameKey = f'plugins.alerting.destination.email.{emailSender}.username'
+    passwordKey = f'plugins.alerting.destination.email.{emailSender}.password'
 
-    keystore_op('elasticsearch', True, 'create', stdin='N')
-    keystore_op('elasticsearch', True, 'remove', usernameKey)
-    keystore_op('elasticsearch', True, 'add', usernameKey, '--stdin', stdin=emailUsername)
-    keystore_op('elasticsearch', True, 'remove', passwordKey)
-    keystore_op('elasticsearch', True, 'add', passwordKey, '--stdin', stdin=emailPassword)
-    success, results = keystore_op('elasticsearch', True, 'list')
+    keystore_op('opensearch', True, 'create', stdin='N')
+    keystore_op('opensearch', True, 'remove', usernameKey)
+    keystore_op('opensearch', True, 'add', usernameKey, '--stdin', stdin=emailUsername)
+    keystore_op('opensearch', True, 'remove', passwordKey)
+    keystore_op('opensearch', True, 'add', passwordKey, '--stdin', stdin=emailPassword)
+    success, results = keystore_op('opensearch', True, 'list')
     results = [x for x in results if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE'))]
     if success and (usernameKey in results) and (passwordKey in results):
       eprint(f"Email alert sender account variables stored: {', '.join(results)}")

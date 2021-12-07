@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
 # Process queued files reported by pcap_watcher.py, using either arkime's capture or zeek to process
-# them for session creation and logging into the Elasticsearch database
+# them for session creation and logging into the OpenSearch database
 #
 # Run the script with --help for options
 ###################################################################################################
