@@ -62,7 +62,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/scripts /data/
-ADD shared/bin/elastic_search_status.sh /data/
+ADD shared/bin/opensearch_status.sh /data/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /usr/share/filebeat-nginx/data && \
     chown -R root:${PGROUP} /usr/share/filebeat-nginx && \

@@ -26,7 +26,7 @@ x-auth-variables: &auth-variables
   NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL : 2
 
 x-nginx-variables: &nginx-variables
-  # Whether or not to write nginx's access.log and error.log to Elasticsearch
+  # Whether or not to write nginx's access.log and error.log to OpenSearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
 x-arkime-variables: &arkime-variables
@@ -76,9 +76,9 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_TFTP : ''
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
-x-kibana-helper-variables: &kibana-helper-variables
-  ELASTICSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
-  ELASTICSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
+x-dashboards-helper-variables: &dashboards-helper-variables
+  OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
+  OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
   ISM_CLOSE_AGE : '60d'
   ISM_COLD_AGE : '30d'
   ISM_DELETE_AGE : '365d'
@@ -91,13 +91,13 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
   LOGSTASH_REVERSE_DNS      : 'false'
-  # ES_EXTERNAL_HOSTS : '10.0.0.123:9200'
-  # ES_EXTERNAL_SSL : 'true'
-  # ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
-  # For security, ES_EXTERNAL_USER and ES_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
+  # OS_EXTERNAL_HOSTS : '10.0.0.123:9200'
+  # OS_EXTERNAL_SSL : 'true'
+  # OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
+  # For security, OS_EXTERNAL_USER and OS_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
   #   See also volume mount for logstash.keystore below.
-  # ES_EXTERNAL_USER : 'janedoe'
-  # ES_EXTERNAL_PASSWORD : 'secret'
+  # OS_EXTERNAL_USER : 'janedoe'
+  # OS_EXTERNAL_PASSWORD : 'secret'
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
@@ -126,27 +126,27 @@ x-pcap-capture-variables: &pcap-capture-variables
 ################################################################################
 
 services:
-  elasticsearch:
+  opensearch:
     build:
       context: .
-      dockerfile: Dockerfiles/elasticsearch.Dockerfile
-    image: malcolmnetsec/elasticsearch-od:4.0.1
+      dockerfile: Dockerfiles/opensearch.Dockerfile
+    image: malcolmnetsec/opensearch:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: elasticsearch
+    hostname: opensearch
     environment:
       << : *process-variables
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
-      ES_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
+      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       VIRTUAL_HOST : 'es.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       indices.query.bool.max_clause_count : 2048
-      path.repo : '/opt/elasticsearch/backup'
+      path.repo : '/opt/opensearch/backup'
     expose:
       - 9200
     ulimits:
@@ -156,37 +156,37 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
-      - ./elasticsearch/elasticsearch.keystore:/usr/share/elasticsearch/config/elasticsearch.keystore:rw
-      - ./nginx/ca-trust:/usr/share/elasticsearch/ca-trust:ro
-      - ./elasticsearch:/usr/share/elasticsearch/data:delegated
-      - ./elasticsearch-backup:/opt/elasticsearch/backup:delegated
+      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
+      - ./nginx/ca-trust:/usr/share/opensearch/ca-trust:ro
+      - ./opensearch:/usr/share/opensearch/data:delegated
+      - ./opensearch-backup:/opt/opensearch/backup:delegated
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 180s
-  kibana-helper:
+  dashboards-helper:
     build:
       context: .
-      dockerfile: Dockerfiles/kibana-helper.Dockerfile
-    image: malcolmnetsec/kibana-helper:4.0.1
+      dockerfile: Dockerfiles/dashboards-helper.Dockerfile
+    image: malcolmnetsec/dashboards-helper:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: kibana-helper
+    hostname: dashboards-helper
     environment:
       << : *process-variables
-      << : *kibana-helper-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
-      KIBANA_URL : 'http://kibana:5601/kibana'
-      VIRTUAL_HOST : 'kibana-helper.malcolm.local'
+      << : *dashboards-helper-variables
+      OPENSEARCH_URL : 'http://opensearch:9200'
+      DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
+      VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
       ARKIME_INDEX_PATTERN_ID : 'arkime_sessions3-*'
       ARKIME_INDEX_TIME_FIELD : 'firstPacket'
-      CREATE_ES_ARKIME_SESSION_INDEX : 'true'
+      CREATE_OS_ARKIME_SESSION_INDEX : 'true'
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 28991
     volumes:
@@ -197,26 +197,26 @@ services:
       timeout: 15s
       retries: 3
       start_period: 30s
-  kibana:
+  dashboards:
     build:
       context: .
-      dockerfile: Dockerfiles/kibana.Dockerfile
-    image: malcolmnetsec/kibana-od:4.0.1
+      dockerfile: Dockerfiles/dashboards.Dockerfile
+    image: malcolmnetsec/dashboards:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: kibana
+    hostname: dashboards
     environment:
       << : *process-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
-      VIRTUAL_HOST : 'kibana.malcolm.local'
+      OPENSEARCH_URL : 'http://opensearch:9200'
+      VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
-      - elasticsearch
-      - kibana-helper
+      - opensearch
+      - dashboards-helper
     expose:
       - 5601
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/kibana/api/status"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -225,7 +225,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:4.0.1
+    image: malcolmnetsec/logstash-oss:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -235,10 +235,10 @@ services:
       << : *logstash-variables
       << : *common-beats-variables
       << : *common-lookup-variables
-      ES_HOSTS : 'elasticsearch:9200'
+      OS_HOSTS : 'opensearch:9200'
       LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss2m -Djava.security.egd=file:/dev/./urandom'
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 5044
       - 9001
@@ -265,7 +265,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:4.0.1
+    image: malcolmnetsec/filebeat-oss:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -306,7 +306,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:4.0.1
+    image: malcolmnetsec/arkime:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -319,9 +319,9 @@ services:
       << : *arkime-variables
       ARKIME_VERSION : '3.1.1'
       VIRTUAL_HOST : 'arkime.malcolm.local'
-      ES_HOST : 'elasticsearch'
-      ES_PORT : 9200
-      ES_MAX_SHARDS_PER_NODE : 2500
+      OS_HOST : 'opensearch'
+      OS_PORT : 9200
+      OS_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
       WISE : 'on'
     ulimits:
@@ -329,7 +329,7 @@ services:
         soft: -1
         hard: -1
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 8000
       - 8005
@@ -351,7 +351,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:4.0.1
+    image: malcolmnetsec/zeek:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -365,7 +365,7 @@ services:
         soft: -1
         hard: -1
     depends_on:
-      - elasticsearch
+      - opensearch
     volumes:
       - ./pcap:/pcap
       - ./zeek-logs/upload:/zeek/upload
@@ -381,7 +381,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:4.0.1
+    image: malcolmnetsec/file-monitor:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -407,7 +407,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:4.0.1
+    image: malcolmnetsec/pcap-capture:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -430,7 +430,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:4.0.1
+    image: malcolmnetsec/pcap-monitor:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -438,9 +438,9 @@ services:
     environment:
       << : *process-variables
       << : *common-upload-variables
-      ELASTICSEARCH_URL : 'http://elasticsearch:9200'
+      OPENSEARCH_URL : 'http://opensearch:9200'
     depends_on:
-      - elasticsearch
+      - opensearch
     expose:
       - 30441
     volumes:
@@ -456,7 +456,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:4.0.1
+    image: malcolmnetsec/file-upload:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -482,7 +482,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:4.0.1
+    image: malcolmnetsec/htadmin:5.0.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -507,7 +507,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:4.0.1
+    image: malcolmnetsec/freq:5.0.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -528,7 +528,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:4.0.1
+    image: malcolmnetsec/name-map-ui:5.0.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -555,7 +555,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:4.0.1
+    image: malcolmnetsec/nginx-proxy:5.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -566,7 +566,7 @@ services:
       << : *nginx-variables
     depends_on:
       - arkime
-      - kibana
+      - dashboards
       - upload
       - htadmin
       - name-map-ui

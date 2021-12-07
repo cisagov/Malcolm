@@ -9,6 +9,7 @@ on:
       - 'freq-server/**'
       - 'Dockerfiles/freq.Dockerfile'
       - 'shared/bin/*'
+      - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
 

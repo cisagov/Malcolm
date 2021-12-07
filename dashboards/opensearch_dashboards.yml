@@ -1,0 +1,34 @@
+---
+# Default OpenSearch dashboards configuration from github.
+
+server.name: dashboards
+server.host: "0"
+server.basePath: "/dashboards"
+server.rewriteBasePath: true
+server.maxPayloadBytes: 8388608
+opensearch.hosts: ["${OPENSEARCH_URL}"]
+opensearch.requestTimeout: 180000
+
+opensearchDashboards.branding:
+  logo:
+    defaultUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/logo/Malcolm_banner.png"
+    darkModeUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/logo/Malcolm_outline_banner_dark.png"
+  mark:
+    defaultUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/icon/icon.png"
+    darkModeUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/icon/icon_dark.png"
+  faviconUrl: "https://raw.githubusercontent.com/mmguero-dev/Malcolm/opensearch/docs/images/favicon/facebook.png"
+  applicationTitle: "Malcolm Dashboards"
+
+map.regionmap:
+  includeOpenSearchMapsService: false
+  layers:
+     - name: "World (offline)"
+       url: "/world.geojson"
+       attribution: "https://exploratory.io/maps"
+       fields:
+          - name: "ISO_A2"
+            description: "Country Code"
+          - name: "WB_A2"
+            description: "Country Code2"
+          - name: "NAME"
+            description: "Country Name"
