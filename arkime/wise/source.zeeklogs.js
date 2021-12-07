@@ -3,14 +3,14 @@
 const WISESource = require('./wiseSource.js');
 
 //////////////////////////////////////////////////////////////////////////////////
-// Arkime WISE Data Source definition for Malcolm data sources.
+// Arkime WISE Data Source definition for Malcolm data sources
 //
 // Part of Malcolm (https://github.com/cisagov/malcolm)
 //
 // Data may be populated with Malcolm's Logstash filters:
 //   (https://github.com/cisagov/Malcolm/tree/main/logstash/pipelines)
 //
-// Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+// Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 // see https://raw.githubusercontent.com/cisagov/Malcolm/main/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 
