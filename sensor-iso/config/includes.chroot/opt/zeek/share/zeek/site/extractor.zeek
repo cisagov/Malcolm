@@ -1,6 +1,6 @@
 #!/usr/bin/env zeek
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 @load ./extractor_params
 

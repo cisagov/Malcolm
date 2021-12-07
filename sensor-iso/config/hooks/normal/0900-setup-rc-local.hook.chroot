@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 sed -i 's/^exit 0//' /etc/rc.local 2>/dev/null
 

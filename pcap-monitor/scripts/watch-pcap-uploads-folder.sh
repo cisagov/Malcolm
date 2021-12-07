@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
 
 PCAP_BASE_PATH=${PCAP_PATH:-"/pcap"}
 ZEEK_BASE_PATH=${ZEEK_PATH:-"/zeek"}
