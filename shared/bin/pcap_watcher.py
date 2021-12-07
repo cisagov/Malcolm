@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
 # Monitor a directory for PCAP files for processing (by publishing their filenames to a ZMQ socket)
@@ -32,7 +32,7 @@ MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
 MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 32*1024*1024*1024
 
 ###################################################################################################
-# for querying the Arkime's "arkime_files" Elasticsearch index to avoid re-processing (duplicating sessions for)
+# for querying the Arkime's "arkime_files" OpenSearch index to avoid re-processing (duplicating sessions for)
 # files that have already been processed
 ARKIME_FILES_INDEX = "arkime_files"
 ARKIME_FILE_TYPE = "file"
@@ -62,45 +62,45 @@ class EventWatcher(pyinotify.ProcessEvent):
 
     super().__init__()
 
-    self.useElastic = False
+    self.useOpenSearch = False
 
-    # if we're going to be querying Elasticsearch for past PCAP file status, connect now
-    if args.elasticHost is not None:
+    # if we're going to be querying OpenSearch for past PCAP file status, connect now
+    if args.opensearchHost is not None:
 
       connected = False
       healthy = False
 
-      # create the connection to Elasticsearch
+      # create the connection to OpenSearch
       while (not connected) and (not shuttingDown):
         try:
-          if debug: eprint(f"{scriptName}:\tconnecting to Elasticsearch {args.elasticHost}...")
-          elasticsearch_dsl.connections.create_connection(hosts=[args.elasticHost])
+          if debug: eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchHost}...")
+          elasticsearch_dsl.connections.create_connection(hosts=[args.opensearchHost])
           if verboseDebug: eprint(f"{scriptName}:\t{elasticsearch_dsl.connections.get_connection().cluster.health()}")
           connected = elasticsearch_dsl.connections.get_connection() is not None
 
         except elasticsearch.exceptions.ConnectionError as connError:
-          if debug: eprint(f"{scriptName}:\tElasticsearch connection error: {connError}")
+          if debug: eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
 
-        if (not connected) and args.elasticWaitForHealth:
+        if (not connected) and args.opensearchWaitForHealth:
           time.sleep(1)
         else:
           break
 
       # if requested, wait for at least "yellow" health in the cluster for the "files" index
-      while connected and args.elasticWaitForHealth and (not healthy) and (not shuttingDown):
+      while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown):
         try:
-          if debug: eprint(f"{scriptName}:\twaiting for Elasticsearch to be healthy")
+          if debug: eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
           elasticsearch_dsl.connections.get_connection().cluster.health(index=ARKIME_FILES_INDEX, wait_for_status='yellow')
           if verboseDebug: eprint(f"{scriptName}:\t{elasticsearch_dsl.connections.get_connection().cluster.health()}")
           healthy = True
 
         except elasticsearch.exceptions.ConnectionTimeout as connError:
-          if verboseDebug: eprint(f"{scriptName}:\tElasticsearch health check: {connError}")
+          if verboseDebug: eprint(f"{scriptName}:\tOpenSearch health check: {connError}")
 
         if (not healthy):
           time.sleep(1)
 
-      self.useElastic = connected and healthy
+      self.useOpenSearch = connected and healthy
 
     # initialize ZeroMQ context and socket(s) to publish messages to
     self.context = zmq.Context()
@@ -142,9 +142,9 @@ def event_process_generator(cls, method):
 
         relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
 
-        # check with Arkime's files index in Elasticsearch and make sure it's not a duplicate
+        # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
         fileIsDuplicate = False
-        if self.useElastic:
+        if self.useOpenSearch:
           s = elasticsearch_dsl.Search(index=ARKIME_FILES_INDEX) \
               .filter("term", _type=ARKIME_FILE_TYPE) \
               .filter("term", node=args.arkimeNode) \
@@ -218,8 +218,8 @@ def main():
 
   parser.add_argument('--min-bytes', dest='minBytes', help="Minimum size for checked files", metavar='<bytes>', type=int, default=MINIMUM_CHECKED_FILE_SIZE_DEFAULT, required=False)
   parser.add_argument('--max-bytes', dest='maxBytes', help="Maximum size for checked files", metavar='<bytes>', type=int, default=MAXIMUM_CHECKED_FILE_SIZE_DEFAULT, required=False)
-  parser.add_argument('--elasticsearch', required=False, dest='elasticHost', metavar='<STR>', type=str, default=None, help='Elasticsearch connection string for querying Arkime files index to ignore duplicates')
-  parser.add_argument('--elasticsearch-wait', dest='elasticWaitForHealth', help="Wait for Elasticsearch to be healthy before starting", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
+  parser.add_argument('--opensearch', required=False, dest='opensearchHost', metavar='<STR>', type=str, default=None, help='OpenSearch connection string for querying Arkime files index to ignore duplicates')
+  parser.add_argument('--opensearch-wait', dest='opensearchWaitForHealth', help="Wait for OpenSearch to be healthy before starting", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
   parser.add_argument('--arkime-node', required=False, dest='arkimeNode', metavar='<STR>', type=str, default='arkime', help='Arkime node value for querying Arkime files index to ignore duplicates')
 
   parser.add_argument('--ignore-existing', dest='ignoreExisting', help="Ignore preexisting files in the monitor directory", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)

@@ -28,11 +28,11 @@ The purpose of this document is to provide some direction for those willing to m
 
 ### Logstash plugins
 
-## <a name="Kibana"></a>Kibana
+## <a name="dashboards"></a>OpenSearch Dashboards
 
 ### Adding new visualizations and dashboards
 
-### Kibana plugins
+### OpenSearch Dashboards plugins
 
 ## <a name="Arkime"></a>Arkime
 
@@ -48,7 +48,7 @@ The purpose of this document is to provide some direction for those willing to m
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
+[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See [`License.txt`](../../License.txt) for the terms of its release.
 

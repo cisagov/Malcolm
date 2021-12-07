@@ -5,7 +5,7 @@
 [Malcolm](https://github.com/cisagov/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
-* **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime (formerly Moloch), a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
+* **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime (formerly Moloch), a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
 * **Streamlined deployment** – Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. This Docker-based deployment model, combined with a few simple scripts for setup and run-time management, makes Malcolm suitable to be deployed quickly across a variety of platforms and use cases, whether it be for long-term deployment on a Linux server in a security operations center (SOC) or for incident response on a Macbook for an individual engagement.
 * **Secure communications** – All communications with Malcolm, both from the user interface and from remote log forwarders, are secured with industry standard encryption protocols.
 * **Permissive license** – Malcolm is comprised of several widely used open source tools, making it an attractive alternative to security solutions requiring paid licenses.
@@ -60,15 +60,15 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     * [Hunt](#ArkimeHunt)
     * [Statistics](#ArkimeStats)
     * [Settings](#ArkimeSettings)
-* [Kibana](#Kibana)
+* [OpenSearch Dashboards](#Dashboards)
     * [Discover](#Discover)
         - [Screenshots](#DiscoverGallery)
-    * [Visualizations and dashboards](#KibanaVisualizations)
+    * [Visualizations and dashboards](#DashboardsVisualizations)
         - [Prebuilt visualizations and dashboards](#PrebuiltVisualizations)
             - [Screenshots](#PrebuiltVisualizationsGallery)
         - [Building your own visualizations and dashboards](#BuildDashboard)
             + [Screenshots](#NewVisualizationsGallery)
-* [Search Queries in Arkime and Kibana](#SearchCheatSheet)
+* [Search Queries in Arkime and OpenSearch](#SearchCheatSheet)
 * [Other Malcolm features](#MalcolmFeatures)
     - [Automatic file extraction and scanning](#ZeekFileExtraction)
     - [Automatic host and subnet name assignment](#HostAndSubnetNaming)
@@ -76,7 +76,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [CIDR subnet to network segment name mapping via `cidr-map.txt`](#SegmentNaming)
         + [Defining hostname and CIDR subnet names interface](#NameMapUI)
         + [Applying mapping changes](#ApplyMapping)
-    - [Elasticsearch index management](#IndexManagement)
+    - [OpenSearch index management](#IndexManagement)
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
     - [Alerting](#Alerting)
@@ -121,41 +121,42 @@ You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
-Pulling arkime        ... done
-Pulling elasticsearch ... done
-Pulling file-monitor  ... done
-Pulling filebeat      ... done
-Pulling freq          ... done
-Pulling htadmin       ... done
-Pulling kibana        ... done
-Pulling logstash      ... done
-Pulling name-map-ui   ... done
-Pulling nginx-proxy   ... done
-Pulling pcap-capture  ... done
-Pulling pcap-monitor  ... done
-Pulling upload        ... done
-Pulling zeek          ... done
+Pulling arkime            ... done
+Pulling dashboards        ... done
+Pulling dashboards-helper ... done
+Pulling file-monitor      ... done
+Pulling filebeat          ... done
+Pulling freq              ... done
+Pulling htadmin           ... done
+Pulling logstash          ... done
+Pulling name-map-ui       ... done
+Pulling nginx-proxy       ... done
+Pulling opensearch        ... done
+Pulling pcap-capture      ... done
+Pulling pcap-monitor      ... done
+Pulling upload            ... done
+Pulling zeek              ... done
 ```
 
 You can then observe that the images have been retrieved by running `docker images`:
 ```
 $ docker images
-REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.1               xxxxxxxxxxxx        39 hours ago        826MB
-malcolmnetsec/elasticsearch-od                      4.0.1               xxxxxxxxxxxx        40 hours ago        1.42GB
-malcolmnetsec/file-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        603MB
-malcolmnetsec/file-upload                           4.0.1               xxxxxxxxxxxx        39 hours ago        605MB
-malcolmnetsec/filebeat-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        266MB
-malcolmnetsec/freq                                  4.0.1               xxxxxxxxxxxx        39 hours ago        151MB
-malcolmnetsec/htadmin                               4.0.1               xxxxxxxxxxxx        39 hours ago        262MB
-malcolmnetsec/kibana-helper                         4.0.1               xxxxxxxxxxxx        40 hours ago        153MB
-malcolmnetsec/kibana-od                             4.0.1               xxxxxxxxxxxx        40 hours ago        1.35GB
-malcolmnetsec/logstash-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        1.36GB
-malcolmnetsec/name-map-ui                           4.0.1               xxxxxxxxxxxx        39 hours ago        142MB
-malcolmnetsec/nginx-proxy                           4.0.1               xxxxxxxxxxxx        39 hours ago        116MB
-malcolmnetsec/pcap-capture                          4.0.1               xxxxxxxxxxxx        39 hours ago        121MB
-malcolmnetsec/pcap-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        221MB
-malcolmnetsec/zeek                                  4.0.1               xxxxxxxxxxxx        39 hours ago        926MB
+REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+malcolmnetsec/arkime                                           5.0.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.0.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.0.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -172,7 +173,7 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
 * Arkime: [https://localhost:443](https://localhost:443)
-* Kibana: [https://localhost/kibana/](https://localhost/kibana/) or [https://localhost:5601](https://localhost:5601)
+* OpenSearch Dashboards: [https://localhost/dashboards/](https://localhost/dashboards/) or [https://localhost:5601](https://localhost:5601)
 * Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/)
 * Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
 * [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
@@ -186,7 +187,7 @@ Malcolm processes network traffic data in the form of packet capture (PCAP) file
 
 Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments](#SegmentNaming) and [hosts](#HostNaming) based on user-defined IP address and MAC mappings, performing [TLS fingerprinting](#https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
 
-The enriched data is stored in an [Elasticsearch](https://opendistro.github.io/for-elasticsearch/) document store in a format suitable for analysis through two intuitive interfaces: Kibana, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
+The enriched data is stored in an [OpenSearch](https://opensearch.org/) document store in a format suitable for analysis through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
 
 For smaller networks, use at home by network security enthusiasts, or in the field for incident response engagements, Malcolm can also easily be deployed locally on an ordinary consumer workstation or laptop. Malcolm can process local artifacts such as locally-generated Zeek logs, locally-captured PCAP files, and PCAP files collected offline without the use of a dedicated sensor appliance.
 
@@ -195,11 +196,11 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 Malcolm leverages the following excellent open source tools, among others.
 
 * [Arkime](https://arkime.com/) (formerly Moloch) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
-    * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into Elasticsearch
+    * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into OpenSearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
-* [Elasticsearch](https://www.elastic.co/products/elasticsearch) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - a search and analytics engine for indexing and querying network traffic session metadata 
-* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into Elasticsearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
-* [Kibana](https://www.elastic.co/products/kibana) ([Open Distro](https://opendistro.github.io/for-elasticsearch/) variant) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
+* [OpenSearch](https://opensearch.org/) - a search and analytics engine for indexing and querying network traffic session metadata 
+* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
+* [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
 * [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
 * [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files
@@ -311,15 +312,15 @@ Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/m
 * `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
 * `docs` - a directory containing instructions and documentation
-* `elasticsearch` - an initially empty directory where the Elasticsearch database instance will reside
-* `elasticsearch-backup` - an initially empty directory for storing Elasticsearch [index snapshots](#IndexManagement) 
+* `opensearch` - an initially empty directory where the OpenSearch database instance will reside
+* `opensearch-backup` - an initially empty directory for storing OpenSearch [index snapshots](#IndexManagement) 
 * `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
 * `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
 * `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
 * `htadmin` - configuration for the `htadmin` user account management container
-* `kibana` - code and configuration for the `kibana` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
-* `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `elasticsearch` container
+* `dashboards` - code and configuration for the `dashboards` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
+* `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `opensearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](#ISO) for a minimal Debian-based Linux installation for running Malcolm
 * `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * `nginx` - configuration for the `nginx` reverse proxy container
@@ -351,21 +352,21 @@ $ ./scripts/build.sh
 
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
-* `malcolmnetsec/arkime` (based on `debian:buster-slim`)
-* `malcolmnetsec/elasticsearch-od` (based on `amazon/opendistro-for-elasticsearch`)
+* `malcolmnetsec/arkime` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
+* `malcolmnetsec/dashboards-helper` (based on `alpine:3.14`)
+* `malcolmnetsec/file-monitor` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/file-upload` (based on `debian:bullseye-slim`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
-* `malcolmnetsec/file-monitor` (based on `debian:buster-slim`)
-* `malcolmnetsec/file-upload` (based on `debian:buster-slim`)
-* `malcolmnetsec/freq` (based on `debian:buster-slim`)
-* `malcolmnetsec/htadmin` (based on `debian:buster-slim`)
-* `malcolmnetsec/kibana-od` (based on `amazon/opendistro-for-elasticsearch-kibana`)
-* `malcolmnetsec/kibana-helper` (based on `alpine:3.12`)
-* `malcolmnetsec/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
-* `malcolmnetsec/name-map-ui` (based on `alpine:3.12`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.12`)
-* `malcolmnetsec/pcap-capture` (based on `debian:buster-slim`)
-* `malcolmnetsec/pcap-monitor` (based on `debian:buster-slim`)
-* `malcolmnetsec/pcap-zeek` (based on `debian:buster-slim`)
+* `malcolmnetsec/freq` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/htadmin` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.14`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.14`)
+* `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
+* `malcolmnetsec/pcap-capture` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/pcap-monitor` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/pcap-zeek` (based on `debian:bullseye-slim`)
 
 Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern.
 
@@ -389,7 +390,7 @@ analyst password (again):
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): 
 
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (y/N): 
+Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): 
 
 Store username/password for email alert sender account (y/N): 
 
@@ -416,7 +417,7 @@ To start, stop, restart, etc. Malcolm:
 
 A minute or so after starting Malcolm, the following services will be accessible:
   - Arkime: https://localhost/
-  - Kibana: https://localhost/kibana/
+  - OpenSearch Dashboards: https://localhost/dashboards/
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
@@ -466,7 +467,7 @@ Although `install.py` will attempt to automate many of the following configurati
 
 #### <a name="DockerComposeYml"></a>`docker-compose.yml` parameters
 
-Edit `docker-compose.yml` and search for the `ES_JAVA_OPTS` key. Edit the `-Xms4g -Xmx4g` values, replacing `4g` with a number that is half of your total system memory, or just under 32 gigabytes, whichever is less. So, for example, if I had 64 gigabytes of memory I would edit those values to be `-Xms31g -Xmx31g`. This indicates how much memory can be allocated to the Elasticsearch heaps. For a pleasant experience, I would suggest not using a value under 10 gigabytes. Similar values can be modified for Logstash with `LS_JAVA_OPTS`, where using 3 or 4 gigabytes is recommended.
+Edit `docker-compose.yml` and search for the `OPENSEARCH_JAVA_OPTS` key. Edit the `-Xms4g -Xmx4g` values, replacing `4g` with a number that is half of your total system memory, or just under 32 gigabytes, whichever is less. So, for example, if I had 64 gigabytes of memory I would edit those values to be `-Xms31g -Xmx31g`. This indicates how much memory can be allocated to the OpenSearch heaps. For a pleasant experience, I would suggest not using a value under 10 gigabytes. Similar values can be modified for Logstash with `LS_JAVA_OPTS`, where using 3 or 4 gigabytes is recommended.
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
@@ -474,7 +475,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 
-* `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to Elasticsearch (default `false`)
+* `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
 
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
 
@@ -506,11 +507,11 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
 
-* `ES_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external Elasticsearch instance in addition to the one maintained locally by Malcolm
+* `OS_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external OpenSearch instance in addition to the one maintained locally by Malcolm
 
-* `ES_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external Elasticsearch instances specified in `ES_EXTERNAL_HOSTS`
+* `OS_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external OpenSearch instances specified in `OS_EXTERNAL_HOSTS`
 
-* `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full SSL certificate validation; this may fail if using self-signed certificates (default `false`)
+* `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full SSL certificate validation; this may fail if using self-signed certificates (default `false`)
 
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
 
@@ -583,7 +584,7 @@ Please follow [this link](https://docs.docker.com/compose/install/) on docker.co
 
 ##### Operating system configuration
 
-The host system (ie., the one running Docker) will need to be configured for the [best possible Elasticsearch performance](https://www.elastic.co/guide/en/elasticsearch/reference/master/system-config.html). Here are a few suggestions for Linux hosts (these may vary from distribution to distribution):
+The host system (ie., the one running Docker) will need to be configured for the [best possible OpenSearch performance](https://www.elastic.co/guide/en/elasticsearch/reference/master/system-config.html). Here are a few suggestions for Linux hosts (these may vary from distribution to distribution):
 
 * Append the following lines to `/etc/sysctl.conf`:
 
@@ -633,7 +634,7 @@ DefaultLimitNOFILE=65535:65535
 DefaultLimitMEMLOCK=infinity
 ```
 
-* Change the readahead value for the disk where the Elasticsearch data will be stored. There are a few ways to do this. For example, you could add this line to `/etc/rc.local` (replacing `/dev/sda` with your disk block descriptor):
+* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, you could add this line to `/etc/rc.local` (replacing `/dev/sda` with your disk block descriptor):
 
 ```
 # change disk read-adhead value (# of blocks)
@@ -642,7 +643,7 @@ blockdev --setra 512 /dev/sda
 
 * Change the I/O scheduler to `deadline` or `noop`. Again, this can be done in a variety of ways. The simplest is to add `elevator=deadline` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub2`
 
-* If you are planning on using very large data sets, consider formatting the drive containing `elasticsearch` volume as XFS.
+* If you are planning on using very large data sets, consider formatting the drive containing `opensearch` volume as XFS.
 
 After making all of these changes, do a reboot for good measure!
 
@@ -679,7 +680,7 @@ Some changes should be made for performance ([this link](http://markshust.com/20
 
 * **Resource allocation** - For a good experience, you likely need at least a quad-core MacBook Pro with 16GB RAM and an SSD. I have run Malcolm on an older 2013 MacBook Pro with 8GB of RAM, but the more the better. Go in your system tray and select **Docker** → **Preferences** → **Advanced**. Set the resources available to docker to at least 4 CPUs and 8GB of RAM (>= 16GB is preferable).
 
-* **Volume mount performance** - You can speed up performance of volume mounts by removing unused paths from **Docker** → **Preferences** → **File Sharing**. For example, if you’re only going to be mounting volumes under your home directory, you could share `/Users` but remove other paths.
+* **Volume mount performance** - You can speed up performance of volume mounts by removing unused paths from **Docker** → **Preferences** → **File Sharing**. For example, if you're only going to be mounting volumes under your home directory, you could share `/Users` but remove other paths.
 
 After making these changes, right click on the Docker 🐋 icon in the system tray and select **Restart**.
 
@@ -718,12 +719,12 @@ In either case, you **must** run `./scripts/auth_setup` before starting Malcolm 
 * specify whether or not to (re)generate the self-signed certificates used for HTTPS access
     * key and certificate files are located in the `nginx/certs/` directory
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
-    * certificate authority, certificate, and key files for Malcolm’s Logstash instance are located in the `logstash/certs/` directory
+    * certificate authority, certificate, and key files for Malcolm's Logstash instance are located in the `logstash/certs/` directory
     * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory
-* specify whether or not to store the username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (see the `ES_EXTERNAL_HOSTS`, `ES_EXTERNAL_SSL`, and `ES_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
+* specify whether or not to store the username/password for forwarding Logstash events to a secondary, external OpenSearch instance (see the `OS_EXTERNAL_HOSTS`, `OS_EXTERNAL_SSL`, and `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
     * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
-* specify whether or not to [store the username/password](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account) for [email alert senders](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#create-destinations)
-    * these parameters are stored securely in the Elasticsearch keystore file `elasticsearch/elasticsearch.keystore`
+* specify whether or not to [store the username/password](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) for [email alert senders](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#create-destinations)
+    * these parameters are stored securely in the OpenSearch keystore file `opensearch/opensearch.keystore`
 
 ##### <a name="AuthBasicAccountManagement"></a>Local account management
 
@@ -814,9 +815,9 @@ You can run `./scripts/stop` to stop the docker containers and remove their virt
 
 Malcolm can be configured to be automatically restarted when the Docker system daemon restart (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
 
-### <a name="Wipe"></a>Clearing Malcolm’s data
+### <a name="Wipe"></a>Clearing Malcolm's data
 
-Run `./scripts/wipe` to stop the Malcolm instance and wipe its Elasticsearch database (**including** [index snapshots and management policies](#IndexManagement) and [alerting configuration](#Alerting)).
+Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch database (**including** [index snapshots and management policies](#IndexManagement) and [alerting configuration](#Alerting)).
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
@@ -837,7 +838,7 @@ Files uploaded via these methods are monitored and moved automatically to other 
 
 ### <a name="Tagging"></a>Tagging
 
-In addition to be processed for uploading, Malcolm events will be tagged according to the components of the filenames of the PCAP files or Zeek log archives files from which the events were parsed. For example, records created from a PCAP file named `ACME_Scada_VLAN10.pcap` would be tagged with `ACME`, `Scada`, and `VLAN10`. Tags are extracted from filenames by splitting on the characters "," (comma), "-" (dash), and "_" (underscore). These tags are viewable and searchable (via the `tags` field) in Arkime and Kibana. This behavior can be changed by modifying the `AUTO_TAG` [environment variable in `docker-compose.yml`](#DockerComposeYml).
+In addition to be processed for uploading, Malcolm events will be tagged according to the components of the filenames of the PCAP files or Zeek log archives files from which the events were parsed. For example, records created from a PCAP file named `ACME_Scada_VLAN10.pcap` would be tagged with `ACME`, `Scada`, and `VLAN10`. Tags are extracted from filenames by splitting on the characters "," (comma), "-" (dash), and "_" (underscore). These tags are viewable and searchable (via the `tags` field) in Arkime and OpenSearch Dashboards. This behavior can be changed by modifying the `AUTO_TAG` [environment variable in `docker-compose.yml`](#DockerComposeYml).
 
 Tags may also be specified manually with the [browser-based upload form](#Upload).
 
@@ -868,7 +869,7 @@ Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/m
 
 ### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
 
-Malcolm’s Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
+Malcolm's Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
 
 Configuring Filebeat to forward Zeek logs to Malcolm might look something like this example [`filebeat.yml`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html):
 ```
@@ -913,7 +914,7 @@ A stock installation of Arkime extracts all of its network connection ("session"
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
-One value of particular mention is **Zeek Log Type** (`event.dataset` in Elasticsearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view Arkime Sessions, use `fileId != EXISTS!`. 
+One value of particular mention is **Zeek Log Type** (`event.dataset` in OpenSearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view Arkime Sessions, use `fileId != EXISTS!`. 
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
@@ -1051,13 +1052,13 @@ See also Arkime's usage documentation for more information on the [hunt feature]
 
 ### <a name="ArkimeStats"></a>Statistics
 
-Arkime provides several other reports which show information about the state of Arkime and the underlying Elasticsearch database.
+Arkime provides several other reports which show information about the state of Arkime and the underlying OpenSearch database.
 
 The **Files** list displays a list of PCAP files processed by Arkime, the date and time of the earliest packet in each file, and the file size:
 
 ![Arkime's Files list](./docs/images/screenshots/arkime_files.png)
 
-The **ES Indices** list (available under the **Stats** page) lists the Elasticsearch indices within which log data is contained:
+The **ES Indices** list (available under the **Stats** page) lists the OpenSearch indices within which log data is contained:
 
 ![Arkime's ES indices list](./docs/images/screenshots/arkime_es_stats.png)
 
@@ -1079,104 +1080,100 @@ See Arkime's usage documentation for more information on [settings](https://loca
 
 ![Arkime custom view management](./docs/images/screenshots/arkime_view_settings.png)
 
-## <a name="Kibana"></a>Kibana
+## <a name="Dashboards"></a>OpenSearch Dashboards
 
-While Arkime provides very nice visualizations, especially for network traffic, [Kibana](https://www.elastic.co/guide/en/kibana/current/getting-started.html) (an open source general-purpose data visualization tool for Elasticsearch) can be used to create custom visualizations (tables, charts, graphs, dashboards, etc.) using the same data.
+While Arkime provides very nice visualizations, especially for network traffic, [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) (an open source general-purpose data visualization tool for OpenSearch) can be used to create custom visualizations (tables, charts, graphs, dashboards, etc.) using the same data.
 
-The Kibana container can be accessed at [https://localhost/kibana/](https://localhost/kibana/) if you are connecting locally. Several preconfigured dashboards for Zeek logs are included in Malcolm's Kibana configuration.
+The OpenSearch Dashboards container can be accessed at [https://localhost/dashboards/](https://localhost/dashboards/) if you are connecting locally. Several preconfigured dashboards for Zeek logs are included in Malcolm's OpenSearch Dashboards configuration.
 
-The official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) has excellent tutorials for a variety of topics.
-
-Kibana has several components for data searching and visualization:
+OpenSearch Dashboards has several components for data searching and visualization:
 
 ### <a name="Discover"></a>Discover
 
-The **Discover** view enables you to view events on a record-by-record basis (similar to a *session* record in Arkime or an individual line from a Zeek log). See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) for information on using the Discover view:
+The **Discover** view enables you to view events on a record-by-record basis (similar to a *session* record in Arkime or an individual line from a Zeek log). See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/7.10/index.html) (OpenSearch Dashboards is an open-source fork of Kibana, which is no longer open-source software) for information on using the Discover view:
 
-* [Getting Started: Discovering Your Data](https://www.elastic.co/guide/en/kibana/current/tutorial-discovering.html)
-* [Discover](https://www.elastic.co/guide/en/kibana/current/discover.html)
-* [Searching Your Data](https://www.elastic.co/guide/en/kibana/current/search.html)
+* [Discover](https://www.elastic.co/guide/en/kibana/7.10/discover.html)
+* [Searching Your Data](https://www.elastic.co/guide/en/kibana/7.10/search.html)
 
 #### <a name="DiscoverGallery"></a>Screenshots
 
-![Kibana's Discover view](./docs/images/screenshots/kibana_discover.png)
+![Discover view](./docs/images/screenshots/dashboards_discover.png)
 
-![Viewing the details of a session in Discover](./docs/images/screenshots/kibana_discover_table.png)
+![Viewing the details of a session in Discover](./docs/images/screenshots/dashboards_discover_table.png)
 
-![Filtering by tags to display only sessions with public IP addresses](./docs/images/screenshots/kibana_add_filter.png)
+![Filtering by tags to display only sessions with public IP addresses](./docs/images/screenshots/dashboards_add_filter.png)
 
-![Changing the fields displayed in Discover](./docs/images/screenshots/kibana_fields_list.png)
+![Changing the fields displayed in Discover](./docs/images/screenshots/dashboards_fields_list.png)
 
-![Opening a previously-saved search](./docs/images/screenshots/kibana_open_search.png)
+![Opening a previously-saved search](./docs/images/screenshots/dashboards_open_search.png)
 
-### <a name="KibanaVisualizations"></a>Visualizations and dashboards
+### <a name="DashboardsVisualizations"></a>Visualizations and dashboards
 
 #### <a name="PrebuiltVisualizations"></a>Prebuilt visualizations and dashboards
 
-Malcolm comes with dozens of prebuilt visualizations and dashboards for the network traffic represented by each of the Zeek log types. Click **Dashboard** to see a list of these dashboards. As is the case with all Kibana's visualizations, all of the charts, graphs, maps, and tables are interactive and can be clicked on to narrow or expand the scope of the data you are investigating. Similarly, click **Visualize** to explore the prebuilt visualizations used to build the dashboards.
+Malcolm comes with dozens of prebuilt visualizations and dashboards for the network traffic represented by each of the Zeek log types. Click **Dashboard** to see a list of these dashboards. As is the case with all OpenSearch Dashboards visualizations, all of the charts, graphs, maps, and tables are interactive and can be clicked on to narrow or expand the scope of the data you are investigating. Similarly, click **Visualize** to explore the prebuilt visualizations used to build the dashboards.
 
-Many of Malcolm's prebuilt visualizations for Zeek logs are heavily inspired by the excellent [Kibana Dashboards](https://github.com/Security-Onion-Solutions/securityonion-elastic/tree/master/kibana/dashboards) that are part of [Security Onion](https://securityonion.net/).
+Many of Malcolm's prebuilt visualizations for Zeek logs were originally inspired by the excellent [Kibana Dashboards](https://github.com/Security-Onion-Solutions/securityonion-elastic/tree/master/kibana/dashboards) that are part of [Security Onion](https://securityonion.net/).
 
 ##### <a name="PrebuiltVisualizationsGallery"></a>Screenshots
 
-![The Connections dashboard displays information about the "top talkers" across all types of sessions](./docs/images/screenshots/kibana_connections.png)
+![The Security Overview highlights security-related network events](./docs/images/screenshots/dashboards_security_overview.png)
 
-![The HTTP dashboard displays important details about HTTP traffic](./docs/images/screenshots/kibana_http.png)
+![The ICS/IoT Security Overview dashboard displays information about ICS and IoT network traffic](./docs/images/screenshots/dashboards_ics_iot_security_overview.png)
 
-![There are several Connections visualizations using locations from GeoIP lookups](./docs/images/screenshots/kibana_latlon_map.png)
+![The Connections dashboard displays information about the "top talkers" across all types of sessions](./docs/images/screenshots/dashboards_connections.png)
 
-![Kibana includes both coordinate and region map types](./docs/images/screenshots/kibana_region_map.png)
+![The HTTP dashboard displays important details about HTTP traffic](./docs/images/screenshots/dashboards_http.png)
 
-![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/kibana_notices.png)
+![There are several Connections visualizations using locations from GeoIP lookups](./docs/images/screenshots/dashboards_latlon_map.png)
 
-![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/kibana_signatures.png)
+![OpenSearch Dashboards includes both coordinate and region map types](./docs/images/screenshots/dashboards_region_map.png)
 
-![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/kibana_software.png)
+![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/dashboards_notices.png)
 
-![The PE (portable executables) dashboard displays information about executable files transferred over the network](./docs/images/screenshots/kibana_portable_executables.png)
+![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/dashboards_signatures.png)
 
-![The SMTP dashboard highlights details about SMTP traffic](./docs/images/screenshots/kibana_smtp.png)
+![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/dashboards_software.png)
 
-![The SSL dashboard displays information about SSL versions, certificates, and TLS JA3 fingerprints](./docs/images/screenshots/kibana_ssl.png)
+![The PE (portable executables) dashboard displays information about executable files transferred over the network](./docs/images/screenshots/dashboards_portable_executables.png)
 
-![The files dashboard displays metrics about the files transferred over the network](./docs/images/screenshots/kibana_files_source.png)
+![The SMTP dashboard highlights details about SMTP traffic](./docs/images/screenshots/dashboards_smtp.png)
 
-![This dashboard provides insight into DNP3 (Distributed Network Protocol), a protocol used commonly in electric and water utilities](./docs/images/screenshots/kibana_dnp3.png)
+![The SSL dashboard displays information about SSL versions, certificates, and TLS JA3 fingerprints](./docs/images/screenshots/dashboards_ssl.png)
 
-![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/kibana_modbus.png)
+![The files dashboard displays metrics about the files transferred over the network](./docs/images/screenshots/dashboards_files_source.png)
 
-![BACnet is a communications protocol for Building Automation and Control (BAC) networks](./docs/images/screenshots/kibana_bacnet.png)
+![This dashboard provides insight into DNP3 (Distributed Network Protocol), a protocol used commonly in electric and water utilities](./docs/images/screenshots/dashboards_dnp3.png)
 
-![EtherNet/IP is an industrial network protocol that adapts the Common Industrial Protocol to standard Ethernet](./docs/images/screenshots/kibana_ethernetip.png)
+![Modbus is a standard protocol found in many industrial control systems (ICS)](./docs/images/screenshots/dashboards_modbus.png)
 
-![MQTT is a lightweight publish-subscribe network protocol that transports messages between devices](./docs/images/screenshots/kibana_mqtt.png)
+![BACnet is a communications protocol for Building Automation and Control (BAC) networks](./docs/images/screenshots/dashboards_bacnet.png)
 
-![PROFINET is an industry technical standard for data communication over Industrial Ethernet](./docs/images/screenshots/kibana_profinet.png)
+![EtherCAT is an Ethernet-based fieldbus system](./docs/images/screenshots/dashboards_ecat.png)
 
-![S7comm is a Siemens proprietary protocol that runs between programmable logic controllers (PLCs) of the Siemens family](./docs/images/screenshots/kibana_s7comm.png)
+![EtherNet/IP is an industrial network protocol that adapts the Common Industrial Protocol to standard Ethernet](./docs/images/screenshots/dashboards_ethernetip.png)
+
+![PROFINET is an industry technical standard for data communication over Industrial Ethernet](./docs/images/screenshots/dashboards_profinet.png)
+
+![S7comm is a Siemens proprietary protocol that runs between programmable logic controllers (PLCs) of the Siemens family](./docs/images/screenshots/dashboards_s7comm.png)
 
 #### <a name="BuildDashboard"></a>Building your own visualizations and dashboards
 
-See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/current/index.html) for information on creating your own visualizations and dashboards:
+See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/7.10/index.html) and [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) (OpenSearch Dashboards is an open-source fork of Kibana, which is no longer open-source software) documentation for information on creating your own visualizations and dashboards:
 
-* [Getting Started: Visualizing Your Data](https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html)
-* [Visualize](https://www.elastic.co/guide/en/kibana/current/visualize.html)
-* [Dashboard](https://www.elastic.co/guide/en/kibana/current/dashboard.html)
-* [Timelion](https://www.elastic.co/guide/en/kibana/current/timelion.html) (more advanced time series data visualizer)
+* [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/)
+* [Kibana Dashboards](https://www.elastic.co/guide/en/kibana/7.10/dashboard.html)
+* [TimeLine](https://www.elastic.co/guide/en/kibana/7.12/timelion.html)
 
 ##### <a name="NewVisualizationsGallery"></a>Screenshots
 
-![Kibana boasts many types of visualizations for displaying your data](./docs/images/screenshots/kibana_new_visualization.png)
+![OpenSearch dashboards boasts many types of visualizations for displaying your data](./docs/images/screenshots/dashboards_new_visualization.png)
 
-![Timelion is a powerful tool for visualizing time series data](./docs/images/screenshots/kibana_timelion.png)
+## <a name="SearchCheatSheet"></a>Search Queries in Arkime and OpenSearch Dashboards
 
-![Visual Builder is another time series data visualizer](./docs/images/screenshots/kibana_time_series.png)
+OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
 
-## <a name="SearchCheatSheet"></a>Search Queries in Arkime and Kibana
-
-Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and the new [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the Kibana interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and Kibana, respectively. See the links provided for further documentation.
-
-| | [Arkime Search String](https://localhost/help#search) | [Kibana Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [Kibana Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
+| | [Arkime Search String](https://localhost/help#search) | [OpenSearch Dashboards Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [OpenSearch Dashboards Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
 |---|:---:|:---:|:---:|
 | Field exists |`event.dataset == EXISTS!`|`_exists_:event.dataset`|`event.dataset:*`|
 | Field does not exist |`event.dataset != EXISTS!`|`NOT _exists_:event.dataset`|`NOT event.dataset:*`|
@@ -1190,19 +1187,19 @@ Kibana supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/g
 | Match any search terms (OR) |`(zeek.ftp.password == EXISTS!) || (zeek.http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek.ftp.password OR _exists_:zeek.http.password OR related.user:"anonymous"`|`zeek.ftp.password:* or zeek.http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|Kibana Query Language does not currently support regex|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|KQL does not support regex|
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
 | Zeek log type |`event.dataset == notice`|`event.dataset:notice`|`event.dataset:notice`|
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
-| Search time frame |Use Arkime time bounding controls under the search bar|Use Kibana time range controls in the upper right-hand corner|Use Kibana time range controls in the upper right-hand corner|
+| Search time frame |Use Arkime time bounding controls under the search bar|Use OpenSearch Dashboards time range controls in the upper right-hand corner|Use OpenSearch Dashboards time range controls in the upper right-hand corner|
 
 When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
 
-As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying Elasticsearch schema. A complete list of these fields can be found in the Arkime help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
+As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying OpenSearch schema. A complete list of these fields can be found in the Arkime help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
 
-Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `source.ip` in Kibana.
+Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `source.ip` in OpenSearch Dashboards.
 
 The table below shows the mapping of some of these fields.
 
@@ -1232,9 +1229,9 @@ The table below shows the mapping of some of these fields.
 | Zeek File UID |||`zeek.fuid`, `event.id`|
 | Zeek Log Type |||`event.dataset`|
 
-In addition to the fields listed above, Arkime provides several special field aliases for matching any field of a particular type. While these aliases do not exist in Kibana *per se*, they can be approximated as illustrated below.
+In addition to the fields listed above, Arkime provides several special field aliases for matching any field of a particular type. While these aliases do not exist in OpenSearch Dashboards *per se*, they can be approximated as illustrated below.
 
-| Matches Any | Arkime Special Field Example | Kibana/Zeek Equivalent Example |
+| Matches Any | Arkime Special Field Example | OpenSearch Dashboards/Zeek Equivalent Example |
 |---|:---:|:---:|
 | IP Address | `ip == 192.168.0.1` | `source.ip:192.168.0.1 OR destination.ip:192.168.0.1` |
 | Port | `port == [80, 443, 8080, 8443]` | `source.port:(80 OR 443 OR 8080 OR 8443) OR destination.port:(80 OR 443 OR 8080 OR 8443)` |
@@ -1268,7 +1265,7 @@ Extracted files can be examined through any of the following methods:
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, set the `EXTRACTED_FILE_ENABLE_YARA` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
 * scanning PE (portable executable) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, set the `EXTRACTED_FILE_ENABLE_CAPA` [environment variable in `docker-compose.yml`](#DockerComposeYml) to `true`
 
-Files which are flagged via any of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in Kibana.
+Files which are flagged via any of these methods will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in OpenSearch Dashboards.
 
 The `EXTRACTED_FILE_PRESERVATION` [environment variable in `docker-compose.yml`](#DockerComposeYml) determines the behavior for preservation of Zeek-extracted files:
 
@@ -1305,7 +1302,7 @@ Each non-comment line (not beginning with a `#`), defines an address-to-name map
 ```
 Each line consists of three `|`-separated fields: address(es), hostname, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
-As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP and MAC address fields (`source.ip`, `destination.ip`, `source.mac`, and `destination.mac`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `source.hostname` or `destination.hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
+As Zeek logs are processed into Malcolm's OpenSearch instance, the log's source and destination IP and MAC address fields (`source.ip`, `destination.ip`, `source.mac`, and `destination.mac`, respectively) are compared against the lists of addresses in `host-map.txt`. When a match is found, a new field is added to the log: `source.hostname` or `destination.hostname`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to matching the IP or MAC address specified in order for the corresponding `_hostname` field to be added.
 
 `source.hostname` and `destination.hostname` may each contain multiple values. For example, if both a host's source IP address and source MAC address were matched by two different lines, `source.hostname` would contain the hostname values from both matching lines.
 
@@ -1335,7 +1332,7 @@ Each non-comment line (not beginning with a `#`), defines an subnet-to-name mapp
 ```
 Each line consists of three `|`-separated fields: CIDR-formatted subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
-As Zeek logs are processed into Malcolm's Elasticsearch instance, the log's source and destination IP address fields (`source.ip` and `destination.ip`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `source.segment` or `destination.segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
+As Zeek logs are processed into Malcolm's OpenSearch instance, the log's source and destination IP address fields (`source.ip` and `destination.ip`, respectively) are compared against the lists of addresses in `cidr-map.txt`. When a match is found, a new field is added to the log: `source.segment` or `destination.segment`, depending on whether the matching address belongs to the originating or responding host. If the third field (the "required tag" field) is specified, a log must also contain that value in its `tags` field in addition to its IP address falling within the subnet specified in order for the corresponding `_segment` field to be added.
 
 `source.segment` and `destination.segment` may each contain multiple values. For example, if `cidr-map.txt` specifies multiple overlapping subnets on different lines, `source.segment` would contain the hostname values from both matching lines if `source.ip` belonged to both subnets.
 
@@ -1367,11 +1364,11 @@ When changes are made to either `cidr-map.txt`, `host-map.txt` or `net-map.json`
 
 Restarting Logstash may take several minutes, after which log ingestion will be resumed.
 
-### <a name="IndexManagement"></a>Elasticsearch index management
+### <a name="IndexManagement"></a>OpenSearch index management
 
-See [Index State Management](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/) in the Open Distro for Elasticsearch documentation on Index State Management [policies](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/policies/), [managed indices](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/managedindices/), [settings](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/settings/) and [APIs](https://opendistro.github.io/for-elasticsearch-docs/docs/ism/api/).
+See [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) in the OpenSearch documentation on Index State Management [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/), [managed indices](https://opensearch.org/docs/latest/im-plugin/ism/managedindices/), [settings](https://opensearch.org/docs/latest/im-plugin/ism/settings/) and [APIs](https://opensearch.org/docs/latest/im-plugin/ism/api/).
 
-Elasticsearch index management only deals with disk space consumed by Elasticsearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
+OpenSearch index management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
 ### <a name="Severity"></a>Event severity scoring
 
@@ -1400,6 +1397,8 @@ As this [feature](https://github.com/idaholab/Malcolm/issues/19) is improved it'
 
 When a Zeek log satisfies more than one of these conditions its severity scores will be summed, with a maximum score of `100`. A Zeek log's severity score is indexed in the `event.severity` field and the conditions which contributed to its score are indexed in `event.severity_tags`.
 
+![The Severity dashboard](./docs/images/screenshots/dashboards_severity.png)
+
 #### <a name="SeverityConfig"></a>Customizing event severity scoring
 
 These categories' severity scores can be customized by editing `logstash/maps/malcolm_severity.yaml`:
@@ -1418,9 +1417,9 @@ Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCOR
 
 ### <a name="Alerting"></a>Alerting
 
-See [Alerting](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/) in the Open Distro for Elasticsearch documentation.
+See [Alerting](https://opensearch.org/docs/latest/monitoring-plugins/alerting/index/) in the OpenSearch documentation.
 
-When using an email account to send alerts, you must [authenticate each sender account](https://opendistro.github.io/for-elasticsearch-docs/docs/alerting/monitors/#authenticate-sender-account) before you can send an email. The [`auth_setup`](#AuthSetup) script can be used to securely store the email account credentials:
+When using an email account to send alerts, you must [authenticate each sender account](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) before you can send an email. The [`auth_setup`](#AuthSetup) script can be used to securely store the email account credentials:
 
 ```
 ./scripts/auth_setup 
@@ -1431,16 +1430,16 @@ Store administrator username/password for local Malcolm access? (Y/n): n
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): n
 
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (y/N): n
+Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): n
 
 Store username/password for email alert sender account (y/N): y
 
-Open Distro alerting destination name: destination_alpha
+OpenSearch alerting destination name: destination_alpha
 
 Email account username: analyst@example.org
 analyst@example.org password: 
 analyst@example.org password (again): 
-Email alert sender account variables stored: opendistro.alerting.destination.email.destination_alpha.password, opendistro.alerting.destination.email.destination_alpha.username
+Email alert sender account variables stored: opensearch.alerting.destination.email.destination_alpha.password, opensearch.alerting.destination.email.destination_alpha.username
 ```
 
 This action should only be performed while Malcolm is [stopped](#StopAndRestart): otherwise the credentials will not be stored correctly.
@@ -1451,13 +1450,15 @@ There are many ICS (industrial control systems) protocols. While Malcolm's colle
 
 In an effort to help identify more ICS traffic, Malcolm can use "buest guess" method based on transport protocol (e.g., TCP or UDP) and port(s) to categorize potential traffic communicating over some ICS protocols without full parser support. This feature involves a [mapping table](https://github.com/cisagov/Malcolm/blob/master/zeek/config/guess_ics_map.txt) and a [Zeek script](https://github.com/cisagov/Malcolm/blob/master/zeek/config/guess.zeek) to look up the transport protocol and destination and/or source port to make a best guess at whether a connection belongs to one of those protocols. These potential ICS communications are categorized by vendor where possible.
 
-Naturally, these lookups could produce false positives, so these connections are displayed in their own dashboard (the **Best Guess** dashboard found under the **ICS** section of Malcolm's [Kibana dashboards'](#KibanaVisualizations) navigation pane). Values such as IP addresses, ports, or UID can be used to [pivot to other dashboards](#ZeekArkimeFlowCorrelation) to investigate further.
+Naturally, these lookups could produce false positives, so these connections are displayed in their own dashboard (the **Best Guess** dashboard found under the **ICS** section of Malcolm's [OpenSearch Dashboards](#DashboardsVisualizations) navigation pane). Values such as IP addresses, ports, or UID can be used to [pivot to other dashboards](#ZeekArkimeFlowCorrelation) to investigate further.
+
+![](./docs/images/screenshots/dashboards_bestguess.png)
 
 This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
-Because Malcolm uses components of the open source data analysis platform [Elastic Stack](https://www.elastic.co/elastic-stack), it can accept various host logs sent from [Beats](https://www.elastic.co/beats/#the-beats-family), Elastic Stack's lightweight data shippers. See [./scripts/beats](./scripts/beats) for more information.
+Because Malcolm uses components of the open source data analysis platform [OpenSearch](https://opensearch.org/), it can also accept various host logs sent from [Beats](https://www.elastic.co/beats/#the-beats-family), Elastic Stack's lightweight data shippers. See [./scripts/beats](./scripts/beats) for more information.
 
 ## <a name="ISO"></a>Malcolm installer ISO
 
@@ -1496,7 +1497,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-4.0.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.0.iso"
 …
 ```
 
@@ -1675,13 +1676,13 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 Arkime has a nice feature that allows you to export PCAP files matching the filters currently populating the search field. However, Arkime viewer will raise an exception if records created from Zeek logs are found among the search results to be exported. For this reason, if you are using the export PCAP feature it is recommended that you apply the **PCAP Files** view to filter your search results prior to doing the export.
 
-### Manual Kibana index pattern refresh
+### Manual OpenSearch Dashboards index pattern refresh
 
-Because some fields are created in Elasticsearch dynamically when Zeek logs are ingested by Logstash, they may not have been present when Kibana configures its index pattern field mapping during initialization. As such, those fields will not show up in Kibana visualizations until Kibana’s copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
+Because some fields are created in OpenSearch dynamically when Zeek logs are ingested by Logstash, they may not have been present when OpenSearch Dashboards configures its index pattern field mapping during initialization. As such, those fields will not show up in OpenSearch Dashboards visualizations until its copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
 
-After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh Kibana’s field list by clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
+After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
 
-![Refreshing Kibana's cached index pattern](./docs/images/screenshots/kibana_refresh_index.png)
+![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
 
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
 
@@ -1790,7 +1791,7 @@ Now that any necessary system configuration changes have been made, the local Ma
 ```
 Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): 
 
-Setting 10g for Elasticsearch and 3g for Logstash. Is this OK? (Y/n): y
+Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
 
 Restart Malcolm upon system or Docker daemon restart? (y/N): y
 
@@ -1798,9 +1799,9 @@ Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped')
 
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Configure snapshot repository for Elasticsearch index state management? (y/N): n
+Configure snapshot repository for OpenSearch index state management? (y/N): n
 
-Store snapshots locally in /home/user/Malcolm/elasticsearch-backup? (Y/n): y
+Store snapshots locally in /home/user/Malcolm/opensearch-backup? (Y/n): y
 
 Automatically analyze all PCAP files with Zeek? (y/N): y
 
@@ -1810,7 +1811,7 @@ Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
 
 Expose Logstash port to external hosts? (y/N): n
 
-Forward Logstash logs to external Elasticstack instance? (y/N): n
+Forward Logstash logs to external OpenSearch instance? (y/N): n
 
 Enable file extraction with Zeek? (y/N): y
 
@@ -1856,7 +1857,7 @@ analyst password (again):
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): 
 
-Store username/password for forwarding Logstash events to a secondary, external Elasticsearch instance (y/N): 
+Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): 
 
 Store username/password for email alert sender account (y/N): 
 ```
@@ -1864,71 +1865,56 @@ Store username/password for email alert sender account (y/N):
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
-Pulling elasticsearch ... done
-Pulling file-monitor  ... done
-Pulling filebeat      ... done
-Pulling freq          ... done
-Pulling htadmin       ... done
-Pulling kibana        ... done
-Pulling logstash      ... done
-Pulling arkime        ... done
-Pulling name-map-ui   ... done
-Pulling nginx-proxy   ... done
-Pulling pcap-capture  ... done
-Pulling pcap-monitor  ... done
-Pulling upload        ... done
-Pulling zeek          ... done
+Pulling arkime            ... done
+Pulling dashboards        ... done
+Pulling dashboards-helper ... done
+Pulling file-monitor      ... done
+Pulling filebeat          ... done
+Pulling freq              ... done
+Pulling htadmin           ... done
+Pulling logstash          ... done
+Pulling name-map-ui       ... done
+Pulling nginx-proxy       ... done
+Pulling opensearch        ... done
+Pulling pcap-capture      ... done
+Pulling pcap-monitor      ... done
+Pulling upload            ... done
+Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
-REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
-malcolmnetsec/arkime                                4.0.1               xxxxxxxxxxxx        39 hours ago        826MB
-malcolmnetsec/elasticsearch-od                      4.0.1               xxxxxxxxxxxx        40 hours ago        1.42GB
-malcolmnetsec/file-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        603MB
-malcolmnetsec/file-upload                           4.0.1               xxxxxxxxxxxx        39 hours ago        605MB
-malcolmnetsec/filebeat-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        266MB
-malcolmnetsec/freq                                  4.0.1               xxxxxxxxxxxx        39 hours ago        151MB
-malcolmnetsec/htadmin                               4.0.1               xxxxxxxxxxxx        39 hours ago        262MB
-malcolmnetsec/kibana-helper                         4.0.1               xxxxxxxxxxxx        40 hours ago        153MB
-malcolmnetsec/kibana-od                             4.0.1               xxxxxxxxxxxx        40 hours ago        1.35GB
-malcolmnetsec/logstash-oss                          4.0.1               xxxxxxxxxxxx        39 hours ago        1.36GB
-malcolmnetsec/name-map-ui                           4.0.1               xxxxxxxxxxxx        39 hours ago        142MB
-malcolmnetsec/nginx-proxy                           4.0.1               xxxxxxxxxxxx        39 hours ago        116MB
-malcolmnetsec/pcap-capture                          4.0.1               xxxxxxxxxxxx        39 hours ago        121MB
-malcolmnetsec/pcap-monitor                          4.0.1               xxxxxxxxxxxx        39 hours ago        221MB
-malcolmnetsec/zeek                                  4.0.1               xxxxxxxxxxxx        39 hours ago        926MB
+REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+malcolmnetsec/arkime                                           5.0.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.0.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.0.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
 ```
 user@host:~/Malcolm$ ./scripts/start
-Creating network "malcolm_default" with the default driver
-Creating malcolm_elasticsearch_1 ... done
-Creating malcolm_file-monitor_1  ... done
-Creating malcolm_filebeat_1      ... done
-Creating malcolm_freq_1          ... done
-Creating malcolm_htadmin_1       ... done
-Creating malcolm_kibana_1        ... done
-Creating malcolm_logstash_1      ... done
-Creating malcolm_name-map-ui_1   ... done
-Creating malcolm_arkime_1        ... done
-Creating malcolm_nginx-proxy_1   ... done
-Creating malcolm_pcap-capture_1  ... done
-Creating malcolm_pcap-monitor_1  ... done
-Creating malcolm_upload_1        ... done
-Creating malcolm_zeek_1          ... done
-
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
   - Arkime: https://localhost/
-  - Kibana: https://localhost/kibana/
-  - PCAP Upload (web): https://localhost/upload/
-  - PCAP Upload (sftp): sftp://username@127.0.0.1:8022/files/
+  - OpenSearch Dashboards: https://localhost/dashboards/
+  - PCAP upload (web): https://localhost/upload/
+  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_elasticsearch_1, malcolm_file-monitor_1, malcolm_filebeat_1, malcolm_freq_1, malcolm_htadmin_1, malcolm_kibana_1, malcolm_logstash_1, malcolm_name-map-ui_1, malcolm_arkime_1, malcolm_nginx-proxy_1, malcolm_pcap-capture_1, malcolm_pcap-monitor_1, malcolm_upload_1, malcolm_zeek_1
+Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
 …
 ```
 
@@ -2008,17 +1994,17 @@ Running `docker-compose ps -a` should give you a good idea if all of Malcolm's D
 
 After upgrading following one of the previous outlines, give Malcolm several minutes to get started. Once things are up and running, open one of Malcolm's [web interfaces](#UserInterfaceURLs) to verify that things are working.
 
-#### Loading new Kibana dashboards and visualizations
+#### Loading new OpenSearch Dashboards visualizations
 
-Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for Kibana. You can signal Malcolm to load the new visualizations by opening Kibana, clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the Kibana browser window. After a few minutes the missing index pattern will be detected and Kibana will be signalled to load its new dashboards and visualizations.
+Once the upgraded instance Malcolm has started up, you'll probably want to import the new dashboards and visualizations for OpenSearch Dashboards. You can signal Malcolm to load the new visualizations by opening OpenSearch Dashboards, clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the delete **🗑** button near the upper-right of the window. Confirm the **Delete index pattern?** prompt by clicking **Delete**. Close the OpenSearch Dashboards browser window. After a few minutes the missing index pattern will be detected and OpenSearch Dashboards will be signalled to load its new dashboards and visualizations.
 
 ### Major releases
 
-The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v3.4.0 to v4.0.1), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
+The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v4.0.1 to v5.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
+[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See [`License.txt`](./License.txt) for the terms of its release.
 

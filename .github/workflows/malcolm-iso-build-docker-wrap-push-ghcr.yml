@@ -8,6 +8,7 @@ on:
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
+      - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
 

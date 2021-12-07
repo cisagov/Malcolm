@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import psutil, time, json, logging, os
 from .sysquery import sys_service as sys_s

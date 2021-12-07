@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # clone STIG-4-Debian, harbian-audit and debian-cis and clean up some stuff we don't need
 mkdir -p /opt

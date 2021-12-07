@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
@@ -67,8 +67,8 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
-  mkdir $VERBOSE -p "$DESTDIR/elasticsearch/nodes/"
-  mkdir $VERBOSE -p "$DESTDIR/elasticsearch-backup/"
+  mkdir $VERBOSE -p "$DESTDIR/opensearch/nodes/"
+  mkdir $VERBOSE -p "$DESTDIR/opensearch-backup/"
   mkdir $VERBOSE -p "$DESTDIR/arkime-raw/"
   mkdir $VERBOSE -p "$DESTDIR/arkime-logs/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
@@ -143,7 +143,7 @@ if mkdir "$DESTDIR"; then
   echo "" | tee -a "$README"
   echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
   echo "  - Arkime: https://localhost/" | tee -a "$README"
-  echo "  - Kibana: https://localhost/kibana/" | tee -a "$README"
+  echo "  - OpenSearch Dashboards: https://localhost/dashboards/" | tee -a "$README"
   echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
   echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
   echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"

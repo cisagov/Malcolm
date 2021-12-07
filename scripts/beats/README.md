@@ -88,16 +88,16 @@ Enter password for sensor:
 Enter password for sensor (again):
 
 Generated keystore for winlogbeat
-BEAT_KIBANA_SSL_VERIFY
-BEAT_ES_HOST
-BEAT_ES_PROTOCOL
-BEAT_ES_SSL_VERIFY
-BEAT_KIBANA_HOST
+BEAT_DASHBOARDS_SSL_VERIFY
+BEAT_OS_HOST
+BEAT_OS_PROTOCOL
+BEAT_OS_SSL_VERIFY
+BEAT_DASHBOARDS_HOST
 BEAT_HTTP_PASSWORD
 BEAT_HTTP_USERNAME
-BEAT_KIBANA_DASHBOARDS_ENABLED
-BEAT_KIBANA_DASHBOARDS_PATH
-BEAT_KIBANA_PROTOCOL
+BEAT_DASHBOARDS_ENABLED
+BEAT_DASHBOARDS_PATH
+BEAT_DASHBOARDS_PROTOCOL
 
 PS C:\Program Files\winlogbeat> .\beat_run.py -c .\winlogbeat.yml -b winlogbeat
 
@@ -149,16 +149,16 @@ Enter password for sensor:
 Enter password for sensor (again): 
 
 Generated keystore for filebeat
-BEAT_KIBANA_PROTOCOL
-BEAT_KIBANA_SSL_VERIFY
-BEAT_ES_PROTOCOL
-BEAT_ES_SSL_VERIFY
-BEAT_KIBANA_DASHBOARDS_ENABLED
-BEAT_KIBANA_DASHBOARDS_PATH
-BEAT_ES_HOST
+BEAT_DASHBOARDS_PROTOCOL
+BEAT_DASHBOARDS_SSL_VERIFY
+BEAT_OS_PROTOCOL
+BEAT_OS_SSL_VERIFY
+BEAT_DASHBOARDS_ENABLED
+BEAT_DASHBOARDS_PATH
+BEAT_OS_HOST
 BEAT_HTTP_PASSWORD
 BEAT_HTTP_USERNAME
-BEAT_KIBANA_HOST
+BEAT_DASHBOARDS_HOST
 
 root@vagrant:/opt/filebeat# beat_run.py -c ./filebeat.yml -b filebeat
 
@@ -172,7 +172,7 @@ KeyboardInterrupt
 
 # <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2021 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
+[Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](https://raw.githubusercontent.com/cisagov/Malcolm/main/License.txt) for the terms of its release.
 

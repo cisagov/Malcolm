@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ARKIME_URL="https://github.com/arkime/arkime.git"
 OUTPUT_DIR="/tmp"

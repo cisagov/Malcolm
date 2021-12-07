@@ -9,6 +9,7 @@ on:
       - 'name-map-ui/**'
       - 'Dockerfiles/name-map-ui.Dockerfile'
       - 'shared/bin/*'
+      - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
 

@@ -1,12 +1,12 @@
 [Desktop Entry]
 Version=1.0
-Name=Malcolm - Kibana
-Exec=/opt/firefox/firefox https://localhost/kibana/
+Name=Malcolm - OpenSearch Dashboards
+Exec=/opt/firefox/firefox https://localhost/dashboards/
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Icon=/usr/share/icons/hicolor/48x48/kibana.png
+Icon=/usr/share/icons/hicolor/48x48/opensearch.png
 Categories=Network;
 StartupWMClass=Firefox
 StartupNotify=true
-X-XFCE-Source=file:///usr/share/applications/malcolm-kibana.desktop
+X-XFCE-Source=file:///usr/share/applications/malcolm-dashboards.desktop

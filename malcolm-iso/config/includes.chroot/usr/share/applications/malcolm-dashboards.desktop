@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - OpenSearch Dashboards
+Exec=/opt/firefox/firefox https://localhost/dashboards/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=/usr/share/icons/hicolor/48x48/opensearch.png
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true

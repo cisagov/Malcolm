@@ -1,0 +1,73 @@
+{
+  "name": "network_protocol",
+  "description": "Detect anomalies based application protocol, aggregated by action and by result",
+  "time_field": "firstPacket",
+  "indices": [
+    "arkime_sessions3-*"
+  ],
+  "category_field": [
+    "network.protocol"
+  ],
+  "feature_attributes": [
+    {
+      "feature_name": "event_action",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "event_action": {
+          "value_count": {
+            "field": "event.action"
+          }
+        }
+      }
+    },
+    {
+      "feature_name": "event_result",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "event_result": {
+          "value_count": {
+            "field": "event.result"
+          }
+        }
+      }
+    }
+  ],
+  "filter_query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "network.protocol",
+            "boost": 1
+          }
+        },
+        {
+          "exists": {
+            "field": "event.action",
+            "boost": 1
+          }
+        },
+        {
+          "exists": {
+            "field": "event.result",
+            "boost": 1
+          }
+        }
+      ],
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "window_delay": {
+    "period": {
+      "interval": 1,
+      "unit": "MINUTES"
+    }
+  },
+  "detection_interval": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  }
+}

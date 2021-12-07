@@ -106,14 +106,14 @@ auditbeat.modules:
 #               - equals:
 #                   event.dataset: 'socket'
 #               - equals:
-#                   destination.ip: "${BEAT_ES_HOST}"
+#                   destination.ip: "${BEAT_OS_HOST}"
 #           - and:
 #               - equals:
 #                   event.module: 'system'
 #               - equals:
 #                   event.dataset: 'socket'
 #               - equals:
-#                   destination.ip: "${BEAT_KIBANA_HOST}"
+#                   destination.ip: "${BEAT_DASHBOARDS_HOST}"
 #           - and:
 #               - equals:
 #                   event.module: 'system'

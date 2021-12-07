@@ -1,54 +1,7 @@
 #!/bin/bash
 
-BEATS_VER="7.10.2"
-BEATS_OSS="-oss"
-BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
-BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
-
-DOCKER_COMPOSE_VER="1.29.1"
+DOCKER_COMPOSE_VER="1.29.2"
 DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VER/docker-compose-$(uname -s)-$(uname -m)"
 
 # install docker-compose
 curl -o /usr/local/bin/docker-compose -sSL "$DOCKER_COMPOSE_URL" && chmod 755 /usr/local/bin/docker-compose
-
-# tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat
-for BEAT in filebeat metricbeat auditbeat packetbeat; do
-  BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
-  BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
-  BEATS_NEW_DEB="$BEAT-dark-$BEATS_VER-amd64.deb"
-  BEATS_TMP_DIR="$BEAT-deb"
-  pushd /tmp && \
-    curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
-    dpkg-deb -x "$BEATS_DEB" "$BEATS_TMP_DIR" && \
-    dpkg-deb -e "$BEATS_DEB" "$BEATS_TMP_DIR/DEBIAN" && \
-    sed -i 's@\(\\"darkTheme\\" *: *\)false@\1true@g' "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/*.json && \
-    ( [[ "$BEAT" == "metricbeat" ]] && sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/* || true ) && \
-    pushd "$BEATS_TMP_DIR" && ( rm -f DEBIAN/md5sums && find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -l -0 md5sum >> DEBIAN/md5sums ) && popd && \
-    dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
-    rm -rf "$BEATS_TMP_DIR" && \
-    dpkg -i "$BEATS_NEW_DEB" && \
-    rm -rf "$BEATS_TMP_DIR" "$BEATS_DEB" "$BEATS_NEW_DEB" && \
-    popd
-done
-
-# add symlinks to our custom dashboards
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/filebeat/kibana/7/dashboard-custom/* /usr/share/filebeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/metricbeat/kibana/7/dashboard-custom/* /usr/share/metricbeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/auditbeat/kibana/7/dashboard-custom/* /usr/share/auditbeat/kibana/7/dashboard/
-fi
-
-###
-
-# set up capabilities for network-related tools
-chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
-  setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
-
-###

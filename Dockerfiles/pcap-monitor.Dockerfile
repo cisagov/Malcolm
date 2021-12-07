@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -24,14 +24,14 @@ ENV PUSER_PRIV_DROP false
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG ELASTICSEARCH_URL="http://elasticsearch:9200"
+ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG PCAP_PATH=/pcap
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_PIPELINE_IGNORE_PREEXISTING=false
 ARG ZEEK_PATH=/zeek
 
-ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL
+ENV OPENSEARCH_URL $OPENSEARCH_URL
 ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA

@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim AS build
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -107,8 +107,8 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG ES_HOST=elasticsearch
-ARG ES_PORT=9200
+ARG OS_HOST=opensearch
+ARG OS_PORT=9200
 ARG MALCOLM_USERNAME=admin
 ARG ARKIME_INTERFACE=eth0
 ARG ARKIME_ANALYZE_PCAP_THREADS=1
@@ -124,9 +124,9 @@ ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
-ENV ES_HOST $ES_HOST
-ENV ES_PORT $ES_PORT
-ENV ARKIME_ELASTICSEARCH "http://"$ES_HOST":"$ES_PORT
+ENV OS_HOST $OS_HOST
+ENV OS_PORT $OS_PORT
+ENV ARKIME_ELASTICSEARCH "http://"$OS_HOST":"$OS_PORT
 ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
@@ -187,7 +187,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
-ADD shared/bin/elastic_search_status.sh /opt/
+ADD shared/bin/opensearch_status.sh /opt/
 ADD arkime/etc $ARKIMEDIR/etc/
 ADD arkime/wise/source.*.js $ARKIMEDIR/wiseService/
 ADD arkime/supervisord.conf /etc/supervisord.conf

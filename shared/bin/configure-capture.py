@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # script for configuring sensor capture and forwarding parameters
 
@@ -67,7 +67,7 @@ class Constants:
     HEATBEAT : f'/opt/sensor/sensor_ctl/{HEATBEAT}'
   }
 
-  BEAT_KIBANA_DIR = {
+  BEAT_DASHBOARDS_DIR = {
     FILEBEAT : f'/usr/share/{FILEBEAT}/kibana',
     METRICBEAT : f'/usr/share/{METRICBEAT}/kibana',
     AUDITBEAT : f'/usr/share/{AUDITBEAT}/kibana',
@@ -92,19 +92,19 @@ class Constants:
   BEAT_LS_SSL_CLIENT_KEY = 'BEAT_LS_SSL_CLIENT_KEY'
   BEAT_LS_SSL_VERIFY = 'BEAT_LS_SSL_VERIFY'
 
-  # specific to beats forwarded to elasticsearch (eg., metricbeat, auditbeat, filebeat-syslog)
-  BEAT_ES_HOST = "BEAT_ES_HOST"
-  BEAT_ES_PORT = "BEAT_ES_PORT"
-  BEAT_ES_PROTOCOL = "BEAT_ES_PROTOCOL"
-  BEAT_ES_SSL_VERIFY = "BEAT_ES_SSL_VERIFY"
+  # specific to beats forwarded to OpenSearch (eg., metricbeat, auditbeat, filebeat-syslog)
+  BEAT_OS_HOST = "BEAT_OS_HOST"
+  BEAT_OS_PORT = "BEAT_OS_PORT"
+  BEAT_OS_PROTOCOL = "BEAT_OS_PROTOCOL"
+  BEAT_OS_SSL_VERIFY = "BEAT_OS_SSL_VERIFY"
   BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
   BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
-  BEAT_KIBANA_DASHBOARDS_ENABLED = "BEAT_KIBANA_DASHBOARDS_ENABLED"
-  BEAT_KIBANA_DASHBOARDS_PATH = "BEAT_KIBANA_DASHBOARDS_PATH"
-  BEAT_KIBANA_HOST = "BEAT_KIBANA_HOST"
-  BEAT_KIBANA_PORT = "BEAT_KIBANA_PORT"
-  BEAT_KIBANA_PROTOCOL = "BEAT_KIBANA_PROTOCOL"
-  BEAT_KIBANA_SSL_VERIFY = "BEAT_KIBANA_SSL_VERIFY"
+  BEAT_DASHBOARDS_ENABLED = "BEAT_DASHBOARDS_ENABLED"
+  BEAT_DASHBOARDS_PATH = "BEAT_DASHBOARDS_PATH"
+  BEAT_DASHBOARDS_HOST = "BEAT_DASHBOARDS_HOST"
+  BEAT_DASHBOARDS_PORT = "BEAT_DASHBOARDS_PORT"
+  BEAT_DASHBOARDS_PROTOCOL = "BEAT_DASHBOARDS_PROTOCOL"
+  BEAT_DASHBOARDS_SSL_VERIFY = "BEAT_DASHBOARDS_SSL_VERIFY"
 
   # specific to filebeat
   BEAT_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
@@ -187,32 +187,32 @@ def mime_to_extension_mappings(mapfile):
   return mime_maps
 
 ###################################################################################################
-def input_elasticsearch_connection_info(forwarder,
-                                        default_es_host=None,
-                                        default_es_port=None,
-                                        default_kibana_host=None,
-                                        default_kibana_port=None,
-                                        default_username=None,
-                                        default_password=None):
+def input_opensearch_connection_info(forwarder,
+                                     default_os_host=None,
+                                     default_os_port=None,
+                                     default_dashboards_host=None,
+                                     default_dashboards_port=None,
+                                     default_username=None,
+                                     default_password=None):
 
   return_dict = defaultdict(str)
 
-  # Elasticsearch configuration
-  # elasticsearch protocol and SSL verification mode
-  elastic_protocol = "http"
-  elastic_ssl_verify = "none"
-  if (d.yesno("Elasticsearch connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
-    elastic_protocol = "https"
-    if (d.yesno("Elasticsearch SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
-      elastic_ssl_verify = "full"
-  return_dict[Constants.BEAT_ES_PROTOCOL] = elastic_protocol
-  return_dict[Constants.BEAT_ES_SSL_VERIFY] = elastic_ssl_verify
+  # OpenSearch configuration
+  # opensearch protocol and SSL verification mode
+  opensearch_protocol = "http"
+  opensearch_ssl_verify = "none"
+  if (d.yesno("OpenSearch connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
+    opensearch_protocol = "https"
+    if (d.yesno("OpenSearch SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
+      opensearch_ssl_verify = "full"
+  return_dict[Constants.BEAT_OS_PROTOCOL] = opensearch_protocol
+  return_dict[Constants.BEAT_OS_SSL_VERIFY] = opensearch_ssl_verify
 
   while True:
-    # host/port for Elasticsearch
+    # host/port for OpenSearch
     code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(forwarder), [
-                          ('Elasticsearch Host', 1, 1, default_es_host or "", 1,  25, 30, 255),
-                          ('Elasticsearch Port', 2, 1, default_es_port or "9200", 2, 25, 6, 5)
+                          ('OpenSearch Host', 1, 1, default_os_host or "", 1,  25, 30, 255),
+                          ('OpenSearch Port', 2, 1, default_os_port or "9200", 2, 25, 6, 5)
                           ])
     values = [x.strip() for x in values]
 
@@ -223,27 +223,27 @@ def input_elasticsearch_connection_info(forwarder,
       code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
 
     else:
-      return_dict[Constants.BEAT_ES_HOST] = values[0]
-      return_dict[Constants.BEAT_ES_PORT] = values[1]
+      return_dict[Constants.BEAT_OS_HOST] = values[0]
+      return_dict[Constants.BEAT_OS_PORT] = values[1]
       break
 
-  # Kibana configuration (if supported by forwarder)
-  if (forwarder in Constants.BEAT_KIBANA_DIR.keys()) and (d.yesno(f"Configure {forwarder} Kibana connectivity?") == Dialog.OK):
-    # elasticsearch protocol and SSL verification mode
-    kibana_protocol = "http"
-    kibana_ssl_verify = "none"
-    if (d.yesno("Kibana connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
-      kibana_protocol = "https"
-      if (d.yesno("Kibana SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
-        kibana_ssl_verify = "full"
-    return_dict[Constants.BEAT_KIBANA_PROTOCOL] = kibana_protocol
-    return_dict[Constants.BEAT_KIBANA_SSL_VERIFY] = kibana_ssl_verify
+  # Dashboards configuration (if supported by forwarder)
+  if (forwarder in Constants.BEAT_DASHBOARDS_DIR.keys()) and (d.yesno(f"Configure {forwarder} Dashboards connectivity?") == Dialog.OK):
+    # opensearch protocol and SSL verification mode
+    dashboards_protocol = "http"
+    dashboards_ssl_verify = "none"
+    if (d.yesno("Dashboards connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK):
+      dashboards_protocol = "https"
+      if (d.yesno("Dashboards SSL verification", yes_label="None", no_label="Full") != Dialog.OK):
+        dashboards_ssl_verify = "full"
+    return_dict[Constants.BEAT_DASHBOARDS_PROTOCOL] = dashboards_protocol
+    return_dict[Constants.BEAT_DASHBOARDS_SSL_VERIFY] = dashboards_ssl_verify
 
     while True:
-      # host/port for Kibana
+      # host/port for Dashboards
       code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(forwarder), [
-                            ('Kibana Host', 1, 1, default_kibana_host or "", 1,  20, 30, 255),
-                            ('Kibana Port', 2, 1, default_kibana_port or "5601", 2, 20, 6, 5)
+                            ('Dashboards Host', 1, 1, default_dashboards_host or "", 1,  20, 30, 255),
+                            ('Dashboards Port', 2, 1, default_dashboards_port or "5601", 2, 20, 6, 5)
                             ])
       values = [x.strip() for x in values]
 
@@ -254,20 +254,20 @@ def input_elasticsearch_connection_info(forwarder,
         code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
 
       else:
-        return_dict[Constants.BEAT_KIBANA_HOST] = values[0]
-        return_dict[Constants.BEAT_KIBANA_PORT] = values[1]
+        return_dict[Constants.BEAT_DASHBOARDS_HOST] = values[0]
+        return_dict[Constants.BEAT_DASHBOARDS_PORT] = values[1]
         break
 
-    if (d.yesno(f"Configure {forwarder} Kibana dashboards?") == Dialog.OK):
-      kibana_dashboards = "true"
+    if (d.yesno(f"Configure {forwarder} Dashboards dashboards?") == Dialog.OK):
+      dashboards_enabled = "true"
     else:
-      kibana_dashboards = "false"
-    return_dict[Constants.BEAT_KIBANA_DASHBOARDS_ENABLED] = kibana_dashboards
+      dashboards_enabled = "false"
+    return_dict[Constants.BEAT_DASHBOARDS_ENABLED] = dashboards_enabled
 
-    if kibana_dashboards == "true":
+    if dashboards_enabled == "true":
       while True:
         code, values = d.form(Constants.MSG_CONFIG_GENERIC.format(forwarder), [
-                              ('Kibana Dashboards Path', 1, 1, Constants.BEAT_KIBANA_DIR[forwarder], 1, 30, 30, 255)
+                              ('Dashboards Dashboards Path', 1, 1, Constants.BEAT_DASHBOARDS_DIR[forwarder], 1, 30, 30, 255)
                               ])
         values = [x.strip() for x in values]
 
@@ -278,10 +278,10 @@ def input_elasticsearch_connection_info(forwarder,
           code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
 
         else:
-          return_dict[Constants.BEAT_KIBANA_DASHBOARDS_PATH] = values[0]
+          return_dict[Constants.BEAT_DASHBOARDS_PATH] = values[0]
           break
 
-  server_display_name = "Elasticsearch/Kibana" if Constants.BEAT_KIBANA_HOST in return_dict.keys() else "Elasticsearch"
+  server_display_name = "OpenSearch/Dashboards" if Constants.BEAT_DASHBOARDS_HOST in return_dict.keys() else "OpenSearch"
 
   # HTTP/HTTPS authentication
   code, http_username = d.inputbox(f"{server_display_name} HTTP/HTTPS server username", init=default_username)
@@ -305,36 +305,36 @@ def input_elasticsearch_connection_info(forwarder,
     else:
       code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format("Passwords did not match"))
 
-  # test Elasticsearch connection
-  code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Elasticsearch"))
-  retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_ES_PROTOCOL],
-                                             host=return_dict[Constants.BEAT_ES_HOST],
-                                             port=return_dict[Constants.BEAT_ES_PORT],
+  # test OpenSearch connection
+  code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("OpenSearch"))
+  retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_OS_PROTOCOL],
+                                             host=return_dict[Constants.BEAT_OS_HOST],
+                                             port=return_dict[Constants.BEAT_OS_PORT],
                                              username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
                                              password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
-                                             ssl_verify=return_dict[Constants.BEAT_ES_SSL_VERIFY])
+                                             ssl_verify=return_dict[Constants.BEAT_OS_SSL_VERIFY])
   if (retcode == 200):
-    code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Elasticsearch", retcode, message))
+    code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("OpenSearch", retcode, message))
   else:
-    code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Elasticsearch", retcode, message, "\n".join(output)),
+    code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("OpenSearch", retcode, message, "\n".join(output)),
                    yes_label="Ignore Error", no_label="Start Over")
     if code != Dialog.OK:
       raise CancelledError
 
-  # test Kibana connection
-  if Constants.BEAT_KIBANA_HOST in return_dict.keys():
-    code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Kibana"))
-    retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_KIBANA_PROTOCOL],
-                                               host=return_dict[Constants.BEAT_KIBANA_HOST],
-                                               port=return_dict[Constants.BEAT_KIBANA_PORT],
+  # test Dashboards connection
+  if Constants.BEAT_DASHBOARDS_HOST in return_dict.keys():
+    code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Dashboards"))
+    retcode, message, output = test_connection(protocol=return_dict[Constants.BEAT_DASHBOARDS_PROTOCOL],
+                                               host=return_dict[Constants.BEAT_DASHBOARDS_HOST],
+                                               port=return_dict[Constants.BEAT_DASHBOARDS_PORT],
                                                uri="api/status",
                                                username=return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None,
                                                password=return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None,
-                                               ssl_verify=return_dict[Constants.BEAT_KIBANA_SSL_VERIFY])
+                                               ssl_verify=return_dict[Constants.BEAT_DASHBOARDS_SSL_VERIFY])
     if (retcode == 200):
-      code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Kibana", retcode, message))
+      code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Dashboards", retcode, message))
     else:
-      code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Kibana", retcode, message, "\n".join(output)),
+      code = d.yesno(text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Dashboards", retcode, message, "\n".join(output)),
                      yes_label="Ignore Error", no_label="Start Over")
       if code != Dialog.OK:
         raise CancelledError
@@ -371,7 +371,7 @@ def main():
   start_dir = os.getcwd()
   quit_flag = False
 
-  # store previously-entered elasticsearch values in case they are going through the loop
+  # store previously-entered opensearch values in case they are going through the loop
   # mulitple times to prevent them from having to enter them over and over
   previous_config_values = defaultdict(str)
 
@@ -391,13 +391,13 @@ def main():
           if len(line.strip()) > 0:
             name, var = remove_prefix(line, "export").partition("=")[::2]
             capture_config_dict[name.strip()] = var.strip().strip("'").strip('"')
-      if (Constants.BEAT_ES_HOST not in previous_config_values.keys()) and ("ES_HOST" in capture_config_dict.keys()):
-        previous_config_values[Constants.BEAT_ES_HOST] = capture_config_dict["ES_HOST"]
-        previous_config_values[Constants.BEAT_KIBANA_HOST] = capture_config_dict["ES_HOST"]
-      if (Constants.BEAT_ES_PORT not in previous_config_values.keys()) and ("ES_PORT" in capture_config_dict.keys()):
-        previous_config_values[Constants.BEAT_ES_PORT] = capture_config_dict["ES_PORT"]
-      if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("ES_USERNAME" in capture_config_dict.keys()):
-        previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["ES_USERNAME"]
+      if (Constants.BEAT_OS_HOST not in previous_config_values.keys()) and ("OS_HOST" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["OS_HOST"]
+        previous_config_values[Constants.BEAT_DASHBOARDS_HOST] = capture_config_dict["OS_HOST"]
+      if (Constants.BEAT_OS_PORT not in previous_config_values.keys()) and ("OS_PORT" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_OS_PORT] = capture_config_dict["OS_PORT"]
+      if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and ("OS_USERNAME" in capture_config_dict.keys()):
+        previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["OS_USERNAME"]
       if (Constants.ARKIME_PACKET_ACL not in previous_config_values.keys()) and ("ARKIME_PACKET_ACL" in capture_config_dict.keys()):
         previous_config_values[Constants.ARKIME_PACKET_ACL] = capture_config_dict[Constants.ARKIME_PACKET_ACL]
 
@@ -697,45 +697,45 @@ def main():
         if (fwd_mode == Constants.ARKIMECAP):
           # forwarding configuration for arkime capture
 
-          # get elasticsearch/kibana connection information from user
-          elastic_config_dict = input_elasticsearch_connection_info(forwarder=fwd_mode,
-                                                                    default_es_host=previous_config_values[Constants.BEAT_ES_HOST],
-                                                                    default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
+          # get opensearch/dashboards connection information from user
+          opensearch_config_dict = input_opensearch_connection_info(forwarder=fwd_mode,
+                                                                    default_os_host=previous_config_values[Constants.BEAT_OS_HOST],
+                                                                    default_os_port=previous_config_values[Constants.BEAT_OS_PORT],
                                                                     default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
                                                                     default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD])
-          arkime_elastic_config_dict = elastic_config_dict.copy()
+          arkime_opensearch_config_dict = opensearch_config_dict.copy()
           # massage the data a bit for how arkime's going to want it in the control_vars.conf file
-          if Constants.BEAT_HTTP_USERNAME in arkime_elastic_config_dict.keys():
-            arkime_elastic_config_dict["ES_USERNAME"] = arkime_elastic_config_dict.pop(Constants.BEAT_HTTP_USERNAME)
-          if Constants.BEAT_HTTP_PASSWORD in arkime_elastic_config_dict.keys():
-            arkime_elastic_config_dict["ES_PASSWORD"] = aggressive_url_encode(arkime_elastic_config_dict.pop(Constants.BEAT_HTTP_PASSWORD))
-          arkime_elastic_config_dict = { k.replace('BEAT_', ''): v for k, v in arkime_elastic_config_dict.items() }
+          if Constants.BEAT_HTTP_USERNAME in arkime_opensearch_config_dict.keys():
+            arkime_opensearch_config_dict["OS_USERNAME"] = arkime_opensearch_config_dict.pop(Constants.BEAT_HTTP_USERNAME)
+          if Constants.BEAT_HTTP_PASSWORD in arkime_opensearch_config_dict.keys():
+            arkime_opensearch_config_dict["OS_PASSWORD"] = aggressive_url_encode(arkime_opensearch_config_dict.pop(Constants.BEAT_HTTP_PASSWORD))
+          arkime_opensearch_config_dict = { k.replace('BEAT_', ''): v for k, v in arkime_opensearch_config_dict.items() }
 
           # get list of IP addresses allowed for packet payload retrieval
           lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
-          lines.append(elastic_config_dict[Constants.BEAT_ES_HOST])
+          lines.append(opensearch_config_dict[Constants.BEAT_OS_HOST])
           code, lines = d.editbox_str("\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL)
           if code != Dialog.OK:
             raise CancelledError
-          arkime_elastic_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
+          arkime_opensearch_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join([ip for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')]))) if isipaddress(ip)])
 
-          list_results = sorted([f"{k}={v}" for k, v in arkime_elastic_config_dict.items() if ("PASSWORD" not in k) and (not k.startswith("#"))])
+          list_results = sorted([f"{k}={v}" for k, v in arkime_opensearch_config_dict.items() if ("PASSWORD" not in k) and (not k.startswith("#"))])
 
           code = d.yesno(Constants.MSG_CONFIG_FORWARDING_CONFIRM.format(fwd_mode, "\n".join(list_results)),
                          yes_label="OK", no_label="Cancel")
           if code != Dialog.OK:
             raise CancelledError
 
-          previous_config_values = elastic_config_dict.copy()
+          previous_config_values = opensearch_config_dict.copy()
 
           # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-          elastic_values_re = re.compile(r"\b(" + '|'.join(list(arkime_elastic_config_dict.keys())) + r")\s*=\s*.*?$")
+          opensearch_values_re = re.compile(r"\b(" + '|'.join(list(arkime_opensearch_config_dict.keys())) + r")\s*=\s*.*?$")
           with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
             for line in file:
               line = line.rstrip("\n")
-              elastic_key_match = elastic_values_re.search(line)
-              if elastic_key_match is not None:
-                print(elastic_values_re.sub(r"\1=%s" % arkime_elastic_config_dict[elastic_key_match.group(1)], line))
+              opensearch_key_match = opensearch_values_re.search(line)
+              if opensearch_key_match is not None:
+                print(opensearch_values_re.sub(r"\1=%s" % arkime_opensearch_config_dict[opensearch_key_match.group(1)], line))
               else:
                 print(line)
 
@@ -778,12 +778,12 @@ def main():
                 raise CancelledError
               forwarder_dict[Constants.BEAT_INTERVAL] = f"{beat_interval}s"
 
-            # get elasticsearch/kibana connection information from user
-            forwarder_dict.update(input_elasticsearch_connection_info(forwarder=fwd_mode,
-                                                                      default_es_host=previous_config_values[Constants.BEAT_ES_HOST],
-                                                                      default_es_port=previous_config_values[Constants.BEAT_ES_PORT],
-                                                                      default_kibana_host=previous_config_values[Constants.BEAT_KIBANA_HOST],
-                                                                      default_kibana_port=previous_config_values[Constants.BEAT_KIBANA_PORT],
+            # get opensearch/dashboards connection information from user
+            forwarder_dict.update(input_opensearch_connection_info(forwarder=fwd_mode,
+                                                                      default_os_host=previous_config_values[Constants.BEAT_OS_HOST],
+                                                                      default_os_port=previous_config_values[Constants.BEAT_OS_PORT],
+                                                                      default_dashboards_host=previous_config_values[Constants.BEAT_DASHBOARDS_HOST],
+                                                                      default_dashboards_port=previous_config_values[Constants.BEAT_DASHBOARDS_PORT],
                                                                       default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
                                                                       default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD]))
 

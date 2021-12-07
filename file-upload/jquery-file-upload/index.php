@@ -1,5 +1,5 @@
 <?php
-// Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+// Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 error_reporting(E_ALL | E_STRICT);
 require('UploadHandler.php');
 class CustomUploadHandler extends UploadHandler {

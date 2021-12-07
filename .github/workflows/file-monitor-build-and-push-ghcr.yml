@@ -9,6 +9,7 @@ on:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'
       - 'shared/bin/*'
+      - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
 

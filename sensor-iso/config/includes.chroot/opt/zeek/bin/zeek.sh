@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # configuration variables may be specified in control_vars.conf rather than on the command line
 CONTROL_VARS_FILE="control_vars.conf"

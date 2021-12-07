@@ -1,6 +1,6 @@
 FROM docker.elastic.co/beats/filebeat-oss:7.10.2
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -62,7 +62,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/scripts /data/
-ADD shared/bin/elastic_search_status.sh /data/
+ADD shared/bin/opensearch_status.sh /data/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /usr/share/filebeat-nginx/data && \
     chown -R root:${PGROUP} /usr/share/filebeat-nginx && \

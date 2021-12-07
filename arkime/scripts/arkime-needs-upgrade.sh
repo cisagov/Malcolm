@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2021 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # this script returns:
 #   0 - an UPGRADE IS NEEDED for Arkime indices
@@ -39,6 +39,6 @@ while read INDEX_NAME; do
     fi # compare INDEX_NAME vs. INDEX_PREFIX
   done # loop over ARKIME_INDEX_CURRENT_VERSIONS
 
-done <<<$(curl -fsS -H"Content-Type: application/json" -XGET "http://$ES_HOST:$ES_PORT/_cat/indices?v" | tail -n +2 | awk '{print $3}')
+done <<<$(curl -fsS -H"Content-Type: application/json" -XGET "http://$OS_HOST:$OS_PORT/_cat/indices?v" | tail -n +2 | awk '{print $3}')
 
 exit $RETURN_CODE
