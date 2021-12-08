@@ -24,8 +24,8 @@ import zmq
 
 from pcap_utils import *
 
-import elasticsearch
-import elasticsearch_dsl
+import opensearchpy
+import opensearch_dsl
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -74,11 +74,11 @@ class EventWatcher(pyinotify.ProcessEvent):
       while (not connected) and (not shuttingDown):
         try:
           if debug: eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchHost}...")
-          elasticsearch_dsl.connections.create_connection(hosts=[args.opensearchHost])
-          if verboseDebug: eprint(f"{scriptName}:\t{elasticsearch_dsl.connections.get_connection().cluster.health()}")
-          connected = elasticsearch_dsl.connections.get_connection() is not None
+          opensearch_dsl.connections.create_connection(hosts=[args.opensearchHost])
+          if verboseDebug: eprint(f"{scriptName}:\t{opensearch_dsl.connections.get_connection().cluster.health()}")
+          connected = opensearch_dsl.connections.get_connection() is not None
 
-        except elasticsearch.exceptions.ConnectionError as connError:
+        except opensearchpy.exceptions.ConnectionError as connError:
           if debug: eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
 
         if (not connected) and args.opensearchWaitForHealth:
@@ -90,11 +90,11 @@ class EventWatcher(pyinotify.ProcessEvent):
       while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown):
         try:
           if debug: eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
-          elasticsearch_dsl.connections.get_connection().cluster.health(index=ARKIME_FILES_INDEX, wait_for_status='yellow')
-          if verboseDebug: eprint(f"{scriptName}:\t{elasticsearch_dsl.connections.get_connection().cluster.health()}")
+          opensearch_dsl.connections.get_connection().cluster.health(index=ARKIME_FILES_INDEX, wait_for_status='yellow')
+          if verboseDebug: eprint(f"{scriptName}:\t{opensearch_dsl.connections.get_connection().cluster.health()}")
           healthy = True
 
-        except elasticsearch.exceptions.ConnectionTimeout as connError:
+        except opensearchpy.exceptions.ConnectionTimeout as connError:
           if verboseDebug: eprint(f"{scriptName}:\tOpenSearch health check: {connError}")
 
         if (not healthy):
@@ -145,7 +145,7 @@ def event_process_generator(cls, method):
         # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
         fileIsDuplicate = False
         if self.useOpenSearch:
-          s = elasticsearch_dsl.Search(index=ARKIME_FILES_INDEX) \
+          s = opensearch_dsl.Search(index=ARKIME_FILES_INDEX) \
               .filter("term", _type=ARKIME_FILE_TYPE) \
               .filter("term", node=args.arkimeNode) \
               .query("wildcard", name=f"*{os.path.sep}{relativePath}")
