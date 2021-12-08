@@ -140,7 +140,7 @@ services:
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
-      VIRTUAL_HOST : 'es.malcolm.local'
+      VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
       cluster.routing.allocation.disk.threshold_enabled : 'false'
