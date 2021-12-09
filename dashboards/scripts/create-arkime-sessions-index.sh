@@ -188,6 +188,11 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "OpenSearch anomaly detectors creation complete!"
 
+      # set opensearch (.opendistro-...) indexes replica count to 0 so we don't have yellow index state on those
+      for INDEX in $(curl -L --silent -XGET "$OS_URL/_cat/shards?h=index,state" | grep UNASSIGNED | sed 's/[[:space:]].*$//'); do
+        [[ $INDEX =~ ^.?open(distro|search) ]] && \
+          curl -L --silent --output /dev/null --show-error -H 'osd-xsrf:true' -H 'Content-type:application/json' -XPUT "$OS_URL/$INDEX/_settings" -d'{ "index" : { "number_of_replicas" : 0 } }'
+      done
     fi
   fi
 fi
