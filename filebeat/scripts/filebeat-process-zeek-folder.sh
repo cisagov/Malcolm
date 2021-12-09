@@ -52,20 +52,25 @@ if mkdir $LOCKDIR; then
       DESTNAME="$DESTDIR/$(basename "{}")"
       DESTDIR_EXTRACTED="${DESTNAME}_${PROCESS_TIME}"
       LINKDIR="./current"
+      USERTAG=false
 
       TAGS=()
-      if [[ "$ZEEK_LOG_AUTO_TAG" = "true" ]]; then
-        IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "{}" | sed "s/\.[^.]*$//")
-        echo "\"{}\" -> \"${DESTNAME}\""
-        for index in "${!SOURCESPLIT[@]}"
-        do
-          TAG_CANDIDATE="${SOURCESPLIT[index]}"
-          if ! in_array TAGS "$TAG_CANDIDATE"; then
-            if [[ -n $TAG_CANDIDATE && ! $TAG_CANDIDATE =~ ^[0-9-]+$ && $TAG_CANDIDATE != "tar" && $TAG_CANDIDATE != "AUTOZEEK" && ! $TAG_CANDIDATE =~ ^AUTOCARVE ]]; then
-              TAGS+=("${TAG_CANDIDATE}")
-            fi
+      IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "{}" | sed "s/\.[^.]*$//")
+      echo "\"{}\" -> \"${DESTNAME}\""
+      for index in "${!SOURCESPLIT[@]}"
+      do
+        TAG_CANDIDATE="${SOURCESPLIT[index]}"
+        if ! in_array TAGS "$TAG_CANDIDATE"; then
+          if [[ "$TAG_CANDIDATE" = "USERTAG" ]]; then
+            USERTAG=true
+          elif [[ -n $TAG_CANDIDATE && ! $TAG_CANDIDATE =~ ^[0-9-]+$ && $TAG_CANDIDATE != "tar" && $TAG_CANDIDATE != "AUTOZEEK" && ! $TAG_CANDIDATE =~ ^AUTOCARVE ]]; then
+            TAGS+=("${TAG_CANDIDATE}")
           fi
-        done
+        fi
+      done
+
+      if [[ "$ZEEK_LOG_AUTO_TAG" != "true" ]] && [[ "$USERTAG" != "true" ]]; then
+        TAGS=()
       fi
 
       mkdir -p "$DESTDIR"

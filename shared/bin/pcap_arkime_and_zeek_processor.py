@@ -44,6 +44,7 @@ ZEEK_LOCAL_SCRIPT = 'local'
 ZEEK_STATE_DIR = '.state'
 ZEEK_AUTOZEEK_TAG = 'AUTOZEEK'
 ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
+ZEEK_USERTAG_TAG = 'USERTAG'
 ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
 ZEEK_LOG_COMPRESSION_LEVEL = 6
 
@@ -107,7 +108,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
         if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
           # finalize tags list
-          fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
+          fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (x != ZEEK_USERTAG_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
           if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
           # put together arkime execution command
@@ -166,7 +167,7 @@ def zeekFileWorker(zeekWorkerArgs):
             extractFileMode = extractFileMode.lower() if extractFileMode else ZEEK_EXTRACTOR_MODE_NONE
 
             # finalize tags list (removing AUTOZEEK and AUTOCARVE*)
-            fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
+            fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (x != ZEEK_USERTAG_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
             # create a temporary work directory where zeek will be executed to generate the log files
