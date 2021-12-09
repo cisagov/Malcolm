@@ -296,7 +296,6 @@ services:
       << : *process-variables
       << : *common-upload-variables
       << : *arkime-variables
-      ARKIME_VERSION : '3.2.0'
       VIRTUAL_HOST : 'arkime.malcolm.local'
       OS_HOST : 'opensearch'
       OS_PORT : 9200
