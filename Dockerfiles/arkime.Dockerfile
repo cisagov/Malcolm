@@ -78,7 +78,6 @@ RUN apt-get -q update && \
     rm -rf ./viewer/vueapp/src/components/upload && \
     sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
-    find . -name "*.js" -exec sed -i "s/\(rejectUnauthorized[[:space:]]*:[[:space:]]*\)[^,]*/\1false/" "{}" \; && \
     ./easybutton-build.sh && \
     npm -g config set user root && \
     make install && \
