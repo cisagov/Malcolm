@@ -23,6 +23,7 @@ apt-get -q update
 cd /tmp
 git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION
 cd "./arkime-"$ARKIME_VERSION
+find . -name "*.js" -exec sed -i "s/\(rejectUnauthorized[[:space:]]*:[[:space:]]*\)[^,]*/\1false/" "{}" \;
 
 export PATH="$ARKIMEDIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
