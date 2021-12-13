@@ -10,7 +10,7 @@ filebeat.inputs:
   exclude_files: ['signatures\(_carved.*\)\.log$']
   symlinks: true
   fields_under_root: true
-  # tags: ["foo"]
+  tags: ["_filebeat_zeek"]
   fields:
     type: "session"
   compression_level: 0
@@ -36,7 +36,7 @@ filebeat.inputs:
     - ${FILEBEAT_LOG_PATH:/data/zeek/current}/signatures(_carved*).log
   symlinks: true
   fields_under_root: true
-  # tags: ["foo"]
+  tags: ["_filebeat_zeek"]
   fields:
     type: "session"
   compression_level: 0
