@@ -93,6 +93,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Known issues](#Issues)
 * [Installation example using Ubuntu 20.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
+* [Modifying or Contributing to Malcolm](#Contributing)
 * [Forks](#Forks)
 * [Copyright](#Footer)
 * [Contact](#Contact)
@@ -2002,6 +2003,10 @@ Once the upgraded instance Malcolm has started up, you'll probably want to impor
 ### Major releases
 
 The Malcolm project uses [semantic versioning](https://semver.org/) when choosing version numbers. If you are moving between major releases (e.g., from v4.0.1 to v5.0.0), you're likely to find that there are enough major backwards compatibility-breaking changes that upgrading may not be worth the time and trouble. A fresh install is strongly recommended between major releases.
+
+## <a name="Contributing"></a>Modifying or Contributing to Malcolm
+
+If you are interested in contributing to the Malcolm project, please read the [Malcolm Contributor Guide](./docs/contributing/README.md).
 
 ## <a name="Forks"></a>Forks
 
