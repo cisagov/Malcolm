@@ -32,6 +32,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+ADD arkime_patch/* /opt/patches/
 ADD build-arkime-deb.sh /usr/local/bin/
 ADD etc /arkime-etc
 
