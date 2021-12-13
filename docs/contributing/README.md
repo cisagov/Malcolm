@@ -1,7 +1,5 @@
 # Malcolm Contributor Guide
 
-This document is a work in progress to cover the topics listed in [idaholab/Malcolm#25](https://github.com/idaholab/Malcolm/issues/25).
-
 The purpose of this document is to provide some direction for those willing to modify Malcolm, whether for local customization or for contribution to the Malcolm project.
 
 ## <a name="TableOfContents"></a>Table of Contents
@@ -28,7 +26,7 @@ The purpose of this document is to provide some direction for those willing to m
 
 ## <a name="LocalMods"></a>Local modifications
 
-There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](../..) (see [`docker-compose.yml` parameters](../../#docker-composeyml-parameters) and [Customizing event severity scoring](../../#customizing-event-severity-scoring) for some examples).
+There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](../..) (see [`docker-compose.yml` parameters](../../README.md#docker-composeyml-parameters) and [Customizing event severity scoring](../../#customizing-event-severity-scoring) for some examples).
 
 ### <a name="Bind"></a>Docker bind mounts
 
