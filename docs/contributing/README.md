@@ -26,7 +26,7 @@ The purpose of this document is to provide some direction for those willing to m
 
 ## <a name="LocalMods"></a>Local modifications
 
-There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](../..) (see [`docker-compose.yml` parameters](../../README.md#docker-composeyml-parameters) and [Customizing event severity scoring](../../#customizing-event-severity-scoring) for some examples).
+There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](../../README.md) (see [`docker-compose.yml` parameters](../../README.md#docker-composeyml-parameters) and [Customizing event severity scoring](../../README.md#customizing-event-severity-scoring) for some examples).
 
 ### <a name="Bind"></a>Docker bind mounts
 
@@ -107,7 +107,7 @@ See the documentation on [Docker bind mount](https://docs.docker.com/storage/bin
 
 ### <a name="Build"></a>Building Malcolm's Docker images
 
-Another method for modifying your local copies of Malcolm's services' containers is to [build your own](../../#Build) containers with the modifications baked-in.
+Another method for modifying your local copies of Malcolm's services' containers is to [build your own](../../README.md#Build) containers with the modifications baked-in.
 
 For example, say you wanted to create a Malcolm container which includes a new dashboard for OpenSearch Dashboards and a new enrichment filter `.conf` file for Logstash. After placing these files under `./dashboards/dashboards` and `./logstash/pipelines/enrichment`, respectively, in your Malcolm working copy, run `./build.sh dashboards-helper logstash` to build just those containers. After the build completes, you can run `docker images` and see you have fresh images for `malcolmnetsec/dashboards-helper` and `malcolmnetsec/logstash-oss`. You may need to review the contents of the [Dockerfiles](../../Dockerfiles) to determine the correct service and filesystem location within that service's Docker image depending on what you're trying to accomplish.
 
@@ -148,7 +148,7 @@ When possible, I recommend you to use (or at least take inspiration from) the [E
 
 ### <a name="LocalZeek"></a>`local.zeek`
 
-Some Zeek behavior can be tweaked without having to manually edit configuration files through the use of environment variables: search for `ZEEK` in the [`docker-compose.yml` parameters](../../#docker-composeyml-parameters) section of the documentation.
+Some Zeek behavior can be tweaked without having to manually edit configuration files through the use of environment variables: search for `ZEEK` in the [`docker-compose.yml` parameters](../../README.md#docker-composeyml-parameters) section of the documentation.
 
 Other changes to Zeek's behavior could be made by modifying [local.zeek](../../zeek/config/local.zeek) and either using a [bind mount](#Bind) or [rebuilding](#Build) the `zeek` Docker image with the modification. See the [Zeek documentation](https://docs.zeek.org/en/master/quickstart.html#local-site-customization) for more information on customizing a Zeek instance. Note that changing Zeek's behavior could result in changes to the format of the logs Zeek generates, which could break Malcolm's parsing of those logs, so exercise caution.
 
@@ -158,7 +158,7 @@ The easiest way to add a new Zeek package to Malcolm is to add the git URL of th
 
 ## <a name="PCAP"></a>PCAP processors
 
-When a PCAP is uploaded (either through Malcolm's [upload web interface](../../#Upload) or just copied manually into the `./pcap/upload/` directory), the `pcap-monitor` container has a script that picks up those PCAP files and publishes to a [ZeroMQ](https://zeromq.org/) topic that can be subscribed to by any other process that wants to analyze that PCAP. In Malcolm at the time of this writing (as of the [v5.0.0 release](https://github.com/idaholab/Malcolm/releases/tag/v5.0.0)), there are two of those: the `zeek` container and the `arkime` container. In Malcolm, they actually both share the [same script](../../shared/bin/pcap_arkime_and_zeek_processor.py) to read from that topic and run the PCAP through Zeek and Arkime, respectively. If you're looking for an example to follow, the `zeek` container is the less complicated of the two. So, if you were looking to integrate a new  PCAP processing tool into Malcolm (named `cooltool` for this example), the process would be something like:
+When a PCAP is uploaded (either through Malcolm's [upload web interface](../../README.md#Upload) or just copied manually into the `./pcap/upload/` directory), the `pcap-monitor` container has a script that picks up those PCAP files and publishes to a [ZeroMQ](https://zeromq.org/) topic that can be subscribed to by any other process that wants to analyze that PCAP. In Malcolm at the time of this writing (as of the [v5.0.0 release](https://github.com/idaholab/Malcolm/releases/tag/v5.0.0)), there are two of those: the `zeek` container and the `arkime` container. In Malcolm, they actually both share the [same script](../../shared/bin/pcap_arkime_and_zeek_processor.py) to read from that topic and run the PCAP through Zeek and Arkime, respectively. If you're looking for an example to follow, the `zeek` container is the less complicated of the two. So, if you were looking to integrate a new  PCAP processing tool into Malcolm (named `cooltool` for this example), the process would be something like:
 
 1. Define your service as instructed in the [Adding a new service](#NewImage) section
     * Note how the existing `zeek` and `arkime` services use [bind mounts](#Bind) to access the local `./pcap` directory
@@ -227,7 +227,7 @@ The [logstash.Dockerfile](../../Dockerfiles/logstash.Dockerfile) installs the Lo
 
 ### <a name="DashboardsNewViz"></a>Adding new visualizations and dashboards
 
-Visualizations and dashboards can be [easily created](../../#BuildDashboard) in OpenSearch Dashboards using its drag-and-drop WYSIWIG tools. Assuming you've created a new dashboard you wish to package with Malcolm, the dashboard and its visualization components can be exported using the following steps:
+Visualizations and dashboards can be [easily created](../../README.md#BuildDashboard) in OpenSearch Dashboards using its drag-and-drop WYSIWIG tools. Assuming you've created a new dashboard you wish to package with Malcolm, the dashboard and its visualization components can be exported using the following steps:
 
 1. Identify the ID of the dashboard (found in the URL: e.g., for `/dashboards/app/dashboards#/view/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` the ID would be `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 1. Export the dashboard with that ID and save it in the `./dashboards./dashboards/` directory with the following command:
@@ -265,7 +265,7 @@ Third-party or community plugisn developed for Kibana will not install into Open
 
 ## <a name="Scanners"></a>Carved file scanners
 
-Similar to the [PCAP processing pipeline](#PCAP) described above, new tools can plug into Malcolm's [automatic file extraction and scanning](../../#ZeekFileExtraction) to examine file transfers carved from network traffic.
+Similar to the [PCAP processing pipeline](#PCAP) described above, new tools can plug into Malcolm's [automatic file extraction and scanning](../../README.md#ZeekFileExtraction) to examine file transfers carved from network traffic.
 
 When Zeek extracts a file it observes being transfered in network traffic, the `file-monitor` container picks up those extracted files and publishes to a [ZeroMQ](https://zeromq.org/) topic that can be subscribed to by any other process that wants to analyze that extracted file. In Malcolm at the time of this writing (as of the [v5.0.0 release](https://github.com/idaholab/Malcolm/releases/tag/v5.0.0)), currently implemented file scanners include ClamAV, YARA, capa and VirusTotal, all of which are managed by the `file-monitor` container. The scripts involved in this code are:
 
