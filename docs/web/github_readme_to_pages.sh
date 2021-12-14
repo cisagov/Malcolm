@@ -63,6 +63,16 @@ curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/se
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/@g" \
   >> $OUTPUT_FILE
 
+# contribution Linux page
+OUTPUT_FILE="$OUTPUT_DIR"/contributions.md
+> $OUTPUT_FILE
+GenerateMarkdownHeader "Contributions" "contributions" >> $OUTPUT_FILE
+curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/docs/contributing/README.md \
+  | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
+  | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
+  | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/docs/contributing/@g" \
+  >> $OUTPUT_FILE
+
 # downloads page
 OUTPUT_FILE="$OUTPUT_DIR"/download.md
 > $OUTPUT_FILE
