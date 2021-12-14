@@ -83,6 +83,7 @@ jobs:
         name: Build image
         run: |
           cp -r ./shared ./sensor-iso
+          cp -r ./arkime/patch ./sensor-iso/shared/arkime_patch
           pushd ./sensor-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt

@@ -126,6 +126,7 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
+  rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
   bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
   cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
