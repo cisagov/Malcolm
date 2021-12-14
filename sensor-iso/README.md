@@ -949,7 +949,7 @@ Once the Hedgehog has come back up, check to make sure everything is working:
     
 # <a name="Footer"></a>Copyright
 
-Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Idaho National Laboratory of the U.S. Department of Homeland Security.
+Hedgehog Linux - part of [Malcolm](https://github.com/idaholab/Malcolm) - is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.
 
 See [`License.txt`](https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt) for the terms of its release.
 
