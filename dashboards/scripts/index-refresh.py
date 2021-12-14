@@ -13,6 +13,8 @@ GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
 GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
 PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
 OS_GET_TEMPLATE_URI = '_template'
+GET_SHARDS_URL = '_cat/shards?h=index,state'
+SHARD_UNASSIGNED_STATUS = 'UNASSIGNED'
 
 ###################################################################################################
 debug = False
@@ -46,6 +48,7 @@ def main():
   parser.add_argument('-d', '--dashboards', dest='dashboardsUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'), help='Dashboards URL')
   parser.add_argument('-o', '--opensearch', dest='opensearchUrl', metavar='<protocol://host:port>', type=str, default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'), help='OpenSearch URL')
   parser.add_argument('-t', '--template', dest='template', metavar='<str>', type=str, default=None, help='OpenSearch template to merge')
+  parser.add_argument('-u', '--unassigned', dest='fixUnassigned', type=str2bool, nargs='?', const=True, default=False, help="Set number_of_replicas for unassigned index shards to 0")
   parser.add_argument('-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)")
   try:
     parser.error = parser.exit
@@ -286,6 +289,19 @@ def main():
 
   else:
     print("failure (could not find Index ID for {})".format(args.index))
+
+  if args.fixUnassigned and not args.dryrun:
+    # set some configuration-related indexes (opensearch/opendistro) replica count to 0
+    # so we don't have yellow index state on those
+    shardsResponse = requests.get('{}/{}'.format(args.opensearchUrl, GET_SHARDS_URL))
+    for shardLine in shardsResponse.iter_lines():
+      shardInfo = shardLine.decode('utf-8').split()
+      if (shardInfo is not None) and (len(shardInfo) == 2) and (shardInfo[1] == SHARD_UNASSIGNED_STATUS):
+        putResponse = requests.put('{}/{}/{}'.format(args.opensearchUrl, shardInfo[0], '_settings'),
+                                   headers={ 'Content-Type': 'application/json',
+                                             'osd-xsrf': 'true', },
+                                   data=json.dumps({'index': { 'number_of_replicas' : 0}}))
+        putResponse.raise_for_status()
 
 if __name__ == '__main__':
   main()

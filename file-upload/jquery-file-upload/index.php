@@ -6,7 +6,7 @@ class CustomUploadHandler extends UploadHandler {
   protected function trim_file_name($file_path, $name, $size, $type, $error, $index, $content_range) {
     $enabled_carve_modes = array("interesting", "mapped", "known", "all");
     if (isset($_POST["tags"]) && !empty($_POST["tags"])) {
-      $name = $_POST["tags"] . "," . $name;
+      $name = $_POST["tags"] . ",USERTAG," . $name;
     }
     if (isset($_POST["auto-carve"]) && in_array($_POST["auto-carve"], $enabled_carve_modes)) {
       $name = "AUTOCARVE".$_POST["auto-carve"]."," . $name;
