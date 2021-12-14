@@ -8,7 +8,7 @@ filebeat.inputs:
     - ${BEAT_LOG_PATTERN:/home/sensor/bro_logs/*.log}
   symlinks: true
   fields_under_root: true
-  # tags: ["remote"]
+  tags: ["_filebeat_zeek"]
   fields:
     type: "session"
   compression_level: 0

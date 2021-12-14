@@ -29,7 +29,7 @@ fi
 
 # run supervisor of capture-related services as non-privileged user
 if [ -f /opt/sensor/sensor_ctl/supervisor.sh ]; then
-  ( getent passwd 1000 >/dev/null 2>&1 ) && sudo -H -u '#1000' /opt/sensor/sensor_ctl/supervisor.sh
+  ( getent passwd 1000 >/dev/null 2>&1 ) && ulimit -l unlimited && sudo -H -u '#1000' /opt/sensor/sensor_ctl/supervisor.sh
 fi
 
 # hddtemp daemon for querying HDD temperatures

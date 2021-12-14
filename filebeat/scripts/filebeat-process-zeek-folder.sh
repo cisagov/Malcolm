@@ -38,7 +38,7 @@ if mkdir $LOCKDIR; then
 
   # get new zeek logs ready for processing
   cd "$ZEEK_LOGS_DIR"
-  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -type f -exec file --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)" | awk -F: '{print $1}' | sort -V | \
+  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)" | awk -F'|' '{print $1}' | sort -V | \
     xargs -n 1 -P $FILEBEAT_PREPARE_PROCESS_COUNT -I '{}' bash -c '
 
     fuser -s "{}" 2>/dev/null
@@ -52,20 +52,25 @@ if mkdir $LOCKDIR; then
       DESTNAME="$DESTDIR/$(basename "{}")"
       DESTDIR_EXTRACTED="${DESTNAME}_${PROCESS_TIME}"
       LINKDIR="./current"
+      USERTAG=false
 
       TAGS=()
-      if [[ "$ZEEK_LOG_AUTO_TAG" = "true" ]]; then
-        IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "{}" | sed "s/\.[^.]*$//")
-        echo "\"{}\" -> \"${DESTNAME}\""
-        for index in "${!SOURCESPLIT[@]}"
-        do
-          TAG_CANDIDATE="${SOURCESPLIT[index]}"
-          if ! in_array TAGS "$TAG_CANDIDATE"; then
-            if [[ -n $TAG_CANDIDATE && ! $TAG_CANDIDATE =~ ^[0-9-]+$ && $TAG_CANDIDATE != "tar" && $TAG_CANDIDATE != "AUTOZEEK" && ! $TAG_CANDIDATE =~ ^AUTOCARVE ]]; then
-              TAGS+=("${TAG_CANDIDATE}")
-            fi
+      IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "{}" | sed "s/\.[^.]*$//")
+      echo "\"{}\" -> \"${DESTNAME}\""
+      for index in "${!SOURCESPLIT[@]}"
+      do
+        TAG_CANDIDATE="${SOURCESPLIT[index]}"
+        if ! in_array TAGS "$TAG_CANDIDATE"; then
+          if [[ "$TAG_CANDIDATE" = "USERTAG" ]]; then
+            USERTAG=true
+          elif [[ -n $TAG_CANDIDATE && ! $TAG_CANDIDATE =~ ^[0-9-]+$ && $TAG_CANDIDATE != "tar" && $TAG_CANDIDATE != "AUTOZEEK" && ! $TAG_CANDIDATE =~ ^AUTOCARVE ]]; then
+            TAGS+=("${TAG_CANDIDATE}")
           fi
-        done
+        fi
+      done
+
+      if [[ "$ZEEK_LOG_AUTO_TAG" != "true" ]] && [[ "$USERTAG" != "true" ]]; then
+        TAGS=()
       fi
 
       mkdir -p "$DESTDIR"

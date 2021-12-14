@@ -93,6 +93,7 @@ if [ -d "$SUPERVISOR_PATH/"/supervisor.init ]; then
   pushd "$SUPERVISOR_PATH" >/dev/null 2>&1
 fi
 
+ulimit -l unlimited || true
 supervisord -c "$CONFIG_FILE"
 
 popd >/dev/null 2>&1

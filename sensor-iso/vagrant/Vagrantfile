@@ -17,6 +17,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/debian-11"
 
   config.vm.network "private_network", type: "dhcp"
+  config.ssh.config = "ssh_config"
 
   config.vm.synced_folder '.', '/vagrant', disabled: true
   config.vm.synced_folder "..", "/sensor-build", type: "sshfs", disabled: false

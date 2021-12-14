@@ -342,11 +342,9 @@ def main():
       else:
         ##### interface IP address configuration #############################################################################################
 
-        # read configuration from /etc/network/interfaces.d/sensor (or /etc/network/interfaces if for some reason it doesn't exist)
-        if os.path.isfile(Constants.SENSOR_INTERFACES_CONFIG):
-          interfaces = Interfaces(interfaces_path=Constants.SENSOR_INTERFACES_CONFIG, backup_path=Constants.SENSOR_BACKUP_CONFIG)
-        else:
-          interfaces = Interfaces(backup_path=Constants.SENSOR_BACKUP_CONFIG)
+        # read configuration from /etc/network/interfaces.d/sensor (or the default /etc/network/interfaces if for some reason it doesn't exist)
+        interfaces_path=Constants.SENSOR_INTERFACES_CONFIG if os.path.isfile(Constants.SENSOR_INTERFACES_CONFIG) else None
+        interfaces = Interfaces(interfaces_path=interfaces_path, backup_path=Constants.SENSOR_BACKUP_CONFIG)
 
         # determine a list of available (non-virtual) adapters
         available_adapters = get_available_adapters()
@@ -393,7 +391,9 @@ def main():
             'auto': True,
             'hotplug': True,
             'addrFam': 'inet',
-            'source': Constants.DHCP}, 0)
+            'source': Constants.DHCP},
+            index=0,
+            interfaces_path=interfaces_path)
 
           write_and_display_results(interfaces, selected_iface)
 
@@ -409,7 +409,9 @@ def main():
             'source': Constants.UNASSIGNED,
             'pre-up': 'ip link set dev $IFACE up',
             'post-up': '/usr/local/bin/nic-capture-setup.sh $IFACE',
-            'post-down': 'ip link set dev $IFACE down'}, 0)
+            'post-down': 'ip link set dev $IFACE down'},
+            index=0,
+            interfaces_path=interfaces_path)
 
           write_and_display_results(interfaces, selected_iface)
 
@@ -459,7 +461,9 @@ def main():
                 'source': Constants.STATIC,
                 'address': values[0],
                 'netmask': values[1],
-                'gateway': values[2]}, 0)
+                'gateway': values[2]},
+                index=0,
+                interfaces_path=interfaces_path)
 
               write_and_display_results(interfaces, selected_iface)
               break
