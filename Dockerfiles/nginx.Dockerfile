@@ -7,7 +7,7 @@
 #             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
 
 ####################################################################################
-FROM alpine:3.14
+FROM alpine:3.15
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -57,7 +57,7 @@ ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP $NGINX_LDAP_TLS_STUNNEL_CHECK_IP
 ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
 # build latest nginx with nginx-auth-ldap
-ENV NGINX_VERSION=1.20.1
+ENV NGINX_VERSION=1.20.2
 ENV NGINX_AUTH_LDAP_BRANCH=master
 
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
