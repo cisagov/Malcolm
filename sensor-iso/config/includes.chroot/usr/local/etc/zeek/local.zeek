@@ -126,3 +126,4 @@ event zeek_init() &priority=-5 {
 @endif
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
+redef CVE_2021_44228::log = F;

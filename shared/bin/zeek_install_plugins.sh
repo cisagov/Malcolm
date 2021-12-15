@@ -82,6 +82,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/CVE-2021-31166"
   "https://github.com/corelight/CVE-2021-41773"
   "https://github.com/corelight/CVE-2021-42292"
+  "https://github.com/corelight/cve-2021-44228"
   "https://github.com/corelight/pingback"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
