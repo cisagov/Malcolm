@@ -241,6 +241,14 @@ if [ -f /opt/sensor/kiosk.service ]; then
   systemctl enable kiosk
 fi
 
+# shutdown sensor cleanly on reboot/halt
+if [ -f /etc/systemd/system/sensor-shutdown.service ]; then
+  chown root:root /etc/systemd/system/sensor-shutdown.service
+  chmod 644 /etc/systemd/system/sensor-shutdown.service
+  systemctl daemon-reload
+  systemctl enable sensor-shutdown
+fi
+
 # run resource logging services as unprivileged user.
 # supervisor is run via /etc/rc.local  (vs. here with a @reboot directive)
 #   so as to work for both live-usb and installed versions
