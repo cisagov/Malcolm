@@ -42,6 +42,11 @@ function _gitowner() {
   git remote get-url "$(_gitremote)" | sed 's@.*github\.com/@@' | cut -d'/' -f1
 }
 
+# get the current git working copy's remote repository name (e.g., malcolm)
+function _gitreponame() {
+  git remote get-url "$(_gitremote)" | sed 's@.*github\.com/@@' | cut -d'/' -f2
+}
+
 # get the current git working copy's Malcolm version (grepped from docker-compose.yml, e.g., 5.0.3)
 function _malcolmversion() {
   grep -P "^\s+image:\s*malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
@@ -80,6 +85,21 @@ function ExtractISOsFromGithubWorkflowBuilds() {
       curl -sSL -O -J http://localhost:8000/"$TOOL"-"$VERSION"-build.log
     docker stop "$TOOL"-iso-srv
   done
+}
+
+################################################################################
+# use your GitHub personal access token (GITHUB_OAUTH_TOKEN) to issue a
+# repository dispatch to build the Malcolm images from the GitHub workflows
+function GithubTriggerPackagesBuild () {
+  if [[ -n $GITHUB_OAUTH_TOKEN ]]; then
+    REPO="$(_gitowner)/$(_gitreponame)"
+    echo "Issuing repository_dispatch on $REPO"
+    curl -sSL  -H "Authorization: token $GITHUB_OAUTH_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+      --data '{"event_type": "CLI trigger"}' \
+      "https://api.github.com/repos/$REPO/dispatches"
+  else
+    echo "\$GITHUB_OAUTH_TOKEN not defined, see https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">&2
+  fi
 }
 
 ################################################################################
