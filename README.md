@@ -143,21 +143,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/arkime                                           5.0.2           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.0.2           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.0.2           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.0.2           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.0.2           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.0.2           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.0.2           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.0.2           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.0.2           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.0.2           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.0.2           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.0.2           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.0.2           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.0.2           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.0.2           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/arkime                                           5.0.3           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.3           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.0.3           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.3           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.3           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.3           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.3           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.3           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.3           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.0.3           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.3           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -370,7 +370,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/pcap-monitor` (based on `debian:bullseye-slim`)
 * `malcolmnetsec/pcap-zeek` (based on `debian:bullseye-slim`)
 
-Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern.
+Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 
 ## <a name="Packager"></a>Pre-Packaged installation files
 
@@ -1499,7 +1499,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.2.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.3.iso"
 …
 ```
 
@@ -1885,21 +1885,21 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/arkime                                           5.0.2           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.0.2           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.0.2           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.0.2           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.0.2           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.0.2           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.0.2           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.0.2           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.0.2           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.0.2           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.0.2           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.0.2           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.0.2           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.0.2           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.0.2           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/arkime                                           5.0.3           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.3           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.0.3           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.3           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.3           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.3           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.3           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.3           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.3           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.0.3           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.3           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
