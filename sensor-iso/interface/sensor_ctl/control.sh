@@ -67,6 +67,15 @@ if [[ -d ./"$CONFIG_DIR" && ("$CONTROL_COMMAND" = "start" || "$CONTROL_COMMAND" 
 else
   # simply pass the command through to supervisorctl
   supervisorctl -c "$CONFIG_FILE" "$CONTROL_COMMAND" "${CONTROL_PROCESS[@]}"
+
+  # if zeek doesn't want to go down in a timely manner (or at all), make it an offer it can't refuse
+  if [[ ("$CONTROL_COMMAND" = "stop" || "$CONTROL_COMMAND" = "shutdown") && ("$CONTROL_PROCESS" = "all" || "$CONTROL_PROCESS" = "zeek"*) ]]; then
+    for i in {1..60}; do
+      sleep 1
+      pidof zeek >/dev/null 2>&1 || break
+    done
+    pidof zeek >/dev/null 2>&1 && killall -9 zeek
+  fi
 fi
 
 popd >/dev/null 2>&1
