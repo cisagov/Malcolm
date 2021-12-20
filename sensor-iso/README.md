@@ -10,6 +10,8 @@ Hedgehog Linux is a Debian-based operating system built to
 * detect file transfers in network traffic and extract and scan those files for threats
 * generate and forward Zeek logs, Arkime sessions and other information to [Malcolm](https://github.com/idaholab/Malcolm)
 
+![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
+
 ### <a name="TableOfContents"></a>Table of Contents
 
 * [Sensor installation](#Installation)
