@@ -17,6 +17,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 ## <a name="TableOfContents"></a>Table of Contents
 
+* [Automated Build Workflows Status](#BuildBadges)
 * [Quick start](#QuickStart)
     * [Getting Malcolm](#GetMalcolm)
     * [User interface](#UserInterfaceURLs)
@@ -97,6 +98,10 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Forks](#Forks)
 * [Copyright](#Footer)
 * [Contact](#Contact)
+
+## <a name="BuildBadges"></a>Automated Builds Status
+
+See [**Building from source**](#Build) to read how you can use GitHub [workflow files](./.github/workflows/) to build Malcolm.
 
 ![arkime-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/arkime-build-and-push-ghcr/badge.svg)
 ![dashboards-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-build-and-push-ghcr/badge.svg)
