@@ -98,6 +98,25 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Copyright](#Footer)
 * [Contact](#Contact)
 
+![arkime-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/arkime-build-and-push-ghcr/badge.svg)
+![dashboards-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-build-and-push-ghcr/badge.svg)
+![dashboards-helper-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-helper-build-and-push-ghcr/badge.svg)
+![file-monitor-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/file-monitor-build-and-push-ghcr/badge.svg)
+![file-upload-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/file-upload-build-and-push-ghcr/badge.svg)
+![filebeat-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/filebeat-build-and-push-ghcr/badge.svg)
+![freq-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/freq-build-and-push-ghcr/badge.svg)
+![htadmin-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/htadmin-build-and-push-ghcr/badge.svg)
+![logstash-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/logstash-build-and-push-ghcr/badge.svg)
+![name-map-ui-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/name-map-ui-build-and-push-ghcr/badge.svg)
+![nginx-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/nginx-build-and-push-ghcr/badge.svg)
+![opensearch-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/opensearch-build-and-push-ghcr/badge.svg)
+![pcap-capture-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-capture-build-and-push-ghcr/badge.svg)
+![pcap-monitor-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
+![zeek-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/zeek-build-and-push-ghcr/badge.svg)
+![malcolm-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
+![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/
+sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
+
 ## <a name="QuickStart"></a>Quick start
 
 ### <a name="GetMalcolm"></a>Getting Malcolm
