@@ -114,8 +114,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 ![pcap-monitor-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
 ![zeek-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/zeek-build-and-push-ghcr/badge.svg)
 ![malcolm-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
-![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/
-sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
+![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
 
 ## <a name="QuickStart"></a>Quick start
 
