@@ -17,6 +17,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 ## <a name="TableOfContents"></a>Table of Contents
 
+* [Automated Build Workflows Status](#BuildBadges)
 * [Quick start](#QuickStart)
     * [Getting Malcolm](#GetMalcolm)
     * [User interface](#UserInterfaceURLs)
@@ -97,6 +98,28 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 * [Copyright](#Footer)
 * [Contact](#Contact)
 
+## <a name="BuildBadges"></a>Automated Builds Status
+
+See [**Building from source**](#Build) to read how you can use GitHub [workflow files](./.github/workflows/) to build Malcolm.
+
+![arkime-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/arkime-build-and-push-ghcr/badge.svg)
+![dashboards-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/dashboards-build-and-push-ghcr/badge.svg)
+![dashboards-helper-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/dashboards-helper-build-and-push-ghcr/badge.svg)
+![file-monitor-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/file-monitor-build-and-push-ghcr/badge.svg)
+![file-upload-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/file-upload-build-and-push-ghcr/badge.svg)
+![filebeat-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/filebeat-build-and-push-ghcr/badge.svg)
+![freq-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/freq-build-and-push-ghcr/badge.svg)
+![htadmin-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/htadmin-build-and-push-ghcr/badge.svg)
+![logstash-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/logstash-build-and-push-ghcr/badge.svg)
+![name-map-ui-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/name-map-ui-build-and-push-ghcr/badge.svg)
+![nginx-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/nginx-build-and-push-ghcr/badge.svg)
+![opensearch-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/opensearch-build-and-push-ghcr/badge.svg)
+![pcap-capture-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/pcap-capture-build-and-push-ghcr/badge.svg)
+![pcap-monitor-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
+![zeek-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/zeek-build-and-push-ghcr/badge.svg)
+![malcolm-iso-build-docker-wrap-push-ghcr](https://github.com/cisagov/Malcolm/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
+![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/cisagov/Malcolm/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
+
 ## <a name="QuickStart"></a>Quick start
 
 ### <a name="GetMalcolm"></a>Getting Malcolm
@@ -143,21 +166,21 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/arkime                                           5.0.3           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.0.3           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.0.3           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.0.3           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.0.3           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.0.3           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.0.3           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.0.3           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.0.3           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.0.3           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.0.3           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/arkime                                           5.0.4           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.4           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.0.4           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.4           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.4           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.4           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.4           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.4           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.4           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.0.4           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.4           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1499,7 +1522,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.3.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.4.iso"
 …
 ```
 
@@ -1885,21 +1908,21 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/arkime                                           5.0.3           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.0.3           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.0.3           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.0.3           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.0.3           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.0.3           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.0.3           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.0.3           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.0.3           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.0.3           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.0.3           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.0.3           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.0.3           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/arkime                                           5.0.4           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.0.4           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.0.4           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.0.4           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.0.4           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.0.4           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.0.4           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.0.4           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.0.4           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.0.4           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.0.4           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
