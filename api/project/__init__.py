@@ -20,11 +20,18 @@ opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]
 
 @app.route('/')
 @app.route('/version')
-def index():
+def version():
   return jsonify(
     version=app.config["MALCOLM_VERSION"],
     built=app.config["BUILD_DATE"],
     sha=app.config["VCS_REVISION"],
     opensearch=requests.get(app.config["OPENSEARCH_URL"]).json(),
     opensearch_health=opensearch_dsl.connections.get_connection().cluster.health()
+  )
+
+
+@app.route('/indices')
+def indices():
+  return jsonify(
+    indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json()
   )
