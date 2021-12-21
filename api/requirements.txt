@@ -2,3 +2,4 @@ Flask==2.0.2
 gunicorn==20.1.0
 opensearch-py==1.0.0
 opensearch-dsl==1.0.0
+requests==2.26.0
