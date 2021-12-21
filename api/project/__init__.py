@@ -35,3 +35,10 @@ def indices():
   return jsonify(
     indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json()
   )
+
+
+@app.route('/ping')
+def ping():
+  return jsonify(
+    ping="pong"
+  )

@@ -514,7 +514,7 @@ services:
     expose:
       - 5000
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/ping"]
       interval: 30s
       timeout: 15s
       retries: 3
