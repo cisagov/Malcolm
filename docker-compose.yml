@@ -550,6 +550,27 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  api:
+    image: malcolmnetsec/api:5.1.0
+    build:
+      context: .
+      dockerfile: Dockerfiles/api.Dockerfile
+    command: gunicorn --bind 0:5000 manage:app
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: api
+    environment:
+      << : *process-variables
+      VIRTUAL_HOST : 'api.malcolm.local'
+    expose:
+      - 5000
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   nginx-proxy:
     build:
       context: .
@@ -564,6 +585,7 @@ services:
       << : *auth-variables
       << : *nginx-variables
     depends_on:
+      - api
       - arkime
       - dashboards
       - upload
