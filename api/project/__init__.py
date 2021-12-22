@@ -57,6 +57,42 @@ def gettimes(args):
     return start_time, end_time
 
 
+def filtertime(search, args):
+    """Applies a time filter (inclusive; extracted from request arguments) to an OpenSearch query and
+    returns the range as a tuple of integers representing the milliseconds since EPOCH. If
+    either end of the range is unspecified, the start and end times default to "1 day ago" and "now",
+    respectively.
+
+    Parameters
+    ----------
+    search : opensearch_dsl.Search
+        The object representing the OpenSearch Search query
+    args : dict
+        The dictionary which should contain 'from' and 'to' times (see gettimes)
+
+    Returns
+    -------
+    return start_time, end_time
+        integers representing the start and end times for the query, in milliseconds since the epoch
+    """
+    start_time, end_time = gettimes(args)
+    start_time_ms = int(
+        start_time.timestamp() * 1000 if start_time is not None else dateparser.parse("1 day ago").timestamp() * 1000
+    )
+    end_time_ms = int(end_time.timestamp() * 1000 if end_time is not None else datetime.now().timestamp() * 1000)
+    search.filter(
+        "range",
+        **{
+            app.config["ARKIME_INDEX_TIME_FIELD"]: {
+                "gte": start_time_ms,
+                "lte": end_time_ms,
+                "format": "epoch_millis",
+            }
+        },
+    )
+    return start_time_ms, end_time_ms
+
+
 @app.route("/protocols")
 @app.route("/services")
 def protocols():
@@ -74,15 +110,18 @@ def protocols():
     return json
         jsonified OpenSearch result set containing protocols
     """
-    start_time, end_time = gettimes(request.args)
 
     s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
         size=0
     )
+    start_time_ms, end_time_ms = filtertime(s, request.args)
     s.aggs.bucket("protocols", "terms", field="network.protocol", size=app.config["RESULT_SET_LIMIT"])
 
     response = s.execute()
-    return jsonify(protocols=response.aggregations.to_dict()["protocols"]["buckets"])
+    return jsonify(
+        protocols=response.aggregations.to_dict()["protocols"]["buckets"],
+        range=(start_time_ms // 1000, end_time_ms // 1000),
+    )
 
 
 @app.route("/indices")
