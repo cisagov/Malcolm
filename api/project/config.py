@@ -10,5 +10,5 @@ class Config(object):
     BUILD_DATE = f"{os.getenv('BUILD_DATE', 'unknown')}"
     MALCOLM_VERSION = f"{os.getenv('MALCOLM_VERSION', 'unknown')}"
     OPENSEARCH_URL = f"{os.getenv('OPENSEARCH_URL', 'http://opensearch:9200')}"
-    RESULT_SET_LIMIT = int(f"{os.getenv('RESULT_SET_LIMIT', '1000')}")
+    RESULT_SET_LIMIT = int(f"{os.getenv('RESULT_SET_LIMIT', '500')}")
     VCS_REVISION = f"{os.getenv('VCS_REVISION', 'unknown')}"
