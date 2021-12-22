@@ -92,13 +92,11 @@ def filtertime(search, args):
     return start_time_ms, end_time_ms
 
 
-def bucketfield(bucketname, fieldname, current_request):
+def bucketfield(fieldname, current_request):
     """Returns a bucket aggregation for a particular field over a given time range
 
     Parameters
     ----------
-    bucketname : string
-        The name of the "bucket" aggregation (not currently displayed in output)
     fieldname : string
         The name of the field on which to perform the aggregation
     current_request : Request
@@ -117,7 +115,7 @@ def bucketfield(bucketname, fieldname, current_request):
     )
     start_time_ms, end_time_ms = filtertime(s, current_request.args)
     s.aggs.bucket(
-        bucketname,
+        "values",
         "terms",
         field=fieldname,
         size=int(current_request.args["limit"]) if "limit" in current_request.args else app.config["RESULT_SET_LIMIT"],
@@ -125,18 +123,19 @@ def bucketfield(bucketname, fieldname, current_request):
 
     response = s.execute()
     return jsonify(
-        values=response.aggregations.to_dict()[bucketname]["buckets"],
+        values=response.aggregations.to_dict()["values"]["buckets"],
         range=(start_time_ms // 1000, end_time_ms // 1000),
     )
 
 
-@app.route("/protocols")
-@app.route("/services")
-def protocols():
-    """Returns the protocols found in network data for a specified period
+@app.route("/agg/<fieldname>")
+def aggregate(fieldname):
+    """Returns the aggregated values and counts for a given field name, see bucketfield
 
     Parameters
     ----------
+    fieldname : string
+        the name of the field to be bucketed
     request : Request
         see bucketfield
 
@@ -147,48 +146,7 @@ def protocols():
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
-
-    return bucketfield("protocols", "network.protocol", request)
-
-
-@app.route("/tags")
-def tags():
-    """Returns the tags applied to network data for a specified period
-
-    Parameters
-    ----------
-    request : Request
-        see bucketfield
-
-    Returns
-    -------
-    values
-        list of dicts containing key and doc_count for each bucket
-    range
-        start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
-    """
-
-    return bucketfield("tags", "tags", request)
-
-
-@app.route("/severity-tags")
-def severity_tags():
-    """Returns the severity tags applied to network data for a specified period
-
-    Parameters
-    ----------
-    request : Request
-        see bucketfield
-
-    Returns
-    -------
-    values
-        list of dicts containing key and doc_count for each bucket
-    range
-        start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
-    """
-
-    return bucketfield("severity-tags", "event.severity_tags", request)
+    return bucketfield(fieldname, request)
 
 
 @app.route("/indices")
