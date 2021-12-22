@@ -8,13 +8,12 @@ ENV PYTHONUNBUFFERED 1
 RUN    apt-get update -q \
     && apt-get install -y --no-install-recommends gcc \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install flake8 black
+    && python3 -m pip install flake8
 
 COPY ./api /usr/src/app/
 WORKDIR /usr/src/app
 
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
-    && python3 -m black --line-length 120 . \
     && flake8 --ignore=E501,F401
 
 FROM python:3-slim-bullseye
