@@ -9,7 +9,7 @@ path = os.path.join(os.path.sep.join(__file__.split(os.path.sep)[:-3]), "sensor_
 
 def service(command):
 
-    #TODO implement better error handling
+    # TODO implement better error handling
 
     command, arguement = command.split(" ")
 
@@ -25,4 +25,5 @@ def service(command):
         return json.dumps(out.decode("utf-8"))
     else:
         return json.dumps(
-            {"cmd": [command_line], "returncode": retcode, "out": out.decode("utf-8"), "err": err.decode("utf-8")})
+            {"cmd": [command_line], "returncode": retcode, "out": out.decode("utf-8"), "err": err.decode("utf-8")}
+        )

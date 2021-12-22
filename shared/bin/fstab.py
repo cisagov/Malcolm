@@ -7,16 +7,16 @@
 
 import os
 
+
 class Fstab:
     """This class extends file in order to implement a file reader/writer
     for file `/etc/fstab`
     """
 
     class Entry(object):
-        """Entry class represents a non-comment line on the `/etc/fstab` file
-        """
-        def __init__(self, device, mountpoint, filesystem,
-                     options, fs_freq=0, fs_passno=0):
+        """Entry class represents a non-comment line on the `/etc/fstab` file"""
+
+        def __init__(self, device, mountpoint, filesystem, options, fs_freq=0, fs_passno=0):
             self.device = device
             self.mountpoint = mountpoint
             self.filesystem = filesystem
@@ -32,12 +32,9 @@ class Fstab:
             return str(self) == str(o)
 
         def __str__(self):
-            return "{} {} {} {} {} {}".format(self.device,
-                                              self.mountpoint,
-                                              self.filesystem,
-                                              self.options,
-                                              self.fs_freq,
-                                              self.fs_passno)
+            return "{} {} {} {} {} {}".format(
+                self.device, self.mountpoint, self.filesystem, self.options, self.fs_freq, self.fs_passno
+            )
 
     DEFAULT_PATH = os.path.join(os.path.sep, 'etc', 'fstab')
 
@@ -48,15 +45,14 @@ class Fstab:
             self._path = self.DEFAULT_PATH
         self.f = open(self._path, 'r+')
 
-    def __enter__ (self):
+    def __enter__(self):
         return self.f
 
-    def __exit__ (self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.f.close()
 
     def _hydrate_entry(self, line):
-        return Fstab.Entry(*[ x for x in line.replace("\t"," ").strip("\n").split(" ")
-                              if x not in ('', None) ])
+        return Fstab.Entry(*[x for x in line.replace("\t", " ").strip("\n").split(" ") if x not in ('', None)])
 
     @property
     def entries(self):
@@ -115,8 +111,6 @@ class Fstab:
 
     @classmethod
     def add(cls, device, mountpoint, filesystem, options=None, fs_freq=0, fs_passno=0, path=None):
-        return cls(path=path).add_entry(Fstab.Entry(device,
-                                                    mountpoint, filesystem,
-                                                    options=options,
-                                                    fs_freq=fs_freq,
-                                                    fs_passno=fs_passno))
+        return cls(path=path).add_entry(
+            Fstab.Entry(device, mountpoint, filesystem, options=options, fs_freq=fs_freq, fs_passno=fs_passno)
+        )

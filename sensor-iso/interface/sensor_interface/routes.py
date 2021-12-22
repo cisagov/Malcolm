@@ -77,7 +77,12 @@ def update_stats():
     ram_data = psutil.virtual_memory()
 
     # contains all disk data (with total size >= 1GB)
-    disks_data = list(filter(lambda y: y[1][0] >= 1000000000, [(x.mountpoint, psutil.disk_usage(x.mountpoint)) for x in psutil.disk_partitions()]))
+    disks_data = list(
+        filter(
+            lambda y: y[1][0] >= 1000000000,
+            [(x.mountpoint, psutil.disk_usage(x.mountpoint)) for x in psutil.disk_partitions()],
+        )
+    )
 
     disks_idx = (req_time // 6) % len(disks_data)
 
@@ -89,37 +94,23 @@ def update_stats():
     io_data = psutil.net_io_counters()
 
     data = {
-        'cpu': {
-            'percent': cpu_data
-        },
-        'ram': {
-            'percent': ram_data[2],
-            'total': ram_data[0],
-            'used': ram_data[3]
-        },
-        'disks': [], # todo: work in progress
-        'disk': {
-            'mount': disk_mount,
-            'total': disk_data[0],
-            'used': disk_data[1],
-            'percent': disk_data[3]
-        },
+        'cpu': {'percent': cpu_data},
+        'ram': {'percent': ram_data[2], 'total': ram_data[0], 'used': ram_data[3]},
+        'disks': [],  # todo: work in progress
+        'disk': {'mount': disk_mount, 'total': disk_data[0], 'used': disk_data[1], 'percent': disk_data[3]},
         'disk_io': {
-            'read_bytes_sec': (disk_write_data[2] - disk_write_data_start[2])
-                              / period,
-            'write_bytes_sec': (disk_write_data[3] - disk_write_data_start[3])
-                               / period
+            'read_bytes_sec': (disk_write_data[2] - disk_write_data_start[2]) / period,
+            'write_bytes_sec': (disk_write_data[3] - disk_write_data_start[3]) / period,
         },
         'net_io': {
             'sent_bytes_sec': (io_data[0] - io_data_start[0]) / period,
-            'received_bytes_sec': (io_data[1] - io_data_start[1]) / period
-        }
+            'received_bytes_sec': (io_data[1] - io_data_start[1]) / period,
+        },
     }
     for disk_data in disks_data:
-      data['disks'].append({'mount': disk_data[0],
-                            'total': disk_data[1][0],
-                            'used': disk_data[1][1],
-                            'percent': disk_data[1][3]})
+        data['disks'].append(
+            {'mount': disk_data[0], 'total': disk_data[1][0], 'used': disk_data[1][1], 'percent': disk_data[1][3]}
+        )
 
     return json.dumps(data)
 

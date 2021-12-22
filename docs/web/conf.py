@@ -147,16 +147,14 @@ NAVIGATION_LINKS = {
         ("/hedgehog/", "Hedgehog Linux"),
         ("/download/", "Downloads"),
         ("/contributions/", "Contributions"),
-        ("https://github.com/idaholab/Malcolm", "↪ GitHub")
+        ("https://github.com/idaholab/Malcolm", "↪ GitHub"),
     ),
 }
 
 # Alternative navigation links. Works the same way NAVIGATION_LINKS does,
 # although themes may not always support them. (translatable)
 # (Bootstrap 4: right-side of navbar, Bootblog 4: right side of title)
-NAVIGATION_ALT_LINKS = {
-    DEFAULT_LANG: ()
-}
+NAVIGATION_ALT_LINKS = {DEFAULT_LANG: ()}
 
 # Name of the theme to use.
 THEME = "hyde"
@@ -523,9 +521,7 @@ INDEX_PATH = "blog"
 
 # Optional HTML that displayed on “main” blog index.html files.
 # May be used for a greeting. (translatable)
-FRONT_INDEX_HEADER = {
-    DEFAULT_LANG: ''
-}
+FRONT_INDEX_HEADER = {DEFAULT_LANG: ''}
 
 # Create per-month archives instead of per-year
 # CREATE_MONTHLY_ARCHIVE = False
@@ -936,8 +932,8 @@ CONTENT_FOOTER_FORMATS = {
             "author": BLOG_AUTHOR,
             "date": time.gmtime().tm_year,
             "license": LICENSE,
-            "siteurl": SITE_URL
-        }
+            "siteurl": SITE_URL,
+        },
     )
 }
 
@@ -1324,8 +1320,7 @@ WARN_ABOUT_TAG_METADATA = False
 
 # Put in global_context things you want available on all your templates.
 # It can be anything, data, functions, modules, etc.
-GLOBAL_CONTEXT = {
-}
+GLOBAL_CONTEXT = {}
 
 
 # Add functions here and they will be called with template
