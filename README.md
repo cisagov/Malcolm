@@ -103,6 +103,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 See [**Building from source**](#Build) to read how you can use GitHub [workflow files](./.github/workflows/) to build Malcolm.
 
+![api-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/api-build-and-push-ghcr/badge.svg)
 ![arkime-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/arkime-build-and-push-ghcr/badge.svg)
 ![dashboards-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-build-and-push-ghcr/badge.svg)
 ![dashboards-helper-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-helper-build-and-push-ghcr/badge.svg)
@@ -146,6 +147,7 @@ You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
+Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done
 Pulling dashboards-helper ... done
@@ -167,6 +169,7 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
 malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
 malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
 malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
@@ -333,6 +336,7 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
 
+* `api` - code and configuration for the `api` container which provides a REST API to query Malcolm
 * `arkime` - code and configuration for the `arkime` container which processes PCAP files using `capture` and which serves the Viewer application
 * `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
 * `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
@@ -378,6 +382,7 @@ $ ./scripts/build.sh
 
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
+* `malcolmnetsec/api` (based on `python:3-slim-bullseye`)
 * `malcolmnetsec/arkime` (based on `debian:bullseye-slim`)
 * `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/dashboards-helper` (based on `alpine:3.15`)
@@ -1891,6 +1896,7 @@ Store username/password for email alert sender account (y/N):
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
+Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done
 Pulling dashboards-helper ... done
@@ -1909,6 +1915,7 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
 malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
 malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
 malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB

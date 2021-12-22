@@ -65,7 +65,7 @@ COPY --from=builder /usr/src/app/requirements.txt .
 COPY ./api "${APP_HOME}"
 COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 
-ADD https://raw.githubusercontent.com/mmguero/docker/master/shared/docker-uid-gid-setup.sh /usr/local/bin/docker-uid-gid-setup.sh
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends install curl netcat \
     && python3 -m pip install --upgrade pip \
