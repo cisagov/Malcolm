@@ -1,14 +1,13 @@
-import os
-import opensearchpy
+import dateparser
 import opensearch_dsl
+import opensearchpy
+import os
 import requests
 import warnings
 
-import dateparser
 from datetime import datetime
+from flask import Flask, jsonify, request
 from opensearch_dsl import Search
-
-from flask import Flask, jsonify, send_from_directory, request, redirect, url_for
 
 warnings.filterwarnings(
     "ignore",
