@@ -92,6 +92,44 @@ def filtertime(search, args):
     return start_time_ms, end_time_ms
 
 
+def bucketfield(bucketname, fieldname, current_request):
+    """Returns a bucket aggregation for a particular field over a given time range
+
+    Parameters
+    ----------
+    bucketname : string
+        The name of the "bucket" aggregation (not currently displayed in output)
+    fieldname : string
+        The name of the field on which to perform the aggregation
+    current_request : Request
+        The flask Request object being processed (see gettimes and filtertime)
+        Uses 'from', 'to', and 'limit' from current_request.args
+
+    Returns
+    -------
+    values
+        list of dicts containing key and doc_count for each bucket
+    range
+        start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
+    """
+    s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
+        size=0
+    )
+    start_time_ms, end_time_ms = filtertime(s, current_request.args)
+    s.aggs.bucket(
+        bucketname,
+        "terms",
+        field=fieldname,
+        size=int(current_request.args["limit"]) if "limit" in current_request.args else app.config["RESULT_SET_LIMIT"],
+    )
+
+    response = s.execute()
+    return jsonify(
+        values=response.aggregations.to_dict()[bucketname]["buckets"],
+        range=(start_time_ms // 1000, end_time_ms // 1000),
+    )
+
+
 @app.route("/protocols")
 @app.route("/services")
 def protocols():
@@ -99,28 +137,58 @@ def protocols():
 
     Parameters
     ----------
-    from : string
-        The beginning of the time period (see gettimes for format)
-    to : string
-        The ending of the time period (see gettimes for format)
+    request : Request
+        see bucketfield
 
     Returns
     -------
-    return json
-        jsonified OpenSearch result set containing protocols
+    values
+        list of dicts containing key and doc_count for each bucket
+    range
+        start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
 
-    s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
-        size=0
-    )
-    start_time_ms, end_time_ms = filtertime(s, request.args)
-    s.aggs.bucket("protocols", "terms", field="network.protocol", size=app.config["RESULT_SET_LIMIT"])
+    return bucketfield("protocols", "network.protocol", request)
 
-    response = s.execute()
-    return jsonify(
-        protocols=response.aggregations.to_dict()["protocols"]["buckets"],
-        range=(start_time_ms // 1000, end_time_ms // 1000),
-    )
+
+@app.route("/tags")
+def tags():
+    """Returns the tags applied to network data for a specified period
+
+    Parameters
+    ----------
+    request : Request
+        see bucketfield
+
+    Returns
+    -------
+    values
+        list of dicts containing key and doc_count for each bucket
+    range
+        start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
+    """
+
+    return bucketfield("tags", "tags", request)
+
+
+@app.route("/severity-tags")
+def severity_tags():
+    """Returns the severity tags applied to network data for a specified period
+
+    Parameters
+    ----------
+    request : Request
+        see bucketfield
+
+    Returns
+    -------
+    values
+        list of dicts containing key and doc_count for each bucket
+    range
+        start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
+    """
+
+    return bucketfield("severity-tags", "event.severity_tags", request)
 
 
 @app.route("/indices")
