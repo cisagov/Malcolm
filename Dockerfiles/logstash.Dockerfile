@@ -1,4 +1,4 @@
-FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.13.4
+FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.2
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
