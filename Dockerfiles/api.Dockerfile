@@ -5,17 +5,17 @@ ENV TERM xterm
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /usr/src/app
-
-COPY ./api /usr/src/app/
-
-RUN    apt-get update \
+RUN    apt-get update -q \
     && apt-get install -y --no-install-recommends gcc \
     && python3 -m pip install --upgrade pip \
-    && python3 -m pip install flake8 black \
+    && python3 -m pip install flake8 black
+
+COPY ./api /usr/src/app/
+WORKDIR /usr/src/app
+
+RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
     && python3 -m black --line-length 120 . \
-    && flake8 --ignore=E501,F401 . \
-    && python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+    && flake8 --ignore=E501,F401
 
 FROM python:3-slim-bullseye
 
@@ -44,6 +44,9 @@ ENV PYTHONUNBUFFERED 1
 
 ARG FLASK_ENV=production
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
+ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
+ARG RESULT_SET_LIMIT="1000"
 
 ENV HOME=/malcolm
 ENV APP_HOME="${HOME}"/api
@@ -51,6 +54,9 @@ ENV APP_FOLDER="${APP_HOME}"
 ENV FLASK_APP=project/__init__.py
 ENV FLASK_ENV $FLASK_ENV
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
+ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
+ENV RESULT_SET_LIMIT $RESULT_SET_LIMIT
 
 WORKDIR "${APP_HOME}"
 

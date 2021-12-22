@@ -6,6 +6,7 @@ import warnings
 
 import dateparser
 from datetime import datetime
+from opensearch_dsl import Search
 
 from flask import Flask, jsonify, send_from_directory, request, redirect, url_for
 
@@ -74,10 +75,14 @@ def protocols():
         jsonified OpenSearch result set containing protocols
     """
     start_time, end_time = gettimes(request.args)
-    return jsonify(
-        start_time=start_time.strftime("%Y/%m/%d %H:%M:%S") if start_time else "",
-        end_time=end_time.strftime("%Y/%m/%d %H:%M:%S") if end_time else "",
+
+    s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
+        size=0
     )
+    s.aggs.bucket("protocols", "terms", field="network.protocol", size=app.config["RESULT_SET_LIMIT"])
+
+    response = s.execute()
+    return jsonify(protocols=response.aggregations.to_dict()["protocols"]["buckets"])
 
 
 @app.route("/indices")
@@ -138,3 +143,18 @@ def ping():
         a string containing 'pong'
     """
     return jsonify(ping="pong")
+
+
+@app.errorhandler(Exception)
+def basic_error(e):
+    """General exception handler for the app
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    error
+        The type of exception and its string representation (e.g., "KeyError: 'protocols'")
+    """
+    return jsonify(error=f"{type(e).__name__}: {str(e)}")
