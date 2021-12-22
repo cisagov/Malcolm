@@ -1,19 +1,20 @@
 FROM python:3-slim-bullseye as builder
 
-WORKDIR /usr/src/app
-
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
+WORKDIR /usr/src/app
 
 COPY ./api /usr/src/app/
 
 RUN    apt-get update \
     && apt-get install -y --no-install-recommends gcc \
     && python3 -m pip install --upgrade pip \
-    && pip install flake8==4.0.1 \
-    && flake8 --indent-size=2 --ignore=E501,F401 . \
+    && python3 -m pip install flake8 black \
+    && python3 -m black --line-length 120 . \
+    && flake8 --ignore=E501,F401 . \
     && python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
 
 FROM python:3-slim-bullseye
