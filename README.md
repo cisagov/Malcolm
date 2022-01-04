@@ -42,6 +42,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     * [Starting Malcolm](#Starting)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
+    * [Temporary read-only interface](#ReadOnlyUI)
 * [Capture file and log archive upload](#Upload)
     - [Tagging](#Tagging)
     - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek)
@@ -849,6 +850,16 @@ Malcolm can be configured to be automatically restarted when the Docker system d
 ### <a name="Wipe"></a>Clearing Malcolm's data
 
 Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch database (**including** [index snapshots and management policies](#IndexManagement) and [alerting configuration](#Alerting)).
+
+### <a name="ReadOnlyUI"></a>Temporary read-only interface
+
+To temporarily set the Malcolm user interaces into a read-only configuration, run the following command from the Malcolm installation directory:
+
+```
+docker-compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
+```
+
+This command must be re-run every time you restart Malcolm.
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
