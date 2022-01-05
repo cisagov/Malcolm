@@ -8,6 +8,7 @@ import re
 import requests
 import warnings
 
+from collections import defaultdict
 from datetime import datetime
 from flask import Flask, jsonify, request
 
@@ -111,6 +112,13 @@ fields_to_urls.append(
     ]
 )
 
+# field type maps from our various field sources
+field_type_map = defaultdict(lambda: 'string')
+field_type_map['integer'] = 'integer'
+field_type_map['long'] = 'integer'
+field_type_map['float'] = 'float'
+field_type_map['double'] = 'double'
+
 warnings.filterwarnings(
     "ignore",
     message="The localize method is no longer necessary, as this time zone supports the fold attribute",
@@ -120,6 +128,15 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object("project.config.Config")
 opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]])
+
+
+def deep_get(d, keys, default=None):
+    assert type(keys) is list
+    if d is None:
+        return default
+    if not keys:
+        return d
+    return deep_get(d.get(keys[0]), keys[1:], default)
 
 
 def gettimes(args):
@@ -260,7 +277,7 @@ def bucketfield(fieldname, current_request, urls=None):
         "values",
         "terms",
         field=fieldname,
-        size=int(current_request.args["limit"]) if "limit" in current_request.args else app.config["RESULT_SET_LIMIT"],
+        size=int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"])),
     )
 
     response = s.execute()
@@ -320,7 +337,8 @@ def indices():
 
 @app.route("/fields")
 def fields():
-    """Provide a list of fields from the Arkime's fields table in OpenSearch data store
+    """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
+    OpenSearch template for the sessions indices, and Kibana's field list
 
     Parameters
     ----------
@@ -328,12 +346,44 @@ def fields():
     Returns
     -------
     fields
-        Each document from the arkime_fields index
+        A dict of fields where key is the field name and value may contain 'description' and 'type'
     """
+    fields = defaultdict(dict)
+
+    # get fields from Arkime's field's table
     s = opensearch_dsl.Search(
         using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
     ).extra(size=3000)
-    return jsonify(fields=[x['_source'] for x in s.execute().to_dict()['hits']['hits']])
+    for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
+        if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
+            fields[fieldname] = {
+                'description': deep_get(hit, ['help']),
+                'type': field_type_map[deep_get(hit, ['type'])],
+            }
+
+    # get fields from OpenSearch template
+    for fieldname, fieldinfo in deep_get(
+        requests.get(f'{app.config["OPENSEARCH_URL"]}/_template/{app.config["MALCOLM_TEMPLATE"]}').json(),
+        [app.config["MALCOLM_TEMPLATE"], "mappings", "properties"],
+    ).items():
+        if 'type' in fieldinfo:
+            fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+
+    # get fields from OpenSearch dashboards
+    for field in requests.get(
+        f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
+        params={
+            'pattern': app.config["ARKIME_INDEX_PATTERN"],
+            'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+        },
+    ).json()['fields']:
+        if fieldname := deep_get(field, ['name']):
+            field_types = deep_get(field, ['esTypes'], [])
+            fields[fieldname]['type'] = field_type_map[
+                field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
+            ]
+
+    return jsonify(fields=fields, total=len(fields))
 
 
 @app.route("/")
