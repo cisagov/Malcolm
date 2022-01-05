@@ -383,6 +383,9 @@ def fields():
                 field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
             ]
 
+    for fieldname in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
+        fields.pop(fieldname, None)
+
     return jsonify(fields=fields, total=len(fields))
 
 
