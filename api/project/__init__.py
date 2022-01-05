@@ -114,10 +114,17 @@ fields_to_urls.append(
 
 # field type maps from our various field sources
 field_type_map = defaultdict(lambda: 'string')
-field_type_map['integer'] = 'integer'
-field_type_map['long'] = 'integer'
+field_type_map['date'] = 'date'
+field_type_map['datetime'] = 'date'
+field_type_map['double'] = 'float'
 field_type_map['float'] = 'float'
-field_type_map['double'] = 'double'
+field_type_map['geo_point'] = 'geo'
+field_type_map['integer'] = 'integer'
+field_type_map['ip'] = 'ip'
+field_type_map['long'] = 'integer'
+field_type_map['time'] = 'date'
+field_type_map['timestamp'] = 'date'
+
 
 warnings.filterwarnings(
     "ignore",
