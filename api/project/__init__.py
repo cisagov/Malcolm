@@ -1,4 +1,5 @@
 import dateparser
+import json
 import opensearch_dsl
 import opensearchpy
 import os
@@ -9,7 +10,6 @@ import warnings
 
 from datetime import datetime
 from flask import Flask, jsonify, request
-from opensearch_dsl import Search
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -252,9 +252,9 @@ def bucketfield(fieldname, current_request, urls=None):
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
-    s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
-        size=0
-    )
+    s = opensearch_dsl.Search(
+        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
+    ).extra(size=0)
     start_time_ms, end_time_ms = filtertime(s, current_request.args)
     s.aggs.bucket(
         "values",
@@ -316,6 +316,24 @@ def indices():
         The output of _cat/indices?format=json from the OpenSearch API
     """
     return jsonify(indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json())
+
+
+@app.route("/fields")
+def fields():
+    """Provide a list of fields from the Arkime's fields table in OpenSearch data store
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    fields
+        Each document from the arkime_fields index
+    """
+    s = opensearch_dsl.Search(
+        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
+    ).extra(size=3000)
+    return jsonify(fields=[x['_source'] for x in s.execute().to_dict()['hits']['hits']])
 
 
 @app.route("/")
