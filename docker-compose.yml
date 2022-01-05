@@ -130,7 +130,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:5.0.4
+    image: malcolmnetsec/opensearch:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -170,7 +170,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:5.0.4
+    image: malcolmnetsec/dashboards-helper:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -201,7 +201,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:5.0.4
+    image: malcolmnetsec/dashboards:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -225,7 +225,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:5.0.4
+    image: malcolmnetsec/logstash-oss:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -265,7 +265,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:5.0.4
+    image: malcolmnetsec/filebeat-oss:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -306,7 +306,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:5.0.4
+    image: malcolmnetsec/arkime:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -350,7 +350,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:5.0.4
+    image: malcolmnetsec/zeek:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -380,7 +380,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:5.0.4
+    image: malcolmnetsec/file-monitor:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -406,7 +406,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:5.0.4
+    image: malcolmnetsec/pcap-capture:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -429,7 +429,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:5.0.4
+    image: malcolmnetsec/pcap-monitor:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -455,7 +455,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:5.0.4
+    image: malcolmnetsec/file-upload:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -481,7 +481,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:5.0.4
+    image: malcolmnetsec/htadmin:5.1.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -506,7 +506,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:5.0.4
+    image: malcolmnetsec/freq:5.1.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -527,7 +527,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:5.0.4
+    image: malcolmnetsec/name-map-ui:5.1.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -550,11 +550,32 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  api:
+    image: malcolmnetsec/api:5.1.0
+    build:
+      context: .
+      dockerfile: Dockerfiles/api.Dockerfile
+    command: gunicorn --bind 0:5000 manage:app
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: api
+    environment:
+      << : *process-variables
+      VIRTUAL_HOST : 'api.malcolm.local'
+    expose:
+      - 5000
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/ping"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   nginx-proxy:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:5.0.4
+    image: malcolmnetsec/nginx-proxy:5.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -564,6 +585,7 @@ services:
       << : *auth-variables
       << : *nginx-variables
     depends_on:
+      - api
       - arkime
       - dashboards
       - upload

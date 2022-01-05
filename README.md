@@ -42,6 +42,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     * [Starting Malcolm](#Starting)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
+    * [Temporary read-only interface](#ReadOnlyUI)
 * [Capture file and log archive upload](#Upload)
     - [Tagging](#Tagging)
     - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek)
@@ -103,6 +104,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
 
 See [**Building from source**](#Build) to read how you can use GitHub [workflow files](./.github/workflows/) to build Malcolm.
 
+![api-build-and-push-ghcr](https://github.com/idaholab/Malcolm/workflows/api-build-and-push-ghcr/badge.svg)
 ![arkime-build-and-push-ghcr](https://github.com/idaholab/Malcolm/workflows/arkime-build-and-push-ghcr/badge.svg)
 ![dashboards-build-and-push-ghcr](https://github.com/idaholab/Malcolm/workflows/dashboards-build-and-push-ghcr/badge.svg)
 ![dashboards-helper-build-and-push-ghcr](https://github.com/idaholab/Malcolm/workflows/dashboards-helper-build-and-push-ghcr/badge.svg)
@@ -146,6 +148,7 @@ You must run [`auth_setup`](#AuthSetup) prior to pulling Malcolm's Docker images
 Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
+Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done
 Pulling dashboards-helper ... done
@@ -167,21 +170,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/arkime                                           5.0.4           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.0.4           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.0.4           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.0.4           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.0.4           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.0.4           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.0.4           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.0.4           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.0.4           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.0.4           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.0.4           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.1.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.1.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.1.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.1.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.1.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.1.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.1.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.1.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -333,6 +337,7 @@ See [Zeek log integration](#ArkimeZeek) for more information on how Malcolm inte
 
 Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
 
+* `api` - code and configuration for the `api` container which provides a REST API to query Malcolm
 * `arkime` - code and configuration for the `arkime` container which processes PCAP files using `capture` and which serves the Viewer application
 * `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
 * `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
@@ -378,6 +383,7 @@ $ ./scripts/build.sh
 
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
+* `malcolmnetsec/api` (based on `python:3-slim-bullseye`)
 * `malcolmnetsec/arkime` (based on `debian:bullseye-slim`)
 * `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/dashboards-helper` (based on `alpine:3.15`)
@@ -844,6 +850,16 @@ Malcolm can be configured to be automatically restarted when the Docker system d
 ### <a name="Wipe"></a>Clearing Malcolm's data
 
 Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch database (**including** [index snapshots and management policies](#IndexManagement) and [alerting configuration](#Alerting)).
+
+### <a name="ReadOnlyUI"></a>Temporary read-only interface
+
+To temporarily set the Malcolm user interaces into a read-only configuration, run the following command from the Malcolm installation directory:
+
+```
+docker-compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
+```
+
+This command must be re-run every time you restart Malcolm.
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
@@ -1523,7 +1539,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.0.4.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.1.0.iso"
 …
 ```
 
@@ -1891,6 +1907,7 @@ Store username/password for email alert sender account (y/N):
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
 ```
 user@host:~/Malcolm$ docker-compose pull
+Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done
 Pulling dashboards-helper ... done
@@ -1909,21 +1926,22 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/arkime                                           5.0.4           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.0.4           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.0.4           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.0.4           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.0.4           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.0.4           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.0.4           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.0.4           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.0.4           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.0.4           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.0.4           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.0.4           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.0.4           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.1.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.1.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.1.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.1.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.1.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.1.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.1.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.1.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

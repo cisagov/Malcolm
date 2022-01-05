@@ -23,6 +23,7 @@ The purpose of this document is to provide some direction for those willing to m
     + [Adding new visualizations and dashboards](#DashboardsNewViz)
     + [OpenSearch Dashboards plugins](#DashboardsPlugins)
 * [Carved file scanners](#Scanners)
+* [Style](#Style)
 
 ## <a name="LocalMods"></a>Local modifications
 
@@ -277,6 +278,12 @@ When Zeek extracts a file it observes being transfered in network traffic, the `
 Additional file scanners could either be added to the `file-monitor` service, or to avoid coupling with Malcolm's code you could simply define a new service as instructed in the [Adding a new service](#NewImage) section and write your own scripts to subscribe and publish to the topics as described above. While that might be a bit of hand-waving, these general steps take care of the plumbing around extracting the file and notifying your tool, as well as handling the logging of "hits": you shouldn't have to really edit any *existing* code to add a new carved file scanner.
 
 The `EXTRACTED_FILE_PIPELINE_DEBUG` and `EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA` environment variables in the `docker-compose` files can be set to `true` to enable verbose debug logging from the output of the Docker containers involved in the carved file processing pipeline.
+
+## <a name="Style"></a>Style
+
+### Python
+
+For Python code found in Malcolm, the author uses [Black: The uncompromising Python code formatter](https://github.com/psf/black) with the options `--line-length 120 --skip-string-normalization`.
 
 ## <a name="Footer"></a>Copyright
 
