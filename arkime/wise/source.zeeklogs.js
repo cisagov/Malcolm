@@ -1071,13 +1071,24 @@ class MalcolmSource extends WISESource {
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
     var filterUrl = "idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
-    this.api.addValueAction("malcolm_dashboards_cat_ip",       {name:filterLabel, url:"idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%", category:"ip"});
+    this.api.addValueAction("malcolm_dashboards_cat_ip",       {name:filterLabel, url:filterUrl, category:"ip"});
     this.api.addValueAction("malcolm_dashboards_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
     this.api.addValueAction("malcolm_dashboards_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
     this.api.addValueAction("malcolm_dashboards_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});
     this.api.addValueAction("malcolm_dashboards_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
     this.api.addValueAction("malcolm_dashboards_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
     this.api.addValueAction("malcolm_dashboards_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
+
+    // add rick-click for opening malcolm agg api
+    var apiLabel = "Malcolm Agg. API %DBFIELD%";
+    var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
+    this.api.addValueAction("malcolm_mapi_cat_ip",       {name:apiLabel, url:apiURL, category:"ip"});
+    this.api.addValueAction("malcolm_mapi_cat_port",     {name:apiLabel, url:apiURL, category:"port"});
+    this.api.addValueAction("malcolm_mapi_cat_country",  {name:apiLabel, url:apiURL, category:"country"});
+    this.api.addValueAction("malcolm_mapi_cat_host",     {name:apiLabel, url:apiURL, category:"host"});
+    this.api.addValueAction("malcolm_mapi_cat_md5",      {name:apiLabel, url:apiURL, category:"md5"});
+    this.api.addValueAction("malcolm_mapi_cat_user",     {name:apiLabel, url:apiURL, category:"user"});
+    this.api.addValueAction("malcolm_mapi_fields_zeek",  {name:apiLabel, url:apiURL, fields:allFieldsStr});
 
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});
