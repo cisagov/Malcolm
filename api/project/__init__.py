@@ -2,6 +2,7 @@ import dateparser
 import opensearch_dsl
 import opensearchpy
 import os
+import pytz
 import re
 import requests
 import warnings
@@ -174,8 +175,14 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     return translated
         a list of URLs relevant to the field
     """
-    start_time_str = f"'{start_time.isoformat()}'" if start_time is not None else 'now-1d'
-    end_time_str = f"'{end_time.isoformat()}'" if end_time is not None else 'now'
+    start_time_str = (
+        f"'{start_time.astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')}'"
+        if start_time is not None
+        else 'now-1d'
+    )
+    end_time_str = (
+        f"'{end_time.astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')}'" if end_time is not None else 'now'
+    )
     translated = []
 
     for url_regex_pair in fields_to_urls:
