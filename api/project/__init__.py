@@ -346,7 +346,7 @@ def fields():
     Returns
     -------
     fields
-        A dict of fields where key is the field name and value may contain 'description' and 'type'
+        A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
     fields = defaultdict(dict)
 
