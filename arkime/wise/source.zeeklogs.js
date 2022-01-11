@@ -122,6 +122,7 @@ class MalcolmSource extends WISESource {
       "oui.src",
       "protocols",
       "related.hash",
+      "related.hosts",
       "related.ip",
       "related.password",
       "related.user",
@@ -469,8 +470,8 @@ class MalcolmSource extends WISESource {
       "zeek.intel.cif_lastseen",
       "zeek.intel.file_description",
       "zeek.intel.file_mime_type",
-      "zeek.intel.indicator",
-      "zeek.intel.indicator_type",
+      "zeek.intel.seen_indicator",
+      "zeek.intel.seen_indicator_type",
       "zeek.intel.matched",
       "zeek.intel.seen_node",
       "zeek.intel.seen_where",
@@ -1132,6 +1133,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
       "    +arrayList(session.related, 'ip', 'Related IP', 'related.ip')\n" +
+      "    +arrayList(session.related, 'hosts', 'Related Host', 'related.hosts')\n" +
       "    +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
       "    +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
       "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
