@@ -370,6 +370,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    cap_add:
+      - IPC_LOCK
     depends_on:
       - opensearch
     volumes:
