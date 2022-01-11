@@ -370,6 +370,7 @@ services:
       - ./zeek-logs/upload:/zeek/upload
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
+      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-zeek"]
       interval: 30s

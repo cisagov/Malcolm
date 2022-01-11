@@ -122,6 +122,8 @@ RUN apt-get -q update && \
     mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
                "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
+    mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel && \
+        touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
     cd /tmp && \
@@ -136,6 +138,7 @@ ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
+ADD zeek/scripts/*.sh /usr/local/bin/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
@@ -156,6 +159,7 @@ RUN mkdir -p /tmp/logs && \
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
+    chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel && \
     ln -sfr /usr/local/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Whether or not to auto-tag logs based on filename
@@ -214,7 +218,9 @@ ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+VOLUME [${ZEEK_DIR}/share/zeek/site/intel]
+
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
