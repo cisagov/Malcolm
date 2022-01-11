@@ -231,6 +231,12 @@ services:
     stdin_open: false
     tty: true
     hostname: logstash
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
     environment:
       << : *process-variables
       << : *logstash-variables
