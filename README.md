@@ -81,6 +81,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [OpenSearch index management](#IndexManagement)
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
+    - [Zeek Intelligence Framework](#ZeekIntel)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
@@ -1456,6 +1457,12 @@ These categories' severity scores can be customized by editing `logstash/maps/ma
 Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take effect. The [hostname and CIDR subnet names interface](#NameMapUI) provides a convenient button for restarting Logstash.
 
 Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCORING` environment variable to `false`  in the [`docker-compose.yml`](#DockerComposeYml) file and [restarting Malcolm](#StopAndRestart).
+
+### <a name="ZeekIntel"></a>Zeek Intelligence Framework
+
+To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/frameworks/intel.html) documentation, "The goals of Zeek’s Intelligence Framework are to consume intelligence data, make it available for matching, and provide infrastructure to improve performance and memory utilization. Data in the Intelligence Framework is an atomic piece of intelligence such as an IP address or an e-mail address. This atomic data will be packed with metadata such as a freeform source field, a freeform descriptive field, and a URL which might lead to more information about the specific item." Zeek [intelligence](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html) [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type) include IP addresses, URLs, file names, hashes, email addresses, and more.
+
+Malcolm doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. On [startup](zeek/scripts/entrypoint.sh), Malcolm's `malcolmnetsec/zeek` docker container enumerates the subdirectories under `./zeek/intel` (which is [bind mounted](https://docs.docker.com/storage/bind-mounts/) into the container's runtime) and configures Zeek so that those intelligence files will be automatically included in its local policy. Subdirectories under `./zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
 
 ### <a name="Alerting"></a>Alerting
 

@@ -21,9 +21,31 @@ if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -
 @load policy/frameworks/intel/do_notice
 
 EOF
+    LOOSE_INTEL_FILES=()
+
+    # process subdirectories under INTEL_DIR
     for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null); do
-        echo "@load $DIR" >> __load__.zeek
+        if [[ -f "${DIR}"/__load__.zeek ]]; then
+            # this intel feed has its own load directive and should take care of itself
+            echo "@load ${DIR}" >> __load__.zeek
+        else
+            # this directory contains "loose" intel files we'll need to load explicitly
+            while IFS= read -r line; do
+                LOOSE_INTEL_FILES+=( "$line" )
+            done < <( find "${INTEL_DIR}/${DIR}" -type f 2>/dev/null )
+        fi
     done
+
+    # explicitly load all of the "loose" intel files in other subdirectories that didn't __load__.zeek themselves
+    if (( ${#LOOSE_INTEL_FILES[@]} )); then
+        echo >> __load__.zeek
+        echo 'redef Intel::read_files += {' >> __load__.zeek
+        for INTEL_FILE in "${LOOSE_INTEL_FILES[@]}"; do
+            echo "  \"${INTEL_FILE}\"," >> __load__.zeek
+        done
+        echo '};' >> __load__.zeek
+    fi
+
     popd >/dev/null 2>&1
 fi
 
