@@ -407,7 +407,7 @@ def version():
     Returns
     -------
     version
-        a string containing the Malcolm version (e.g., "5.1.1")
+        a string containing the Malcolm version (e.g., "5.2.0")
     built
         a string containing the Malcolm build timestamp (e.g., "2021-12-22T14:13:26Z")
     sha
