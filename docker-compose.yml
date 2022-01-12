@@ -130,7 +130,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:5.1.0
+    image: malcolmnetsec/opensearch:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -139,6 +139,7 @@ services:
       << : *process-variables
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
+      MAX_LOCKED_MEMORY : 'unlimited'
       OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
@@ -170,7 +171,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:5.1.0
+    image: malcolmnetsec/dashboards-helper:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -201,7 +202,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:5.1.0
+    image: malcolmnetsec/dashboards:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -225,11 +226,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:5.1.0
+    image: malcolmnetsec/logstash-oss:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: logstash
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
     environment:
       << : *process-variables
       << : *logstash-variables
@@ -265,7 +272,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:5.1.0
+    image: malcolmnetsec/filebeat-oss:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -275,7 +282,7 @@ services:
       << : *nginx-variables
       << : *common-upload-variables
       << : *common-beats-variables
-      FILEBEAT_LOG_PATH : '/data/zeek/current'
+      FILEBEAT_ZEEK_LOG_PATH : '/data/zeek/current'
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
       FILEBEAT_LOG_CLEANUP_MINUTES : 180
       FILEBEAT_ZIP_CLEANUP_MINUTES : 360
@@ -306,7 +313,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:5.1.0
+    image: malcolmnetsec/arkime:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -350,7 +357,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:5.1.0
+    image: malcolmnetsec/zeek:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -363,6 +370,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    cap_add:
+      - IPC_LOCK
     depends_on:
       - opensearch
     volumes:
@@ -370,6 +379,7 @@ services:
       - ./zeek-logs/upload:/zeek/upload
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
+      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-zeek"]
       interval: 30s
@@ -380,7 +390,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:5.1.0
+    image: malcolmnetsec/file-monitor:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -406,7 +416,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:5.1.0
+    image: malcolmnetsec/pcap-capture:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -429,7 +439,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:5.1.0
+    image: malcolmnetsec/pcap-monitor:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -455,7 +465,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:5.1.0
+    image: malcolmnetsec/file-upload:5.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -481,7 +491,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:5.1.0
+    image: malcolmnetsec/htadmin:5.2.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -506,7 +516,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:5.1.0
+    image: malcolmnetsec/freq:5.2.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -527,7 +537,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:5.1.0
+    image: malcolmnetsec/name-map-ui:5.2.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -551,7 +561,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:5.1.0
+    image: malcolmnetsec/api:5.2.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -575,7 +585,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:5.1.0
+    image: malcolmnetsec/nginx-proxy:5.2.0
     restart: "no"
     stdin_open: false
     tty: true

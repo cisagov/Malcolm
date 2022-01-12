@@ -81,6 +81,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [OpenSearch index management](#IndexManagement)
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
+    - [Zeek Intelligence Framework](#ZeekIntel)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
@@ -169,22 +170,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.1.0           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.1.0           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.1.0           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.1.0           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.1.0           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.1.0           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.1.0           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.1.0           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.0           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1456,6 +1457,18 @@ Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take
 
 Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCORING` environment variable to `false`  in the [`docker-compose.yml`](#DockerComposeYml) file and [restarting Malcolm](#StopAndRestart).
 
+### <a name="ZeekIntel"></a>Zeek Intelligence Framework
+
+To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/frameworks/intel.html) documentation, "The goals of Zeek’s Intelligence Framework are to consume intelligence data, make it available for matching, and provide infrastructure to improve performance and memory utilization. Data in the Intelligence Framework is an atomic piece of intelligence such as an IP address or an e-mail address. This atomic data will be packed with metadata such as a freeform source field, a freeform descriptive field, and a URL which might lead to more information about the specific item." Zeek [intelligence](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html) [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type) include IP addresses, URLs, file names, hashes, email addresses, and more.
+
+Malcolm doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. On [startup](zeek/scripts/entrypoint.sh), Malcolm's `malcolmnetsec/zeek` docker container enumerates the subdirectories under `./zeek/intel` (which is [bind mounted](https://docs.docker.com/storage/bind-mounts/) into the container's runtime) and configures Zeek so that those intelligence files will be automatically included in its local policy. Subdirectories under `./zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
+
+Note that Malcolm does not manage updates for these intelligence files. You should use the update mechanism suggested by your feeds' maintainers to keep them up to date. Adding and deleting intelligence files under this directory will take effect upon [restarting Malcolm](#StopAndRestart), although modifying intelligence files in-place should not require a restart. Alternately, it can be done without restarting Malcolm by running the following command from the Malcolm installation directory:
+
+```
+docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
+```
+
 ### <a name="Alerting"></a>Alerting
 
 See [Alerting](https://opensearch.org/docs/latest/monitoring-plugins/alerting/index/) in the OpenSearch documentation.
@@ -1538,7 +1551,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.1.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.0.iso"
 …
 ```
 
@@ -1925,22 +1938,22 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.1.0           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.1.0           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.1.0           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.1.0           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.1.0           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.1.0           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.1.0           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.1.0           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.0           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

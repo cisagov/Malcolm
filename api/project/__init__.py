@@ -1,4 +1,5 @@
 import dateparser
+import json
 import opensearch_dsl
 import opensearchpy
 import os
@@ -7,9 +8,9 @@ import re
 import requests
 import warnings
 
+from collections import defaultdict
 from datetime import datetime
 from flask import Flask, jsonify, request
-from opensearch_dsl import Search
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -111,6 +112,20 @@ fields_to_urls.append(
     ]
 )
 
+# field type maps from our various field sources
+field_type_map = defaultdict(lambda: 'string')
+field_type_map['date'] = 'date'
+field_type_map['datetime'] = 'date'
+field_type_map['double'] = 'float'
+field_type_map['float'] = 'float'
+field_type_map['geo_point'] = 'geo'
+field_type_map['integer'] = 'integer'
+field_type_map['ip'] = 'ip'
+field_type_map['long'] = 'integer'
+field_type_map['time'] = 'date'
+field_type_map['timestamp'] = 'date'
+
+
 warnings.filterwarnings(
     "ignore",
     message="The localize method is no longer necessary, as this time zone supports the fold attribute",
@@ -120,6 +135,15 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object("project.config.Config")
 opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]])
+
+
+def deep_get(d, keys, default=None):
+    assert type(keys) is list
+    if d is None:
+        return default
+    if not keys:
+        return d
+    return deep_get(d.get(keys[0]), keys[1:], default)
 
 
 def gettimes(args):
@@ -252,15 +276,15 @@ def bucketfield(fieldname, current_request, urls=None):
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
-    s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
-        size=0
-    )
+    s = opensearch_dsl.Search(
+        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
+    ).extra(size=0)
     start_time_ms, end_time_ms = filtertime(s, current_request.args)
     s.aggs.bucket(
         "values",
         "terms",
         field=fieldname,
-        size=int(current_request.args["limit"]) if "limit" in current_request.args else app.config["RESULT_SET_LIMIT"],
+        size=int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"])),
     )
 
     response = s.execute()
@@ -318,6 +342,60 @@ def indices():
     return jsonify(indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json())
 
 
+@app.route("/fields")
+def fields():
+    """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
+    OpenSearch template for the sessions indices, and Kibana's field list
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    fields
+        A dict of dicts where key is the field name and value may contain 'description' and 'type'
+    """
+    fields = defaultdict(dict)
+
+    # get fields from Arkime's field's table
+    s = opensearch_dsl.Search(
+        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
+    ).extra(size=3000)
+    for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
+        if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
+            fields[fieldname] = {
+                'description': deep_get(hit, ['help']),
+                'type': field_type_map[deep_get(hit, ['type'])],
+            }
+
+    # get fields from OpenSearch template
+    for fieldname, fieldinfo in deep_get(
+        requests.get(f'{app.config["OPENSEARCH_URL"]}/_template/{app.config["MALCOLM_TEMPLATE"]}').json(),
+        [app.config["MALCOLM_TEMPLATE"], "mappings", "properties"],
+    ).items():
+        if 'type' in fieldinfo:
+            fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+
+    # get fields from OpenSearch dashboards
+    for field in requests.get(
+        f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
+        params={
+            'pattern': app.config["ARKIME_INDEX_PATTERN"],
+            'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+        },
+    ).json()['fields']:
+        if fieldname := deep_get(field, ['name']):
+            field_types = deep_get(field, ['esTypes'], [])
+            fields[fieldname]['type'] = field_type_map[
+                field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
+            ]
+
+    for fieldname in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
+        fields.pop(fieldname, None)
+
+    return jsonify(fields=fields, total=len(fields))
+
+
 @app.route("/")
 @app.route("/version")
 def version():
@@ -329,7 +407,7 @@ def version():
     Returns
     -------
     version
-        a string containing the Malcolm version (e.g., "5.1.0")
+        a string containing the Malcolm version (e.g., "5.2.0")
     built
         a string containing the Malcolm build timestamp (e.g., "2021-12-22T14:13:26Z")
     sha
