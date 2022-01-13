@@ -13,3 +13,5 @@
 "Lateral_Movement_Multiple_Attempts": "TA0008"
 "Persistence": "TA0003"
 "Privilege_Escalation": "TA0004"
+"Reconnaissance": "TA0043"
+"Resource_Development": "TA0042"

@@ -13,3 +13,5 @@
 "Lateral_Movement_Multiple_Attempts": "https://attack.mitre.org/tactics/TA0008/"
 "Persistence": "https://attack.mitre.org/tactics/TA0003/"
 "Privilege_Escalation": "https://attack.mitre.org/tactics/TA0004/"
+"Reconnaissance": "https://attack.mitre.org/tactics/TA0043/"
+"Resource_Development": "https://attack.mitre.org/tactics/TA0042/"
