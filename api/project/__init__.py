@@ -314,6 +314,7 @@ def bucketfield(fieldname, current_request, urls=None):
         )
 
 
+@app.route("/agg", defaults={'fieldname': 'event.provider'})
 @app.route("/agg/<fieldname>")
 def aggregate(fieldname):
     """Returns the aggregated values and counts for a given field name, see bucketfield
