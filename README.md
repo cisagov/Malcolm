@@ -84,6 +84,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Zeek Intelligence Framework](#ZeekIntel)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
+    - [API](#API)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -1510,6 +1511,344 @@ Naturally, these lookups could produce false positives, so these connections are
 ![](./docs/images/screenshots/dashboards_bestguess.png)
 
 This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+
+### <a name="API"></a>API
+
+Malcolm provides a [REST API](./api/project/__init__.py) that can be used to programatically query some aspects of Malcolm's status and data. Malcolm's API is not to be confused with the [Viewer API](https://arkime.com/apiv3) provided by Arkime, although there may be some overlap in functionality.
+
+#### Ping
+
+`GET` - /mapi/ping
+
+Returns `pong` (for a simple "up" check).
+
+Example output:
+
+```json
+{"ping":"pong"}
+```
+
+#### Version Information
+
+`GET` - /mapi/version
+
+Returns version information about Malcolm and version/[health](https://opensearch.org/docs/latest/opensearch/rest-api/cluster-health/) information about the underlying OpenSearch instance.
+
+Example output:
+
+```json
+{
+    "built": "2022-01-18T16:10:39Z",
+    "opensearch": {
+        "cluster_name": "docker-cluster",
+        "cluster_uuid": "TcSiEaOgTdO_l1IivYz2gA",
+        "name": "opensearch",
+        "tagline": "The OpenSearch Project: https://opensearch.org/",
+        "version": {
+            "build_date": "2021-12-21T01:36:21.407473Z",
+            "build_hash": "8a529d77c7432bc45b005ac1c4ba3b2741b57d4a",
+            "build_snapshot": false,
+            "build_type": "tar",
+            "lucene_version": "8.10.1",
+            "minimum_index_compatibility_version": "6.0.0-beta1",
+            "minimum_wire_compatibility_version": "6.8.0",
+            "number": "7.10.2"
+        }
+    },
+    "opensearch_health": {
+        "active_primary_shards": 29,
+        "active_shards": 29,
+        "active_shards_percent_as_number": 82.85714285714286,
+        "cluster_name": "docker-cluster",
+        "delayed_unassigned_shards": 0,
+        "discovered_master": true,
+        "initializing_shards": 0,
+        "number_of_data_nodes": 1,
+        "number_of_in_flight_fetch": 0,
+        "number_of_nodes": 1,
+        "number_of_pending_tasks": 0,
+        "relocating_shards": 0,
+        "status": "yellow",
+        "task_max_waiting_in_queue_millis": 0,
+        "timed_out": false,
+        "unassigned_shards": 6
+    },
+    "sha": "8ddbbf4",
+    "version": "5.2.0"
+}
+```
+
+#### Fields
+
+`GET` - /mapi/fields
+
+Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
+
+
+Example output:
+
+```json
+{
+    "fields": {
+        "@timestamp": {
+            "type": "date"
+        },
+…
+        "zeek.x509.san_uri": {
+            "description": "Subject Alternative Name URI",
+            "type": "string"
+        },
+        "zeek.x509.san_uri.text": {
+            "type": "string"
+        }
+    },
+    "total": 2005
+}
+```
+
+#### Indices
+
+`GET` - /mapi/indices
+
+Lists [information related to the underlying OpenSearch indices](https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-indices/), similar to Arkime's [esindices](https://arkime.com/apiv3#esindices-api) API.
+
+Example output:
+
+```json
+
+{
+    "indices": [
+…
+        {
+            "docs.count": "2268613",
+            "docs.deleted": "0",
+            "health": "green",
+            "index": "arkime_sessions3-210301",
+            "pri": "1",
+            "pri.store.size": "1.8gb",
+            "rep": "0",
+            "status": "open",
+            "store.size": "1.8gb",
+            "uuid": "w-4Q0ofBTdWO9KqeIIAAWg"
+        },
+…
+    ]
+}
+```
+
+#### Field Aggregations
+
+`GET` - /mapi/agg/`<fieldname>`
+
+Executes an OpenSearch [bucket aggregation](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the requested fields across all of Malcolm's indexed network traffic metadata.
+
+Parameters:
+
+* `fieldname` (URL parameter) - the name(s) of the field(s) to be queried (comma-separated if multiple fields) (default: `event.provider`)
+* `limit` (query parameter) - the maximum number of records to return at each level of aggregation (default: 500)
+* `from` (query parameter) - the time frame ([`gte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "1 day ago")
+* `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
+
+Example URL and output:
+
+```
+https://localhost/mapi/agg/source.segment,network.protocol?from=6 hours ago&to=now
+```
+
+```json
+{
+    "fields": [
+        "source.segment",
+        "network.protocol"
+    ],
+    "range": [
+        1642517830,
+        1642539399
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 3251,
+                "key": "Battery Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1485,
+                            "key": "modbus"
+                        },
+                        {
+                            "doc_count": 862,
+                            "key": "smb"
+                        },
+                        {
+                            "doc_count": 397,
+                            "key": "dns"
+                        },
+                        {
+                            "doc_count": 225,
+                            "key": "http"
+                        },
+                        {
+                            "doc_count": 212,
+                            "key": "ntlm"
+                        },
+                        {
+                            "doc_count": 32,
+                            "key": "dce_rpc"
+                        },
+                        {
+                            "doc_count": 19,
+                            "key": "gssapi"
+                        },
+                        {
+                            "doc_count": 2,
+                            "key": "rdp"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2394,
+                "key": "Combined Cycle BOP",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 674,
+                            "key": "enip"
+                        },
+                        {
+                            "doc_count": 626,
+                            "key": "cip"
+                        },
+                        {
+                            "doc_count": 550,
+                            "key": "smb"
+                        },
+                        {
+                            "doc_count": 104,
+                            "key": "ntlm"
+                        },
+                        {
+                            "doc_count": 52,
+                            "key": "dce_rpc"
+                        },
+                        {
+                            "doc_count": 13,
+                            "key": "dns"
+                        },
+                        {
+                            "doc_count": 3,
+                            "key": "gssapi"
+                        },
+                        {
+                            "doc_count": 3,
+                            "key": "rdp"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1741,
+                "key": "Solar Panel Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1177,
+                            "key": "cotp"
+                        },
+                        {
+                            "doc_count": 361,
+                            "key": "s7comm"
+                        },
+                        {
+                            "doc_count": 115,
+                            "key": "smb"
+                        },
+                        {
+                            "doc_count": 26,
+                            "key": "ntlm"
+                        },
+                        {
+                            "doc_count": 19,
+                            "key": "dce_rpc"
+                        },
+                        {
+                            "doc_count": 3,
+                            "key": "dns"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1153,
+                "key": "Wind Turbine Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1127,
+                            "key": "dce_rpc"
+                        },
+                        {
+                            "doc_count": 11,
+                            "key": "smb"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 161,
+                "key": "Site Office Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 144,
+                            "key": "tds"
+                        },
+                        {
+                            "doc_count": 6,
+                            "key": "rfb"
+                        },
+                        {
+                            "doc_count": 3,
+                            "key": "smb"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "dhcp"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 4,
+                "key": "Substation Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "telnet"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
