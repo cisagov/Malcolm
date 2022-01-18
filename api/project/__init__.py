@@ -217,15 +217,16 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     )
     translated = []
 
-    for url_regex_pair in fields_to_urls:
-        if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], fieldname, flags=re.IGNORECASE):
-            for url in url_regex_pair[1]:
-                if url.startswith('DASH:'):
-                    translated.append(
-                        f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
-                    )
-                else:
-                    translated.append(url)
+    for field in get_iterable(fieldname):
+        for url_regex_pair in fields_to_urls:
+            if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
+                for url in url_regex_pair[1]:
+                    if url.startswith('DASH:'):
+                        translated.append(
+                            f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
+                        )
+                    else:
+                        translated.append(url)
 
     return list(set(translated))
 
@@ -347,7 +348,7 @@ def aggregate(fieldname):
     return bucketfield(
         fields,
         request,
-        urls=urls_for_field(fields[0] if len(fields) > 0 else None, start_time=start_time, end_time=end_time),
+        urls=urls_for_field(fields, start_time=start_time, end_time=end_time),
     )
 
 
