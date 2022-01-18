@@ -9,6 +9,7 @@ import requests
 import warnings
 
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import datetime
 from flask import Flask, jsonify, request
 
@@ -146,6 +147,13 @@ def deep_get(d, keys, default=None):
     return deep_get(d.get(keys[0]), keys[1:], default)
 
 
+def get_iterable(x):
+    if isinstance(x, Iterable) and not isinstance(x, str):
+        return x
+    else:
+        return (x,)
+
+
 def gettimes(args):
     """Parses 'from' and 'to' times out of the provided dictionary, returning
     two datetime objects
@@ -263,8 +271,8 @@ def bucketfield(fieldname, current_request, urls=None):
 
     Parameters
     ----------
-    fieldname : string
-        The name of the field on which to perform the aggregation
+    fieldname : string or Array of string
+        The name of the field(s) on which to perform the aggregation
     current_request : Request
         The flask Request object being processed (see gettimes and filtertime)
         Uses 'from', 'to', and 'limit' from current_request.args
@@ -280,23 +288,26 @@ def bucketfield(fieldname, current_request, urls=None):
         using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
     ).extra(size=0)
     start_time_ms, end_time_ms = filtertime(s, current_request.args)
-    s.aggs.bucket(
-        "values",
-        "terms",
-        field=fieldname,
-        size=int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"])),
-    )
+    bucket_limit = int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
+    last_bucket = s.aggs
+    for fname in get_iterable(fieldname):
+        last_bucket = last_bucket.bucket(
+            "values",
+            "terms",
+            field=fname,
+            size=bucket_limit,
+        )
 
     response = s.execute()
     if (urls is not None) and (len(urls) > 0):
         return jsonify(
-            values=response.aggregations.to_dict()["values"]["buckets"],
+            values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
             urls=urls,
         )
     else:
         return jsonify(
-            values=response.aggregations.to_dict()["values"]["buckets"],
+            values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
         )
 
@@ -308,7 +319,7 @@ def aggregate(fieldname):
     Parameters
     ----------
     fieldname : string
-        the name of the field to be bucketed
+        the name of the field(s) to be bucketed (comma-separated if multiple fields)
     request : Request
         see bucketfield
 
@@ -320,10 +331,11 @@ def aggregate(fieldname):
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
     start_time, end_time = gettimes(request.args)
+    fields = fieldname.split(",")
     return bucketfield(
-        fieldname,
+        fields,
         request,
-        urls=urls_for_field(fieldname, start_time=start_time, end_time=end_time),
+        urls=urls_for_field(fields[0] if len(fields) > 0 else None, start_time=start_time, end_time=end_time),
     )
 
 
