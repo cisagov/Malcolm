@@ -245,25 +245,34 @@ def filtertime(search, args):
 
     Returns
     -------
-    return start_time, end_time
+    start_time,
+    end_time,
         integers representing the start and end times for the query, in milliseconds since the epoch
+    search.filter(...)
+        filtered search object
     """
     start_time, end_time = gettimes(args)
     start_time_ms = int(
         start_time.timestamp() * 1000 if start_time is not None else dateparser.parse("1 day ago").timestamp() * 1000
     )
     end_time_ms = int(end_time.timestamp() * 1000 if end_time is not None else datetime.now().timestamp() * 1000)
-    search.filter(
-        "range",
-        **{
-            app.config["ARKIME_INDEX_TIME_FIELD"]: {
-                "gte": start_time_ms,
-                "lte": end_time_ms,
-                "format": "epoch_millis",
-            }
-        },
+    print(f'{app.config["ARKIME_INDEX_TIME_FIELD"]}, {start_time_ms}, {end_time_ms}')
+    return (
+        start_time_ms,
+        end_time_ms,
+        search.filter(
+            "range",
+            **{
+                app.config["ARKIME_INDEX_TIME_FIELD"]: {
+                    "gte": start_time_ms,
+                    "lte": end_time_ms,
+                    "format": "epoch_millis",
+                }
+            },
+        )
+        if search
+        else None,
     )
-    return start_time_ms, end_time_ms
 
 
 def bucketfield(fieldname, current_request, urls=None):
@@ -287,7 +296,7 @@ def bucketfield(fieldname, current_request, urls=None):
     s = opensearch_dsl.Search(
         using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
     ).extra(size=0)
-    start_time_ms, end_time_ms = filtertime(s, current_request.args)
+    start_time_ms, end_time_ms, s = filtertime(s, current_request.args)
     bucket_limit = int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
     last_bucket = s.aggs
     for fname in get_iterable(fieldname):
