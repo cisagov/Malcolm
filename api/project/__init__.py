@@ -303,12 +303,14 @@ def bucketfield(fieldname, current_request, urls=None):
         return jsonify(
             values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
+            fields=get_iterable(fieldname),
             urls=urls,
         )
     else:
         return jsonify(
             values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
+            fields=get_iterable(fieldname),
         )
 
 
