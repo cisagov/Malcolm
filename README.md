@@ -1652,57 +1652,118 @@ Parameters:
 Example URL and output:
 
 ```
-https://localhost/mapi/agg/source.segment,network.protocol?from=6 hours ago&to=now
+https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=now
 ```
 
 ```json
 {
     "fields": [
-        "source.segment",
-        "network.protocol"
+        "network.protocol",
+        "event.result"
     ],
     "range": [
-        1642517830,
-        1642539399
+        1642456456,
+        1642542856
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))",
+        "/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))"
     ],
     "values": {
         "buckets": [
             {
-                "doc_count": 3251,
-                "key": "Battery Network",
+                "doc_count": 12858,
+                "key": "dns",
                 "values": {
                     "buckets": [
                         {
-                            "doc_count": 1485,
-                            "key": "modbus"
+                            "doc_count": 7439,
+                            "key": "Success"
                         },
                         {
-                            "doc_count": 862,
-                            "key": "smb"
+                            "doc_count": 1848,
+                            "key": "Rejected"
                         },
                         {
-                            "doc_count": 397,
-                            "key": "dns"
+                            "doc_count": 89,
+                            "key": "NXDOMAIN"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 396,
+                "key": "ssl",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 324,
+                "key": "tls",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 277,
+                            "key": "Success"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 274,
+                "key": "http",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 121,
+                            "key": "Success"
                         },
                         {
-                            "doc_count": 225,
-                            "key": "http"
-                        },
+                            "doc_count": 1,
+                            "key": "Bad Gateway"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 47,
+                "key": "X.509",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 44,
+                "key": "ntp",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 30,
+                "key": "smb",
+                "values": {
+                    "buckets": [
                         {
-                            "doc_count": 212,
-                            "key": "ntlm"
-                        },
-                        {
-                            "doc_count": 32,
-                            "key": "dce_rpc"
-                        },
-                        {
-                            "doc_count": 19,
-                            "key": "gssapi"
+                            "doc_count": 25,
+                            "key": "Success"
                         },
                         {
                             "doc_count": 2,
-                            "key": "rdp"
+                            "key": "NO_MORE_FILES"
                         }
                     ],
                     "doc_count_error_upper_bound": 0,
@@ -1710,135 +1771,10 @@ https://localhost/mapi/agg/source.segment,network.protocol?from=6 hours ago&to=n
                 }
             },
             {
-                "doc_count": 2394,
-                "key": "Combined Cycle BOP",
+                "doc_count": 3,
+                "key": "ldap",
                 "values": {
-                    "buckets": [
-                        {
-                            "doc_count": 674,
-                            "key": "enip"
-                        },
-                        {
-                            "doc_count": 626,
-                            "key": "cip"
-                        },
-                        {
-                            "doc_count": 550,
-                            "key": "smb"
-                        },
-                        {
-                            "doc_count": 104,
-                            "key": "ntlm"
-                        },
-                        {
-                            "doc_count": 52,
-                            "key": "dce_rpc"
-                        },
-                        {
-                            "doc_count": 13,
-                            "key": "dns"
-                        },
-                        {
-                            "doc_count": 3,
-                            "key": "gssapi"
-                        },
-                        {
-                            "doc_count": 3,
-                            "key": "rdp"
-                        }
-                    ],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 1741,
-                "key": "Solar Panel Network",
-                "values": {
-                    "buckets": [
-                        {
-                            "doc_count": 1177,
-                            "key": "cotp"
-                        },
-                        {
-                            "doc_count": 361,
-                            "key": "s7comm"
-                        },
-                        {
-                            "doc_count": 115,
-                            "key": "smb"
-                        },
-                        {
-                            "doc_count": 26,
-                            "key": "ntlm"
-                        },
-                        {
-                            "doc_count": 19,
-                            "key": "dce_rpc"
-                        },
-                        {
-                            "doc_count": 3,
-                            "key": "dns"
-                        }
-                    ],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 1153,
-                "key": "Wind Turbine Network",
-                "values": {
-                    "buckets": [
-                        {
-                            "doc_count": 1127,
-                            "key": "dce_rpc"
-                        },
-                        {
-                            "doc_count": 11,
-                            "key": "smb"
-                        }
-                    ],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 161,
-                "key": "Site Office Network",
-                "values": {
-                    "buckets": [
-                        {
-                            "doc_count": 144,
-                            "key": "tds"
-                        },
-                        {
-                            "doc_count": 6,
-                            "key": "rfb"
-                        },
-                        {
-                            "doc_count": 3,
-                            "key": "smb"
-                        },
-                        {
-                            "doc_count": 1,
-                            "key": "dhcp"
-                        }
-                    ],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 4,
-                "key": "Substation Network",
-                "values": {
-                    "buckets": [
-                        {
-                            "doc_count": 1,
-                            "key": "telnet"
-                        }
-                    ],
+                    "buckets": [],
                     "doc_count_error_upper_bound": 0,
                     "sum_other_doc_count": 0
                 }
