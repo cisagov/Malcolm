@@ -77,7 +77,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-enip"
   "https://github.com/cisagov/icsnpp-ethercat"
   "https://github.com/cisagov/icsnpp-modbus"
-  "https://github.com/mmguero-dev/icsnpp-opcua-binary|versions"
+  "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/corelight/callstranger-detector"
   "https://github.com/corelight/CVE-2020-16898"
   "https://github.com/corelight/CVE-2021-31166"
