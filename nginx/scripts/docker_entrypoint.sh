@@ -37,6 +37,9 @@ NGINX_BASIC_AUTH_CONF=/etc/nginx/nginx_auth_basic.conf
 # "include" file for auth_ldap, prompt, and "auth_ldap_servers" name
 NGINX_LDAP_AUTH_CONF=/etc/nginx/nginx_auth_ldap.conf
 
+# "include" file for fully disabling authentication
+NGINX_NO_AUTH_CONF=/etc/nginx/nginx_auth_disabled.conf
+
 # volume-mounted user configuration containing "ldap_server ad_server" section with URL, binddn, etc.
 NGINX_LDAP_USER_CONF=/etc/nginx/nginx_ldap.conf
 
@@ -96,7 +99,18 @@ if [[ -z $NGINX_BASIC_AUTH ]] || [[ "$NGINX_BASIC_AUTH" == "true" ]]; then
   # ldap configuration is empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_CONF"
 
+elif [[ "$NGINX_BASIC_AUTH" == "no_authentication" ]]; then
+  # completely disabling authentication (not recommended)
+
+  # point nginx_auth_rt.conf to nginx_auth_disabled.conf
+  ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_CONF"
+
+  # ldap configuration is empty
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_CONF"
+
 else
+  # ldap authentication
+
   # point nginx_auth_rt.conf to nginx_auth_ldap.conf
   ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_CONF"
 
