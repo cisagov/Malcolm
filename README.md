@@ -81,8 +81,10 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [OpenSearch index management](#IndexManagement)
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
+    - [Zeek Intelligence Framework](#ZeekIntel)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
+    - [API](#API)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -169,22 +171,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.1.0           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.1.0           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.1.0           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.1.0           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.1.0           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.1.0           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.1.0           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.1.0           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.0           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -298,6 +300,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |NT Lan Manager (NTLM)|[🔗](https://en.wikipedia.org/wiki/NT_LAN_Manager)|[🔗](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-nlmp/b38c36ed-2804-4868-a9ff-8dd3182128e4?redirectedfrom=MSDN)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ntlm/main.zeek.html#type-NTLM::Info)|
 |Network Time Protocol (NTP)|[🔗](https://en.wikipedia.org/wiki/Network_Time_Protocol)|[🔗](http://www.ntp.org)||[✓](https://docs.zeek.org/en/latest/scripts/base/protocols/ntp/main.zeek.html#type-NTP::Info)|
 |Oracle|[🔗](https://en.wikipedia.org/wiki/Oracle_Net_Services)|[🔗](https://docs.oracle.com/cd/E11882_01/network.112/e41945/layers.htm#NETAG004)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/oracle.c)||
+|Open Platform Communications Unified Architecture (OPC UA) Binary|[🔗](https://en.wikipedia.org/wiki/OPC_Unified_Architecture)|[🔗](https://opcfoundation.org/developer-tools/specifications-unified-architecture)||[✓](https://github.com/cisagov/icsnpp-opcua-binary)|
 |Open Shortest Path First (OSPF)|[🔗](https://en.wikipedia.org/wiki/Open_Shortest_Path_First)|[🔗](https://datatracker.ietf.org/wg/ospf/charter/)[🔗](https://datatracker.ietf.org/doc/html/rfc2328)[🔗](https://datatracker.ietf.org/doc/html/rfc5340)||[✓](https://github.com/corelight/zeek-spicy-ospf)|
 |OpenVPN|[🔗](https://en.wikipedia.org/wiki/OpenVPN)|[🔗](https://openvpn.net/community-resources/openvpn-protocol/)[🔗](https://zeek.org/2021/03/16/a-zeek-openvpn-protocol-analyzer/)||[✓](https://github.com/corelight/zeek-spicy-openvpn)|
 |PostgreSQL|[🔗](https://en.wikipedia.org/wiki/PostgreSQL)|[🔗](https://www.postgresql.org/)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/postgresql.c)||
@@ -1456,6 +1459,18 @@ Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take
 
 Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCORING` environment variable to `false`  in the [`docker-compose.yml`](#DockerComposeYml) file and [restarting Malcolm](#StopAndRestart).
 
+### <a name="ZeekIntel"></a>Zeek Intelligence Framework
+
+To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/frameworks/intel.html) documentation, "The goals of Zeek’s Intelligence Framework are to consume intelligence data, make it available for matching, and provide infrastructure to improve performance and memory utilization. Data in the Intelligence Framework is an atomic piece of intelligence such as an IP address or an e-mail address. This atomic data will be packed with metadata such as a freeform source field, a freeform descriptive field, and a URL which might lead to more information about the specific item." Zeek [intelligence](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html) [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type) include IP addresses, URLs, file names, hashes, email addresses, and more.
+
+Malcolm doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. On [startup](zeek/scripts/entrypoint.sh), Malcolm's `malcolmnetsec/zeek` docker container enumerates the subdirectories under `./zeek/intel` (which is [bind mounted](https://docs.docker.com/storage/bind-mounts/) into the container's runtime) and configures Zeek so that those intelligence files will be automatically included in its local policy. Subdirectories under `./zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
+
+Note that Malcolm does not manage updates for these intelligence files. You should use the update mechanism suggested by your feeds' maintainers to keep them up to date. Adding and deleting intelligence files under this directory will take effect upon [restarting Malcolm](#StopAndRestart), although modifying intelligence files in-place should not require a restart. Alternately, it can be done without restarting Malcolm by running the following command from the Malcolm installation directory:
+
+```
+docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
+```
+
 ### <a name="Alerting"></a>Alerting
 
 See [Alerting](https://opensearch.org/docs/latest/monitoring-plugins/alerting/index/) in the OpenSearch documentation.
@@ -1496,6 +1511,280 @@ Naturally, these lookups could produce false positives, so these connections are
 ![](./docs/images/screenshots/dashboards_bestguess.png)
 
 This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+
+### <a name="API"></a>API
+
+Malcolm provides a [REST API](./api/project/__init__.py) that can be used to programatically query some aspects of Malcolm's status and data. Malcolm's API is not to be confused with the [Viewer API](https://arkime.com/apiv3) provided by Arkime, although there may be some overlap in functionality.
+
+#### Ping
+
+`GET` - /mapi/ping
+
+Returns `pong` (for a simple "up" check).
+
+Example output:
+
+```json
+{"ping":"pong"}
+```
+
+#### Version Information
+
+`GET` - /mapi/version
+
+Returns version information about Malcolm and version/[health](https://opensearch.org/docs/latest/opensearch/rest-api/cluster-health/) information about the underlying OpenSearch instance.
+
+Example output:
+
+```json
+{
+    "built": "2022-01-18T16:10:39Z",
+    "opensearch": {
+        "cluster_name": "docker-cluster",
+        "cluster_uuid": "TcSiEaOgTdO_l1IivYz2gA",
+        "name": "opensearch",
+        "tagline": "The OpenSearch Project: https://opensearch.org/",
+        "version": {
+            "build_date": "2021-12-21T01:36:21.407473Z",
+            "build_hash": "8a529d77c7432bc45b005ac1c4ba3b2741b57d4a",
+            "build_snapshot": false,
+            "build_type": "tar",
+            "lucene_version": "8.10.1",
+            "minimum_index_compatibility_version": "6.0.0-beta1",
+            "minimum_wire_compatibility_version": "6.8.0",
+            "number": "7.10.2"
+        }
+    },
+    "opensearch_health": {
+        "active_primary_shards": 29,
+        "active_shards": 29,
+        "active_shards_percent_as_number": 82.85714285714286,
+        "cluster_name": "docker-cluster",
+        "delayed_unassigned_shards": 0,
+        "discovered_master": true,
+        "initializing_shards": 0,
+        "number_of_data_nodes": 1,
+        "number_of_in_flight_fetch": 0,
+        "number_of_nodes": 1,
+        "number_of_pending_tasks": 0,
+        "relocating_shards": 0,
+        "status": "yellow",
+        "task_max_waiting_in_queue_millis": 0,
+        "timed_out": false,
+        "unassigned_shards": 6
+    },
+    "sha": "8ddbbf4",
+    "version": "5.2.0"
+}
+```
+
+#### Fields
+
+`GET` - /mapi/fields
+
+Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
+
+
+Example output:
+
+```json
+{
+    "fields": {
+        "@timestamp": {
+            "type": "date"
+        },
+…
+        "zeek.x509.san_uri": {
+            "description": "Subject Alternative Name URI",
+            "type": "string"
+        },
+        "zeek.x509.san_uri.text": {
+            "type": "string"
+        }
+    },
+    "total": 2005
+}
+```
+
+#### Indices
+
+`GET` - /mapi/indices
+
+Lists [information related to the underlying OpenSearch indices](https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-indices/), similar to Arkime's [esindices](https://arkime.com/apiv3#esindices-api) API.
+
+Example output:
+
+```json
+
+{
+    "indices": [
+…
+        {
+            "docs.count": "2268613",
+            "docs.deleted": "0",
+            "health": "green",
+            "index": "arkime_sessions3-210301",
+            "pri": "1",
+            "pri.store.size": "1.8gb",
+            "rep": "0",
+            "status": "open",
+            "store.size": "1.8gb",
+            "uuid": "w-4Q0ofBTdWO9KqeIIAAWg"
+        },
+…
+    ]
+}
+```
+
+#### Field Aggregations
+
+`GET` - /mapi/agg/`<fieldname>`
+
+Executes an OpenSearch [bucket aggregation](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the requested fields across all of Malcolm's indexed network traffic metadata.
+
+Parameters:
+
+* `fieldname` (URL parameter) - the name(s) of the field(s) to be queried (comma-separated if multiple fields) (default: `event.provider`)
+* `limit` (query parameter) - the maximum number of records to return at each level of aggregation (default: 500)
+* `from` (query parameter) - the time frame ([`gte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "1 day ago")
+* `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
+
+Example URL and output:
+
+```
+https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=now
+```
+
+```json
+{
+    "fields": [
+        "network.protocol",
+        "event.result"
+    ],
+    "range": [
+        1642456456,
+        1642542856
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))",
+        "/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 12858,
+                "key": "dns",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 7439,
+                            "key": "Success"
+                        },
+                        {
+                            "doc_count": 1848,
+                            "key": "Rejected"
+                        },
+                        {
+                            "doc_count": 89,
+                            "key": "NXDOMAIN"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 396,
+                "key": "ssl",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 324,
+                "key": "tls",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 277,
+                            "key": "Success"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 274,
+                "key": "http",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 121,
+                            "key": "Success"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Bad Gateway"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 47,
+                "key": "X.509",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 44,
+                "key": "ntp",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 30,
+                "key": "smb",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 25,
+                            "key": "Success"
+                        },
+                        {
+                            "doc_count": 2,
+                            "key": "NO_MORE_FILES"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 3,
+                "key": "ldap",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
@@ -1538,7 +1827,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.1.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.0.iso"
 …
 ```
 
@@ -1925,22 +2214,22 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.1.0           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.1.0           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.1.0           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.1.0           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.1.0           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.1.0           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.1.0           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.1.0           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.1.0           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.1.0           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.1.0           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.1.0           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.1.0           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.1.0           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.0           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.0           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.0           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.0           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.0           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.0           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.0           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.0           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.0           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.0           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.0           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.0           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.0           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.0           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

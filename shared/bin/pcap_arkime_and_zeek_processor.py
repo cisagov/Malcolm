@@ -59,6 +59,7 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
+arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -89,6 +90,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
     global verboseDebug
     global shuttingDown
     global scanWorkersCount
+    global arkimeProvider
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
@@ -133,7 +135,14 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                     # put together arkime execution command
-                    cmd = [arkimeBin, '--quiet', '-r', fileInfo[FILE_INFO_DICT_NAME]]
+                    cmd = [
+                        arkimeBin,
+                        '--quiet',
+                        '-o',
+                        f'ecsEventProvider={arkimeProvider}',
+                        '-r',
+                        fileInfo[FILE_INFO_DICT_NAME],
+                    ]
                     if notLocked:
                         cmd.append('--nolockpcap')
                     cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))

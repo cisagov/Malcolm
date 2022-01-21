@@ -493,6 +493,9 @@ def start():
     # touch the metadata file
     open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
+    # touch the zeek intel file
+    open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
+
     # if the OpenSearch and Logstash keystore don't exist exist, create empty ones
     if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore'))):
         keystore_op('opensearch', True, 'create')

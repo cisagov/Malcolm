@@ -5,7 +5,7 @@ logging.metrics.enabled: false
 filebeat.inputs:
 - type: log
   paths:
-    - ${FILEBEAT_LOG_PATH:/data/zeek/current}/*.log
+    - ${FILEBEAT_ZEEK_LOG_PATH:/data/zeek/current}/*.log
   # see comment below for signatures(_carved).log
   exclude_files: ['signatures\(_carved.*\)\.log$']
   symlinks: true
@@ -33,7 +33,7 @@ filebeat.inputs:
 # custom settings here.
 - type: log
   paths:
-    - ${FILEBEAT_LOG_PATH:/data/zeek/current}/signatures(_carved*).log
+    - ${FILEBEAT_ZEEK_LOG_PATH:/data/zeek/current}/signatures(_carved*).log
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek"]

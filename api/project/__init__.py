@@ -1,4 +1,5 @@
 import dateparser
+import json
 import opensearch_dsl
 import opensearchpy
 import os
@@ -7,9 +8,10 @@ import re
 import requests
 import warnings
 
+from collections import defaultdict
+from collections.abc import Iterable
 from datetime import datetime
 from flask import Flask, jsonify, request
-from opensearch_dsl import Search
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -111,6 +113,20 @@ fields_to_urls.append(
     ]
 )
 
+# field type maps from our various field sources
+field_type_map = defaultdict(lambda: 'string')
+field_type_map['date'] = 'date'
+field_type_map['datetime'] = 'date'
+field_type_map['double'] = 'float'
+field_type_map['float'] = 'float'
+field_type_map['geo_point'] = 'geo'
+field_type_map['integer'] = 'integer'
+field_type_map['ip'] = 'ip'
+field_type_map['long'] = 'integer'
+field_type_map['time'] = 'date'
+field_type_map['timestamp'] = 'date'
+
+
 warnings.filterwarnings(
     "ignore",
     message="The localize method is no longer necessary, as this time zone supports the fold attribute",
@@ -120,6 +136,22 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object("project.config.Config")
 opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]])
+
+
+def deep_get(d, keys, default=None):
+    assert type(keys) is list
+    if d is None:
+        return default
+    if not keys:
+        return d
+    return deep_get(d.get(keys[0]), keys[1:], default)
+
+
+def get_iterable(x):
+    if isinstance(x, Iterable) and not isinstance(x, str):
+        return x
+    else:
+        return (x,)
 
 
 def gettimes(args):
@@ -185,15 +217,16 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     )
     translated = []
 
-    for url_regex_pair in fields_to_urls:
-        if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], fieldname, flags=re.IGNORECASE):
-            for url in url_regex_pair[1]:
-                if url.startswith('DASH:'):
-                    translated.append(
-                        f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
-                    )
-                else:
-                    translated.append(url)
+    for field in get_iterable(fieldname):
+        for url_regex_pair in fields_to_urls:
+            if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
+                for url in url_regex_pair[1]:
+                    if url.startswith('DASH:'):
+                        translated.append(
+                            f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
+                        )
+                    else:
+                        translated.append(url)
 
     return list(set(translated))
 
@@ -213,25 +246,34 @@ def filtertime(search, args):
 
     Returns
     -------
-    return start_time, end_time
+    start_time,
+    end_time,
         integers representing the start and end times for the query, in milliseconds since the epoch
+    search.filter(...)
+        filtered search object
     """
     start_time, end_time = gettimes(args)
     start_time_ms = int(
         start_time.timestamp() * 1000 if start_time is not None else dateparser.parse("1 day ago").timestamp() * 1000
     )
     end_time_ms = int(end_time.timestamp() * 1000 if end_time is not None else datetime.now().timestamp() * 1000)
-    search.filter(
-        "range",
-        **{
-            app.config["ARKIME_INDEX_TIME_FIELD"]: {
-                "gte": start_time_ms,
-                "lte": end_time_ms,
-                "format": "epoch_millis",
-            }
-        },
+    print(f'{app.config["ARKIME_INDEX_TIME_FIELD"]}, {start_time_ms}, {end_time_ms}')
+    return (
+        start_time_ms,
+        end_time_ms,
+        search.filter(
+            "range",
+            **{
+                app.config["ARKIME_INDEX_TIME_FIELD"]: {
+                    "gte": start_time_ms,
+                    "lte": end_time_ms,
+                    "format": "epoch_millis",
+                }
+            },
+        )
+        if search
+        else None,
     )
-    return start_time_ms, end_time_ms
 
 
 def bucketfield(fieldname, current_request, urls=None):
@@ -239,8 +281,8 @@ def bucketfield(fieldname, current_request, urls=None):
 
     Parameters
     ----------
-    fieldname : string
-        The name of the field on which to perform the aggregation
+    fieldname : string or Array of string
+        The name of the field(s) on which to perform the aggregation
     current_request : Request
         The flask Request object being processed (see gettimes and filtertime)
         Uses 'from', 'to', and 'limit' from current_request.args
@@ -252,31 +294,37 @@ def bucketfield(fieldname, current_request, urls=None):
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
-    s = Search(using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]).extra(
-        size=0
-    )
-    start_time_ms, end_time_ms = filtertime(s, current_request.args)
-    s.aggs.bucket(
-        "values",
-        "terms",
-        field=fieldname,
-        size=int(current_request.args["limit"]) if "limit" in current_request.args else app.config["RESULT_SET_LIMIT"],
-    )
+    s = opensearch_dsl.Search(
+        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
+    ).extra(size=0)
+    start_time_ms, end_time_ms, s = filtertime(s, current_request.args)
+    bucket_limit = int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
+    last_bucket = s.aggs
+    for fname in get_iterable(fieldname):
+        last_bucket = last_bucket.bucket(
+            "values",
+            "terms",
+            field=fname,
+            size=bucket_limit,
+        )
 
     response = s.execute()
     if (urls is not None) and (len(urls) > 0):
         return jsonify(
-            values=response.aggregations.to_dict()["values"]["buckets"],
+            values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
+            fields=get_iterable(fieldname),
             urls=urls,
         )
     else:
         return jsonify(
-            values=response.aggregations.to_dict()["values"]["buckets"],
+            values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
+            fields=get_iterable(fieldname),
         )
 
 
+@app.route("/agg", defaults={'fieldname': 'event.provider'})
 @app.route("/agg/<fieldname>")
 def aggregate(fieldname):
     """Returns the aggregated values and counts for a given field name, see bucketfield
@@ -284,7 +332,7 @@ def aggregate(fieldname):
     Parameters
     ----------
     fieldname : string
-        the name of the field to be bucketed
+        the name of the field(s) to be bucketed (comma-separated if multiple fields)
     request : Request
         see bucketfield
 
@@ -296,10 +344,11 @@ def aggregate(fieldname):
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
     start_time, end_time = gettimes(request.args)
+    fields = fieldname.split(",")
     return bucketfield(
-        fieldname,
+        fields,
         request,
-        urls=urls_for_field(fieldname, start_time=start_time, end_time=end_time),
+        urls=urls_for_field(fields, start_time=start_time, end_time=end_time),
     )
 
 
@@ -318,6 +367,60 @@ def indices():
     return jsonify(indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json())
 
 
+@app.route("/fields")
+def fields():
+    """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
+    OpenSearch template for the sessions indices, and Kibana's field list
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    fields
+        A dict of dicts where key is the field name and value may contain 'description' and 'type'
+    """
+    fields = defaultdict(dict)
+
+    # get fields from Arkime's field's table
+    s = opensearch_dsl.Search(
+        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
+    ).extra(size=3000)
+    for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
+        if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
+            fields[fieldname] = {
+                'description': deep_get(hit, ['help']),
+                'type': field_type_map[deep_get(hit, ['type'])],
+            }
+
+    # get fields from OpenSearch template
+    for fieldname, fieldinfo in deep_get(
+        requests.get(f'{app.config["OPENSEARCH_URL"]}/_template/{app.config["MALCOLM_TEMPLATE"]}').json(),
+        [app.config["MALCOLM_TEMPLATE"], "mappings", "properties"],
+    ).items():
+        if 'type' in fieldinfo:
+            fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+
+    # get fields from OpenSearch dashboards
+    for field in requests.get(
+        f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
+        params={
+            'pattern': app.config["ARKIME_INDEX_PATTERN"],
+            'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+        },
+    ).json()['fields']:
+        if fieldname := deep_get(field, ['name']):
+            field_types = deep_get(field, ['esTypes'], [])
+            fields[fieldname]['type'] = field_type_map[
+                field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
+            ]
+
+    for fieldname in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
+        fields.pop(fieldname, None)
+
+    return jsonify(fields=fields, total=len(fields))
+
+
 @app.route("/")
 @app.route("/version")
 def version():
@@ -329,7 +432,7 @@ def version():
     Returns
     -------
     version
-        a string containing the Malcolm version (e.g., "5.1.0")
+        a string containing the Malcolm version (e.g., "5.2.0")
     built
         a string containing the Malcolm build timestamp (e.g., "2021-12-22T14:13:26Z")
     sha
