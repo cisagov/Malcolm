@@ -11,12 +11,12 @@ opensearch.requestTimeout: 180000
 
 opensearchDashboards.branding:
   logo:
-    defaultUrl: "https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/logo/Malcolm_banner.png"
-    darkModeUrl: "https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/logo/Malcolm_outline_banner_dark.png"
+    defaultUrl: "https://raw.githubusercontent.com/cisagov/Malcolm/main/docs/images/logo/Malcolm_banner.png"
+    darkModeUrl: "https://raw.githubusercontent.com/cisagov/Malcolm/main/docs/images/logo/Malcolm_outline_banner_dark.png"
   mark:
-    defaultUrl: "https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/icon/icon.png"
-    darkModeUrl: "https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/icon/icon_dark.png"
-  faviconUrl: "https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/favicon/facebook.png"
+    defaultUrl: "https://raw.githubusercontent.com/cisagov/Malcolm/main/docs/images/icon/icon.png"
+    darkModeUrl: "https://raw.githubusercontent.com/cisagov/Malcolm/main/docs/images/icon/icon_dark.png"
+  faviconUrl: "https://raw.githubusercontent.com/cisagov/Malcolm/main/docs/images/favicon/facebook.png"
   applicationTitle: "Malcolm Dashboards"
 
 map.regionmap:
