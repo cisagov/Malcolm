@@ -138,7 +138,7 @@ ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
-ADD zeek/scripts/*.sh /usr/local/bin/
+ADD shared/bin/zeek_intel_setup.sh /usr/local/bin/entrypoint.sh
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh

@@ -2,6 +2,11 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+# set up intel files prior to running zeek
+#   - https://github.com/idaholab/Malcolm#zeek-intelligence-framework
+#   - https://github.com/idaholab/Malcolm/issues/20
+# used as the Zeek Dockerfile's entrypoint as well
+
 set -uo pipefail
 shopt -s nocasematch
 ENCODING="utf-8"
