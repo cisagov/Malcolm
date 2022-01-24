@@ -1523,11 +1523,13 @@ Malcolm provides a [REST API](./api/project/__init__.py) that can be used to pro
 
 Returns `pong` (for a simple "up" check).
 
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 {"ping":"pong"}
 ```
+</details>
 
 #### Version Information
 
@@ -1535,7 +1537,8 @@ Example output:
 
 Returns version information about Malcolm and version/[health](https://opensearch.org/docs/latest/opensearch/rest-api/cluster-health/) information about the underlying OpenSearch instance.
 
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 {
@@ -1578,6 +1581,7 @@ Example output:
     "version": "5.2.0"
 }
 ```
+</details>
 
 #### Fields
 
@@ -1585,8 +1589,8 @@ Example output:
 
 Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
 
-
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 {
@@ -1606,6 +1610,8 @@ Example output:
     "total": 2005
 }
 ```
+</details>
+
 
 #### Indices
 
@@ -1613,7 +1619,8 @@ Example output:
 
 Lists [information related to the underlying OpenSearch indices](https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-indices/), similar to Arkime's [esindices](https://arkime.com/apiv3#esindices-api) API.
 
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 
@@ -1636,6 +1643,7 @@ Example output:
     ]
 }
 ```
+</details>
 
 #### Field Aggregations
 
@@ -1660,7 +1668,8 @@ Examples of `filter` URL query parameter:
 * `filter={"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
 * `filter={"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
 
-Example URL and output:
+<details>
+<summary>Example URL and output:</summary>
 
 ```
 https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=now
@@ -1796,6 +1805,7 @@ https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=
     }
 }
 ```
+</details>
 
 #### Document Lookup
 
