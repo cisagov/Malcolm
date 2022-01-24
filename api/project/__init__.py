@@ -75,6 +75,9 @@ fields_to_urls.append(
 )
 fields_to_urls.append([r'^zeek\.ntlm\.', ['DASH:543118a9-02d7-43fe-b669-b8652177fc37']])
 fields_to_urls.append([r'^zeek\.ntp\.', ['DASH:af5df620-eeb6-11e9-bdef-65a192b7f586']])
+fields_to_urls.append(
+    [r'^zeek\.opcua.*\.', ['DASH:dd87edd0-796a-11ec-9ce6-b395c1ff58f4', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
+)
 fields_to_urls.append([r'^zeek\.ospf\.', ['DASH:1cc01ff0-5205-11ec-a62c-7bc80e88f3f0']])
 fields_to_urls.append([r'^zeek\.pe\.', ['DASH:0a490422-0ce9-44bf-9a2d-19329ddde8c3']])
 fields_to_urls.append(
@@ -190,6 +193,33 @@ def gettimes(args):
     return start_time, end_time
 
 
+def getfilters(args):
+    """Parses 'filter' dictionary from the request args dictionary, returning
+    the filters themselves as a dict()
+
+    e.g.,
+
+    https://localhost/mapi/agg?from=25 years ago&to=now&filter={"network.direction":"outbound"}
+
+    Parameters
+    ----------
+    args : dict
+        The dictionary which should contain 'filter'.
+
+    Returns
+    -------
+    return filters
+        dict containing the filters, e.g., { "fieldname1": "value", "fieldname2": 1234, "fieldname3": ["abc", "123"] }
+    """
+    try:
+        if (filters := args.get("filter")) and (filters := json.loads(filters)) and isinstance(filters, dict):
+            return filters
+        else:
+            return None
+    except ValueError:
+        return None
+
+
 def urls_for_field(fieldname, start_time=None, end_time=None):
     """looks up a list of URLs relevant to a particular database field
 
@@ -257,7 +287,6 @@ def filtertime(search, args):
         start_time.timestamp() * 1000 if start_time is not None else dateparser.parse("1 day ago").timestamp() * 1000
     )
     end_time_ms = int(end_time.timestamp() * 1000 if end_time is not None else datetime.now().timestamp() * 1000)
-    print(f'{app.config["ARKIME_INDEX_TIME_FIELD"]}, {start_time_ms}, {end_time_ms}')
     return (
         start_time_ms,
         end_time_ms,
@@ -276,6 +305,53 @@ def filtertime(search, args):
     )
 
 
+def filtervalues(search, args):
+    """Applies field value filters (logically AND-ing them) to an OpenSearch query. Using a !
+    effectively negates/excludes the filter. Using a 'null' value implies "does not exist."
+
+    Parameters
+    ----------
+    search : opensearch_dsl.Search
+        The object representing the OpenSearch Search query
+    args : dict
+        The dictionary which should contain 'filter' (see getfilters)
+
+    Returns
+    -------
+    filters
+        dict containing the filters, e.g., { "fieldname1": "value", "fieldname2": 1234, "fieldname3": ["abc", "123"] }
+    search.filter(...)
+        filtered search object
+    """
+    if (s := search) and (filters := getfilters(args)) and isinstance(filters, dict):
+        # loop over filters, AND'ing all of them
+        for fieldname, filtervalue in filters.items():
+            if fieldname.startswith('!'):
+                # AND NOT filter
+                if filtervalue is not None:
+                    # field != value
+                    s = s.exclude(
+                        "terms",
+                        **{fieldname[1:]: get_iterable(filtervalue)},
+                    )
+                else:
+                    # field exists ("is not null")
+                    s = s.filter("exists", field=fieldname[1:])
+            else:
+                # AND filter
+                if filtervalue is not None:
+                    # field == value
+                    s = s.filter(
+                        "terms",
+                        **{fieldname: get_iterable(filtervalue)},
+                    )
+                else:
+                    # field does not exist ("is null")
+                    s = s.filter('bool', must_not=opensearch_dsl.Q('exists', field=fieldname))
+
+    return (filters, s)
+
+
 def bucketfield(fieldname, current_request, urls=None):
     """Returns a bucket aggregation for a particular field over a given time range
 
@@ -284,8 +360,8 @@ def bucketfield(fieldname, current_request, urls=None):
     fieldname : string or Array of string
         The name of the field(s) on which to perform the aggregation
     current_request : Request
-        The flask Request object being processed (see gettimes and filtertime)
-        Uses 'from', 'to', and 'limit' from current_request.args
+        The flask Request object being processed (see gettimes/filtertime and getfilters/filtervalues)
+        Uses 'from', 'to', 'limit', and 'filter' from current_request.args
 
     Returns
     -------
@@ -298,6 +374,7 @@ def bucketfield(fieldname, current_request, urls=None):
         using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
     ).extra(size=0)
     start_time_ms, end_time_ms, s = filtertime(s, current_request.args)
+    filters, s = filtervalues(s, current_request.args)
     bucket_limit = int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
     last_bucket = s.aggs
     for fname in get_iterable(fieldname):
@@ -313,6 +390,7 @@ def bucketfield(fieldname, current_request, urls=None):
         return jsonify(
             values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
+            filter=filters,
             fields=get_iterable(fieldname),
             urls=urls,
         )
@@ -320,6 +398,7 @@ def bucketfield(fieldname, current_request, urls=None):
         return jsonify(
             values=response.aggregations.to_dict()["values"],
             range=(start_time_ms // 1000, end_time_ms // 1000),
+            filter=filters,
             fields=get_iterable(fieldname),
         )
 

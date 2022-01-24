@@ -1648,6 +1648,16 @@ Parameters:
 * `limit` (query parameter) - the maximum number of records to return at each level of aggregation (default: 500)
 * `from` (query parameter) - the time frame ([`gte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "1 day ago")
 * `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
+* `filter` (query parameter) - field filters formatted as a JSON dictionary
+
+The `from`, `to`, and `filter` parameters can be used to further restrict the range of documents returned. The `filter` dictionary should be formatted such that its keys are field names and its values are the values for which to filter. A field name may be prepended with a `!` to negate the filter (e.g., `filter={"event.provider":"zeek"}` vs. `filter={"!event.provider":"zeek"}`). Filtering for value `null` implies "is not set" or "does not exist" (e.g., `filter={"event.dataset":null}` means "the field `event.dataset` is `null`/is not set" while `filter={"!event.dataset":null}` means "the field `event.dataset` is not `null`/is set").
+
+Examples of `filter` URL query parameter:
+
+* `filter={"!network.transport":"icmp"}` - `network.transport` is not `icmp`
+* `filter={"network.direction":["inbound","outbound"]}` - `network.direction` is either `inbound` or `outbound`
+* `filter={"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
+* `filter={"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
 
 Example URL and output:
 
