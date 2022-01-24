@@ -1888,8 +1888,388 @@ https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
 
 Some security-related API examples:
 
-* Protocols
-    - `/mapi/agg/network.type,network.transport,network.protocol,network.protocol_version`
+<details>
+<summary>Protocols</summary>
+
+```
+/mapi/agg/network.type,network.transport,network.protocol,network.protocol_version
+```
+
+```json
+{
+    "fields": [
+        "network.type",
+        "network.transport",
+        "network.protocol",
+        "network.protocol_version"
+    ],
+    "filter": null,
+    "range": [
+        1970,
+        1643067256
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 442240,
+                "key": "ipv4",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 279538,
+                            "key": "udp",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 266527,
+                                        "key": "bacnet",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 12365,
+                                        "key": "dns",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 78,
+                                        "key": "dhcp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 44,
+                                        "key": "ntp",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 22,
+                                                    "key": "4"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 3,
+                                        "key": "enip",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 2,
+                                        "key": "krb",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 1,
+                                        "key": "syslog",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 30824,
+                            "key": "tcp",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 7097,
+                                        "key": "smb",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 4244,
+                                                    "key": "1"
+                                                },
+                                                {
+                                                    "doc_count": 1438,
+                                                    "key": "2"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 1792,
+                                        "key": "http",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 829,
+                                                    "key": "1.0"
+                                                },
+                                                {
+                                                    "doc_count": 230,
+                                                    "key": "1.1"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 1280,
+                                        "key": "dce_rpc",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 857,
+                                        "key": "s7comm",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 426,
+                                        "key": "ntlm",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 378,
+                                        "key": "gssapi",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 146,
+                                        "key": "tds",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 125,
+                                        "key": "ssl",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 91,
+                                        "key": "tls",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 48,
+                                                    "key": "TLSv13"
+                                                },
+                                                {
+                                                    "doc_count": 28,
+                                                    "key": "TLSv12"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 29,
+                                        "key": "ssh",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 18,
+                                                    "key": "2"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 26,
+                                        "key": "modbus",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 17,
+                                        "key": "iso_cotp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 8,
+                                        "key": "enip",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 6,
+                                        "key": "rdp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 4,
+                                        "key": "ftp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 4,
+                                        "key": "krb",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 4,
+                                        "key": "rfb",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 3,
+                                        "key": "ldap",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 2,
+                                        "key": "telnet",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 848,
+                            "key": "icmp",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1573,
+                "key": "ipv6",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1486,
+                            "key": "udp",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 1433,
+                                        "key": "dns",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 80,
+                            "key": "icmp",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+
+</details>
+
 * Software
     - `/mapi/agg/zeek.software.name,zeek.software.unparsed_version`
 * User agent
