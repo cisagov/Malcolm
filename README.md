@@ -1523,13 +1523,11 @@ Malcolm provides a [REST API](./api/project/__init__.py) that can be used to pro
 
 Returns `pong` (for a simple "up" check).
 
-<details>
-<summary>Example output:</summary>
+Example output:
 
 ```json
 {"ping":"pong"}
 ```
-</details>
 
 #### Version Information
 
