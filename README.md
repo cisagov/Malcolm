@@ -2267,9 +2267,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-
 <details>
 <summary>Software</summary>
 
@@ -2665,9 +2663,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-
 <details>
 <summary>User agent</summary>
 
@@ -2769,9 +2765,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-
 <details>
 <summary>External traffic (outbound/inbound)</summary>
 
@@ -2829,9 +2823,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-
 <details>
 <summary>Cross-segment traffic</summary>
 
@@ -3012,9 +3004,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-  
 <details>
 <summary>Plaintext password</summary>
 
@@ -3049,9 +3039,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-   
 <details>
 <summary>Insecure/outdated protocols</summary>
 
@@ -3133,10 +3121,7 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
-
-    
 <details>
 <summary>Notice categories</summary>
 
@@ -3247,7 +3232,7 @@ Some security-related API examples:
     }
 }
 ```
-
+</details>
 <details>
 <summary>Severity tags</summary>
 
@@ -3369,7 +3354,6 @@ Some security-related API examples:
     }
 }
 ```
-
 </details>
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
