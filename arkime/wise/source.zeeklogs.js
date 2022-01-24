@@ -1206,7 +1206,7 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_dashboards_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
 
     // add rick-click for opening malcolm agg api
-    var apiLabel = "Malcolm Agg. API %DBFIELD%";
+    var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
     this.api.addValueAction("malcolm_mapi_cat_ip",       {name:apiLabel, url:apiURL, category:"ip"});
     this.api.addValueAction("malcolm_mapi_cat_port",     {name:apiLabel, url:apiURL, category:"port"});
@@ -1217,7 +1217,7 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_mapi_fields_zeek",  {name:apiLabel, url:apiURL, fields:allFieldsStr});
 
     // add right-click for viewing original JSON document
-    this.api.addValueAction("malcolm_session_json_source", {name:"View JSON Document", url:"sessions.json?expression=id=%TEXT%&fields=*&%DATE%", fields:"id"});
+    this.api.addValueAction("malcolm_json_source", {name:"%DBFIELD% Document(s) JSON", url:"mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields:"communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid"});
 
     this.api.addView("malcolm_common",
       "if (session.malcolmDocId)\n" +
