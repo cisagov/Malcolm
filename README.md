@@ -85,6 +85,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
+        + [Examples](#APIExamples)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -1882,6 +1883,29 @@ https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
                     ],
 …
 ```
+
+#### <a name="APIExamples"></a>Examples
+
+Some security-related API examples:
+
+* Protocols
+    - `/mapi/agg/network.type,network.transport,network.protocol,network.protocol_version`
+* Software
+    - `/mapi/agg/zeek.software.name,zeek.software.unparsed_version`
+* User agent
+    - `/mapi/agg/user_agent.original`
+* External traffic (outbound/inbound)
+    - `/mapi/agg/network.protocol?filter={"network.direction":["inbound","outbound"]}`
+* Cross-segment traffic
+    - `/mapi/agg/source.segment,destination.segment,network.protocol?filter={"tags":"cross_segment"}`
+* Plaintext password
+    - `/mapi/agg/network.protocol?filter={"!related.password":null}`
+* Insecure/outdated protocols
+    - `/mapi/agg/network.protocol,network.protocol_version?filter={"event.severity_tags":"Insecure or outdated protocol"}`
+* Notice categories
+    - `/mapi/agg/zeek.notice.category,zeek.notice.sub_category`
+* Severity tags
+    - `/mapi/agg/event.severity_tags`
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
