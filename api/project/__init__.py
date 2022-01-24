@@ -261,7 +261,7 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     return list(set(translated))
 
 
-def filtertime(search, args):
+def filtertime(search, args, default_from="1 day ago", default_to="now"):
     """Applies a time filter (inclusive; extracted from request arguments) to an OpenSearch query and
     returns the range as a tuple of integers representing the milliseconds since EPOCH. If
     either end of the range is unspecified, the start and end times default to "1 day ago" and "now",
@@ -284,9 +284,11 @@ def filtertime(search, args):
     """
     start_time, end_time = gettimes(args)
     start_time_ms = int(
-        start_time.timestamp() * 1000 if start_time is not None else dateparser.parse("1 day ago").timestamp() * 1000
+        start_time.timestamp() * 1000 if start_time is not None else dateparser.parse(default_from).timestamp() * 1000
     )
-    end_time_ms = int(end_time.timestamp() * 1000 if end_time is not None else datetime.now().timestamp() * 1000)
+    end_time_ms = int(
+        end_time.timestamp() * 1000 if end_time is not None else dateparser.parse(default_to).timestamp() * 1000
+    )
     return (
         start_time_ms,
         end_time_ms,
@@ -369,6 +371,10 @@ def bucketfield(fieldname, current_request, urls=None):
         list of dicts containing key and doc_count for each bucket
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
+    filter
+        dict containing the filters, e.g., { "fieldname1": "value", "fieldname2": 1234, "fieldname3": ["abc", "123"] }
+    fields
+        the name of the field(s) on which the aggregation was performed
     """
     s = opensearch_dsl.Search(
         using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
@@ -431,6 +437,39 @@ def aggregate(fieldname):
     )
 
 
+@app.route("/document", defaults={'index': app.config["ARKIME_INDEX_PATTERN"]})
+@app.route("/document/<index>")
+def document(index):
+    """Returns the matching document(s) from the specified index
+
+    Parameters
+    ----------
+    index : string
+        the name of the index from which to retrieve the document (defaults: arkime_sessions3-*)
+    request : Request
+        Uses 'from', 'to', 'limit', and 'filter' from current_request.args
+
+    Returns
+    -------
+    filter
+        dict containing the filters, e.g., {"_id":"210301-Cgnjsc2Tkdl38g25D6-iso_cotp-5485"}
+    results
+        array of the documents retrieved (up to 'limit')
+    """
+    s = opensearch_dsl.Search(using=opensearch_dsl.connections.get_connection(), index=index).extra(
+        size=int(deep_get(request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
+    )
+    start_time_ms, end_time_ms, s = filtertime(s, request.args, default_from="1970-1-1", default_to="now")
+    filters, s = filtervalues(s, request.args)
+    return jsonify(
+        results=s.execute().to_dict()['hits']['hits'],
+        range=(start_time_ms // 1000, end_time_ms // 1000),
+        filter=filters,
+    )
+
+
+@app.route("/index")
+@app.route("/indexes")
 @app.route("/indices")
 def indices():
     """Provide a list of indices in the OpenSearch data store
