@@ -35,6 +35,7 @@ Hedgehog Linux is a Debian-based operating system built to
             * [filebeat-syslog](#syslogbeat): syslog forwarding
             * [heatbeat](#heatbeat): temperature forwarding
         + [Autostart services](#ConfigAutostart)
+        + [Zeek Intelligence Framework](#ZeekIntel)
 * [Appendix A - Generating the ISO](#ISOBuild)
 * [Appendix B - Configuring SSH access](#ConfigSSH)
 * [Appendix C - Troubleshooting](#Troubleshooting)
@@ -199,7 +200,7 @@ To specify which files should be extracted, specify the Zeek file carving mode:
 
 ![Zeek file carving mode](./docs/images/zeek_file_carve_mode.png)
 
-If you're not sure what to choose, either of **mapped (except common plain text files)** (if you want to carve and scan almost all files) or **interesting** (if you only want to carve and scan files with [mime types of common attack vectors](./interface/sensor_ctl/extractor_override.interesting.zeek)) is probably a good choice.
+If you're not sure what to choose, either of **mapped (except common plain text files)** (if you want to carve and scan almost all files) or **interesting** (if you only want to carve and scan files with [mime types of common attack vectors](./interface/sensor_ctl/zeek/extractor_override.interesting.zeek)) is probably a good choice.
 
 Next, specify which carved files to preserve (saved on the sensor under `/capture/bro/capture/extract_files/quarantine` by default). In order to not consume all of the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#ConfigAutostart) section.
 
@@ -386,6 +387,14 @@ zeek:clamav                      RUNNING   pid 14435, uptime 8 days, 20:22:32
 zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
 zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
 ```
+
+### <a name="ZeekIntel"></a>Zeek Intelligence Framework
+
+To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/frameworks/intel.html) documentation, "The goals of Zeek’s Intelligence Framework are to consume intelligence data, make it available for matching, and provide infrastructure to improve performance and memory utilization. Data in the Intelligence Framework is an atomic piece of intelligence such as an IP address or an e-mail address. This atomic data will be packed with metadata such as a freeform source field, a freeform descriptive field, and a URL which might lead to more information about the specific item." Zeek [intelligence](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html) [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type) include IP addresses, URLs, file names, hashes, email addresses, and more.
+
+Hedgehog Linux doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. Before Zeek starts, Hedgehog Linux configures it such that intelligence files will be automatically included in its local policy. Subdirectories under `/opt/sensor/sensor_ctl/zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
+
+Note that Hedgehog Linux does not manage updates for these intelligence files. You should use the update mechanism suggested by your feeds' maintainers to keep them up to date. Adding and deleting intelligence files under this directory will take effect upon restarting Zeek.
 
 # <a name="ISOBuild"></a>Appendix A - Generating the ISO
 

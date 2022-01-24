@@ -71,7 +71,7 @@ redef ignore_checksums = T;
 @endif
 
 @load packages
-@load intel
+@load /opt/sensor/sensor_ctl/zeek/intel
 
 event zeek_init() &priority=-5 {
   if (disable_spicy_dhcp) {
