@@ -85,6 +85,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
+        + [Examples](#APIExamples)
 * [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
@@ -171,22 +172,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.1           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.2.1           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.2.1           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.2.1           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.2.1           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.2.1           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.2.1           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.2.1           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.1           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.1           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.2.1           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.2.1           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.2.1           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.2.1           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.2.1           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.2.1           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.2           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.2           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.2           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.2           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.2           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.2           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.2           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.2           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.2           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.2           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.2           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.2           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.2           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.2           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.2           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.2           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -1463,7 +1464,7 @@ Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCOR
 
 To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/frameworks/intel.html) documentation, "The goals of Zeek’s Intelligence Framework are to consume intelligence data, make it available for matching, and provide infrastructure to improve performance and memory utilization. Data in the Intelligence Framework is an atomic piece of intelligence such as an IP address or an e-mail address. This atomic data will be packed with metadata such as a freeform source field, a freeform descriptive field, and a URL which might lead to more information about the specific item." Zeek [intelligence](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html) [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type) include IP addresses, URLs, file names, hashes, email addresses, and more.
 
-Malcolm doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. On [startup](zeek/scripts/entrypoint.sh), Malcolm's `malcolmnetsec/zeek` docker container enumerates the subdirectories under `./zeek/intel` (which is [bind mounted](https://docs.docker.com/storage/bind-mounts/) into the container's runtime) and configures Zeek so that those intelligence files will be automatically included in its local policy. Subdirectories under `./zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
+Malcolm doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. On [startup](shared/bin/zeek_intel_setup.sh), Malcolm's `malcolmnetsec/zeek` docker container enumerates the subdirectories under `./zeek/intel` (which is [bind mounted](https://docs.docker.com/storage/bind-mounts/) into the container's runtime) and configures Zeek so that those intelligence files will be automatically included in its local policy. Subdirectories under `./zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
 
 Note that Malcolm does not manage updates for these intelligence files. You should use the update mechanism suggested by your feeds' maintainers to keep them up to date. Adding and deleting intelligence files under this directory will take effect upon [restarting Malcolm](#StopAndRestart), although modifying intelligence files in-place should not require a restart. Alternately, it can be done without restarting Malcolm by running the following command from the Malcolm installation directory:
 
@@ -1534,7 +1535,8 @@ Example output:
 
 Returns version information about Malcolm and version/[health](https://opensearch.org/docs/latest/opensearch/rest-api/cluster-health/) information about the underlying OpenSearch instance.
 
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 {
@@ -1577,6 +1579,7 @@ Example output:
     "version": "5.2.0"
 }
 ```
+</details>
 
 #### Fields
 
@@ -1584,8 +1587,8 @@ Example output:
 
 Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
 
-
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 {
@@ -1605,6 +1608,8 @@ Example output:
     "total": 2005
 }
 ```
+</details>
+
 
 #### Indices
 
@@ -1612,7 +1617,8 @@ Example output:
 
 Lists [information related to the underlying OpenSearch indices](https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-indices/), similar to Arkime's [esindices](https://arkime.com/apiv3#esindices-api) API.
 
-Example output:
+<details>
+<summary>Example output:</summary>
 
 ```json
 
@@ -1635,6 +1641,7 @@ Example output:
     ]
 }
 ```
+</details>
 
 #### Field Aggregations
 
@@ -1648,45 +1655,441 @@ Parameters:
 * `limit` (query parameter) - the maximum number of records to return at each level of aggregation (default: 500)
 * `from` (query parameter) - the time frame ([`gte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "1 day ago")
 * `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
+* `filter` (query parameter) - field filters formatted as a JSON dictionary
 
-Example URL and output:
+The `from`, `to`, and `filter` parameters can be used to further restrict the range of documents returned. The `filter` dictionary should be formatted such that its keys are field names and its values are the values for which to filter. A field name may be prepended with a `!` to negate the filter (e.g., `filter={"event.provider":"zeek"}` vs. `filter={"!event.provider":"zeek"}`). Filtering for value `null` implies "is not set" or "does not exist" (e.g., `filter={"event.dataset":null}` means "the field `event.dataset` is `null`/is not set" while `filter={"!event.dataset":null}` means "the field `event.dataset` is not `null`/is set").
+
+Examples of `filter` URL query parameter:
+
+* `filter={"!network.transport":"icmp"}` - `network.transport` is not `icmp`
+* `filter={"network.direction":["inbound","outbound"]}` - `network.direction` is either `inbound` or `outbound`
+* `filter={"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
+* `filter={"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
+
+See [Examples](#APIExamples) for more examples of `filter` and corresponding output.
+
+#### Document Lookup
+
+`GET` - /mapi/document
+
+Executes an OpenSearch [query](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the matching documents across all of Malcolm's indexed network traffic metadata.
+
+Parameters:
+
+* `limit` (query parameter) - the maximum number of documents to return (default: 500)
+* `from` (query parameter) - the time frame ([`gte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: the UNIX epoch)
+* `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
+* `filter` (query parameter) - field filters formatted as a JSON dictionary (see **Field Aggregations** for examples)
+
+<details>
+<summary>Example URL and output:</summary>
 
 ```
-https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=now
+https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
+```
+
+```json
+{
+    "filter": {
+        "zeek.uid": "CYeji2z7CKmPRGyga"
+    },
+    "range": [
+        0,
+        1643056677
+    ],
+    "results": [
+        {
+            "_id": "220124-CYeji2z7CKmPRGyga-http-7677",
+            "_index": "arkime_sessions3-220124",
+            "_score": 0.0,
+            "_source": {
+                "@timestamp": "2022-01-24T20:31:01.846Z",
+                "@version": "1",
+                "agent": {
+                    "hostname": "filebeat",
+                    "id": "bc25716b-8fe7-4de6-a357-65c7d3c15c33",
+                    "name": "filebeat",
+                    "type": "filebeat",
+                    "version": "7.10.2"
+                },
+                "client": {
+                    "bytes": 0
+                },
+                "destination": {
+                    "as": {
+                        "full": "AS54113 Fastly"
+                    },
+                    "geo": {
+                        "city_name": "Seattle",
+                        "continent_code": "NA",
+                        "country_code2": "US",
+                        "country_code3": "US",
+                        "country_iso_code": "US",
+                        "country_name": "United States",
+                        "dma_code": 819,
+                        "ip": "151.101.54.132",
+                        "latitude": 47.6092,
+                        "location": {
+                            "lat": 47.6092,
+                            "lon": -122.3314
+                        },
+                        "longitude": -122.3314,
+                        "postal_code": "98111",
+                        "region_code": "WA",
+                        "region_name": "Washington",
+                        "timezone": "America/Los_Angeles"
+                    },
+                    "ip": "151.101.54.132",
+                    "port": 80
+                },
+                "ecs": {
+                    "version": "1.6.0"
+                },
+                "event": {
+                    "action": [
+                        "GET"
+                    ],
+                    "category": [
+                        "web",
+                        "network"
+                    ],
+…
+```
+</details>
+
+#### <a name="APIExamples"></a>Examples
+
+Some security-related API examples:
+
+<details>
+<summary>Protocols</summary>
+
+```
+/mapi/agg/network.type,network.transport,network.protocol,network.protocol_version
 ```
 
 ```json
 {
     "fields": [
+        "network.type",
+        "network.transport",
         "network.protocol",
-        "event.result"
+        "network.protocol_version"
     ],
+    "filter": null,
     "range": [
-        1642456456,
-        1642542856
+        1970,
+        1643067256
     ],
     "urls": [
-        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))",
-        "/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1d,to:now))"
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
     ],
     "values": {
         "buckets": [
             {
-                "doc_count": 12858,
-                "key": "dns",
+                "doc_count": 442240,
+                "key": "ipv4",
                 "values": {
                     "buckets": [
                         {
-                            "doc_count": 7439,
-                            "key": "Success"
+                            "doc_count": 279538,
+                            "key": "udp",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 266527,
+                                        "key": "bacnet",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 12365,
+                                        "key": "dns",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 78,
+                                        "key": "dhcp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 44,
+                                        "key": "ntp",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 22,
+                                                    "key": "4"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 3,
+                                        "key": "enip",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 2,
+                                        "key": "krb",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 1,
+                                        "key": "syslog",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
                         },
                         {
-                            "doc_count": 1848,
-                            "key": "Rejected"
+                            "doc_count": 30824,
+                            "key": "tcp",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 7097,
+                                        "key": "smb",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 4244,
+                                                    "key": "1"
+                                                },
+                                                {
+                                                    "doc_count": 1438,
+                                                    "key": "2"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 1792,
+                                        "key": "http",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 829,
+                                                    "key": "1.0"
+                                                },
+                                                {
+                                                    "doc_count": 230,
+                                                    "key": "1.1"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 1280,
+                                        "key": "dce_rpc",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 857,
+                                        "key": "s7comm",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 426,
+                                        "key": "ntlm",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 378,
+                                        "key": "gssapi",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 146,
+                                        "key": "tds",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 125,
+                                        "key": "ssl",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 91,
+                                        "key": "tls",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 48,
+                                                    "key": "TLSv13"
+                                                },
+                                                {
+                                                    "doc_count": 28,
+                                                    "key": "TLSv12"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 29,
+                                        "key": "ssh",
+                                        "values": {
+                                            "buckets": [
+                                                {
+                                                    "doc_count": 18,
+                                                    "key": "2"
+                                                }
+                                            ],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 26,
+                                        "key": "modbus",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 17,
+                                        "key": "iso_cotp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 8,
+                                        "key": "enip",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 6,
+                                        "key": "rdp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 4,
+                                        "key": "ftp",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 4,
+                                        "key": "krb",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 4,
+                                        "key": "rfb",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 3,
+                                        "key": "ldap",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    },
+                                    {
+                                        "doc_count": 2,
+                                        "key": "telnet",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
                         },
                         {
-                            "doc_count": 89,
-                            "key": "NXDOMAIN"
+                            "doc_count": 848,
+                            "key": "icmp",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
                         }
                     ],
                     "doc_count_error_upper_bound": 0,
@@ -1694,40 +2097,97 @@ https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=
                 }
             },
             {
-                "doc_count": 396,
-                "key": "ssl",
-                "values": {
-                    "buckets": [],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 324,
-                "key": "tls",
+                "doc_count": 1573,
+                "key": "ipv6",
                 "values": {
                     "buckets": [
                         {
-                            "doc_count": 277,
-                            "key": "Success"
+                            "doc_count": 1486,
+                            "key": "udp",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 1433,
+                                        "key": "dns",
+                                        "values": {
+                                            "buckets": [],
+                                            "doc_count_error_upper_bound": 0,
+                                            "sum_other_doc_count": 0
+                                        }
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 80,
+                            "key": "icmp",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
                         }
                     ],
                     "doc_count_error_upper_bound": 0,
                     "sum_other_doc_count": 0
                 }
-            },
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>Software</summary>
+
+```
+/mapi/agg/zeek.software.name,zeek.software.unparsed_version
+```
+
+```json
+{
+    "fields": [
+        "zeek.software.name",
+        "zeek.software.unparsed_version"
+    ],
+    "filter": null,
+    "range": [
+        1970,
+        1643067759
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
             {
-                "doc_count": 274,
-                "key": "http",
+                "doc_count": 6,
+                "key": "Chrome",
                 "values": {
                     "buckets": [
                         {
-                            "doc_count": 121,
-                            "key": "Success"
+                            "doc_count": 2,
+                            "key": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
                         },
                         {
                             "doc_count": 1,
-                            "key": "Bad Gateway"
+                            "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Chrome/1.0.154.36 Safari/525.19"
                         }
                     ],
                     "doc_count_error_upper_bound": 0,
@@ -1735,35 +2195,65 @@ https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=
                 }
             },
             {
-                "doc_count": 47,
-                "key": "X.509",
-                "values": {
-                    "buckets": [],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 44,
-                "key": "ntp",
-                "values": {
-                    "buckets": [],
-                    "doc_count_error_upper_bound": 0,
-                    "sum_other_doc_count": 0
-                }
-            },
-            {
-                "doc_count": 30,
-                "key": "smb",
+                "doc_count": 6,
+                "key": "Nmap-SSH",
                 "values": {
                     "buckets": [
                         {
-                            "doc_count": 25,
-                            "key": "Success"
+                            "doc_count": 3,
+                            "key": "Nmap-SSH1-Hostkey"
                         },
                         {
+                            "doc_count": 3,
+                            "key": "Nmap-SSH2-Hostkey"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 5,
+                "key": "MSIE",
+                "values": {
+                    "buckets": [
+                        {
                             "doc_count": 2,
-                            "key": "NO_MORE_FILES"
+                            "key": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; Win64; x64; Trident/7.0; .NET4.0C; .NET4.0E)"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 4,
+                "key": "Firefox",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:34.0) Gecko/20100101 Firefox/34.0"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Mozilla/5.0 (X11; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0"
                         }
                     ],
                     "doc_count_error_upper_bound": 0,
@@ -1772,7 +2262,726 @@ https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=
             },
             {
                 "doc_count": 3,
-                "key": "ldap",
+                "key": "ECS (sec",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "ECS (sec/96EE)"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "ECS (sec/97A6)"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 3,
+                "key": "NmapNSE",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 3,
+                            "key": "NmapNSE_1.0"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "<unknown browser>",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "Microsoft-Windows",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "Microsoft-Windows/6.1 UPnP/1.0 Windows-Media-Player-DMS/12.0.7601.17514 DLNADOC/1.50"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "Microsoft-Windows-NT",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "Microsoft-Windows-NT/5.1 UPnP/1.0 UPnP-Device-Host/1.0 Microsoft-HTTPAPI/2.0"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "SimpleHTTP",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "SimpleHTTP/0.6 Python/2.7.17"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "Windows-Media-Player-DMS",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 2,
+                            "key": "Windows-Media-Player-DMS/12.0.7601.17514"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "A-B WWW",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "A-B WWW/0.1"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "CONF-CTR-NAE1",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "CONF-CTR-NAE1"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "ClearSCADA",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "ClearSCADA/6.72.4644.1"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "GoAhead-Webs",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "GoAhead-Webs"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "MSFT",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "MSFT 5.0"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Microsoft-IIS",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Microsoft-IIS/7.5"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Microsoft-WebDAV-MiniRedir",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Microsoft-WebDAV-MiniRedir/6.1.7601"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Python-urllib",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Python-urllib/2.7"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Schneider-WEB/V",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Schneider-WEB/V2.1.4"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Version",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Version_1.0"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "nginx",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "nginx"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "sublime-license-check",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "sublime-license-check/3.0"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>User agent</summary>
+
+```
+/mapi/agg/user_agent.original
+```
+
+```json
+{
+    "fields": [
+        "user_agent.original"
+    ],
+    "filter": null,
+    "range": [
+        1970,
+        1643067845
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 230,
+                "key": "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0"
+            },
+            {
+                "doc_count": 142,
+                "key": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"
+            },
+            {
+                "doc_count": 114,
+                "key": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)"
+            },
+            {
+                "doc_count": 50,
+                "key": "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)"
+            },
+            {
+                "doc_count": 48,
+                "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+            },
+            {
+                "doc_count": 43,
+                "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+            },
+            {
+                "doc_count": 33,
+                "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:34.0) Gecko/20100101 Firefox/34.0"
+            },
+            {
+                "doc_count": 17,
+                "key": "Python-urllib/2.7"
+            },
+            {
+                "doc_count": 12,
+                "key": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"
+            },
+            {
+                "doc_count": 9,
+                "key": "Microsoft-Windows/6.1 UPnP/1.0 Windows-Media-Player-DMS/12.0.7601.17514 DLNADOC/1.50"
+            },
+            {
+                "doc_count": 9,
+                "key": "Windows-Media-Player-DMS/12.0.7601.17514"
+            },
+            {
+                "doc_count": 8,
+                "key": "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"
+            },
+            {
+                "doc_count": 5,
+                "key": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+            },
+            {
+                "doc_count": 5,
+                "key": "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Chrome/1.0.154.36 Safari/525.19"
+            },
+            {
+                "doc_count": 3,
+                "key": "Mozilla/5.0 (X11; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0"
+            },
+            {
+                "doc_count": 2,
+                "key": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+            },
+            {
+                "doc_count": 1,
+                "key": "Microsoft-WebDAV-MiniRedir/6.1.7601"
+            },
+            {
+                "doc_count": 1,
+                "key": "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; Win64; x64; Trident/7.0; .NET4.0C; .NET4.0E)"
+            },
+            {
+                "doc_count": 1,
+                "key": "sublime-license-check/3.0"
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>External traffic (outbound/inbound)</summary>
+
+```
+/mapi/agg/network.protocol?filter={"network.direction":["inbound","outbound"]}
+```
+
+```json
+{
+    "fields": [
+        "network.protocol"
+    ],
+    "filter": {
+        "network.direction": [
+            "inbound",
+            "outbound"
+        ]
+    },
+    "range": [
+        1970,
+        1643068000
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 202597,
+                "key": "bacnet"
+            },
+            {
+                "doc_count": 129,
+                "key": "tls"
+            },
+            {
+                "doc_count": 128,
+                "key": "ssl"
+            },
+            {
+                "doc_count": 33,
+                "key": "http"
+            },
+            {
+                "doc_count": 33,
+                "key": "ntp"
+            },
+            {
+                "doc_count": 20,
+                "key": "dns"
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>Cross-segment traffic</summary>
+
+```
+/mapi/agg/source.segment,destination.segment,network.protocol?filter={"tags":"cross_segment"}
+```
+
+```json
+{
+    "fields": [
+        "source.segment",
+        "destination.segment",
+        "network.protocol"
+    ],
+    "filter": {
+        "tags": "cross_segment"
+    },
+    "range": [
+        1970,
+        1643068080
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 6893,
+                "key": "Corporate",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 6893,
+                            "key": "OT",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 891,
+                                        "key": "enip"
+                                    },
+                                    {
+                                        "doc_count": 889,
+                                        "key": "cip"
+                                    },
+                                    {
+                                        "doc_count": 202,
+                                        "key": "http"
+                                    },
+                                    {
+                                        "doc_count": 146,
+                                        "key": "modbus"
+                                    },
+                                    {
+                                        "doc_count": 1,
+                                        "key": "ftp"
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 189,
+                "key": "OT",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 138,
+                            "key": "Corporate",
+                            "values": {
+                                "buckets": [
+                                    {
+                                        "doc_count": 128,
+                                        "key": "http"
+                                    }
+                                ],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 51,
+                            "key": "DMZ",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 28,
+                "key": "Battery Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 25,
+                            "key": "Combined Cycle BOP",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 3,
+                            "key": "Solar Panel Network",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 20,
+                "key": "Combined Cycle BOP",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 11,
+                            "key": "Battery Network",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        },
+                        {
+                            "doc_count": 9,
+                            "key": "Solar Panel Network",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Solar Panel Network",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Combined Cycle BOP",
+                            "values": {
+                                "buckets": [],
+                                "doc_count_error_upper_bound": 0,
+                                "sum_other_doc_count": 0
+                            }
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>Plaintext password</summary>
+
+```
+/mapi/agg/network.protocol?filter={"!related.password":null}
+```
+
+```json
+{
+    "fields": [
+        "network.protocol"
+    ],
+    "filter": {
+        "!related.password": null
+    },
+    "range": [
+        1970,
+        1643068162
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 20,
+                "key": "http"
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>Insecure/outdated protocols</summary>
+
+```
+/mapi/agg/network.protocol,network.protocol_version?filter={"event.severity_tags":"Insecure or outdated protocol"}
+```
+
+```json
+{
+    "fields": [
+        "network.protocol",
+        "network.protocol_version"
+    ],
+    "filter": {
+        "event.severity_tags": "Insecure or outdated protocol"
+    },
+    "range": [
+        1970,
+        1643068248
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 4244,
+                "key": "smb",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 4244,
+                            "key": "1"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "ftp",
+                "values": {
+                    "buckets": [],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "rdp",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "5.1"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "5.2"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 2,
+                "key": "telnet",
                 "values": {
                     "buckets": [],
                     "doc_count_error_upper_bound": 0,
@@ -1785,6 +2994,240 @@ https://localhost/mapi/agg/source.segment,network.protocol?from=24 hours ago&to=
     }
 }
 ```
+</details>
+<details>
+<summary>Notice categories</summary>
+
+```
+/mapi/agg/zeek.notice.category,zeek.notice.sub_category
+```
+
+```json
+{
+    "fields": [
+        "zeek.notice.category",
+        "zeek.notice.sub_category"
+    ],
+    "filter": null,
+    "range": [
+        1970,
+        1643068300
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))",
+        "/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 100,
+                "key": "ATTACK",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 42,
+                            "key": "Lateral_Movement_Extracted_File"
+                        },
+                        {
+                            "doc_count": 30,
+                            "key": "Lateral_Movement"
+                        },
+                        {
+                            "doc_count": 17,
+                            "key": "Discovery"
+                        },
+                        {
+                            "doc_count": 5,
+                            "key": "Execution"
+                        },
+                        {
+                            "doc_count": 5,
+                            "key": "Lateral_Movement_Multiple_Attempts"
+                        },
+                        {
+                            "doc_count": 1,
+                            "key": "Lateral_Movement_and_Execution"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 14,
+                "key": "EternalSafety",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 11,
+                            "key": "EternalSynergy"
+                        },
+                        {
+                            "doc_count": 3,
+                            "key": "ViolationPidMid"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 6,
+                "key": "Scan",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 6,
+                            "key": "Port_Scan"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            },
+            {
+                "doc_count": 1,
+                "key": "Ripple20",
+                "values": {
+                    "buckets": [
+                        {
+                            "doc_count": 1,
+                            "key": "Treck_TCP_observed"
+                        }
+                    ],
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0
+                }
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
+<details>
+<summary>Severity tags</summary>
+
+```
+/mapi/agg/event.severity_tags
+```
+
+```json
+{
+    "fields": [
+        "event.severity_tags"
+    ],
+    "filter": null,
+    "range": [
+        1970,
+        1643068363
+    ],
+    "urls": [
+        "/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))",
+        "/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'1970-01-01T00:32:50Z',to:now))"
+    ],
+    "values": {
+        "buckets": [
+            {
+                "doc_count": 160180,
+                "key": "Outbound traffic"
+            },
+            {
+                "doc_count": 43059,
+                "key": "Inbound traffic"
+            },
+            {
+                "doc_count": 11091,
+                "key": "Connection attempt rejected"
+            },
+            {
+                "doc_count": 8967,
+                "key": "Connection attempt, no reply"
+            },
+            {
+                "doc_count": 7131,
+                "key": "Cross-segment traffic"
+            },
+            {
+                "doc_count": 4250,
+                "key": "Insecure or outdated protocol"
+            },
+            {
+                "doc_count": 2219,
+                "key": "External traffic"
+            },
+            {
+                "doc_count": 1985,
+                "key": "Country of concern"
+            },
+            {
+                "doc_count": 760,
+                "key": "Weird"
+            },
+            {
+                "doc_count": 537,
+                "key": "Connection aborted (originator)"
+            },
+            {
+                "doc_count": 474,
+                "key": "Connection aborted (responder)"
+            },
+            {
+                "doc_count": 206,
+                "key": "File transfer (high concern)"
+            },
+            {
+                "doc_count": 100,
+                "key": "MITRE ATT&CK framework technique"
+            },
+            {
+                "doc_count": 66,
+                "key": "Service on non-standard port"
+            },
+            {
+                "doc_count": 64,
+                "key": "Signature (capa)"
+            },
+            {
+                "doc_count": 30,
+                "key": "Signature (YARA)"
+            },
+            {
+                "doc_count": 25,
+                "key": "Signature (ClamAV)"
+            },
+            {
+                "doc_count": 20,
+                "key": "Cleartext password"
+            },
+            {
+                "doc_count": 19,
+                "key": "Long connection"
+            },
+            {
+                "doc_count": 15,
+                "key": "Notice (vulnerability)"
+            },
+            {
+                "doc_count": 13,
+                "key": "File transfer (medium concern)"
+            },
+            {
+                "doc_count": 6,
+                "key": "Notice (scan)"
+            },
+            {
+                "doc_count": 1,
+                "key": "High volume connection"
+            }
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0
+    }
+}
+```
+</details>
 
 ## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
 
@@ -1827,7 +3270,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.2.iso"
 …
 ```
 
@@ -2214,22 +3657,22 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.1           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.2.1           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.2.1           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.2.1           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.2.1           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.2.1           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.2.1           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.2.1           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.1           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.1           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.2.1           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.2.1           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.2.1           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.2.1           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.2.1           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.2.1           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.2           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.2           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.2           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.2           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.2           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.2           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.2           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.2           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.2           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.2           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.2           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.2           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.2           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.2           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.2           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.2           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

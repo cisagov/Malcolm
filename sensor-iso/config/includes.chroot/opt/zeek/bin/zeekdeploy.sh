@@ -76,9 +76,9 @@ ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRI
 ([[ ! -r "$ZEEK_EXTRACTOR_OVERRIDE_FILE" ]] || [[ -z "$ZEEK_EXTRACTOR_SCRIPT" ]] || [[ ! "$ZEEK_EXTRACTOR_MODE" = "mapped" ]]) && ZEEK_EXTRACTOR_OVERRIDE_FILE=""
 
 # make sure "intel" directory exists, even if empty
-INTEL_PATH="$ZEEK_INSTALL_PATH"/share/zeek/site/intel
-mkdir -p "$INTEL_PATH"
-touch "$INTEL_PATH"/__load__.zeek
+export INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
+mkdir -p "$INTEL_DIR"
+touch "$INTEL_DIR"/__load__.zeek
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true
 

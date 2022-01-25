@@ -43,7 +43,7 @@ class Constants:
     ZEEK_FILE_CARVING_CUSTOM_EXT = 'custom (extension-sorted)'
     ZEEK_FILE_CARVING_DEFAULTS = '/opt/zeek/share/zeek/site/extractor_params.zeek'
     ZEEK_FILE_CARVING_OVERRIDE_FILE = '/opt/sensor/sensor_ctl/extractor_override.zeek'
-    ZEEK_FILE_CARVING_OVERRIDE_INTERESTING_FILE = '/opt/sensor/sensor_ctl/extractor_override.interesting.zeek'
+    ZEEK_FILE_CARVING_OVERRIDE_INTERESTING_FILE = '/opt/sensor/sensor_ctl/zeek/extractor_override.interesting.zeek'
     ZEEK_FILE_CARVING_OVERRIDE_FILE_MAP_NAME = 'extractor_mime_to_ext_map'
     ZEEK_FILE_CARVING_PLAIN_TEXT_MIMES = {
         "application/json",
