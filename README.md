@@ -1818,7 +1818,8 @@ Parameters:
 * `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
 * `filter` (query parameter) - field filters formatted as a JSON dictionary (see **Field Aggregations** for examples)
 
-Example URL and output:
+<details>
+<summary>Example URL and output:</summary>
 
 ```
 https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
@@ -1891,6 +1892,7 @@ https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
                     ],
 …
 ```
+</details>
 
 #### <a name="APIExamples"></a>Examples
 
