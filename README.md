@@ -856,13 +856,21 @@ Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch databa
 
 ### <a name="ReadOnlyUI"></a>Temporary read-only interface
 
-To temporarily set the Malcolm user interaces into a read-only configuration, run the following command from the Malcolm installation directory:
+To temporarily set the Malcolm user interaces into a read-only configuration, run the following commands from the Malcolm installation directory.
+
+First, to configure [Nginx] to disable access to the upload and other interfaces for changing Malcolm settings, and to deny HTTP methods other than `GET` and `POST`:
 
 ```
 docker-compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
 ```
 
-This command must be re-run every time you restart Malcolm.
+Second, to set the existing OpenSearch data store to read-only:
+
+```
+docker-compose exec dashboards-helper /data/opensearch_read_only.py -i _cluster
+```
+
+These commands must be re-run every time you restart Malcolm. Note that after you run these commands you may see an increase of error messages in the Malcolm containers' output as various background processes will fail due to the read-only nature of the indices.
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
