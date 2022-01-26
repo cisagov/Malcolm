@@ -836,8 +836,8 @@ chown root:netdev /sbin/ethtool && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
 chown root:netdev /opt/zeek/bin/capstats && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/capstats
-chown root:netdev /usr/sbin/tcpdump && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump
+chown root:netdev /usr/bin/tcpdump && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
@@ -847,7 +847,7 @@ chown root:netdev /opt/arkime/bin/capture && \
 
 ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
 ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
-ln -s -f /usr/sbin/tcpdump /usr/local/bin/
+ln -s -f /usr/bin/tcpdump /usr/local/bin/
 ln -s -f /opt/arkime/bin/capture /usr/local/bin/
 ln -s -f /opt/arkime/bin/npm /usr/local/bin
 ln -s -f /opt/arkime/bin/node /usr/local/bin
@@ -865,8 +865,8 @@ root@hedgehog:/tmp# chown root:netdev /sbin/ethtool && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
 root@hedgehog:/tmp# chown root:netdev /opt/zeek/bin/capstats && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/capstats
-root@hedgehog:/tmp# chown root:netdev /usr/sbin/tcpdump && \
->   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/sbin/tcpdump
+root@hedgehog:/tmp# chown root:netdev /usr/bin/tcpdump && \
+>   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 root@hedgehog:/tmp# chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
 >   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 root@hedgehog:/tmp# chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
@@ -875,7 +875,7 @@ root@hedgehog:/tmp# chown root:netdev /opt/arkime/bin/capture && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 root@hedgehog:/tmp# ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
-root@hedgehog:/tmp# ln -s -f /usr/sbin/tcpdump /usr/local/bin/
+root@hedgehog:/tmp# ln -s -f /usr/bin/tcpdump /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/capture /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/npm /usr/local/bin
 root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/node /usr/local/bin
