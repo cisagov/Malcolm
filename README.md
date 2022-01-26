@@ -870,7 +870,9 @@ Second, to set the existing OpenSearch data store to read-only:
 docker-compose exec dashboards-helper /data/opensearch_read_only.py -i _cluster
 ```
 
-These commands must be re-run every time you restart Malcolm. Note that after you run these commands you may see an increase of error messages in the Malcolm containers' output as various background processes will fail due to the read-only nature of the indices.
+These commands must be re-run every time you restart Malcolm.
+
+Note that after you run these commands you may see an increase of error messages in the Malcolm containers' output as various background processes will fail due to the read-only nature of the indices. Additionally, some features such as Arkime's [Hunt](#ArkimeHunt) and [building your own visualizations and dashboards](#BuildDashboard) in OpenSearch Dashboards will not function correctly in read-only mode.
 
 ## <a name="Upload"></a>Capture file and log archive upload
 
