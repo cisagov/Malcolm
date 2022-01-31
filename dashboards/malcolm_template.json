@@ -395,6 +395,7 @@
         "zeek.files.extracted_cutoff": { "type": "keyword" },
         "zeek.files.extracted_size": { "type": "integer" },
         "zeek.files.filename": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "zeek.files.ftime": { "type": "date" },
         "zeek.files.is_orig": { "type": "keyword" },
         "zeek.files.local_orig": { "type": "keyword" },
         "zeek.files.md5": { "type": "keyword" },

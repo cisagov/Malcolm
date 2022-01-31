@@ -71,6 +71,7 @@ export SPICY_ZKG_PROCESSES=1
 
 # install Zeek packages that install nicely using zkg
 ZKG_GITHUB_URLS=(
+  "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap"
   "https://github.com/cisagov/icsnpp-dnp3"
@@ -87,6 +88,11 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/pingback"
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-community-id"
+  "https://github.com/corelight/zeek-spicy-ipsec"
+  "https://github.com/corelight/zeek-spicy-openvpn"
+  "https://github.com/corelight/zeek-spicy-ospf"
+  "https://github.com/corelight/zeek-spicy-stun"
+  "https://github.com/corelight/zeek-spicy-wireguard"
   "https://github.com/corelight/zerologon"
   "https://github.com/mitre-attack/bzar"
   "https://github.com/mmguero-dev/cve-2020-0601|zeek-v4.1-compatibility"
@@ -95,7 +101,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/ripple20|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/zeek-af_packet-plugin|master"
-  "https://github.com/mmguero-dev/zeek-EternalSafety|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/zeek-plugin-profinet|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/zeek-plugin-s7comm|zeek-v4.1-compatibility"
   "https://github.com/mmguero-dev/zeek-plugin-tds|zeek-v4.1-compatibility"
@@ -111,11 +116,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/zeek/spicy-pe"
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
-  "https://github.com/corelight/zeek-spicy-ipsec"
-  "https://github.com/corelight/zeek-spicy-openvpn"
-  "https://github.com/corelight/zeek-spicy-ospf"
-  "https://github.com/corelight/zeek-spicy-stun"
-  "https://github.com/corelight/zeek-spicy-wireguard"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"

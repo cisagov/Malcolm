@@ -28,7 +28,7 @@ auditbeat.modules:
                   auditd.summary.object.type: 'network-device'
               - or:
                   - equals:
-                      auditd.summary.how: '/usr/sbin/tcpdump'
+                      auditd.summary.how: '/usr/bin/tcpdump'
                   - equals:
                       auditd.summary.how: '/opt/zeek/bin/zeek'
                   - equals:
@@ -59,7 +59,7 @@ auditbeat.modules:
                         - equals:
                             auditd.summary.how: '/opt/firefox/firefox'
                         - equals:
-                            auditd.summary.how: '/usr/sbin/tcpdump'
+                            auditd.summary.how: '/usr/bin/tcpdump'
                         - equals:
                             auditd.summary.how: '/opt/zeek/bin/zeek'
                         - equals:

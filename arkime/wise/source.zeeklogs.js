@@ -406,6 +406,7 @@ class MalcolmSource extends WISESource {
       "zeek.files.extracted_cutoff",
       "zeek.files.extracted_size",
       "zeek.files.filename",
+      "zeek.files.ftime",
       "zeek.files.is_orig",
       "zeek.files.local_orig",
       "zeek.files.md5",

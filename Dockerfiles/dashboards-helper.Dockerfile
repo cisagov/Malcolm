@@ -66,6 +66,7 @@ ADD dashboards/malcolm_template.json /data/malcolm_template.json
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /data/
 ADD shared/bin/opensearch_index_size_prune.py /data/
+ADD shared/bin/opensearch_read_only.py /data/
 
 RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && \
     npm install -g http-server && \

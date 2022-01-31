@@ -9,7 +9,7 @@ export CCACHE_COMPRESS=1
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-ZEEK_VERSION=4.1.1-0
+ZEEK_VERSION=4.2.0-0
 ZEEK_LTS=
 SPICY_VERSION=1.3.0
 ZEEK_DIR="/opt/zeek"
