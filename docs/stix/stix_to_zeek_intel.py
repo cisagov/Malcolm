@@ -8,11 +8,9 @@ import logging
 import os
 import sys
 
-from stix2 import exceptions as StixExceptions
 from stix2 import parse as StixParse
+from stix2.exceptions import STIXError
 from stix2.utils import STIXdatetime
-from stix2.v20 import Indicator as Indicator_v20
-from stix2.v21 import Indicator as Indicator_v21
 import stix_zeek_utils
 
 ###################################################################################################
@@ -92,15 +90,18 @@ def main():
 
     print('\t'.join(['#fields'] + fields))
     for infile in args.input:
-        with open(infile) as f:
-            try:
-                for obj in StixParse(f).objects:
-                    if (type(obj) is Indicator_v20) or (type(obj) is Indicator_v21):
-                        if vals := stix_zeek_utils.map_indicator_to_zeek(indicator=obj, logger=logging):
-                            for val in vals:
-                                print('\t'.join([val[key] for key in fields]))
-            except StixExceptions.InvalidValueError as ve:
-                logging.error(f"ValueError parsing {infile}: {ve}")
+        try:
+            with open(infile) as f:
+                try:
+                    for obj in StixParse(f).objects:
+                        if type(obj).__name__ == "Indicator":
+                            if vals := stix_zeek_utils.map_indicator_to_zeek(indicator=obj, logger=logging):
+                                for val in vals:
+                                    print('\t'.join([val[key] for key in fields]))
+                except STIXError as ve:
+                    logging.error(f"{type(ve).__name__} parsing '{infile}': {ve}")
+        except Exception as e:
+            logging.error(f"{type(e).__name__} for '{infile}': {e}")
 
 
 ###################################################################################################
