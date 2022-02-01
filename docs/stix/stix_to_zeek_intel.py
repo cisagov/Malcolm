@@ -28,11 +28,11 @@ def main():
                 'See:',
                 ' - Zeek intelligence framework: https://docs.zeek.org/en/master/frameworks/intel.html',
                 ' - Zeek intel types: https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type',
-                ' - STIX™ cyber-observable objects: https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr',
+                ' - STIX cyber-observable objects: https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr',
                 ' - Malcolm documentation: https://github.com/idaholab/Malcolm#zeek-intelligence-framework',
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
-                'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
+                'The STIX standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
