@@ -42,6 +42,7 @@ ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 ZEEK_INTEL_TYPE_MAP = {
     "domain-name:value": "DOMAIN",
     "email-addr:value": "EMAIL",
+    "email-message:from_ref.'value'": "EMAIL",
     "file:name": "FILE_NAME",
     "file:hashes.MD5": "FILE_HASH",
     "file:hashes.'MD5'": "FILE_HASH",
@@ -213,8 +214,10 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
         zeekItem = defaultdict(lambda: '-')
 
         zeekItem[ZEEK_INTEL_META_SOURCE] = str(indicator.id)
+        zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
+        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         if ('name' in indicator) or ('description' in indicator):
-            zeekItem[ZEEK_INTEL_META_DESC] = ':'.join(
+            zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
                 [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
             )
             # some of these are from CFM, what the heck...
@@ -222,10 +225,11 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
             #   "description": "severity level: Low\n\nCONFIDENCE: High",
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(indicator.created.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(indicator.modified.timetuple()))
-        if 'labels' in indicator:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(indicator.labels)
-        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = zeek_type
-        zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
+        tags = []
+        tags.extend([x for x in indicator.get('labels', []) if x])
+        tags.extend([x for x in indicator.get('indicator_types', []) if x])
+        if len(tags) > 0:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
 
         results.append(zeekItem)
         logger.debug(zeekItem)
