@@ -213,8 +213,13 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
         zeekItem = defaultdict(lambda: '-')
 
         zeekItem[ZEEK_INTEL_META_SOURCE] = str(indicator.id)
-        if 'name' in indicator:
-            zeekItem[ZEEK_INTEL_META_DESC] = indicator.name
+        if ('name' in indicator) or ('description' in indicator):
+            zeekItem[ZEEK_INTEL_META_DESC] = ':'.join(
+                [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
+            )
+            # some of these are from CFM, what the heck...
+            # if 'description' in indicator:
+            #   "description": "severity level: Low\n\nCONFIDENCE: High",
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(indicator.created.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(indicator.modified.timetuple()))
         if 'labels' in indicator:
