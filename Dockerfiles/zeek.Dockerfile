@@ -90,7 +90,7 @@ RUN apt-get -q update && \
       swig \
       vim-tiny \
       zlib1g-dev && \
-    pip3 install --no-cache-dir stix2 && \
+    pip3 install --no-cache-dir stix2 taxii2-client && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
