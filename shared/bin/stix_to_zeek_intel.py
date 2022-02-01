@@ -32,7 +32,7 @@ def main():
                 ' - Malcolm documentation: https://github.com/idaholab/Malcolm#zeek-intelligence-framework',
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
-                'The STIX standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
+                'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
