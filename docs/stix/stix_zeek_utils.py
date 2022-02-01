@@ -4,24 +4,42 @@
 # - BSD 3-Clause license: https://github.com/tenzir/threatbus/blob/master/COPYING
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
-import json
 import re
+import datetime
+import time
+from collections import defaultdict
+from collections.abc import Iterable
 
+# for handling v2.0 and v2.1 of STIX objects
 from stix2.v20 import Indicator as Indicator_v20
 from stix2.v21 import Indicator as Indicator_v21
 from stix2patterns.v21.pattern import Pattern as Pattern_v21
 from stix2patterns.v20.pattern import Pattern as Pattern_v20
+
+# strong type checking
 from typing import Tuple, Union
+
+# to remove leading protocol from URL-type indicators
 from urllib.parse import urlparse
-from collections import namedtuple
-from collections.abc import Iterable
+
+ZEEK_INTEL_INDICATOR = 'indicator'
+ZEEK_INTEL_INDICATOR_TYPE = 'indicator_type'
+ZEEK_INTEL_META_SOURCE = 'meta.source'
+ZEEK_INTEL_META_DESC = 'meta.desc'
+ZEEK_INTEL_META_URL = 'meta.url'
+ZEEK_INTEL_META_DO_NOTICE = 'meta.do_notice'
+ZEEK_INTEL_CIF_TAGS = 'meta.cif_tags'
+ZEEK_INTEL_CIF_CONFIDENCE = 'meta.cif_confidence'
+ZEEK_INTEL_CIF_SOURCE = 'meta.cif_source'
+ZEEK_INTEL_CIF_DESCRIPTION = 'meta.cif_description'
+ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
+ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 
-# See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber
-# observable objects [2]
+# See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
 # [2] https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr
-zeek_intel_type_map = {
+ZEEK_INTEL_TYPE_MAP = {
     "domain-name:value": "DOMAIN",
     "email-addr:value": "EMAIL",
     "file:name": "FILE_NAME",
@@ -43,10 +61,17 @@ zeek_intel_type_map = {
     "x509-certificate:hashes.'SHA-1'": "CERT_HASH",  # Zeek only supports SHA-1
 }
 
-ZeekIntel = namedtuple("ZeekIntel", ["id", "name", "created", "intel_type", "ioc"], rename=False)
-
 
 def pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v21, Pattern_v20, None]:
+    """
+    Creates a stix2patterns.v20.pattern.Pattern (Pattern_v20) or a
+    stix2patterns.v21.pattern.Pattern (Pattern_v21) based on the given
+    pattern string depending on the type of the indicator (v2.0 or v2.1).
+    Returns None if the indicator type is unsupported.
+    @param indicator_type the type of the indicator object
+    @param pattern_str the STIX-2 pattern
+    @return the Pattern object initialized from the pattern string
+    """
     if indicator_type is Indicator_v21:
         return Pattern_v21(pattern_str)
     elif indicator_type is Indicator_v20:
@@ -61,7 +86,9 @@ def is_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -
     only consists of a single EqualityComparisonExpression. However, that EqualityComparisonExpression
     may contain multiple OR'ed values, e.g.,
     "[file:hashes.'SHA-1' = '080989879772b0da6a78be8d38dba1f50279fd22' OR file:hashes.MD5 = 'a04aae944126fc3256cf4cf6de4646fb]"
+    @param indicator_type the type of the indicator object
     @param pattern_str The STIX-2 pattern string to inspect
+    @return True (the pattern is a point-IoC) or False (the pattern is NOT a point-IoC)
     """
     try:
         if pattern := pattern_from_str(indicator_type, pattern_str):
@@ -99,22 +126,24 @@ def split_object_path_and_value(
     ioc_value of that pattern (e.g., [domain-name:value = 'evil.com'] is split
     to `domain-name:value` and `evil.com`. Returns None if the pattern is not
     a point-ioc pattern.
-    @param pattern_str The STIX-2 pattern to split
+    @param indicator_type the type of the indicator object
+    @param pattern_str the STIX-2 pattern to split
     @return the object_path and ioc_value of the pattern or None
     """
-    if not is_point_equality_ioc(indicator_type, pattern_str, logger):
-        return None
-
-    if pattern := pattern_from_str(indicator_type, pattern_str):
+    if is_point_equality_ioc(indicator_type, pattern_str, logger) and (
+        pattern := pattern_from_str(indicator_type, pattern_str)
+    ):
         il = pattern.inspect()
-
         results = []
 
+        # some of these checks are redundant (there is only one key, len(element) == 3, etc.) in is_point_equality_ioc
         for comparison in list(il.comparisons.keys()):
             for element in il.comparisons[comparison]:
-                # this check is redundant as it's also done in is_point_equality_ioc
                 if isinstance(element, Iterable) and (len(element) == 3) and (element[1] in ('=', '==')):
-                    # construct object path name
+
+                    # construct object path name, e.g.:
+                    #     file:hashes.'SHA-1'
+                    #     software:name
                     if isinstance(element[0], Iterable):
                         object_path = ':'.join(
                             (
@@ -126,26 +155,30 @@ def split_object_path_and_value(
                         )
                     else:
                         object_path = ':'.join((comparison.strip(), element[0].strip()))
+
+                    # strip quotes from IoC value
                     if element[2].startswith("'") and element[2].endswith("'"):
                         ioc_value = element[2].strip("'")
                     elif element[2].startswith('"') and element[2].endswith('"'):
                         ioc_value = element[2].strip('"')
                     else:
                         ioc_value = element[2]
+
                     results.append((object_path, ioc_value))
 
         return results
 
     else:
+        # invalid pattern
         return None
 
 
-def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger) -> Union[Tuple[ZeekIntel], None]:
+def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger) -> Union[Tuple[defaultdict], None]:
     """
-    Maps STIX-2 Indicators to strings formatted in the Zeek Intel format
+    Maps a STIX-2 indicator to Zeek intel items
     @see https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
     @param indicator The STIX-2 Indicator to convert
-    @return The mapped broker event or None
+    @return a list containing the Zeek intel dict(s) from the STIX-2 Indicator
     """
     if (type(indicator) is not Indicator_v20) and (type(indicator) is not Indicator_v21):
         logger.warning(f"Discarding message, expected STIX-2 Indicator: {indicator}")
@@ -157,11 +190,13 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
         )
         return None
 
+    logger.debug(indicator)
+
     results = []
     for object_path, ioc_value in split_object_path_and_value(type(indicator), indicator.pattern, logger):
 
         # get matching Zeek intel type
-        if not (zeek_type := zeek_intel_type_map.get(object_path, None)):
+        if not (zeek_type := ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
             logger.warning(f"No matching Zeek type found for STIX-2 indicator type '{object_path}'")
             continue
 
@@ -174,14 +209,20 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
             # elevate to subnet if possible
             zeek_type = "SUBNET"
 
-        results.append(
-            ZeekIntel(
-                str(indicator.id),
-                indicator.name if 'name' in indicator else '',
-                indicator.created,
-                zeek_type,
-                ioc_value,
-            )
-        )
+        # ... "fields containing only a hyphen are considered to be null values"
+        zeekItem = defaultdict(lambda: '-')
+
+        zeekItem[ZEEK_INTEL_META_SOURCE] = str(indicator.id)
+        if 'name' in indicator:
+            zeekItem[ZEEK_INTEL_META_DESC] = indicator.name
+        zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(indicator.created.timetuple()))
+        zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(indicator.modified.timetuple()))
+        if 'labels' in indicator:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(indicator.labels)
+        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = zeek_type
+        zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
+
+        results.append(zeekItem)
+        logger.debug(zeekItem)
 
     return results
