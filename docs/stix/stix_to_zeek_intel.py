@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
 import argparse
-import datetime
-import json
 import logging
 import os
 import sys
@@ -16,23 +16,52 @@ import stix_zeek_utils
 ###################################################################################################
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
-orig_path = os.getcwd()
 
 ###################################################################################################
 # main
 def main():
-    global args
-    global debug
-
     parser = argparse.ArgumentParser(
-        description=script_name, add_help=False, usage='{} <arguments>'.format(script_name)
+        description='\n'.join(
+            [
+                'Outputs a Zeek intelligence framework file from "Indicator" objects in STIX™ v2.0/v2.1 JSON files.',
+                '',
+                'See:',
+                ' - Zeek intelligence framework: https://docs.zeek.org/en/master/frameworks/intel.html',
+                ' - Zeek intel types: https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type',
+                ' - STIX™ cyber-observable objects: https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr',
+                ' - Malcolm documentation: https://github.com/idaholab/Malcolm#zeek-intelligence-framework',
+                '',
+                'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
+                'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
+            ]
+        ),
+        formatter_class=argparse.RawTextHelpFormatter,
+        add_help=False,
+        usage='{} <arguments>'.format(script_name),
     )
-    parser.add_argument('--verbose', '-v', action='count', default=1)
-    parser.add_argument('--notice', dest='notice', action='store_true')
-    parser.add_argument('--no-notice', dest='notice', action='store_false')
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    parser.add_argument(
+        '--notice', dest='notice', action='store_true', help='Add fields for policy/frameworks/intel/do_notice.zeek'
+    )
+    parser.add_argument(
+        '--no-notice',
+        dest='notice',
+        action='store_false',
+        help='Do not add fields for policy/frameworks/intel/do_notice.zeek',
+    )
     parser.set_defaults(notice=True)
-    parser.add_argument('--cif', dest='cif', action='store_true')
-    parser.add_argument('--no-cif', dest='cif', action='store_false')
+    parser.add_argument(
+        '--cif',
+        dest='cif',
+        action='store_true',
+        help='Add fields for policy/integration/collective-intel/main.zeek',
+    )
+    parser.add_argument(
+        '--no-cif',
+        dest='cif',
+        action='store_false',
+        help='Do not add fields for policy/integration/collective-intel/main.zeek',
+    )
     parser.set_defaults(cif=True)
     parser.add_argument(
         '-i',
@@ -42,7 +71,6 @@ def main():
         type=str,
         default=None,
         required=True,
-        metavar='<STR>',
         help="STIX file(s)",
     )
     try:
@@ -88,18 +116,31 @@ def main():
             ]
         )
 
-    print('\t'.join(['#fields'] + fields))
+    # we'll print the #fields header the first time we print a valid row
+    headerPrinted = False
+
+    # process each given input STIX JSON file
     for infile in args.input:
         try:
             with open(infile) as f:
+
                 try:
+                    # parse the STIX file and process all "Indicator" objects
                     for obj in StixParse(f).objects:
                         if type(obj).__name__ == "Indicator":
+
+                            # map indicator object to Zeek value(s)
                             if vals := stix_zeek_utils.map_indicator_to_zeek(indicator=obj, logger=logging):
                                 for val in vals:
+                                    if not headerPrinted:
+                                        print('\t'.join(['#fields'] + fields))
+                                        headerPrinted = True
+                                    # print the intelligence item fields according to the columns in 'fields'
                                     print('\t'.join([val[key] for key in fields]))
+
                 except STIXError as ve:
                     logging.error(f"{type(ve).__name__} parsing '{infile}': {ve}")
+
         except Exception as e:
             logging.error(f"{type(e).__name__} for '{infile}': {e}")
 

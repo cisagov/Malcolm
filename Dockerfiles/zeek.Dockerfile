@@ -81,12 +81,16 @@ RUN apt-get -q update && \
       psmisc \
       python3 \
       python3-git \
+      python3-pip \
       python3-semantic-version \
+      python3-setuptools \
+      python3-wheel \
       python3-zmq \
       supervisor \
       swig \
       vim-tiny \
       zlib1g-dev && \
+    pip3 install --no-cache-dir stix2 && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
@@ -134,6 +138,7 @@ RUN apt-get -q update && \
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
+ADD docs/stix/*.py /usr/local/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/

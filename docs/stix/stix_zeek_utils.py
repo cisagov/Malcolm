@@ -1,11 +1,12 @@
-# borrows code from tenzir/threatbus
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
+# adapted some code from tenzir/threatbus
 # - https://github.com/tenzir/threatbus
 # - Copyright (c) 2020, Tenzir GmbH
 # - BSD 3-Clause license: https://github.com/tenzir/threatbus/blob/master/COPYING
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
 import re
-import datetime
 import time
 from collections import defaultdict
 from collections.abc import Iterable
@@ -22,6 +23,7 @@ from typing import Tuple, Union
 # to remove leading protocol from URL-type indicators
 from urllib.parse import urlparse
 
+# keys for dict returned by map_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
 ZEEK_INTEL_INDICATOR_TYPE = 'indicator_type'
 ZEEK_INTEL_META_SOURCE = 'meta.source'
