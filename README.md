@@ -82,6 +82,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
     - [Zeek Intelligence Framework](#ZeekIntel)
+        + [STIX™](#ZeekIntelSTIX)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
@@ -265,7 +266,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
-    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
+    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
@@ -566,7 +567,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
 
-* `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK technique](https://attack.mitre.org/techniques) classifications will be logged
+* `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
 
 * `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
 
@@ -1481,6 +1482,12 @@ Note that Malcolm does not manage updates for these intelligence files. You shou
 ```
 docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
 ```
+
+#### <a name="ZeekIntelSTIX"></a>STIX™
+
+In addition to loading Zeek intelligence files, Malcolm will automatically generate Zeek intelligence files for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) v2.0/v2.1 JSON files found under `./zeek/intel/STIX`.
+
+Note that only indicators of [cyber-observable objects](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the equals (`=`) [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a single value can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
 
 ### <a name="Alerting"></a>Alerting
 

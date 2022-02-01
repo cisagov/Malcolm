@@ -13,6 +13,7 @@ ENCODING="utf-8"
 
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
+STIX_TO_ZEEK_SCRIPT=${STIX_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/stix_to_zeek_intel.py"}
 
 # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
 if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
@@ -27,10 +28,17 @@ if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -
 
 EOF
     LOOSE_INTEL_FILES=()
+    STIX_JSON_FILES=()
 
     # process subdirectories under INTEL_DIR
     for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null); do
-        if [[ -f "${DIR}"/__load__.zeek ]]; then
+        if [[ "${DIR}" == "./STIX" ]]; then
+            # this directory contains STIX JSON files we'll need to convert to zeek intel files then load
+            while IFS= read -r line; do
+                STIX_JSON_FILES+=( "$line" )
+            done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
+
+        elif [[ -f "${DIR}"/__load__.zeek ]]; then
             # this intel feed has its own load directive and should take care of itself
             echo "@load ${DIR}" >> __load__.zeek
         else
@@ -40,6 +48,14 @@ EOF
             done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
         fi
     done
+
+    # process STIX JSON files by converting them to Zeek intel format
+    if (( ${#STIX_JSON_FILES[@]} )) && [[ -f "${STIX_TO_ZEEK_SCRIPT}" ]]; then
+        "${STIX_TO_ZEEK_SCRIPT}" -i "${STIX_JSON_FILES[@]}" >./stix_autogen.zeek 2>/dev/null
+        LOOSE_INTEL_FILES+=( "${INTEL_DIR}/stix_autogen.zeek" )
+    else
+        rm -f ./stix_autogen.zeek
+    fi
 
     # explicitly load all of the "loose" intel files in other subdirectories that didn't __load__.zeek themselves
     if (( ${#LOOSE_INTEL_FILES[@]} )); then

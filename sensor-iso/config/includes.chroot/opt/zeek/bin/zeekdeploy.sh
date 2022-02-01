@@ -77,7 +77,7 @@ ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRI
 
 # make sure "intel" directory exists, even if empty
 export INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
-mkdir -p "$INTEL_DIR"
+mkdir -p "$INTEL_DIR"/STIX
 touch "$INTEL_DIR"/__load__.zeek
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true

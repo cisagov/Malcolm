@@ -126,7 +126,7 @@ RUN apt-get -q update && \
     mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
                "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
-    mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel && \
+    mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
         touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
@@ -138,7 +138,7 @@ RUN apt-get -q update && \
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
-ADD docs/stix/*.py /usr/local/bin/
+ADD shared/bin/stix*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
