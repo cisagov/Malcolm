@@ -1485,7 +1485,7 @@ docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
 
 #### <a name="ZeekIntelSTIX"></a>STIX™ and TAXII™
 
-In addition to loading Zeek intelligence files, Malcolm will [automatically generate](shared/bin/stix_to_zeek_intel.py) a Zeek intelligence file for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) [v2.0](https://docs.oasis-open.org/cti/stix/v2.0/stix-v2.0-part1-stix-core.html)/[v2.1](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html) JSON files found under `./zeek/intel/STIX`.
+In addition to loading Zeek intelligence files, on startup Malcolm will [automatically generate](shared/bin/stix_to_zeek_intel.py) a Zeek intelligence file for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) [v2.0](https://docs.oasis-open.org/cti/stix/v2.0/stix-v2.0-part1-stix-core.html)/[v2.1](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html) JSON files found under `./zeek/intel/STIX`.
 
 Additionally, if a special text file named `.stix_input.txt` is found in `./zeek/intel/STIX`, that file will be read and processed as a list of [TAXII™](https://oasis-open.github.io/cti-documentation/taxii/intro.html) [2.0](http://docs.oasis-open.org/cti/taxii/v2.0/cs01/taxii-v2.0-cs01.html)/[2.1](https://docs.oasis-open.org/cti/taxii/v2.1/csprd02/taxii-v2.1-csprd02.html) feeds, one per line, according to the following format:
 
