@@ -137,7 +137,7 @@ def main():
                     # this is a STIX file, open and parse it
                     try:
                         # parse the STIX file and process all "Indicator" objects
-                        for obj in StixParse(f).objects:
+                        for obj in StixParse(f, allow_custom=True).objects:
                             if type(obj).__name__ == "Indicator":
 
                                 # map indicator object to Zeek value(s)
@@ -210,7 +210,12 @@ def main():
                                     **stix_zeek_utils.TAXII_INDICATOR_FILTER,
                                 )
                             ):
-                                logging.debug(json.dumps(envelope))
+                                try:
+                                    parsed = StixParse(envelope, allow_custom=True)
+                                    logging.debug(parsed.serialize(pretty=True))
+                                except STIXError as ve:
+                                    logging.error(f"{type(ve).__name__} for object of collection '{title}': {ve}")
+
                         except Exception as e:
                             logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
 
