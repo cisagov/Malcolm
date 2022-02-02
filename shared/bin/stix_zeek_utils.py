@@ -227,7 +227,11 @@ def split_object_path_and_value(
         return None
 
 
-def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger) -> Union[Tuple[defaultdict], None]:
+def map_indicator_to_zeek(
+    indicator: Union[Indicator_v20, Indicator_v21],
+    source: Union[str, None] = None,
+    logger=None,
+) -> Union[Tuple[defaultdict], None]:
     """
     Maps a STIX-2 indicator to Zeek intel items
     @see https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -270,7 +274,7 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
 
-        zeekItem[ZEEK_INTEL_META_SOURCE] = str(indicator.id)
+        zeekItem[ZEEK_INTEL_META_SOURCE] = source if source is not None else str(indicator.id)
         zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         if ('name' in indicator) or ('description' in indicator):
@@ -330,14 +334,14 @@ class STIXParserZeekPrinter(object):
                 ]
             )
 
-    def ProcessSTIX(self, toParse):
+    def ProcessSTIX(self, toParse, source: Union[str, None] = None):
         try:
             # parse the STIX and process all "Indicator" objects
             for obj in StixParse(toParse, allow_custom=True).objects:
                 if type(obj).__name__ == "Indicator":
 
                     # map indicator object to Zeek value(s)
-                    if vals := map_indicator_to_zeek(indicator=obj, logger=self.logger):
+                    if vals := map_indicator_to_zeek(indicator=obj, source=source, logger=self.logger):
                         for val in vals:
                             if not self.printedHeader:
                                 print('\t'.join(['#fields'] + self.fields), file=self.outFile)

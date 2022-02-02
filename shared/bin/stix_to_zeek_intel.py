@@ -154,7 +154,7 @@ def main():
                 with open(inarg) if ((inarg is not None) and os.path.isfile(inarg)) else nullcontext() as infile:
 
                     if infile:
-                        zeekPrinter.ProcessSTIX(infile)
+                        zeekPrinter.ProcessSTIX(infile, source=os.path.splitext(os.path.basename(inarg))[0])
 
                     elif inarg.lower().startswith('taxii'):
                         # this is a TAXII URL, connect and retrieve STIX indicators from it
@@ -224,7 +224,9 @@ def main():
                                         **stix_zeek_utils.TAXII_INDICATOR_FILTER,
                                     )
                                 ):
-                                    zeekPrinter.ProcessSTIX(envelope)
+                                    zeekPrinter.ProcessSTIX(
+                                        envelope, source=':'.join([x for x in [server.title, title] if x is not None])
+                                    )
 
                             except Exception as e:
                                 logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
