@@ -5,13 +5,10 @@
 
 import argparse
 import logging
-import json
 import os
 import sys
 
 from contextlib import nullcontext
-from stix2 import parse as StixParse
-from stix2.exceptions import STIXError
 from taxii2client.v20 import as_pages as TaxiiAsPages_v20
 from taxii2client.v20 import Collection as TaxiiCollection_v20
 from taxii2client.v20 import Server as TaxiiServer_v20
@@ -79,7 +76,7 @@ def main():
         type=str,
         default=None,
         required=True,
-        help="STIX file(s), or TAXII URL(s), e.g., 'taxii|2.0|http://example.com/discovery|Collection Name|user|password'",
+        help="STIX file(s), or TAXII 2.x URL(s), e.g., 'taxii|2.0|http://example.com/discovery|Collection Name|user|password'",
     )
     parser.add_argument(
         '-o',
