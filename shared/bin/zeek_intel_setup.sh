@@ -11,6 +11,7 @@ set -uo pipefail
 shopt -s nocasematch
 ENCODING="utf-8"
 
+SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
@@ -74,6 +75,19 @@ EOF
     fi
 
     popd >/dev/null 2>&1
+fi
+
+# if supercronic is being used to periodically refresh the intel sources,
+# write a cron entry to $SUPERCRONIC_CRONTAB using the interval specified in
+# $ZEEK_INTEL_REFRESH_CRON_EXPRESSION (e.g., 15 1 * * *) to execute this script
+if [[ -n "${SUPERCRONIC_CRONTAB}" ]] && [[ -f "${SUPERCRONIC_CRONTAB}" ]]; then
+    if [[ -n "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION}" ]]; then
+        echo "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION} ${SCRIPT_FILESPEC} true" > "${SUPERCRONIC_CRONTAB}"
+    else
+        > "${SUPERCRONIC_CRONTAB}"
+    fi
+    # reload supercronic if it's running
+    killall -s USR2 supercronic >/dev/null 2>&1 || true
 fi
 
 # start supervisor to spawn the other process(es) or whatever the default command is
