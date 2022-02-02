@@ -17,6 +17,8 @@ from stix2.v20 import Indicator as Indicator_v20
 from stix2.v21 import Indicator as Indicator_v21
 from stix2patterns.v21.pattern import Pattern as Pattern_v21
 from stix2patterns.v20.pattern import Pattern as Pattern_v20
+from stix2 import parse as StixParse
+from stix2.exceptions import STIXError
 
 # strong type checking
 from typing import Tuple, Union
@@ -248,3 +250,58 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
         logger.debug(zeekItem)
 
     return results
+
+
+class STIXParserZeekPrinter(object):
+    fields = []
+    # we'll print the #fields header the first time we print a valid row
+    printedHeader = False
+    logger = None
+    outFile = None
+
+    def __init__(self, notice: bool, cif: bool, file=None, logger=None):
+        self.logger = logger
+        self.outFile = file
+        self.fields = [
+            ZEEK_INTEL_INDICATOR,
+            ZEEK_INTEL_INDICATOR_TYPE,
+            ZEEK_INTEL_META_SOURCE,
+            ZEEK_INTEL_META_DESC,
+            ZEEK_INTEL_META_URL,
+        ]
+        if notice:
+            self.fields.extend(
+                [
+                    ZEEK_INTEL_META_DO_NOTICE,
+                ]
+            )
+        if cif:
+            self.fields.extend(
+                [
+                    ZEEK_INTEL_CIF_TAGS,
+                    ZEEK_INTEL_CIF_CONFIDENCE,
+                    ZEEK_INTEL_CIF_SOURCE,
+                    ZEEK_INTEL_CIF_DESCRIPTION,
+                    ZEEK_INTEL_CIF_FIRSTSEEN,
+                    ZEEK_INTEL_CIF_LASTSEEN,
+                ]
+            )
+
+    def ProcessSTIX(self, toParse):
+        try:
+            # parse the STIX and process all "Indicator" objects
+            for obj in StixParse(toParse, allow_custom=True).objects:
+                if type(obj).__name__ == "Indicator":
+
+                    # map indicator object to Zeek value(s)
+                    if vals := map_indicator_to_zeek(indicator=obj, logger=self.logger):
+                        for val in vals:
+                            if not self.printedHeader:
+                                print('\t'.join(['#fields'] + self.fields), file=self.outFile)
+                                self.printedHeader = True
+                            # print the intelligence item fields according to the columns in 'fields'
+                            print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+
+        except STIXError as ve:
+            if self.logger is not None:
+                self.logger.error(f"{type(ve).__name__} parsing '{infile}': {ve}")

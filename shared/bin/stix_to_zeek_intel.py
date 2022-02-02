@@ -12,7 +12,6 @@ import sys
 from contextlib import nullcontext
 from stix2 import parse as StixParse
 from stix2.exceptions import STIXError
-from stix2.utils import STIXdatetime
 from taxii2client.v20 import as_pages as TaxiiAsPages_v20
 from taxii2client.v20 import Collection as TaxiiCollection_v20
 from taxii2client.v20 import Server as TaxiiServer_v20
@@ -82,6 +81,14 @@ def main():
         required=True,
         help="STIX file(s)",
     )
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='output',
+        type=str,
+        default=None,
+        help="Output file (stdout if unspecified)",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -100,141 +107,84 @@ def main():
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
-    fields = [
-        stix_zeek_utils.ZEEK_INTEL_INDICATOR,
-        stix_zeek_utils.ZEEK_INTEL_INDICATOR_TYPE,
-        stix_zeek_utils.ZEEK_INTEL_META_SOURCE,
-        stix_zeek_utils.ZEEK_INTEL_META_DESC,
-        stix_zeek_utils.ZEEK_INTEL_META_URL,
-    ]
-    if args.notice:
-        fields.extend(
-            [
-                stix_zeek_utils.ZEEK_INTEL_META_DO_NOTICE,
-            ]
-        )
-    if args.cif:
-        fields.extend(
-            [
-                stix_zeek_utils.ZEEK_INTEL_CIF_TAGS,
-                stix_zeek_utils.ZEEK_INTEL_CIF_CONFIDENCE,
-                stix_zeek_utils.ZEEK_INTEL_CIF_SOURCE,
-                stix_zeek_utils.ZEEK_INTEL_CIF_DESCRIPTION,
-                stix_zeek_utils.ZEEK_INTEL_CIF_FIRSTSEEN,
-                stix_zeek_utils.ZEEK_INTEL_CIF_LASTSEEN,
-            ]
-        )
+    with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
+        zeekPrinter = stix_zeek_utils.STIXParserZeekPrinter(args.notice, args.cif, file=outfile, logger=logging)
 
-    # we'll print the #fields header the first tim ewe print a valid row
-    headerPrinted = False
+        # process each given STIX input
+        for infile in args.input:
+            try:
+                with open(infile) if ((infile is not None) and os.path.isfile(infile)) else nullcontext() as f:
 
-    # process each given STIX input
-    for infile in args.input:
-        try:
-            with open(infile) if ((infile is not None) and os.path.isfile(infile)) else nullcontext() as f:
+                    if f:
+                        zeekPrinter.ProcessSTIX(f)
 
-                if f:
-                    # this is a STIX file, open and parse it
-                    try:
-                        # parse the STIX file and process all "Indicator" objects
-                        for obj in StixParse(f, allow_custom=True).objects:
-                            if type(obj).__name__ == "Indicator":
+                    elif infile.lower().startswith('taxii'):
+                        # this is a TAXII URL, connect and retrieve STIX indicators from it
 
-                                # map indicator object to Zeek value(s)
-                                if vals := stix_zeek_utils.map_indicator_to_zeek(indicator=obj, logger=logging):
-                                    for val in vals:
-                                        if not headerPrinted:
-                                            print('\t'.join(['#fields'] + fields))
-                                            headerPrinted = True
-                                        # print the intelligence item fields according to the columns in 'fields'
-                                        print('\t'.join([val[key] for key in fields]))
-
-                    except STIXError as ve:
-                        logging.error(f"{type(ve).__name__} parsing '{infile}': {ve}")
-
-                elif infile.lower().startswith('taxii'):
-                    # this is a TAXII URL, connect and retrieve STIX indicators from it
-
-                    # taxii|2.0|discovery_url|collection_name|username|password
-                    taxiiConnInfo = [stix_zeek_utils.base64_decode_if_prefixed(x) for x in infile.split('|')[1::]]
-                    taxiiVersion, taxiiDisoveryURL, taxiiCollectionName, taxiiUsername, taxiiPassword = (
-                        None,
-                        None,
-                        None,
-                        None,
-                        None,
-                    )
-                    if len(taxiiConnInfo) >= 3:
-                        taxiiVersion, taxiiDisoveryURL, taxiiCollectionName = taxiiConnInfo[0:3]
-                    if len(taxiiConnInfo) >= 4:
-                        taxiiUsername = taxiiConnInfo[3]
-                    if len(taxiiConnInfo) >= 5:
-                        taxiiPassword = taxiiConnInfo[4]
-
-                    # connect to the server with the appropriate API for the TAXII version
-                    if taxiiVersion == '2.0':
-                        server = TaxiiServer_v20(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
-                    elif taxiiVersion == '2.1':
-                        server = TaxiiServer_v21(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
-                    else:
-                        raise Exception(f'Unsupported TAXII version "{taxiiVersion}"')
-
-                    # collect the collection URL(s) for the given collection name
-                    collectionUrls = {}
-                    for api_root in server.api_roots:
-                        for collection in api_root.collections:
-                            if collection.title.lower() == taxiiCollectionName.lower():
-                                collectionUrls[collection.title] = {
-                                    'id': collection.id,
-                                    'url': collection.url,
-                                }
-
-                    # connect to and retrieve indicator STIX objects from the collection URL(s)
-                    for title, info in collectionUrls.items():
-                        collection = (
-                            TaxiiCollection_v21(info['url'])
-                            if taxiiVersion == '2.1'
-                            else TaxiiCollection_v20(info['url'])
+                        # taxii|2.0|discovery_url|collection_name|username|password
+                        taxiiConnInfo = [stix_zeek_utils.base64_decode_if_prefixed(x) for x in infile.split('|')[1::]]
+                        taxiiVersion, taxiiDisoveryURL, taxiiCollectionName, taxiiUsername, taxiiPassword = (
+                            None,
+                            None,
+                            None,
+                            None,
+                            None,
                         )
-                        try:
-                            # loop over paginated results
-                            for envelope in (
-                                TaxiiAsPages_v21(
-                                    collection.get_objects,
-                                    per_request=stix_zeek_utils.TAXII_PAGE_SIZE,
-                                    **stix_zeek_utils.TAXII_INDICATOR_FILTER,
-                                )
+                        if len(taxiiConnInfo) >= 3:
+                            taxiiVersion, taxiiDisoveryURL, taxiiCollectionName = taxiiConnInfo[0:3]
+                        if len(taxiiConnInfo) >= 4:
+                            taxiiUsername = taxiiConnInfo[3]
+                        if len(taxiiConnInfo) >= 5:
+                            taxiiPassword = taxiiConnInfo[4]
+
+                        # connect to the server with the appropriate API for the TAXII version
+                        if taxiiVersion == '2.0':
+                            server = TaxiiServer_v20(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
+                        elif taxiiVersion == '2.1':
+                            server = TaxiiServer_v21(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
+                        else:
+                            raise Exception(f'Unsupported TAXII version "{taxiiVersion}"')
+
+                        # collect the collection URL(s) for the given collection name
+                        collectionUrls = {}
+                        for api_root in server.api_roots:
+                            for collection in api_root.collections:
+                                if collection.title.lower() == taxiiCollectionName.lower():
+                                    collectionUrls[collection.title] = {
+                                        'id': collection.id,
+                                        'url': collection.url,
+                                    }
+
+                        # connect to and retrieve indicator STIX objects from the collection URL(s)
+                        for title, info in collectionUrls.items():
+                            collection = (
+                                TaxiiCollection_v21(info['url'])
                                 if taxiiVersion == '2.1'
-                                else TaxiiAsPages_v20(
-                                    collection.get_objects,
-                                    per_request=stix_zeek_utils.TAXII_PAGE_SIZE,
-                                    **stix_zeek_utils.TAXII_INDICATOR_FILTER,
-                                )
-                            ):
-                                try:
-                                    # parse the STIX bundle and process all "Indicator" objects
-                                    for obj in StixParse(envelope, allow_custom=True).objects:
-                                        if type(obj).__name__ == "Indicator":
+                                else TaxiiCollection_v20(info['url'])
+                            )
+                            try:
 
-                                            # map indicator object to Zeek value(s)
-                                            if vals := stix_zeek_utils.map_indicator_to_zeek(
-                                                indicator=obj, logger=logging
-                                            ):
-                                                for val in vals:
-                                                    if not headerPrinted:
-                                                        print('\t'.join(['#fields'] + fields))
-                                                        headerPrinted = True
-                                                    # print the intelligence item fields according to the columns in 'fields'
-                                                    print('\t'.join([val[key] for key in fields]))
+                                # loop over paginated results
+                                for envelope in (
+                                    TaxiiAsPages_v21(
+                                        collection.get_objects,
+                                        per_request=stix_zeek_utils.TAXII_PAGE_SIZE,
+                                        **stix_zeek_utils.TAXII_INDICATOR_FILTER,
+                                    )
+                                    if taxiiVersion == '2.1'
+                                    else TaxiiAsPages_v20(
+                                        collection.get_objects,
+                                        per_request=stix_zeek_utils.TAXII_PAGE_SIZE,
+                                        **stix_zeek_utils.TAXII_INDICATOR_FILTER,
+                                    )
+                                ):
+                                    zeekPrinter.ProcessSTIX(envelope)
 
-                                except STIXError as ve:
-                                    logging.error(f"{type(ve).__name__} for object of collection '{title}': {ve}")
+                            except Exception as e:
+                                logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
 
-                        except Exception as e:
-                            logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
-
-        except Exception as e:
-            logging.error(f"{type(e).__name__} for '{infile}': {e}")
+            except Exception as e:
+                logging.error(f"{type(e).__name__} for '{infile}': {e}")
 
 
 ###################################################################################################
