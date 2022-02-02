@@ -7,8 +7,12 @@
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
 import base64
+import os
 import re
+import requests
+import tempfile
 import time
+import contextlib
 from collections import defaultdict
 from collections.abc import Iterable
 
@@ -78,6 +82,40 @@ def base64_decode_if_prefixed(s: str):
         return s
 
 
+@contextlib.contextmanager
+def temporary_filename(suffix=None):
+    try:
+        f = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
+        tmp_name = f.name
+        f.close()
+        yield tmp_name
+    finally:
+        os.unlink(tmp_name)
+
+
+# download to file
+def download_to_file(url, local_filename=None, chunk_bytes=4096, logger=None):
+    tmpDownloadedFileSpec = local_filename if local_filename else os.path.basename(urlparse(url).path)
+    r = requests.get(url, stream=True, allow_redirects=True)
+    with open(tmpDownloadedFileSpec, "wb") as f:
+        for chunk in r.iter_content(chunk_size=chunk_bytes):
+            if chunk:
+                f.write(chunk)
+    fExists = os.path.isfile(tmpDownloadedFileSpec)
+    fSize = os.path.getsize(tmpDownloadedFileSpec)
+    if logger is not None:
+        logger.debug(
+            f"Download of {url} to {tmpDownloadedFileSpec} {'succeeded' if fExists else 'failed'} ({fSize} bytes)"
+        )
+
+    if fExists and (fSize > 0):
+        return tmpDownloadedFileSpec
+    else:
+        if fExists:
+            os.remove(tmpDownloadedFileSpec)
+        return None
+
+
 def pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v21, Pattern_v20, None]:
     """
     Creates a stix2patterns.v20.pattern.Pattern (Pattern_v20) or a
@@ -129,7 +167,7 @@ def is_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -
             return False
 
     except Exception as e:
-        if logger:
+        if logger is not None:
             logger.debug(f'Parsing "{pattern_str}": {e}')
         return False
 
@@ -197,23 +235,27 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
     @return a list containing the Zeek intel dict(s) from the STIX-2 Indicator
     """
     if (type(indicator) is not Indicator_v20) and (type(indicator) is not Indicator_v21):
-        logger.warning(f"Discarding message, expected STIX-2 Indicator: {indicator}")
+        if logger is not None:
+            logger.warning(f"Discarding message, expected STIX-2 Indicator: {indicator}")
         return None
 
     if not is_point_equality_ioc(type(indicator), indicator.pattern, logger):
-        logger.warning(
-            f"Zeek only supports point-IoCs. Cannot map compound pattern to a Zeek Intel item: {indicator.pattern}"
-        )
+        if logger is not None:
+            logger.warning(
+                f"Zeek only supports point-IoCs. Cannot map compound pattern to a Zeek Intel item: {indicator.pattern}"
+            )
         return None
 
-    logger.debug(indicator)
+    if logger is not None:
+        logger.debug(indicator)
 
     results = []
     for object_path, ioc_value in split_object_path_and_value(type(indicator), indicator.pattern, logger):
 
         # get matching Zeek intel type
         if not (zeek_type := ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
-            logger.warning(f"No matching Zeek type found for STIX-2 indicator type '{object_path}'")
+            if logger is not None:
+                logger.warning(f"No matching Zeek type found for STIX-2 indicator type '{object_path}'")
             continue
 
         if zeek_type == "URL":
@@ -247,7 +289,8 @@ def map_indicator_to_zeek(indicator: Union[Indicator_v20, Indicator_v21], logger
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
 
         results.append(zeekItem)
-        logger.debug(zeekItem)
+        if logger is not None:
+            logger.debug(zeekItem)
 
     return results
 
@@ -304,4 +347,4 @@ class STIXParserZeekPrinter(object):
 
         except STIXError as ve:
             if self.logger is not None:
-                self.logger.error(f"{type(ve).__name__} parsing '{infile}': {ve}")
+                self.logger.warning(f"{type(ve).__name__} parsing '{infile}': {ve}")

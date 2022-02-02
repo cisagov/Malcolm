@@ -49,11 +49,14 @@ EOF
         fi
     done
 
-    # process STIX JSON files by converting them to Zeek intel format
-    rm -f ./.stix_autogen.zeek
-    if (( ${#STIX_JSON_FILES[@]} )) && [[ -f "${STIX_TO_ZEEK_SCRIPT}" ]]; then
-        "${STIX_TO_ZEEK_SCRIPT}" -o .stix_autogen.zeek -i "${STIX_JSON_FILES[@]}" 2>/dev/null
-        LOOSE_INTEL_FILES+=( "${INTEL_DIR}/.stix_autogen.zeek" )
+    # process STIX inputs by converting them to Zeek intel format
+    rm -f ./STIX/.stix_autogen.zeek
+    if ( (( ${#STIX_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] ) && [[ -x "${STIX_TO_ZEEK_SCRIPT}" ]]; then
+        "${STIX_TO_ZEEK_SCRIPT}" \
+            --output ./STIX/.stix_autogen.zeek \
+            --input "${STIX_JSON_FILES[@]}" \
+            --input-file ./STIX/.stix_input.txt
+        LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/STIX/.stix_autogen.zeek )
     fi
 
     # explicitly load all of the "loose" intel files in other subdirectories that didn't __load__.zeek themselves

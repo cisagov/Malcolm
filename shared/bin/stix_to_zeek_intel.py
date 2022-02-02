@@ -4,6 +4,7 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
+import errno
 import logging
 import os
 import sys
@@ -75,8 +76,15 @@ def main():
         nargs='*',
         type=str,
         default=None,
-        required=True,
         help="STIX file(s), or TAXII 2.x URL(s), e.g., 'taxii|2.0|http://example.com/discovery|Collection Name|user|password'",
+    )
+    parser.add_argument(
+        '--input-file',
+        dest='inputFile',
+        nargs='*',
+        type=str,
+        default=None,
+        help="Read --input arguments from a local or external file (one per line)",
     )
     parser.add_argument(
         '-o',
@@ -104,8 +112,41 @@ def main():
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
+    if args.input is None:
+        args.input = []
+
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
         zeekPrinter = stix_zeek_utils.STIXParserZeekPrinter(args.notice, args.cif, file=outfile, logger=logging)
+
+        # if --input-file is specified, process first and append to  --input
+        for infileArg in args.inputFile:
+            try:
+                if os.path.isfile(infileArg):
+                    # read inputs from local file
+                    with open(infileArg) as f:
+                        args.input.extend(f.read().splitlines())
+
+                elif '://' in infileArg:
+                    # download from URL and read input from remote file
+                    with stix_zeek_utils.temporary_filename(suffix='.txt') as tmpFileName:
+                        dlFileName = stix_zeek_utils.download_to_file(
+                            infileArg,
+                            local_filename=tmpFileName,
+                            logger=logging,
+                        )
+                        if dlFileName is not None and os.path.isfile(dlFileName):
+                            with open(dlFileName) as f:
+                                args.input.extend(f.read().splitlines())
+
+                else:
+                    logging.warning(f"File '{infileArg}' not found")
+            except Exception as e:
+                logging.warning(f"{type(e).__name__} for '{infileArg}': {e}")
+
+        # deduplicate input sources
+        seenInput = {}
+        args.input = [seenInput.setdefault(x, x) for x in args.input if x not in seenInput]
+        logging.debug(f"Input: {args.input}")
 
         # process each given STIX input
         for inarg in args.input:
@@ -117,8 +158,14 @@ def main():
 
                     elif inarg.lower().startswith('taxii'):
                         # this is a TAXII URL, connect and retrieve STIX indicators from it
-
                         # taxii|2.0|discovery_url|collection_name|username|password
+                        #
+                        # examples of URLs I've used successfully for testing:
+                        # - "taxii|2.0|https://cti-taxii.mitre.org/taxii/|Enterprise ATT&CK"
+                        # - "taxii|2.0|https://limo.anomali.com/api/v1/taxii2/taxii/|CyberCrime|guest|guest"
+                        #
+                        # collection_name can be specified as * to retrieve all collections (careful!)
+
                         taxiiConnInfo = [stix_zeek_utils.base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]]
                         taxiiVersion, taxiiDisoveryURL, taxiiCollectionName, taxiiUsername, taxiiPassword = (
                             None,
@@ -146,7 +193,9 @@ def main():
                         collectionUrls = {}
                         for api_root in server.api_roots:
                             for collection in api_root.collections:
-                                if collection.title.lower() == taxiiCollectionName.lower():
+                                if (taxiiCollectionName == '*') or (
+                                    collection.title.lower() == taxiiCollectionName.lower()
+                                ):
                                     collectionUrls[collection.title] = {
                                         'id': collection.id,
                                         'url': collection.url,
@@ -155,9 +204,9 @@ def main():
                         # connect to and retrieve indicator STIX objects from the collection URL(s)
                         for title, info in collectionUrls.items():
                             collection = (
-                                TaxiiCollection_v21(info['url'])
+                                TaxiiCollection_v21(info['url'], user=taxiiUsername, password=taxiiPassword)
                                 if taxiiVersion == '2.1'
-                                else TaxiiCollection_v20(info['url'])
+                                else TaxiiCollection_v20(info['url'], user=taxiiUsername, password=taxiiPassword)
                             )
                             try:
 
@@ -181,7 +230,7 @@ def main():
                                 logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
 
             except Exception as e:
-                logging.error(f"{type(e).__name__} for '{inarg}': {e}")
+                logging.warning(f"{type(e).__name__} for '{inarg}': {e}")
 
 
 ###################################################################################################
