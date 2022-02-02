@@ -111,18 +111,18 @@ def main():
         zeekPrinter = stix_zeek_utils.STIXParserZeekPrinter(args.notice, args.cif, file=outfile, logger=logging)
 
         # process each given STIX input
-        for infile in args.input:
+        for inarg in args.input:
             try:
-                with open(infile) if ((infile is not None) and os.path.isfile(infile)) else nullcontext() as f:
+                with open(inarg) if ((inarg is not None) and os.path.isfile(inarg)) else nullcontext() as infile:
 
-                    if f:
-                        zeekPrinter.ProcessSTIX(f)
+                    if infile:
+                        zeekPrinter.ProcessSTIX(infile)
 
-                    elif infile.lower().startswith('taxii'):
+                    elif inarg.lower().startswith('taxii'):
                         # this is a TAXII URL, connect and retrieve STIX indicators from it
 
                         # taxii|2.0|discovery_url|collection_name|username|password
-                        taxiiConnInfo = [stix_zeek_utils.base64_decode_if_prefixed(x) for x in infile.split('|')[1::]]
+                        taxiiConnInfo = [stix_zeek_utils.base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]]
                         taxiiVersion, taxiiDisoveryURL, taxiiCollectionName, taxiiUsername, taxiiPassword = (
                             None,
                             None,
@@ -184,7 +184,7 @@ def main():
                                 logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
 
             except Exception as e:
-                logging.error(f"{type(e).__name__} for '{infile}': {e}")
+                logging.error(f"{type(e).__name__} for '{inarg}': {e}")
 
 
 ###################################################################################################
