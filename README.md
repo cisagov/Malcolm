@@ -82,7 +82,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
     - [Zeek Intelligence Framework](#ZeekIntel)
-        + [STIX™](#ZeekIntelSTIX)
+        + [STIX™ and TAXII™](#ZeekIntelSTIX)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
@@ -1483,11 +1483,27 @@ Note that Malcolm does not manage updates for these intelligence files. You shou
 docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
 ```
 
-#### <a name="ZeekIntelSTIX"></a>STIX™
+#### <a name="ZeekIntelSTIX"></a>STIX™ and TAXII™
 
-In addition to loading Zeek intelligence files, Malcolm will automatically generate Zeek intelligence files for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) v2.0/v2.1 JSON files found under `./zeek/intel/STIX`.
+In addition to loading Zeek intelligence files, Malcolm will [automatically generate](shared/bin/stix_to_zeek_intel.py) a Zeek intelligence file for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) [v2.0](https://docs.oasis-open.org/cti/stix/v2.0/stix-v2.0-part1-stix-core.html)/[v2.1](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html) JSON files found under `./zeek/intel/STIX`.
 
-Note that only indicators of [cyber-observable objects](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the equals (`=`) [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a single value can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
+Additionally, if a special text file named `.stix_input.txt` is found in `./zeek/intel/STIX`, that file will be read and processed as a list of [TAXII™](https://oasis-open.github.io/cti-documentation/taxii/intro.html) [2.0](http://docs.oasis-open.org/cti/taxii/v2.0/cs01/taxii-v2.0-cs01.html)/[2.1](https://docs.oasis-open.org/cti/taxii/v2.1/csprd02/taxii-v2.1-csprd02.html) feeds, one per line, according to the following format:
+
+```
+taxii|version|discovery_url|collection_name|username|password
+```
+
+For example:
+
+```
+taxii|2.0|http://example.org/taxii/|IP Blocklist|guest|guest
+taxii|2.1|https://example.com/taxii/api2/|URL Blocklist
+…
+```
+
+Malcolm will attempt to query the TAXII feed(s) for `indicator` STIX objects and convert them to the Zeek intelligence format as described above.
+
+Note that only **indicators** of [**cyber-observable objects**](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the **equals (`=`)** [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a **single value** can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
 
 ### <a name="Alerting"></a>Alerting
 
