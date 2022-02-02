@@ -79,7 +79,7 @@ def main():
         type=str,
         default=None,
         required=True,
-        help="STIX file(s)",
+        help="STIX file(s), or TAXII URL(s), e.g., 'taxii|2.0|http://example.com/discovery|Collection Name|user|password'",
     )
     parser.add_argument(
         '-o',
