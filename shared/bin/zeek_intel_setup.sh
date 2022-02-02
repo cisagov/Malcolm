@@ -12,6 +12,7 @@ shopt -s nocasematch
 ENCODING="utf-8"
 
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
+ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
 STIX_TO_ZEEK_SCRIPT=${STIX_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/stix_to_zeek_intel.py"}
 
@@ -25,6 +26,9 @@ if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -
 @load policy/integration/collective-intel
 @load policy/frameworks/intel/seen
 @load policy/frameworks/intel/do_notice
+@load policy/frameworks/intel/do_expire
+
+redef Intel::item_expiration = ${ZEEK_INTEL_ITEM_EXPIRATION};
 
 EOF
     LOOSE_INTEL_FILES=()
