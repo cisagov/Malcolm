@@ -197,6 +197,7 @@ def main():
                             else TaxiiCollection_v20(info['url'])
                         )
                         try:
+                            # loop over paginated results
                             for envelope in (
                                 TaxiiAsPages_v21(
                                     collection.get_objects,
@@ -211,8 +212,21 @@ def main():
                                 )
                             ):
                                 try:
-                                    parsed = StixParse(envelope, allow_custom=True)
-                                    logging.debug(parsed.serialize(pretty=True))
+                                    # parse the STIX bundle and process all "Indicator" objects
+                                    for obj in StixParse(envelope, allow_custom=True).objects:
+                                        if type(obj).__name__ == "Indicator":
+
+                                            # map indicator object to Zeek value(s)
+                                            if vals := stix_zeek_utils.map_indicator_to_zeek(
+                                                indicator=obj, logger=logging
+                                            ):
+                                                for val in vals:
+                                                    if not headerPrinted:
+                                                        print('\t'.join(['#fields'] + fields))
+                                                        headerPrinted = True
+                                                    # print the intelligence item fields according to the columns in 'fields'
+                                                    print('\t'.join([val[key] for key in fields]))
+
                                 except STIXError as ve:
                                     logging.error(f"{type(ve).__name__} for object of collection '{title}': {ve}")
 
