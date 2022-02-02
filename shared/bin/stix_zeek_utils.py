@@ -6,6 +6,7 @@
 # - BSD 3-Clause license: https://github.com/tenzir/threatbus/blob/master/COPYING
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
+import base64
 import re
 import time
 from collections import defaultdict
@@ -37,6 +38,9 @@ ZEEK_INTEL_CIF_DESCRIPTION = 'meta.cif_description'
 ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
+TAXII_INDICATOR_FILTER = {'type': 'indicator'}
+TAXII_PAGE_SIZE = 50
+
 
 # See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -63,6 +67,13 @@ ZEEK_INTEL_TYPE_MAP = {
     "user:account_login": "USER_NAME",
     "x509-certificate:hashes.'SHA-1'": "CERT_HASH",  # Zeek only supports SHA-1
 }
+
+
+def base64_decode_if_prefixed(s: str):
+    if s.startswith('base64:'):
+        return base64.b64decode(s[7:]).decode('utf-8')
+    else:
+        return s
 
 
 def pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v21, Pattern_v20, None]:
