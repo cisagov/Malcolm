@@ -1489,6 +1489,8 @@ Adding and deleting intelligence files under this directory will take effect upo
 docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
 ```
 
+For a public example of Zeek intelligence files, see Critical Path Security's [repository](https://github.com/CriticalPathSecurity/Zeek-Intelligence-Feeds) which aggregates data from various other threat feeds into Zeek's format.
+
 #### <a name="ZeekIntelSTIX"></a>STIX™ and TAXII™
 
 In addition to loading Zeek intelligence files, on startup Malcolm will [automatically generate](shared/bin/stix_to_zeek_intel.py) a Zeek intelligence file for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) [v2.0](https://docs.oasis-open.org/cti/stix/v2.0/stix-v2.0-part1-stix-core.html)/[v2.1](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html) JSON files found under `./zeek/intel/STIX`.
