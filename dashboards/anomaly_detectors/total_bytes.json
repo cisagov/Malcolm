@@ -1,6 +1,6 @@
 {
   "name": "total_bytes",
-  "description": "Detect anomalies based on total bytes, summed",
+  "description": "Detect anomalies based on traffic size (sum of network.bytes)",
   "time_field": "firstPacket",
   "indices": [
     "arkime_sessions3-*"
