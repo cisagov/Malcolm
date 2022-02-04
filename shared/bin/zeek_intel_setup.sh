@@ -80,6 +80,7 @@ fi
 # if supercronic is being used to periodically refresh the intel sources,
 # write a cron entry to $SUPERCRONIC_CRONTAB using the interval specified in
 # $ZEEK_INTEL_REFRESH_CRON_EXPRESSION (e.g., 15 1 * * *) to execute this script
+set +u
 if [[ -n "${SUPERCRONIC_CRONTAB}" ]] && [[ -f "${SUPERCRONIC_CRONTAB}" ]]; then
     if [[ -n "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION}" ]]; then
         echo "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION} ${SCRIPT_FILESPEC} true" > "${SUPERCRONIC_CRONTAB}"

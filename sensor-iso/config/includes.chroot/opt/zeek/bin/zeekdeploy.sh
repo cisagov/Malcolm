@@ -65,7 +65,7 @@ ARCHIVE_PATH="$ZEEK_LOG_PATH/logs"
 WORK_PATH="$ZEEK_LOG_PATH/spool"
 TMP_PATH="$ZEEK_INSTALL_PATH/spool/tmp"
 EXTRACT_FILES_PATH="$ZEEK_LOG_PATH/extract_files"
-mkdir -p "$ARCHIVE_PATH" "$WORK_PATH" "$EXTRACT_FILES_PATH" "$TMP_PATH"
+mkdir -p "$ARCHIVE_PATH"/static "$WORK_PATH" "$EXTRACT_FILES_PATH" "$TMP_PATH"
 export TMP="$TMP_PATH"
 
 # if file extraction is enabled and file extraction script exists, set up the argument for zeek to use it

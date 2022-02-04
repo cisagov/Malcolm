@@ -6,6 +6,7 @@ filebeat.inputs:
 - type: log
   paths:
     - ${BEAT_LOG_PATTERN:/home/sensor/bro_logs/*.log}
+    - ${BEAT_STATIC_LOG_PATTERN:/home/sensor/bro_logs/static/*.log}
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek"]
