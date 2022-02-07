@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=hedgehog
-IMAGE_PUBLISHER=cisagov
+IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bullseye
 
@@ -104,8 +104,8 @@ if [ -d "$WORKDIR" ]; then
   echo "ID_LIKE=\"debian\""                                             >> ./config/includes.chroot/opt/sensor/.os-info
   echo "HOME_URL=\"https://malcolm.fyi\""                               >> ./config/includes.chroot/opt/sensor/.os-info
   echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""            >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "SUPPORT_URL=\"https://github.com/cisagov\""                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=\"https://github.com/idaholab\""                    >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"

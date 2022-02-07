@@ -4,10 +4,10 @@ FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.2
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
-LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
-LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/logstash-oss'
 LABEL org.opencontainers.image.description='Malcolm container providing Logstash (the Apache-licensed variant)'
 
