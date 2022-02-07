@@ -35,7 +35,7 @@ from typing import Tuple, Union
 # to remove leading protocol from URL-type indicators
 from urllib.parse import urlparse
 
-# keys for dict returned by map_indicator_to_zeek for Zeek intel file fields
+# keys for dict returned by map_stix_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
 ZEEK_INTEL_INDICATOR_TYPE = 'indicator_type'
 ZEEK_INTEL_META_SOURCE = 'meta.source'
@@ -115,8 +115,12 @@ def get_url_paths_from_response(response_text, parent_url='', ext=''):
     ]
 
 
-def get_url_paths(url, ext='', params={}):
-    response = requests.get(url, params=params)
+def get_url_paths(url, session=None, ext='', params={}):
+    response = (
+        requests.get(url, params=params, allow_redirects=True)
+        if session is None
+        else session.get(url, params=params, allow_redirects=True)
+    )
     if response.ok:
         response_text = response.text
     else:
@@ -125,9 +129,13 @@ def get_url_paths(url, ext='', params={}):
 
 
 # download to file
-def download_to_file(url, local_filename=None, chunk_bytes=4096, logger=None):
+def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, logger=None):
     tmpDownloadedFileSpec = local_filename if local_filename else os.path.basename(urlparse(url).path)
-    r = requests.get(url, stream=True, allow_redirects=True)
+    r = (
+        requests.get(url, stream=True, allow_redirects=True)
+        if session is None
+        else session.get(url, stream=True, allow_redirects=True)
+    )
     with open(tmpDownloadedFileSpec, "wb") as f:
         for chunk in r.iter_content(chunk_size=chunk_bytes):
             if chunk:
@@ -147,7 +155,7 @@ def download_to_file(url, local_filename=None, chunk_bytes=4096, logger=None):
         return None
 
 
-def pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v21, Pattern_v20, None]:
+def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v21, Pattern_v20, None]:
     """
     Creates a stix2patterns.v20.pattern.Pattern (Pattern_v20) or a
     stix2patterns.v21.pattern.Pattern (Pattern_v21) based on the given
@@ -165,7 +173,7 @@ def pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v2
         return None
 
 
-def is_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -> bool:
+def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -> bool:
     """
     Predicate to check if a STIX-2 pattern is a point-IoC, i.e., if the pattern
     only consists of a single EqualityComparisonExpression. However, that EqualityComparisonExpression
@@ -176,7 +184,7 @@ def is_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -
     @return True (the pattern is a point-IoC) or False (the pattern is NOT a point-IoC)
     """
     try:
-        if pattern := pattern_from_str(indicator_type, pattern_str):
+        if pattern := stix_pattern_from_str(indicator_type, pattern_str):
 
             # InspectionListener https://github.com/oasis-open/cti-pattern-validator/blob/e926d0a14adf88de08acb908a51db1f453c13647/stix2patterns/v21/inspector.py#L5
             # E.g.,   pattern = "[domain-name:value = 'evil.com']"
@@ -203,7 +211,7 @@ def is_point_equality_ioc(indicator_type: type, pattern_str: str, logger=None) -
         return False
 
 
-def split_object_path_and_value(
+def split_stix_object_path_and_value(
     indicator_type: type, pattern_str: str, logger=None
 ) -> Union[Tuple[Tuple[str, str]], None]:
     """
@@ -215,13 +223,13 @@ def split_object_path_and_value(
     @param pattern_str the STIX-2 pattern to split
     @return the object_path and ioc_value of the pattern or None
     """
-    if is_point_equality_ioc(indicator_type, pattern_str, logger) and (
-        pattern := pattern_from_str(indicator_type, pattern_str)
+    if is_stix_point_equality_ioc(indicator_type, pattern_str, logger) and (
+        pattern := stix_pattern_from_str(indicator_type, pattern_str)
     ):
         il = pattern.inspect()
         results = []
 
-        # some of these checks are redundant (there is only one key, len(element) == 3, etc.) in is_point_equality_ioc
+        # some of these checks are redundant (there is only one key, len(element) == 3, etc.) in is_stix_point_equality_ioc
         for comparison in list(il.comparisons.keys()):
             for element in il.comparisons[comparison]:
                 if isinstance(element, Iterable) and (len(element) == 3) and (element[1] in ('=', '==')):
@@ -258,7 +266,7 @@ def split_object_path_and_value(
         return None
 
 
-def map_indicator_to_zeek(
+def map_stix_indicator_to_zeek(
     indicator: Union[Indicator_v20, Indicator_v21],
     source: Union[str, None] = None,
     logger=None,
@@ -274,7 +282,7 @@ def map_indicator_to_zeek(
             logger.warning(f"Discarding message, expected STIX-2 Indicator: {indicator}")
         return None
 
-    if not is_point_equality_ioc(type(indicator), indicator.pattern, logger):
+    if not is_stix_point_equality_ioc(type(indicator), indicator.pattern, logger):
         if logger is not None:
             logger.warning(
                 f"Zeek only supports point-IoCs. Cannot map compound pattern to a Zeek Intel item: {indicator.pattern}"
@@ -285,7 +293,7 @@ def map_indicator_to_zeek(
         logger.debug(indicator)
 
     results = []
-    for object_path, ioc_value in split_object_path_and_value(type(indicator), indicator.pattern, logger):
+    for object_path, ioc_value in split_stix_object_path_and_value(type(indicator), indicator.pattern, logger):
 
         # get matching Zeek intel type
         if not (zeek_type := ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
@@ -365,6 +373,11 @@ class FeedParserZeekPrinter(object):
                 ]
             )
 
+    def PrintHeader():
+        if not self.printedHeader:
+            print('\t'.join(['#fields'] + self.fields), file=self.outFile)
+            self.printedHeader = True
+
     def ProcessSTIX(self, toParse, source: Union[str, None] = None):
         try:
             # parse the STIX and process all "Indicator" objects
@@ -372,11 +385,9 @@ class FeedParserZeekPrinter(object):
                 if type(obj).__name__ == "Indicator":
 
                     # map indicator object to Zeek value(s)
-                    if vals := map_indicator_to_zeek(indicator=obj, source=source, logger=self.logger):
+                    if vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger):
                         for val in vals:
-                            if not self.printedHeader:
-                                print('\t'.join(['#fields'] + self.fields), file=self.outFile)
-                                self.printedHeader = True
+                            PrintHeader()
                             # print the intelligence item fields according to the columns in 'fields'
                             print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
 
@@ -386,8 +397,10 @@ class FeedParserZeekPrinter(object):
 
     def ProcessMISP(self, toParse, source: Union[str, None] = None):
         try:
-            # TODO
-            pass
+            if self.logger is not None:
+                self.logger.debug(
+                    f"{type(toParse).__name__} {len(toParse)}: {set(toParse.keys()) if isinstance(toParse, dict) else ''}"
+                )
 
         except Exception as e:
             if logger is not None:
