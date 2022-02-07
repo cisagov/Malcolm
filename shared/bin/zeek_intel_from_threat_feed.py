@@ -192,79 +192,83 @@ def main():
                             mispAuthKey = mispConnInfo[1]
                             # TODO: use auth_key
 
-                        # download the URL and parse as JSON to figure out what it is. it could be:
-                        # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
-                        # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
-                        # - a directory listing of misc. JSON files without a manifest.json
-                        mispResponse = requests.get(mispUrl)
-                        mispResponse.raise_for_status()
-                        if mispJson := zeek_threat_feed_utils.LoadStrIfJson(mispResponse.content):
-                            # the contents are JSON. determine if this is a manifest or a single event
+                        with requests.Session() as mispSession:
 
-                            if (len(mispJson.keys()) == 1) and ('Event' in mispJson):
-                                # TODO: is this always the case? anything other than "Event", or multiple objects?
-                                # this is a MISP event, process it
-                                zeekPrinter.ProcessMISP(
-                                    mispJson,
+                            # download the URL and parse as JSON to figure out what it is. it could be:
+                            # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
+                            # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
+                            # - a directory listing of misc. JSON files without a manifest.json
+                            mispResponse = mispSession.get(mispUrl)
+                            mispResponse.raise_for_status()
+                            if mispJson := zeek_threat_feed_utils.LoadStrIfJson(mispResponse.content):
+                                # the contents are JSON. determine if this is a manifest or a single event
+
+                                if (len(mispJson.keys()) == 1) and ('Event' in mispJson):
+                                    # TODO: is this always the case? anything other than "Event", or multiple objects?
+                                    # this is a MISP event, process it
+                                    zeekPrinter.ProcessMISP(
+                                        mispJson,
+                                    )
+
+                                else:
+                                    # this is a manifest, loop over, retrieve and process the MISP events it references
+                                    for uri in mispJson:
+                                        try:
+                                            newUrl = urljoin(mispUrl, f'{uri}.json')
+                                            mispObjectReponse = mispSession.get(newUrl)
+                                            mispObjectReponse.raise_for_status()
+                                            zeekPrinter.ProcessMISP(
+                                                mispObjectReponse.json(),
+                                            )
+                                        except Exception as e:
+                                            logging.warning(f"{type(e).__name__} for MISP object at '{newUrl}': {e}")
+
+                            else:
+                                # the contents are NOT JSON, it's probably an HTML-formatted directory listing
+
+                                # retrieve the links listed (non-recursive, all .json files in this directory)
+                                paths = zeek_threat_feed_utils.get_url_paths_from_response(
+                                    mispResponse.text, parent_url=mispUrl, ext='.json'
                                 )
 
-                            else:
-                                # this is a manifest, loop over, retrieve and process the MISP events it references
-                                for uri in mispJson:
-                                    try:
-                                        newUrl = urljoin(mispUrl, f'{uri}.json')
-                                        mispObjectReponse = requests.get(newUrl)
-                                        mispObjectReponse.raise_for_status()
-                                        zeekPrinter.ProcessMISP(
-                                            mispObjectReponse.json(),
-                                        )
-                                    except Exception as e:
-                                        logging.warning(f"{type(e).__name__} for MISP object at '{newUrl}': {e}")
+                                # see if manifest.json exists in this directory
+                                manifestPaths = [x for x in paths if x.endswith('/manifest.json')]
+                                if len(manifestPaths) > 0:
+                                    # the manifest.json exists!
+                                    # retrieve it, then loop over it and retrieve and process the MISP events it references
+                                    for url in manifestPaths:
+                                        try:
+                                            mispManifestResponse = mispSession.get(url)
+                                            mispManifestResponse.raise_for_status()
+                                            mispManifest = mispManifestResponse.json()
+                                            for uri in mispManifest:
+                                                try:
+                                                    mispObjectReponse = mispSession.get(
+                                                        f'{mispUrl.strip("/")}/{uri}.json'
+                                                    )
+                                                    mispObjectReponse.raise_for_status()
+                                                    zeekPrinter.ProcessMISP(
+                                                        mispObjectReponse.json(),
+                                                    )
+                                                except Exception as e:
+                                                    logging.warning(
+                                                        f"{type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
+                                                    )
+                                        except Exception as e:
+                                            logging.warning(f"{type(e).__name__} for manifest at '{url}': {e}")
 
-                        else:
-                            # the contents are NOT JSON, it's probably an HTML-formatted directory listing
-
-                            # retrieve the links listed (non-recursive, all .json files in this directory)
-                            paths = zeek_threat_feed_utils.get_url_paths_from_response(
-                                mispResponse.text, parent_url=mispUrl, ext='.json'
-                            )
-
-                            # see if manifest.json exists in this directory
-                            manifestPaths = [x for x in paths if x.endswith('/manifest.json')]
-                            if len(manifestPaths) > 0:
-                                # the manifest.json exists!
-                                # retrieve it, then loop over it and retrieve and process the MISP events it references
-                                for url in manifestPaths:
-                                    try:
-                                        mispManifestResponse = requests.get(url)
-                                        mispManifestResponse.raise_for_status()
-                                        mispManifest = mispManifestResponse.json()
-                                        for uri in mispManifest:
-                                            try:
-                                                mispObjectReponse = requests.get(f'{mispUrl}/{uri}.json')
-                                                mispObjectReponse.raise_for_status()
-                                                zeekPrinter.ProcessMISP(
-                                                    mispObjectReponse.json(),
-                                                )
-                                            except Exception as e:
-                                                logging.warning(
-                                                    f"{type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
-                                                )
-                                    except Exception as e:
-                                        logging.warning(f"{type(e).__name__} for manifest at '{url}': {e}")
-
-                            else:
-                                # the manifest.json does not exist!
-                                # just loop over, retrieve and process the .json files in this directory
-                                for url in paths:
-                                    try:
-                                        mispObjectReponse = requests.get(url)
-                                        mispObjectReponse.raise_for_status()
-                                        zeekPrinter.ProcessMISP(
-                                            mispObjectReponse.json(),
-                                        )
-                                    except Exception as e:
-                                        logging.warning(f"{type(e).__name__} for MISP object at '{url}': {e}")
+                                else:
+                                    # the manifest.json does not exist!
+                                    # just loop over, retrieve and process the .json files in this directory
+                                    for url in paths:
+                                        try:
+                                            mispObjectReponse = mispSession.get(url)
+                                            mispObjectReponse.raise_for_status()
+                                            zeekPrinter.ProcessMISP(
+                                                mispObjectReponse.json(),
+                                            )
+                                        except Exception as e:
+                                            logging.warning(f"{type(e).__name__} for MISP object at '{url}': {e}")
 
                     elif inarg.lower().startswith('taxii'):
                         ##################################################################################
