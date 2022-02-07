@@ -15,7 +15,7 @@ SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
-STIX_TO_ZEEK_SCRIPT=${STIX_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/stix_to_zeek_intel.py"}
+THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_intel_from_threat_feed.py"}
 
 # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
 if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
@@ -56,8 +56,8 @@ EOF
 
     # process STIX inputs by converting them to Zeek intel format
     rm -f ./STIX/.stix_autogen.zeek
-    if ( (( ${#STIX_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] ) && [[ -x "${STIX_TO_ZEEK_SCRIPT}" ]]; then
-        "${STIX_TO_ZEEK_SCRIPT}" \
+    if ( (( ${#STIX_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+        "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
             --output ./STIX/.stix_autogen.zeek \
             --input "${STIX_JSON_FILES[@]}" \
             --input-file ./STIX/.stix_input.txt

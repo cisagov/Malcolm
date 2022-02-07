@@ -7,12 +7,14 @@
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
 import base64
+import json
 import os
 import re
 import requests
 import tempfile
 import time
 import contextlib
+from bs4 import BeautifulSoup
 from collections import defaultdict
 from collections.abc import Iterable
 
@@ -23,6 +25,9 @@ from stix2patterns.v21.pattern import Pattern as Pattern_v21
 from stix2patterns.v20.pattern import Pattern as Pattern_v20
 from stix2 import parse as StixParse
 from stix2.exceptions import STIXError
+
+# for handling MISP
+import pymisp
 
 # strong type checking
 from typing import Tuple, Union
@@ -82,6 +87,13 @@ def base64_decode_if_prefixed(s: str):
         return s
 
 
+def LoadStrIfJson(jsonStr):
+    try:
+        return json.loads(jsonStr)
+    except ValueError as e:
+        return None
+
+
 @contextlib.contextmanager
 def temporary_filename(suffix=None):
     try:
@@ -91,6 +103,25 @@ def temporary_filename(suffix=None):
         yield tmp_name
     finally:
         os.unlink(tmp_name)
+
+
+# get URL directory listing
+def get_url_paths_from_response(response_text, parent_url='', ext=''):
+    soup = BeautifulSoup(response_text, 'html.parser')
+    return [
+        parent_url + ('' if parent_url.endswith('/') else '/') + node.get('href')
+        for node in soup.find_all('a')
+        if node.get('href').endswith(ext)
+    ]
+
+
+def get_url_paths(url, ext='', params={}):
+    response = requests.get(url, params=params)
+    if response.ok:
+        response_text = response.text
+    else:
+        return response.raise_for_status()
+    return get_url_paths_from_response(response_text, parent_url=url, ext=ext)
 
 
 # download to file
@@ -299,7 +330,7 @@ def map_indicator_to_zeek(
     return results
 
 
-class STIXParserZeekPrinter(object):
+class FeedParserZeekPrinter(object):
     fields = []
     # we'll print the #fields header the first time we print a valid row
     printedHeader = False
@@ -352,3 +383,12 @@ class STIXParserZeekPrinter(object):
         except STIXError as ve:
             if self.logger is not None:
                 self.logger.warning(f"{type(ve).__name__} parsing '{infile}': {ve}")
+
+    def ProcessMISP(self, toParse, source: Union[str, None] = None):
+        try:
+            # TODO
+            pass
+
+        except Exception as e:
+            if logger is not None:
+                logger.debug(f'Exception: {e}')

@@ -107,7 +107,7 @@ cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/z
 mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX
 touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
 [[ -f /usr/local/bin/zeek_intel_setup.sh ]] && mv /usr/local/bin/zeek_intel_setup.sh "${ZEEK_DIR}"/bin/
-[[ -f /usr/local/bin/stix_to_zeek_intel.py ]] && mv /usr/local/bin/stix*.py "${ZEEK_DIR}"/bin/
+[[ -f /usr/local/bin/zeek_intel_from_threat_feed.py ]] && mv /usr/local/bin/zeek*threat*.py "${ZEEK_DIR}"/bin/
 
 # cleanup
 cd /usr/local/src
