@@ -19,11 +19,11 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 # for handling v2.0 and v2.1 of STIX objects
-from stix2.v20 import Indicator as Indicator_v20
-from stix2.v21 import Indicator as Indicator_v21
-from stix2patterns.v21.pattern import Pattern as Pattern_v21
-from stix2patterns.v20.pattern import Pattern as Pattern_v20
-from stix2 import parse as StixParse
+from stix2.v20 import Indicator as STIX_Indicator_v20
+from stix2.v21 import Indicator as STIX_Indicator_v21
+from stix2patterns.v21.pattern import Pattern as STIX_Pattern_v21
+from stix2patterns.v20.pattern import Pattern as STIX_Pattern_v20
+from stix2 import parse as STIXParse
 from stix2.exceptions import STIXError
 
 # for handling MISP
@@ -93,6 +93,7 @@ MISP_ZEEK_INTEL_TYPE_MAP = {
     "filename|sha1": ["FILE_NAME", "FILE_HASH"],
     "filename|sha256": ["FILE_NAME", "FILE_HASH"],
     "filename|sha512": ["FILE_NAME", "FILE_HASH"],
+    "hostname": "DOMAIN",
     "ip-dst": "ADDR",
     "ip-src": "ADDR",
     "md5": "FILE_HASH",
@@ -183,20 +184,20 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, l
         return None
 
 
-def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[Pattern_v21, Pattern_v20, None]:
+def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[STIX_Pattern_v21, STIX_Pattern_v20, None]:
     """
-    Creates a stix2patterns.v20.pattern.Pattern (Pattern_v20) or a
-    stix2patterns.v21.pattern.Pattern (Pattern_v21) based on the given
+    Creates a stix2patterns.v20.pattern.Pattern (STIX_Pattern_v20) or a
+    stix2patterns.v21.pattern.Pattern (STIX_Pattern_v21) based on the given
     pattern string depending on the type of the indicator (v2.0 or v2.1).
     Returns None if the indicator type is unsupported.
     @param indicator_type the type of the indicator object
     @param pattern_str the STIX-2 pattern
     @return the Pattern object initialized from the pattern string
     """
-    if indicator_type is Indicator_v21:
-        return Pattern_v21(pattern_str)
-    elif indicator_type is Indicator_v20:
-        return Pattern_v20(pattern_str)
+    if indicator_type is STIX_Indicator_v21:
+        return STIX_Pattern_v21(pattern_str)
+    elif indicator_type is STIX_Indicator_v20:
+        return STIX_Pattern_v20(pattern_str)
     else:
         return None
 
@@ -295,7 +296,7 @@ def split_stix_object_path_and_value(
 
 
 def map_stix_indicator_to_zeek(
-    indicator: Union[Indicator_v20, Indicator_v21],
+    indicator: Union[STIX_Indicator_v20, STIX_Indicator_v21],
     source: Union[str, None] = None,
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
@@ -305,7 +306,7 @@ def map_stix_indicator_to_zeek(
     @param indicator The STIX-2 Indicator to convert
     @return a list containing the Zeek intel dict(s) from the STIX-2 Indicator
     """
-    if (type(indicator) is not Indicator_v20) and (type(indicator) is not Indicator_v21):
+    if (type(indicator) is not STIX_Indicator_v20) and (type(indicator) is not STIX_Indicator_v21):
         if logger is not None:
             logger.warning(f"Discarding message, expected STIX-2 Indicator: {indicator}")
         return None
@@ -390,9 +391,9 @@ def map_misp_attribute_to_zeek(
 
     # some MISP indicators are actually two values together (e.g., filename|sha256)
     valTypePairs = (
-        zip(zeek_types, attribute.value.split('|'))
-        if isinstance(zeek_types, Iterable)
-        else [zeek_types, attribute.value]
+        list(zip(zeek_types, attribute.value.split('|')))
+        if isinstance(zeek_types, list)
+        else [(zeek_types, attribute.value)]
     )
 
     # process type/value pairs
@@ -479,7 +480,7 @@ class FeedParserZeekPrinter(object):
     def ProcessSTIX(self, toParse, source: Union[str, None] = None):
         try:
             # parse the STIX and process all "Indicator" objects
-            for obj in StixParse(toParse, allow_custom=True).objects:
+            for obj in STIXParse(toParse, allow_custom=True).objects:
                 if type(obj).__name__ == "Indicator":
 
                     # map indicator object to Zeek value(s)
