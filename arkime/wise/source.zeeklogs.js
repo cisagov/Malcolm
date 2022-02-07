@@ -124,6 +124,8 @@ class MalcolmSource extends WISESource {
       "related.hash",
       "related.hosts",
       "related.ip",
+      "related.mac",
+      "related.oui",
       "related.password",
       "related.user",
       "rootId",
@@ -1228,13 +1230,19 @@ class MalcolmSource extends WISESource {
       "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
       "    +arrayList(session.event, 'id', 'Log ID', 'event.id')\n" +
       "    +arrayList(session.network, 'community_id', 'Connection Community ID', 'network.community_id')\n" +
-      "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +
       "    +arrayList(session.event, 'provider', 'Data Source', 'event.provider')\n" +
+      "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +
       "    +arrayList(session.host, 'name', 'Malcolm Node', 'host.name')\n" +
 
       // basic connection information
       "  dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
+      "    +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
+      "    +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
+      "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
+      "    +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
+      "    +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
       "    +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
+      "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
       "    +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
       "    +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
@@ -1243,6 +1251,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
       "    +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
       "    +arrayList(session.destination, 'ip', 'Responding Host', 'destination.ip')\n" +
+      "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
       "    +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
       "    +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
       "    +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
@@ -1250,15 +1259,10 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
       "    +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
       "    +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
-      "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
-      "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
       "    +arrayList(session.related, 'ip', 'Related IP', 'related.ip')\n" +
+      "    +arrayList(session.related, 'mac', 'Related MAC', 'related.mac')\n" +
+      "    +arrayList(session.related, 'oui', 'Related OUI', 'related.oui')\n" +
       "    +arrayList(session.related, 'hosts', 'Related Host', 'related.hosts')\n" +
-      "    +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
-      "    +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
-      "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
-      "    +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
-      "    +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
       "    +arrayList(session.related, 'user', 'User', 'related.user')\n" +
       "    +arrayList(session.related, 'password', 'Password', 'related.password')\n" +
       "    +arrayList(session.user_agent, 'original', 'User Agent', 'user_agent.original')\n" +

@@ -13,7 +13,7 @@ ENV ARKIME_INET yes
 ADD arkime/scripts/bs4_remove_div.py /opt/
 ADD arkime/patch/* /opt/patches/
 ADD README.md $ARKIMEDIR/doc/
-ADD doc.css $ARKIMEDIR/doc/
+ADD docs/doc.css $ARKIMEDIR/doc/
 ADD docs/images $ARKIMEDIR/doc/images/
 
 RUN apt-get -q update && \

@@ -97,6 +97,8 @@
         "related.hash": { "type": "keyword" },
         "related.hosts": { "type": "keyword" },
         "related.ip": { "type": "ip" },
+        "related.mac": { "type": "keyword" },
+        "related.oui": { "type": "keyword" },
         "related.password": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
         "related.user": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
         "rule.author": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text", "norms": false } } },

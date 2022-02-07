@@ -1,6 +1,6 @@
 {
   "name": "file_mime_type",
-  "description": "Detect anomalies based on transferred file type",
+  "description": "Detect anomalies based on transferred file type (file.mime_type)",
   "time_field": "firstPacket",
   "indices": [
     "arkime_sessions3-*"

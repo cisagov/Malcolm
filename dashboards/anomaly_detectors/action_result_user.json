@@ -1,0 +1,85 @@
+{
+  "name": "action_result_user",
+  "description": "Detect anomalies in action (event.action), result (event.result) and user (related.user) within application protocols (network.protocol)",
+  "time_field": "firstPacket",
+  "indices": [
+    "arkime_sessions3-*"
+  ],
+  "category_field": [
+    "network.protocol"
+  ],
+  "feature_attributes": [
+    {
+      "feature_name": "event_action",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "event_action": {
+          "value_count": {
+            "field": "event.action"
+          }
+        }
+      }
+    },
+    {
+      "feature_name": "event_result",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "event_result": {
+          "value_count": {
+            "field": "event.result"
+          }
+        }
+      }
+    },
+    {
+      "feature_name": "related_user",
+      "feature_enabled": true,
+      "aggregation_query": {
+        "related_user": {
+          "value_count": {
+            "field": "related.user"
+          }
+        }
+      }
+    }
+  ],
+  "filter_query": {
+    "bool": {
+      "should": [
+        {
+          "exists": {
+            "field": "event.action",
+            "boost": 1
+          }
+        },
+        {
+          "exists": {
+            "field": "event.result",
+            "boost": 1
+          }
+        },
+        {
+          "exists": {
+            "field": "related.user",
+            "boost": 1
+          }
+        }
+      ],
+      "minimum_should_match": 1,
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "window_delay": {
+    "period": {
+      "interval": 1,
+      "unit": "MINUTES"
+    }
+  },
+  "detection_interval": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  }
+}

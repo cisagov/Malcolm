@@ -82,6 +82,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
     - [Event severity scoring](#Severity)
         + [Customizing event severity scoring](#SeverityConfig)
     - [Zeek Intelligence Framework](#ZeekIntel)
+        + [STIX™ and TAXII™](#ZeekIntelSTIX)
     - [Alerting](#Alerting)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
@@ -172,22 +173,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.3           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.2.3           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.2.3           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.2.3           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.2.3           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.2.3           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.2.3           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.2.3           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.3           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.3           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.2.3           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.2.3           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.2.3           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.2.3           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.2.3           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.2.3           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.4           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.4           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.4           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.4           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.4           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.4           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.4           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.4           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.4           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.4           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.4           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.4           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.4           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.4           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.4           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.4           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 #### Import from pre-packaged tarballs
@@ -265,7 +266,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
-    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
+    * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
     * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
@@ -516,6 +517,10 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
 
+* `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](#ZeekIntel) files (defaults to empty, which disables automatic refresh)
+
+* `ZEEK_INTEL_ITEM_EXPIRATION` - specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](#ZeekIntel) (default `-1min`, which disables item expiration)
+
 * `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
 
 * `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
@@ -566,7 +571,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
 
-* `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK technique](https://attack.mitre.org/techniques) classifications will be logged
+* `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
 
 * `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
 
@@ -1476,11 +1481,37 @@ To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/framewo
 
 Malcolm doesn't come bundled with intelligence files from any particular feed, but they can be easily included into your local instance. On [startup](shared/bin/zeek_intel_setup.sh), Malcolm's `malcolmnetsec/zeek` docker container enumerates the subdirectories under `./zeek/intel` (which is [bind mounted](https://docs.docker.com/storage/bind-mounts/) into the container's runtime) and configures Zeek so that those intelligence files will be automatically included in its local policy. Subdirectories under `./zeek/intel` which contain their own `__load__.zeek` file will be `@load`-ed as-is, while subdirectories containing "loose" intelligence files will be [loaded](https://docs.zeek.org/en/master/frameworks/intel.html#loading-intelligence) automatically with a `redef Intel::read_files` directive.
 
-Note that Malcolm does not manage updates for these intelligence files. You should use the update mechanism suggested by your feeds' maintainers to keep them up to date. Adding and deleting intelligence files under this directory will take effect upon [restarting Malcolm](#StopAndRestart), although modifying intelligence files in-place should not require a restart. Alternately, it can be done without restarting Malcolm by running the following command from the Malcolm installation directory:
+Note that Malcolm does not manage updates for these intelligence files. You should use the update mechanism suggested by your feeds' maintainers to keep them up to date, or use a [TAXII feed](#ZeekIntelSTIX) as described below.
+
+Adding and deleting intelligence files under this directory will take effect upon [restarting Malcolm](#StopAndRestart). Alternately, you can use the `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` environment variable containing a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) to specify the interval at which the intel files should be refreshed. It can also be done manually without restarting Malcolm by running the following command from the Malcolm installation directory:
 
 ```
 docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
 ```
+
+For a public example of Zeek intelligence files, see Critical Path Security's [repository](https://github.com/CriticalPathSecurity/Zeek-Intelligence-Feeds) which aggregates data from various other threat feeds into Zeek's format.
+
+#### <a name="ZeekIntelSTIX"></a>STIX™ and TAXII™
+
+In addition to loading Zeek intelligence files, on startup Malcolm will [automatically generate](shared/bin/stix_to_zeek_intel.py) a Zeek intelligence file for all [Structured Threat Information Expression (STIX™)](https://oasis-open.github.io/cti-documentation/stix/intro.html) [v2.0](https://docs.oasis-open.org/cti/stix/v2.0/stix-v2.0-part1-stix-core.html)/[v2.1](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html) JSON files found under `./zeek/intel/STIX`.
+
+Additionally, if a special text file named `.stix_input.txt` is found in `./zeek/intel/STIX`, that file will be read and processed as a list of [TAXII™](https://oasis-open.github.io/cti-documentation/taxii/intro.html) [2.0](http://docs.oasis-open.org/cti/taxii/v2.0/cs01/taxii-v2.0-cs01.html)/[2.1](https://docs.oasis-open.org/cti/taxii/v2.1/csprd02/taxii-v2.1-csprd02.html) feeds, one per line, according to the following format:
+
+```
+taxii|version|discovery_url|collection_name|username|password
+```
+
+For example:
+
+```
+taxii|2.0|http://example.org/taxii/|IP Blocklist|guest|guest
+taxii|2.1|https://example.com/taxii/api2/|URL Blocklist
+…
+```
+
+Malcolm will attempt to query the TAXII feed(s) for `indicator` STIX objects and convert them to the Zeek intelligence format as described above. There are publicly available TAXII 2.x-compatible services provided by a number of organizations including [Anomali Labs](https://www.anomali.com/resources/limo) and [MITRE](https://www.mitre.org/capabilities/cybersecurity/overview/cybersecurity-blog/attck%E2%84%A2-content-available-in-stix%E2%84%A2-20-via), or you may choose from several open-source offerings to roll your own TAXII 2 server (e.g., [oasis-open/cti-taxii-server](https://github.com/oasis-open/cti-taxii-server), [freetaxii/server](https://github.com/freetaxii/server), [StephenOTT/TAXII-Server](https://github.com/StephenOTT/TAXII-Server), etc.).
+
+Note that only **indicators** of [**cyber-observable objects**](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the **equals (`=`)** [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a **single value** can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
 
 ### <a name="Alerting"></a>Alerting
 
@@ -3280,7 +3311,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.3.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.4.iso"
 …
 ```
 
@@ -3667,22 +3698,22 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.3           xxxxxxxxxxxx   2 days ago   155MB
-malcolmnetsec/arkime                                           5.2.3           xxxxxxxxxxxx   2 days ago   811MB
-malcolmnetsec/dashboards                                       5.2.3           xxxxxxxxxxxx   2 days ago   970MB
-malcolmnetsec/dashboards-helper                                5.2.3           xxxxxxxxxxxx   2 days ago   154MB
-malcolmnetsec/filebeat-oss                                     5.2.3           xxxxxxxxxxxx   2 days ago   621MB
-malcolmnetsec/file-monitor                                     5.2.3           xxxxxxxxxxxx   2 days ago   586MB
-malcolmnetsec/file-upload                                      5.2.3           xxxxxxxxxxxx   2 days ago   259MB
-malcolmnetsec/freq                                             5.2.3           xxxxxxxxxxxx   2 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.3           xxxxxxxxxxxx   2 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.3           xxxxxxxxxxxx   2 days ago   1.27GB
-malcolmnetsec/name-map-ui                                      5.2.3           xxxxxxxxxxxx   2 days ago   142MB
-malcolmnetsec/nginx-proxy                                      5.2.3           xxxxxxxxxxxx   2 days ago   117MB
-malcolmnetsec/opensearch                                       5.2.3           xxxxxxxxxxxx   2 days ago   1.18GB
-malcolmnetsec/pcap-capture                                     5.2.3           xxxxxxxxxxxx   2 days ago   122MB
-malcolmnetsec/pcap-monitor                                     5.2.3           xxxxxxxxxxxx   2 days ago   214MB
-malcolmnetsec/zeek                                             5.2.3           xxxxxxxxxxxx   2 days ago   938MB
+malcolmnetsec/api                                              5.2.4           xxxxxxxxxxxx   2 days ago   155MB
+malcolmnetsec/arkime                                           5.2.4           xxxxxxxxxxxx   2 days ago   811MB
+malcolmnetsec/dashboards                                       5.2.4           xxxxxxxxxxxx   2 days ago   970MB
+malcolmnetsec/dashboards-helper                                5.2.4           xxxxxxxxxxxx   2 days ago   154MB
+malcolmnetsec/filebeat-oss                                     5.2.4           xxxxxxxxxxxx   2 days ago   621MB
+malcolmnetsec/file-monitor                                     5.2.4           xxxxxxxxxxxx   2 days ago   586MB
+malcolmnetsec/file-upload                                      5.2.4           xxxxxxxxxxxx   2 days ago   259MB
+malcolmnetsec/freq                                             5.2.4           xxxxxxxxxxxx   2 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.4           xxxxxxxxxxxx   2 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.4           xxxxxxxxxxxx   2 days ago   1.27GB
+malcolmnetsec/name-map-ui                                      5.2.4           xxxxxxxxxxxx   2 days ago   142MB
+malcolmnetsec/nginx-proxy                                      5.2.4           xxxxxxxxxxxx   2 days ago   117MB
+malcolmnetsec/opensearch                                       5.2.4           xxxxxxxxxxxx   2 days ago   1.18GB
+malcolmnetsec/pcap-capture                                     5.2.4           xxxxxxxxxxxx   2 days ago   122MB
+malcolmnetsec/pcap-monitor                                     5.2.4           xxxxxxxxxxxx   2 days ago   214MB
+malcolmnetsec/zeek                                             5.2.4           xxxxxxxxxxxx   2 days ago   938MB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

@@ -65,7 +65,7 @@ ARCHIVE_PATH="$ZEEK_LOG_PATH/logs"
 WORK_PATH="$ZEEK_LOG_PATH/spool"
 TMP_PATH="$ZEEK_INSTALL_PATH/spool/tmp"
 EXTRACT_FILES_PATH="$ZEEK_LOG_PATH/extract_files"
-mkdir -p "$ARCHIVE_PATH" "$WORK_PATH" "$EXTRACT_FILES_PATH" "$TMP_PATH"
+mkdir -p "$ARCHIVE_PATH"/static "$WORK_PATH" "$EXTRACT_FILES_PATH" "$TMP_PATH"
 export TMP="$TMP_PATH"
 
 # if file extraction is enabled and file extraction script exists, set up the argument for zeek to use it
@@ -77,7 +77,7 @@ ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRI
 
 # make sure "intel" directory exists, even if empty
 export INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
-mkdir -p "$INTEL_DIR"
+mkdir -p "$INTEL_DIR"/STIX
 touch "$INTEL_DIR"/__load__.zeek
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true

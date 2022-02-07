@@ -121,6 +121,18 @@ RUN yum install -y curl psmisc util-linux zip unzip && \
 ADD dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
+# Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
+# to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
+# internal opensearch code validating them AND the web browser retrieving them. So we're going scorched earth instead.
+ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo.svg
+ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_dark_mode.svg
+ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_default_mode.svg
+ADD docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico
+ADD docs/images/favicon/favicon16.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-16x16.png
+ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-32x32.png
+ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
+
+
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/share/opensearch-dashboards/opensearch-dashboards-docker-entrypoint.sh"]

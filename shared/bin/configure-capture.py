@@ -110,6 +110,8 @@ class Constants:
     # specific to filebeat
     BEAT_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
     BEAT_LOG_PATTERN_KEY = 'BEAT_LOG_PATTERN'
+    BEAT_STATIC_LOG_PATH_SUBDIR = os.path.join('logs', 'static')
+    BEAT_STATIC_LOG_PATTERN_KEY = 'BEAT_STATIC_LOG_PATTERN'
     BEAT_LOG_PATTERN_VAL = '*.log'
 
     # specific to metricbeat
@@ -1088,6 +1090,10 @@ def main():
                             else:
                                 forwarder_dict[Constants.BEAT_LOG_PATTERN_KEY] = os.path.join(
                                     os.path.join(values[0], Constants.BEAT_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_LOG_PATTERN_VAL,
+                                )
+                                forwarder_dict[Constants.BEAT_STATIC_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(values[0], Constants.BEAT_STATIC_LOG_PATH_SUBDIR),
                                     Constants.BEAT_LOG_PATTERN_VAL,
                                 )
                                 forwarder_dict[Constants.BEAT_LS_HOST] = values[1]

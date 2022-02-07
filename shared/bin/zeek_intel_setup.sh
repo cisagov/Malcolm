@@ -11,8 +11,11 @@ set -uo pipefail
 shopt -s nocasematch
 ENCODING="utf-8"
 
+SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
+ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
+STIX_TO_ZEEK_SCRIPT=${STIX_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/stix_to_zeek_intel.py"}
 
 # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
 if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
@@ -24,13 +27,23 @@ if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -
 @load policy/integration/collective-intel
 @load policy/frameworks/intel/seen
 @load policy/frameworks/intel/do_notice
+@load policy/frameworks/intel/do_expire
+
+redef Intel::item_expiration = ${ZEEK_INTEL_ITEM_EXPIRATION};
 
 EOF
     LOOSE_INTEL_FILES=()
+    STIX_JSON_FILES=()
 
     # process subdirectories under INTEL_DIR
     for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null); do
-        if [[ -f "${DIR}"/__load__.zeek ]]; then
+        if [[ "${DIR}" == "./STIX" ]]; then
+            # this directory contains STIX JSON files we'll need to convert to zeek intel files then load
+            while IFS= read -r line; do
+                STIX_JSON_FILES+=( "$line" )
+            done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
+
+        elif [[ -f "${DIR}"/__load__.zeek ]]; then
             # this intel feed has its own load directive and should take care of itself
             echo "@load ${DIR}" >> __load__.zeek
         else
@@ -40,6 +53,16 @@ EOF
             done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
         fi
     done
+
+    # process STIX inputs by converting them to Zeek intel format
+    rm -f ./STIX/.stix_autogen.zeek
+    if ( (( ${#STIX_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] ) && [[ -x "${STIX_TO_ZEEK_SCRIPT}" ]]; then
+        "${STIX_TO_ZEEK_SCRIPT}" \
+            --output ./STIX/.stix_autogen.zeek \
+            --input "${STIX_JSON_FILES[@]}" \
+            --input-file ./STIX/.stix_input.txt
+        LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/STIX/.stix_autogen.zeek )
+    fi
 
     # explicitly load all of the "loose" intel files in other subdirectories that didn't __load__.zeek themselves
     if (( ${#LOOSE_INTEL_FILES[@]} )); then
@@ -52,6 +75,20 @@ EOF
     fi
 
     popd >/dev/null 2>&1
+fi
+
+# if supercronic is being used to periodically refresh the intel sources,
+# write a cron entry to $SUPERCRONIC_CRONTAB using the interval specified in
+# $ZEEK_INTEL_REFRESH_CRON_EXPRESSION (e.g., 15 1 * * *) to execute this script
+set +u
+if [[ -n "${SUPERCRONIC_CRONTAB}" ]] && [[ -f "${SUPERCRONIC_CRONTAB}" ]]; then
+    if [[ -n "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION}" ]]; then
+        echo "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION} ${SCRIPT_FILESPEC} true" > "${SUPERCRONIC_CRONTAB}"
+    else
+        > "${SUPERCRONIC_CRONTAB}"
+    fi
+    # reload supercronic if it's running
+    killall -s USR2 supercronic >/dev/null 2>&1 || true
 fi
 
 # start supervisor to spawn the other process(es) or whatever the default command is

@@ -195,7 +195,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
-ADD docs/images/icon/favicon.ico /etc/nginx/favicon.ico
+ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
 EXPOSE 80
 
