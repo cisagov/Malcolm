@@ -27,7 +27,7 @@ from stix2 import parse as StixParse
 from stix2.exceptions import STIXError
 
 # for handling MISP
-import pymisp
+from pymisp import MISPEvent, MISPAttribute
 
 # strong type checking
 from typing import Tuple, Union
@@ -56,7 +56,7 @@ TAXII_PAGE_SIZE = 50
 # See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
 # [2] https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr
-ZEEK_INTEL_TYPE_MAP = {
+STIX_ZEEK_INTEL_TYPE_MAP = {
     "domain-name:value": "DOMAIN",
     "email-addr:value": "EMAIL",
     "email-message:from_ref.'value'": "EMAIL",
@@ -77,6 +77,34 @@ ZEEK_INTEL_TYPE_MAP = {
     "user:user_id": "USER_NAME",
     "user:account_login": "USER_NAME",
     "x509-certificate:hashes.'SHA-1'": "CERT_HASH",  # Zeek only supports SHA-1
+}
+
+# See the documentation for the Zeek INTEL framework [1] and MISP attribute types [2]
+# [1] https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+# [2] https://www.misp-project.org/datamodels/
+MISP_ZEEK_INTEL_TYPE_MAP = {
+    "domain": "DOMAIN",
+    "email": "EMAIL",
+    "email-dst": "EMAIL",
+    "email-reply-to": "EMAIL",
+    "email-src": "EMAIL",
+    "filename": "FILE_NAME",
+    "filename|md5": ["FILE_NAME", "FILE_HASH"],
+    "filename|sha1": ["FILE_NAME", "FILE_HASH"],
+    "filename|sha256": ["FILE_NAME", "FILE_HASH"],
+    "filename|sha512": ["FILE_NAME", "FILE_HASH"],
+    "ip-dst": "ADDR",
+    "ip-src": "ADDR",
+    "md5": "FILE_HASH",
+    "pgp-public-key": "PUBKEY_HASH",
+    "sha1": "FILE_HASH",
+    "sha256": "FILE_HASH",
+    "sha512": "FILE_HASH",
+    "ssh-fingerprint": "PUBKEY_HASH",
+    "target-email": "EMAIL",
+    "target-user": "USER_NAME",
+    "url": "URL",
+    "x509-fingerprint-sha1": "CERT_HASH",
 }
 
 
@@ -296,7 +324,7 @@ def map_stix_indicator_to_zeek(
     for object_path, ioc_value in split_stix_object_path_and_value(type(indicator), indicator.pattern, logger):
 
         # get matching Zeek intel type
-        if not (zeek_type := ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
+        if not (zeek_type := STIX_ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
             if logger is not None:
                 logger.warning(f"No matching Zeek type found for STIX-2 indicator type '{object_path}'")
             continue
@@ -330,6 +358,76 @@ def map_stix_indicator_to_zeek(
         tags.extend([x for x in indicator.get('indicator_types', []) if x])
         if len(tags) > 0:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
+
+        results.append(zeekItem)
+        if logger is not None:
+            logger.debug(zeekItem)
+
+    return results
+
+
+def map_misp_attribute_to_zeek(
+    attribute: MISPAttribute,
+    source: Union[str, None] = None,
+    logger=None,
+) -> Union[Tuple[defaultdict], None]:
+    """
+    Maps a MISP attribute to Zeek intel items
+    @see https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+    @param attribute The MISPAttribute to convert
+    @return a list containing the Zeek intel dict(s) from the MISPAttribute object
+    """
+    if logger is not None:
+        logger.debug(attribute.to_json())
+
+    results = []
+
+    # get matching Zeek intel type
+    if not (zeek_types := MISP_ZEEK_INTEL_TYPE_MAP.get(attribute.type, None)):
+        if logger is not None:
+            logger.warning(f"No matching Zeek type found for MISP attribute type '{attribute.type}'")
+        return None
+
+    # some MISP indicators are actually two values together (e.g., filename|sha256)
+    valTypePairs = (
+        zip(zeek_types, attribute.value.split('|'))
+        if isinstance(zeek_types, Iterable)
+        else [zeek_types, attribute.value]
+    )
+
+    # process type/value pairs
+    for zeek_type, attribute_value in valTypePairs:
+
+        if zeek_type == "URL":
+            # remove leading protocol, if any
+            parsed = urlparse(attribute_value)
+            scheme = f"{parsed.scheme}://"
+            attribute_value = parsed.geturl().replace(scheme, "", 1)
+        elif zeek_type == "ADDR" and re.match(".+/.+", attribute_value):
+            # elevate to subnet if possible
+            zeek_type = "SUBNET"
+
+        # ... "fields containing only a hyphen are considered to be null values"
+        zeekItem = defaultdict(lambda: '-')
+
+        if source is not None:
+            zeekItem[ZEEK_INTEL_META_SOURCE] = source
+        zeekItem[ZEEK_INTEL_INDICATOR] = attribute_value
+        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+        # if ('name' in indicator) or ('description' in indicator):
+        #     zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
+        #         [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
+        #     )
+        #     # some of these are from CFM, what the heck...
+        #     # if 'description' in indicator:
+        #     #   "description": "severity level: Low\n\nCONFIDENCE: High",
+        # zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(indicator.created.timetuple()))
+        # zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(indicator.modified.timetuple()))
+        # tags = []
+        # tags.extend([x for x in indicator.get('labels', []) if x])
+        # tags.extend([x for x in indicator.get('indicator_types', []) if x])
+        # if len(tags) > 0:
+        #     zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
 
         results.append(zeekItem)
         if logger is not None:
@@ -373,7 +471,7 @@ class FeedParserZeekPrinter(object):
                 ]
             )
 
-    def PrintHeader():
+    def PrintHeader(self):
         if not self.printedHeader:
             print('\t'.join(['#fields'] + self.fields), file=self.outFile)
             self.printedHeader = True
@@ -387,7 +485,7 @@ class FeedParserZeekPrinter(object):
                     # map indicator object to Zeek value(s)
                     if vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger):
                         for val in vals:
-                            PrintHeader()
+                            self.PrintHeader()
                             # print the intelligence item fields according to the columns in 'fields'
                             print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
 
@@ -397,11 +495,17 @@ class FeedParserZeekPrinter(object):
 
     def ProcessMISP(self, toParse, source: Union[str, None] = None):
         try:
-            if self.logger is not None:
-                self.logger.debug(
-                    f"{type(toParse).__name__} {len(toParse)}: {set(toParse.keys()) if isinstance(toParse, dict) else ''}"
-                )
+            event = MISPEvent()
+            event.from_dict(**toParse)
+            for attribute in event.attributes:
+
+                # map event attribute to Zeek value(s)
+                if vals := map_misp_attribute_to_zeek(attribute=attribute, source=source, logger=self.logger):
+                    for val in vals:
+                        self.PrintHeader()
+                        # print the intelligence item fields according to the columns in 'fields'
+                        print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
 
         except Exception as e:
-            if logger is not None:
-                logger.debug(f'Exception: {e}')
+            if self.logger is not None:
+                self.logger.debug(f'Exception: {e}')
