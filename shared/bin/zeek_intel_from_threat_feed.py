@@ -4,14 +4,17 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
+import dateparser
 import json
 import logging
 import os
+import pytz
 import requests
 import sys
 
 from bs4 import BeautifulSoup
 from contextlib import nullcontext
+from datetime import datetime
 from urllib.parse import urljoin
 from taxii2client.v20 import as_pages as TaxiiAsPages_v20
 from taxii2client.v20 import Collection as TaxiiCollection_v20
@@ -105,6 +108,13 @@ def main():
         default=None,
         help="Output file (stdout if unspecified)",
     )
+    parser.add_argument(
+        '--since',
+        dest='since',
+        type=str,
+        default=None,
+        help="Retrieve indicators since this timestamp",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -125,9 +135,13 @@ def main():
 
     if args.input is None:
         args.input = []
+    since = dateparser.parse(args.since).astimezone(pytz.utc) if args.since is not None else None
+    defaultNow = datetime.now().astimezone(pytz.utc)
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
-        zeekPrinter = zeek_threat_feed_utils.FeedParserZeekPrinter(args.notice, args.cif, file=outfile, logger=logging)
+        zeekPrinter = zeek_threat_feed_utils.FeedParserZeekPrinter(
+            args.notice, args.cif, since=since, file=outfile, logger=logging
+        )
 
         # if --input-file is specified, process first and append to  --input
         if (args.inputFile is not None) and (len(args.inputFile) > 0):
@@ -215,11 +229,19 @@ def main():
                                     for uri in mispJson:
                                         try:
                                             newUrl = urljoin(mispUrl, f'{uri}.json')
-                                            mispObjectReponse = mispSession.get(newUrl)
-                                            mispObjectReponse.raise_for_status()
-                                            zeekPrinter.ProcessMISP(
-                                                mispObjectReponse.json(),
+                                            eventTime = (
+                                                datetime.utcfromtimestamp(int(mispJson[uri]['timestamp'])).astimezone(
+                                                    pytz.utc
+                                                )
+                                                if 'timestamp' in mispJson[uri]
+                                                else defaultNow
                                             )
+                                            if (since is None) or (eventTime >= since):
+                                                mispObjectReponse = mispSession.get(newUrl)
+                                                mispObjectReponse.raise_for_status()
+                                                zeekPrinter.ProcessMISP(
+                                                    mispObjectReponse.json(),
+                                                )
                                         except Exception as e:
                                             logging.warning(f"{type(e).__name__} for MISP object at '{newUrl}': {e}")
 
@@ -243,13 +265,21 @@ def main():
                                             mispManifest = mispManifestResponse.json()
                                             for uri in mispManifest:
                                                 try:
-                                                    mispObjectReponse = mispSession.get(
-                                                        f'{mispUrl.strip("/")}/{uri}.json'
+                                                    eventTime = (
+                                                        datetime.utcfromtimestamp(
+                                                            int(mispManifest[uri]['timestamp'])
+                                                        ).astimezone(pytz.utc)
+                                                        if 'timestamp' in mispManifest[uri]
+                                                        else defaultNow
                                                     )
-                                                    mispObjectReponse.raise_for_status()
-                                                    zeekPrinter.ProcessMISP(
-                                                        mispObjectReponse.json(),
-                                                    )
+                                                    if (since is None) or (eventTime >= since):
+                                                        mispObjectReponse = mispSession.get(
+                                                            f'{mispUrl.strip("/")}/{uri}.json'
+                                                        )
+                                                        mispObjectReponse.raise_for_status()
+                                                        zeekPrinter.ProcessMISP(
+                                                            mispObjectReponse.json(),
+                                                        )
                                                 except Exception as e:
                                                     logging.warning(
                                                         f"{type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"

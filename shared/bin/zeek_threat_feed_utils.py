@@ -7,6 +7,7 @@
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
 import base64
+import dateparser
 import json
 import os
 import re
@@ -443,10 +444,12 @@ class FeedParserZeekPrinter(object):
     printedHeader = False
     logger = None
     outFile = None
+    since = None
 
-    def __init__(self, notice: bool, cif: bool, file=None, logger=None):
+    def __init__(self, notice: bool, cif: bool, since=None, file=None, logger=None):
         self.logger = logger
         self.outFile = file
+        self.since = since
         self.fields = [
             ZEEK_INTEL_INDICATOR,
             ZEEK_INTEL_INDICATOR_TYPE,
@@ -484,7 +487,9 @@ class FeedParserZeekPrinter(object):
                 if type(obj).__name__ == "Indicator":
 
                     # map indicator object to Zeek value(s)
-                    if vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger):
+                    if ((self.since is None) or (obj.created >= self.since) or (obj.modified >= self.since)) and (
+                        vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger)
+                    ):
                         for val in vals:
                             self.PrintHeader()
                             # print the intelligence item fields according to the columns in 'fields'
@@ -501,7 +506,9 @@ class FeedParserZeekPrinter(object):
             for attribute in event.attributes:
 
                 # map event attribute to Zeek value(s)
-                if vals := map_misp_attribute_to_zeek(attribute=attribute, source=source, logger=self.logger):
+                if ((self.since is None) or (attribute.timestamp >= self.since)) and (
+                    vals := map_misp_attribute_to_zeek(attribute=attribute, source=source, logger=self.logger)
+                ):
                     for val in vals:
                         self.PrintHeader()
                         # print the intelligence item fields according to the columns in 'fields'

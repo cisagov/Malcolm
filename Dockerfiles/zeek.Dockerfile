@@ -87,10 +87,12 @@ RUN apt-get -q update && \
       psmisc \
       python3 \
       python3-bs4 \
+      python3-dateparser \
       python3-git \
       python3-pip \
       python3-semantic-version \
       python3-setuptools \
+      python3-tz \
       python3-wheel \
       python3-zmq \
       supervisor \
