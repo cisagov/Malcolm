@@ -90,7 +90,7 @@ def main():
         nargs='*',
         type=str,
         default=None,
-        help="JSON file(s), TAXII 2.x URL(s) or MISP URL(s), e.g.\n\ttaxii|2.0|http://example.com/discovery|Collection Name|user|password\n\tmisp|https://example.com/data/feed-osint/|key",
+        help="JSON file(s), TAXII 2.x URL(s) or MISP URL(s), e.g.\n\ttaxii|2.0|http://example.com/discovery|Collection Name|user|password\n\tmisp|https://example.com/data/feed-osint/manifest.json|auth_key",
     )
     parser.add_argument(
         '--input-file',
