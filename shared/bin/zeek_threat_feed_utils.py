@@ -526,11 +526,10 @@ class FeedParserZeekPrinter(object):
                 if (event.Tag is not None) and (len(event.Tag) > 0)
                 else []
             )
-            if len(certaintyTags) > 0:
-                try:
-                    certainty = float(certaintyTags[0].split('=')[-1])
-                except ValueError as ve:
-                    certainty = None
+            try:
+                certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
+            except ValueError as ve:
+                certainty = None
 
             for attribute in event.attributes:
 
