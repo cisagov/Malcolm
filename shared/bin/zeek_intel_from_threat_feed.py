@@ -190,12 +190,18 @@ def main():
                         if infileJson := zeek_threat_feed_utils.LoadFileIfJson(infile):
                             if 'type' in infileJson and 'id' in infileJson:
                                 # STIX input file
-                                zeekPrinter.ProcessSTIX(infileJson, source=os.path.splitext(os.path.basename(inarg))[0])
+                                zeekPrinter.ProcessSTIX(
+                                    infileJson,
+                                    source=[os.path.splitext(os.path.basename(inarg))[0]],
+                                )
 
                             elif (len(infileJson.keys()) == 1) and ('Event' in infileJson):
                                 # TODO: is this always the case? anything other than "Event", or multiple objects?
                                 # MISP input file
-                                zeekPrinter.ProcessMISP(mispJson)
+                                zeekPrinter.ProcessMISP(
+                                    mispJson,
+                                    source=[os.path.splitext(os.path.basename(inarg))[0]],
+                                )
 
                             else:
                                 raise Exception(f"Could not identify content in '{inarg}'")
@@ -394,7 +400,8 @@ def main():
                                     )
                                 ):
                                     zeekPrinter.ProcessSTIX(
-                                        envelope, source=':'.join([x for x in [server.title, title] if x is not None])
+                                        envelope,
+                                        source=[':'.join([x for x in [server.title, title] if x is not None])],
                                     )
 
                             except Exception as e:
