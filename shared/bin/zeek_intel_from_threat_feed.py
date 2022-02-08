@@ -135,7 +135,11 @@ def main():
 
     if args.input is None:
         args.input = []
-    since = dateparser.parse(args.since).astimezone(pytz.utc) if args.since is not None else None
+    since = (
+        dateparser.parse(args.since).astimezone(pytz.utc)
+        if (args.since is not None) and (len(args.since) > 0)
+        else None
+    )
     defaultNow = datetime.now().astimezone(pytz.utc)
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:

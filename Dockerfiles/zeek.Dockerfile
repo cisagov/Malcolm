@@ -141,7 +141,8 @@ RUN apt-get -q update && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
                "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
-        touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
+      mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
+      touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
     cd /tmp && \
@@ -189,6 +190,7 @@ ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
 ARG ZEEK_INTEL_ITEM_EXPIRATION=-1min
 ARG ZEEK_INTEL_REFRESH_CRON_EXPRESSION=
+ARG ZEEK_INTEL_FEED_SINCE=
 ARG ZEEK_EXTRACTOR_MODE=none
 ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
 ARG PCAP_PIPELINE_DEBUG=false
@@ -200,6 +202,7 @@ ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_INTEL_ITEM_EXPIRATION $ZEEK_INTEL_ITEM_EXPIRATION
 ENV ZEEK_INTEL_REFRESH_CRON_EXPRESSION $ZEEK_INTEL_REFRESH_CRON_EXPRESSION
+ENV ZEEK_INTEL_FEED_SINCE $ZEEK_INTEL_FEED_SINCE
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
