@@ -50,6 +50,25 @@ filebeat.inputs:
   close_eof: false
   clean_removed: true
 
+- type: log
+  paths:
+    - ${FILEBEAT_ZEEK_LOG_PATH:/data/zeek/current}/eve.json 
+  symlinks: true
+  fields_under_root: true
+  tags: ["_filebeat_suricata"]
+  fields:
+    type: "session"
+  compression_level: 0
+  exclude_lines: ['^\s*#']
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: 200m
+  ignore_older: 180m
+  close_inactive: 120m
+  close_renamed: false
+  close_removed: true
+  close_eof: false
+  clean_removed: true
+
 output.logstash:
   hosts: ["logstash:5044"]
   ssl.enabled: ${BEATS_SSL:false}
