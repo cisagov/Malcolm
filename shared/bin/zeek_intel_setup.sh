@@ -62,14 +62,14 @@ EOF
     done
 
     # process STIX and MISP inputs by converting them to Zeek intel format
-    rm -f ./STIX/.threat_autogen.zeek
+    rm -f ./.threat_autogen.zeek
     if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
         "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
-            --since "${ZEEK_INTEL_FEED_SINCE}"
-            --output ./STIX/.threat_autogen.zeek \
+            --since "${ZEEK_INTEL_FEED_SINCE}" \
+            --output ./.threat_autogen.zeek \
             --input "${THREAT_JSON_FILES[@]}" \
-            --input-file ./STIX/.stix_input.txt ./STIX/.misp_input.txt
-        LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/STIX/.threat_autogen.zeek )
+            --input-file ./STIX/.stix_input.txt ./MISP/.misp_input.txt
+        LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/.threat_autogen.zeek )
     fi
 
     # explicitly load all of the "loose" intel files in other subdirectories that didn't __load__.zeek themselves

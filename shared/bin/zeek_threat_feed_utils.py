@@ -124,6 +124,13 @@ def LoadStrIfJson(jsonStr):
         return None
 
 
+def LoadFileIfJson(fileHandle):
+    try:
+        return json.load(fileHandle)
+    except ValueError as e:
+        return None
+
+
 @contextlib.contextmanager
 def temporary_filename(suffix=None):
     try:

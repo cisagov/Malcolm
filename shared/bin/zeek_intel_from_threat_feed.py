@@ -90,7 +90,7 @@ def main():
         nargs='*',
         type=str,
         default=None,
-        help="JSON file(s), TAXII 2.x URL(s) or MISP URL(s), e.g.\n\ttaxii|2.0|http://example.com/discovery|Collection Name|user|password\n\tmisp|TODO:2.0|http://example.com/discovery|Collection Name|user|password",
+        help="JSON file(s), TAXII 2.x URL(s) or MISP URL(s), e.g.\n\ttaxii|2.0|http://example.com/discovery|Collection Name|user|password\n\tmisp|https://example.com/data/feed-osint/|key",
     )
     parser.add_argument(
         '--input-file',
@@ -185,10 +185,22 @@ def main():
 
                     if infile:
                         ##################################################################################
-                        # JSON FILE
+                        # JSON FILE (STIX or MISP)
 
-                        # TODO: detect MISP vs. STIX for input file
-                        zeekPrinter.ProcessSTIX(infile, source=os.path.splitext(os.path.basename(inarg))[0])
+                        if infileJson := zeek_threat_feed_utils.LoadFileIfJson(infile):
+                            if 'type' in infileJson and 'id' in infileJson:
+                                # STIX input file
+                                zeekPrinter.ProcessSTIX(infileJson, source=os.path.splitext(os.path.basename(inarg))[0])
+
+                            elif (len(infileJson.keys()) == 1) and ('Event' in infileJson):
+                                # TODO: is this always the case? anything other than "Event", or multiple objects?
+                                # MISP input file
+                                zeekPrinter.ProcessMISP(mispJson)
+
+                            else:
+                                raise Exception(f"Could not identify content in '{inarg}'")
+                        else:
+                            raise Exception(f"Could not parse JSON in '{inarg}'")
 
                     elif inarg.lower().startswith('misp'):
                         ##################################################################################
@@ -344,7 +356,7 @@ def main():
                         elif taxiiVersion == '2.1':
                             server = TaxiiServer_v21(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
                         else:
-                            raise Exception(f'Unsupported TAXII version "{taxiiVersion}"')
+                            raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
 
                         # collect the collection URL(s) for the given collection name
                         collectionUrls = {}
