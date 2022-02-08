@@ -14,6 +14,7 @@ ENCODING="utf-8"
 SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
+ZEEK_INTEL_FEED_SINCE=${ZEEK_INTEL_FEED_SINCE:-""}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
 THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_intel_from_threat_feed.py"}
 
@@ -33,15 +34,21 @@ redef Intel::item_expiration = ${ZEEK_INTEL_ITEM_EXPIRATION};
 
 EOF
     LOOSE_INTEL_FILES=()
-    STIX_JSON_FILES=()
+    THREAT_JSON_FILES=()
 
     # process subdirectories under INTEL_DIR
     for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null); do
         if [[ "${DIR}" == "./STIX" ]]; then
             # this directory contains STIX JSON files we'll need to convert to zeek intel files then load
             while IFS= read -r line; do
-                STIX_JSON_FILES+=( "$line" )
+                THREAT_JSON_FILES+=( "$line" )
             done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
+
+        elif [[ "${DIR}" == "./MISP" ]]; then
+            # this directory contains MISP JSON files we'll need to convert to zeek intel files then load
+            while IFS= read -r line; do
+                THREAT_JSON_FILES+=( "$line" )
+            done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" ! -name "manifest.json" ! -name "hashes.csv" 2>/dev/null )
 
         elif [[ -f "${DIR}"/__load__.zeek ]]; then
             # this intel feed has its own load directive and should take care of itself
@@ -54,14 +61,15 @@ EOF
         fi
     done
 
-    # process STIX inputs by converting them to Zeek intel format
-    rm -f ./STIX/.stix_autogen.zeek
-    if ( (( ${#STIX_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+    # process STIX and MISP inputs by converting them to Zeek intel format
+    rm -f ./STIX/.threat_autogen.zeek
+    if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
         "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
-            --output ./STIX/.stix_autogen.zeek \
-            --input "${STIX_JSON_FILES[@]}" \
-            --input-file ./STIX/.stix_input.txt
-        LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/STIX/.stix_autogen.zeek )
+            --since "${ZEEK_INTEL_FEED_SINCE}"
+            --output ./STIX/.threat_autogen.zeek \
+            --input "${THREAT_JSON_FILES[@]}" \
+            --input-file ./STIX/.stix_input.txt ./STIX/.misp_input.txt
+        LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/STIX/.threat_autogen.zeek )
     fi
 
     # explicitly load all of the "loose" intel files in other subdirectories that didn't __load__.zeek themselves
