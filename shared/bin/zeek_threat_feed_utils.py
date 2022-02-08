@@ -305,7 +305,7 @@ def split_stix_object_path_and_value(
 
 def map_stix_indicator_to_zeek(
     indicator: Union[STIX_Indicator_v20, STIX_Indicator_v21],
-    source: Union[str, None] = None,
+    source: Union[Tuple[str], None] = None,
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
     """
@@ -350,7 +350,11 @@ def map_stix_indicator_to_zeek(
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
 
-        zeekItem[ZEEK_INTEL_META_SOURCE] = source if source is not None else str(indicator.id)
+        zeekItem[ZEEK_INTEL_META_SOURCE] = (
+            ','.join([x.replace(',', '\\x2c') for x in source])
+            if source is not None and len(source) > 0
+            else str(indicator.id)
+        )
         zeekItem[ZEEK_INTEL_INDICATOR] = ioc_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         if ('name' in indicator) or ('description' in indicator):
@@ -366,7 +370,7 @@ def map_stix_indicator_to_zeek(
         tags.extend([x for x in indicator.get('labels', []) if x])
         tags.extend([x for x in indicator.get('indicator_types', []) if x])
         if len(tags) > 0:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
 
         # TODO: revoked?
         # TODO: confidence?
@@ -380,7 +384,7 @@ def map_stix_indicator_to_zeek(
 
 def map_misp_attribute_to_zeek(
     attribute: MISPAttribute,
-    source: Union[str, None] = None,
+    source: Union[Tuple[str], None] = None,
     url: Union[str, None] = None,
     description: Union[str, None] = None,
     tags: Union[Tuple[str], None] = None,
@@ -426,8 +430,8 @@ def map_misp_attribute_to_zeek(
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
 
-        if source is not None:
-            zeekItem[ZEEK_INTEL_META_SOURCE] = source
+        if source is not None and len(source) > 0:
+            zeekItem[ZEEK_INTEL_META_SOURCE] = ','.join([x.replace(',', '\\x2c') for x in source])
         if description is not None:
             zeekItem[ZEEK_INTEL_META_DESC] = description
         if url is not None:
@@ -437,9 +441,9 @@ def map_misp_attribute_to_zeek(
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(attribute.timestamp.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(attribute.timestamp.timetuple()))
         if tags is not None and len(tags) > 0:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([attribute.category] + tags)
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in [attribute.category] + tags])
         else:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category.replace(',', '\\x2c')
         if confidence is not None:
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(confidence)
 
@@ -492,7 +496,11 @@ class FeedParserZeekPrinter(object):
             print('\t'.join(['#fields'] + self.fields), file=self.outFile)
             self.printedHeader = True
 
-    def ProcessSTIX(self, toParse, source: Union[str, None] = None):
+    def ProcessSTIX(
+        self,
+        toParse,
+        source: Union[Tuple[str], None] = None,
+    ):
         try:
             # parse the STIX and process all "Indicator" objects
             for obj in STIXParse(toParse, allow_custom=True).objects:
@@ -511,31 +519,40 @@ class FeedParserZeekPrinter(object):
             if self.logger is not None:
                 self.logger.warning(f"{type(ve).__name__} parsing '{infile}': {ve}")
 
-    def ProcessMISP(self, toParse, source: Union[str, None] = None, url: Union[str, None] = None):
+    def ProcessMISP(
+        self,
+        toParse,
+        source: Union[Tuple[str], None] = None,
+        url: Union[str, None] = None,
+    ):
         try:
             event = MISPEvent()
             event.from_dict(**toParse)
 
-            if (source is None) and (event.Orgc is not None):
-                source = event.Orgc.name
+            if source is None:
+                source = []
+
+            if event.Orgc is not None:
+                source.append(event.Orgc.name)
+
             description = event.info
-            tags = (
-                [
+
+            if (event.Tag is not None) and (len(event.Tag) > 0):
+                tags = [
                     x.name
                     for x in event.Tag
-                    if not x.name.startswith('osint:certainty') and not x.name.startswith('type:')
+                    if not x.name.startswith('osint:certainty')
+                    and not x.name.startswith('type:')
+                    and not x.name.startswith('source:')
                 ]
-                if (event.Tag is not None) and (len(event.Tag) > 0)
-                else []
-            )
-            certaintyTags = (
-                [x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')]
-                if (event.Tag is not None) and (len(event.Tag) > 0)
-                else []
-            )
-            try:
-                certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
-            except ValueError as ve:
+                source.extend([x[7:] for x in event.Tag if x.name.startswith('source:')])
+                certaintyTags = [x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')]
+                try:
+                    certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
+                except ValueError as ve:
+                    certainty = None
+            else:
+                tags = []
                 certainty = None
 
             for attribute in event.attributes:
