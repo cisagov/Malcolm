@@ -535,7 +535,7 @@ class FeedParserZeekPrinter(object):
 
                 # map event attribute to Zeek value(s)
                 if (
-                    (attribute.deleted == False)
+                    ((not hasattr(attribute, 'deleted')) or (attribute.deleted == False))
                     and ((self.since is None) or (event.timestamp >= self.since) or (attribute.timestamp >= self.since))
                     and (
                         vals := map_misp_attribute_to_zeek(

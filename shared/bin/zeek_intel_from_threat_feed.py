@@ -196,17 +196,18 @@ def main():
                         mispConnInfo = [
                             zeek_threat_feed_utils.base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]
                         ]
-                        mispVersion, mispUrl, mispAuthKey = (
-                            None,
+                        mispUrl, mispAuthKey = (
                             None,
                             None,
                         )
                         mispUrl = mispConnInfo[0]
                         if len(mispConnInfo) >= 2:
                             mispAuthKey = mispConnInfo[1]
-                            # TODO: use auth_key
 
                         with requests.Session() as mispSession:
+
+                            if mispAuthKey is not None:
+                                mispSession.headers.update({'Authorization': mispAuthKey})
 
                             # download the URL and parse as JSON to figure out what it is. it could be:
                             # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
