@@ -364,7 +364,15 @@ def suricataFileWorker(suricataWorkerArgs):
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                     # put together suricata execution command
-                    cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/', '-c', '/opt/suricata/suricata.yaml']
+                    cmd = [
+                        suricataBin,
+                        '-r',
+                        fileInfo[FILE_INFO_DICT_NAME],
+                        '-l',
+                        '/var/log/suricata/',
+                        '-c',
+                        '/opt/suricata/suricata.yaml',
+                    ]
 
                     # execute suricata-capture for pcap file
                     retcode, output = run_process(cmd, debug=verboseDebug)
