@@ -237,7 +237,7 @@ def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=No
 
     except Exception as e:
         if logger is not None:
-            logger.debug(f'Parsing "{pattern_str}": {e}')
+            logger.warning(f'Parsing "{pattern_str}": {e}')
         return False
 
 
@@ -361,6 +361,9 @@ def map_stix_indicator_to_zeek(
         if len(tags) > 0:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
 
+        # TODO: revoked?
+        # TODO: confidence?
+
         results.append(zeekItem)
         if logger is not None:
             logger.debug(zeekItem)
@@ -371,6 +374,10 @@ def map_stix_indicator_to_zeek(
 def map_misp_attribute_to_zeek(
     attribute: MISPAttribute,
     source: Union[str, None] = None,
+    url: Union[str, None] = None,
+    description: Union[str, None] = None,
+    tags: Union[Tuple[str], None] = None,
+    confidence: Union[float, None] = None,
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
     """
@@ -414,22 +421,20 @@ def map_misp_attribute_to_zeek(
 
         if source is not None:
             zeekItem[ZEEK_INTEL_META_SOURCE] = source
+        if description is not None:
+            zeekItem[ZEEK_INTEL_META_DESC] = description
+        if url is not None:
+            zeekItem[ZEEK_INTEL_META_URL] = url
         zeekItem[ZEEK_INTEL_INDICATOR] = attribute_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
-        # if ('name' in indicator) or ('description' in indicator):
-        #     zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
-        #         [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
-        #     )
-        #     # some of these are from CFM, what the heck...
-        #     # if 'description' in indicator:
-        #     #   "description": "severity level: Low\n\nCONFIDENCE: High",
-        # zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(indicator.created.timetuple()))
-        # zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(indicator.modified.timetuple()))
-        # tags = []
-        # tags.extend([x for x in indicator.get('labels', []) if x])
-        # tags.extend([x for x in indicator.get('indicator_types', []) if x])
-        # if len(tags) > 0:
-        #     zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
+        zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(time.mktime(attribute.timestamp.timetuple()))
+        zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(time.mktime(attribute.timestamp.timetuple()))
+        if tags is not None and len(tags) > 0:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([attribute.category] + tags)
+        else:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category
+        if confidence is not None:
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(confidence)
 
         results.append(zeekItem)
         if logger is not None:
@@ -499,15 +504,51 @@ class FeedParserZeekPrinter(object):
             if self.logger is not None:
                 self.logger.warning(f"{type(ve).__name__} parsing '{infile}': {ve}")
 
-    def ProcessMISP(self, toParse, source: Union[str, None] = None):
+    def ProcessMISP(self, toParse, source: Union[str, None] = None, url: Union[str, None] = None):
         try:
             event = MISPEvent()
             event.from_dict(**toParse)
+
+            if (source is None) and (event.Orgc is not None):
+                source = event.Orgc.name
+            description = event.info
+            tags = (
+                [
+                    x.name
+                    for x in event.Tag
+                    if not x.name.startswith('osint:certainty') and not x.name.startswith('type:')
+                ]
+                if (event.Tag is not None) and (len(event.Tag) > 0)
+                else []
+            )
+            certaintyTags = (
+                [x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')]
+                if (event.Tag is not None) and (len(event.Tag) > 0)
+                else []
+            )
+            if len(certaintyTags) > 0:
+                try:
+                    certainty = float(certaintyTags[0].split('=')[-1])
+                except ValueError as ve:
+                    certainty = None
+
             for attribute in event.attributes:
 
                 # map event attribute to Zeek value(s)
-                if ((self.since is None) or (attribute.timestamp >= self.since)) and (
-                    vals := map_misp_attribute_to_zeek(attribute=attribute, source=source, logger=self.logger)
+                if (
+                    (attribute.deleted == False)
+                    and ((self.since is None) or (event.timestamp >= self.since) or (attribute.timestamp >= self.since))
+                    and (
+                        vals := map_misp_attribute_to_zeek(
+                            attribute=attribute,
+                            source=source,
+                            url=url,
+                            description=f"{description}{'. '+attribute.comment if attribute.comment else ''}",
+                            tags=tags,
+                            confidence=certainty,
+                            logger=self.logger,
+                        )
+                    )
                 ):
                     for val in vals:
                         self.PrintHeader()
@@ -516,4 +557,4 @@ class FeedParserZeekPrinter(object):
 
         except Exception as e:
             if self.logger is not None:
-                self.logger.debug(f'Exception: {e}')
+                self.logger.warning(f'Exception: {e}')

@@ -222,6 +222,7 @@ def main():
                                     # this is a MISP event, process it
                                     zeekPrinter.ProcessMISP(
                                         mispJson,
+                                        url=mispUrl,
                                     )
 
                                 else:
@@ -241,6 +242,7 @@ def main():
                                                 mispObjectReponse.raise_for_status()
                                                 zeekPrinter.ProcessMISP(
                                                     mispObjectReponse.json(),
+                                                    url=newUrl,
                                                 )
                                         except Exception as e:
                                             logging.warning(f"{type(e).__name__} for MISP object at '{newUrl}': {e}")
@@ -273,12 +275,12 @@ def main():
                                                         else defaultNow
                                                     )
                                                     if (since is None) or (eventTime >= since):
-                                                        mispObjectReponse = mispSession.get(
-                                                            f'{mispUrl.strip("/")}/{uri}.json'
-                                                        )
+                                                        newUrl = f'{mispUrl.strip("/")}/{uri}.json'
+                                                        mispObjectReponse = mispSession.get(newUrl)
                                                         mispObjectReponse.raise_for_status()
                                                         zeekPrinter.ProcessMISP(
                                                             mispObjectReponse.json(),
+                                                            url=newUrl,
                                                         )
                                                 except Exception as e:
                                                     logging.warning(
@@ -296,6 +298,7 @@ def main():
                                             mispObjectReponse.raise_for_status()
                                             zeekPrinter.ProcessMISP(
                                                 mispObjectReponse.json(),
+                                                url=url,
                                             )
                                         except Exception as e:
                                             logging.warning(f"{type(e).__name__} for MISP object at '{url}': {e}")
