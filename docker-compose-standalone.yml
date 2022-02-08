@@ -567,6 +567,36 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
+  suricata:
+    build: 
+      context: .
+      dockerfile: Dockerfiles/suricata.Dockerfile
+    image: malcolmnetsec/suricata
+    restart: "no"
+    stdin_open: false
+    tty: true 
+    hostname: suricata
+    environment:
+      << : *process-variables
+      << : *logstash-variables
+    depends_on:
+      - logstash
+    volumes:
+      - /data/suricata/log:/var/log/suricata
+      - ./pcap:/data/pcap
+    expose:
+      - 8711
+    cap_add:
+     - NET_ADMIN
+     - SYS_NICE
+     - NET_RAW
+    network_mode: host
+    healthcheck:
+      test: ["CMD", "curl", "--insecure", "--silent", "https://localhost:443"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
 
 # shared named volume so filebeat can access nginx access logs
 volumes:

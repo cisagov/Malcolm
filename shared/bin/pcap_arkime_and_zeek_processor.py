@@ -31,6 +31,11 @@ MAX_WORKER_PROCESSES_DEFAULT = 1
 
 PCAP_PROCESSING_MODE_ARKIME = "arkime"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
+PCAP_PROCESSING_MODE_SURICATA = "suricata"
+
+#TODO: Add required Suricata Options
+SURICATA_AUTOSURICATA_TAG = True
+SURICATA_PATH = "/opt/suricata/src/suricata"
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
 
@@ -73,7 +78,7 @@ def shutdown_handler(signum, frame):
 def pdb_handler(sig, frame):
     global pdbFlagged
     pdbFlagged = True
-
+    
 
 ###################################################################################################
 # handle sigusr2 for toggling debug
@@ -311,6 +316,54 @@ def zeekFileWorker(zeekWorkerArgs):
 
 
 ###################################################################################################
+def suricataFileWorker(suricataWorkerArgs):
+  global debug
+  global verboseDebug
+  global shuttingDown
+  global scanWorkersCount
+
+  scanWorkerId = scanWorkersCount.increment() # unique ID for this thread
+
+  newFileQueue, pcapBaseDir, autosuricata, suricataBin, autotag = suricataWorkerArgs[0], suricataWorkerArgs[1], suricataWorkerArgs[2], suricataWorkerArgs[3], suricataWorkerArgs[4]
+
+  if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
+
+  # loop forever, or until we're told to shut down
+  while not shuttingDown:
+    try:
+      # pull an item from the queue of files that need to be processed
+      fileInfo = newFileQueue.popleft()
+    except IndexError:
+      time.sleep(1)
+    else:
+      if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+
+        #if autosuricata or ((FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]):
+
+          if pcapBaseDir and os.path.isdir(pcapBaseDir):
+            fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+          if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+            # finalize tags list
+            fileInfo[FILE_INFO_DICT_TAGS] = [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x != ZEEK_AUTOZEEK_TAG) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))] if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag) else list()
+            if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+
+            # put together suricata execution command TODO: Add other Suricata CLI arguments
+            cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/"]
+            # if notLocked: cmd.append('--nolockpcap')
+            cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
+
+            # execute suricata-capture for pcap file
+            retcode, output = run_process(cmd, debug=verboseDebug)
+            if (retcode == 0):
+              if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+            else:
+              if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}")
+
+
+    if debug: eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
+
+###################################################################################################
 # main
 def main():
 
@@ -324,6 +377,8 @@ def main():
         processingMode = PCAP_PROCESSING_MODE_ARKIME
     elif PCAP_PROCESSING_MODE_ZEEK in scriptName:
         processingMode = PCAP_PROCESSING_MODE_ZEEK
+    elif PCAP_PROCESSING_MODE_SURICATA in scriptName:
+        processingMode = PCAP_PROCESSING_MODE_SURICATA
     else:
         eprint(
             f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead."
@@ -467,6 +522,9 @@ def main():
             type=str,
             required=True,
         )
+    elif (processingMode == PCAP_PROCESSING_MODE_SURICATA):
+        parser.add_argument('--suricata', required=False, dest='executable', help="suricata executable path", metavar='<STR>', type=str, default=SURICATA_PATH)
+        parser.add_argument('--autosuricata', dest='autosuricata', help="Autoanalyze all PCAP file with Suricata", metavar='true|false', type=str2bool, nargs='?', const=True, default=False, required=False)
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -533,6 +591,8 @@ def main():
                 ],
             ),
         )
+  elif (processingMode == PCAP_PROCESSING_MODE_SURICATA):
+    scannerThreads = ThreadPool(args.threads, suricataFileWorker, ([newFileQueue,args.pcapBaseDir,args.executable,args.autosuricata,args.autotag],))
 
     while not shuttingDown:
         # for debugging
