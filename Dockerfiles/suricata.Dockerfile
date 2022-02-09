@@ -20,12 +20,6 @@ ENV PUSER "suricata"
 ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP true
 
-ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/pcap_utils.py /opt/
-ADD shared/pcaps /tmp/
-ADD suricata/supervisord.conf /etc/supervisord.conf
-
 #UPDATE VERSION OF SURICATA
 ENV SURICATA_VER "6.0.0"
 ENV SURICATADIR "/opt/suricata"
@@ -69,7 +63,9 @@ RUN apt-get -q update && \
         libnfnetlink0 \
         python3-pip \
         supervisor \
-        python3-zmq
+        python3-zmq \
+        procps \
+        psmisc
 
 #Install Rust
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
@@ -78,7 +74,7 @@ RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 #Upgrade pip
 RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir suricata-update && \
-    pip3 install pyyaml 
+    pip3 install pyyaml
 
 #Build Suricata
 RUN mkdir -p $SURICATADIR/ && \
@@ -105,6 +101,12 @@ RUN mkdir -p $SURICATADIR/ && \
     make install && \
     make install-full
 
+ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
+ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD shared/bin/pcap_utils.py /opt/
+ADD shared/pcaps /tmp/
+ADD suricata/supervisord.conf /etc/supervisord.conf
+
 #Setup User, Groups, and Configs
 RUN addgroup --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
@@ -130,6 +132,6 @@ ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 ADD suricata/suricata.yaml $SURICATADIR/suricata.yaml
 ADD suricata/rules/*.rules $SURICATADIR/rules/
 
-#ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
