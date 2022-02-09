@@ -493,9 +493,6 @@ def start():
     # touch the metadata file
     open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
-    # touch the zeek intel file
-    open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
-
     # if the OpenSearch and Logstash keystore don't exist exist, create empty ones
     if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore'))):
         keystore_op('opensearch', True, 'create')
@@ -523,6 +520,8 @@ def start():
         os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
+        os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'MISP'))),
+        os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'STIX'))),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'current')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'upload')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'processed')),
@@ -535,6 +534,9 @@ def start():
                 pass
             else:
                 raise
+
+    # touch the zeek intel file
+    open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
 
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
     osEnv = os.environ.copy()
