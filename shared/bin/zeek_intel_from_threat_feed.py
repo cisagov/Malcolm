@@ -3,26 +3,16 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+from collections import deque
+from dateparser import parse as ParseDate
+from datetime import datetime
+from multiprocessing.pool import ThreadPool
+from pytz import utc as UTCTimeZone
+from time import sleep
 import argparse
-import dateparser
-import json
 import logging
 import os
-import pytz
-import requests
 import sys
-
-from bs4 import BeautifulSoup
-from contextlib import nullcontext
-from datetime import datetime
-from urllib.parse import urljoin
-from taxii2client.v20 import as_pages as TaxiiAsPages_v20
-from taxii2client.v20 import Collection as TaxiiCollection_v20
-from taxii2client.v20 import Server as TaxiiServer_v20
-from taxii2client.v21 import as_pages as TaxiiAsPages_v21
-from taxii2client.v21 import Collection as TaxiiCollection_v21
-from taxii2client.v21 import Server as TaxiiServer_v21
-
 import zeek_threat_feed_utils
 
 ###################################################################################################
@@ -115,6 +105,14 @@ def main():
         default=None,
         help="Retrieve indicators since this timestamp",
     )
+    parser.add_argument(
+        '-t',
+        '--threads',
+        dest='threads',
+        type=int,
+        default=zeek_threat_feed_utils.ZEEK_INTEL_WORKER_THREADS_DEFAULT,
+        help="Worker threads",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -136,11 +134,9 @@ def main():
     if args.input is None:
         args.input = []
     since = (
-        dateparser.parse(args.since).astimezone(pytz.utc)
-        if (args.since is not None) and (len(args.since) > 0)
-        else None
+        ParseDate(args.since).astimezone(UTCTimeZone) if (args.since is not None) and (len(args.since) > 0) else None
     )
-    defaultNow = datetime.now().astimezone(pytz.utc)
+    defaultNow = datetime.now().astimezone(UTCTimeZone)
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
         zeekPrinter = zeek_threat_feed_utils.FeedParserZeekPrinter(
@@ -178,237 +174,30 @@ def main():
         args.input = [seenInput.setdefault(x, x) for x in args.input if x not in seenInput]
         logging.debug(f"Input: {args.input}")
 
-        # process each given feed input
-        for inarg in args.input:
-            try:
-                with open(inarg) if ((inarg is not None) and os.path.isfile(inarg)) else nullcontext() as infile:
+        # we'll queue and then process all of the input arguments in workers
+        inputQueue = deque()
+        inputQueue.extend(args.input)
+        workerThreadCount = zeek_threat_feed_utils.AtomicInt(value=0)
+        workerThreads = ThreadPool(
+            args.threads,
+            zeek_threat_feed_utils.ProcessThreatInputWorker,
+            (
+                [
+                    inputQueue,
+                    zeekPrinter,
+                    since,
+                    workerThreadCount,
+                    logging,
+                ],
+            ),
+        )
 
-                    if infile:
-                        ##################################################################################
-                        # JSON FILE (STIX or MISP)
-
-                        if infileJson := zeek_threat_feed_utils.LoadFileIfJson(infile):
-                            if 'type' in infileJson and 'id' in infileJson:
-                                # STIX input file
-                                zeekPrinter.ProcessSTIX(
-                                    infileJson,
-                                    source=[os.path.splitext(os.path.basename(inarg))[0]],
-                                )
-
-                            elif (len(infileJson.keys()) == 1) and ('Event' in infileJson):
-                                # TODO: is this always the case? anything other than "Event", or multiple objects?
-                                # MISP input file
-                                zeekPrinter.ProcessMISP(
-                                    mispJson,
-                                    source=[os.path.splitext(os.path.basename(inarg))[0]],
-                                )
-
-                            else:
-                                raise Exception(f"Could not identify content in '{inarg}'")
-                        else:
-                            raise Exception(f"Could not parse JSON in '{inarg}'")
-
-                    elif inarg.lower().startswith('misp'):
-                        ##################################################################################
-                        # MISP URL
-
-                        # this is a MISP URL, connect and retrieve STIX indicators from it
-                        # misp|misp_url|auth_key
-
-                        mispConnInfo = [
-                            zeek_threat_feed_utils.base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]
-                        ]
-                        mispUrl, mispAuthKey = (
-                            None,
-                            None,
-                        )
-                        mispUrl = mispConnInfo[0]
-                        if len(mispConnInfo) >= 2:
-                            mispAuthKey = mispConnInfo[1]
-
-                        with requests.Session() as mispSession:
-
-                            if mispAuthKey is not None:
-                                mispSession.headers.update({'Authorization': mispAuthKey})
-
-                            # download the URL and parse as JSON to figure out what it is. it could be:
-                            # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
-                            # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
-                            # - a directory listing of misc. JSON files without a manifest.json
-                            mispResponse = mispSession.get(mispUrl)
-                            mispResponse.raise_for_status()
-                            if mispJson := zeek_threat_feed_utils.LoadStrIfJson(mispResponse.content):
-                                # the contents are JSON. determine if this is a manifest or a single event
-
-                                if (len(mispJson.keys()) == 1) and ('Event' in mispJson):
-                                    # TODO: is this always the case? anything other than "Event", or multiple objects?
-                                    # this is a MISP event, process it
-                                    zeekPrinter.ProcessMISP(
-                                        mispJson,
-                                        url=mispUrl,
-                                    )
-
-                                else:
-                                    # this is a manifest, loop over, retrieve and process the MISP events it references
-                                    for uri in mispJson:
-                                        try:
-                                            newUrl = urljoin(mispUrl, f'{uri}.json')
-                                            eventTime = (
-                                                datetime.utcfromtimestamp(int(mispJson[uri]['timestamp'])).astimezone(
-                                                    pytz.utc
-                                                )
-                                                if 'timestamp' in mispJson[uri]
-                                                else defaultNow
-                                            )
-                                            if (since is None) or (eventTime >= since):
-                                                mispObjectReponse = mispSession.get(newUrl)
-                                                mispObjectReponse.raise_for_status()
-                                                zeekPrinter.ProcessMISP(
-                                                    mispObjectReponse.json(),
-                                                    url=newUrl,
-                                                )
-                                        except Exception as e:
-                                            logging.warning(f"{type(e).__name__} for MISP object at '{newUrl}': {e}")
-
-                            else:
-                                # the contents are NOT JSON, it's probably an HTML-formatted directory listing
-
-                                # retrieve the links listed (non-recursive, all .json files in this directory)
-                                paths = zeek_threat_feed_utils.get_url_paths_from_response(
-                                    mispResponse.text, parent_url=mispUrl, ext='.json'
-                                )
-
-                                # see if manifest.json exists in this directory
-                                manifestPaths = [x for x in paths if x.endswith('/manifest.json')]
-                                if len(manifestPaths) > 0:
-                                    # the manifest.json exists!
-                                    # retrieve it, then loop over it and retrieve and process the MISP events it references
-                                    for url in manifestPaths:
-                                        try:
-                                            mispManifestResponse = mispSession.get(url)
-                                            mispManifestResponse.raise_for_status()
-                                            mispManifest = mispManifestResponse.json()
-                                            for uri in mispManifest:
-                                                try:
-                                                    eventTime = (
-                                                        datetime.utcfromtimestamp(
-                                                            int(mispManifest[uri]['timestamp'])
-                                                        ).astimezone(pytz.utc)
-                                                        if 'timestamp' in mispManifest[uri]
-                                                        else defaultNow
-                                                    )
-                                                    if (since is None) or (eventTime >= since):
-                                                        newUrl = f'{mispUrl.strip("/")}/{uri}.json'
-                                                        mispObjectReponse = mispSession.get(newUrl)
-                                                        mispObjectReponse.raise_for_status()
-                                                        zeekPrinter.ProcessMISP(
-                                                            mispObjectReponse.json(),
-                                                            url=newUrl,
-                                                        )
-                                                except Exception as e:
-                                                    logging.warning(
-                                                        f"{type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
-                                                    )
-                                        except Exception as e:
-                                            logging.warning(f"{type(e).__name__} for manifest at '{url}': {e}")
-
-                                else:
-                                    # the manifest.json does not exist!
-                                    # just loop over, retrieve and process the .json files in this directory
-                                    for url in paths:
-                                        try:
-                                            mispObjectReponse = mispSession.get(url)
-                                            mispObjectReponse.raise_for_status()
-                                            zeekPrinter.ProcessMISP(
-                                                mispObjectReponse.json(),
-                                                url=url,
-                                            )
-                                        except Exception as e:
-                                            logging.warning(f"{type(e).__name__} for MISP object at '{url}': {e}")
-
-                    elif inarg.lower().startswith('taxii'):
-                        ##################################################################################
-                        # TAXI (STIX) URL
-
-                        # this is a TAXII URL, connect and retrieve STIX indicators from it
-                        # taxii|2.0|discovery_url|collection_name|username|password
-                        #
-                        # examples of URLs I've used successfully for testing:
-                        # - "taxii|2.0|https://cti-taxii.mitre.org/taxii/|Enterprise ATT&CK"
-                        # - "taxii|2.0|https://limo.anomali.com/api/v1/taxii2/taxii/|CyberCrime|guest|guest"
-                        #
-                        # collection_name can be specified as * to retrieve all collections (careful!)
-
-                        taxiiConnInfo = [
-                            zeek_threat_feed_utils.base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]
-                        ]
-                        taxiiVersion, taxiiDisoveryURL, taxiiCollectionName, taxiiUsername, taxiiPassword = (
-                            None,
-                            None,
-                            None,
-                            None,
-                            None,
-                        )
-                        if len(taxiiConnInfo) >= 3:
-                            taxiiVersion, taxiiDisoveryURL, taxiiCollectionName = taxiiConnInfo[0:3]
-                        if len(taxiiConnInfo) >= 4:
-                            taxiiUsername = taxiiConnInfo[3]
-                        if len(taxiiConnInfo) >= 5:
-                            taxiiPassword = taxiiConnInfo[4]
-
-                        # connect to the server with the appropriate API for the TAXII version
-                        if taxiiVersion == '2.0':
-                            server = TaxiiServer_v20(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
-                        elif taxiiVersion == '2.1':
-                            server = TaxiiServer_v21(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
-                        else:
-                            raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
-
-                        # collect the collection URL(s) for the given collection name
-                        collectionUrls = {}
-                        for api_root in server.api_roots:
-                            for collection in api_root.collections:
-                                if (taxiiCollectionName == '*') or (
-                                    collection.title.lower() == taxiiCollectionName.lower()
-                                ):
-                                    collectionUrls[collection.title] = {
-                                        'id': collection.id,
-                                        'url': collection.url,
-                                    }
-
-                        # connect to and retrieve indicator STIX objects from the collection URL(s)
-                        for title, info in collectionUrls.items():
-                            collection = (
-                                TaxiiCollection_v21(info['url'], user=taxiiUsername, password=taxiiPassword)
-                                if taxiiVersion == '2.1'
-                                else TaxiiCollection_v20(info['url'], user=taxiiUsername, password=taxiiPassword)
-                            )
-                            try:
-
-                                # loop over paginated results
-                                for envelope in (
-                                    TaxiiAsPages_v21(
-                                        collection.get_objects,
-                                        per_request=zeek_threat_feed_utils.TAXII_PAGE_SIZE,
-                                        **zeek_threat_feed_utils.TAXII_INDICATOR_FILTER,
-                                    )
-                                    if taxiiVersion == '2.1'
-                                    else TaxiiAsPages_v20(
-                                        collection.get_objects,
-                                        per_request=zeek_threat_feed_utils.TAXII_PAGE_SIZE,
-                                        **zeek_threat_feed_utils.TAXII_INDICATOR_FILTER,
-                                    )
-                                ):
-                                    zeekPrinter.ProcessSTIX(
-                                        envelope,
-                                        source=[':'.join([x for x in [server.title, title] if x is not None])],
-                                    )
-
-                            except Exception as e:
-                                logging.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
-
-            except Exception as e:
-                logging.warning(f"{type(e).__name__} for '{inarg}': {e}")
+        # wait until all inputs are processed and threads are finished
+        sleep(1)
+        while len(inputQueue) > 0:
+            sleep(1)
+        while workerThreadCount.value() > 0:
+            sleep(1)
 
 
 ###################################################################################################
