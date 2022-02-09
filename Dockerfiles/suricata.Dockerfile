@@ -84,18 +84,18 @@ RUN mkdir -p $SURICATADIR/ && \
     cd $SURICATADIR/ && \
     ./configure \
     --prefix=/usr \
-	--sysconfdir=/opt \
-	--mandir=/usr/share/man \
-	--localstatedir=/var \
-	--enable-non-bundled-htp \
-	--enable-nfqueue \
+    --sysconfdir=/opt \
+    --mandir=/usr/share/man \
+    --localstatedir=/var \
+    --enable-non-bundled-htp \
+    --enable-nfqueue \
     --enable-rust \
-	--disable-gccmarch-native \
-	--enable-hiredis \
-	--enable-geoip \
-	--enable-gccprotect \
-	--enable-pie \
-	--enable-luajit && \
+    --disable-gccmarch-native \
+    --enable-hiredis \
+    --enable-geoip \
+    --enable-gccprotect \
+    --enable-pie \
+    --enable-luajit && \
     make && \
     make check && \
     make install && \
