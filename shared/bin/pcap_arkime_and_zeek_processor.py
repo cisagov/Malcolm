@@ -349,7 +349,7 @@ def suricataFileWorker(suricataWorkerArgs):
             if debug: eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
             # put together suricata execution command TODO: Add other Suricata CLI arguments
-            cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/"]
+            cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/']
             # if notLocked: cmd.append('--nolockpcap')
             cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
