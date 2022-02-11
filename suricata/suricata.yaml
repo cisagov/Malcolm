@@ -71,10 +71,6 @@ stats:
   # Add stream events as stats.
   #stream-events: false
 
-# Plugins -- Experimental -- specify the filename for each plugin shared object
-plugins:
-#   - /path/to/plugin.so
-
 # Configure the type of alert (and other) logging you would like.
 outputs:
   # a line based alerts log similar to Snort's fast.log
@@ -86,7 +82,7 @@ outputs:
 
   # Extensible Event Format (nicknamed EVE) event log in JSON format
   - eve-log:
-      enabled: @e_enable_evelog@
+      enabled: yes
       filetype: regular #regular|syslog|unix_dgram|unix_stream|redis
       filename: eve.json
       # Enable for multi-threaded eve.json output; output files are amended with
@@ -270,7 +266,7 @@ outputs:
         - nfs
         - smb
         - tftp
-        - ike
+        - ikev2
         - dcerpc
         - krb5
         - snmp
@@ -286,7 +282,10 @@ outputs:
         - ssh
         - mqtt:
             # passwords: yes           # enable output of passwords
-        - http2
+        # HTTP2 logging. HTTP2 support is currently experimental and
+        # disabled by default. To enable, uncomment the following line
+        # and be sure to enable http2 in the app-layer section.
+        #- http2
         - stats:
             totals: yes       # stats for all threads merged together
             threads: no       # per thread stats
@@ -399,6 +398,14 @@ outputs:
       filename: alert-debug.log
       append: yes
       #filetype: regular # 'regular', 'unix_stream' or 'unix_dgram'
+
+  # alert output to prelude (https://www.prelude-siem.org/) only
+  # available if Suricata has been compiled with --enable-prelude
+  - alert-prelude:
+      enabled: no
+      profile: suricata
+      log-packet-content: no
+      log-packet-header: yes
 
   # Stats.log contains data from various counters of the Suricata engine.
   - stats:
@@ -711,16 +718,15 @@ app-layer:
       enabled: yes
       detection-ports:
         dp: 5900, 5901, 5902, 5903, 5904, 5905, 5906, 5907, 5908, 5909
+    # MQTT, disabled by default.
     mqtt:
-      enabled: yes
+      # enabled: no
       # max-msg-length: 1mb
-      # subscribe-topic-match-limit: 100
-      # unsubscribe-topic-match-limit: 100
     krb5:
       enabled: yes
     snmp:
       enabled: yes
-    ike:
+    ikev2:
       enabled: yes
     tls:
       enabled: yes
@@ -755,8 +761,9 @@ app-layer:
     ssh:
       enabled: yes
       #hassh: yes
+    # HTTP2: Experimental HTTP 2 support. Disabled by default.
     http2:
-      enabled: yes
+      enabled: no
     smtp:
       enabled: yes
       raw-extraction: no
@@ -811,12 +818,6 @@ app-layer:
           dp: 53
     http:
       enabled: yes
-
-      # Byte Range Containers default settings
-      # byterange:
-      #   memcap: 100mb
-      #   timeout: 60
-
       # memcap:                   Maximum memory capacity for HTTP
       #                           Default is unlimited, values can be 64mb, e.g.
 
@@ -871,8 +872,8 @@ app-layer:
            swf-decompression:
              enabled: yes
              type: both
-             compress-depth: 100kb
-             decompress-depth: 100kb
+             compress-depth: 0
+             decompress-depth: 0
 
            # Use a random value for inspection sizes around the specified value.
            # This lowers the risk of some evasion techniques but could lead
@@ -896,8 +897,6 @@ app-layer:
            # Maximum decompressed size with a compression ratio
            # above 2048 (only LZMA can reach this ratio, deflate cannot)
            #compression-bomb-limit: 1mb
-           # Maximum time spent decompressing a single transaction in usec
-           #decompression-time-limit: 100000
 
          server-config:
 
@@ -1000,7 +999,7 @@ asn1-max-frames: 256
 # Default location of the pid file. The pid file is only used in
 # daemon mode (start Suricata with -D). If not running in daemon mode
 # the --pidfile command line option must be used to create a pid file.
-#pid-file: @e_rundir@suricata.pid
+#pid-file: /var/run/suricata.pid
 
 # Daemon working directory
 # Suricata will change directory to this one if provided
@@ -1067,7 +1066,7 @@ unix-command:
 
 # Magic file. The extension .mgc is added to the value here.
 #magic-file: /usr/share/file/magic
-@e_magic_file_comment@magic-file: @e_magic_file@
+#magic-file: 
 
 # GeoIP2 database file. Specify path and filename of GeoIP2 database
 # if using rules with "geoip" rule option.
@@ -1089,8 +1088,8 @@ legacy:
 #   - alert
 
 # IP Reputation
-#reputation-categories-file: @e_sysconfdir@iprep/categories.txt
-#default-reputation-path: @e_sysconfdir@iprep
+#reputation-categories-file: /opt/suricata/iprep/categories.txt
+#default-reputation-path: /opt/suricata/iprep
 #reputation-files:
 # - reputation.list
 
@@ -1249,7 +1248,7 @@ flow-timeouts:
 # engine is configured.
 #
 # stream:
-#   memcap: 64mb                # Can be specified in kb, mb, gb.  Just a
+#   memcap: 32mb                # Can be specified in kb, mb, gb.  Just a
 #                               # number indicates it's in bytes.
 #   checksum-validation: yes    # To validate the checksum of received
 #                               # packet. If csum validation is specified as
@@ -1271,7 +1270,7 @@ flow-timeouts:
 #                               # the bypass.
 #
 #   reassembly:
-#     memcap: 256mb             # Can be specified in kb, mb, gb.  Just a number
+#     memcap: 64mb              # Can be specified in kb, mb, gb.  Just a number
 #                               # indicates it's in bytes.
 #     depth: 1mb                # Can be specified in kb, mb, gb.  Just a number
 #                               # indicates it's in bytes.
@@ -1359,9 +1358,6 @@ decoder:
   geneve:
     enabled: true
     ports: $GENEVE_PORTS # syntax: '[6081, 1234]' or '6081'.
-
-  # maximum number of decoder layers for a packet
-  # max-layers: 16
 
 ##
 ## Performance tuning and profiling
@@ -1532,7 +1528,7 @@ profiling:
     limit: 10
 
     # output to json
-    json: @e_enable_evelog@
+    json: yes
 
   # per keyword profiling
   keywords:
@@ -1766,6 +1762,12 @@ ipfw:
 
 
 napatech:
+    # The Host Buffer Allowance for all streams
+    # (-1 = OFF, 1 - 100 = percentage of the host buffer that can be held back)
+    # This may be enabled when sharing streams with another application.
+    # Otherwise, it should be turned off.
+    #hba: -1
+
     # When use_all_streams is set to "yes" the initialization code will query
     # the Napatech service for all configured streams and listen on all of them.
     # When set to "no" the streams config array will be used.
@@ -1860,37 +1862,19 @@ napatech:
 ## Configure Suricata to load Suricata-Update managed rules.
 ##
 
-default-rule-path: @e_defaultruledir@
+default-rule-path: /var/lib/suricata/rules
 
 rule-files:
   - suricata.rules
-  - app-layer-events.rules
-  - decoder-events.rules
-  - dhcp-events.rules
-  - dnp3-events.rules
-  - dns-events.rules
-  - files.rules
-  - http-events.rules
-  - http2-events.rules
-  - ipsec-events.rules
-  - kerberos-events.rules
-  - modbus-events.rules
-  - mqtt-events.rules
-  - nfs-events.rules
-  - ntp-events.rules
-  - smb-events.rules
-  - smtp-events.rules
-  - ssh-events.rules
-  - stream-events.rules
-  - tls-events.rules
+  - /opt/suricata/rules/*.rules
 
 ##
 ## Auxiliary configuration files.
 ##
 
-classification-file: @e_sysconfdir@classification.config
-reference-config-file: @e_sysconfdir@reference.config
-# threshold-file: @e_sysconfdir@threshold.config
+classification-file: /opt/suricata/classification.config
+reference-config-file: /opt/suricata/reference.config
+# threshold-file: /opt/suricata/threshold.config
 
 ##
 ## Include other configs

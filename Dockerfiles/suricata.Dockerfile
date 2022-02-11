@@ -84,7 +84,7 @@ RUN mkdir -p $SURICATADIR/ && \
     cd $SURICATADIR/ && \
     ./configure \
     --prefix=/usr \
-	--sysconfdir=/etc \
+	--sysconfdir=/opt \
 	--mandir=/usr/share/man \
 	--localstatedir=/var \
 	--enable-non-bundled-htp \
@@ -106,11 +106,14 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/pcap_utils.py /opt/
 ADD shared/pcaps /tmp/
 ADD suricata/supervisord.conf /etc/supervisord.conf
+ADD suricata/rules/*.rules /var/lib/suricata/rules/
+ADD suricata/suricata.yaml $SURICATADIR/suricata.yaml
 
 #Setup User, Groups, and Configs
 RUN addgroup --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
+    chmod -R +rw $SURICATADIR && \
     ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_suricata_processor.py
 
 ARG PCAP_PIPELINE_DEBUG=false
@@ -129,8 +132,8 @@ ENV SURICATA_AUTO_ANALYZE_PCAP_FILES $SURICATA_AUTO_ANALYZE_PCAP_FILES
 ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 
 #Move Suricata YML
-ADD suricata/suricata.yaml $SURICATADIR/suricata.yaml
-ADD suricata/rules/*.rules $SURICATADIR/rules/
+
+
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

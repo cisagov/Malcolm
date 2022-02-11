@@ -365,9 +365,11 @@ def suricataFileWorker(suricataWorkerArgs):
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                     # put together suricata execution command TODO: Add other Suricata CLI arguments
-                    cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/']
+                    cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/', '-c', '/opt/suricata/suricata.yaml']
                     # if notLocked: cmd.append('--nolockpcap')
-                    cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
+                    #cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
+                    
+                    eprint(cmd)
 
                     # execute suricata-capture for pcap file
                     retcode, output = run_process(cmd, debug=verboseDebug)

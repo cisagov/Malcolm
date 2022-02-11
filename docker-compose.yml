@@ -81,11 +81,11 @@ x-zeek-variables: &zeek-variables
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
-  ISM_CLOSE_AGE : '60d'
-  ISM_COLD_AGE : '30d'
-  ISM_DELETE_AGE : '365d'
+  ISM_CLOSE_AGE : '0'
+  ISM_COLD_AGE : '0'
+  ISM_DELETE_AGE : '0'
   ISM_POLICY_NAME : 'session_index_policy'
-  ISM_SNAPSHOT_AGE : '1d'
+  ISM_SNAPSHOT_AGE : '0'
   ISM_SNAPSHOT_COMPRESSED : 'false'
   ISM_SNAPSHOT_REPO : 'logs'
 
@@ -93,9 +93,9 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
   LOGSTASH_REVERSE_DNS      : 'false'
-  # OS_EXTERNAL_HOSTS : '10.0.0.123:9200'
-  # OS_EXTERNAL_SSL : 'true'
-  # OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
+  OS_EXTERNAL_HOSTS : ''
+  OS_EXTERNAL_SSL : 'false'
+  OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
   # For security, OS_EXTERNAL_USER and OS_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
   #   See also volume mount for logstash.keystore below.
   # OS_EXTERNAL_USER : 'janedoe'
@@ -103,13 +103,13 @@ x-logstash-variables: &logstash-variables
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
-  PCAP_PIPELINE_DEBUG : 'false'
-  PCAP_PIPELINE_DEBUG_EXTRA : 'false'
+  PCAP_PIPELINE_DEBUG : 'true'
+  PCAP_PIPELINE_DEBUG_EXTRA : 'true'
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
   PCAP_MONITOR_HOST : 'pcap-monitor'
 
 x-common-lookup-variables: &common-lookup-variables
-  FREQ_LOOKUP : 'false'
+  FREQ_LOOKUP : 'true'
   FREQ_SEVERITY_THRESHOLD : '2.0'
   TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
   CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
@@ -121,7 +121,7 @@ x-common-beats-variables: &common-beats-variables
 x-pcap-capture-variables: &pcap-capture-variables
   PCAP_ENABLE_NETSNIFF : 'false'
   PCAP_ENABLE_TCPDUMP : 'false'
-  PCAP_IFACE : 'eth0'
+  PCAP_IFACE : 'lo'
   PCAP_ROTATE_MEGABYTES : 1024
   PCAP_ROTATE_MINUTES : 10
   PCAP_FILTER : ''
@@ -142,7 +142,7 @@ services:
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
-      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      OPENSEARCH_JAVA_OPTS : '-Xms10g -Xmx10g -Xss256k -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
@@ -245,7 +245,7 @@ services:
       << : *common-beats-variables
       << : *common-lookup-variables
       OS_HOSTS : 'opensearch:9200'
-      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss2m -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      LS_JAVA_OPTS : '-Xms3g -Xmx3g -Xss2m -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
     expose:
