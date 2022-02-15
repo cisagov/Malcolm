@@ -3846,13 +3846,6 @@ The Malcolm project uses [semantic versioning](https://semver.org/) when choosin
 
 If you are interested in contributing to the Malcolm project, please read the [Malcolm Contributor Guide](./docs/contributing/README.md).
 
-<<<<<<< HEAD
-## <a name="Forks"></a>Forks
-
-[CISA](https://www.cisa.gov/) maintains the upstream source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
-
-=======
->>>>>>> parent of 7053d00 (reset links for idaholab/Malcolm)
 ## <a name="Footer"></a>Copyright
 
 [Malcolm](https://github.com/cisagov/Malcolm) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
