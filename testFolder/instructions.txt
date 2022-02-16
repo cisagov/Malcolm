@@ -4,6 +4,6 @@ PCAPs can be downloaded from the following link:
 https://www.netresec.com/?page=PCAP4SICS 
 
 For eve.json files, when testing the Logstash Pipeline portion of Malcolm (without obtaining eve.json file via Suricata),
-use test.json to get reproducable output with the testing procedure. Note that you when following the testing procedure for 
+use test.json to get reproducable output with the testing procedure. Note that you when following the testing procedure for
 testing the Suricata Logstash pipeline, you will need to rename test.json to be eve.json at some point before running Malcolm.
 Additionally, this file needs to be moved to be in the /data/zeek/current path of Filebeat before starting Malcolm.
