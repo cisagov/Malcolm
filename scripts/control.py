@@ -250,7 +250,11 @@ def status():
     osEnv = os.environ.copy()
     osEnv['TMPDIR'] = MalcolmTmpPath
 
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], env=osEnv, debug=args.debug)
+    err, out = run_process(
+        [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
+        env=osEnv,
+        debug=args.debug,
+    )
     if err == 0:
         print("\n".join(out))
     else:
@@ -317,10 +321,18 @@ def logs():
     # docker-compose use local temporary path
     osEnv['TMPDIR'] = MalcolmTmpPath
 
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'ps'], env=osEnv, debug=args.debug)
+    err, out = run_process(
+        [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
+        env=osEnv,
+        debug=args.debug,
+    )
     print("\n".join(out))
 
-    process = Popen([dockerComposeBin, '-f', args.composeFile, 'logs', '-f'], env=osEnv, stdout=PIPE)
+    process = Popen(
+        [dockerComposeBin, '-f', args.composeFile, 'logs', '-f', args.service][: 6 if args.service is not None else -1],
+        env=osEnv,
+        stdout=PIPE,
+    )
     while True:
         output = process.stdout.readline()
         if (len(output) == 0) and (process.poll() is not None):
@@ -1026,6 +1038,16 @@ def main():
         type=str,
         default='docker-compose.yml',
         help='docker-compose YML file',
+    )
+    parser.add_argument(
+        '-s',
+        '--service',
+        required=False,
+        dest='service',
+        metavar='<STR>',
+        type=str,
+        default=None,
+        help='docker-compose service (only for status and logs operations)',
     )
     parser.add_argument(
         '-l', '--logs', dest='cmdLogs', type=str2bool, nargs='?', const=True, default=False, help="Tail Malcolm logs"
