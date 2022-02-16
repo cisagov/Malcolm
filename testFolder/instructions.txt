@@ -1,0 +1,4 @@
+Because PCAPs take up a large amount of space, and because GitHub does not support large binary files, use this folder to store downloaded PCAP and other relevant testing files.
+
+PCAPs can be downloaded from the following link:
+https://www.netresec.com/?page=PCAP4SICS 
