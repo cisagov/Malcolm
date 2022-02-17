@@ -91,6 +91,7 @@ x-dashboards-helper-variables: &dashboards-helper-variables
   ISM_SNAPSHOT_REPO : 'logs'
 
 x-logstash-variables: &logstash-variables
+  pipeline.workers : 4
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
   LOGSTASH_REVERSE_DNS      : 'false'
