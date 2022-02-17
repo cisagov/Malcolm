@@ -57,7 +57,7 @@ ADD shared/bin/manuf-oui-parse.py /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
-ADD logstash/config/logstash.yml /usr/share/logstash/config/
+ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
@@ -69,6 +69,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
     chown --silent -R ${PUSER}:root \
+        /usr/share/logstash/config/logstash*.yml \
         /usr/share/logstash/malcolm-pipelines \
         /usr/share/logstash/malcolm-ruby \
         /logstash-persistent-queue && \
