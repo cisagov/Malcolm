@@ -41,15 +41,11 @@ RUN yum install -y epel-release && \
     yum install -y curl gettext patch python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
     pip3 install ipaddress supervisor manuf pyyaml && \
-    for PACKAGE in logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
-                   logstash-filter-json logstash-filter-prune logstash-filter-http \
-                   logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
-                   logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
-                   logstash-input-beats logstash-output-elasticsearch; do \
-        for GEM in rack-protection sinatra; do sed -i "s/\($GEM.*\)2\.2\.0/\12\.1\.0/" /usr/share/logstash/Gemfile.lock; done; \
-        logstash-plugin install "$PACKAGE"; \
-        for GEM in rack-protection sinatra; do sed -i "s/\($GEM.*\)2\.2\.0/\12\.1\.0/" /usr/share/logstash/Gemfile.lock; done; \
-    done && \
+    logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
+                                       logstash-filter-json logstash-filter-prune logstash-filter-http \
+                                       logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
+                                       logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
+                                       logstash-input-beats logstash-output-elasticsearch && \
     rm -rf /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
