@@ -777,7 +777,7 @@
         "zeek.ospf.link_type": { "type": "keyword" },
         "zeek.ospf.lsa_type": { "type": "keyword" },
         "zeek.ospf.metric": { "type": "integer" },
-        "zeek.ospf.metrics": { "type": "integer" },
+        "zeek.ospf.metrics": { "type": "long" },
         "zeek.ospf.neighbor_interface_id": { "type": "integer" },
         "zeek.ospf.neighbor_router_id": { "type": "ip" },
         "zeek.ospf.neighbors": { "type": "ip" },
