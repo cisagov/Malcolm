@@ -92,6 +92,8 @@ x-dashboards-helper-variables: &dashboards-helper-variables
 
 x-logstash-variables: &logstash-variables
   pipeline.workers : 4
+  pipeline.batch.size : 75
+  pipeline.batch.delay : 50
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
   LOGSTASH_REVERSE_DNS      : 'false'
