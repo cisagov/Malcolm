@@ -33,7 +33,6 @@ PCAP_PROCESSING_MODE_ARKIME = "arkime"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
 PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
-# TODO: Add required Suricata Options
 SURICATA_AUTOSURICATA_TAG = True
 SURICATA_PATH = "/opt/suricata/src/suricata"
 
@@ -364,12 +363,8 @@ def suricataFileWorker(suricataWorkerArgs):
                     if debug:
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-                    # put together suricata execution command TODO: Add other Suricata CLI arguments
+                    # put together suricata execution command
                     cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/', '-c', '/opt/suricata/suricata.yaml']
-                    # if notLocked: cmd.append('--nolockpcap')
-                    #cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
-                    
-                    eprint(cmd)
 
                     # execute suricata-capture for pcap file
                     retcode, output = run_process(cmd, debug=verboseDebug)
