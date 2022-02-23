@@ -455,3 +455,16 @@ function sensorwatch () {
     fi
   fi
 }
+
+function sensormonitor () {
+  /usr/bin/tmux new-session \; \
+    split-window -v \; \
+    select-pane -t 1 \; \
+    split-window -h \; \
+    select-pane -t 1 \; \
+    send-keys 'sensorwatch' C-m \; \
+    select-pane -t 2 \; \
+    send-keys 'while true; do clear; /opt/sensor/sensor_ctl/status | grep -v "Not started" | sed "s/pid.* //"; sleep 60; done' C-m \; \
+    select-pane -t 3 \; \
+    send-keys 'tail -F /opt/sensor/sensor_ctl/log/*' C-m
+}

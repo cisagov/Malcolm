@@ -91,6 +91,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
   mkdir -p "$MALCOLM_DEST_DIR/yara/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX"
+  mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/current/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/upload/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/processed/"
