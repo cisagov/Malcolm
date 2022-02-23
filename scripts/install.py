@@ -403,9 +403,6 @@ class Installer(object):
                 )
 
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
-        autoSuricata = InstallerYesOrNo(
-            'Automatically analyze all PCAP files with Suricata?', default=True
-        )
         reverseDns = InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False
         )
@@ -594,11 +591,6 @@ class Installer(object):
                         # automatic pcap analysis with Zeek
                         line = re.sub(
                             r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoZeek)}", line
-                        )
-                    elif 'SURICATA_AUTO_ANALYZE_PCAP_FILES' in line:
-                        #automatic pcap analysis with suricata
-                        line = re.sub(
-                            r'(SURICATA_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoSuricata)}", line
                         )
                     elif 'LOGSTASH_REVERSE_DNS' in line:
                         # automatic local reverse dns lookup
