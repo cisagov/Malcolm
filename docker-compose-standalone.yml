@@ -582,6 +582,7 @@ services:
       << : *process-variables
       << : *logstash-variables
       << : *common-upload-variables
+      << : *suricata-vartiables
     depends_on:
       - logstash
     volumes:
