@@ -53,6 +53,16 @@ function _malcolmversion() {
 }
 
 ################################################################################
+# cleanup temporary directory, if any
+WORKDIR="$(mktemp -d -t malcolm-github-XXXXXX)"
+
+function _cleanup {
+  if [[ -d "$WORKDIR" ]] && ! rm -rf "$WORKDIR"; then
+   echo "Failed to remove temporary directory '$WORKDIR'" >&2
+  fi
+}
+
+################################################################################
 # pull ghcr.io/$OWNER/$IMG:$BRANCH for each image in docker-compose.yml and re-tag as $IMG:$VERSION
 # e.g., pull ghcr.io/johndoe/malcolmnetsec/arkime:main and tag as malcolmnetsec/arkime:5.0.3
 function PullAndTagGithubWorkflowBuilds() {
@@ -72,19 +82,55 @@ function PullAndTagGithubWorkflowBuilds() {
 # extract the ISO wrapped in the ghcr.io docker image to the current directory
 # e.g., extract live.iso from ghcr.io/johndoe/malcolmnetsec/hedgehog:development
 # and save locally as hedgehog-5.0.3.iso
-function ExtractISOsFromGithubWorkflowBuilds() {
+function _ExtractISOFromGithubWorkflowBuild() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
 
-  for TOOL in malcolm hedgehog; do
-    docker run --rm -d --name "$TOOL"-iso-srv -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
-        ghcr.io/"$OWNER"/malcolmnetsec/"$TOOL":"$BRANCH" && \
-      sleep 10 && \
-      curl -sSL -o "$TOOL"-"$VERSION".iso http://localhost:8000/live.iso && \
-      curl -sSL -O -J http://localhost:8000/"$TOOL"-"$VERSION"-build.log
-    docker stop "$TOOL"-iso-srv
-  done
+  TOOL="$1"
+  DEST_DIR="${2:-"$(pwd)"}"
+  ISO_NAME="${3:-"$TOOL-$VERSION"}"
+
+  docker run --rm -d --name "$TOOL"-iso-srv -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
+      ghcr.io/"$OWNER"/malcolmnetsec/"$TOOL":"$BRANCH" && \
+    sleep 10 && \
+    curl -sSL -o "$DEST_DIR"/"$ISO_NAME".iso http://localhost:8000/live.iso && \
+    curl -sSL -o "$DEST_DIR"/"$ISO_NAME"-build.log http://localhost:8000/"$TOOL"-"$VERSION"-build.log
+  docker stop "$TOOL"-iso-srv
+}
+
+function ExtractISOsFromGithubWorkflowBuilds() {
+  _ExtractISOFromGithubWorkflowBuild malcolm
+  _ExtractISOFromGithubWorkflowBuild hedgehog
+}
+
+################################################################################
+# extract the malcolm ISO wrapped in the ghcr.io docker image to a temp directory,
+# then extract and load the docker images tarball from the ISO.
+function ExtractAndLoadImagesFromGithubWorkflowBuildISO() {
+  if ! type xorriso >/dev/null 2>&1 || ! type unsquashfs >/dev/null 2>&1; then
+    echo "Cannot extract ISO file without xorriso" >&2
+  else
+    mkdir -p "$WORKDIR"
+    _ExtractISOFromGithubWorkflowBuild malcolm "$WORKDIR" malcolm
+    pushd "$WORKDIR" >/dev/null 2>&1
+    if [[ -e malcolm.iso ]]; then
+      xorriso -osirrox on -indev malcolm.iso -extract /live/filesystem.squashfs filesystem.squashfs
+      if [[ -e filesystem.squashfs ]]; then
+        unsquashfs filesystem.squashfs -f malcolm_images.tar.gz
+        if [[ -e squashfs-root/malcolm_images.tar.gz ]]; then
+          docker load -i squashfs-root/malcolm_images.tar.gz
+        else
+          echo "Failed to images tarball" 2>&1
+        fi
+      else
+        echo "Failed to extract squashfs file" 2>&1
+      fi
+    else
+      echo "Failed to extract ISO file" 2>&1
+    fi
+    popd "$WORKDIR" >/dev/null 2>&1
+  fi
 }
 
 ################################################################################
@@ -104,6 +150,8 @@ function GithubTriggerPackagesBuild () {
 
 ################################################################################
 # "main"
+
+trap "_cleanup" EXIT
 
 # get a list of all the "public" functions (not starting with _)
 FUNCTIONS=($(declare -F | awk '{print $NF}' | sort | egrep -v "^_"))
