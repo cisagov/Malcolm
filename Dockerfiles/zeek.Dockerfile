@@ -86,17 +86,20 @@ RUN apt-get -q update && \
       procps \
       psmisc \
       python3 \
+      python3-bs4 \
+      python3-dateparser \
       python3-git \
       python3-pip \
       python3-semantic-version \
       python3-setuptools \
+      python3-tz \
       python3-wheel \
       python3-zmq \
       supervisor \
       swig \
       vim-tiny \
       zlib1g-dev && \
-    pip3 install --no-cache-dir stix2 taxii2-client && \
+    pip3 install --no-cache-dir pymisp stix2 taxii2-client && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
@@ -138,7 +141,8 @@ RUN apt-get -q update && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
                "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
-        touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
+      mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
+      touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
     cd /tmp && \
@@ -149,7 +153,7 @@ RUN apt-get -q update && \
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
-ADD shared/bin/stix*.py ${ZEEK_DIR}/bin/
+ADD shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
@@ -186,6 +190,8 @@ ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
 ARG ZEEK_INTEL_ITEM_EXPIRATION=-1min
 ARG ZEEK_INTEL_REFRESH_CRON_EXPRESSION=
+ARG ZEEK_INTEL_REFRESH_THREADS=2
+ARG ZEEK_INTEL_FEED_SINCE=
 ARG ZEEK_EXTRACTOR_MODE=none
 ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
 ARG PCAP_PIPELINE_DEBUG=false
@@ -197,6 +203,8 @@ ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_INTEL_ITEM_EXPIRATION $ZEEK_INTEL_ITEM_EXPIRATION
 ENV ZEEK_INTEL_REFRESH_CRON_EXPRESSION $ZEEK_INTEL_REFRESH_CRON_EXPRESSION
+ENV ZEEK_INTEL_REFRESH_THREADS $ZEEK_INTEL_REFRESH_THREADS
+ENV ZEEK_INTEL_FEED_SINCE $ZEEK_INTEL_FEED_SINCE
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
@@ -239,7 +247,7 @@ ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 
-VOLUME [${ZEEK_DIR}/share/zeek/site/intel]
+VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/entrypoint.sh"]
 
