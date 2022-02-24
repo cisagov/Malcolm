@@ -289,6 +289,7 @@ services:
       << : *common-upload-variables
       << : *common-beats-variables
       FILEBEAT_ZEEK_LOG_PATH : '/data/zeek/current'
+      FILEBEAT_SURICATA_LOG_PATH : '/data/suricata'
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
       FILEBEAT_LOG_CLEANUP_MINUTES : 180
       FILEBEAT_ZIP_CLEANUP_MINUTES : 360
