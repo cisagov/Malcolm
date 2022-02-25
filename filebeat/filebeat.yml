@@ -59,7 +59,7 @@ filebeat.inputs:
   fields:
     type: "session"
   compression_level: 0
-  exclude_lines: ['^\s*#']
+  # exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: 200m
   ignore_older: 180m
