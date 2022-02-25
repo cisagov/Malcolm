@@ -15,6 +15,7 @@
 # options
 # -v        (verbose)
 # -w        (wipe malcolm)
+# -o        (set to read-only after processing)
 # -m <malcolm docker-compose file>
 # -p <PCAP file>
 # -d <PCAP start date or offset>
