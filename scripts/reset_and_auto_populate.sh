@@ -208,6 +208,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     # wait for logstash to be ready for Zeek logs to be ingested
     until docker-compose -f "$MALCOLM_FILE" logs logstash 2>/dev/null | grep -q "Pipelines running"; do
       [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready for PCAP data..." >&2
+      sleep 10
     done
 
     # copy the adjusted PCAP file to the Malcolm upload directory to be processed
