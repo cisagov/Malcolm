@@ -277,9 +277,8 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
       sleep 5
       docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
       sleep 5
-      docker-compose -f "$MALCOLM_FILE" stop filebeat
-      sleep 5
-      docker-compose -f "$MALCOLM_FILE" stop logstash
+      docker-compose -f "$MALCOLM_FILE" pause filebeat
+      docker-compose -f "$MALCOLM_FILE" pause logstash
       sleep 5
     fi
 
