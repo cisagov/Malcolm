@@ -16,6 +16,7 @@
 # -v        (verbose)
 # -w        (wipe malcolm)
 # -o        (set to read-only after processing)
+# -n        (pause nginx-proxy for the duration)
 # -m <malcolm docker-compose file>
 # -p <PCAP file>
 # -d <PCAP start date or offset>
@@ -66,13 +67,14 @@ VERBOSE_FLAG=""
 WIPE="false"
 RESTART="false"
 READ_ONLY="false"
+NGINX_DISABLE="false"
 MALCOLM_DOCKER_COMPOSE="$FULL_PWD"/docker-compose.yml
 PCAP_FILE=""
 PCAP_ADJUST_SCRIPT=""
 PCAP_DATE="two days ago"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
-while getopts 'vwrom:p:d:s:' OPTION; do
+while getopts 'vwronm:p:d:s:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -88,6 +90,10 @@ while getopts 'vwrom:p:d:s:' OPTION; do
 
     o)
       READ_ONLY="true"
+      ;;
+
+    n)
+      NGINX_DISABLE="true"
       ;;
 
     m)
@@ -205,11 +211,16 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
       sleep 10
     fi
 
+    if [[ "$NGINX_DISABLE" == "true" ]]; then
+      docker-compose -f "$MALCOLM_FILE" pause nginx-proxy
+    fi
+
     # wait for logstash to be ready for Zeek logs to be ingested
     until docker-compose -f "$MALCOLM_FILE" logs logstash 2>/dev/null | grep -q "Pipelines running"; do
       [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready for PCAP data..." >&2
       sleep 10
     done
+    sleep 30
 
     # copy the adjusted PCAP file to the Malcolm upload directory to be processed
     cp $VERBOSE_FLAG "$PCAP_FILE_ADJUSTED" ./pcap/upload/
@@ -242,6 +253,11 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         fi
         sleep 10
       done
+    fi
+
+    if [[ "$NGINX_DISABLE" == "true" ]]; then
+      docker-compose -f "$MALCOLM_FILE" unpause nginx-proxy
+      sleep 10
     fi
 
     if [[ "$READ_ONLY" == "true" ]]; then
