@@ -261,10 +261,26 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     fi
 
     if [[ "$READ_ONLY" == "true" ]]; then
+      [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
+      for USER in \
+        $(cat nginx/htpasswd | cut -d: -f1) \
+        $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
+        docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -sSL -XGET \
+          --header 'Content-type:application/json' \
+          --header "http_auth_http_user:$USER" \
+          --header "Authorization:" \
+          "http://localhost:8005"
+      done
+      sleep 5
       [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
       docker-compose -f "$MALCOLM_FILE" exec -T nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
       sleep 5
       docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
+      sleep 5
+      docker-compose -f "$MALCOLM_FILE" stop filebeat
+      sleep 5
+      docker-compose -f "$MALCOLM_FILE" stop logstash
+      sleep 5
     fi
 
     popd >/dev/null 2>&1
