@@ -204,10 +204,6 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
       PCAP_FILES_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
   done
 
-  for ((j = 0; j < ${#PCAP_FILES_ADJUSTED[@]}; j++)); do
-    echo "${PCAP_FILES_ADJUSTED[$j]}"
-  done
-
   [[ -n "$PCAP_ADJUST_SCRIPT" ]] && \
     "$PCAP_ADJUST_SCRIPT" $VERBOSE_FLAG \
       --time "$PCAP_DATE" \
