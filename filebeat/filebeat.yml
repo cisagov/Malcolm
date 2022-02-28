@@ -52,14 +52,14 @@ filebeat.inputs:
 
 - type: log
   paths:
-    - ${FILEBEAT_ZEEK_LOG_PATH:/data/zeek/current}/eve.json 
+    - ${FILEBEAT_SURICATA_LOG_PATH:/data/suricata}/eve.json 
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata"]
   fields:
     type: "session"
   compression_level: 0
-  exclude_lines: ['^\s*#']
+  # exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: 200m
   ignore_older: 180m
