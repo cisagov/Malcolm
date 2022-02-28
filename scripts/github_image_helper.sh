@@ -65,15 +65,34 @@ function _cleanup {
 ################################################################################
 # pull ghcr.io/$OWNER/$IMG:$BRANCH for each image in docker-compose.yml and re-tag as $IMG:$VERSION
 # e.g., pull ghcr.io/johndoe/malcolmnetsec/arkime:main and tag as malcolmnetsec/arkime:5.0.3
-function PullAndTagGithubWorkflowBuilds() {
+function _PullAndTagGithubWorkflowBuild() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
+  IMAGE=$1
 
+  docker pull ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" && \
+    docker tag ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" "$IMAGE":"$VERSION"
+}
+
+function PullAndTagGithubWorkflowImages() {
+  BRANCH="$(_gitbranch)"
+  VERSION="$(_malcolmversion)"
+  OWNER="$(_gitowner)"
   echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
-  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1) malcolmnetsec/{malcolm,hedgehog}; do
-    docker pull ghcr.io/"$OWNER"/"$IMG":"$BRANCH" && \
-      docker tag ghcr.io/"$OWNER"/"$IMG":"$BRANCH" "$IMG":"$VERSION"
+  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1); do
+    _PullAndTagGithubWorkflowBuild "$IMG"
+  done
+  echo "done"
+}
+
+function PullAndTagGithubWorkflowISOImages() {
+  BRANCH="$(_gitbranch)"
+  VERSION="$(_malcolmversion)"
+  OWNER="$(_gitowner)"
+  echo "Pulling ISO wrapper images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
+  for IMG in malcolmnetsec/{malcolm,hedgehog}; do
+    _PullAndTagGithubWorkflowBuild "$IMG"
   done
   echo "done"
 }
