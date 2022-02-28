@@ -21,6 +21,7 @@
 # -m <malcolm docker-compose file>
 # -d <PCAP start date or offset>
 # -s <seconds after inserts become "idle" before we assume the data has been inserted>
+# -x <maximum number of seconds to wait for idle state before continuing anyway>
 # remaining parameters: PCAP file(s)
 
 ###############################################################################
@@ -76,7 +77,8 @@ PCAP_DATE="two days ago"
 PCAP_RELATIVE_ADJUST="false"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
-while getopts 'vwronlm:s:d:' OPTION; do
+PCAP_PROCESS_IDLE_MAX_SECONDS=3600
+while getopts 'vwronlm:x:s:d:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -112,12 +114,18 @@ while getopts 'vwronlm:s:d:' OPTION; do
       fi
       ;;
 
+    x)
+      if [[ $OPTARG =~ $NUMERIC_REGEX ]] ; then
+         PCAP_PROCESS_IDLE_MAX_SECONDS=$OPTARG
+      fi
+      ;;
+
     d)
       PCAP_DATE="$OPTARG"
       ;;
 
     ?)
-      echo -e "script usage: $(basename $0)\n\t[-v (verbose)]\n\t[-w (wipe)]\n\t[-r (restart)]\n\t[-o (read-only)]\n\t[-n (disable NGINX during setup)]\n\t[-m <Malcolm docker-compose file>]\n\t[-s <idle seconds>]\n\t[-d <PCAP start date/time>]\n\t[-l (maintain relative offsets)]\n\t<PCAP file> [<PCAP file> ...]" >&2
+      echo -e "script usage: $(basename $0)\n\t[-v (verbose)]\n\t[-w (wipe)]\n\t[-r (restart)]\n\t[-o (read-only)]\n\t[-n (disable NGINX during setup)]\n\t[-m <Malcolm docker-compose file>]\n\t[-s <idle seconds>]\n\t[-x <max wait for idle seconds>]\n\t[-d <PCAP start date/time>]\n\t[-l (maintain relative offsets)]\n\t<PCAP file> [<PCAP file> ...]" >&2
       exit 1
       ;;
   esac
@@ -249,23 +257,38 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
       sleep $PCAP_PROCESS_PRE_WAIT
       LAST_LOG_COUNT=0
       LAST_LOG_COUNT_CHANGED_TIME=$(date -u +%s)
+      FIRST_LOG_COUNT_TIME=$LAST_LOG_COUNT_CHANGED_TIME
       while true; do
+
+        # if it's been more than the maximum wait time, bail
+        CURRENT_TIME=$(date -u +%s)
+        if (( ($CURRENT_TIME - $FIRST_LOG_COUNT_TIME) >= $PCAP_PROCESS_IDLE_MAX_SECONDS )); then
+          [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for idle state" >&2
+          break
+        fi
+
+        # get the total number of session records in the database
         NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
                           curl -sSL "http://localhost:5000/agg/event.provider?from=1970" | \
                           jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
                           awk '{s+=$1} END {print s}') 2>/dev/null )
         if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
           [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
-          NEW_LOG_COUNT_TIME=$(date -u +%s)
+          NEW_LOG_COUNT_TIME=$CURRENT_TIME
+
           if (( $LAST_LOG_COUNT == $NEW_LOG_COUNT )); then
+            # the count hasn't changed, so compare against how long we've been idle
             if (( ($NEW_LOG_COUNT_TIME - $LAST_LOG_COUNT_CHANGED_TIME) >= $PCAP_PROCESS_IDLE_SECONDS )); then
               [[ -n $VERBOSE_FLAG ]] && echo "Idle state reached ($NEW_LOG_COUNT logs for at lease $PCAP_PROCESS_IDLE_SECONDS seconds)" >&2
               break
             fi
+
           else
+            # the count has changed, no longer idle, reset the non-idle time counter
             LAST_LOG_COUNT=$NEW_LOG_COUNT
             LAST_LOG_COUNT_CHANGED_TIME=$NEW_LOG_COUNT_TIME
           fi
+
         else
           echo "Failed to get log count, will retry!" >&2
           sleep 30
