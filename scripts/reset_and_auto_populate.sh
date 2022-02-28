@@ -17,10 +17,11 @@
 # -w        (wipe malcolm)
 # -o        (set to read-only after processing)
 # -n        (pause nginx-proxy for the duration)
+# -l        (for multiple PCAP files, maintain offsets relative to each other)
 # -m <malcolm docker-compose file>
-# -p <PCAP file>
 # -d <PCAP start date or offset>
 # -s <seconds after inserts become "idle" before we assume the data has been inserted>
+# remaining parameters: PCAP file(s)
 
 ###############################################################################
 # force bash
@@ -69,12 +70,13 @@ RESTART="false"
 READ_ONLY="false"
 NGINX_DISABLE="false"
 MALCOLM_DOCKER_COMPOSE="$FULL_PWD"/docker-compose.yml
-PCAP_FILE=""
+PCAP_FILES=()
 PCAP_ADJUST_SCRIPT=""
 PCAP_DATE="two days ago"
+PCAP_RELATIVE_ADJUST="false"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
-while getopts 'vwronm:p:d:s:' OPTION; do
+while getopts 'vwronlm:s:d:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -96,16 +98,15 @@ while getopts 'vwronm:p:d:s:' OPTION; do
       NGINX_DISABLE="true"
       ;;
 
+    l)
+      PCAP_RELATIVE_ADJUST="true"
+      ;;
+
     m)
       MALCOLM_DOCKER_COMPOSE="$OPTARG"
       ;;
 
-    p)
-      PCAP_FILE="$OPTARG"
-      ;;
-
     s)
-
       if [[ $OPTARG =~ $NUMERIC_REGEX ]] ; then
          PCAP_PROCESS_IDLE_SECONDS=$OPTARG
       fi
@@ -116,12 +117,13 @@ while getopts 'vwronm:p:d:s:' OPTION; do
       ;;
 
     ?)
-      echo "script usage: $(basename $0) [-v (verbose)] [-w (wipe)] [-p <pcap file>] [-d <pcap date>] [-m <Malcolm docker-compose file>] [-s <idle seconds>]" >&2
+      echo -e "script usage: $(basename $0)\n\t[-v (verbose)]\n\t[-w (wipe)]\n\t[-r (restart)]\n\t[-o (read-only)]\n\t[-n (disable NGINX during setup)]\n\t[-m <Malcolm docker-compose file>]\n\t[-s <idle seconds>]\n\t[-d <PCAP start date/time>]\n\t[-l (maintain relative offsets)]\n\t<PCAP file> [<PCAP file> ...]" >&2
       exit 1
       ;;
   esac
 done
 shift "$(($OPTIND -1))"
+PCAP_FILES=("${@}")
 
 if [[ -f "$FULL_PWD"/pcap_time_shift.py ]]; then
   PCAP_ADJUST_SCRIPT="$FULL_PWD"/pcap_time_shift.py
@@ -171,7 +173,7 @@ function urlencode() {
 trap clean_up EXIT
 
 if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
-   [[ -f "$PCAP_FILE" ]] && \
+   (( ${#PCAP_FILES[@]} > 0 )) && \
    which docker-compose >/dev/null 2>&1 && \
    which jq >/dev/null 2>&1; then
   mkdir -p "$WORKDIR"
@@ -179,17 +181,34 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   # get paths of things we're working with
   MALCOLM_PATH="$($DIRNAME $($REALPATH -e "$MALCOLM_DOCKER_COMPOSE"))"
   MALCOLM_FILE="$(basename $($REALPATH -e "$MALCOLM_DOCKER_COMPOSE"))"
-  PCAP_FILE_ABSOLUTE="$($REALPATH -e "$PCAP_FILE")"
-  PCAP_FILE_ADJUSTED="$WORKDIR"/"$(basename "$PCAP_FILE")"
 
-  # if possible, time shift a temporary copy of the PCAP file
+  # if possible, time shift a temporary copy of the PCAP file(s)
   # see https://github.com/mmguero-dev/Malcolm-PCAP/blob/main/tools/pcap_time_shift.py
   pushd "$WORKDIR" >/dev/null 2>&1
-  cp $VERBOSE_FLAG "$PCAP_FILE_ABSOLUTE" "$PCAP_FILE_ADJUSTED"
-  [[ -f "$PCAP_ADJUST_SCRIPT" ]] && \
-    "$PCAP_ADJUST_SCRIPT" $VERBOSE_FLAG --time "$PCAP_DATE" --format pcap --pcap "$PCAP_FILE_ADJUSTED" --in-place
-  popd >/dev/null 2>&1
-  if [[ -f "$PCAP_FILE_ADJUSTED" ]]; then
+
+  PCAP_FILES_ADJUSTED=()
+
+  for ((i = 0; i < ${#PCAP_FILES[@]}; i++)); do
+    PCAP_FILE_ABSOLUTE="$($REALPATH -e "${PCAP_FILES[$i]}")"
+    PCAP_FILE_ADJUSTED="$WORKDIR"/"$(basename "${PCAP_FILES[$i]}")"
+    cp $VERBOSE_FLAG "$PCAP_FILE_ABSOLUTE" "$PCAP_FILE_ADJUSTED"
+    [[ -f "$PCAP_FILE_ADJUSTED" ]] && \
+      PCAP_FILES_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
+  done
+
+  for ((j = 0; j < ${#PCAP_FILES_ADJUSTED[@]}; j++)); do
+    echo "${PCAP_FILES_ADJUSTED[$j]}"
+  done
+
+  [[ -n "$PCAP_ADJUST_SCRIPT" ]] && \
+    "$PCAP_ADJUST_SCRIPT" $VERBOSE_FLAG \
+      --time "$PCAP_DATE" \
+      --relative "$PCAP_RELATIVE_ADJUST" \
+      --format pcap \
+      --in-place \
+      --pcap "${PCAP_FILES_ADJUSTED[@]}"
+
+  if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )); then
 
     # do the Malcolm stuff
     pushd "$MALCOLM_PATH" >/dev/null 2>&1
@@ -222,8 +241,8 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     done
     sleep 30
 
-    # copy the adjusted PCAP file to the Malcolm upload directory to be processed
-    cp $VERBOSE_FLAG "$PCAP_FILE_ADJUSTED" ./pcap/upload/
+    # copy the adjusted PCAP file(s) to the Malcolm upload directory to be processed
+    cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
 
     if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
       # wait for processing to finish out (count becomes "idle", no longer increasing)
@@ -286,11 +305,11 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
 
     [[ -n $VERBOSE_FLAG ]] && echo "Finished" >&2
   else
-    echo "failed to create time-shifted PCAP file" >/dev/null 2>&1
+    echo "failed to create time-shifted PCAP file(s)" >/dev/null 2>&1
     exit 1
   fi
 else
-  echo "must specify docker-compose.yml file with -m and PCAP file with -p" >&2
+  echo "must specify docker-compose.yml file with -m and PCAP file(s)" >&2
   echo "also, pcap_time_shift.py, docker-compose and jq must be available"
   exit 1
 fi
