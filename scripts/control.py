@@ -523,8 +523,6 @@ def start():
         os.path.join(MalcolmPath, os.path.join('suricata-logs')),
         os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'MISP'))),
         os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'STIX'))),
-        os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
-        os.path.join(MalcolmPath, os.path.join('suricata-logs')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'current')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'extract_files')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'processed')),
