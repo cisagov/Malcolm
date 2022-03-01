@@ -236,6 +236,7 @@ function InstallCommonPackages {
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     $SUDO_CMD yum update -y >/dev/null 2>&1
+    $SUDO_CMD yum groupinstall -y 'Development Tools'
 
     PACKAGE_LIST=(
       python3.8
@@ -246,14 +247,6 @@ function InstallCommonPackages {
     done
     $SUDO_CMD ln -s -r -f /usr/bin/python3.8 /usr/bin/python3
     $SUDO_CMD ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3
-
-    GROUP_LIST=(
-      "Development Tools"
-    )
-    # install the groups from yum
-    for i in ${PACKAGE_LIST[@]}; do
-      $SUDO_CMD yum groupinstall -y "$i"
-    done
 
     PACKAGE_LIST=(
       c-ares-devel
@@ -266,6 +259,7 @@ function InstallCommonPackages {
       libpcap-devel
       lua-devel
       make
+      ninja-build
       openssl
       openssl-devel
       tmux
@@ -285,14 +279,16 @@ function InstallCommonPackages {
       pushd "$SOURCE_DIR" >/dev/null 2>&1
 
       # cmake
-      CMAKE_VERSION=3.22.2
-      curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
-      tar xvf cmake-"${CMAKE_VERSION}".tar.gz
-      pushd cmake-"${CMAKE_VERSION}" >/dev/null 2>&1
-      ./bootstrap --prefix=/usr
-      make
-      $SUDO_CMD make install
-      popd >/dev/null 2>&1
+      if ! type cmake >/dev/null 2>&1; then
+        CMAKE_VERSION=3.22.2
+        curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
+        tar xvf cmake-"${CMAKE_VERSION}".tar.gz
+        pushd cmake-"${CMAKE_VERSION}" >/dev/null 2>&1
+        ./bootstrap --prefix=/usr
+        make
+        $SUDO_CMD make install
+        popd >/dev/null 2>&1
+      fi
 
       # wireshark
       WIRESHARK_VERSION=3.6.2
@@ -301,9 +297,9 @@ function InstallCommonPackages {
       pushd wireshark-"${WIRESHARK_VERSION}" >/dev/null 2>&1
       mkdir -p build
       pushd "build" >/dev/null 2>&1
-      cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_wireshark=OFF ..
-      make
-      $SUDO_CMD make install
+      cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_wireshark=OFF -G Ninja ..
+      ninja-build
+      $SUDO_CMD ninja-build install
       popd >/dev/null 2>&1
       popd >/dev/null 2>&1
 
