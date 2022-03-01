@@ -636,7 +636,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:5.2.5
+    image: malcolmnetsec/suricata:5.3.0
     restart: "no"
     stdin_open: false
     tty: true
