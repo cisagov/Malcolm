@@ -287,8 +287,8 @@ function InstallCommonPackages {
       # cmake
       CMAKE_VERSION=3.22.2
       curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
-      tar xvf cmake-"${3.22.2}".tar.gz
-      pushd cmake-"${3.22.2}" >/dev/null 2>&1
+      tar xvf cmake-"${CMAKE_VERSION}".tar.gz
+      pushd cmake-"${CMAKE_VERSION}" >/dev/null 2>&1
       ./bootstrap --prefix=/usr
       make
       $SUDO_CMD make install
@@ -597,12 +597,12 @@ read USER_FUNCTION_IDX
 if (( $USER_FUNCTION_IDX == 0 )); then
   # ALL: do everything, in order
   InstallEnvs
-  InstallEnvPackages
   InstallEssentialPackages
   InstallCommonPackages
   InstallDocker
   SystemConfig
   InstallUserLocalBinaries
+  InstallEnvPackages
   CreateCommonLinuxConfig
   SGroverDotfiles
   InstallMalcolm
