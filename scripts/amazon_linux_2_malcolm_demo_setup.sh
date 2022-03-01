@@ -563,6 +563,7 @@ function InstallMalcolm {
   read -p "Download a sample PCAP (SANS Cyberville ICS CTF) [Y/n]? " CONFIRMATION
   CONFIRMATION=${CONFIRMATION:-Y}
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+    mkdir -p "$ARTIFACTS_PATH"
     pushd "$ARTIFACTS_PATH" >/dev/null 2>&1
     curl -sSL -J -O https://malcolm.fyi/examples/Cyberville.pcap
     curl -sSL -J -O https://malcolm.fyi/examples/net-map.json
