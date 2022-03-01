@@ -297,11 +297,28 @@ class Installer(object):
             osMemory = '8g'
             lsMemory = '3g'
 
+        # see Tuning and Profiling Logstash Performance
+        # - https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html
+        # - https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html
+        # - https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
+        # we don't want it too high, as in Malcolm Logstash also competes with OpenSearch, etc. for resources
+        if self.totalCores > 16:
+            lsWorkers = 12
+        elif self.totalCores >= 12:
+            lsWorkers = 8
+        else:
+            lsWorkers = 4
+
         while not InstallerYesOrNo(
             f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
         ):
             osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
             lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
+
+        while (not str(lsWorkers).isdigit()) or (
+            not InstallerYesOrNo(f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True)
+        ):
+            lsWorkers = InstallerAskForString('Enter lsWorkers (e.g., 4, 8, etc.)')
 
         restartMode = None
         allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
@@ -608,6 +625,9 @@ class Installer(object):
                     elif 'LOGSTASH_OUI_LOOKUP' in line:
                         # automatic MAC OUI lookup
                         line = re.sub(r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line)
+                    elif 'pipeline.workers' in line:
+                        # logstash pipeline workers
+                        line = re.sub(r'(pipeline\.workers\s*:\s*)(\S+)', fr"\g<1>{lsWorkers}", line)
                     elif 'FREQ_LOOKUP' in line:
                         # freq.py string randomness calculations
                         line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
@@ -850,7 +870,7 @@ class LinuxInstaller(Installer):
         # determine total system memory
         try:
             totalMemBytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
-            self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0 ** 3))
+            self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0**3))
         except:
             self.totalMemoryGigs = 0.0
 
@@ -859,7 +879,7 @@ class LinuxInstaller(Installer):
             err, out = self.run_process(['awk', '/MemTotal/ { printf "%.0f \\n", $2 }', '/proc/meminfo'])
             if (err == 0) and (len(out) > 0):
                 totalMemKiloBytes = int(out[0])
-                self.totalMemoryGigs = math.ceil(totalMemKiloBytes / (1024.0 ** 2))
+                self.totalMemoryGigs = math.ceil(totalMemKiloBytes / (1024.0**2))
 
         # determine total system CPU cores
         try:
@@ -1351,7 +1371,7 @@ class MacInstaller(Installer):
         # determine total system memory
         try:
             totalMemBytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
-            self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0 ** 3))
+            self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0**3))
         except:
             self.totalMemoryGigs = 0.0
 
@@ -1360,7 +1380,7 @@ class MacInstaller(Installer):
             err, out = self.run_process(['sysctl', '-n', 'hw.memsize'])
             if (err == 0) and (len(out) > 0):
                 totalMemBytes = int(out[0])
-                self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0 ** 3))
+                self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0**3))
 
         # determine total system CPU cores
         try:
