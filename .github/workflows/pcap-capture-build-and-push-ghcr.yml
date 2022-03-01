@@ -3,8 +3,7 @@ name: pcap-capture-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'pcap-capture/**'
       - 'Dockerfiles/pcap-capture.Dockerfile'

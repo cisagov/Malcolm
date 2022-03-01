@@ -1,12 +1,12 @@
-name: pcap-monitor-build-and-push-ghcr
+name: suricata-build-and-push-ghcr
 
 on:
   push:
     branches:
       - logstash_pipeline
     paths:
-      - 'pcap-monitor/**'
-      - 'Dockerfiles/pcap-monitor.Dockerfile'
+      - 'suricata/**'
+      - 'Dockerfiles/suricata.Dockerfile'
       - 'shared/bin/*'
       - '.trigger_workflow_build'
   workflow_dispatch:
@@ -53,6 +53,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfiles/pcap-monitor.Dockerfile
+          file: ./Dockerfiles/suricata.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/pcap-monitor:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/suricata:${{ steps.extract_branch.outputs.branch }}

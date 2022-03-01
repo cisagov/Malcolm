@@ -3,8 +3,7 @@ name: file-upload-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'file-upload/**'
       - 'Dockerfiles/file-upload.Dockerfile'

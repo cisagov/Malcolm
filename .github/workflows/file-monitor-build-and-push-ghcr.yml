@@ -3,8 +3,7 @@ name: file-monitor-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'
