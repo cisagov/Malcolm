@@ -289,7 +289,7 @@ function InstallCommonPackages {
       curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
       tar xvf cmake-"${3.22.2}".tar.gz
       pushd cmake-"${3.22.2}" >/dev/null 2>&1
-      ./bootstrap
+      ./bootstrap --prefix=/usr
       make
       $SUDO_CMD make install
       popd >/dev/null 2>&1
@@ -300,8 +300,8 @@ function InstallCommonPackages {
       tar xvf wireshark-"${WIRESHARK_VERSION}".tar.xz
       pushd wireshark-"${WIRESHARK_VERSION}" >/dev/null 2>&1
       mkdir -p build
-      pushd "$build" >/dev/null 2>&1
-      cmake -DBUILD_wireshark=OFF ..
+      pushd "build" >/dev/null 2>&1
+      cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_wireshark=OFF ..
       make
       $SUDO_CMD make install
       popd >/dev/null 2>&1
