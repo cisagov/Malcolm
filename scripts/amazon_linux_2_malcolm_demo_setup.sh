@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 ###################################################################################
-# script for setting up a Malcolm demo instance on an Amazon Linux 2 instance
-# from scratch.
+# for setting up a Malcolm demo instance on an Amazon Linux 2 instance from scratch
+#
+# so far I have had the best luck on c4.4xlarge (16 CPU, 30 GB RAM)
+#
 
 ###################################################################################
 # initialize
@@ -234,35 +236,80 @@ function InstallCommonPackages {
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     $SUDO_CMD yum update -y >/dev/null 2>&1
-    $SUDO_CMD amazon-linux-extras install -y epel
-    $SUDO_CMD yum update -y >/dev/null 2>&1
 
     PACKAGE_LIST=(
       python3.8
     )
     # install the packages from amazon-linux-extras
     for i in ${PACKAGE_LIST[@]}; do
-      if [[ ! $i =~ ^firmware ]] || [[ -z $WINDOWS ]]; then
-        $SUDO_CMD amazon-linux-extras install -y "$i"
-      fi
+      $SUDO_CMD amazon-linux-extras install -y "$i"
     done
     $SUDO_CMD ln -s -r -f /usr/bin/python3.8 /usr/bin/python3
     $SUDO_CMD ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3
 
+    GROUP_LIST=(
+      "Development Tools"
+    )
+    # install the groups from yum
+    for i in ${PACKAGE_LIST[@]}; do
+      $SUDO_CMD yum groupinstall -y "$i"
+    done
 
     PACKAGE_LIST=(
+      c-ares-devel
+      flex
+      gcc
+      gcc-c++
+      glib2-devel
       httpd-tools
+      libgcrypt-devel
+      libpcap-devel
+      lua-devel
       make
       openssl
+      openssl-devel
       tmux
-      wireshark
+      zlib-devel
     )
     # install the packages from yum
     for i in ${PACKAGE_LIST[@]}; do
-      if [[ ! $i =~ ^firmware ]] || [[ -z $WINDOWS ]]; then
-        $SUDO_CMD yum install -y "$i"
-      fi
+      $SUDO_CMD yum install -y "$i"
     done
+
+    sudo yum groupinstall
+
+    # wireshark (for capinfos/editcap) in repo is FLIPPIN' old, why?
+    # guess we'll have to build from source
+    if ! type tshark >/dev/null 2>&1; then
+      export SOURCE_DIR="$(mktemp -d)"
+      pushd "$SOURCE_DIR" >/dev/null 2>&1
+
+      # cmake
+      CMAKE_VERSION=3.22.2
+      curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
+      tar xvf cmake-"${3.22.2}".tar.gz
+      pushd cmake-"${3.22.2}" >/dev/null 2>&1
+      ./bootstrap
+      make
+      $SUDO_CMD make install
+      popd >/dev/null 2>&1
+
+      # wireshark
+      WIRESHARK_VERSION=3.6.2
+      curl -sSL -O -J "https://2.na.dl.wireshark.org/src/wireshark-${WIRESHARK_VERSION}.tar.xz"
+      tar xvf wireshark-"${WIRESHARK_VERSION}".tar.xz
+      pushd wireshark-"${WIRESHARK_VERSION}" >/dev/null 2>&1
+      mkdir -p build
+      pushd "$build" >/dev/null 2>&1
+      cmake -DBUILD_wireshark=OFF ..
+      make
+      $SUDO_CMD make install
+      popd >/dev/null 2>&1
+      popd >/dev/null 2>&1
+
+      popd >/dev/null 2>&1
+      rm -rf "$SOURCE_DIR"
+    fi
 
   fi # install common packages confirmation
 }
