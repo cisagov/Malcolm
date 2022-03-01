@@ -3,8 +3,7 @@ name: filebeat-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'filebeat/**'
       - 'Dockerfiles/filebeat.Dockerfile'

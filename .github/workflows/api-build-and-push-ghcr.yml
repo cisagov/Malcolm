@@ -3,8 +3,7 @@ name: api-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'api/**'
       - 'Dockerfiles/api.Dockerfile'

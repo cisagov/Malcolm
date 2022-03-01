@@ -3,8 +3,7 @@ name: opensearch-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'Dockerfiles/opensearch.Dockerfile'
       - 'shared/bin/*'

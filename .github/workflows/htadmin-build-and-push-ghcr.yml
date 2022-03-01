@@ -3,8 +3,7 @@ name: htadmin-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'htadmin/**'
       - 'Dockerfiles/htadmin.Dockerfile'

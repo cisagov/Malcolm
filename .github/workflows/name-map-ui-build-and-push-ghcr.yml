@@ -3,8 +3,7 @@ name: name-map-ui-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'name-map-ui/**'
       - 'Dockerfiles/name-map-ui.Dockerfile'

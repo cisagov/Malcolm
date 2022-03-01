@@ -3,8 +3,7 @@ name: malcolm-iso-build-docker-wrap-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'

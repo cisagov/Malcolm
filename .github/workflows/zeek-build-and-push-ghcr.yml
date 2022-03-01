@@ -3,8 +3,7 @@ name: zeek-build-and-push-ghcr
 on:
   push:
     branches:
-      - main
-      - development
+      - logstash_pipeline
     paths:
       - 'zeek/**'
       - 'Dockerfiles/zeek.Dockerfile'
