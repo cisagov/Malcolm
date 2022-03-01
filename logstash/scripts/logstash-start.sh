@@ -84,6 +84,11 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPE
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
+# logstash may wish to modify logstash.yml based on some environment variables (e.g.,
+# pipeline.workers), so copy the original onto from the image over the "working copy" before start
+[[ -r /usr/share/logstash/config/logstash.orig.yml ]] && \
+  cp /usr/share/logstash/config/logstash.orig.yml /usr/share/logstash/config/logstash.yml
+
 # start logstash (adapted from docker-entrypoint)
 env2yaml /usr/share/logstash/config/logstash.yml
 export LS_JAVA_OPTS="-Dls.cgroup.cpuacct.path.override=/ -Dls.cgroup.cpu.path.override=/ $LS_JAVA_OPTS"

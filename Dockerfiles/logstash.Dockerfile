@@ -1,4 +1,4 @@
-FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.2
+FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -38,14 +38,14 @@ USER root
 
 RUN yum install -y epel-release && \
     yum update -y && \
-    yum install -y curl gettext python3-setuptools python3-pip python3-requests openssl && \
+    yum install -y curl gettext patch python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
     pip3 install ipaddress supervisor manuf pyyaml && \
-    logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
-                            logstash-filter-json logstash-filter-prune logstash-filter-http \
-                            logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
-                            logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
-                            logstash-input-beats logstash-output-elasticsearch && \
+    logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
+                                       logstash-filter-json logstash-filter-prune logstash-filter-http \
+                                       logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
+                                       logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
+                                       logstash-input-beats logstash-output-elasticsearch && \
     rm -rf /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -53,7 +53,7 @@ ADD shared/bin/manuf-oui-parse.py /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
-ADD logstash/config/logstash.yml /usr/share/logstash/config/
+ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
@@ -64,7 +64,11 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
     mkdir /logstash-persistent-queue && \
-    chown --silent -R ${PUSER}:root /usr/share/logstash/malcolm-pipelines /logstash-persistent-queue && \
+    chown --silent -R ${PUSER}:root \
+        /usr/share/logstash/config/logstash*.yml \
+        /usr/share/logstash/malcolm-pipelines \
+        /usr/share/logstash/malcolm-ruby \
+        /logstash-persistent-queue && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Retrieving JA3 fingerprint lists..." && \
