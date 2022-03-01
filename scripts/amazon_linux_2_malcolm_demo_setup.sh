@@ -498,7 +498,9 @@ function InstallMalcolm {
       for i in ${CONFIG_PAIRS[@]}; do
         KEY="$(echo "$i" | cut -d':' -f1)"
         VALUE="$(echo "$i" | cut -d':' -f2)"
-        sed -i "s/\(^[[:space:]]*$KEY[[:space:]]*:[[:space:]]*\).*/\1$VALUE/g" docker-compose.yml
+        for CONFIG in docker-compose.yml docker-compose-standalone.yml; do
+          sed -i "s/\(^[[:space:]]*$KEY[[:space:]]*:[[:space:]]*\).*/\1$VALUE/g" "$CONFIG"
+        done
       done
       touch auth.env
       docker-compose pull
