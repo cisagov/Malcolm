@@ -541,6 +541,7 @@ function InstallMalcolm {
         "ZEEK_AUTO_ANALYZE_PCAP_FILES:'true'"
         "ZEEK_DISABLE_BEST_GUESS_ICS:''"
         "ZEEK_EXTRACTOR_MODE:'all'"
+        # "NGINX_BASIC_AUTH:'no_authentication'"
       )
       for i in ${CONFIG_PAIRS[@]}; do
         KEY="$(echo "$i" | cut -d':' -f1)"
