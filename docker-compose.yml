@@ -257,7 +257,7 @@ services:
       - 9001
       - 9600
     volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.orig.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
