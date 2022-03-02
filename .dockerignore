@@ -11,6 +11,7 @@
 **/htpasswd
 **/malcolm_*images.tar.gz
 .trigger_workflow_build
+.tmp
 docker-compose*yml
 Dockerfiles
 opensearch

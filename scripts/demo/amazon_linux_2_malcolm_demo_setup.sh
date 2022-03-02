@@ -33,6 +33,8 @@ LOCAL_DATA_PATH=${XDG_DATA_HOME:-$HOME/.local/share}
 LOCAL_BIN_PATH=$HOME/.local/bin
 LOCAL_CONFIG_PATH=${XDG_CONFIG_HOME:-$HOME/.config}
 
+MALCOLM_SETUP_NONINTERACTIVE=${MALCOLM_SETUP_NONINTERACTIVE:-0}
+
 ###################################################################################
 # variables for env development environments and tools
 
@@ -54,6 +56,21 @@ else
   SCRIPT_USER="$(whoami)"
   SUDO_CMD="sudo"
 fi
+
+###################################################################################
+function _GetConfirmation {
+  PROMPT=${1:-"[y/N]?"}
+  DEFAULT_ANSWER=${2:-n}
+  unset CONFIRMATION
+  if (( $MALCOLM_SETUP_NONINTERACTIVE == 1 )); then
+    echo "${PROMPT} ${DEFAULT_ANSWER}" >&2
+  else
+    echo -n "${PROMPT} " >&2
+    read CONFIRMATION
+  fi
+  CONFIRMATION=${CONFIRMATION:-$DEFAULT_ANSWER}
+  echo $CONFIRMATION
+}
 
 ###################################################################################
 # convenience function for installing curl/git/jq/moreutils for cloning/downloading
@@ -109,9 +126,7 @@ function InstallEnvs {
 
   if ([[ -n $ASDF_DIR ]] && [[ ! -d "$ASDF_DIR" ]]) || ([[ -z $ASDF_DIR ]] && [[ ! -d "$HOME"/.asdf ]]) ; then
     ASDF_DIR="${ASDF_DIR:-$HOME/.asdf}"
-    unset CONFIRMATION
-    read -p "\"asdf\" is not installed, attempt to install it [Y/n]? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "\"asdf\" is not installed, attempt to install it [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       InstallEssentialPackages
       git clone --recurse-submodules --shallow-submodules https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
@@ -127,16 +142,12 @@ function InstallEnvs {
       asdf update
       for i in ${ENV_LIST[@]}; do
         if ! ( asdf plugin list | grep -q "$i" ) >/dev/null 2>&1 ; then
-          unset CONFIRMATION
-          read -p "\"$i\" is not installed, attempt to install it [y/N]? " CONFIRMATION
-          CONFIRMATION=${CONFIRMATION:-N}
+          CONFIRMATION=$(_GetConfirmation "\"$i\" is not installed, attempt to install it [Y/n]?" Y)
           if [[ $CONFIRMATION =~ ^[Yy] ]]; then
             asdf plugin add "$i" && ENVS_INSTALLED[$i]=true
           fi
         else
-          unset CONFIRMATION
-          read -p "\"$i\" is already installed, attempt to update it [y/N]? " CONFIRMATION
-          CONFIRMATION=${CONFIRMATION:-N}
+          CONFIRMATION=$(_GetConfirmation "\"$i\" is already installed, attempt to update it [Y/n]?" Y)
           if [[ $CONFIRMATION =~ ^[Yy] ]]; then
             ENVS_INSTALLED[$i]=true
           fi
@@ -161,9 +172,7 @@ function InstallEnvs {
 ################################################################################
 # InstallEnvPackages
 function InstallEnvPackages {
-  unset CONFIRMATION
-  read -p "Install common pip, etc. packages [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Install common pip, etc. packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     _EnvSetup
 
@@ -183,9 +192,7 @@ function InstallDocker {
 
   # install docker-ce, if needed
   if ! $SUDO_CMD docker info >/dev/null 2>&1 ; then
-    unset CONFIRMATION
-    read -p "\"docker info\" failed, attempt to install docker [Y/n]? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "\"docker info\" failed, attempt to install docker [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
       InstallEssentialPackages
@@ -209,9 +216,7 @@ function InstallDocker {
 
   # install docker-compose, if needed
   if ! docker-compose version >/dev/null 2>&1 ; then
-    unset CONFIRMATION
-    read -p "\"docker-compose version\" failed, attempt to install docker-compose [Y/n]? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "\"docker-compose version\" failed, attempt to install docker-compose [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       echo "Installing Docker Compose via curl to /usr/bin..." >&2
       InstallEssentialPackages
@@ -230,9 +235,7 @@ function InstallDocker {
 ################################################################################
 function InstallCommonPackages {
 
-  unset CONFIRMATION
-  read -p "Install common packages [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Install common packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     $SUDO_CMD yum update -y >/dev/null 2>&1
@@ -313,9 +316,7 @@ function InstallCommonPackages {
 ################################################################################
 function CreateCommonLinuxConfig {
 
-  unset CONFIRMATION
-  read -p "Create missing common local config in home [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Create missing common local config in home [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     touch ~/.hushlogin
@@ -336,9 +337,7 @@ function CreateCommonLinuxConfig {
 
 ################################################################################
 function InstallUserLocalBinaries {
-  unset CONFIRMATION
-  read -p "Install user-local binaries/packages [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_DATA_PATH"/bash-completion/completions
 
@@ -393,9 +392,7 @@ function InstallUserLocalBinaries {
 function SystemConfig {
 
   if [[ -r /etc/sysctl.conf ]] && ! grep -q swappiness /etc/sysctl.conf; then
-    unset CONFIRMATION
-    read -p "Tweak sysctl.conf (swap, NIC buffers, handles, etc.) [Y/n]? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "Tweak sysctl.conf (swap, NIC buffers, handles, etc.) [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       $SUDO_CMD tee -a /etc/sysctl.conf > /dev/null <<'EOT'
 
@@ -427,9 +424,7 @@ EOT
   fi # sysctl check
 
   if [[ ! -f /etc/security/limits.d/limits.conf ]]; then
-    unset CONFIRMATION
-    read -p "Increase limits for file handles and memlock [Y/n]? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "Increase limits for file handles and memlock [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       $SUDO_CMD mkdir -p /etc/security/limits.d/
       $SUDO_CMD tee /etc/security/limits.d/limits.conf > /dev/null <<'EOT'
@@ -442,9 +437,7 @@ EOT
   fi # limits.conf check
 
   if [[ -f /etc/default/grub ]] && ! grep -q cgroup /etc/default/grub; then
-    unset CONFIRMATION
-    read -p "Tweak kernel parameters in grub (cgroup, etc.) [Y/n]? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "Tweak kernel parameters in grub (cgroup, etc.) [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       $SUDO_CMD sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& random.trust_cpu=on cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem/' /etc/default/grub
       $SUDO_CMD grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -454,9 +447,7 @@ EOT
 
 ################################################################################
 function SGroverDotfiles {
-  unset CONFIRMATION
-  read -p "Clone and setup symlinks for Seth Grover's dotfiles [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Clone and setup symlinks for Seth Grover's dotfiles [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_CONFIG_PATH"
@@ -511,9 +502,7 @@ function InstallMalcolm {
   MALCOLM_PATH="$HOME"/Malcolm
   ARTIFACTS_PATH="$HOME"/artifacts
 
-  unset CONFIRMATION
-  read -p "Clone and setup Malcolm [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Clone and setup Malcolm [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     if _GitClone https://github.com/idaholab/Malcolm "$MALCOLM_PATH"; then
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
@@ -547,20 +536,18 @@ function InstallMalcolm {
         done
       done
       touch auth.env
-      docker-compose pull
+      grep image: docker-compose-standalone.yml | awk '{print $2}' | xargs -l -r $SUDO_CMD docker pull
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1
     fi
 
     pushd "$LOCAL_BIN_PATH" >/dev/null 2>&1
-    curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/reset_and_auto_populate.sh
+    curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/demo/reset_and_auto_populate.sh
     curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm-PCAP/main/tools/pcap_time_shift.py
     chmod 755 reset_and_auto_populate.sh pcap_time_shift.py
     popd >/dev/null 2>&1
 
-    unset CONFIRMATION
-    read -p "Set up crontab for starting/resetting Malcolm? " CONFIRMATION
-    CONFIRMATION=${CONFIRMATION:-Y}
+    CONFIRMATION=$(_GetConfirmation "Set up crontab for starting/resetting Malcolm? [y/N]?" N)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       ((echo 'SHELL=/bin/bash') ; \
        (( crontab -l | grep . | grep -v ^SHELL= ; \
@@ -570,9 +557,7 @@ function InstallMalcolm {
     fi
   fi
 
-  unset CONFIRMATION
-  read -p "Download a sample PCAP (SANS Cyberville ICS CTF) [Y/n]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-Y}
+  CONFIRMATION=$(_GetConfirmation "Download a sample PCAP (SANS Cyberville ICS CTF) [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     mkdir -p "$ARTIFACTS_PATH"
     pushd "$ARTIFACTS_PATH" >/dev/null 2>&1
@@ -599,8 +584,14 @@ for i in "${!FUNCTIONS[@]}"; do
   ((IPLUS=i+1))
   printf "%s\t%s\n" "$IPLUS" "${FUNCTIONS[$i]}"
 done
-echo -n "Operation:"
-read USER_FUNCTION_IDX
+
+if (( $MALCOLM_SETUP_NONINTERACTIVE == 1 )); then
+  echo "Operation: ALL (non-interactive)"
+  USER_FUNCTION_IDX=0
+else
+  echo -n "Operation:"
+  read USER_FUNCTION_IDX
+fi
 
 if (( $USER_FUNCTION_IDX == 0 )); then
   # ALL: do everything, in order

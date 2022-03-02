@@ -1,0 +1,76 @@
+class VagrantPlugins::ProviderVirtualBox::Action::Network
+  def dhcp_server_matches_config?(dhcp_server, config)
+    true
+  end
+end
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "bento/amazonlinux-2"
+
+  config.vm.synced_folder '.', '/vagrant', disabled: false
+
+  config.vm.network "private_network", type: "dhcp"
+  config.vm.network "forwarded_port", protocol: "tcp", guest: 443, host: 8443, host_ip: "0.0.0.0"
+
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus   = 8
+    vb.memory = 24576
+    config.vm.disk :disk, size: "150G"
+  end
+
+  config.vm.provider "libvirt" do |libvirt|
+    libvirt.cpus                          = 8
+    libvirt.memory                        = 24576
+    libvirt.disk_bus                      = "virtio"
+    libvirt.driver                        = "kvm"
+    libvirt.graphics_type                 = "spice"
+    libvirt.machine_arch                  = 'x86_64'
+    libvirt.machine_type                  = "q35"
+    libvirt.nic_model_type                = "virtio"
+    libvirt.management_network_guest_ipv6 = 'no'
+    libvirt.cpu_mode                      = 'host-model'
+    libvirt.cpu_fallback                  = 'forbid'
+    libvirt.channel :type  => 'spicevmc', :target_name => 'com.redhat.spice.0',     :target_type => 'virtio'
+    libvirt.channel :type  => 'unix',     :target_name => 'org.qemu.guest_agent.0', :target_type => 'virtio'
+    libvirt.random  :model => 'random'
+    libvirt.storage :file, :size => '150G'
+  end
+
+  config.vm.provision "shell", privileged: true, inline: <<-STEP0
+    yum install -y btrfs-progs
+    DISK=$(lsblk -o NAME,FSTYPE -dsn | awk '$2 == "" {print $1}' | grep -P "^[a-z]+$" | tail -n 1)
+    if [[ -n "$DISK" ]] && [[ -e /dev/"$DISK" ]]; then
+      parted -s /dev/"$DISK" mklabel gpt
+      parted -s -a optimal /dev/"$DISK" mkpart primary 1 20GB
+      parted -s -a optimal /dev/"$DISK" mkpart primary 20GB 100%
+      mkfs.btrfs -f /dev/"${DISK}"1
+      mkfs.xfs -f /dev/"${DISK}"2
+      mkdir -p /var/lib/docker /media/extra
+      echo "/dev/${DISK}1 /var/lib/docker btrfs defaults,noatime,nodiratime 0 0" >> /etc/fstab
+      echo "/dev/${DISK}2 /home xfs defaults,nodiratime 0 0" >> /etc/fstab
+      mount /var/lib/docker && \
+        mkdir -p /etc/docker && \
+        echo -e '{\n  "storage-driver": "btrfs"\n}' >/etc/docker/daemon.json
+      mv /home /home.old && \
+        mkdir /home && \
+        mount /home && \
+        mv /home.old/* /home/ && \
+        rmdir /home.old
+    fi
+  STEP0
+
+  config.vm.provision "shell", privileged: false, inline: <<-STEP1
+    mkdir -p ~/.local/bin ~/.config
+    curl -sSL -o ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/amazon_linux_2_malcolm_demo_setup.sh
+    chmod 755 ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh
+
+    MALCOLM_SETUP_NONINTERACTIVE=1 ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh
+  STEP1
+  config.vm.provision :reload
+
+end
