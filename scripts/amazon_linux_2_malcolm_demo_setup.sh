@@ -557,6 +557,17 @@ function InstallMalcolm {
     curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm-PCAP/main/tools/pcap_time_shift.py
     chmod 755 reset_and_auto_populate.sh pcap_time_shift.py
     popd >/dev/null 2>&1
+
+    unset CONFIRMATION
+    read -p "Set up crontab for starting/resetting Malcolm? " CONFIRMATION
+    CONFIRMATION=${CONFIRMATION:-Y}
+    if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+      ((echo 'SHELL=/bin/bash') ; \
+       (( crontab -l | grep . | grep -v ^SHELL= ; \
+          echo "@reboot sleep 60 && /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -r -o -n -m $MALCOLM_PATH/docker-compose-standalone.yml" ; \
+          echo "15 8 * * * /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -w -o -n -m $MALCOLM_PATH/docker-compose-standalone.yml -d yesterday $ARTIFACTS_PATH/*.pcap" ) \
+          | sort | uniq )) | crontab -
+    fi
   fi
 
   unset CONFIRMATION
