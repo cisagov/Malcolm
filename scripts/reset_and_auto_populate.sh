@@ -247,51 +247,51 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )); then
     # copy the adjusted PCAP file(s) to the Malcolm upload directory to be processed
     cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
-  fi
 
-  if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
-    # wait for processing to finish out (count becomes "idle", no longer increasing)
-    sleep $PCAP_PROCESS_PRE_WAIT
-    LAST_LOG_COUNT=0
-    LAST_LOG_COUNT_CHANGED_TIME=$(date -u +%s)
-    FIRST_LOG_COUNT_TIME=$LAST_LOG_COUNT_CHANGED_TIME
-    while true; do
+    if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
+      # wait for processing to finish out (count becomes "idle", no longer increasing)
+      sleep $PCAP_PROCESS_PRE_WAIT
+      LAST_LOG_COUNT=0
+      LAST_LOG_COUNT_CHANGED_TIME=$(date -u +%s)
+      FIRST_LOG_COUNT_TIME=$LAST_LOG_COUNT_CHANGED_TIME
+      while true; do
 
-      # if it's been more than the maximum wait time, bail
-      CURRENT_TIME=$(date -u +%s)
-      if (( ($CURRENT_TIME - $FIRST_LOG_COUNT_TIME) >= $PCAP_PROCESS_IDLE_MAX_SECONDS )); then
-        [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for idle state" >&2
-        break
-      fi
+        # if it's been more than the maximum wait time, bail
+        CURRENT_TIME=$(date -u +%s)
+        if (( ($CURRENT_TIME - $FIRST_LOG_COUNT_TIME) >= $PCAP_PROCESS_IDLE_MAX_SECONDS )); then
+          [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for idle state" >&2
+          break
+        fi
 
-      # get the total number of session records in the database
-      NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
-                        curl -sSL "http://localhost:5000/agg/event.provider?from=1970" | \
-                        jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
-                        awk '{s+=$1} END {print s}') 2>/dev/null )
-      if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
-        [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
-        NEW_LOG_COUNT_TIME=$CURRENT_TIME
+        # get the total number of session records in the database
+        NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
+                          curl -sSL "http://localhost:5000/agg/event.provider?from=1970" | \
+                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
+                          awk '{s+=$1} END {print s}') 2>/dev/null )
+        if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
+          [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
+          NEW_LOG_COUNT_TIME=$CURRENT_TIME
 
-        if (( $LAST_LOG_COUNT == $NEW_LOG_COUNT )); then
-          # the count hasn't changed, so compare against how long we've been idle
-          if (( ($NEW_LOG_COUNT_TIME - $LAST_LOG_COUNT_CHANGED_TIME) >= $PCAP_PROCESS_IDLE_SECONDS )); then
-            [[ -n $VERBOSE_FLAG ]] && echo "Idle state reached ($NEW_LOG_COUNT logs for at lease $PCAP_PROCESS_IDLE_SECONDS seconds)" >&2
-            break
+          if (( $LAST_LOG_COUNT == $NEW_LOG_COUNT )); then
+            # the count hasn't changed, so compare against how long we've been idle
+            if (( ($NEW_LOG_COUNT_TIME - $LAST_LOG_COUNT_CHANGED_TIME) >= $PCAP_PROCESS_IDLE_SECONDS )); then
+              [[ -n $VERBOSE_FLAG ]] && echo "Idle state reached ($NEW_LOG_COUNT logs for at lease $PCAP_PROCESS_IDLE_SECONDS seconds)" >&2
+              break
+            fi
+
+          else
+            # the count has changed, no longer idle, reset the non-idle time counter
+            LAST_LOG_COUNT=$NEW_LOG_COUNT
+            LAST_LOG_COUNT_CHANGED_TIME=$NEW_LOG_COUNT_TIME
           fi
 
         else
-          # the count has changed, no longer idle, reset the non-idle time counter
-          LAST_LOG_COUNT=$NEW_LOG_COUNT
-          LAST_LOG_COUNT_CHANGED_TIME=$NEW_LOG_COUNT_TIME
+          echo "Failed to get log count, will retry!" >&2
+          sleep 30
         fi
-
-      else
-        echo "Failed to get log count, will retry!" >&2
-        sleep 30
-      fi
-      sleep 10
-    done
+        sleep 10
+      done
+    fi
   fi
 
   if [[ "$NGINX_DISABLE" == "true" ]]; then
