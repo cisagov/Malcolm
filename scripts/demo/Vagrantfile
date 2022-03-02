@@ -1,3 +1,5 @@
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
 class VagrantPlugins::ProviderVirtualBox::Action::Network
   def dhcp_server_matches_config?(dhcp_server, config)
     true
