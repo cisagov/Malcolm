@@ -181,7 +181,6 @@ function urlencode() {
 trap clean_up EXIT
 
 if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
-   (( ${#PCAP_FILES[@]} > 0 )) && \
    which docker-compose >/dev/null 2>&1 && \
    which jq >/dev/null 2>&1; then
   mkdir -p "$WORKDIR"
@@ -196,138 +195,136 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
 
   PCAP_FILES_ADJUSTED=()
 
-  for ((i = 0; i < ${#PCAP_FILES[@]}; i++)); do
-    PCAP_FILE_ABSOLUTE="$($REALPATH -e "${PCAP_FILES[$i]}")"
-    PCAP_FILE_ADJUSTED="$WORKDIR"/"$(basename "${PCAP_FILES[$i]}")"
-    cp $VERBOSE_FLAG "$PCAP_FILE_ABSOLUTE" "$PCAP_FILE_ADJUSTED"
-    [[ -f "$PCAP_FILE_ADJUSTED" ]] && \
-      PCAP_FILES_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
-  done
+  if (( ${#PCAP_FILES[@]} > 0 )); then
+    for ((i = 0; i < ${#PCAP_FILES[@]}; i++)); do
+      PCAP_FILE_ABSOLUTE="$($REALPATH -e "${PCAP_FILES[$i]}")"
+      PCAP_FILE_ADJUSTED="$WORKDIR"/"$(basename "${PCAP_FILES[$i]}")"
+      cp $VERBOSE_FLAG "$PCAP_FILE_ABSOLUTE" "$PCAP_FILE_ADJUSTED"
+      [[ -f "$PCAP_FILE_ADJUSTED" ]] && \
+        PCAP_FILES_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
+    done
 
-  [[ -n "$PCAP_ADJUST_SCRIPT" ]] && \
-    "$PCAP_ADJUST_SCRIPT" $VERBOSE_FLAG \
-      --time "$PCAP_DATE" \
-      --relative "$PCAP_RELATIVE_ADJUST" \
-      --format pcap \
-      --in-place \
-      --pcap "${PCAP_FILES_ADJUSTED[@]}"
+    [[ -n "$PCAP_ADJUST_SCRIPT" ]] && \
+      "$PCAP_ADJUST_SCRIPT" $VERBOSE_FLAG \
+        --time "$PCAP_DATE" \
+        --relative "$PCAP_RELATIVE_ADJUST" \
+        --format pcap \
+        --in-place \
+        --pcap "${PCAP_FILES_ADJUSTED[@]}"
+  fi
+
+  # do the Malcolm stuff
+  pushd "$MALCOLM_PATH" >/dev/null 2>&1
+
+  # wipe and/or restart the database as requested
+  if [[ "$WIPE" == "true" ]]; then
+    ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE"
+    ./scripts/start $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
+    START_PID=$!
+  elif [[ "$RESTART" == "true" ]]; then
+    ./scripts/restart $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
+    START_PID=$!
+  else
+    START_PID=
+  fi
+  if [[ -n "$START_PID" ]]; then
+    sleep 30
+    kill $START_PID
+    sleep 10
+  fi
+
+  if [[ "$NGINX_DISABLE" == "true" ]]; then
+    docker-compose -f "$MALCOLM_FILE" pause nginx-proxy
+  fi
+
+  # wait for logstash to be ready for Zeek logs to be ingested
+  until docker-compose -f "$MALCOLM_FILE" logs logstash 2>/dev/null | grep -q "Pipelines running"; do
+    [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready for PCAP data..." >&2
+    sleep 10
+  done
+  sleep 30
 
   if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )); then
-
-    # do the Malcolm stuff
-    pushd "$MALCOLM_PATH" >/dev/null 2>&1
-
-    # wipe and/or restart the database as requested
-    if [[ "$WIPE" == "true" ]]; then
-      ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE"
-      ./scripts/start $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
-      START_PID=$!
-    elif [[ "$RESTART" == "true" ]]; then
-      ./scripts/restart $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
-      START_PID=$!
-    else
-      START_PID=
-    fi
-    if [[ -n "$START_PID" ]]; then
-      sleep 30
-      kill $START_PID
-      sleep 10
-    fi
-
-    if [[ "$NGINX_DISABLE" == "true" ]]; then
-      docker-compose -f "$MALCOLM_FILE" pause nginx-proxy
-    fi
-
-    # wait for logstash to be ready for Zeek logs to be ingested
-    until docker-compose -f "$MALCOLM_FILE" logs logstash 2>/dev/null | grep -q "Pipelines running"; do
-      [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready for PCAP data..." >&2
-      sleep 10
-    done
-    sleep 30
-
     # copy the adjusted PCAP file(s) to the Malcolm upload directory to be processed
     cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
+  fi
 
-    if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
-      # wait for processing to finish out (count becomes "idle", no longer increasing)
-      sleep $PCAP_PROCESS_PRE_WAIT
-      LAST_LOG_COUNT=0
-      LAST_LOG_COUNT_CHANGED_TIME=$(date -u +%s)
-      FIRST_LOG_COUNT_TIME=$LAST_LOG_COUNT_CHANGED_TIME
-      while true; do
+  if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
+    # wait for processing to finish out (count becomes "idle", no longer increasing)
+    sleep $PCAP_PROCESS_PRE_WAIT
+    LAST_LOG_COUNT=0
+    LAST_LOG_COUNT_CHANGED_TIME=$(date -u +%s)
+    FIRST_LOG_COUNT_TIME=$LAST_LOG_COUNT_CHANGED_TIME
+    while true; do
 
-        # if it's been more than the maximum wait time, bail
-        CURRENT_TIME=$(date -u +%s)
-        if (( ($CURRENT_TIME - $FIRST_LOG_COUNT_TIME) >= $PCAP_PROCESS_IDLE_MAX_SECONDS )); then
-          [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for idle state" >&2
-          break
-        fi
+      # if it's been more than the maximum wait time, bail
+      CURRENT_TIME=$(date -u +%s)
+      if (( ($CURRENT_TIME - $FIRST_LOG_COUNT_TIME) >= $PCAP_PROCESS_IDLE_MAX_SECONDS )); then
+        [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for idle state" >&2
+        break
+      fi
 
-        # get the total number of session records in the database
-        NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
-                          curl -sSL "http://localhost:5000/agg/event.provider?from=1970" | \
-                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
-                          awk '{s+=$1} END {print s}') 2>/dev/null )
-        if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
-          [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
-          NEW_LOG_COUNT_TIME=$CURRENT_TIME
+      # get the total number of session records in the database
+      NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
+                        curl -sSL "http://localhost:5000/agg/event.provider?from=1970" | \
+                        jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
+                        awk '{s+=$1} END {print s}') 2>/dev/null )
+      if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
+        [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
+        NEW_LOG_COUNT_TIME=$CURRENT_TIME
 
-          if (( $LAST_LOG_COUNT == $NEW_LOG_COUNT )); then
-            # the count hasn't changed, so compare against how long we've been idle
-            if (( ($NEW_LOG_COUNT_TIME - $LAST_LOG_COUNT_CHANGED_TIME) >= $PCAP_PROCESS_IDLE_SECONDS )); then
-              [[ -n $VERBOSE_FLAG ]] && echo "Idle state reached ($NEW_LOG_COUNT logs for at lease $PCAP_PROCESS_IDLE_SECONDS seconds)" >&2
-              break
-            fi
-
-          else
-            # the count has changed, no longer idle, reset the non-idle time counter
-            LAST_LOG_COUNT=$NEW_LOG_COUNT
-            LAST_LOG_COUNT_CHANGED_TIME=$NEW_LOG_COUNT_TIME
+        if (( $LAST_LOG_COUNT == $NEW_LOG_COUNT )); then
+          # the count hasn't changed, so compare against how long we've been idle
+          if (( ($NEW_LOG_COUNT_TIME - $LAST_LOG_COUNT_CHANGED_TIME) >= $PCAP_PROCESS_IDLE_SECONDS )); then
+            [[ -n $VERBOSE_FLAG ]] && echo "Idle state reached ($NEW_LOG_COUNT logs for at lease $PCAP_PROCESS_IDLE_SECONDS seconds)" >&2
+            break
           fi
 
         else
-          echo "Failed to get log count, will retry!" >&2
-          sleep 30
+          # the count has changed, no longer idle, reset the non-idle time counter
+          LAST_LOG_COUNT=$NEW_LOG_COUNT
+          LAST_LOG_COUNT_CHANGED_TIME=$NEW_LOG_COUNT_TIME
         fi
-        sleep 10
-      done
-    fi
 
-    if [[ "$NGINX_DISABLE" == "true" ]]; then
-      docker-compose -f "$MALCOLM_FILE" unpause nginx-proxy
+      else
+        echo "Failed to get log count, will retry!" >&2
+        sleep 30
+      fi
       sleep 10
-    fi
-
-    if [[ "$READ_ONLY" == "true" ]]; then
-      [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
-      for USER in \
-        $(cat nginx/htpasswd | cut -d: -f1) \
-        $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
-        docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -sSL -XGET \
-          --header 'Content-type:application/json' \
-          --header "http_auth_http_user:$USER" \
-          --header "Authorization:" \
-          "http://localhost:8005"
-      done
-      sleep 5
-      [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
-      docker-compose -f "$MALCOLM_FILE" exec -T nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
-      sleep 5
-      docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
-      sleep 5
-      for CONTAINER in filebeat logstash upload pcap-monitor file-monitor zeek name-map-ui pcap-capture freq; do
-        docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
-      done
-      sleep 5
-    fi
-
-    popd >/dev/null 2>&1
-
-    [[ -n $VERBOSE_FLAG ]] && echo "Finished" >&2
-  else
-    echo "failed to create time-shifted PCAP file(s)" >/dev/null 2>&1
-    exit 1
+    done
   fi
+
+  if [[ "$NGINX_DISABLE" == "true" ]]; then
+    docker-compose -f "$MALCOLM_FILE" unpause nginx-proxy
+    sleep 10
+  fi
+
+  if [[ "$READ_ONLY" == "true" ]]; then
+    [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
+    for USER in \
+      $(cat nginx/htpasswd | cut -d: -f1) \
+      $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
+      docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -sSL -XGET \
+        --header 'Content-type:application/json' \
+        --header "http_auth_http_user:$USER" \
+        --header "Authorization:" \
+        "http://localhost:8005"
+    done
+    sleep 5
+    [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
+    docker-compose -f "$MALCOLM_FILE" exec -T nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
+    sleep 5
+    docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
+    sleep 5
+    for CONTAINER in filebeat logstash upload pcap-monitor file-monitor zeek name-map-ui pcap-capture freq; do
+      docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
+    done
+    sleep 5
+  fi
+
+  popd >/dev/null 2>&1
+
+  [[ -n $VERBOSE_FLAG ]] && echo "Finished" >&2
 else
   echo "must specify docker-compose.yml file with -m and PCAP file(s)" >&2
   echo "also, pcap_time_shift.py, docker-compose and jq must be available"
