@@ -517,7 +517,7 @@ function InstallMalcolm {
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     if _GitClone https://github.com/idaholab/Malcolm "$MALCOLM_PATH"; then
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
-      python3 ./scripts/install.py -c -d -r
+      python3 ./scripts/install.py -c -d
       CONFIG_PAIRS=(
         "CAPA_MAX_REQUESTS:2"
         "CLAMD_MAX_REQUESTS:4"
