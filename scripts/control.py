@@ -275,6 +275,7 @@ def logs():
     .+(
         deprecated
       | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
+      | \bGET.+\b302\s+30\b
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
       | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
       | /_ns_/nstest\.html
