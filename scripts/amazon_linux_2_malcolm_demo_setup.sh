@@ -213,11 +213,11 @@ function InstallDocker {
     read -p "\"docker-compose version\" failed, attempt to install docker-compose [Y/n]? " CONFIRMATION
     CONFIRMATION=${CONFIRMATION:-Y}
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-      echo "Installing Docker Compose via curl to /usr/local/bin..." >&2
+      echo "Installing Docker Compose via curl to /usr/bin..." >&2
       InstallEssentialPackages
-      $SUDO_CMD curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_INSTALL_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      $SUDO_CMD chmod +x /usr/local/bin/docker-compose
-      if ! /usr/local/bin/docker-compose version >/dev/null 2>&1 ; then
+      $SUDO_CMD curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_INSTALL_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
+      $SUDO_CMD chmod +x /usr/bin/docker-compose
+      if ! /usr/bin/docker-compose version >/dev/null 2>&1 ; then
         echo "Installing docker-compose failed" >&2
         exit 1
       fi
