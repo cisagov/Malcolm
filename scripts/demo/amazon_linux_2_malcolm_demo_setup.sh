@@ -382,6 +382,24 @@ function _InstallBat {
 }
 
 ################################################################################
+# _InstallBoringProxy - boringproxy/boringproxy: a reverse proxy and tunnel manager
+function _InstallBoringProxy {
+  [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
+  mkdir -p "$LOCAL_BIN_PATH"
+
+  TMP_CLONE_DIR="$(mktemp -d)"
+  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
+  "${LOCAL_BIN_PATH}"/dra boringproxy/boringproxy download -s "boringproxy-linux-x86_64"
+  mv ./boringproxy-linux-x86_64 "${LOCAL_BIN_PATH}"/boringproxy.new
+  chmod 755 "${LOCAL_BIN_PATH}"/boringproxy.new
+  $SUDO_CMD /usr/sbin/setcap 'cap_net_bind_service=+ep' "${LOCAL_BIN_PATH}"/boringproxy.new
+  [[ -f "$LOCAL_BIN_PATH"/boringproxy ]] && rm -f "$LOCAL_BIN_PATH"/boringproxy
+  mv "$LOCAL_BIN_PATH"/boringproxy.new "$LOCAL_BIN_PATH"/boringproxy
+  popd >/dev/null 2>&1
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+################################################################################
 # _InstallNgrok - inconshreveable/ngrok: secure introspectable tunnels to localhost
 function _InstallNgrok {
   mkdir -p "$LOCAL_BIN_PATH"
@@ -390,8 +408,10 @@ function _InstallNgrok {
   curl -o "${TMP_CLONE_DIR}"/ngrok.zip -L "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
   pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
   unzip ./ngrok.zip
-  chmod 755 ./ngrok
-  cp -f ./ngrok "$LOCAL_BIN_PATH"/ngrok
+  mv ./ngrok "$LOCAL_BIN_PATH"/ngrok.new
+  chmod 755 "$LOCAL_BIN_PATH"/ngrok.new
+  [[ -f "$LOCAL_BIN_PATH"/ngrok ]] && rm -f "$LOCAL_BIN_PATH"/ngrok
+  mv "$LOCAL_BIN_PATH"/ngrok.new "$LOCAL_BIN_PATH"/ngrok
   popd >/dev/null 2>&1
   rm -rf "$TMP_CLONE_DIR"
 }
@@ -405,6 +425,7 @@ function InstallUserLocalBinaries {
     [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
     [[ ! -f "${LOCAL_BIN_PATH}"/bat ]] && _InstallBat
     [[ ! -f "${LOCAL_BIN_PATH}"/ngrok ]] && _InstallNgrok
+    [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
   fi
 }
 
@@ -614,7 +635,7 @@ function InstallMalcolm {
 }
 
 ################################################################################
-# SetupConnectivity - configure dynamic DNS and ngrok for easier connectivity
+# SetupConnectivity - configure dynamic DNS and/or reverse tunnel for easier connectivity
 function SetupConnectivity {
 
   # dynamic DNS
@@ -646,6 +667,27 @@ function SetupConnectivity {
       fi
     fi
   fi
+
+  # boringproxy
+  if ! ( crontab -l | grep -q boringproxy ); then
+    CONFIRMATION=$(_GetConfirmation "Configure boringproxy [y/N]?" N)
+    if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+      [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
+      SERVER=$(_GetString "boringproxy server:" "")
+      CLIENT=$(_GetString "boringproxy client name:" "")
+      USER=$(_GetString "boringproxy user:" "")
+      TOKEN=$(_GetString "boringproxy token (will be stored in plaintext in crontab):" "")
+      if [[ -n "$SERVER" ]] && [[ -n "$CLIENT" ]] && [[ -n "$USER" ]] && [[ -n "$TOKEN" ]]; then
+        mkdir -p "${LOCAL_CONFIG_PATH}"/boringproxy/certs
+        ((echo 'SHELL=/bin/bash') ; \
+         (( crontab -l | grep . | grep -v ^SHELL= ; \
+            echo "@reboot sleep 180 && ( nohup ${LOCAL_BIN_PATH}/boringproxy client -client-name ${CLIENT} -acme-email example@example.com -cert-dir ${LOCAL_CONFIG_PATH}/boringproxy/certs -user ${USER} -token ${TOKEN} -server ${SERVER} >/dev/null 2>&1 </dev/null & )" ) \
+            | sort | uniq )) | crontab -
+      fi
+    fi
+  fi
+
+
 }
 
 ################################################################################
