@@ -64,15 +64,22 @@ Vagrant.configure("2") do |config|
         mv /home.old/* /home/ && \
         rmdir /home.old
     fi
+    cd /tmp
+    ( uname -r | grep -q "^4" ) && amazon-linux-extras install -y kernel-5.10
   STEP0
+  config.vm.provision :reload
 
-  config.vm.provision "shell", privileged: false, inline: <<-STEP1
+  config.vm.provision "shell", privileged: true, inline: <<-STEP1
+    package-cleanup -y --oldkernels --count=1
+  STEP1
+
+  config.vm.provision "shell", privileged: false, inline: <<-STEP2
     mkdir -p ~/.local/bin ~/.config
     curl -sSL -o ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/demo/amazon_linux_2_malcolm_demo_setup.sh
     chmod 755 ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh
 
     MALCOLM_SETUP_NONINTERACTIVE=1 ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh
-  STEP1
+  STEP2
   config.vm.provision :reload
 
 end
