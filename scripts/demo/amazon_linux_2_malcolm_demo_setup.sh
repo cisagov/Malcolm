@@ -11,7 +11,7 @@
 ###################################################################################
 # initialize
 
-if [ -z "$BASH_VERSION" ]; then
+if [[ -z "$BASH_VERSION" ]]; then
   echo "Wrong interpreter, please run \"$0\" with bash" >&2
   exit 1
 fi
@@ -20,7 +20,6 @@ if ! type amazon-linux-extras >/dev/null 2>&1; then
   echo "This command only targets Amazon Linux 2" >&2
   exit 1
 fi
-
 
 REALPATH=realpath
 DIRNAME=dirname
@@ -31,15 +30,24 @@ fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 SCRIPT_NAME="$(basename $($REALPATH -e "${BASH_SOURCE[0]}"))"
 
+if [[ $EUID -eq 0 ]]; then
+  SCRIPT_USER="root"
+  SUDO_CMD=""
+else
+  SCRIPT_USER="$(whoami)"
+  SUDO_CMD="sudo"
+fi
+
+# default user paths
 LOCAL_DATA_PATH=${XDG_DATA_HOME:-$HOME/.local/share}
 LOCAL_BIN_PATH=$HOME/.local/bin
 LOCAL_CONFIG_PATH=${XDG_CONFIG_HOME:-$HOME/.config}
 
+# set MALCOLM_SETUP_NONINTERACTIVE=1 to accept defaults without interaction
 MALCOLM_SETUP_NONINTERACTIVE=${MALCOLM_SETUP_NONINTERACTIVE:-0}
 
 ###################################################################################
 # variables for env development environments and tools
-
 ENV_LIST=(
   age
   fd
@@ -51,15 +59,8 @@ ENV_LIST=(
 
 DOCKER_COMPOSE_INSTALL_VERSION=( 1.29.2 )
 
-if [[ $EUID -eq 0 ]]; then
-  SCRIPT_USER="root"
-  SUDO_CMD=""
-else
-  SCRIPT_USER="$(whoami)"
-  SUDO_CMD="sudo"
-fi
-
 ###################################################################################
+# _GetConfirmation - get a yes/no confirmation from the user (or accept the default)
 function _GetConfirmation {
   PROMPT=${1:-"[y/N]?"}
   DEFAULT_ANSWER=${2:-n}
@@ -75,6 +76,7 @@ function _GetConfirmation {
 }
 
 ###################################################################################
+# _GetString - get a string response from the user (or accept the default)
 function _GetString {
   PROMPT=${1:-""}
   DEFAULT_ANSWER=${2:-""}
@@ -90,7 +92,7 @@ function _GetString {
 }
 
 ###################################################################################
-# convenience function for installing curl/git/jq/moreutils for cloning/downloading
+# InstallEssentialPackages - installing curl, git and jq which are required
 function InstallEssentialPackages {
   if curl -V >/dev/null 2>&1 && \
      git --version >/dev/null 2>&1 && \
@@ -104,13 +106,15 @@ function InstallEssentialPackages {
 }
 
 ###################################################################################
+# _GitClone - glone a git repository (recursing submodules) without history
 function _GitClone {
   git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags "$@"
 }
 
 ###################################################################################
+# _GitLatestRelease - query the latest version from a github project's releases
 function _GitLatestRelease {
-  if [ "$1" ]; then
+  if [[ -n "$1" ]]; then
     (set -o pipefail && curl -sL -f "https://api.github.com/repos/$1/releases/latest" | jq '.tag_name' | sed -e 's/^"//' -e 's/"$//' ) || \
       (set -o pipefail && curl -sL -f "https://api.github.com/repos/$1/releases" | jq '.[0].tag_name' | sed -e 's/^"//' -e 's/"$//' ) || \
       echo unknown
@@ -120,7 +124,7 @@ function _GitLatestRelease {
 }
 
 ###################################################################################
-# function to set up paths and init things after env installations
+# _EnvSetup - asdf path/variable initialization
 function _EnvSetup {
   if [ -d "${ASDF_DIR:-$HOME/.asdf}" ]; then
     . "${ASDF_DIR:-$HOME/.asdf}"/asdf.sh
@@ -134,7 +138,7 @@ function _EnvSetup {
 }
 
 ################################################################################
-# envs (via asdf)
+# InstallEnvs - install asdf environments
 function InstallEnvs {
   declare -A ENVS_INSTALLED
   for i in ${ENV_LIST[@]}; do
@@ -187,7 +191,7 @@ function InstallEnvs {
 }
 
 ################################################################################
-# InstallEnvPackages
+# InstallEnvPackages - install specific env. packages (e.g., pip)
 function InstallEnvPackages {
   CONFIRMATION=$(_GetConfirmation "Install common pip, etc. packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
@@ -205,6 +209,7 @@ function InstallEnvPackages {
 }
 
 ################################################################################
+# InstallDocker - install Docker and enable it as a service, and install docker-compose
 function InstallDocker {
 
   # install docker-ce, if needed
@@ -250,6 +255,8 @@ function InstallDocker {
 }
 
 ################################################################################
+# InstallCommonPackages - install yum and amazon-linux-extras packages, and build
+# the non-GUI version of wireshark from source (for editcap/capinfos/tshark)
 function InstallCommonPackages {
 
   CONFIRMATION=$(_GetConfirmation "Install common packages [Y/n]?" Y)
@@ -290,8 +297,6 @@ function InstallCommonPackages {
       $SUDO_CMD yum install -y "$i"
     done
 
-    sudo yum groupinstall
-
     # wireshark (for capinfos/editcap) in repo is FLIPPIN' old, why?
     # guess we'll have to build from source
     if ! type tshark >/dev/null 2>&1; then
@@ -331,62 +336,53 @@ function InstallCommonPackages {
 }
 
 ################################################################################
-function CreateCommonLinuxConfig {
+# _InstallDra - devmatteini/dra is a command line tool to download release assets from GitHub
+function _InstallDra {
+  mkdir -p "$LOCAL_BIN_PATH"
 
-  CONFIRMATION=$(_GetConfirmation "Create missing common local config in home [Y/n]?" Y)
-  if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-
-    touch ~/.hushlogin
-
-    mkdir -p "$HOME/tmp" \
-             "$HOME/devel" \
-             "$LOCAL_BIN_PATH" \
-             "$LOCAL_DATA_PATH"/bash-completion/completions
-
-    [ ! -f ~/.vimrc ] && echo "set nocompatible" > ~/.vimrc
-
-    if [ ! -d ~/.ssh ]; then
-      mkdir ~/.ssh
-      chmod 700 ~/.ssh
-    fi
-  fi
+  DRA_RELEASE="$(_GitLatestRelease devmatteini/dra)"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -L "https://github.com/devmatteini/dra/releases/download/${DRA_RELEASE}/dra-${DRA_RELEASE}.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
+  cp -f "${TMP_CLONE_DIR}"/dra "$LOCAL_BIN_PATH"/dra
+  chmod 755 "$LOCAL_BIN_PATH"/dra
+  rm -rf "$TMP_CLONE_DIR"
 }
 
 ################################################################################
+# _InstallCroc - schollz/croc: easily and securely send things from one computer to another
 function _InstallCroc {
+  [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
   mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_DATA_PATH"/bash-completion/completions
 
-  CROC_RELEASE="$(_GitLatestRelease schollz/croc | sed 's/^v//')"
   TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/schollz/croc/releases/download/v${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-  cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
-  cp -f "${TMP_CLONE_DIR}"/bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
+  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
+  "${LOCAL_BIN_PATH}"/dra schollz/croc download -s "croc_{tag}_Linux-64bit.tar.gz"
+  tar xf croc*.tar.gz
+  cp -f croc "$LOCAL_BIN_PATH"/croc
+  cp -f bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
   chmod 755 "$LOCAL_BIN_PATH"/croc
+  popd >/dev/null 2>&1
   rm -rf "$TMP_CLONE_DIR"
 }
 
-function _InstallGron {
+################################################################################
+# _InstallBat - sharkdp/bat: a cat(1) clone with wings
+function _InstallBat {
+  [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
   mkdir -p "$LOCAL_BIN_PATH"
 
-  GRON_RELEASE="$(_GitLatestRelease tomnomnom/gron | sed 's/^v//')"
   TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/tomnomnom/gron/releases/download/v${GRON_RELEASE}/gron-linux-amd64-${GRON_RELEASE}.tgz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-  cp -f "${TMP_CLONE_DIR}"/gron "$LOCAL_BIN_PATH"/gron
-  chmod 755 "$LOCAL_BIN_PATH"/gron
+  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
+  "${LOCAL_BIN_PATH}"/dra sharkdp/bat download -s "bat-v{tag}-x86_64-unknown-linux-musl.tar.gz"
+  tar xf bat*.tar.gz
+  cp -f bat*/bat "$LOCAL_BIN_PATH"/bat
+  chmod 755 "$LOCAL_BIN_PATH"/bat
+  popd >/dev/null 2>&1
   rm -rf "$TMP_CLONE_DIR"
 }
 
-function _InstallSq {
-  mkdir -p "$LOCAL_BIN_PATH"
-
-  SQ_RELEASE="$(_GitLatestRelease neilotoole/sq | sed 's/^v//')"
-  TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/neilotoole/sq/releases/download/v${SQ_RELEASE}/sq-linux-amd64.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-  cp -f "${TMP_CLONE_DIR}"/sq "$LOCAL_BIN_PATH"/sq
-  chmod 755 "$LOCAL_BIN_PATH"/sq
-  rm -rf "$TMP_CLONE_DIR"
-}
-
+################################################################################
+# _InstallNgrok - inconshreveable/ngrok: secure introspectable tunnels to localhost
 function _InstallNgrok {
   mkdir -p "$LOCAL_BIN_PATH"
 
@@ -400,41 +396,43 @@ function _InstallNgrok {
   rm -rf "$TMP_CLONE_DIR"
 }
 
-function _InstallBat {
-  mkdir -p "$LOCAL_BIN_PATH"
-
-  BAT_RELEASE="$(_GitLatestRelease sharkdp/bat)"
-  TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/sharkdp/bat/releases/download/${BAT_RELEASE}/bat-${BAT_RELEASE}-x86_64-unknown-linux-musl.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
-  cp -f "${TMP_CLONE_DIR}"/bat "$LOCAL_BIN_PATH"/bat
-  chmod 755 "$LOCAL_BIN_PATH"/bat
-  rm -rf "$TMP_CLONE_DIR"
-}
-
-function _InstallDra {
-  mkdir -p "$LOCAL_BIN_PATH"
-
-  DRA_RELEASE="$(_GitLatestRelease devmatteini/dra)"
-  TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/devmatteini/dra/releases/download/${DRA_RELEASE}/dra-${DRA_RELEASE}.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
-  cp -f "${TMP_CLONE_DIR}"/dra "$LOCAL_BIN_PATH"/dra
-  chmod 755 "$LOCAL_BIN_PATH"/dra
-  rm -rf "$TMP_CLONE_DIR"
-}
-
+################################################################################
+# InstallUserLocalBinaries - install various tools to LOCAL_BIN_PATH
 function InstallUserLocalBinaries {
   CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-    _InstallCroc
-    _InstallGron
-    _InstallSq
-    _InstallNgrok
-    _InstallBat
-    _InstallDra
+    [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
+    [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
+    [[ ! -f "${LOCAL_BIN_PATH}"/bat ]] && _InstallBat
+    [[ ! -f "${LOCAL_BIN_PATH}"/ngrok ]] && _InstallNgrok
   fi
 }
 
 ################################################################################
+# CreateCommonLinuxConfig - tweak a few things in $HOME (.vimrc, local paths, .ssh, etc.)
+function CreateCommonLinuxConfig {
+
+  CONFIRMATION=$(_GetConfirmation "Create missing common local config in home [Y/n]?" Y)
+  if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+
+    touch ~/.hushlogin
+
+    mkdir -p "$HOME/tmp" \
+             "$HOME/devel" \
+             "$LOCAL_BIN_PATH" \
+             "$LOCAL_DATA_PATH"/bash-completion/completions
+
+    [[ ! -f ~/.vimrc ]] && echo "set nocompatible" > ~/.vimrc
+
+    if [[ ! -d ~/.ssh ]]; then
+      mkdir ~/.ssh
+      chmod 700 ~/.ssh
+    fi
+  fi
+}
+
+################################################################################
+# SystemConfig - configure sysctl parameters, kernel parameters, and limits
 function SystemConfig {
 
   if [[ -r /etc/sysctl.conf ]] && ! grep -q swappiness /etc/sysctl.conf; then
@@ -492,8 +490,9 @@ EOT
 }
 
 ################################################################################
+# SGroverDotfiles - download the author's dotfiles for convenience
 function SGroverDotfiles {
-  CONFIRMATION=$(_GetConfirmation "Clone and setup symlinks for Seth Grover's dotfiles [Y/n]?" Y)
+  CONFIRMATION=$(_GetConfirmation "Clone and setup symlinks for Seth Grover's dotfiles [y/N]?" N)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_CONFIG_PATH"
@@ -541,8 +540,8 @@ function SGroverDotfiles {
   fi # dotfiles setup confirmation
 }
 
-
 ################################################################################
+# InstallMalcolm - clone and configure Malcolm and grab some sample PCAP
 function InstallMalcolm {
 
   MALCOLM_PATH="$HOME"/Malcolm
@@ -615,6 +614,7 @@ function InstallMalcolm {
 }
 
 ################################################################################
+# SetupConnectivity - configure dynamic DNS and ngrok for easier connectivity
 function SetupConnectivity {
 
   # dynamic DNS
@@ -649,7 +649,7 @@ function SetupConnectivity {
 }
 
 ################################################################################
-# "main"
+# "main" - ask the user what they want to do, and do it (or do it without interaction)
 
 # in case we've already got some envs set up to use
 _EnvSetup
