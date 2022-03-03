@@ -75,6 +75,21 @@ function _GetConfirmation {
 }
 
 ###################################################################################
+function _GetString {
+  PROMPT=${1:-""}
+  DEFAULT_ANSWER=${2:-""}
+  unset RESPONSE
+  if (( $MALCOLM_SETUP_NONINTERACTIVE == 1 )); then
+    echo "${PROMPT} ${DEFAULT_ANSWER}" >&2
+  else
+    echo -n "${PROMPT} " >&2
+    read RESPONSE
+  fi
+  RESPONSE=${RESPONSE:-$DEFAULT_ANSWER}
+  echo $RESPONSE
+}
+
+###################################################################################
 # convenience function for installing curl/git/jq/moreutils for cloning/downloading
 function InstallEssentialPackages {
   if curl -V >/dev/null 2>&1 && \
@@ -338,55 +353,84 @@ function CreateCommonLinuxConfig {
 }
 
 ################################################################################
+function _InstallCroc {
+  mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_DATA_PATH"/bash-completion/completions
+
+  CROC_RELEASE="$(_GitLatestRelease schollz/croc | sed 's/^v//')"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -L "https://github.com/schollz/croc/releases/download/v${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
+  cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
+  cp -f "${TMP_CLONE_DIR}"/bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
+  chmod 755 "$LOCAL_BIN_PATH"/croc
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+function _InstallGron {
+  mkdir -p "$LOCAL_BIN_PATH"
+
+  GRON_RELEASE="$(_GitLatestRelease tomnomnom/gron | sed 's/^v//')"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -L "https://github.com/tomnomnom/gron/releases/download/v${GRON_RELEASE}/gron-linux-amd64-${GRON_RELEASE}.tgz" | tar xvzf - -C "${TMP_CLONE_DIR}"
+  cp -f "${TMP_CLONE_DIR}"/gron "$LOCAL_BIN_PATH"/gron
+  chmod 755 "$LOCAL_BIN_PATH"/gron
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+function _InstallSq {
+  mkdir -p "$LOCAL_BIN_PATH"
+
+  SQ_RELEASE="$(_GitLatestRelease neilotoole/sq | sed 's/^v//')"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -L "https://github.com/neilotoole/sq/releases/download/v${SQ_RELEASE}/sq-linux-amd64.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
+  cp -f "${TMP_CLONE_DIR}"/sq "$LOCAL_BIN_PATH"/sq
+  chmod 755 "$LOCAL_BIN_PATH"/sq
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+function _InstallNgrok {
+  mkdir -p "$LOCAL_BIN_PATH"
+
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -o "${TMP_CLONE_DIR}"/ngrok.zip -L "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
+  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
+  unzip ./ngrok.zip
+  chmod 755 ./ngrok
+  cp -f ./ngrok "$LOCAL_BIN_PATH"/ngrok
+  popd >/dev/null 2>&1
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+function _InstallBat {
+  mkdir -p "$LOCAL_BIN_PATH"
+
+  BAT_RELEASE="$(_GitLatestRelease sharkdp/bat)"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -L "https://github.com/sharkdp/bat/releases/download/${BAT_RELEASE}/bat-${BAT_RELEASE}-x86_64-unknown-linux-musl.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
+  cp -f "${TMP_CLONE_DIR}"/bat "$LOCAL_BIN_PATH"/bat
+  chmod 755 "$LOCAL_BIN_PATH"/bat
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+function _InstallDra {
+  mkdir -p "$LOCAL_BIN_PATH"
+
+  DRA_RELEASE="$(_GitLatestRelease devmatteini/dra)"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  curl -L "https://github.com/devmatteini/dra/releases/download/${DRA_RELEASE}/dra-${DRA_RELEASE}.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
+  cp -f "${TMP_CLONE_DIR}"/dra "$LOCAL_BIN_PATH"/dra
+  chmod 755 "$LOCAL_BIN_PATH"/dra
+  rm -rf "$TMP_CLONE_DIR"
+}
+
 function InstallUserLocalBinaries {
   CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-    mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_DATA_PATH"/bash-completion/completions
-
-    CROC_RELEASE="$(_GitLatestRelease schollz/croc | sed 's/^v//')"
-    TMP_CLONE_DIR="$(mktemp -d)"
-    curl -L "https://github.com/schollz/croc/releases/download/v${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-    cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
-    cp -f "${TMP_CLONE_DIR}"/bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
-    chmod 755 "$LOCAL_BIN_PATH"/croc
-    rm -rf "$TMP_CLONE_DIR"
-
-    GRON_RELEASE="$(_GitLatestRelease tomnomnom/gron | sed 's/^v//')"
-    TMP_CLONE_DIR="$(mktemp -d)"
-    curl -L "https://github.com/tomnomnom/gron/releases/download/v${GRON_RELEASE}/gron-linux-amd64-${GRON_RELEASE}.tgz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-    cp -f "${TMP_CLONE_DIR}"/gron "$LOCAL_BIN_PATH"/gron
-    chmod 755 "$LOCAL_BIN_PATH"/gron
-    rm -rf "$TMP_CLONE_DIR"
-
-    SQ_RELEASE="$(_GitLatestRelease neilotoole/sq | sed 's/^v//')"
-    TMP_CLONE_DIR="$(mktemp -d)"
-    curl -L "https://github.com/neilotoole/sq/releases/download/v${SQ_RELEASE}/sq-linux-amd64.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-    cp -f "${TMP_CLONE_DIR}"/sq "$LOCAL_BIN_PATH"/sq
-    chmod 755 "$LOCAL_BIN_PATH"/sq
-    rm -rf "$TMP_CLONE_DIR"
-
-    TMP_CLONE_DIR="$(mktemp -d)"
-    curl -o "${TMP_CLONE_DIR}"/ngrok.zip -L "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
-    pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
-    unzip ./ngrok.zip
-    chmod 755 ./ngrok
-    cp -f ./ngrok "$LOCAL_BIN_PATH"/ngrok
-    popd >/dev/null 2>&1
-    rm -rf "$TMP_CLONE_DIR"
-
-    BAT_RELEASE="$(_GitLatestRelease sharkdp/bat)"
-    TMP_CLONE_DIR="$(mktemp -d)"
-    curl -L "https://github.com/sharkdp/bat/releases/download/${BAT_RELEASE}/bat-${BAT_RELEASE}-x86_64-unknown-linux-musl.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
-    cp -f "${TMP_CLONE_DIR}"/bat "$LOCAL_BIN_PATH"/bat
-    chmod 755 "$LOCAL_BIN_PATH"/bat
-    rm -rf "$TMP_CLONE_DIR"
-
-    DRA_RELEASE="$(_GitLatestRelease devmatteini/dra)"
-    TMP_CLONE_DIR="$(mktemp -d)"
-    curl -L "https://github.com/devmatteini/dra/releases/download/${DRA_RELEASE}/dra-${DRA_RELEASE}.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
-    cp -f "${TMP_CLONE_DIR}"/dra "$LOCAL_BIN_PATH"/dra
-    chmod 755 "$LOCAL_BIN_PATH"/dra
-    rm -rf "$TMP_CLONE_DIR"
+    _InstallCroc
+    _InstallGron
+    _InstallSq
+    _InstallNgrok
+    _InstallBat
+    _InstallDra
   fi
 }
 
@@ -570,6 +614,39 @@ function InstallMalcolm {
   fi
 }
 
+################################################################################
+function SetupConnectivity {
+
+  # dynamic DNS
+  if ! ( crontab -l | grep -q curl ); then
+    CONFIRMATION=$(_GetConfirmation "Specify @reboot crontab command for DDNS [y/N]?" N)
+    if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+      COMMAND=$(_GetString "Command:" "")
+      if [[ -n "$COMMAND" ]]; then
+        ((echo 'SHELL=/bin/bash') ; \
+         (( crontab -l | grep . | grep -v ^SHELL= ; \
+            echo "@reboot ${COMMAND}" ) \
+            | sort | uniq )) | crontab -
+      fi
+    fi
+  fi
+
+  # ngrok
+  if ! ( crontab -l | grep -q ngrok ); then
+    CONFIRMATION=$(_GetConfirmation "Configure ngrok [y/N]?" N)
+    if [[ $CONFIRMATION =~ ^[Yy] ]]; then
+      [[ ! -f "${LOCAL_BIN_PATH}"/ngrok ]] && _InstallNgrok
+      TOKEN=$(_GetString "ngrok token:" "")
+      if [[ -n "$TOKEN" ]]; then
+        "${LOCAL_BIN_PATH}"/ngrok authtoken "$TOKEN"
+        ((echo 'SHELL=/bin/bash') ; \
+         (( crontab -l | grep . | grep -v ^SHELL= ; \
+            echo "@reboot sleep 180 && ( nohup ${LOCAL_BIN_PATH}/ngrok http https://localhost >/dev/null 2>&1 </dev/null & )" ) \
+            | sort | uniq )) | crontab -
+      fi
+    fi
+  fi
+}
 
 ################################################################################
 # "main"
@@ -607,6 +684,7 @@ if (( $USER_FUNCTION_IDX == 0 )); then
   CreateCommonLinuxConfig
   SGroverDotfiles
   InstallMalcolm
+  SetupConnectivity
 
 elif (( $USER_FUNCTION_IDX > 0 )) && (( $USER_FUNCTION_IDX <= "${#FUNCTIONS[@]}" )); then
   # execute one function, à la carte
