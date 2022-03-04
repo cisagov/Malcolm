@@ -126,7 +126,7 @@ outputs:
       # to make the id less predictable.
 
       # enable/disable the community id feature.
-      community-id: false
+      community-id: True
       # Seed value for the ID output. Valid values are 0-65535.
       community-id-seed: 0
 
