@@ -2,7 +2,7 @@
   "type": "custom_webhook",
   "name": "Malcolm API Loopback Webhook",
   "custom_webhook": {
-    "path": "event",
+    "path": "alert",
     "header_params": {
       "Content-Type": "application/json"
     },

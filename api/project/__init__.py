@@ -592,18 +592,63 @@ def ping():
     return jsonify(ping="pong")
 
 
+@app.route('/alert', methods=['POST'])
 @app.route('/event', methods=['POST'])
 def event():
-    """Handles
+    """Webhook that accepts alert data (like that from the OpenSearch Alerting API) to be
+    reindexed into OpenSearch as session records (e.g., arkime_sessions3-*) for viewing
+    in Malcolm's default visualizations.
+
+    See Malcolm's malcolm_api_loopback_monitor.json and malcolm_api_loopback_destination.json
+    for formatting template examples.
 
     Parameters
     ----------
     HTTP POST data in JSON format
+    e.g.:
+        {
+          "alert": {
+            "monitor": {
+              "name": "Malcolm API Loopback Monitor"
+            },
+            "trigger": {
+              "name": "Malcolm API Loopback Trigger",
+              "severity": 4
+            },
+            "period": {
+              "start": "2022-03-08T18:03:30.576Z",
+              "end": "2022-03-08T18:04:30.576Z"
+            },
+            "results": [
+              {
+                "_shards": {
+                  "total": 5,
+                  "failed": 0,
+                  "successful": 5,
+                  "skipped": 0
+                },
+                "hits": {
+                  "hits": [],
+                  "total": {
+                    "value": 697,
+                    "relation": "eq"
+                  },
+                  "max_score": null
+                },
+                "took": 1,
+                "timed_out": false
+              }
+            ],
+            "body": "",
+            "alert": "PLauan8BaL6eY1yCu9Xj",
+            "error": ""
+          }
+        }
 
     Returns
     -------
     status
-        the JSON-formatted response from indexing/updating the alert record
+        the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
     alert = {}
     idxResponse = {}

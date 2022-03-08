@@ -85,6 +85,7 @@ In short, Malcolm provides an easily deployable network analysis tool suite for 
         + [STIX™ and TAXII™](#ZeekIntelSTIX)
         + [MISP](#ZeekIntelMISP)
     - [Alerting](#Alerting)
+        + [Email Sender Accounts](#AlertingEmail)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
         + [Examples](#APIExamples)
@@ -1544,6 +1545,10 @@ Note that only a subset of MISP [attribute types](https://www.misp-project.org/d
 ### <a name="Alerting"></a>Alerting
 
 See [Alerting](https://opensearch.org/docs/latest/monitoring-plugins/alerting/index/) in the OpenSearch documentation.
+
+A fresh installation of Malcolm configures an example [custom webhook destination](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#create-destinations) named **Malcolm API Loopback Webhook** that directs the triggered alerts back into the [Malcolm API](#API) to be reindexed as a session record with `event.dataset` set to `alerting`. The corresponding monitor **Malcolm API Loopback Monitor** is disabled by default, as you'll likely want to configure the trigger conditions to suit your needs. These examples are provided to illustrate how triggers and monitors can interact with a custom webhook to process alerts.
+
+#### <a name="AlertingEmail"></a>Email Sender Accounts
 
 When using an email account to send alerts, you must [authenticate each sender account](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) before you can send an email. The [`auth_setup`](#AuthSetup) script can be used to securely store the email account credentials:
 
@@ -3294,6 +3299,80 @@ Some security-related API examples:
         "doc_count_error_upper_bound": 0,
         "sum_other_doc_count": 0
     }
+}
+```
+</details>
+
+#### Event Logging
+
+`POST` - /mapi/event
+
+A webhook that accepts alert data to be reindexed into OpenSearch as session records for viewing in Malcolm's [dashboards](#Dashboards). See [Alerting](#Alerting) for more details and an example of how this API is used.
+
+<details>
+<summary>Example input:</summary>
+
+```json
+
+{
+  "alert": {
+    "monitor": {
+      "name": "Malcolm API Loopback Monitor"
+    },
+    "trigger": {
+      "name": "Malcolm API Loopback Trigger",
+      "severity": 4
+    },
+    "period": {
+      "start": "2022-03-08T18:03:30.576Z",
+      "end": "2022-03-08T18:04:30.576Z"
+    },
+    "results": [
+      {
+        "_shards": {
+          "total": 5,
+          "failed": 0,
+          "successful": 5,
+          "skipped": 0
+        },
+        "hits": {
+          "hits": [],
+          "total": {
+            "value": 697,
+            "relation": "eq"
+          },
+          "max_score": null
+        },
+        "took": 1,
+        "timed_out": false
+      }
+    ],
+    "body": "",
+    "alert": "PLauan8BaL6eY1yCu9Xj",
+    "error": ""
+  }
+}
+```
+</details>
+
+<details>
+<summary>Example output:</summary>
+
+```json
+
+{
+  "_index": "arkime_sessions3-220308",
+  "_type": "_doc",
+  "_id": "220308-PLauan8BaL6eY1yCu9Xj",
+  "_version": 4,
+  "result": "updated",
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0
+  },
+  "_seq_no": 9045,
+  "_primary_term": 1
 }
 ```
 </details>
