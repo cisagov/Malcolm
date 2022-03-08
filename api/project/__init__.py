@@ -4,14 +4,17 @@ import opensearch_dsl
 import opensearchpy
 import os
 import pytz
+import random
 import re
 import requests
+import string
 import warnings
 
 from collections import defaultdict
 from collections.abc import Iterable
 from datetime import datetime
 from flask import Flask, jsonify, request
+
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -156,6 +159,10 @@ def get_iterable(x):
         return x
     else:
         return (x,)
+
+
+def random_id(length=20):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 def gettimes(args):
@@ -596,9 +603,10 @@ def event():
     Returns
     -------
     status
-        a string containing "OK"
+        the JSON-formatted response from indexing/updating the alert record
     """
     alert = {}
+    idxResponse = {}
     if request.method == 'POST':
         data = request.get_json() if request.is_json else None
         if data:
@@ -634,14 +642,14 @@ def event():
                 alert['event']['dataset'] = 'alerting'
                 alert['event']['module'] = 'alerting'
                 alert['event']['url'] = '/dashboards/app/alerting#/dashboard'
-                if alertId := deep_get(
+                alertId = deep_get(
                     data,
                     [
                         'alert',
                         'alert',
                     ],
-                ):
-                    alert['event']['id'] = alertId
+                )
+                alert['event']['id'] = alertId if alertId else random_id()
                 if alertBody := deep_get(
                     data,
                     [
@@ -695,10 +703,18 @@ def event():
                         if hitCount := deep_get(alertResults[0], ['hits', 'total', 'value'], 0):
                             alert['event']['hits'] = hitCount
 
+                docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
+                idxResponse = opensearch_dsl.connections.get_connection().index(
+                    index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
+                    id=f"{docDateStr}-{alert['event']['id']}",
+                    body=alert,
+                )
+
     if debugApi:
         print(json.dumps(data))
         print(json.dumps(alert))
-    return jsonify(alert=alert)
+        print(json.dumps(idxResponse))
+    return jsonify(result=idxResponse)
 
 
 @app.errorhandler(Exception)
