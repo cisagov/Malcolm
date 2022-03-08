@@ -139,6 +139,7 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object("project.config.Config")
 opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]])
+debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 
 def deep_get(d, keys, default=None):
@@ -597,11 +598,107 @@ def event():
     status
         a string containing "OK"
     """
+    alert = {}
     if request.method == 'POST':
         data = request.get_json() if request.is_json else None
         if data:
-            print("Received Data = ", data)
-    return jsonify(status="OK")
+            nowTimeStr = datetime.now().astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')
+            if 'alert' in data:
+                alert['@timestamp'] = deep_get(
+                    data,
+                    [
+                        'alert',
+                        'period',
+                        'start',
+                    ],
+                    nowTimeStr,
+                )
+                alert['firstPacket'] = alert['@timestamp']
+                alert['lastPacket'] = deep_get(
+                    data,
+                    [
+                        'alert',
+                        'period',
+                        'end',
+                    ],
+                    nowTimeStr,
+                )
+                alert['ecs'] = {}
+                alert['ecs']['version'] = '1.6.0'
+                alert['event'] = {}
+                alert['event']['kind'] = 'alert'
+                alert['event']['start'] = alert['firstPacket']
+                alert['event']['end'] = alert['lastPacket']
+                alert['event']['ingested'] = nowTimeStr
+                alert['event']['provider'] = 'malcolm'
+                alert['event']['dataset'] = 'alerting'
+                alert['event']['module'] = 'alerting'
+                alert['event']['url'] = '/dashboards/app/alerting#/dashboard'
+                if alertId := deep_get(
+                    data,
+                    [
+                        'alert',
+                        'alert',
+                    ],
+                ):
+                    alert['event']['id'] = alertId
+                if alertBody := deep_get(
+                    data,
+                    [
+                        'alert',
+                        'body',
+                    ],
+                ):
+                    alert['event']['original'] = alertBody
+                if triggerName := deep_get(
+                    data,
+                    [
+                        'alert',
+                        'trigger',
+                        'name',
+                    ],
+                ):
+                    alert['event']['reason'] = triggerName
+                if monitorName := deep_get(
+                    data,
+                    [
+                        'alert',
+                        'monitor',
+                        'name',
+                    ],
+                ):
+                    alert['rule'] = {}
+                    alert['rule']['name'] = monitorName
+                if alertSeverity := str(
+                    deep_get(
+                        data,
+                        [
+                            'alert',
+                            'trigger',
+                            'severity',
+                        ],
+                    )
+                ):
+                    sevnum = 100 - ((int(alertSeverity) - 1) * 20) if alertSeverity.isdigit() else 40
+                    alert['event']['risk_score'] = sevnum
+                    alert['event']['risk_score_norm'] = sevnum
+                    alert['event']['severity'] = sevnum
+                    alert['event']['severity_tags'] = 'Alert'
+                if alertResults := deep_get(
+                    data,
+                    [
+                        'alert',
+                        'results',
+                    ],
+                ):
+                    if len(alertResults) > 0:
+                        if hitCount := deep_get(alertResults[0], ['hits', 'total', 'value'], 0):
+                            alert['event']['hits'] = hitCount
+
+    if debugApi:
+        print(json.dumps(data))
+        print(json.dumps(alert))
+    return jsonify(alert=alert)
 
 
 @app.errorhandler(Exception)
@@ -616,4 +713,7 @@ def basic_error(e):
     error
         The type of exception and its string representation (e.g., "KeyError: 'protocols'")
     """
-    return jsonify(error=f"{type(e).__name__}: {str(e)}")
+    errorStr = f"{type(e).__name__}: {str(e)}"
+    if debugApi:
+        print(errorStr)
+    return jsonify(error=errorStr)
