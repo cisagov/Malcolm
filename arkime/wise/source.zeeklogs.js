@@ -67,6 +67,7 @@ class MalcolmSource extends WISESource {
       "event.end",
       "event.freq_score_v1",
       "event.freq_score_v2",
+      "event.hits",
       "event.id",
       "event.ingested",
       "event.kind",
