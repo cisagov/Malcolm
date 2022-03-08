@@ -59,6 +59,7 @@ ADD sensor-iso/config/includes.chroot/usr/share/filebeat/kibana/7/dashboard-cust
 ADD sensor-iso/config/includes.chroot/usr/share/auditbeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
 ADD sensor-iso/config/includes.chroot/usr/share/protologbeat/kibana/7/dashboard/*.json /opt/dashboards/beats
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
+ADD dashboards/alerting /opt/alerting
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
