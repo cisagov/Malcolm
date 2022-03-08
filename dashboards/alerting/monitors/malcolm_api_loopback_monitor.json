@@ -1,0 +1,78 @@
+{
+  "type": "monitor",
+  "name": "Malcolm API Loopback Monitor",
+  "monitor_type": "query_level_monitor",
+  "enabled": false,
+  "schedule": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  },
+  "inputs": [
+    {
+      "search": {
+        "indices": [
+          "arkime_sessions3-*"
+        ],
+        "query": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "range": {
+                    "firstPacket": {
+                      "from": "{{period_end}}||-10m",
+                      "to": "{{period_end}}",
+                      "include_lower": true,
+                      "include_upper": true,
+                      "format": "epoch_millis",
+                      "boost": 1
+                    }
+                  }
+                }
+              ],
+              "adjust_pure_negative": true,
+              "boost": 1
+            }
+          },
+          "aggregations": {}
+        }
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "query_level_trigger": {
+        "name": "Malcolm API Loopback Trigger",
+        "severity": "4",
+        "condition": {
+          "script": {
+            "source": "ctx.results[0].hits.total.value > 999999999",
+            "lang": "painless"
+          }
+        },
+        "actions": [
+          {
+            "name": "Malcolm API Loopback Action",
+            "destination_id": "ALERTING_EXAMPLE_DESTINATION_ID",
+            "message_template": {
+              "source": "{\n  \"alert\": {\n    \"monitor\": {\n      \"name\": \"{{ctx.monitor.name}}\"\n    },\n    \"trigger\": {\n      \"name\": \"{{ctx.trigger.name}}\",\n      \"severity\": {{ctx.trigger.severity}}\n    },\n    \"period\": {\n      \"start\": \"{{ctx.periodStart}}\",\n      \"end\": \"{{ctx.periodEnd}}\"\n    },\n    \"results\": {{#toJson}}ctx.results{{/toJson}},\n    \"body\": \"{{#toJson}}ctx.payload{{/toJson}}\"\n  }\n}",
+              "lang": "mustache"
+            },
+            "throttle_enabled": true,
+            "subject_template": {
+              "source": "",
+              "lang": "mustache"
+            },
+            "throttle": {
+              "value": 1,
+              "unit": "MINUTES"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

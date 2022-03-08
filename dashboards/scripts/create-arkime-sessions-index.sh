@@ -25,6 +25,7 @@ INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
+ALERTING_EXAMPLE_DESTINATION_NAME=${ALERTING_EXAMPLE_DESTINATION_NAME:-"Malcolm API Loopback Webhook"}
 
 OTHER_INDEX_PATTERNS=(
   "filebeat-*;filebeat-*;@timestamp"
@@ -187,6 +188,37 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       fi
 
       echo "OpenSearch anomaly detectors creation complete!"
+
+      echo "Creating OpenSearch alerting objects..."
+
+      # Create alerting objects here
+
+      # destinations
+      for i in /opt/alerting/destinations/*.json; do
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/destinations" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+      done
+      # get example destination ID
+      ALERTING_EXAMPLE_DESTINATION_ID=$(curl -L --silent --show-error -XGET -H 'osd-xsrf:true' -H 'Content-type:application/json' \
+          "$OS_URL/_plugins/_alerting/destinations" | \
+            jq -r ".destinations[] | select(.name == \"$ALERTING_EXAMPLE_DESTINATION_NAME\").id" | \
+            head -n 1)
+
+      # monitors
+      for i in /opt/alerting/monitors/*.json; do
+        if [[ -n "$ALERTING_EXAMPLE_DESTINATION_ID" ]] && \
+           grep -q ALERTING_EXAMPLE_DESTINATION_ID "$i"; then
+          # replace example destination ID in monitor definition
+          TMP_MONITOR_FILENAME="$(mktemp)"
+          sed "s/ALERTING_EXAMPLE_DESTINATION_ID/$ALERTING_EXAMPLE_DESTINATION_ID/g" "$i" > "$TMP_MONITOR_FILENAME"
+          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$TMP_MONITOR_FILENAME"
+          rm -f "$TMP_MONITOR_FILENAME"
+        else
+          # insert monitor as defined
+          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        fi
+      done
+
+      echo "OpenSearch alerting objects creation complete!"
 
     fi
   fi

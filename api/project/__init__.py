@@ -584,6 +584,26 @@ def ping():
     return jsonify(ping="pong")
 
 
+@app.route('/event', methods=['POST'])
+def event():
+    """Handles
+
+    Parameters
+    ----------
+    HTTP POST data in JSON format
+
+    Returns
+    -------
+    status
+        a string containing "OK"
+    """
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else None
+        if data:
+            print("Received Data = ", data)
+    return jsonify(status="OK")
+
+
 @app.errorhandler(Exception)
 def basic_error(e):
     """General exception handler for the app
