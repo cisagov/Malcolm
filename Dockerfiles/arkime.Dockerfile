@@ -4,7 +4,7 @@ FROM debian:bullseye-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "3.3.1"
+ENV ARKIME_VERSION "3.4.0"
 ENV ARKIMEDIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
