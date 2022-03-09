@@ -15,6 +15,10 @@ Although all of the open source tools which make up Malcolm are already availabl
 
 In short, Malcolm provides an easily deployable network analysis tool suite for full packet capture artifacts (PCAP files) and Zeek logs. While Internet access is required to build it, it is not required at runtime.
 
+## Share your feedback
+
+You can help steer Malcolm's development by sharing your ideas and feedback. Please take a few minutes to complete [this survey ↪](https://forms.gle/JYt9QwA5C4SYX8My6) (hosted on Google Forms) so we can understand the members of the Malcolm community and their use cases for this tool.
+
 ## <a name="TableOfContents"></a>Table of Contents
 
 * [Automated Build Workflows Status](#BuildBadges)
