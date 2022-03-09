@@ -11,6 +11,7 @@
 ###################################################################################################
 
 import argparse
+from datetime import date, datetime
 import json
 import os
 import shutil
@@ -368,6 +369,8 @@ def suricataFileWorker(suricataWorkerArgs):
 
                     # execute suricata-capture for pcap file
                     retcode, output = run_process(cmd, debug=verboseDebug)
+                    unique_name = "eve_" + str(datetime.now()) + ".json"
+                    os.rename('/var/log/suricata/eve.json', unique_name)
                     if retcode == 0:
                         if debug:
                             eprint(
