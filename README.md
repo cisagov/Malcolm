@@ -43,6 +43,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
         * [Local account management](#AuthBasicAccountManagement)
         * [Lightweight Directory Access Protocol (LDAP) authentication](#AuthLDAP)
             - [LDAP connection security](#AuthLDAPSecurity)
+    * [TLS certificates](#TLSCerts)
     * [Starting Malcolm](#Starting)
     * [Stopping and restarting Malcolm](#StopAndRestart)
     * [Clearing Malcolm's data](#Wipe)
@@ -566,7 +567,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `OS_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external OpenSearch instances specified in `OS_EXTERNAL_HOSTS`
 
-* `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full SSL certificate validation; this may fail if using self-signed certificates (default `false`)
+* `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full TLS certificate validation; this may fail if using self-signed certificates (default `false`)
 
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
 
@@ -851,6 +852,14 @@ In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` 
     - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
 
 For encrypted connections (whether using **StartTLS** or **LDAPS**), Malcolm will require and verify certificates when one or more trusted CA certificate files are placed in the `nginx/ca-trust/` directory. Otherwise, any certificate presented by the domain server will be accepted.
+
+### <a name="TLSCerts"></a>TLS certificates
+
+When you [set up authentication](#AuthSetup) for Malcolm a set of unique [self-signed](https://en.wikipedia.org/wiki/Self-signed_certificate) TLS certificates are created which are used to secure the connection between clients (e.g., your web browser) and Malcolm's browser-based interface. This is adequate for most Malcolm instances as they are often run locally or on internal networks, although your browser will most likely require you to add a security exception for the certificate the first time you connect to Malcolm.
+
+Another option is to generate your own certificates (or have them issued to you) and have them placed in the `nginx/certs/` directory. The certificate and key file should be named `cert.pem` and `key.pem`, respectively.
+
+A third possibility is to use a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates for you and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities like [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm, so you'll need to set the `NGINX_SSL` environment variable to `false` in [`docker-compose.yml`](#DockerComposeYml) (or answer `no` to the "Require encrypted HTTPS connections?" question posed by `install.py`). If you are setting `NGINX_SSL` to `false`, **make sure** you understand what you are doing and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying your local firewall configuration.
 
 ### <a name="Starting"></a>Starting Malcolm
 
@@ -3738,6 +3747,8 @@ Restart Malcolm upon system or Docker daemon restart? (y/N): y
 
 Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
 
+Require encrypted HTTPS connections? (Y/n): y
+
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
 Configure snapshot repository for OpenSearch index state management? (y/N): n
@@ -3785,7 +3796,7 @@ in /home/user/Malcolm/scripts.
 
 At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
 
-Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed SSL certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
+Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed TLS certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
 user@host:~/Malcolm$ ./scripts/auth_setup
 Store administrator username/password for local Malcolm access? (Y/n): 
