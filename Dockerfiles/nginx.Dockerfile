@@ -32,7 +32,10 @@ ENV TERM xterm
 
 USER root
 
-# authentication method: encrypted HTTP basic authentication ('true') vs nginx-auth-ldap ('false')
+# encryption method: HTTPS ('true') vs. unencrypted HTTP ('false')
+ARG NGINX_SSL=true
+
+# authentication method: HTTP basic authentication ('true') vs nginx-auth-ldap ('false')
 ARG NGINX_BASIC_AUTH=true
 
 # NGINX LDAP (NGINX_BASIC_AUTH=false) can support LDAP, LDAPS, or LDAP+StartTLS.
@@ -50,6 +53,7 @@ ARG NGINX_LDAP_TLS_STUNNEL_CHECK_HOST=
 ARG NGINX_LDAP_TLS_STUNNEL_CHECK_IP=
 ARG NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL=2
 
+ENV NGINX_SSL $NGINX_SSL
 ENV NGINX_BASIC_AUTH $NGINX_BASIC_AUTH
 ENV NGINX_LDAP_TLS_STUNNEL $NGINX_LDAP_TLS_STUNNEL
 ENV NGINX_LDAP_TLS_STUNNEL_CHECK_HOST $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
@@ -197,7 +201,6 @@ ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
 ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
-EXPOSE 80
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

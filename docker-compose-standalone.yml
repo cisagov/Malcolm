@@ -26,6 +26,13 @@ x-auth-variables: &auth-variables
   NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL : 2
 
 x-nginx-variables: &nginx-variables
+  # Whether or not nginx should use HTTPS. This is almost CERTAINLY what you want.
+  # The only case you may want to set this to false is if you're using another
+  # reverse proxy in front of Malcolm. Even if set to 'false', NGINX will still
+  # listen on port 443 (it just won't be encrypted). If you change this, you'll
+  # probably want to change "0.0.0.0:443:443" to something like
+  # "127.0.0.1:80:443" in the ports section for the nginx-proxy service.
+  NGINX_SSL : 'true'
   # Whether or not to write nginx's access.log and error.log to OpenSearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
