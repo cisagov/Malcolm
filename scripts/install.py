@@ -332,6 +332,10 @@ class Installer(object):
         if restartMode == 'no':
             restartMode = '"no"'
 
+        nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=True)
+        if not nginxSSL:
+            nginxSSL = not InstallerYesOrNo('Unencrypted connections are NOT recommended. Are you sure?', default=False)
+
         ldapStartTLS = False
         ldapServerType = 'winldap'
         useBasicAuth = not InstallerYesOrNo(
@@ -544,8 +548,11 @@ class Installer(object):
                     elif 'PGID' in line:
                         # process GID
                         line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
+                    elif 'NGINX_SSL' in line:
+                        # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
+                        line = re.sub(r'(NGINX_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(nginxSSL)}", line)
                     elif 'NGINX_BASIC_AUTH' in line:
-                        # basic (useBasicAuth=true) vs ldap (useBasicAuth=false)
+                        # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
                         line = re.sub(
                             r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line
                         )
@@ -709,6 +716,30 @@ class Installer(object):
                         line = (
                             f"{' ' * leadingSpaces}{'' if opensearchOpen else '# '}{line.lstrip().lstrip('#').lstrip()}"
                         )
+                    elif (
+                        (not serviceStartLine) and (currentService == 'nginx-proxy') and re.match(r'^\s*test\s*:', line)
+                    ):
+                        # set nginx-proxy health check based on whether they're using HTTPS or not
+                        line = re.sub(
+                            r'https?://localhost:\d+',
+                            fr"{'https' if nginxSSL else 'http'}://localhost:{443 if nginxSSL else 80}",
+                            line,
+                        )
+                    elif (
+                        (not serviceStartLine)
+                        and (currentService == 'nginx-proxy')
+                        and re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line)
+                    ):
+                        # set bind IP and HTTP port based on whether they're using HTTPS or not
+                        line = re.sub(
+                            r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                            fr"\g<1>{'0.0.0.0' if nginxSSL else '127.0.0.1'}:\g<3>",
+                            line,
+                        )
+                        if (':80:' in line) and (nginxSSL == True):
+                            line = line.replace(':80:', ':443:')
+                        elif (':443"' in line) and (nginxSSL == False):
+                            line = line.replace(':443:', ':80:')
 
                     if not skipLine:
                         print(line)

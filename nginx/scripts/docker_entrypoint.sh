@@ -26,7 +26,14 @@ if [ "$socketMissing" = 1 -a "$1" = 'supervisord' -a "$2" = '-c' -a "$3" = '/etc
   exit 1
 fi
 
-# set up for NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth
+# set up for HTTPS/HTTP and NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth
+
+# "include" file that sets 'ssl on' and indicates the locations of the PEM files
+NGINX_SSL_ON_CONF=/etc/nginx/nginx_ssl_on_config.conf
+# "include" file that sets 'ssl off'
+NGINX_SSL_OFF_CONF=/etc/nginx/nginx_ssl_off_config.conf
+# "include" symlink name which, at runtime, will point to either the ON of OFF file
+NGINX_SSL_CONF=/etc/nginx/nginx_ssl_config.conf
 
 # a blank file just to use as an "include" placeholder for the nginx's LDAP config when LDAP is not used
 NGINX_BLANK_CONF=/etc/nginx/nginx_blank.conf
@@ -88,6 +95,14 @@ if (( ${#CA_FILES} )) ; then
     ( [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] || [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] ) && NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;" || NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert chain;"
   fi
   popd >/dev/null 2>&1
+fi
+
+if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
+  # doing encrypted HTTPS
+  ln -sf "$NGINX_SSL_ON_CONF" "$NGINX_SSL_CONF"
+else
+  # doing unencrypted HTTP (not recommended)
+  ln -sf "$NGINX_SSL_OFF_CONF" "$NGINX_SSL_CONF"
 fi
 
 if [[ -z $NGINX_BASIC_AUTH ]] || [[ "$NGINX_BASIC_AUTH" == "true" ]]; then
