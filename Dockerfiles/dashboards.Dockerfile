@@ -58,12 +58,12 @@ RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodule
 
 RUN eval "$(nodenv init -)" && \
     mkdir -p /usr/share/opensearch-dashboards/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch rerefactor https://github.com/mmguero-dev/osd_sankey_vis.git /usr/share/opensearch-dashboards/plugins/sankey_vis && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/mmguero-dev/osd_sankey_vis.git /usr/share/opensearch-dashboards/plugins/sankey_vis && \
     cd /usr/share/opensearch-dashboards/plugins/sankey_vis && \
     yarn osd bootstrap && \
     yarn install && \
     yarn build --opensearch-dashboards-version "${OPENSEARCH_DASHBOARDS_VERSION}" && \
-    mv ./build/osdSankeyVis-"${OPENSEARCH_DASHBOARDS_VERSION}".zip ./build/osdSankeyVis.zip
+    mv ./build/kbnSankeyVis-"${OPENSEARCH_DASHBOARDS_VERSION}".zip ./build/kbnSankeyVis.zip
 
 # runtime ##################################################################
 
@@ -107,14 +107,14 @@ ENV NODE_OPTIONS $NODE_OPTIONS
 
 USER root
 
-COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/osdSankeyVis.zip /tmp/osdSankeyVis.zip
+COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 
 RUN yum install -y curl psmisc util-linux zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
-    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/osdSankeyVis.zip --allow-root && \
+    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards/plugins/* && \
     yum clean all && \
     rm -rf /var/cache/yum
