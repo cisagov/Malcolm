@@ -115,7 +115,7 @@ RUN yum install -y curl psmisc util-linux zip unzip && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/osdSankeyVis.zip --allow-root && \
-    chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards/plugins && \
+    chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards/plugins/* && \
     yum clean all && \
     rm -rf /var/cache/yum
 
