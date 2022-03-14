@@ -123,4 +123,4 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
   [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
 done
 
-find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 644 "{}" \;
+find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \;
