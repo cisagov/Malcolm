@@ -336,67 +336,42 @@ function InstallCommonPackages {
 }
 
 ################################################################################
-# _InstallDra - devmatteini/dra is a command line tool to download release assets from GitHub
-function _InstallDra {
-  mkdir -p "$LOCAL_BIN_PATH"
-
-  DRA_RELEASE="$(_GitLatestRelease devmatteini/dra)"
-  TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/devmatteini/dra/releases/download/${DRA_RELEASE}/dra-${DRA_RELEASE}.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
-  cp -f "${TMP_CLONE_DIR}"/dra "$LOCAL_BIN_PATH"/dra
-  chmod 755 "$LOCAL_BIN_PATH"/dra
-  rm -rf "$TMP_CLONE_DIR"
-}
-
-################################################################################
 # _InstallCroc - schollz/croc: easily and securely send things from one computer to another
 function _InstallCroc {
-  [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
   mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_DATA_PATH"/bash-completion/completions
 
+  CROC_RELEASE="$(_GitLatestRelease schollz/croc | sed 's/^v//')"
   TMP_CLONE_DIR="$(mktemp -d)"
-  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
-  "${LOCAL_BIN_PATH}"/dra schollz/croc download -s "croc_{tag}_Linux-64bit.tar.gz"
-  tar xf croc*.tar.gz
-  cp -f croc "$LOCAL_BIN_PATH"/croc
-  cp -f bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
+  curl -L "https://github.com/schollz/croc/releases/download/v${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
+  cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
+  cp -f "${TMP_CLONE_DIR}"/bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
   chmod 755 "$LOCAL_BIN_PATH"/croc
-  popd >/dev/null 2>&1
   rm -rf "$TMP_CLONE_DIR"
 }
 
 ################################################################################
 # _InstallBat - sharkdp/bat: a cat(1) clone with wings
 function _InstallBat {
-  [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
   mkdir -p "$LOCAL_BIN_PATH"
 
+  BAT_RELEASE="$(_GitLatestRelease sharkdp/bat)"
   TMP_CLONE_DIR="$(mktemp -d)"
-  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
-  "${LOCAL_BIN_PATH}"/dra sharkdp/bat download -s "bat-v{tag}-x86_64-unknown-linux-musl.tar.gz"
-  tar xf bat*.tar.gz
-  cp -f bat*/bat "$LOCAL_BIN_PATH"/bat
+  curl -L "https://github.com/sharkdp/bat/releases/download/${BAT_RELEASE}/bat-${BAT_RELEASE}-x86_64-unknown-linux-musl.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
+  cp -f "${TMP_CLONE_DIR}"/bat "$LOCAL_BIN_PATH"/bat
   chmod 755 "$LOCAL_BIN_PATH"/bat
-  popd >/dev/null 2>&1
   rm -rf "$TMP_CLONE_DIR"
 }
 
 ################################################################################
 # _InstallBoringProxy - boringproxy/boringproxy: a reverse proxy and tunnel manager
 function _InstallBoringProxy {
-  [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
   mkdir -p "$LOCAL_BIN_PATH"
 
-  TMP_CLONE_DIR="$(mktemp -d)"
-  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
-  "${LOCAL_BIN_PATH}"/dra boringproxy/boringproxy download -s "boringproxy-linux-x86_64"
-  mv ./boringproxy-linux-x86_64 "${LOCAL_BIN_PATH}"/boringproxy.new
+  BORING_RELEASE="$(_GitLatestRelease boringproxy/boringproxy)"
+  curl -L -o "${LOCAL_BIN_PATH}"/boringproxy.new "https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-x86_64"
   chmod 755 "${LOCAL_BIN_PATH}"/boringproxy.new
-  $SUDO_CMD /usr/sbin/setcap 'cap_net_bind_service=+ep' "${LOCAL_BIN_PATH}"/boringproxy.new
   [[ -f "$LOCAL_BIN_PATH"/boringproxy ]] && rm -f "$LOCAL_BIN_PATH"/boringproxy
   mv "$LOCAL_BIN_PATH"/boringproxy.new "$LOCAL_BIN_PATH"/boringproxy
-  popd >/dev/null 2>&1
-  rm -rf "$TMP_CLONE_DIR"
 }
 
 ################################################################################
@@ -405,7 +380,7 @@ function _InstallNgrok {
   mkdir -p "$LOCAL_BIN_PATH"
 
   TMP_CLONE_DIR="$(mktemp -d)"
-  curl -o "${TMP_CLONE_DIR}"/ngrok.zip -L "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
+  curl -L -o "${TMP_CLONE_DIR}"/ngrok.zip -L "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
   pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
   unzip ./ngrok.zip
   mv ./ngrok "$LOCAL_BIN_PATH"/ngrok.new
@@ -421,7 +396,6 @@ function _InstallNgrok {
 function InstallUserLocalBinaries {
   CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-    [[ ! -f "${LOCAL_BIN_PATH}"/dra ]] && _InstallDra
     [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
     [[ ! -f "${LOCAL_BIN_PATH}"/bat ]] && _InstallBat
     [[ ! -f "${LOCAL_BIN_PATH}"/ngrok ]] && _InstallNgrok
