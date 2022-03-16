@@ -267,8 +267,7 @@ Visualizations and dashboards can be [easily created](../../README.md#BuildDashb
 
 The [dashboards.Dockerfile](../../Dockerfiles/dashboards.Dockerfile) installs the OpenSearch Dashboards plugins used by Malcolm (search for `opensearch-dashboards-plugin install` in that file). Additional Dashboards plugins could be installed by modifying this Dockerfile and [rebuilding](#Build) the `dashboards` Docker image.
 
-Third-party or community plugisn developed for Kibana will not install into OpenSearch dashboards without source code modification. Depending on the plugin, this could range from very smiple to very complex. As an illustrative example, the changes that were required to port the Sankey diagram visualization plugin from Kibana to OpenSearch Dashboards compatibility can be [viewed on GitHub](https://github.com/mmguero-dev/osd_sankey_vis/compare/edacf6b
-...main).
+Third-party or community plugisn developed for Kibana will not install into OpenSearch dashboards without source code modification. Depending on the plugin, this could range from very smiple to very complex. As an illustrative example, the changes that were required to port the Sankey diagram visualization plugin from Kibana to OpenSearch Dashboards compatibility can be [viewed on GitHub](https://github.com/mmguero-dev/osd_sankey_vis/compare/edacf6b...main).
 
 ## <a name="Scanners"></a>Carved file scanners
 
