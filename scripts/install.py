@@ -722,7 +722,7 @@ class Installer(object):
                         # set nginx-proxy health check based on whether they're using HTTPS or not
                         line = re.sub(
                             r'https?://localhost:\d+',
-                            fr"{'https' if nginxSSL else 'http'}://localhost:{443 if nginxSSL else 80}",
+                            fr"{'https' if nginxSSL else 'http'}://localhost:443",
                             line,
                         )
                     elif (
