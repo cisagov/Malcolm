@@ -52,6 +52,7 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # build and install system packages, zeek, spicy and plugins
 RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       bison \
       ca-certificates \

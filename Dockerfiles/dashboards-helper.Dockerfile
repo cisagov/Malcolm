@@ -69,7 +69,9 @@ ADD shared/bin/opensearch_status.sh /data/
 ADD shared/bin/opensearch_index_size_prune.py /data/
 ADD shared/bin/opensearch_read_only.py /data/
 
-RUN apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && \
+RUN apk update --no-cache && \
+    apk upgrade --no-cache && \
+    apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && \
     npm install -g http-server && \
     pip3 install supervisor humanfriendly && \
     curl -fsSLO "$SUPERCRONIC_URL" && \

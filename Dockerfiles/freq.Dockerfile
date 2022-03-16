@@ -29,8 +29,9 @@ ENV FREQ_LOOKUP $FREQ_LOOKUP
 
 ENV FREQ_URL "https://codeload.github.com/markbaggett/freq/tar.gz/master"
 
-RUN apt-get update && \
-    apt-get  -y -q install \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
+    apt-get -y --no-install-recommends install \
       curl \
       procps \
       psmisc \

@@ -17,6 +17,7 @@ ADD docs/doc.css $ARKIMEDIR/doc/
 ADD docs/images $ARKIMEDIR/doc/images/
 
 RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
         binutils \
         bison \
@@ -147,6 +148,7 @@ COPY --from=build $ARKIMEDIR $ARKIMEDIR
 
 RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       curl \
       file \

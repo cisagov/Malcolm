@@ -104,6 +104,7 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
       automake \
       bc \

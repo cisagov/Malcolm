@@ -37,7 +37,7 @@ ENV JAVA_HOME=/usr/share/logstash/jdk
 USER root
 
 RUN yum install -y epel-release && \
-    yum update -y && \
+    yum upgrade -y && \
     yum install -y curl gettext patch python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
     pip3 install ipaddress supervisor manuf pyyaml && \
