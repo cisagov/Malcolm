@@ -10,7 +10,8 @@ ENV SITE_NAME $SITE_NAME
 ENV JQUERY_FILE_UPLOAD_VERSION v9.19.1
 ENV JQUERY_FILE_UPLOAD_URL "https://github.com/blueimp/jQuery-File-Upload/archive/${JQUERY_FILE_UPLOAD_VERSION}.tar.gz"
 
-RUN apt-get update && \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends npm node-encoding git ca-certificates curl wget && \
     npm install -g bower && \
     mkdir -p /jQuery-File-Upload && \
@@ -53,7 +54,8 @@ ENV PHP_VERSION $PHP_VERSION
 
 COPY --from=build /jQuery-File-Upload/ /var/www/upload/
 
-RUN apt-get update && \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       wget \
       ca-certificates \

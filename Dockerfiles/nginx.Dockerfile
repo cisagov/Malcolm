@@ -115,6 +115,8 @@ RUN set -x ; \
     --with-http_v2_module \
     --add-module=/usr/src/nginx-auth-ldap \
   " ; \
+  apk update --no-cache; \
+  apk upgrade --no-cache; \
   apk add --no-cache curl shadow; \
   addgroup -g ${DEFAULT_GID} -S ${PGROUP} ; \
   adduser -S -D -H -u ${DEFAULT_UID} -h /var/cache/nginx -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \

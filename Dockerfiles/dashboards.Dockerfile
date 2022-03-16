@@ -25,6 +25,7 @@ ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 USER root
 
 RUN amazon-linux-extras install -y epel && \
+    yum upgrade -y && \
     yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
     adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
@@ -109,7 +110,8 @@ USER root
 
 COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 
-RUN yum install -y curl psmisc util-linux zip unzip && \
+RUN yum upgrade -y && \
+    yum install -y curl psmisc util-linux zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \

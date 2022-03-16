@@ -55,7 +55,8 @@ ADD pcap-capture/supervisord.conf /etc/supervisord.conf
 ADD pcap-capture/scripts/*.sh /usr/local/bin/
 ADD pcap-capture/templates/*.template /etc/supervisor.d/
 
-RUN apt-get update && \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
       bc \
       ethtool \

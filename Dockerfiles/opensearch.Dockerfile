@@ -34,6 +34,7 @@ USER root
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 # override_main_response_version - https://opensearch.org/docs/latest/clients/agents-and-ingestion-tools/index/#compatibility-matrices
 RUN yum install -y openssl util-linux procps && \
+  yum upgrade -y && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\ncompatibility.override_main_response_version: true\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \

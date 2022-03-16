@@ -24,7 +24,9 @@ ENV TERM xterm
 ENV JQUERY_VERSION 1.6.4
 ENV LISTJS_VERSION v1.5.0
 
-RUN apk --no-cache add bash php7 php7-fpm php7-mysqli php7-json php7-openssl php7-curl php7-fileinfo \
+RUN apk update --no-cache && \
+    apk upgrade --no-cache && \
+    apk --no-cache add bash php7 php7-fpm php7-mysqli php7-json php7-openssl php7-curl php7-fileinfo \
     php7-zlib php7-xml php7-phar php7-intl php7-dom php7-xmlreader php7-ctype php7-session \
     php7-mbstring php7-gd nginx supervisor curl inotify-tools file psmisc shadow
 

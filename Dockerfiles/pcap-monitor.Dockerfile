@@ -38,7 +38,8 @@ ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_PIPELINE_IGNORE_PREEXISTING $PCAP_PIPELINE_IGNORE_PREEXISTING
 ENV ZEEK_PATH $ZEEK_PATH
 
-RUN apt-get update && \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
       file \
       inotify-tools \
