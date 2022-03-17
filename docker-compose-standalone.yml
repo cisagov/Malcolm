@@ -98,8 +98,8 @@ x-dashboards-helper-variables: &dashboards-helper-variables
   ISM_SNAPSHOT_REPO : 'logs'
 
 x-logstash-variables: &logstash-variables
-  pipeline.workers : 4
-  pipeline.batch.size : 100
+  pipeline.workers : 3
+  pipeline.batch.size : 75
   pipeline.batch.delay : 50
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
