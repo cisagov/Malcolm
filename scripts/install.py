@@ -303,11 +303,11 @@ class Installer(object):
         # - https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
         # we don't want it too high, as in Malcolm Logstash also competes with OpenSearch, etc. for resources
         if self.totalCores > 16:
-            lsWorkers = 12
+            lsWorkers = 10
         elif self.totalCores >= 12:
-            lsWorkers = 8
+            lsWorkers = 6
         else:
-            lsWorkers = 4
+            lsWorkers = 3
 
         while not InstallerYesOrNo(
             f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
