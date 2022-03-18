@@ -32,9 +32,6 @@ ARG EXTRACTED_FILE_MIN_BYTES=64
 ARG EXTRACTED_FILE_MAX_BYTES=134217728
 ARG VTOT_API2_KEY=0
 ARG VTOT_REQUESTS_PER_MINUTE=4
-ARG MALASS_HOST=0
-ARG MALASS_PORT=80
-ARG MALASS_MAX_REQUESTS=20
 ARG EXTRACTED_FILE_ENABLE_CLAMAV=false
 ARG EXTRACTED_FILE_UPDATE_RULES=false
 ARG EXTRACTED_FILE_PIPELINE_DEBUG=false
@@ -64,9 +61,6 @@ ENV EXTRACTED_FILE_MIN_BYTES $EXTRACTED_FILE_MIN_BYTES
 ENV EXTRACTED_FILE_MAX_BYTES $EXTRACTED_FILE_MAX_BYTES
 ENV VTOT_API2_KEY $VTOT_API2_KEY
 ENV VTOT_REQUESTS_PER_MINUTE $VTOT_REQUESTS_PER_MINUTE
-ENV MALASS_HOST $MALASS_HOST
-ENV MALASS_PORT $MALASS_PORT
-ENV MALASS_MAX_REQUESTS $MALASS_MAX_REQUESTS
 ENV EXTRACTED_FILE_ENABLE_CLAMAV $EXTRACTED_FILE_ENABLE_CLAMAV
 ENV EXTRACTED_FILE_UPDATE_RULES $EXTRACTED_FILE_UPDATE_RULES
 ENV EXTRACTED_FILE_PIPELINE_DEBUG $EXTRACTED_FILE_PIPELINE_DEBUG
@@ -204,12 +198,10 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
-      ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/malass_scan.py && \
       echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /bin/bash /usr/local/bin/yara-rules-update.sh" > ${SUPERCRONIC_CRONTAB}
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/zeek_carve*.py /usr/local/bin/
-ADD shared/bin/malass_client.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 ADD file-monitor/*update.sh /usr/local/bin/

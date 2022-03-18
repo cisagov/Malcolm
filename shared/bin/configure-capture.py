@@ -809,7 +809,6 @@ def main():
                         "ZEEK_FILE_WATCH",
                         "ZEEK_FILE_SCAN_CLAMAV",
                         "ZEEK_FILE_SCAN_VTOT",
-                        "ZEEK_FILE_SCAN_MALASS",
                         "ZEEK_FILE_SCAN_YARA",
                     ]:
                         capture_config_dict[key] = "false"
