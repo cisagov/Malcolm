@@ -397,22 +397,22 @@ $ ./scripts/build.sh
 
 Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
 
-* `malcolmnetsec/api` (based on `python:3-slim-bullseye`)
-* `malcolmnetsec/arkime` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/api` (based on `python:3-slim`)
+* `malcolmnetsec/arkime` (based on `debian:11-slim`)
 * `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/dashboards-helper` (based on `alpine:3.15`)
-* `malcolmnetsec/file-monitor` (based on `debian:bullseye-slim`)
-* `malcolmnetsec/file-upload` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/file-monitor` (based on `debian:11-slim`)
+* `malcolmnetsec/file-upload` (based on `debian:11-slim`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
-* `malcolmnetsec/freq` (based on `debian:bullseye-slim`)
-* `malcolmnetsec/htadmin` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/freq` (based on `debian:11-slim`)
+* `malcolmnetsec/htadmin` (based on `debian:11-slim`)
 * `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
 * `malcolmnetsec/name-map-ui` (based on `alpine:3.15`)
 * `malcolmnetsec/nginx-proxy` (based on `alpine:3.15`)
 * `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
-* `malcolmnetsec/pcap-capture` (based on `debian:bullseye-slim`)
-* `malcolmnetsec/pcap-monitor` (based on `debian:bullseye-slim`)
-* `malcolmnetsec/pcap-zeek` (based on `debian:bullseye-slim`)
+* `malcolmnetsec/pcap-capture` (based on `debian:11-slim`)
+* `malcolmnetsec/pcap-monitor` (based on `debian:11-slim`)
+* `malcolmnetsec/pcap-zeek` (based on `debian:11-slim`)
 
 Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 
