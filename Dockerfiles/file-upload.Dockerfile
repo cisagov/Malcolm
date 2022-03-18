@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim AS build
+FROM debian:11-slim AS build
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -24,7 +24,7 @@ RUN apt-get -q update && \
     rm -rf /jQuery-File-Upload/*.html /jQuery-File-Upload/test/ /jQuery-File-Upload/server/gae-go/ \
            /jQuery-File-Upload/server/gae-python/
 
-FROM debian:bullseye-slim AS runtime
+FROM debian:11-slim AS runtime
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
