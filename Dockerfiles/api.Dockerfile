@@ -1,4 +1,4 @@
-FROM python:3-slim-bullseye as builder
+FROM python:3-slim as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -17,7 +17,7 @@ WORKDIR /usr/src/app
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
     && flake8 --ignore=E501,F401
 
-FROM python:3-slim-bullseye
+FROM python:3-slim
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"

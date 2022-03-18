@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim AS build
+FROM debian:11-slim AS build
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -86,7 +86,7 @@ RUN apt-get -q update && \
     rm -f ${ARKIMEDIR}/wiseService/source.* && \
     bash -c "file ${ARKIMEDIR}/bin/* ${ARKIMEDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
-FROM debian:bullseye-slim
+FROM debian:11-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
