@@ -10,9 +10,6 @@
     "session": {
       "properties": {
         "malcolmDocId": { "type": "keyword" },
-        "firstPacket": { "type": "date" },
-        "lastPacket": { "type": "date" },
-        "timestamp": { "type": "date" },
         "client.domain": { "type": "keyword" },
         "destination.domain": { "type": "keyword" },
         "destination.geo.city_name": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text" } } },
