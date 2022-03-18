@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="1.2.4"
+ARG OPENSEARCH_VERSION="1.3.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="1.2.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="1.3.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -68,7 +68,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:1.2.0
+FROM opensearchproject/opensearch-dashboards:1.3.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
