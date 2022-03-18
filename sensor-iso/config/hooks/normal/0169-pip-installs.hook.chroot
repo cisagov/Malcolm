@@ -8,6 +8,7 @@ export LANG=C.UTF-8
 # python 3
 pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   clamd \
+  dateparser \
   debinterface \
   pymisp \
   stix2 \

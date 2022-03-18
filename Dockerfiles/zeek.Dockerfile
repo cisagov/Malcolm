@@ -88,7 +88,6 @@ RUN apt-get -q update && \
       psmisc \
       python3 \
       python3-bs4 \
-      python3-dateparser \
       python3-git \
       python3-pip \
       python3-semantic-version \
@@ -100,7 +99,7 @@ RUN apt-get -q update && \
       swig \
       vim-tiny \
       zlib1g-dev && \
-    pip3 install --no-cache-dir pymisp stix2 taxii2-client && \
+    pip3 install --no-cache-dir pymisp stix2 taxii2-client dateparser && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
