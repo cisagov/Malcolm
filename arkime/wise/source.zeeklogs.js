@@ -16,7 +16,7 @@ const WISESource = require('./wiseSource.js');
 
 class MalcolmSource extends WISESource {
   // ----------------------------------------------------------------------------
-  constructor (api, section) {
+  constructor(api, section) {
     super(api, section, { dontCache: true });
 
     this.api.addSource('malcolm', this, []);
@@ -31,6 +31,7 @@ class MalcolmSource extends WISESource {
 
     // add right-clicks
     var allFields = [
+      "@timestamp",
       "malcolmDocId",
       "client.bytes",
       "client.domain",
@@ -92,6 +93,7 @@ class MalcolmSource extends WISESource {
       "file.path",
       "file.size",
       "file.type",
+      "file.uid",
       "host.name",
       "http.request.body.bytes",
       "http.request.method",
@@ -154,6 +156,116 @@ class MalcolmSource extends WISESource {
       "source.packets",
       "source.port",
       "source.segment",
+      "suricata.app_proto_tc",
+      "suricata.alert.action",
+      "suricata.alert.category",
+      "suricata.alert.gid",
+      "suricata.alert.rev",
+      "suricata.alert.signature",
+      "suricata.alert.signature_id",
+      "suricata.anomaly.app_proto",
+      "suricata.anomaly.event",
+      "suricata.anomaly.layer",
+      "suricata.anomaly.type",
+      "suricata.app_proto_ts",
+      "suricata.dns.flags",
+      "suricata.dns.qr",
+      "suricata.dns.ra",
+      "suricata.dns.rd",
+      "suricata.dns.rrname",
+      "suricata.dns.rrtype",
+      "suricata.dns.tx_id",
+      "suricata.dns.version",
+      "suricata.event_type",
+      "suricata.fileinfo.gaps",
+      "suricata.fileinfo.state",
+      "suricata.fileinfo.stored",
+      "suricata.fileinfo.tx_id",
+      "suricata.files[].filename",
+      "suricata.files[].gaps",
+      "suricata.files[].sid",
+      "suricata.files[].size",
+      "suricata.files[].state",
+      "suricata.files[].stored",
+      "suricata.files[].tx_id",
+      "suricata.flow.age",
+      "suricata.flow.alerted",
+      "suricata.flow.bytes_toclient",
+      "suricata.flow.bytes_toserver",
+      "suricata.flow.end",
+      "suricata.flow.pkts_toclient",
+      "suricata.flow.pkts_toserver",
+      "suricata.flow.reason",
+      "suricata.flow.start",
+      "suricata.flow.state",
+      "suricata.flow_id",
+      "suricata.ftp.command ",
+      "suricata.ftp.command_data",
+      "suricata.ftp.completion_code",
+      "suricata.ftp.reply",
+      "suricata.ftp.reply_received",
+      "suricata.http.content_type",
+      "suricata.http.hostname",
+      "suricata.http.http_method",
+      "suricata.http.http_port",
+      "suricata.http.http_refer",
+      "suricata.http.http_user_agent",
+      "suricata.http.length",
+      "suricata.http.redirect",
+      "suricata.http.url",
+      "suricata.icmp_code",
+      "suricata.icmp_type",
+      "suricata.metadata.flowints[\"applayer.anomoaly.count\"]",
+      "suricata.metadata.flowints[\"http.anomaly.count\"]",
+      "suricata.pcap_cnt",
+      "suricata.proto",
+      "suricata.response_icmp_code",
+      "suricata.response_icmp_type",
+      "suricata.smb.client_dialects",
+      "suricata.smb.command",
+      "suricata.smb.dialect",
+      "suricata.smb.id",
+      "suricata.smb.server_guid",
+      "suricata.smb.session_id",
+      "suricata.smb.tree_id",
+      "suricata.ssh.client",
+      "suricata.ssh.client.proto_version",
+      "suricata.ssh.client.software_version",
+      "suricata.ssh.server",
+      "suricata.ssh.server.proto_version",
+      "suricata.ssh.server.software_version",
+      "suricata.stats.app_layer.expectations",
+      "suricata.stats.detect.alert",
+      "suricata.stats.detect.engines[].last_reload",
+      "suricata.stats.detect.engines[].rules_failed",
+      "suricata.stats.detect.engines[].rules_loaded",
+      "suricata.stats.flow_bypassed.bytes",
+      "suricata.stats.flow_bypassed.closed",
+      "suricata.stats.flow_bypassed.local_bytes",
+      "suricata.stats.flow_bypassed.local_capture_bytes",
+      "suricata.stats.flow_bypassed.local_capture_pkts",
+      "suricata.stats.flow_bypassed.local_pkts",
+      "suricata.stats.flow_bypassed.pkts",
+      "suricata.stats.uptime",
+      "suricata.tcp.ack",
+      "suricata.tcp.cwr",
+      "suricata.tcp.ecn",
+      "suricata.tcp.fin",
+      "suricata.tcp.psh",
+      "suricata.tcp.rst",
+      "suricata.tcp.state",
+      "suricata.tcp.syn",
+      "suricata.tcp.tcp_flags",
+      "suricata.tcp.tcp_flags_tc",
+      "suricata.tcp.tcp_flags_ts",
+      "suricata.tls.fingerprint",
+      "suricata.tls.issuerdn",
+      "suricata.tls.not_after",
+      "suricata.tls.not_before",
+      "suricata.tls.serial",
+      "suricata.tls.session_resumed",
+      "suricata.tls.subject",
+      "suricata.tx_id",
       "tags",
       "threat.framework",
       "threat.tactic.id",
@@ -1157,68 +1269,68 @@ class MalcolmSource extends WISESource {
 
     // add URL link for assigned transport protocol numbers
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_proto",  {name:"Protocol Registry", url:'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields:protoFieldsStr});
+    this.api.addValueAction("malcolm_websearch_proto", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
 
     // add right-click for searching IANA for services
     var serviceFieldsStr = allFields.filter(value => /^(protocols?|network\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_service",  {name:"Service Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:serviceFieldsStr});
+    this.api.addValueAction("malcolm_websearch_service", { name: "Service Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: serviceFieldsStr });
 
     // add right-click for searching VirusTotal for other IP addresses
     var ipFieldsStr = allFields.filter(value => /[_\.-](h|ip)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_ip",  {name:"VirusTotal IP", url:"https://www.virustotal.com/en/ip-address/%TEXT%/information", fields:ipFieldsStr});
+    this.api.addValueAction("malcolm_websearch_ip", { name: "VirusTotal IP", url: "https://www.virustotal.com/en/ip-address/%TEXT%/information", fields: ipFieldsStr });
 
     // add right-click for searching IANA for ports
     var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_port",            {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:portFieldsStr});
-    this.api.addValueAction("malcolm_websearch_port_arkime",     {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category:"port"});
+    this.api.addValueAction("malcolm_websearch_port", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: portFieldsStr });
+    this.api.addValueAction("malcolm_websearch_port_arkime", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category: "port" });
 
     // add right-click for searching VirusTotal for hash signatures
     var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_vt_fields_hash",         {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", fields:hashFieldsStr});
-    this.api.addValueAction("malcolm_vt_fields_hash_arkime",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", category:"md5"});
+    this.api.addValueAction("malcolm_vt_fields_hash", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", fields: hashFieldsStr });
+    this.api.addValueAction("malcolm_vt_fields_hash_arkime", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", category: "md5" });
 
     // add right-click for searching the web for signature IDs
     var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_sig",  {name:"Web Search", url:'https://duckduckgo.com/?q="%TEXT%"', fields:sigFieldsStr});
+    this.api.addValueAction("malcolm_websearch_sig", { name: "Web Search", url: 'https://duckduckgo.com/?q="%TEXT%"', fields: sigFieldsStr });
 
     // add right-click for searching ARIN for ASN
     var asnFieldsStr = allFields.filter(value => /(as\.number|(src|dst)ASN|asn\.(src|dst))$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_asn",  {name:"ARIN ASN", url:'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields:asnFieldsStr});
+    this.api.addValueAction("malcolm_websearch_asn", { name: "ARIN ASN", url: 'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields: asnFieldsStr });
 
     // add right-click for searching mime/media/content types
     var mimeFieldsStr = allFields.filter(value => /mime[_\.-]?type/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
+    this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
     // add right-click for extracted/quarantined files from zeek
     var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_carved_file_quarantined",         {name:"Download (if quarantined)", url:"/dl-extracted-files/quarantine/%TEXT%", fields:carvedFieldsStr});
-    this.api.addValueAction("malcolm_carved_file_preserved",           {name:"Download (if preserved)", url:"/dl-extracted-files/preserved/%TEXT%", fields:carvedFieldsStr});
+    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download (if quarantined)", url: "/dl-extracted-files/quarantine/%TEXT%", fields: carvedFieldsStr });
+    this.api.addValueAction("malcolm_carved_file_preserved", { name: "Download (if preserved)", url: "/dl-extracted-files/preserved/%TEXT%", fields: carvedFieldsStr });
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
     var filterUrl = "idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
-    this.api.addValueAction("malcolm_dashboards_cat_ip",       {name:filterLabel, url:filterUrl, category:"ip"});
-    this.api.addValueAction("malcolm_dashboards_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
-    this.api.addValueAction("malcolm_dashboards_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
-    this.api.addValueAction("malcolm_dashboards_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});
-    this.api.addValueAction("malcolm_dashboards_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
-    this.api.addValueAction("malcolm_dashboards_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
-    this.api.addValueAction("malcolm_dashboards_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
+    this.api.addValueAction("malcolm_dashboards_cat_ip", { name: filterLabel, url: filterUrl, category: "ip" });
+    this.api.addValueAction("malcolm_dashboards_cat_port", { name: filterLabel, url: filterUrl, category: "port" });
+    this.api.addValueAction("malcolm_dashboards_cat_country", { name: filterLabel, url: filterUrl, category: "country" });
+    this.api.addValueAction("malcolm_dashboards_cat_host", { name: filterLabel, url: filterUrl, category: "host" });
+    this.api.addValueAction("malcolm_dashboards_cat_md5", { name: filterLabel, url: filterUrl, category: "md5" });
+    this.api.addValueAction("malcolm_dashboards_cat_user", { name: filterLabel, url: filterUrl, category: "user" });
+    this.api.addValueAction("malcolm_dashboards_fields_zeek", { name: filterLabel, url: filterUrl, fields: allFieldsStr });
 
     // add rick-click for opening malcolm agg api
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
-    this.api.addValueAction("malcolm_mapi_cat_ip",       {name:apiLabel, url:apiURL, category:"ip"});
-    this.api.addValueAction("malcolm_mapi_cat_port",     {name:apiLabel, url:apiURL, category:"port"});
-    this.api.addValueAction("malcolm_mapi_cat_country",  {name:apiLabel, url:apiURL, category:"country"});
-    this.api.addValueAction("malcolm_mapi_cat_host",     {name:apiLabel, url:apiURL, category:"host"});
-    this.api.addValueAction("malcolm_mapi_cat_md5",      {name:apiLabel, url:apiURL, category:"md5"});
-    this.api.addValueAction("malcolm_mapi_cat_user",     {name:apiLabel, url:apiURL, category:"user"});
-    this.api.addValueAction("malcolm_mapi_fields_zeek",  {name:apiLabel, url:apiURL, fields:allFieldsStr});
+    this.api.addValueAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
+    this.api.addValueAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
+    this.api.addValueAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
+    this.api.addValueAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
+    this.api.addValueAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
+    this.api.addValueAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
+    this.api.addValueAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
 
     // add right-click for viewing original JSON document
-    this.api.addValueAction("malcolm_json_source", {name:"%DBFIELD% Document(s) JSON", url:"mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields:"communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid"});
+    this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
 
     this.api.addView("malcolm_common",
       "if (session.malcolmDocId)\n" +
