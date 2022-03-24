@@ -98,14 +98,14 @@ if [ -d "$WORKDIR" ]; then
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   # write out some version stuff specific to this installation version
-  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""               > ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""          >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT_ID=\"hedgehog-sensor\""                                 >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "ID_LIKE=\"debian\""                                             >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "HOME_URL=\"https://malcolm.fyi\""                               >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""            >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "SUPPORT_URL=\"https://github.com/idaholab\""                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT_ID=\"hedgehog-sensor\""                                           >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "ID_LIKE=\"debian\""                                                       >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "HOME_URL=\"https://malcolm.fyi\""                                         >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""                      >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
@@ -135,7 +135,7 @@ if [ -d "$WORKDIR" ]; then
   # clone and build custom protologbeat from github for logging temperature, etc.
   mkdir -p ./config/includes.chroot/usr/local/bin/
   bash "$SCRIPT_PATH/beats/build-docker-image.sh"
-  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "es_7_10_2_compat"
+  bash "$SCRIPT_PATH/beats/beat-build.sh" -b "https://github.com/mmguero-dev/protologbeat" -t "main"
   cp github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv github.com_mmguero-dev_protologbeat/protologbeat ./config/includes.chroot/usr/local/bin
 

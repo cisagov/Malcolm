@@ -126,14 +126,14 @@ if [ -d "$WORKDIR" ]; then
   fi
 
   # write out some version stuff specific to this installation version
-  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""               > "$MALCOLM_DEST_DIR"/.os-info
-  echo "VARIANT=\"Hedgehog Linux (Malcolm) v${IMAGE_VERSION}\""         >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "VARIANT_ID=\"hedgehog-malcolm\""                                >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "ID_LIKE=\"debian\""                                             >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "HOME_URL=\"https://malcolm.fyi\""                               >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/documentation/\""       >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "SUPPORT_URL=\"https://github.com/idaholab\""                    >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/idaholab/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > "$MALCOLM_DEST_DIR"/.os-info
+  echo "VARIANT=\"Hedgehog Linux (Malcolm) v${IMAGE_VERSION}\""                   >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "VARIANT_ID=\"hedgehog-malcolm\""                                          >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "ID_LIKE=\"debian\""                                                       >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "HOME_URL=\"https://malcolm.fyi\""                                         >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/documentation/\""                 >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
