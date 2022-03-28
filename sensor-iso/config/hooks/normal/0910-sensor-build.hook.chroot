@@ -26,6 +26,8 @@ YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
+SURICATA_RULES_DIR="/etc/suricata/rules"
+
 CAPA_VERSION="3.2.0"
 CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 CAPA_DIR="/usr/local/bin"
@@ -114,6 +116,17 @@ cd /usr/local/src
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
 mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/spicy-packages /tmp/zeek-packages /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
+###
+
+# suricata
+apt-get -qqy update
+apt-get install -t bullseye-backports --no-install-recommends -y -q suricata suricata-update
+
+mkdir -p "${SURICATA_RULES_DIR}"/custom
+
+cd "${SURICATA_RULES_DIR}"/..
+tar czf suricata-rules-hedgehog.tar.gz "$(basename "${SURICATA_RULES_DIR}")"
+mv ./suricata-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # yara
@@ -211,6 +224,8 @@ chown root:netdev "${ZEEK_DIR}"/bin/capstats && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats
 chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
+chown root:netdev /usr/bin/suricata && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/suricata
 chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /usr/share/packetbeat/bin/packetbeat && \

@@ -58,6 +58,11 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chown -R 1000:1000 /opt/yara-rules/custom
     chmod -R 750 /opt/yara-rules/custom
   fi
+  if [[ -d /etc/suricata/rules ]]; then
+    mkdir -p /etc/suricata/rules/custom
+    chown -R 1000:1000 /etc/suricata/rules/custom
+    chmod -R 750 /etc/suricata/rules/custom
+  fi
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
   if dpkg -s clamav >/dev/null 2>&1 ; then
