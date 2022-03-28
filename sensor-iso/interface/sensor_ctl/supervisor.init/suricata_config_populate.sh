@@ -13,6 +13,15 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -n $CAPTURE_INTERFACE ]] && [[ -r "$SUPERVISO
   /usr/bin/yq eval --inplace 'del(."af-packet")' "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace ".\"af-packet\"=[${AFPACKET_INTERFACES_YAML_SOURCE}{\"interface\":\"default\"}]" "$SURICATA_CONFIG_FILE"
 
+  # disable all outputs, then enable only the ones we want
+  for OUTPUT in $(/usr/bin/yq -M '... comments=""' "$SURICATA_CONFIG_FILE" | /usr/bin/yq -M '(.outputs.[]|keys)' | sed "s/^- //"); do
+    /usr/bin/yq --inplace "(.outputs.[] | select(.$OUTPUT))[].enabled = \"no\"" "$SURICATA_CONFIG_FILE"
+  done
+  for OUTPUT in eve-log; do
+    /usr/bin/yq --inplace "(.outputs.[] | select(.$OUTPUT))[].enabled = \"yes\"" "$SURICATA_CONFIG_FILE"
+  done
+  /usr/bin/yq --inplace '(.outputs.[] | select(.eve-log))[].community-id = true' "$SURICATA_CONFIG_FILE"
+
   # make sure interface flags are set appropriately for capture
   IFS=","
   for IFACE_NAME in $CAPTURE_INTERFACE; do
