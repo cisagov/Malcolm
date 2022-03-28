@@ -123,6 +123,7 @@ apt-get -qqy update
 apt-get install -t bullseye-backports --no-install-recommends -y -q suricata suricata-update
 
 mkdir -p "${SURICATA_RULES_DIR}"/custom
+/usr/bin/suricata-update -v -D /var/lib/suricata --etopen --local "${SURICATA_RULES_DIR}"/custom
 
 cd "${SURICATA_RULES_DIR}"/..
 tar czf suricata-rules-hedgehog.tar.gz "$(basename "${SURICATA_RULES_DIR}")"

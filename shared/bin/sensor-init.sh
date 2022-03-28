@@ -58,10 +58,24 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chown -R 1000:1000 /opt/yara-rules/custom
     chmod -R 750 /opt/yara-rules/custom
   fi
-  if [[ -d /etc/suricata/rules ]]; then
-    mkdir -p /etc/suricata/rules/custom
-    chown -R 1000:1000 /etc/suricata/rules/custom
-    chmod -R 750 /etc/suricata/rules/custom
+
+  # configure suricata
+  if dpkg -s suricata >/dev/null 2>&1 ; then
+    mkdir -p /etc/suricata/rules/custom /var/log/suricata /var/lib/suricata/rules
+    chown -R 1000:1000 /etc/suricata/rules /var/log/suricata /var/lib/suricata
+    chmod -R 750 /etc/suricata/rules /var/log/suricata /var/lib/suricata
+    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(community-id\)[[:space:]]*:.*/\1\2\3: true/g" /etc/suricata/suricata.yaml
+    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(max-dump\)[[:space:]]*:.*/\1\2\3: 0/g" /etc/suricata/suricata.yaml
+    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(default-rule-path\)[[:space:]]*:.*/\1\2\3: \/var\/lib\/suricata\/rules/g" /etc/suricata/suricata.yaml
+    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(run-as\|group\|user\)[[:space:]]*:\(.*\)/\1#\2\3:\4/g" /etc/suricata/suricata.yaml
+    if [[ -d /opt/sensor/sensor_ctl ]]; then
+      mkdir -p /opt/sensor/sensor_ctl/suricata/logs
+      chown -R 1000:1000 /opt/sensor/sensor_ctl/suricata
+      chmod -R 750 /opt/sensor/sensor_ctl/suricata
+      sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(filename\)[[:space:]]*:.*socket.*/\1\2\3: \/opt\/sensor\/sensor_ctl\/suricata\/suricata-command.socket/g" /etc/suricata/suricata.yaml
+      sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(default-log-dir\)[[:space:]]*:.*socket.*/\1\2\3: \/opt\/sensor\/sensor_ctl\/suricata\/logs/g" /etc/suricata/suricata.yaml
+    fi
+    [[ -r /opt/sensor/sensor_ctl/control_vars.conf ]] && source /opt/sensor/sensor_ctl/control_vars.conf
   fi
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
