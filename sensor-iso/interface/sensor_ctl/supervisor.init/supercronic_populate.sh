@@ -19,15 +19,26 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
         mkdir -p "$SURICATA_CUSTOM_RULES_DIR"
         SURICATA_CONFIG_FILE="$SURICATA_DIR"/suricata.yaml
         SURICATA_UPDATE_CONFIG_FILE="$SURICATA_DIR"/update.yaml
-        [[ "${SURICATA_REFRESH_ETOPEN:-true}" == "true" ]] && ETOPEN_FLAG="--etopen" || ETOPEN_FLAG=
 
         /usr/bin/yq --inplace ".disable-conf=\"$SURICATA_DIR/disable.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq --inplace ".enable-conf=\"$SURICATA_DIR/enable.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq --inplace ".drop-conf=\"$SURICATA_DIR/drop.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq --inplace ".modify-conf=\"$SURICATA_DIR/modify.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
+
+        /usr/bin/yq eval --inplace 'del(."reload-command")' "$SURICATA_UPDATE_CONFIG_FILE" 2>/dev/null || true
+        /usr/bin/yq eval --inplace ".\"reload-command\"=\"kill -USR2 \$(pidof suricata)\"" "$SURICATA_UPDATE_CONFIG_FILE"
+
+        /usr/bin/yq eval --inplace 'del(."sources")' "$SURICATA_UPDATE_CONFIG_FILE"
+        if [[ "${SURICATA_REFRESH_ETOPEN:-true}" == "true" ]]; then
+            ETOPEN_FLAG="--etopen"
+            /usr/bin/yq eval --inplace ".\"sources\"=[\"https://rules.emergingthreats.net/open/suricata-%(__version__)s/emerging.rules.tar.gz\",\"https://sslbl.abuse.ch/blacklist/sslblacklist.rules\"]" "$SURICATA_UPDATE_CONFIG_FILE"
+        else
+            ETOPEN_FLAG=
+        fi
+
         /usr/bin/yq eval --inplace 'del(."local")' "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq eval --inplace ".\"local\"=[\"/etc/suricata/rules\",\"$SURICATA_CUSTOM_RULES_DIR\"]" "$SURICATA_UPDATE_CONFIG_FILE"
 
-        echo "${SURICATA_REFRESH_CRON_EXPRESSION:-15 2 * * *} /usr/bin/suricata-update --verbose --config \"$SURICATA_UPDATE_CONFIG_FILE\" --suricata-conf \"$SURICATA_CONFIG_FILE\" $ETOPEN_FLAG --data-dir \"${SURICATA_MANAGED_DIR:-/var/lib/suricata}\" --reload-command='kill -USR2 \$(pidof suricata)'" >> "$CRONTAB_PATH"
+        echo "${SURICATA_REFRESH_CRON_EXPRESSION:-15 2 * * *} /usr/bin/suricata-update --verbose --config \"$SURICATA_UPDATE_CONFIG_FILE\" --suricata-conf \"$SURICATA_CONFIG_FILE\" --data-dir \"${SURICATA_MANAGED_DIR:-/var/lib/suricata}\" $ETOPEN_FLAG" >> "$CRONTAB_PATH"
     fi # suricata updates
 fi
