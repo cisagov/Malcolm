@@ -67,6 +67,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     if [[ -d /opt/sensor/sensor_ctl ]]; then
       mkdir -p /opt/sensor/sensor_ctl/suricata
       [[ ! -f /opt/sensor/sensor_ctl/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml /opt/sensor/sensor_ctl/suricata/suricata.yaml
+      [[ ! -f /opt/sensor/sensor_ctl/suricata/update.yaml ]] && cp "$(dpkg -L suricata-update | grep 'update\.yaml' | head -n 1)" /opt/sensor/sensor_ctl/suricata/update.yaml
       chown -R 1000:1000 /opt/sensor/sensor_ctl/suricata
       chmod -R 750 /opt/sensor/sensor_ctl/suricata
     fi
