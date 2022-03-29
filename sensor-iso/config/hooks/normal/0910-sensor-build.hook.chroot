@@ -235,7 +235,7 @@ chown root:netdev "${ZEEK_DIR}"/bin/capstats && \
 chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 chown root:netdev /usr/bin/suricata && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/suricata
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata
 chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /usr/share/packetbeat/bin/packetbeat && \

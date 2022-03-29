@@ -28,12 +28,18 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -n $CAPTURE_INTERFACE ]] && [[ -r "$SUPERVISO
   done
   /usr/bin/yq --inplace '(.outputs.[] | select(.eve-log))[].community-id = true' "$SURICATA_CONFIG_FILE"
 
+  # other global settings
   /usr/bin/yq eval --inplace 'del(."run-as")' "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace 'del(."coredump")' "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace ".\"coredump\"={\"max-dump\":0}" "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace 'del(."default-rule-path")' "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace ".\"default-rule-path\"=\"${SURICATA_MANAGED_RULES_DIR:-/var/lib/suricata/rules}\"" "$SURICATA_CONFIG_FILE"
+  /usr/bin/yq eval --inplace 'del(."unix-command")' "$SURICATA_CONFIG_FILE"
+  /usr/bin/yq eval --inplace ".\"unix-command\"={\"enabled\":\"yes\",\"filename\":\"$SUPERVISOR_PATH/suricata/suricata-command.socket\"}" "$SURICATA_CONFIG_FILE"
 
+  # restore YAML head that would have been stripped by yq
   head -n 2 "$SURICATA_CONFIG_FILE" | grep -Pzq '^%YAML.*\n---' || (echo -e "%YAML 1.1\n---\n" ; cat "$SURICATA_CONFIG_FILE") | sponge "$SURICATA_CONFIG_FILE"
 
+  # remove the pidfile and command file for a new run (in case they weren't cleaned up before)
+  rm -f "$SUPERVISOR_PATH"/suricata/suricata.pid "$SUPERVISOR_PATH"/suricata/suricata-command.socket
 fi
