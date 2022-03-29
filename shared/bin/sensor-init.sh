@@ -61,11 +61,11 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
   # configure suricata
   if dpkg -s suricata >/dev/null 2>&1 ; then
-    mkdir -p /etc/suricata/rules/custom /var/log/suricata /var/lib/suricata/rules
+    mkdir -p /etc/suricata/rules /var/log/suricata /var/lib/suricata/rules
     chown -R 1000:1000 /etc/suricata/rules /var/log/suricata /var/lib/suricata
     chmod -R 750 /etc/suricata/rules /var/log/suricata /var/lib/suricata
     if [[ -d /opt/sensor/sensor_ctl ]]; then
-      mkdir -p /opt/sensor/sensor_ctl/suricata
+      mkdir -p /opt/sensor/sensor_ctl/suricata/rules
       [[ ! -f /opt/sensor/sensor_ctl/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml /opt/sensor/sensor_ctl/suricata/suricata.yaml
       [[ ! -f /opt/sensor/sensor_ctl/suricata/update.yaml ]] && cp "$(dpkg -L suricata-update | grep 'update\.yaml' | head -n 1)" /opt/sensor/sensor_ctl/suricata/update.yaml
       chown -R 1000:1000 /opt/sensor/sensor_ctl/suricata
