@@ -36,6 +36,10 @@ CAPA_BIN="${CAPA_DIR}/capa"
 YQ_VERSION="4.24.2"
 YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
+SUPERCRONIC_VERSION="0.1.12"
+SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
+SUPERCRONIC="supercronic-linux-amd64"
+
 mkdir -p /opt/hedgehog_install_artifacts/
 
 # an arkime .deb is built and installed in a different context
@@ -176,6 +180,11 @@ cp "${CAPA_BIN}" /opt/hedgehog_install_artifacts/
 # yq
 curl -fsSL -o /usr/bin/yq "${YQ_URL}"
 chmod 755 /usr/bin/yq
+###
+
+# supercronic
+curl -fsSL -o /usr/local/bin/supercronic "$SUPERCRONIC_URL"
+chmod 755 /usr/local/bin/supercronic
 ###
 
 # update clamav signatures
