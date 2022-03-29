@@ -45,6 +45,6 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
 
         /usr/bin/yq --inplace -M '... comments=""' "$SURICATA_UPDATE_CONFIG_FILE"
 
-        echo "${SURICATA_REFRESH_CRON_EXPRESSION:-15 2 * * *} /usr/bin/suricata-update --verbose --config \"$SURICATA_UPDATE_CONFIG_FILE\" --suricata-conf \"$SURICATA_CONFIG_FILE\" --data-dir \"${SURICATA_MANAGED_DIR:-/var/lib/suricata}\" $ETOPEN_FLAG" >> "$CRONTAB_PATH"
+        echo "${SURICATA_REFRESH_CRON_EXPRESSION:-15 2 * * *} /usr/bin/suricata-update --config \"$SURICATA_UPDATE_CONFIG_FILE\" --suricata-conf \"$SURICATA_CONFIG_FILE\" --data-dir \"${SURICATA_MANAGED_DIR:-/var/lib/suricata}\" $ETOPEN_FLAG" >> "$CRONTAB_PATH"
     fi # suricata updates
 fi
