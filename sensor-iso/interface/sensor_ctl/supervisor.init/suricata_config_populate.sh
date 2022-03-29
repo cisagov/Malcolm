@@ -21,6 +21,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -n $CAPTURE_INTERFACE ]] && [[ -r "$SUPERVISO
     /usr/bin/yq --inplace "(.outputs.[] | select(.$OUTPUT))[].enabled = \"yes\"" "$SURICATA_CONFIG_FILE"
   done
   /usr/bin/yq --inplace '(.outputs.[] | select(.eve-log))[].community-id = true' "$SURICATA_CONFIG_FILE"
+  /usr/bin/yq --inplace '.stats.enabled="no"' "$SURICATA_CONFIG_FILE"
 
   head -n 2 "$SURICATA_CONFIG_FILE" | grep -Pzq '^%YAML.*\n---' || (echo -e "%YAML 1.1\n---\n" ; cat "$SURICATA_CONFIG_FILE") | sponge "$SURICATA_CONFIG_FILE"
 
