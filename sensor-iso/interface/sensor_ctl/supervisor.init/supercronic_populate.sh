@@ -20,12 +20,16 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
         SURICATA_CONFIG_FILE="$SURICATA_DIR"/suricata.yaml
         SURICATA_UPDATE_CONFIG_FILE="$SURICATA_DIR"/update.yaml
 
-        /usr/bin/yq --inplace ".disable-conf=\"$SURICATA_DIR/disable.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
-        /usr/bin/yq --inplace ".enable-conf=\"$SURICATA_DIR/enable.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
-        /usr/bin/yq --inplace ".drop-conf=\"$SURICATA_DIR/drop.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
-        /usr/bin/yq --inplace ".modify-conf=\"$SURICATA_DIR/modify.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
-
+        /usr/bin/yq eval --inplace 'del(."disable-conf")' "$SURICATA_UPDATE_CONFIG_FILE"
+        /usr/bin/yq eval --inplace 'del(."enable-conf")' "$SURICATA_UPDATE_CONFIG_FILE"
+        /usr/bin/yq eval --inplace 'del(."drop-conf")' "$SURICATA_UPDATE_CONFIG_FILE"
+        /usr/bin/yq eval --inplace 'del(."modify-conf")' "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq eval --inplace 'del(."reload-command")' "$SURICATA_UPDATE_CONFIG_FILE" 2>/dev/null || true
+
+        /usr/bin/yq eval --inplace ".\"disable-conf\"=\"$SURICATA_DIR/disable.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
+        /usr/bin/yq eval --inplace ".\"enable-conf\"=\"$SURICATA_DIR/enable.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
+        /usr/bin/yq eval --inplace ".\"drop-conf\"=\"$SURICATA_DIR/drop.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
+        /usr/bin/yq eval --inplace ".\"modify-conf\"=\"$SURICATA_DIR/modify.conf\"" "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq eval --inplace ".\"reload-command\"=\"kill -USR2 \$(pidof suricata)\"" "$SURICATA_UPDATE_CONFIG_FILE"
 
         /usr/bin/yq eval --inplace 'del(."sources")' "$SURICATA_UPDATE_CONFIG_FILE"
@@ -38,6 +42,8 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
 
         /usr/bin/yq eval --inplace 'del(."local")' "$SURICATA_UPDATE_CONFIG_FILE"
         /usr/bin/yq eval --inplace ".\"local\"=[\"/etc/suricata/rules\",\"$SURICATA_CUSTOM_RULES_DIR\"]" "$SURICATA_UPDATE_CONFIG_FILE"
+
+        /usr/bin/yq --inplace -M '... comments=""' "$SURICATA_UPDATE_CONFIG_FILE"
 
         echo "${SURICATA_REFRESH_CRON_EXPRESSION:-15 2 * * *} /usr/bin/suricata-update --verbose --config \"$SURICATA_UPDATE_CONFIG_FILE\" --suricata-conf \"$SURICATA_CONFIG_FILE\" --data-dir \"${SURICATA_MANAGED_DIR:-/var/lib/suricata}\" $ETOPEN_FLAG" >> "$CRONTAB_PATH"
     fi # suricata updates
