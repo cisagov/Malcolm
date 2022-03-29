@@ -65,7 +65,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chown -R 1000:1000 /etc/suricata/rules /var/log/suricata /var/lib/suricata
     chmod -R 750 /etc/suricata/rules /var/log/suricata /var/lib/suricata
     if [[ -d /opt/sensor/sensor_ctl ]]; then
-      mkdir -p /opt/sensor/sensor_ctl/suricata/logs
+      mkdir -p /opt/sensor/sensor_ctl/suricata
       [[ ! -f /opt/sensor/sensor_ctl/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml /opt/sensor/sensor_ctl/suricata/suricata.yaml
       chown -R 1000:1000 /opt/sensor/sensor_ctl/suricata
       chmod -R 750 /opt/sensor/sensor_ctl/suricata

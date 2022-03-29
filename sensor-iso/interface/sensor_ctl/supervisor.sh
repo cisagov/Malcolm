@@ -80,8 +80,8 @@ CreateCaptureConfigs
 mkdir -p "$SUPERVISOR_PATH/"{log,run}
 rm -f "$SUPERVISOR_PATH/"/log/*
 
-mkdir -p "$ZEEK_LOG_PATH/" 2>/dev/null || true
-mkdir -p "$PCAP_PATH/"  2>/dev/null || true
+mkdir -p "$ZEEK_LOG_PATH"/suricata 2>/dev/null || true
+mkdir -p "$PCAP_PATH"/  2>/dev/null || true
 
 if [ -d "$SUPERVISOR_PATH/"/supervisor.init ]; then
   popd >/dev/null 2>&1
