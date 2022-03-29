@@ -66,19 +66,10 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chmod -R 750 /etc/suricata/rules /var/log/suricata /var/lib/suricata
     if [[ -d /opt/sensor/sensor_ctl ]]; then
       mkdir -p /opt/sensor/sensor_ctl/suricata/logs
-      SURICATA_CONFIG_FILE=/opt/sensor/sensor_ctl/suricata/suricata.yaml
-      [[ ! -f "$SURICATA_CONFIG_FILE" ]] && cp /etc/suricata/suricata.yaml "$SURICATA_CONFIG_FILE"
+      [[ ! -f /opt/sensor/sensor_ctl/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml /opt/sensor/sensor_ctl/suricata/suricata.yaml
       chown -R 1000:1000 /opt/sensor/sensor_ctl/suricata
       chmod -R 750 /opt/sensor/sensor_ctl/suricata
-      sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(filename\)[[:space:]]*:.*socket.*/\1\2\3: \/opt\/sensor\/sensor_ctl\/suricata\/suricata-command.socket/g" "$SURICATA_CONFIG_FILE"
-      sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(default-log-dir\)[[:space:]]*:.*socket.*/\1\2\3: \/opt\/sensor\/sensor_ctl\/suricata\/logs/g" "$SURICATA_CONFIG_FILE"
-    else
-      SURICATA_CONFIG_FILE=/etc/suricata/suricata.yaml
     fi
-    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(community-id\)[[:space:]]*:.*/\1\2\3: true/g" "$SURICATA_CONFIG_FILE"
-    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(max-dump\)[[:space:]]*:.*/\1\2\3: 0/g" "$SURICATA_CONFIG_FILE"
-    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(default-rule-path\)[[:space:]]*:.*/\1\2\3: \/var\/lib\/suricata\/rules/g" "$SURICATA_CONFIG_FILE"
-    sed -i "s/^\([[:space:]]*\)#*\([[:space:]]*\)\(run-as\|group\|user\)[[:space:]]*:\(.*\)/\1#\2\3:\4/g" "$SURICATA_CONFIG_FILE"
   fi
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
