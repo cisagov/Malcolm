@@ -507,7 +507,7 @@ function malcolmmonitor () {
       select-pane -t 5 \; \
       send-keys 'while true; do clear; free -m | head -n 2; sleep 60; done' C-m \; \
       select-pane -t 6 \; \
-      send-keys 'while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker-compose exec -u $(id -u) api curl "http://localhost:5000/agg/event.dataset?from=1970" | python3 -m json.tool | grep -P "\b(doc_count|key)\b" | tr -d "\", " | cut -d: -f2 | paste - - -d"\t\t" | head -n $(( (MAX_HEIGHT / 2) - 1 )) ; popd >/dev/null 2>&1; sleep 60; done' C-m \; \
+      send-keys 'while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker-compose exec -u $(id -u) api curl "http://localhost:5000/agg/event.dataset?from=1970" | python3 -m json.tool | grep -P "\b(doc_count|key)\b" | tr -d "\", " | cut -d: -f2 | paste - - -d"\t\t" | head -n $(( (MAX_HEIGHT / 2) - 5 )) ; popd >/dev/null 2>&1; sleep 60; done' C-m \; \
       select-pane -t 7 \; \
       send-keys 'while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker-compose exec -u $(id -u) api curl "http://localhost:5000/agg?from=1970" | python3 -m json.tool | grep -P "\b(doc_count|key)\b" | tr -d "\", " | cut -d: -f2 | paste - - -d"\t\t" ; popd >/dev/null 2>&1; sleep 60; done' C-m \; \
       split-window -v \; \
