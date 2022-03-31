@@ -524,6 +524,7 @@ function malcolmmonitor () {
       select-pane -t 7 \; \
       resize-pane -U $(( ($MAX_HEIGHT / 8) - 4 )) \; \
       select-pane -t 8 \; \
-      resize-pane -U $(( ($MAX_HEIGHT / 8) - 1 )) \;
+      resize-pane -U $(( ($MAX_HEIGHT / 8) - 1 )) \; \
+      select-pane -t 4 \;
   fi
 }
