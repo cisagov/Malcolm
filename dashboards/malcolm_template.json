@@ -265,7 +265,7 @@
         "zeek.cip_identity.vendor_name": { "type": "keyword" },
         "zeek.cip_io.connection_id": { "type": "keyword" },
         "zeek.cip_io.data_length": { "type": "integer" },
-        "zeek.cip_io.io_data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
+        "zeek.cip_io.io_data": { "type": "keyword", "ignore_above": 8, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.cip_io.sequence_number": { "type": "integer" },
         "zeek.conn.conn_state": { "type": "keyword" },
         "zeek.conn.conn_state_description": { "type": "keyword" },
