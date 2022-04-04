@@ -312,18 +312,6 @@ def main():
         required=False,
     )
     parser.add_argument(
-        '--malass-host', dest='malassHost', help="Malass host or IP address", metavar='<host>', type=str, required=False
-    )
-    parser.add_argument(
-        '--malass-port',
-        dest='malassPort',
-        help="Malass web interface port",
-        metavar='<port>',
-        type=int,
-        default=80,
-        required=False,
-    )
-    parser.add_argument(
         '--vtot-api', dest='vtotApi', help="VirusTotal API key", metavar='<API key>', type=str, required=False
     )
     parser.add_argument(
@@ -423,9 +411,7 @@ def main():
         sleepCount += 1
 
     # intialize objects for virus scanning engines
-    if isinstance(args.malassHost, str) and (len(args.malassHost) > 1):
-        checkConnInfo = MalassScan(args.malassHost, args.malassPort, reqLimit=args.reqLimit)
-    elif isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.vtotReqLimit > 0):
+    if isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.vtotReqLimit > 0):
         checkConnInfo = VirusTotalSearch(args.vtotApi, reqLimit=args.reqLimit)
     elif args.enableYara:
         yaraDirs = []

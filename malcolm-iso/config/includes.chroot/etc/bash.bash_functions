@@ -476,3 +476,55 @@ function dstop() { docker stop $(docker ps -a -q); }
 function dregls () {
   curl -k -X GET "https://"$1"/v2/_catalog"
 }
+
+########################################################################
+# malcolm-specific
+########################################################################
+function malcolmmonitor () {
+  if [[ -d "$HOME"/Malcolm ]]; then
+    MAX_WIDTH=$(tput cols)
+    MAX_HEIGHT=$(tput lines)
+    /usr/bin/tmux new-session \; \
+      split-window -h \; \
+      select-pane -t 1 \; \
+      split-window -v \; \
+      select-pane -t 2 \; \
+      split-window -h \; \
+      select-pane -t 2 \; \
+      split-window -v \; \
+      select-pane -t 5 \; \
+      split-window -v \; \
+      split-window -v \; \
+      select-pane -t 1 \; \
+      send-keys '~/Malcolm/scripts/logs' C-m \; \
+      select-pane -t 2 \; \
+      send-keys 'dstats' C-m \; \
+      select-pane -t 3 \; \
+      send-keys 'while true; do clear; df -h ~/Malcolm/; sleep 60; done' C-m \; \
+      select-pane -t 4 \; \
+      send-keys 'top' C-m \; \
+      split-window -v \; \
+      select-pane -t 5 \; \
+      send-keys 'while true; do clear; free -m | head -n 2; sleep 60; done' C-m \; \
+      select-pane -t 6 \; \
+      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker-compose exec -u $(id -u) api curl 'http://localhost:5000/agg/event.dataset?from=1970' | python3 -m json.tool | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' | head -n $(( (MAX_HEIGHT / 2) - 1 )) ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
+      select-pane -t 7 \; \
+      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker-compose exec -u $(id -u) api curl 'http://localhost:5000/agg?from=1970' | python3 -m json.tool | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
+      split-window -v \; \
+      select-pane -t 8 \; \
+      send-keys "while true; do clear; find ~/Malcolm/zeek-logs/extract_files -type f | sed 's@.*/\(.*\)/.*@\1@' | sort | uniq -c | sort -nr; sleep 60; done" C-m \; \
+      select-pane -t 9 \; \
+      send-keys "while true; do clear; find ~/Malcolm/zeek-logs/extract_files -type f | sed 's@.*/@@' | sed 's/.*\.//' | sort | uniq -c | sort -nr | head -n $(( (MAX_HEIGHT / 3) - 1 )) ; sleep 60; done" C-m \; \
+      select-pane -t 9 \; \
+      resize-pane -R $(( ($MAX_WIDTH / 2) - 30 )) \; \
+      select-pane -t 3 \; \
+      resize-pane -D $(( ($MAX_HEIGHT / 4) - 4 )) \; \
+      select-pane -t 5 \; \
+      resize-pane -D $(( ($MAX_HEIGHT / 4) - 4 )) \; \
+      select-pane -t 7 \; \
+      resize-pane -U $(( ($MAX_HEIGHT / 8) - 4 )) \; \
+      select-pane -t 8 \; \
+      resize-pane -U $(( ($MAX_HEIGHT / 8) - 1 )) \; \
+      select-pane -t 4 \;
+  fi
+}

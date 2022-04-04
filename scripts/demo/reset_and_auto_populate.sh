@@ -316,7 +316,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
-    for CONTAINER in filebeat logstash upload pcap-monitor file-monitor zeek name-map-ui pcap-capture freq; do
+    for CONTAINER in filebeat logstash upload pcap-monitor zeek name-map-ui pcap-capture freq; do
       docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5
