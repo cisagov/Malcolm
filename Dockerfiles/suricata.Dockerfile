@@ -20,6 +20,13 @@ ENV PUSER "suricata"
 ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP true
 
+#SuperCronic information
+ENV SUPERCRONIC_VERSION "0.1.12"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
 #UPDATE VERSION OF SURICATA
 ENV SURICATA_VER "6.0.0"
 ENV SURICATADIR "/opt/suricata"
@@ -65,7 +72,19 @@ RUN apt-get -q update && \
         supervisor \
         python3-zmq \
         procps \
-        psmisc
+        psmisc \
+        tar \
+        gzip \
+        unzip \
+        cpio \
+        bzip2 \
+        lzma \
+        p7zip \
+        unar \
+        unar \
+        python3-setuptools \
+        inotify-tools \
+        file
 
 #Install Rust
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
@@ -101,6 +120,13 @@ RUN mkdir -p $SURICATADIR/ && \
     make install && \
     make install-full
 
+#Install SuperCronic
+RUN curl -fsSLO "$SUPERCRONIC_URL" && \
+    echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+    chmod +x "$SUPERCRONIC" && \
+    mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+    ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+
 ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/pcap_utils.py /opt/
@@ -108,13 +134,16 @@ ADD shared/pcaps /tmp/
 ADD suricata/supervisord.conf /etc/supervisord.conf
 ADD suricata/rules/*.rules /var/lib/suricata/rules/
 ADD suricata/suricata.yaml $SURICATADIR/suricata.yaml
+ADD suricata/scripts/*.sh /opt/
 
 #Setup User, Groups, and Configs
 RUN addgroup --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
     chmod -R +rw $SURICATADIR && \
-    ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_suricata_processor.py
+    ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_suricata_processor.py && \
+    chmod 755 /opt/*.sh && \
+    (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB})
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
