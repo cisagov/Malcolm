@@ -370,7 +370,7 @@ class Installer(object):
                     )
 
         dockerNetworkExternalName = InstallerAskForString(
-            'Specify external Docker network name (or leave blank for default networking)'
+            'Specify external Docker network name (or leave blank for default networking)', default=""
         )
 
         ldapStartTLS = False
