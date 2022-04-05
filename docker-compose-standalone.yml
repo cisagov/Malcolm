@@ -145,6 +145,8 @@ services:
     stdin_open: false
     tty: true
     hostname: opensearch
+    networks:
+      - default
     environment:
       << : *process-variables
       logger.level : 'WARN'
@@ -183,6 +185,8 @@ services:
     stdin_open: false
     tty: true
     hostname: dashboards-helper
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *dashboards-helper-variables
@@ -211,6 +215,8 @@ services:
     stdin_open: false
     tty: true
     hostname: dashboards
+    networks:
+      - default
     environment:
       << : *process-variables
       OPENSEARCH_URL : 'http://opensearch:9200'
@@ -232,6 +238,8 @@ services:
     stdin_open: false
     tty: true
     hostname: logstash
+    networks:
+      - default
     ulimits:
       memlock:
         soft: -1
@@ -273,6 +281,8 @@ services:
     stdin_open: false
     tty: true
     hostname: filebeat
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *nginx-variables
@@ -310,6 +320,8 @@ services:
     stdin_open: false
     tty: true
     hostname: arkime
+    networks:
+      - default
     env_file:
       - ./auth.env
     environment:
@@ -348,6 +360,8 @@ services:
     stdin_open: false
     tty: true
     hostname: zeek
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *common-upload-variables
@@ -377,6 +391,8 @@ services:
     stdin_open: false
     tty: true
     hostname: file-monitor
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *zeek-variables
@@ -420,6 +436,8 @@ services:
     stdin_open: false
     tty: true
     hostname: pcapmon
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *common-upload-variables
@@ -443,6 +461,8 @@ services:
     stdin_open: false
     tty: true
     hostname: upload
+    networks:
+      - default
     env_file:
       - ./auth.env
     environment:
@@ -469,6 +489,8 @@ services:
     stdin_open: false
     tty: true
     hostname: htadmin
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *auth-variables
@@ -491,6 +513,8 @@ services:
     stdin_open: false
     tty: true
     hostname: freq
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *common-lookup-variables
@@ -509,6 +533,8 @@ services:
     stdin_open: false
     tty: true
     hostname: name-map-ui
+    networks:
+      - default
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
@@ -531,6 +557,8 @@ services:
     stdin_open: false
     tty: true
     hostname: api
+    networks:
+      - default
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'api.malcolm.local'
@@ -548,6 +576,8 @@ services:
     stdin_open: false
     tty: true
     hostname: nginx-proxy
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *auth-variables
@@ -578,7 +608,16 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
+    #labels:
+    #  - "traefik.enable=true"
+    #  - "traefik.http.routers.malcolm.rule=Host(`malcolm.example.org`)"
+    #  - "traefik.http.routers.malcolm.entrypoints=websecure"
+    #  - "traefik.http.routers.malcolm.tls.certresolver=myresolver"
+    #  - "traefik.http.services.malcolm.loadbalancer.server.port=443"
 
 # shared named volume so filebeat can access nginx access logs
 volumes:
   nginx-log-path:
+
+networks:
+  default:
