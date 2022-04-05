@@ -141,7 +141,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
 
-The scripts to control Malcolm require Python 3.
+The scripts to control Malcolm require Python 3. The [`install.py`](#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3.
 
 #### Source code
 

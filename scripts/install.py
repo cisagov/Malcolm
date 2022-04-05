@@ -42,6 +42,7 @@ origPath = os.getcwd()
 
 ###################################################################################################
 args = None
+requests_imported = None
 
 ###################################################################################################
 # get interactive user response to Y/N question
@@ -336,6 +337,41 @@ class Installer(object):
         if not nginxSSL:
             nginxSSL = not InstallerYesOrNo('Unencrypted connections are NOT recommended. Are you sure?', default=False)
 
+        behindReverseProxy = False
+        dockerNetworkExternalName = ""
+        traefikLabels = False
+        traefikHost = ""
+        traefikOpenSearchHost = ""
+        traefikEntrypoint = ""
+        traefikResolver = ""
+
+        behindReverseProxy = InstallerYesOrNo(
+            'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?', default=(not nginxSSL)
+        )
+
+        if behindReverseProxy:
+            dockerNetworkExternalName = InstallerAskForString(
+                'Specify external Docker network name (or leave blank for default networking)'
+            )
+            traefikLabels = InstallerYesOrNo('Configure labels for Traefik?', default=False)
+            if traefikLabels:
+                while len(traefikHost) <= 1:
+                    traefikHost = InstallerAskForString(
+                        'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)'
+                    )
+                while len(traefikOpenSearchHost) <= 1:
+                    traefikOpenSearchHost = InstallerAskForString(
+                        f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})'
+                    )
+                while len(traefikEntrypoint) <= 1:
+                    traefikEntrypoint = InstallerAskForString(
+                        'Enter Traefik router entrypoint (e.g., websecure)', default="websecure"
+                    )
+                while len(traefikResolver) <= 1:
+                    traefikResolver = InstallerAskForString(
+                        'Enter Traefik router resolver (e.g., myresolver)', default="myresolver"
+                    )
+
         ldapStartTLS = False
         ldapServerType = 'winldap'
         useBasicAuth = not InstallerYesOrNo(
@@ -517,7 +553,9 @@ class Installer(object):
                     skipLine = False
 
                     # it would be cleaner to use something like PyYAML to do this, but I want to have as few dependencies
-                    # as possible so we're going to do it janky instead
+                    # as possible so we're going to do it janky instead. Also, as of right now pyyaml doesn't preserve
+                    # comments, which is a big deal for this complicated docker-compose file. There is
+                    # https://pypi.org/project/ruamel.yaml to possibly consider if we're comfortable with the dependency.
 
                     # determine indentation for each service section (assumes YML file is consistently indented)
                     if (not servicesSectionFound) and line.lower().startswith('services:'):
@@ -542,20 +580,25 @@ class Installer(object):
                     ):
                         # OpenSearch backup directory
                         line = f"{serviceIndent * 2}restart: {restartMode}"
+
                     elif 'PUID' in line:
                         # process UID
                         line = re.sub(r'(PUID\s*:\s*)(\S+)', fr"\g<1>{puid}", line)
+
                     elif 'PGID' in line:
                         # process GID
                         line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
+
                     elif 'NGINX_SSL' in line:
                         # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
                         line = re.sub(r'(NGINX_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(nginxSSL)}", line)
+
                     elif 'NGINX_BASIC_AUTH' in line:
                         # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
                         line = re.sub(
                             r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line
                         )
+
                     elif 'NGINX_LDAP_TLS_STUNNEL' in line:
                         # StartTLS vs. ldap:// or ldaps://
                         line = re.sub(
@@ -563,78 +606,97 @@ class Installer(object):
                             fr"\g<1>{TrueOrFalseQuote(((not useBasicAuth) and ldapStartTLS))}",
                             line,
                         )
+
                     elif 'ZEEK_EXTRACTOR_MODE' in line:
                         # zeek file extraction mode
                         line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', fr"\g<1>'{fileCarveMode}'", line)
+
                     elif 'EXTRACTED_FILE_PRESERVATION' in line:
                         # zeek file preservation mode
                         line = re.sub(r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', fr"\g<1>'{filePreserveMode}'", line)
+
                     elif 'VTOT_API2_KEY' in line:
                         # virustotal API key
                         line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', fr"\g<1>'{vtotApiKey}'", line)
+
                     elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
                         # file scanning via yara
                         line = re.sub(
                             r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(yaraScan)}", line
                         )
+
                     elif 'EXTRACTED_FILE_ENABLE_CAPA' in line:
                         # PE file scanning via capa
                         line = re.sub(
                             r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(capaScan)}", line
                         )
+
                     elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
                         # file scanning via clamav
                         line = re.sub(
                             r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(clamAvScan)}", line
                         )
+
                     elif 'EXTRACTED_FILE_UPDATE_RULES' in line:
                         # rule updates (yara/capa via git, clamav via freshclam)
                         line = re.sub(
                             r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(ruleUpdate)}", line
                         )
+
                     elif 'PCAP_ENABLE_NETSNIFF' in line:
                         # capture pcaps via netsniff-ng
                         line = re.sub(
                             r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapNetSniff)}", line
                         )
+
                     elif 'PCAP_ENABLE_TCPDUMP' in line:
                         # capture pcaps via tcpdump
                         line = re.sub(
                             r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
                         )
+
                     elif 'PCAP_IFACE' in line:
                         # capture interface(s)
                         line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
+
                     elif 'OPENSEARCH_JAVA_OPTS' in line:
                         # OpenSearch memory allowance
                         line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
+
                     elif 'LS_JAVA_OPTS' in line:
                         # logstash memory allowance
                         line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', line)
+
                     elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
                         # automatic pcap analysis with Zeek
                         line = re.sub(
                             r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoZeek)}", line
                         )
+
                     elif 'LOGSTASH_REVERSE_DNS' in line:
                         # automatic local reverse dns lookup
                         line = re.sub(
                             r'(LOGSTASH_REVERSE_DNS\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(reverseDns)}", line
                         )
+
                     elif 'LOGSTASH_OUI_LOOKUP' in line:
                         # automatic MAC OUI lookup
                         line = re.sub(r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line)
+
                     elif 'pipeline.workers' in line:
                         # logstash pipeline workers
                         line = re.sub(r'(pipeline\.workers\s*:\s*)(\S+)', fr"\g<1>{lsWorkers}", line)
+
                     elif 'FREQ_LOOKUP' in line:
                         # freq.py string randomness calculations
                         line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
+
                     elif 'BEATS_SSL' in line:
                         # enable/disable beats SSL
                         line = re.sub(
                             r'(BEATS_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}", line
                         )
+
                     elif (
                         (currentService == 'opensearch')
                         and re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line)
@@ -645,18 +707,23 @@ class Installer(object):
                         volumeParts = line.strip().lstrip('-').lstrip().split(':')
                         volumeParts[0] = indexSnapshotDir
                         line = "{}- {}".format(serviceIndent * 3, ':'.join(volumeParts))
+
                     elif 'ISM_SNAPSHOT_AGE' in line:
                         # OpenSearch index state management snapshot age
                         line = re.sub(r'(ISM_SNAPSHOT_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexSnapshotAge}'", line)
+
                     elif 'ISM_COLD_AGE' in line:
                         # OpenSearch index state management cold (read-only) age
                         line = re.sub(r'(ISM_COLD_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexColdAge}'", line)
+
                     elif 'ISM_CLOSE_AGE' in line:
                         # OpenSearch index state management close age
                         line = re.sub(r'(ISM_CLOSE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexCloseAge}'", line)
+
                     elif 'ISM_DELETE_AGE' in line:
                         # OpenSearch index state management close age
                         line = re.sub(r'(ISM_DELETE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexDeleteAge}'", line)
+
                     elif 'ISM_SNAPSHOT_COMPRESSED' in line:
                         # OpenSearch index state management snapshot compression
                         line = re.sub(
@@ -664,11 +731,13 @@ class Installer(object):
                             fr"\g<1>{TrueOrFalseQuote(indexSnapshotCompressed)}",
                             line,
                         )
+
                     elif 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
                         # delete based on index pattern size
                         line = re.sub(
                             r'(OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)', fr"\g<1>'{indexPruneSizeLimit}'", line
                         )
+
                     elif 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
                         # delete based on index pattern size (sorted by name vs. creation time)
                         line = re.sub(
@@ -676,9 +745,11 @@ class Installer(object):
                             fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}",
                             line,
                         )
+
                     elif 'OS_EXTERNAL_HOSTS' in line:
                         # enable/disable forwarding Logstash to external OpenSearch instance
                         line = re.sub(r'(#\s*)?(OS_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
+
                     elif 'OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
                         # enable/disable SSL certificate verification for external OpenSearch instance
                         line = re.sub(
@@ -686,60 +757,103 @@ class Installer(object):
                             fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}",
                             line,
                         )
+
                     elif 'OS_EXTERNAL_SSL' in line:
                         # enable/disable SSL certificate verification for external OpenSearch instance
                         line = re.sub(
                             r'(#\s*)?(OS_EXTERNAL_SSL\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}", line
                         )
-                    elif logstashOpen and serviceStartLine and (currentService == 'logstash'):
-                        # exposing logstash port 5044 to the world
-                        print(line)
-                        line = f"{serviceIndent * 2}ports:"
-                        print(line)
-                        line = f'{serviceIndent * 3}- "0.0.0.0:5044:5044"'
+
                     elif (
                         (not serviceStartLine)
                         and (currentService == 'logstash')
-                        and re.match(fr'^({serviceIndent * 2}ports:|{serviceIndent * 3}-.*5044:5044)"?\s*$', line)
-                    ):
-                        # remove previous/leftover/duplicate exposing logstash port 5044 to the world
-                        skipLine = True
-                    elif (
-                        (not serviceStartLine)
-                        and (currentService == 'nginx-proxy')
-                        and re.match(r'^.*-.*\b9200:9200"?\s*$', line)
-                    ):
-                        # comment/uncomment port forwarding for OpenSearch based on opensearchOpen
-                        leadingSpaces = len(line) - len(line.lstrip())
-                        if leadingSpaces <= 0:
-                            leadingSpaces = 6
-                        line = (
-                            f"{' ' * leadingSpaces}{'' if opensearchOpen else '# '}{line.lstrip().lstrip('#').lstrip()}"
-                        )
-                    elif (
-                        (not serviceStartLine) and (currentService == 'nginx-proxy') and re.match(r'^\s*test\s*:', line)
-                    ):
-                        # set nginx-proxy health check based on whether they're using HTTPS or not
-                        line = re.sub(
-                            r'https?://localhost:\d+',
-                            fr"{'https' if nginxSSL else 'http'}://localhost:443",
-                            line,
-                        )
-                    elif (
-                        (not serviceStartLine)
-                        and (currentService == 'nginx-proxy')
                         and re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line)
                     ):
-                        # set bind IP and HTTP port based on whether they're using HTTPS or not
+                        # set bind IP based on whether it should be externally exposed or not
                         line = re.sub(
                             r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                            fr"\g<1>{'0.0.0.0' if nginxSSL else '127.0.0.1'}:\g<3>",
+                            fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
                             line,
                         )
-                        if (':80:' in line) and (nginxSSL == True):
-                            line = line.replace(':80:', ':443:')
-                        elif (':443"' in line) and (nginxSSL == False):
-                            line = line.replace(':443:', ':80:')
+
+                    elif (not serviceStartLine) and (currentService == 'nginx-proxy'):
+                        # stuff specifically in the nginx-proxy section
+
+                        if re.match(r'^\s*test\s*:', line):
+                            # set nginx-proxy health check based on whether they're using HTTPS or not
+                            line = re.sub(
+                                r'https?://localhost:\d+',
+                                fr"{'https' if nginxSSL else 'http'}://localhost:443",
+                                line,
+                            )
+
+                        elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                            # set bind IPs and HTTP port based on whether it should be externally exposed or not
+                            line = re.sub(
+                                r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
+                                line,
+                            )
+                            if (':80:' in line) and (nginxSSL == True):
+                                line = line.replace(':80:', ':443:')
+
+                            elif (':443"' in line) and (nginxSSL == False):
+                                line = line.replace(':443:', ':80:')
+
+                        elif 'traefik.' in line:
+                            # enable/disable/configure traefik labels if applicable
+
+                            # Traefik enabled vs. disabled
+                            if 'traefik.enable' in line:
+                                line = re.sub(
+                                    r'(#\s*)?(traefik\.enable\s*:\s*)(\S+)',
+                                    fr"\g<2>{TrueOrFalseQuote(behindReverseProxy and traefikLabels)}",
+                                    line,
+                                )
+                            else:
+                                line = re.sub(
+                                    r'(#\s*)?(traefik\..*)',
+                                    fr"{'' if traefikLabels else '# '}\g<2>",
+                                    line,
+                                )
+
+                            if 'traefik.http.' in line and '.osmalcolm.' in line:
+                                # OpenSearch router enabled/disabled/host value
+                                line = re.sub(
+                                    r'(#\s*)?(traefik\..*)',
+                                    fr"{'' if behindReverseProxy and traefikLabels and opensearchOpen else '# '}\g<2>",
+                                    line,
+                                )
+                                if ('.rule') in line:
+                                    line = re.sub(
+                                        r'(traefik\.http\.routers\.osmalcolm\.rule\s*:\s*)(\S+)',
+                                        fr"\g<1>'{traefikOpenSearchHost}'",
+                                        line,
+                                    )
+
+                            if 'traefik.http.routers.malcolm.rule' in line:
+                                # Malcolm interface router host value
+                                line = re.sub(
+                                    r'(traefik\.http\.routers\.malcolm\.rule\s*:\s*)(\S+)',
+                                    fr"\g<1>'{traefikHost}'",
+                                    line,
+                                )
+
+                            elif 'traefik.http.routers.' in line and '.entrypoints' in line:
+                                # Malcolm routers entrypoints
+                                line = re.sub(
+                                    r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
+                                    fr"\g<1>'{traefikEntrypoint}'",
+                                    line,
+                                )
+
+                            elif 'traefik.http.routers.' in line and '.certresolver' in line:
+                                # Malcolm routers resolvers
+                                line = re.sub(
+                                    r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
+                                    fr"\g<1>'{traefikResolver}'",
+                                    line,
+                                )
 
                     if not skipLine:
                         print(line)
@@ -918,6 +1032,8 @@ class LinuxInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker(self):
+        global requests_imported
+
         result = False
 
         # first see if docker is already installed and runnable
@@ -965,7 +1081,7 @@ class LinuxInstaller(Installer):
                     # for debian/ubuntu, add docker GPG key and check its fingerprint
                     if self.debug:
                         eprint("Requesting docker GPG key for package signing")
-                    dockerGpgKey = requests.get(
+                    dockerGpgKey = requests_imported.get(
                         f'https://download.docker.com/linux/{self.distro}/gpg', allow_redirects=True
                     )
                     err, out = self.run_process(
@@ -1570,6 +1686,7 @@ class MacInstaller(Installer):
 # main
 def main():
     global args
+    global requests_imported
 
     # extract arguments from the command line
     # print (sys.argv[1:]);
@@ -1674,7 +1791,10 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    if not ImportRequests(debug=args.debug):
+    requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaults))
+    if args.debug:
+        eprint(f"Imported requests: {requests_imported}")
+    if not requests_imported:
         exit(2)
 
     # If Malcolm and images tarballs are provided, we will use them.

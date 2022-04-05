@@ -259,6 +259,8 @@ services:
       - 5044
       - 9001
       - 9600
+    ports:
+      - "127.0.0.1:5044:5044"
     volumes:
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
@@ -593,8 +595,8 @@ services:
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:488:488"
-      - "0.0.0.0:5601:5601"
-      # - "0.0.0.0:9200:9200"
+      - "127.0.0.1:5601:5601"
+      - "127.0.0.1:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
@@ -608,12 +610,16 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
-    #labels:
-    #  - "traefik.enable=true"
-    #  - "traefik.http.routers.malcolm.rule=Host(`malcolm.example.org`)"
-    #  - "traefik.http.routers.malcolm.entrypoints=websecure"
-    #  - "traefik.http.routers.malcolm.tls.certresolver=myresolver"
-    #  - "traefik.http.services.malcolm.loadbalancer.server.port=443"
+    labels:
+      traefik.enable: "false"
+      # traefik.http.routers.osmalcolm.rule: "Host(`opensearch.malcolm.example.org`)"
+      # traefik.http.routers.osmalcolm.entrypoints: "websecure"
+      # traefik.http.routers.osmalcolm.tls.certresolver: "myresolver"
+      # traefik.http.services.osmalcolm.loadbalancer.server.port: "9200"
+      # traefik.http.routers.malcolm.rule: "Host(`malcolm.example.org`)"
+      # traefik.http.routers.malcolm.entrypoints: "websecure"
+      # traefik.http.routers.malcolm.tls.certresolver: "myresolver"
+      # traefik.http.services.malcolm.loadbalancer.server.port: "443"
 
 # shared named volume so filebeat can access nginx access logs
 volumes:

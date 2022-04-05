@@ -5,6 +5,7 @@
 
 import contextlib
 import getpass
+import importlib
 import json
 import os
 import platform
@@ -24,16 +25,6 @@ from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
-
-###################################################################################################
-
-# attempt to import requests, will cover failure later
-try:
-    import requests
-
-    RequestsImported = True
-except ImportError:
-    RequestsImported = False
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"
@@ -242,70 +233,73 @@ def run_process(
 
 
 ###################################################################################################
-# make sure we can import requests properly and take care of it automatically if possible
-def ImportRequests(debug=False):
-    global RequestsImported
+# attempt dynamic imports, prompting for install via pip if possible
+DynImports = defaultdict(lambda: None)
 
-    if not RequestsImported:
-        # see if we can help out by installing the requests module
+
+def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
+    global DynImports
+
+    # see if we've already imported it
+    if not DynImports[importName]:
+
+        # if not, attempt the import
+        try:
+            tmpImport = importlib.import_module(importName)
+            if tmpImport:
+                DynImports[importName] = tmpImport
+                return DynImports[importName]
+        except ImportError as e:
+            pass
+
+        # see if we can help out by installing the module
 
         pyPlatform = platform.system()
         pyExec = sys.executable
-        pipCmd = 'pip3'
+        pipCmd = "pip3"
         if not Which(pipCmd, debug=debug):
-            pipCmd = 'pip'
+            pipCmd = "pip"
 
-        eprint(f'The requests module is required under Python {platform.python_version()} ({pyExec})')
+        eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
-        if Which(pipCmd, debug=debug):
-            if YesOrNo(f'Importing the requests module failed. Attempt to install via {pipCmd}?'):
+        if interactive and Which(pipCmd, debug=debug):
+            if YesOrNo(f"Importing the {pipPkgName} module failed. Attempt to install via {pipCmd}?"):
                 installCmd = None
 
                 if (pyPlatform == PLATFORM_LINUX) or (pyPlatform == PLATFORM_MAC):
                     # for linux/mac, we're going to try to figure out if this python is owned by root or the script user
                     if getpass.getuser() == getpwuid(os.stat(pyExec).st_uid).pw_name:
                         # we're running a user-owned python, regular pip should work
-                        installCmd = [pipCmd, 'install', 'requests']
+                        installCmd = [pipCmd, "install", pipPkgName]
                     else:
                         # python is owned by system, so make sure to pass the --user flag
-                        installCmd = [pipCmd, 'install', '--user', 'requests']
+                        installCmd = [pipCmd, "install", "--user", pipPkgName]
                 else:
                     # on windows (or whatever other platform this is) I don't know any other way other than pip
-                    installCmd = [pipCmd, 'install', 'requests']
+                    installCmd = [pipCmd, "install", pipPkgName]
 
                 err, out = run_process(installCmd, debug=debug)
                 if err == 0:
-                    eprint("Installation of requests module apparently succeeded")
+                    eprint(f"Installation of {pipPkgName} module apparently succeeded")
                     try:
-                        import requests
-
-                        RequestsImported = True
+                        tmpImport = importlib.import_module(importName)
+                        if tmpImport:
+                            DynImports[importName] = tmpImport
                     except ImportError as e:
-                        eprint(f"Importing the requests module still failed: {e}")
+                        eprint(f"Importing the {importName} module still failed: {e}")
                 else:
-                    eprint(f"Installation of requests module failed: {out}")
+                    eprint(f"Installation of {importName} module failed: {out}")
 
-    if not RequestsImported:
+    if not DynImports[importName]:
         eprint(
             "System-wide installation varies by platform and Python configuration. Please consult platform-specific documentation for installing Python modules."
         )
-        if platform.system() == PLATFORM_MAC:
-            eprint(
-                'You *may* be able to install pip and requests manually via: sudo sh -c "easy_install pip && pip install requests"'
-            )
-        elif pyPlatform == PLATFORM_LINUX:
-            if Which('apt-get', debug=debug):
-                eprint("You *may* be able to install requests manually via: sudo apt-get install python3-requests")
-            elif Which('apt', debug=debug):
-                eprint("You *may* be able to install requests manually via: sudo apt install python3-requests")
-            elif Which('dnf', debug=debug):
-                eprint("You *may* be able to install requests manually via: sudo dnf install python3-requests")
-            elif Which('yum', debug=debug):
-                eprint(
-                    'You *may* be able to install pip and requests manually via: sudo sh -c "yum install python3-pip && python3 -m pip install requests"'
-                )
 
-    return RequestsImported
+    return DynImports[importName]
+
+
+def RequestsDynamic(debug=False, forceInteraction=False):
+    return DoDynamicImport("requests", "requests", interactive=forceInteraction, debug=debug)
 
 
 ###################################################################################################
@@ -324,7 +318,7 @@ def MalcolmAuthFilesExist():
 ###################################################################################################
 # download to file
 def DownloadToFile(url, local_filename, debug=False):
-    r = requests.get(url, stream=True, allow_redirects=True)
+    r = RequestsDynamic.get(url, stream=True, allow_redirects=True)
     with open(local_filename, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:

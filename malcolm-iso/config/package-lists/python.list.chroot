@@ -7,3 +7,4 @@ python3-psutil
 python3-pycryptodome
 python3-dialog
 python3-requests
+python3-yaml
