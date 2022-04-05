@@ -615,10 +615,12 @@ services:
       # traefik.http.routers.osmalcolm.rule: "Host(`opensearch.malcolm.example.org`)"
       # traefik.http.routers.osmalcolm.entrypoints: "websecure"
       # traefik.http.routers.osmalcolm.tls.certresolver: "myresolver"
+      # traefik.http.routers.osmalcolm.service: "osmalcolm"
       # traefik.http.services.osmalcolm.loadbalancer.server.port: "9200"
       # traefik.http.routers.malcolm.rule: "Host(`malcolm.example.org`)"
       # traefik.http.routers.malcolm.entrypoints: "websecure"
       # traefik.http.routers.malcolm.tls.certresolver: "myresolver"
+      # traefik.http.routers.malcolm.service: "malcolm"
       # traefik.http.services.malcolm.loadbalancer.server.port: "443"
 
 # shared named volume so filebeat can access nginx access logs

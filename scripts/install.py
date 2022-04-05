@@ -545,7 +545,7 @@ class Installer(object):
             origUid, origGuid = composeFileStat[4], composeFileStat[5]
             composeFileHandle = fileinput.FileInput(composeFile, inplace=True, backup=None)
             try:
-                sectionIndents = defaultdict(lambda: 2)
+                sectionIndents = defaultdict(lambda: '  ')
                 currentSection = None
                 currentService = None
                 networkWritten = False
@@ -852,7 +852,7 @@ class Installer(object):
                                     if ('.rule') in line:
                                         line = re.sub(
                                             r'(traefik\.http\.routers\.osmalcolm\.rule\s*:\s*)(\S+)',
-                                            fr"\g<1>'{traefikOpenSearchHost}'",
+                                            fr"\g<1>'Host(`{traefikOpenSearchHost}`)'",
                                             line,
                                         )
 
@@ -860,7 +860,7 @@ class Installer(object):
                                     # Malcolm interface router host value
                                     line = re.sub(
                                         r'(traefik\.http\.routers\.malcolm\.rule\s*:\s*)(\S+)',
-                                        fr"\g<1>'{traefikHost}'",
+                                        fr"\g<1>'Host(`{traefikHost}`)'",
                                         line,
                                     )
 
