@@ -319,7 +319,7 @@ class Installer(object):
         while (not str(lsWorkers).isdigit()) or (
             not InstallerYesOrNo(f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True)
         ):
-            lsWorkers = InstallerAskForString('Enter lsWorkers (e.g., 4, 8, etc.)')
+            lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
 
         restartMode = None
         allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
@@ -813,17 +813,22 @@ class Installer(object):
                                 )
 
                             elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                # set bind IPs and HTTP port based on whether it should be externally exposed or not
+                                # set bind IPs and ports based on whether it should be externally exposed or not
                                 line = re.sub(
                                     r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
                                     fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
-                                if (':80:' in line) and (nginxSSL == True):
-                                    line = line.replace(':80:', ':443:')
-
-                                elif (':443"' in line) and (nginxSSL == False):
-                                    line = line.replace(':443:', ':80:')
+                                if nginxSSL == False:
+                                    if ':443:' in line:
+                                        line = line.replace(':443:', ':80:')
+                                    if ':9200:' in line:
+                                        line = line.replace(':9200:', ':9201:')
+                                else:
+                                    if ':80:' in line:
+                                        line = line.replace(':80:', ':443:')
+                                    if ':9201:' in line:
+                                        line = line.replace(':9201:', ':9200:')
 
                             elif 'traefik.' in line:
                                 # enable/disable/configure traefik labels if applicable
