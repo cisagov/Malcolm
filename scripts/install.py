@@ -350,16 +350,13 @@ class Installer(object):
         )
 
         if behindReverseProxy:
-            dockerNetworkExternalName = InstallerAskForString(
-                'Specify external Docker network name (or leave blank for default networking)'
-            )
             traefikLabels = InstallerYesOrNo('Configure labels for Traefik?', default=False)
             if traefikLabels:
                 while len(traefikHost) <= 1:
                     traefikHost = InstallerAskForString(
                         'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)'
                     )
-                while len(traefikOpenSearchHost) <= 1:
+                while (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost):
                     traefikOpenSearchHost = InstallerAskForString(
                         f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})'
                     )
@@ -371,6 +368,10 @@ class Installer(object):
                     traefikResolver = InstallerAskForString(
                         'Enter Traefik router resolver (e.g., myresolver)', default="myresolver"
                     )
+
+        dockerNetworkExternalName = InstallerAskForString(
+            'Specify external Docker network name (or leave blank for default networking)'
+        )
 
         ldapStartTLS = False
         ldapServerType = 'winldap'
@@ -544,316 +545,352 @@ class Installer(object):
             origUid, origGuid = composeFileStat[4], composeFileStat[5]
             composeFileHandle = fileinput.FileInput(composeFile, inplace=True, backup=None)
             try:
-                servicesSectionFound = False
-                serviceIndent = None
+                sectionIndents = defaultdict(lambda: 2)
+                currentSection = None
                 currentService = None
+                networkWritten = False
 
                 for line in composeFileHandle:
                     line = line.rstrip("\n")
                     skipLine = False
+                    sectionStartLine = False
+                    serviceStartLine = False
 
                     # it would be cleaner to use something like PyYAML to do this, but I want to have as few dependencies
                     # as possible so we're going to do it janky instead. Also, as of right now pyyaml doesn't preserve
                     # comments, which is a big deal for this complicated docker-compose file. There is
                     # https://pypi.org/project/ruamel.yaml to possibly consider if we're comfortable with the dependency.
 
-                    # determine indentation for each service section (assumes YML file is consistently indented)
-                    if (not servicesSectionFound) and line.lower().startswith('services:'):
-                        servicesSectionFound = True
-                    elif servicesSectionFound and (serviceIndent is None):
+                    # determine which section of the compose file we are in (e.g., services, networks, volumes, etc.)
+                    sectionMatch = re.match(r'^([^\s#]+):\s*(#.*)?$', line)
+                    if sectionMatch is not None:
+                        currentSection = sectionMatch.group(1)
+                        sectionStartLine = True
+                        currentService = None
+
+                    # determine indentation for each compose file section (assumes YML file is consistently indented)
+                    if (currentSection is not None) and (not currentSection in sectionIndents):
                         indentMatch = re.search(r'^(\s+)\S+\s*:\s*$', line)
                         if indentMatch is not None:
-                            serviceIndent = indentMatch.group(1)
+                            sectionIndents[currentSection] = indentMatch.group(1)
 
                     # determine which service we're currently processing in the YML file
-                    serviceStartLine = False
-                    if servicesSectionFound and (serviceIndent is not None):
-                        serviceMatch = re.search(fr'^{serviceIndent}(\S+)\s*:\s*$', line)
+                    if currentSection == 'services':
+                        serviceMatch = re.search(fr'^{sectionIndents[currentSection]}(\S+)\s*:\s*$', line)
                         if serviceMatch is not None:
                             currentService = serviceMatch.group(1).lower()
                             serviceStartLine = True
 
-                    if (
-                        (currentService is not None)
-                        and (restartMode is not None)
-                        and re.match(r'^\s*restart\s*:.*$', line)
-                    ):
-                        # OpenSearch backup directory
-                        line = f"{serviceIndent * 2}restart: {restartMode}"
+                    if currentSection == None:
+                        # variables defined in the sections at the top of the compose file
 
-                    elif 'PUID' in line:
-                        # process UID
-                        line = re.sub(r'(PUID\s*:\s*)(\S+)', fr"\g<1>{puid}", line)
+                        if 'PUID' in line:
+                            # process UID
+                            line = re.sub(r'(PUID\s*:\s*)(\S+)', fr"\g<1>{puid}", line)
 
-                    elif 'PGID' in line:
-                        # process GID
-                        line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
+                        elif 'PGID' in line:
+                            # process GID
+                            line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
 
-                    elif 'NGINX_SSL' in line:
-                        # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
-                        line = re.sub(r'(NGINX_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(nginxSSL)}", line)
+                        elif 'NGINX_SSL' in line:
+                            # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
+                            line = re.sub(r'(NGINX_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(nginxSSL)}", line)
 
-                    elif 'NGINX_BASIC_AUTH' in line:
-                        # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
-                        line = re.sub(
-                            r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line
-                        )
-
-                    elif 'NGINX_LDAP_TLS_STUNNEL' in line:
-                        # StartTLS vs. ldap:// or ldaps://
-                        line = re.sub(
-                            r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)',
-                            fr"\g<1>{TrueOrFalseQuote(((not useBasicAuth) and ldapStartTLS))}",
-                            line,
-                        )
-
-                    elif 'ZEEK_EXTRACTOR_MODE' in line:
-                        # zeek file extraction mode
-                        line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', fr"\g<1>'{fileCarveMode}'", line)
-
-                    elif 'EXTRACTED_FILE_PRESERVATION' in line:
-                        # zeek file preservation mode
-                        line = re.sub(r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', fr"\g<1>'{filePreserveMode}'", line)
-
-                    elif 'VTOT_API2_KEY' in line:
-                        # virustotal API key
-                        line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', fr"\g<1>'{vtotApiKey}'", line)
-
-                    elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
-                        # file scanning via yara
-                        line = re.sub(
-                            r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(yaraScan)}", line
-                        )
-
-                    elif 'EXTRACTED_FILE_ENABLE_CAPA' in line:
-                        # PE file scanning via capa
-                        line = re.sub(
-                            r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(capaScan)}", line
-                        )
-
-                    elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
-                        # file scanning via clamav
-                        line = re.sub(
-                            r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(clamAvScan)}", line
-                        )
-
-                    elif 'EXTRACTED_FILE_UPDATE_RULES' in line:
-                        # rule updates (yara/capa via git, clamav via freshclam)
-                        line = re.sub(
-                            r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(ruleUpdate)}", line
-                        )
-
-                    elif 'PCAP_ENABLE_NETSNIFF' in line:
-                        # capture pcaps via netsniff-ng
-                        line = re.sub(
-                            r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapNetSniff)}", line
-                        )
-
-                    elif 'PCAP_ENABLE_TCPDUMP' in line:
-                        # capture pcaps via tcpdump
-                        line = re.sub(
-                            r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
-                        )
-
-                    elif 'PCAP_IFACE' in line:
-                        # capture interface(s)
-                        line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
-
-                    elif 'OPENSEARCH_JAVA_OPTS' in line:
-                        # OpenSearch memory allowance
-                        line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
-
-                    elif 'LS_JAVA_OPTS' in line:
-                        # logstash memory allowance
-                        line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', line)
-
-                    elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
-                        # automatic pcap analysis with Zeek
-                        line = re.sub(
-                            r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoZeek)}", line
-                        )
-
-                    elif 'LOGSTASH_REVERSE_DNS' in line:
-                        # automatic local reverse dns lookup
-                        line = re.sub(
-                            r'(LOGSTASH_REVERSE_DNS\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(reverseDns)}", line
-                        )
-
-                    elif 'LOGSTASH_OUI_LOOKUP' in line:
-                        # automatic MAC OUI lookup
-                        line = re.sub(r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line)
-
-                    elif 'pipeline.workers' in line:
-                        # logstash pipeline workers
-                        line = re.sub(r'(pipeline\.workers\s*:\s*)(\S+)', fr"\g<1>{lsWorkers}", line)
-
-                    elif 'FREQ_LOOKUP' in line:
-                        # freq.py string randomness calculations
-                        line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
-
-                    elif 'BEATS_SSL' in line:
-                        # enable/disable beats SSL
-                        line = re.sub(
-                            r'(BEATS_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}", line
-                        )
-
-                    elif (
-                        (currentService == 'opensearch')
-                        and re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line)
-                        and (indexSnapshotDir is not None)
-                        and os.path.isdir(indexSnapshotDir)
-                    ):
-                        # OpenSearch backup directory
-                        volumeParts = line.strip().lstrip('-').lstrip().split(':')
-                        volumeParts[0] = indexSnapshotDir
-                        line = "{}- {}".format(serviceIndent * 3, ':'.join(volumeParts))
-
-                    elif 'ISM_SNAPSHOT_AGE' in line:
-                        # OpenSearch index state management snapshot age
-                        line = re.sub(r'(ISM_SNAPSHOT_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexSnapshotAge}'", line)
-
-                    elif 'ISM_COLD_AGE' in line:
-                        # OpenSearch index state management cold (read-only) age
-                        line = re.sub(r'(ISM_COLD_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexColdAge}'", line)
-
-                    elif 'ISM_CLOSE_AGE' in line:
-                        # OpenSearch index state management close age
-                        line = re.sub(r'(ISM_CLOSE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexCloseAge}'", line)
-
-                    elif 'ISM_DELETE_AGE' in line:
-                        # OpenSearch index state management close age
-                        line = re.sub(r'(ISM_DELETE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexDeleteAge}'", line)
-
-                    elif 'ISM_SNAPSHOT_COMPRESSED' in line:
-                        # OpenSearch index state management snapshot compression
-                        line = re.sub(
-                            r'(ISM_SNAPSHOT_COMPRESSED\s*:\s*)(\S+)',
-                            fr"\g<1>{TrueOrFalseQuote(indexSnapshotCompressed)}",
-                            line,
-                        )
-
-                    elif 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
-                        # delete based on index pattern size
-                        line = re.sub(
-                            r'(OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)', fr"\g<1>'{indexPruneSizeLimit}'", line
-                        )
-
-                    elif 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
-                        # delete based on index pattern size (sorted by name vs. creation time)
-                        line = re.sub(
-                            r'(OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)',
-                            fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}",
-                            line,
-                        )
-
-                    elif 'OS_EXTERNAL_HOSTS' in line:
-                        # enable/disable forwarding Logstash to external OpenSearch instance
-                        line = re.sub(r'(#\s*)?(OS_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
-
-                    elif 'OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
-                        # enable/disable SSL certificate verification for external OpenSearch instance
-                        line = re.sub(
-                            r'(#\s*)?(OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
-                            fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}",
-                            line,
-                        )
-
-                    elif 'OS_EXTERNAL_SSL' in line:
-                        # enable/disable SSL certificate verification for external OpenSearch instance
-                        line = re.sub(
-                            r'(#\s*)?(OS_EXTERNAL_SSL\s*:\s*)(\S+)', fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}", line
-                        )
-
-                    elif (
-                        (not serviceStartLine)
-                        and (currentService == 'logstash')
-                        and re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line)
-                    ):
-                        # set bind IP based on whether it should be externally exposed or not
-                        line = re.sub(
-                            r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                            fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
-                            line,
-                        )
-
-                    elif (not serviceStartLine) and (currentService == 'nginx-proxy'):
-                        # stuff specifically in the nginx-proxy section
-
-                        if re.match(r'^\s*test\s*:', line):
-                            # set nginx-proxy health check based on whether they're using HTTPS or not
+                        elif 'NGINX_BASIC_AUTH' in line:
+                            # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
                             line = re.sub(
-                                r'https?://localhost:\d+',
-                                fr"{'https' if nginxSSL else 'http'}://localhost:443",
+                                r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line
+                            )
+
+                        elif 'NGINX_LDAP_TLS_STUNNEL' in line:
+                            # StartTLS vs. ldap:// or ldaps://
+                            line = re.sub(
+                                r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(((not useBasicAuth) and ldapStartTLS))}",
                                 line,
                             )
 
-                        elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                            # set bind IPs and HTTP port based on whether it should be externally exposed or not
+                        elif 'ZEEK_EXTRACTOR_MODE' in line:
+                            # zeek file extraction mode
+                            line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', fr"\g<1>'{fileCarveMode}'", line)
+
+                        elif 'EXTRACTED_FILE_PRESERVATION' in line:
+                            # zeek file preservation mode
                             line = re.sub(
-                                r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
+                                r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', fr"\g<1>'{filePreserveMode}'", line
+                            )
+
+                        elif 'VTOT_API2_KEY' in line:
+                            # virustotal API key
+                            line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', fr"\g<1>'{vtotApiKey}'", line)
+
+                        elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
+                            # file scanning via yara
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(yaraScan)}", line
+                            )
+
+                        elif 'EXTRACTED_FILE_ENABLE_CAPA' in line:
+                            # PE file scanning via capa
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(capaScan)}", line
+                            )
+
+                        elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
+                            # file scanning via clamav
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(clamAvScan)}",
                                 line,
                             )
-                            if (':80:' in line) and (nginxSSL == True):
-                                line = line.replace(':80:', ':443:')
 
-                            elif (':443"' in line) and (nginxSSL == False):
-                                line = line.replace(':443:', ':80:')
+                        elif 'EXTRACTED_FILE_UPDATE_RULES' in line:
+                            # rule updates (yara/capa via git, clamav via freshclam)
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(ruleUpdate)}",
+                                line,
+                            )
 
-                        elif 'traefik.' in line:
-                            # enable/disable/configure traefik labels if applicable
+                        elif 'PCAP_ENABLE_NETSNIFF' in line:
+                            # capture pcaps via netsniff-ng
+                            line = re.sub(
+                                r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapNetSniff)}", line
+                            )
 
-                            # Traefik enabled vs. disabled
-                            if 'traefik.enable' in line:
+                        elif 'PCAP_ENABLE_TCPDUMP' in line:
+                            # capture pcaps via tcpdump
+                            line = re.sub(
+                                r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
+                            )
+
+                        elif 'PCAP_IFACE' in line:
+                            # capture interface(s)
+                            line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
+
+                        elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
+                            # automatic pcap analysis with Zeek
+                            line = re.sub(
+                                r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoZeek)}",
+                                line,
+                            )
+
+                        elif 'LOGSTASH_REVERSE_DNS' in line:
+                            # automatic local reverse dns lookup
+                            line = re.sub(
+                                r'(LOGSTASH_REVERSE_DNS\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(reverseDns)}", line
+                            )
+
+                        elif 'LOGSTASH_OUI_LOOKUP' in line:
+                            # automatic MAC OUI lookup
+                            line = re.sub(
+                                r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line
+                            )
+
+                        elif 'pipeline.workers' in line:
+                            # logstash pipeline workers
+                            line = re.sub(r'(pipeline\.workers\s*:\s*)(\S+)', fr"\g<1>{lsWorkers}", line)
+
+                        elif 'FREQ_LOOKUP' in line:
+                            # freq.py string randomness calculations
+                            line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
+
+                        elif 'BEATS_SSL' in line:
+                            # enable/disable beats SSL
+                            line = re.sub(
+                                r'(BEATS_SSL\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}",
+                                line,
+                            )
+
+                        elif 'ISM_SNAPSHOT_AGE' in line:
+                            # OpenSearch index state management snapshot age
+                            line = re.sub(r'(ISM_SNAPSHOT_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexSnapshotAge}'", line)
+
+                        elif 'ISM_COLD_AGE' in line:
+                            # OpenSearch index state management cold (read-only) age
+                            line = re.sub(r'(ISM_COLD_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexColdAge}'", line)
+
+                        elif 'ISM_CLOSE_AGE' in line:
+                            # OpenSearch index state management close age
+                            line = re.sub(r'(ISM_CLOSE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexCloseAge}'", line)
+
+                        elif 'ISM_DELETE_AGE' in line:
+                            # OpenSearch index state management close age
+                            line = re.sub(r'(ISM_DELETE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexDeleteAge}'", line)
+
+                        elif 'ISM_SNAPSHOT_COMPRESSED' in line:
+                            # OpenSearch index state management snapshot compression
+                            line = re.sub(
+                                r'(ISM_SNAPSHOT_COMPRESSED\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(indexSnapshotCompressed)}",
+                                line,
+                            )
+
+                        elif 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
+                            # delete based on index pattern size
+                            line = re.sub(
+                                r'(OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)',
+                                fr"\g<1>'{indexPruneSizeLimit}'",
+                                line,
+                            )
+
+                        elif 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
+                            # delete based on index pattern size (sorted by name vs. creation time)
+                            line = re.sub(
+                                r'(OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}",
+                                line,
+                            )
+
+                        elif 'OS_EXTERNAL_HOSTS' in line:
+                            # enable/disable forwarding Logstash to external OpenSearch instance
+                            line = re.sub(r'(#\s*)?(OS_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
+
+                        elif 'OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
+                            # enable/disable SSL certificate verification for external OpenSearch instance
+                            line = re.sub(
+                                r'(#\s*)?(OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
+                                fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}",
+                                line,
+                            )
+
+                        elif 'OS_EXTERNAL_SSL' in line:
+                            # enable/disable SSL certificate verification for external OpenSearch instance
+                            line = re.sub(
+                                r'(#\s*)?(OS_EXTERNAL_SSL\s*:\s*)(\S+)',
+                                fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}",
+                                line,
+                            )
+
+                    elif (currentSection == 'services') and (not serviceStartLine) and (currentService is not None):
+                        # down in the individual services sections of the compose file
+
+                        if re.match(r'^\s*restart\s*:.*$', line):
+                            # whether or not to restart services automatically (on boot, etc.)
+                            line = f"{sectionIndents[currentSection] * 2}restart: {restartMode}"
+
+                        elif currentService == 'opensearch':
+                            # stuff specifically in the opensearch section
+                            if 'OPENSEARCH_JAVA_OPTS' in line:
+                                # OpenSearch memory allowance
+                                line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
+
+                            elif (
+                                re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line)
+                                and (indexSnapshotDir is not None)
+                                and os.path.isdir(indexSnapshotDir)
+                            ):
+                                # OpenSearch backup directory
+                                volumeParts = line.strip().lstrip('-').lstrip().split(':')
+                                volumeParts[0] = indexSnapshotDir
+                                line = "{}- {}".format(sectionIndents[currentSection] * 3, ':'.join(volumeParts))
+
+                        elif currentService == 'logstash':
+                            # stuff specifically in the logstash section
+                            if 'LS_JAVA_OPTS' in line:
+                                # logstash memory allowance
+                                line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', line)
+
+                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IP based on whether it should be externally exposed or not
                                 line = re.sub(
-                                    r'(#\s*)?(traefik\.enable\s*:\s*)(\S+)',
-                                    fr"\g<2>{TrueOrFalseQuote(behindReverseProxy and traefikLabels)}",
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
-                            else:
+
+                        elif currentService == 'nginx-proxy':
+                            # stuff specifically in the nginx-proxy section
+
+                            if re.match(r'^\s*test\s*:', line):
+                                # set nginx-proxy health check based on whether they're using HTTPS or not
                                 line = re.sub(
-                                    r'(#\s*)?(traefik\..*)',
-                                    fr"{'' if traefikLabels else '# '}\g<2>",
+                                    r'https?://localhost:\d+',
+                                    fr"{'https' if nginxSSL else 'http'}://localhost:443",
                                     line,
                                 )
 
-                            if 'traefik.http.' in line and '.osmalcolm.' in line:
-                                # OpenSearch router enabled/disabled/host value
+                            elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IPs and HTTP port based on whether it should be externally exposed or not
                                 line = re.sub(
-                                    r'(#\s*)?(traefik\..*)',
-                                    fr"{'' if behindReverseProxy and traefikLabels and opensearchOpen else '# '}\g<2>",
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
-                                if ('.rule') in line:
+                                if (':80:' in line) and (nginxSSL == True):
+                                    line = line.replace(':80:', ':443:')
+
+                                elif (':443"' in line) and (nginxSSL == False):
+                                    line = line.replace(':443:', ':80:')
+
+                            elif 'traefik.' in line:
+                                # enable/disable/configure traefik labels if applicable
+
+                                # Traefik enabled vs. disabled
+                                if 'traefik.enable' in line:
                                     line = re.sub(
-                                        r'(traefik\.http\.routers\.osmalcolm\.rule\s*:\s*)(\S+)',
-                                        fr"\g<1>'{traefikOpenSearchHost}'",
+                                        r'(#\s*)?(traefik\.enable\s*:\s*)(\S+)',
+                                        fr"\g<2>{TrueOrFalseQuote(behindReverseProxy and traefikLabels)}",
+                                        line,
+                                    )
+                                else:
+                                    line = re.sub(
+                                        r'(#\s*)?(traefik\..*)',
+                                        fr"{'' if traefikLabels else '# '}\g<2>",
                                         line,
                                     )
 
-                            if 'traefik.http.routers.malcolm.rule' in line:
-                                # Malcolm interface router host value
-                                line = re.sub(
-                                    r'(traefik\.http\.routers\.malcolm\.rule\s*:\s*)(\S+)',
-                                    fr"\g<1>'{traefikHost}'",
-                                    line,
-                                )
+                                if 'traefik.http.' in line and '.osmalcolm.' in line:
+                                    # OpenSearch router enabled/disabled/host value
+                                    line = re.sub(
+                                        r'(#\s*)?(traefik\..*)',
+                                        fr"{'' if behindReverseProxy and traefikLabels and opensearchOpen else '# '}\g<2>",
+                                        line,
+                                    )
+                                    if ('.rule') in line:
+                                        line = re.sub(
+                                            r'(traefik\.http\.routers\.osmalcolm\.rule\s*:\s*)(\S+)',
+                                            fr"\g<1>'{traefikOpenSearchHost}'",
+                                            line,
+                                        )
 
-                            elif 'traefik.http.routers.' in line and '.entrypoints' in line:
-                                # Malcolm routers entrypoints
-                                line = re.sub(
-                                    r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
-                                    fr"\g<1>'{traefikEntrypoint}'",
-                                    line,
-                                )
+                                if 'traefik.http.routers.malcolm.rule' in line:
+                                    # Malcolm interface router host value
+                                    line = re.sub(
+                                        r'(traefik\.http\.routers\.malcolm\.rule\s*:\s*)(\S+)',
+                                        fr"\g<1>'{traefikHost}'",
+                                        line,
+                                    )
 
-                            elif 'traefik.http.routers.' in line and '.certresolver' in line:
-                                # Malcolm routers resolvers
-                                line = re.sub(
-                                    r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
-                                    fr"\g<1>'{traefikResolver}'",
-                                    line,
-                                )
+                                elif 'traefik.http.routers.' in line and '.entrypoints' in line:
+                                    # Malcolm routers entrypoints
+                                    line = re.sub(
+                                        r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
+                                        fr"\g<1>'{traefikEntrypoint}'",
+                                        line,
+                                    )
+
+                                elif 'traefik.http.routers.' in line and '.certresolver' in line:
+                                    # Malcolm routers resolvers
+                                    line = re.sub(
+                                        r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
+                                        fr"\g<1>'{traefikResolver}'",
+                                        line,
+                                    )
+
+                    elif currentSection == 'networks':
+                        # re-write the network definition from scratch
+                        if not sectionStartLine:
+                            if not networkWritten:
+                                print(f"{sectionIndents[currentSection]}default:")
+                                if len(dockerNetworkExternalName) > 0:
+                                    print(f"{sectionIndents[currentSection] * 2}external:")
+                                    print(f"{sectionIndents[currentSection] * 3}name: {dockerNetworkExternalName}")
+                                networkWritten = True
+                            # we already re-wrote the network stuff, anything else is superfluous
+                            skipLine = True
 
                     if not skipLine:
                         print(line)

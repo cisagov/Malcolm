@@ -3739,9 +3739,11 @@ user@host:~/Malcolm$ ./scripts/install.py --configure
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
-Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): 
+Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
 
 Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
+
+Setting 3 workers for Logstash pipelines. Is this OK? (Y/n): y
 
 Restart Malcolm upon system or Docker daemon restart? (y/N): y
 
@@ -3749,17 +3751,23 @@ Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped')
 
 Require encrypted HTTPS connections? (Y/n): y
 
+Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y/N): n
+
+Specify external Docker network name (or leave blank for default networking):
+
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Configure snapshot repository for OpenSearch index state management? (y/N): n
+Configure OpenSearch index state management? (y/N): n
 
-Store snapshots locally in /home/user/Malcolm/opensearch-backup? (Y/n): y
-
-Automatically analyze all PCAP files with Zeek? (y/N): y
+Automatically analyze all PCAP files with Zeek? (Y/n): y
 
 Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs? (y/N): n
 
 Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
+
+Perform string randomness scoring on some fields? (Y/n): y
+
+Expose OpenSearch port to external hosts? (y/N): n
 
 Expose Logstash port to external hosts? (y/N): n
 
