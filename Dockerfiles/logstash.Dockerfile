@@ -41,11 +41,11 @@ RUN yum install -y epel-release && \
     yum install -y curl gettext python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
     pip3 install ipaddress supervisor manuf pyyaml && \
-    logstash-plugin install logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
-                            logstash-filter-json logstash-filter-prune logstash-filter-http \
-                            logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
-                            logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
-                            logstash-input-beats logstash-output-elasticsearch && \
+    logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
+                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
+                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
+                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
+                                        logstash-input-beats logstash-output-elasticsearch && \
     rm -rf /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
