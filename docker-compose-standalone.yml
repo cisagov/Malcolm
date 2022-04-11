@@ -592,7 +592,7 @@ services:
     expose:
       - 8711
     healthcheck:
-      test: ["CMD", "curl", "--insecure", "--silent", "https://localhost:443"]
+      test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
       interval: 30s
       timeout: 15s
       retries: 3

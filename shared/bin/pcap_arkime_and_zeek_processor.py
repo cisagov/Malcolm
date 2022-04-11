@@ -11,6 +11,7 @@
 ###################################################################################################
 
 import argparse
+from datetime import date, datetime
 import json
 import os
 import shutil
@@ -70,7 +71,6 @@ arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
 def shutdown_handler(signum, frame):
     global shuttingDown
     shuttingDown = True
-
 
 ###################################################################################################
 # handle sigusr1 for a pdb breakpoint
@@ -368,6 +368,8 @@ def suricataFileWorker(suricataWorkerArgs):
 
                     # execute suricata-capture for pcap file
                     retcode, output = run_process(cmd, debug=verboseDebug)
+                    unique_name = "/var/log/suricata/eve_" + str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) + ".json"
+                    shutil.move('/var/log/suricata/eve.json', unique_name)
                     if retcode == 0:
                         if debug:
                             eprint(
