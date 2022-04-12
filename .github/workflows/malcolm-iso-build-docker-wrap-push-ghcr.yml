@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - suricata_merge
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
