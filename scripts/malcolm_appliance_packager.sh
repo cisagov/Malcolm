@@ -74,6 +74,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
   mkdir $VERBOSE -p "$DESTDIR/yara/rules/"
+  mkdir $VERBOSE -p "$DESTDIR/suricata-logs/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/current/"

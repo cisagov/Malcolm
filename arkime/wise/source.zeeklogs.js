@@ -16,7 +16,7 @@ const WISESource = require('./wiseSource.js');
 
 class MalcolmSource extends WISESource {
   // ----------------------------------------------------------------------------
-  constructor (api, section) {
+  constructor(api, section) {
     super(api, section, { dontCache: true });
 
     this.api.addSource('malcolm', this, []);
@@ -93,6 +93,7 @@ class MalcolmSource extends WISESource {
       "file.path",
       "file.size",
       "file.type",
+      "file.uid",
       "host.name",
       "http.request.body.bytes",
       "http.request.method",
@@ -155,6 +156,373 @@ class MalcolmSource extends WISESource {
       "source.packets",
       "source.port",
       "source.segment",
+      "suricata.alert.action",
+      "suricata.alert.category",
+      "suricata.alert.gid",
+      "suricata.alert.rev",
+      "suricata.alert.signature",
+      "suricata.alert.signature_id",
+      "suricata.anomaly.app_proto",
+      "suricata.anomaly.event",
+      "suricata.anomaly.layer",
+      "suricata.anomaly.type",
+      "suricata.app_proto_tc",
+      "suricata.app_proto_ts",
+      "suricata.dns.flags",
+      "suricata.dns.qr",
+      "suricata.dns.ra",
+      "suricata.dns.rd",
+      "suricata.dns.rrname",
+      "suricata.dns.rrtype",
+      "suricata.dns.tx_id",
+      "suricata.dns.version",
+      "suricata.event_type",
+      "suricata.fileinfo.gaps",
+      "suricata.fileinfo.state",
+      "suricata.fileinfo.stored",
+      "suricata.fileinfo.tx_id",
+      // "suricata.files[].filename",
+      // "suricata.files[].gaps",
+      // "suricata.files[].sid",
+      // "suricata.files[].size",
+      // "suricata.files[].state",
+      // "suricata.files[].stored",
+      // "suricata.files[].tx_id",
+      "suricata.flow.age",
+      "suricata.flow.alerted",
+      "suricata.flow.bytes_toclient",
+      "suricata.flow.bytes_toserver",
+      "suricata.flow.end",
+      "suricata.flow.pkts_toclient",
+      "suricata.flow.pkts_toserver",
+      "suricata.flow.reason",
+      "suricata.flow.start",
+      "suricata.flow.state",
+      "suricata.flow_id",
+      "suricata.ftp.command ",
+      "suricata.ftp.command_data",
+      "suricata.ftp.completion_code",
+      "suricata.ftp.reply",
+      "suricata.ftp.reply_received",
+      "suricata.http.http_content_type",
+      "suricata.http.hostname",
+      "suricata.http.http_method",
+      "suricata.http.http_port",
+      "suricata.http.http_refer",
+      "suricata.http.http_user_agent",
+      "suricata.http.length",
+      "suricata.http.redirect",
+      "suricata.http.url",
+      "suricata.icmp_code",
+      "suricata.icmp_type",
+      // "suricata.metadata.flowints[\"applayer.anomoaly.count\"]",
+      // "suricata.metadata.flowints[\"http.anomaly.count\"]",
+      "suricata.pcap_cnt",
+      "suricata.proto",
+      "suricata.response_icmp_code",
+      "suricata.response_icmp_type",
+      "suricata.smb.client_dialects[]",
+      "suricata.smb.command",
+      "suricata.smb.dialect",
+      "suricata.smb.id",
+      "suricata.smb.server_guid",
+      "suricata.smb.session_id",
+      "suricata.smb.tree_id",
+      // "suricata.ssh.client",
+      "suricata.ssh.client.proto_version",
+      "suricata.ssh.client.software_version",
+      // "suricata.ssh.server",
+      "suricata.ssh.server.proto_version",
+      "suricata.ssh.server.software_version",
+      "suricata.stats.app_layer.expectations",
+      "suricata.stats.app_layer.expectations",
+      "suricata.stats.app_layer.flow.dcerpc_tcp",
+      "suricata.stats.app_layer.flow.dcerpc_udp",
+      "suricata.stats.app_layer.flow.dhcp",
+      "suricata.stats.app_layer.flow.dns_tcp",
+      "suricata.stats.app_layer.flow.dns_udp",
+      "suricata.stats.app_layer.flow.failed_tcp",
+      "suricata.stats.app_layer.flow.failed_udp",
+      "suricata.stats.app_layer.flow.ftp",
+      "suricata.stats.app_layer.flow.http",
+      "suricata.stats.app_layer.flow.http",
+      "suricata.stats.app_layer.flow.ikev2",
+      "suricata.stats.app_layer.flow.imap",
+      "suricata.stats.app_layer.flow.krb5_tcp",
+      "suricata.stats.app_layer.flow.krb5_udp",
+      "suricata.stats.app_layer.flow.mqtt",
+      "suricata.stats.app_layer.flow.nfs_tcp",
+      "suricata.stats.app_layer.flow.nfs_udp",
+      "suricata.stats.app_layer.flow.ntp",
+      "suricata.stats.app_layer.flow.rdp",
+      "suricata.stats.app_layer.flow.rfb",
+      "suricata.stats.app_layer.flow.sip",
+      "suricata.stats.app_layer.flow.smb",
+      "suricata.stats.app_layer.flow.smtp",
+      "suricata.stats.app_layer.flow.snmp",
+      "suricata.stats.app_layer.flow.ssh",
+      "suricata.stats.app_layer.flow.tftp",
+      "suricata.stats.app_layer.flow.tls",
+      "suricata.stats.app_layer.tx.dcerpc_tcp",
+      "suricata.stats.app_layer.tx.dcerpc_udp",
+      "suricata.stats.app_layer.tx.dhcp",
+      "suricata.stats.app_layer.tx.dns_tcp",
+      "suricata.stats.app_layer.tx.dns_udp",
+      "suricata.stats.app_layer.tx.failed_tcp",
+      "suricata.stats.app_layer.tx.failed_udp",
+      "suricata.stats.app_layer.tx.ftp",
+      "suricata.stats.app_layer.tx.http",
+      "suricata.stats.app_layer.tx.http",
+      "suricata.stats.app_layer.tx.ikev2",
+      "suricata.stats.app_layer.tx.imap",
+      "suricata.stats.app_layer.tx.krb5_tcp",
+      "suricata.stats.app_layer.tx.krb5_udp",
+      "suricata.stats.app_layer.tx.mqtt",
+      "suricata.stats.app_layer.tx.nfs_tcp",
+      "suricata.stats.app_layer.tx.nfs_udp",
+      "suricata.stats.app_layer.tx.ntp",
+      "suricata.stats.app_layer.tx.rdp",
+      "suricata.stats.app_layer.tx.rfb",
+      "suricata.stats.app_layer.tx.sip",
+      "suricata.stats.app_layer.tx.smb",
+      "suricata.stats.app_layer.tx.smtp",
+      "suricata.stats.app_layer.tx.snmp",
+      "suricata.stats.app_layer.tx.ssh",
+      "suricata.stats.app_layer.tx.tftp",
+      "suricata.stats.app_layer.tx.tls",
+      // "suricata.stats.app_layer.tx[\"ftp-data\"]",
+      "suricata.stats.decoder.avg_pkt_size",
+      "suricata.stats.decoder.bytes",
+      "suricata.stats.decoder.chdlc",
+      "suricata.stats.decoder.erspan",
+      "suricata.stats.decoder.ethernet",
+      "suricata.stats.decoder.event.dce.pkt_too_small",
+      "suricata.stats.decoder.event.erspan.header_too_small",
+      "suricata.stats.decoder.event.erspan.too_many_vlan_layers",
+      "suricata.stats.decoder.event.erspan.unsupported_version",
+      "suricata.stats.decoder.event.ethernet.pkt_too_small",
+      "suricata.stats.decoder.event.geneve.unknown_payload_type",
+      "suricata.stats.decoder.event.gre.pkt_too_small",
+      "suricata.stats.decoder.event.gre.version0_flags",
+      "suricata.stats.decoder.event.gre.version0_hdr_too_big",
+      "suricata.stats.decoder.event.gre.version0_malformed_sre_hdr",
+      "suricata.stats.decoder.event.gre.version0_recur",
+      "suricata.stats.decoder.event.gre.version1_chksum",
+      "suricata.stats.decoder.event.gre.version1_flags",
+      "suricata.stats.decoder.event.gre.version1_hdr_too_big",
+      "suricata.stats.decoder.event.gre.version1_malformed_sre_hdr",
+      "suricata.stats.decoder.event.gre.version1_no_key",
+      "suricata.stats.decoder.event.gre.version1_recur",
+      "suricata.stats.decoder.event.gre.version1_route",
+      "suricata.stats.decoder.event.gre.version1_ssr",
+      "suricata.stats.decoder.event.gre.version1_wrong_protocol",
+      "suricata.stats.decoder.event.gre.wrong_version",
+      "suricata.stats.decoder.event.icmpv4.ipv4_trunc_pkt",
+      "suricata.stats.decoder.event.icmpv4.ipv4_unknown_ver",
+      "suricata.stats.decoder.event.icmpv4.pkt_too_small",
+      "suricata.stats.decoder.event.icmpv4.unknown_code",
+      "suricata.stats.decoder.event.icmpv4.unknown_type",
+      "suricata.stats.decoder.event.icmpv6.experimentation_type",
+      "suricata.stats.decoder.event.icmpv6.ipv6_trunc_pkt",
+      "suricata.stats.decoder.event.icmpv6.ipv6_unknown_version",
+      "suricata.stats.decoder.event.icmpv6.mld_message_with_invalid_hl",
+      "suricata.stats.decoder.event.icmpv6.pkt_too_small",
+      "suricata.stats.decoder.event.icmpv6.unassigned_type",
+      "suricata.stats.decoder.event.icmpv6.unknown_code",
+      "suricata.stats.decoder.event.icmpv6.unknown_type",
+      "suricata.stats.decoder.event.ieee8021ah.header_too_small",
+      "suricata.stats.decoder.event.ipraw.invalid_ip_version",
+      "suricata.stats.decoder.event.ipv4.frag_ignored",
+      "suricata.stats.decoder.event.ipv4.frag_overlap",
+      "suricata.stats.decoder.event.ipv4.frag_pkt_too_large",
+      "suricata.stats.decoder.event.ipv4.hlen_too_small",
+      "suricata.stats.decoder.event.ipv4.icmpv6",
+      "suricata.stats.decoder.event.ipv4.invalid_ip_version",
+      "suricata.stats.decoder.event.ipv4.iplen_smaller_than_hlen",
+      "suricata.stats.decoder.event.ipv4.opt_duplicate",
+      "suricata.stats.decoder.event.ipv4.opt_eol_required",
+      "suricata.stats.decoder.event.ipv4.opt_invalid",
+      "suricata.stats.decoder.event.ipv4.opt_invalid_len",
+      "suricata.stats.decoder.event.ipv4.opt_malformed",
+      "suricata.stats.decoder.event.ipv4.opt_pad_required",
+      "suricata.stats.decoder.event.ipv4.opt_unknown",
+      "suricata.stats.decoder.event.ipv4.pkt_too_small",
+      "suricata.stats.decoder.event.ipv4.trunc_pkt",
+      "suricata.stats.decoder.event.ipv6.data_after_none_header",
+      "suricata.stats.decoder.event.ipv6.dstopts_only_padding",
+      "suricata.stats.decoder.event.ipv6.dstopts_unknown_opt",
+      "suricata.stats.decoder.event.ipv6.exthdr_ah_res_not_null",
+      "suricata.stats.decoder.event.ipv6.exthdr_dupl_ah",
+      "suricata.stats.decoder.event.ipv6.exthdr_dupl_dh",
+      "suricata.stats.decoder.event.ipv6.exthdr_dupl_fh",
+      "suricata.stats.decoder.event.ipv6.exthdr_dupl_hh",
+      "suricata.stats.decoder.event.ipv6.exthdr_dupl_rh",
+      "suricata.stats.decoder.event.ipv6.exthdr_dupl_eh",
+      "suricata.stats.decoder.event.ipv6.exthdr_invalid_optlen",
+      "suricata.stats.decoder.event.ipv6.exthdr_useless_fh",
+      "suricata.stats.decoder.event.ipv6.fh_non_zero_reserved_field",
+      "suricata.stats.decoder.event.ipv6.frag_ignored",
+      "suricata.stats.decoder.event.ipv6.frag_overlap",
+      "suricata.stats.decoder.event.ipv6.frag_pkt_too_large",
+      "suricata.stats.decoder.event.ipv6.hopopts_only_padding",
+      "suricata.stats.decoder.event.ipv6.hopopts_unknown_opt",
+      "suricata.stats.decoder.event.ipv6.icmpv4",
+      "suricata.stats.decoder.event.ipv6.ipv4_in_ipv6_too_small",
+      "suricata.stats.decoder.event.ipv6.ipv4_in_ipv6_wrong_version",
+      "suricata.stats.decoder.event.ipv6.ipv6_in_ipv6_too_small",
+      "suricata.stats.decoder.event.ipv6.ipv6_in_ipv6_wrong_version",
+      "suricata.stats.decoder.event.ipv6.pkt_too_small",
+      "suricata.stats.decoder.event.ipv6.rh_type_0",
+      "suricata.stats.decoder.event.ipv6.trunc_exthdr",
+      "suricata.stats.decoder.event.ipv6.trunc_pkt",
+      "suricata.stats.decoder.event.ipv6.unknown_next_header",
+      "suricata.stats.decoder.event.ipv6.wrong_ip_version",
+      "suricata.stats.decoder.event.ipv6.zero_len_padn",
+      "suricata.stats.decoder.event.ltnull.pkt_too_small",
+      "suricata.stats.decoder.event.ltnull.unsupported_type",
+      "suricata.stats.decoder.event.mpls.bad_label_implicit_null",
+      "suricata.stats.decoder.event.mpls.bad_label_reserved",
+      "suricata.stats.decoder.event.mpls.bad_label_router_alert",
+      "suricata.stats.decoder.event.mpls.header_too_small",
+      "suricata.stats.decoder.event.mpls.pkt_too_small",
+      "suricata.stats.decoder.event.mpls.unknown_payload_type",
+      "suricata.stats.decoder.event.ppp.ip4_pkt_too_small",
+      "suricata.stats.decoder.event.ppp.ip6_pkt_too_small",
+      "suricata.stats.decoder.event.ppp.pkt_too_small",
+      "suricata.stats.decoder.event.ppp.unsup_proto",
+      "suricata.stats.decoder.event.ppp.vju_pkt_too_small",
+      "suricata.stats.decoder.event.ppp.wrong_type",
+      "suricata.stats.decoder.event.pppoe.malformed_tags",
+      "suricata.stats.decoder.event.pppoe.pkt_too_small",
+      "suricata.stats.decoder.event.pppoe.wrong_code",
+      "suricata.stats.decoder.event.sctp.pkt_too_small",
+      "suricata.stats.decoder.event.sll.pkt_too_small",
+      "suricata.stats.decoder.event.tcp.hlen_too_small",
+      "suricata.stats.decoder.event.tcp.invalid_potlen",
+      "suricata.stats.decoder.event.tcp.opt_duplicate",
+      "suricata.stats.decoder.event.tcp.opt_invalid_len",
+      "suricata.stats.decoder.event.tcp.pkt_too_small",
+      "suricata.stats.decoder.event.udp.hlen_invalid",
+      "suricata.stats.decoder.event.udp.hlen_too_small",
+      "suricata.stats.decoder.event.udp.pkt_too_small",
+      "suricata.stats.decoder.event.vlan.header_too_small",
+      "suricata.stats.decoder.event.vlan.too_many_layers",
+      "suricata.stats.decoder.event.vlan.unknown_type",
+      "suricata.stats.decoder.event.vxlan.unknown_payload",
+      "suricata.stats.decoder.geneve",
+      "suricata.stats.decoder.gre",
+      "suricata.stats.decoder.icmpv4",
+      "suricata.stats.decoder.icmpv6",
+      "suricata.stats.decoder.ieee8021ah",
+      "suricata.stats.decoder.invalid",
+      "suricata.stats.decoder.ipv4",
+      "suricata.stats.decoder.ipv4_in_ipv6",
+      "suricata.stats.decoder.ipv6",
+      "suricata.stats.decoder.ipv6_in_ipv6",
+      "suricata.stats.decoder.max_mac_addrs_dst",
+      "suricata.stats.decoder.max_mac_addrs_src",
+      "suricata.stats.decoder.max_pkt_size",
+      "suricata.stats.decoder.mpls",
+      "suricata.stats.decoder.pkts",
+      "suricata.stats.decoder.ppp",
+      "suricata.stats.decoder.pppoe",
+      "suricata.stats.decoder.raw",
+      "suricata.stats.decoder.sctp",
+      "suricata.stats.decoder.sll",
+      "suricata.stats.decoder.tcp",
+      "suricata.stats.decoder.teredo",
+      "suricata.stats.decoder.udp",
+      "suricata.stats.decoder.vlan",
+      "suricata.stats.decoder.vlan_qinq",
+      "suricata.stats.decoder.vxlan",
+      // "suricata.stats.decoder[\"null\"]",
+      "suricata.stats.defrag.ipv4.fragments",
+      "suricata.stats.defrag.ipv4.reassembled",
+      "suricata.stats.defrag.ipv4.timeouts",
+      "suricata.stats.defrag.ipv6.fragments",
+      "suricata.stats.defrag.ipv6.reassembled",
+      "suricata.stats.defrag.ipv6.timeouts",
+      "suricata.stats.defrag.max_frag_hits",
+      "suricata.stats.detect.alert",
+      "suricata.stats.detect.alert",
+      // "suricata.stats.detect.engines[]",
+      // "suricata.stats.detect.engines[].last_reload",
+      // "suricata.stats.detect.engines[].rules_failed",
+      // "suricata.stats.detect.engines[].rules_loaded",
+      "suricata.stats.flow.emerg_mode_entered",
+      "suricata.stats.flow.emerged_mode_over",
+      "suricata.stats.flow.get_used",
+      "suricata.stats.flow.get_used_eval",
+      "suricata.stats.flow.get_used_eval_busy",
+      "suricata.stats.flow.get_used_eval_reject",
+      "suricata.stats.flow.get_used_failed",
+      "suricata.stats.flow.icmpv4",
+      "suricata.stats.flow.icmpv6",
+      "suricata.stats.flow.memcap",
+      "suricata.stats.flow.memuse",
+      "suricata.stats.flow.mgr.bypassed_pruned",
+      "suricata.stats.flow.mgr.closed_pruned",
+      "suricata.stats.flow.mgr.est_pruned",
+      "suricata.stats.flow.mgr.flows_checked",
+      "suricata.stats.flow.mgr.flows_evicted",
+      "suricata.stats.flow.mgr.flows_evicted_needs_work",
+      "suricata.stats.flow.mgr.flows_notimeout",
+      "suricata.stats.flow.mgr.flows_timeout",
+      "suricata.stats.flow.mgr.flows_timeout_inuse",
+      "suricata.stats.flow.mgr.full_hash_pass",
+      "suricata.stats.flow.mgr.new_pruned",
+      "suricata.stats.flow.mgr.rows_maxlen",
+      "suricata.stats.flow.spare",
+      "suricata.stats.flow.tcp",
+      "suricata.stats.flow.tcp_reuse",
+      "suricata.stats.flow.udp",
+      "suricata.stats.flow.wrk.flows_evicted",
+      "suricata.stats.flow.wrk.flows_evicted_needs_work",
+      "suricata.stats.flow.wrk.flows_evicted_pkt_inject",
+      "suricata.stats.flow.wrk.flows_injected",
+      "suricata.stats.flow.wrk.spare_sync",
+      "suricata.stats.flow.wrk.spare_sync_avg",
+      "suricata.stats.flow.wrk.spare_sync_empty",
+      "suricata.stats.flow.wrk.spare_sync_incomplete",
+      "suricata.stats.flow_bypassed.bytes",
+      "suricata.stats.flow_bypassed.bytes",
+      "suricata.stats.flow_bypassed.closed",
+      "suricata.stats.flow_bypassed.closed",
+      "suricata.stats.flow_bypassed.local_bytes",
+      "suricata.stats.flow_bypassed.local_bytes",
+      "suricata.stats.flow_bypassed.local_capture_bytes",
+      "suricata.stats.flow_bypassed.local_capture_bytes",
+      "suricata.stats.flow_bypassed.local_capture_pkts",
+      "suricata.stats.flow_bypassed.local_capture_pkts",
+      "suricata.stats.flow_bypassed.local_pkts",
+      "suricata.stats.flow_bypassed.local_pkts",
+      "suricata.stats.flow_bypassed.pkts",
+      "suricata.stats.flow_bypassed.pkts",
+      "suricata.stats.ftp.memcap",
+      "suricata.stats.ftp.memuse",
+      "suricata.stats.http.memcap",
+      "suricata.stats.http.memuse",
+      "suricata.stats.uptime",
+      "suricata.tcp.ack",
+      "suricata.tcp.cwr",
+      "suricata.tcp.ecn",
+      "suricata.tcp.fin",
+      "suricata.tcp.psh",
+      "suricata.tcp.rst",
+      "suricata.tcp.state",
+      "suricata.tcp.syn",
+      "suricata.tcp.tcp_flags",
+      "suricata.tcp.tcp_flags_tc",
+      "suricata.tcp.tcp_flags_ts",
+      "suricata.tls.fingerprint",
+      "suricata.tls.issuerdn",
+      "suricata.tls.notafter",
+      "suricata.tls.notbefore",
+      "suricata.tls.serial",
+      "suricata.tls.session_resumed",
+      "suricata.tls.subject",
+      "suricata.timestamp",
+      "suricata.tx_id",
       "tags",
       "threat.framework",
       "threat.tactic.id",
@@ -1158,68 +1526,68 @@ class MalcolmSource extends WISESource {
 
     // add URL link for assigned transport protocol numbers
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_proto",  {name:"Protocol Registry", url:'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields:protoFieldsStr});
+    this.api.addValueAction("malcolm_websearch_proto", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
 
     // add right-click for searching IANA for services
     var serviceFieldsStr = allFields.filter(value => /^(protocols?|network\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_service",  {name:"Service Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:serviceFieldsStr});
+    this.api.addValueAction("malcolm_websearch_service", { name: "Service Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: serviceFieldsStr });
 
     // add right-click for searching VirusTotal for other IP addresses
     var ipFieldsStr = allFields.filter(value => /[_\.-](h|ip)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_ip",  {name:"VirusTotal IP", url:"https://www.virustotal.com/en/ip-address/%TEXT%/information", fields:ipFieldsStr});
+    this.api.addValueAction("malcolm_websearch_ip", { name: "VirusTotal IP", url: "https://www.virustotal.com/en/ip-address/%TEXT%/information", fields: ipFieldsStr });
 
     // add right-click for searching IANA for ports
     var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_port",            {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields:portFieldsStr});
-    this.api.addValueAction("malcolm_websearch_port_arkime",     {name:"Port Registry", url:'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category:"port"});
+    this.api.addValueAction("malcolm_websearch_port", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: portFieldsStr });
+    this.api.addValueAction("malcolm_websearch_port_arkime", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category: "port" });
 
     // add right-click for searching VirusTotal for hash signatures
     var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_vt_fields_hash",         {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", fields:hashFieldsStr});
-    this.api.addValueAction("malcolm_vt_fields_hash_arkime",  {name:"VirusTotal Hash", url:"https://www.virustotal.com/gui/file/%TEXT%/detection", category:"md5"});
+    this.api.addValueAction("malcolm_vt_fields_hash", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", fields: hashFieldsStr });
+    this.api.addValueAction("malcolm_vt_fields_hash_arkime", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", category: "md5" });
 
     // add right-click for searching the web for signature IDs
     var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_sig",  {name:"Web Search", url:'https://duckduckgo.com/?q="%TEXT%"', fields:sigFieldsStr});
+    this.api.addValueAction("malcolm_websearch_sig", { name: "Web Search", url: 'https://duckduckgo.com/?q="%TEXT%"', fields: sigFieldsStr });
 
     // add right-click for searching ARIN for ASN
     var asnFieldsStr = allFields.filter(value => /(as\.number|(src|dst)ASN|asn\.(src|dst))$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_asn",  {name:"ARIN ASN", url:'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields:asnFieldsStr});
+    this.api.addValueAction("malcolm_websearch_asn", { name: "ARIN ASN", url: 'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields: asnFieldsStr });
 
     // add right-click for searching mime/media/content types
     var mimeFieldsStr = allFields.filter(value => /mime[_\.-]?type/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_mime",  {name:"Media Type Registry", url:'https://www.iana.org/assignments/media-types/%TEXT%', fields:mimeFieldsStr});
+    this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
     // add right-click for extracted/quarantined files from zeek
     var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_carved_file_quarantined",         {name:"Download (if quarantined)", url:"/dl-extracted-files/quarantine/%TEXT%", fields:carvedFieldsStr});
-    this.api.addValueAction("malcolm_carved_file_preserved",           {name:"Download (if preserved)", url:"/dl-extracted-files/preserved/%TEXT%", fields:carvedFieldsStr});
+    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download (if quarantined)", url: "/dl-extracted-files/quarantine/%TEXT%", fields: carvedFieldsStr });
+    this.api.addValueAction("malcolm_carved_file_preserved", { name: "Download (if preserved)", url: "/dl-extracted-files/preserved/%TEXT%", fields: carvedFieldsStr });
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
     var filterUrl = "idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
-    this.api.addValueAction("malcolm_dashboards_cat_ip",       {name:filterLabel, url:filterUrl, category:"ip"});
-    this.api.addValueAction("malcolm_dashboards_cat_port",     {name:filterLabel, url:filterUrl, category:"port"});
-    this.api.addValueAction("malcolm_dashboards_cat_country",  {name:filterLabel, url:filterUrl, category:"country"});
-    this.api.addValueAction("malcolm_dashboards_cat_host",     {name:filterLabel, url:filterUrl, category:"host"});
-    this.api.addValueAction("malcolm_dashboards_cat_md5",      {name:filterLabel, url:filterUrl, category:"md5"});
-    this.api.addValueAction("malcolm_dashboards_cat_user",     {name:filterLabel, url:filterUrl, category:"user"});
-    this.api.addValueAction("malcolm_dashboards_fields_zeek",  {name:filterLabel, url:filterUrl, fields:allFieldsStr});
+    this.api.addValueAction("malcolm_dashboards_cat_ip", { name: filterLabel, url: filterUrl, category: "ip" });
+    this.api.addValueAction("malcolm_dashboards_cat_port", { name: filterLabel, url: filterUrl, category: "port" });
+    this.api.addValueAction("malcolm_dashboards_cat_country", { name: filterLabel, url: filterUrl, category: "country" });
+    this.api.addValueAction("malcolm_dashboards_cat_host", { name: filterLabel, url: filterUrl, category: "host" });
+    this.api.addValueAction("malcolm_dashboards_cat_md5", { name: filterLabel, url: filterUrl, category: "md5" });
+    this.api.addValueAction("malcolm_dashboards_cat_user", { name: filterLabel, url: filterUrl, category: "user" });
+    this.api.addValueAction("malcolm_dashboards_fields_zeek", { name: filterLabel, url: filterUrl, fields: allFieldsStr });
 
     // add rick-click for opening malcolm agg api
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
-    this.api.addValueAction("malcolm_mapi_cat_ip",       {name:apiLabel, url:apiURL, category:"ip"});
-    this.api.addValueAction("malcolm_mapi_cat_port",     {name:apiLabel, url:apiURL, category:"port"});
-    this.api.addValueAction("malcolm_mapi_cat_country",  {name:apiLabel, url:apiURL, category:"country"});
-    this.api.addValueAction("malcolm_mapi_cat_host",     {name:apiLabel, url:apiURL, category:"host"});
-    this.api.addValueAction("malcolm_mapi_cat_md5",      {name:apiLabel, url:apiURL, category:"md5"});
-    this.api.addValueAction("malcolm_mapi_cat_user",     {name:apiLabel, url:apiURL, category:"user"});
-    this.api.addValueAction("malcolm_mapi_fields_zeek",  {name:apiLabel, url:apiURL, fields:allFieldsStr});
+    this.api.addValueAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
+    this.api.addValueAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
+    this.api.addValueAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
+    this.api.addValueAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
+    this.api.addValueAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
+    this.api.addValueAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
+    this.api.addValueAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
 
     // add right-click for viewing original JSON document
-    this.api.addValueAction("malcolm_json_source", {name:"%DBFIELD% Document(s) JSON", url:"mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields:"communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid"});
+    this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
 
     this.api.addView("malcolm_common",
       "if (session.malcolmDocId)\n" +
