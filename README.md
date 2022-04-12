@@ -141,7 +141,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
 
-The scripts to control Malcolm require Python 3. The [`install.py`](#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3.
+The scripts to control Malcolm require Python 3. The [`install.py`](#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
 #### Source code
 
@@ -3746,14 +3746,17 @@ Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
 Setting 3 workers for Logstash pipelines. Is this OK? (Y/n): y
 
 Restart Malcolm upon system or Docker daemon restart? (y/N): y
-
-Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
+1: no
+2: on-failure
+3: always
+4: unless-stopped
+Select Malcolm restart behavior (unless-stopped): 4
 
 Require encrypted HTTPS connections? (Y/n): y
 
 Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y/N): n
 
-Specify external Docker network name (or leave blank for default networking):
+Specify external Docker network name (or leave blank for default networking) (): 
 
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
@@ -3774,10 +3777,16 @@ Expose Logstash port to external hosts? (y/N): n
 Forward Logstash logs to external OpenSearch instance? (y/N): n
 
 Enable file extraction with Zeek? (y/N): y
-
-Select file extraction behavior ('none', 'known', 'mapped', 'all', 'interesting'): interesting
-
-Select file preservation behavior ('quarantined', 'all', 'none'): quarantined
+1: none
+2: known
+3: mapped
+4: all
+5: interesting
+Select file extraction behavior (none): 5
+1: quarantined
+2: all
+3: none
+Select file preservation behavior (quarantined): 1
 
 Scan extracted files with ClamAV? (y/N): y
 

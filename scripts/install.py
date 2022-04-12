@@ -46,16 +46,92 @@ requests_imported = None
 
 ###################################################################################################
 # get interactive user response to Y/N question
-def InstallerYesOrNo(question, default=None, forceInteraction=False):
+def InstallerYesOrNo(
+    question,
+    default=None,
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+):
     global args
-    return YesOrNo(question, default=default, forceInteraction=forceInteraction, acceptDefault=args.acceptDefaults)
+    defBehavior = defaultBehavior
+    if args.acceptDefaultsNonInteractive and not forceInteraction:
+        defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
+
+    return YesOrNo(
+        question,
+        default=default,
+        defaultBehavior=defBehavior,
+        uiMode=uiMode,
+    )
 
 
 ###################################################################################################
-# get interactive user response
-def InstallerAskForString(question, default=None, forceInteraction=False):
+# get interactive user response string
+def InstallerAskForString(
+    question,
+    default=None,
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+):
     global args
-    return AskForString(question, default=default, forceInteraction=forceInteraction, acceptDefault=args.acceptDefaults)
+    defBehavior = defaultBehavior
+    if args.acceptDefaultsNonInteractive and not forceInteraction:
+        defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
+
+    return AskForString(
+        question,
+        default=default,
+        defaultBehavior=defBehavior,
+        uiMode=uiMode,
+    )
+
+
+###################################################################################################
+# choose one from a list
+def InstallerChooseOne(
+    prompt,
+    choices=[],
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+):
+
+    global args
+    defBehavior = defaultBehavior
+    if args.acceptDefaultsNonInteractive and not forceInteraction:
+        defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
+
+    return ChooseOne(
+        prompt,
+        choices=choices,
+        defaultBehavior=defBehavior,
+        uiMode=uiMode,
+    )
+
+
+###################################################################################################
+# choose multiple from a list
+def InstallerChooseMultiple(
+    prompt,
+    choices=[],
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+):
+
+    global args
+    defBehavior = defaultBehavior
+    if args.acceptDefaultsNonInteractive and not forceInteraction:
+        defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
+
+    return ChooseMultiple(
+        prompt,
+        choices=choices,
+        defaultBehavior=defBehavior,
+        uiMode=uiMode,
+    )
 
 
 def TrueOrFalseQuote(expression):
@@ -325,8 +401,9 @@ class Installer(object):
         allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
         if InstallerYesOrNo('Restart Malcolm upon system or Docker daemon restart?', default=restart_mode_default):
             while restartMode not in allowedRestartModes:
-                restartMode = InstallerAskForString(
-                    f'Select Malcolm restart behavior {allowedRestartModes}', default='unless-stopped'
+                restartMode = InstallerChooseOne(
+                    'Select Malcolm restart behavior',
+                    choices=[(x, '', x == 'unless-stopped') for x in allowedRestartModes],
                 )
         else:
             restartMode = 'no'
@@ -382,8 +459,9 @@ class Installer(object):
             allowedLdapModes = ('winldap', 'openldap')
             ldapServerType = None
             while ldapServerType not in allowedLdapModes:
-                ldapServerType = InstallerAskForString(
-                    f'Select LDAP server compatibility type {allowedLdapModes}', default='winldap'
+                ldapServerType = InstallerChooseOne(
+                    f'Select LDAP server compatibility type',
+                    choices=[(x, '', x == 'winldap') for x in allowedLdapModes],
                 )
             ldapStartTLS = InstallerYesOrNo('Use StartTLS for LDAP connection security?', default=True)
             try:
@@ -501,12 +579,14 @@ class Installer(object):
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
             while fileCarveMode not in allowedFileCarveModes:
-                fileCarveMode = InstallerAskForString(
-                    f'Select file extraction behavior {allowedFileCarveModes}', default=allowedFileCarveModes[0]
+                fileCarveMode = InstallerChooseOne(
+                    'Select file extraction behavior',
+                    choices=[(x, '', x == allowedFileCarveModes[0]) for x in allowedFileCarveModes],
                 )
             while filePreserveMode not in allowedFilePreserveModes:
-                filePreserveMode = InstallerAskForString(
-                    f'Select file preservation behavior {allowedFilePreserveModes}', default=allowedFilePreserveModes[0]
+                filePreserveMode = InstallerChooseOne(
+                    'Select file preservation behavior',
+                    choices=[(x, '', x == allowedFilePreserveModes[0]) for x in allowedFilePreserveModes],
                 )
             if fileCarveMode is not None:
                 if InstallerYesOrNo('Scan extracted files with ClamAV?', default=False):
@@ -1011,9 +1091,9 @@ class LinuxInstaller(Installer):
 
         # determine packages required by Malcolm itself (not docker, those will be done later)
         if (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN):
-            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl'])
+            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog'])
         elif (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
-            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl'])
+            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog'])
 
         # on Linux this script requires root, or sudo, unless we're in local configuration-only mode
         if os.getuid() == 0:
@@ -1781,7 +1861,7 @@ def main():
     parser.add_argument(
         '-d',
         '--defaults',
-        dest='acceptDefaults',
+        dest='acceptDefaultsNonInteractive',
         type=str2bool,
         nargs='?',
         const=True,
@@ -1833,7 +1913,7 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaults))
+    requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     if args.debug:
         eprint(f"Imported requests: {requests_imported}")
     if not requests_imported:
