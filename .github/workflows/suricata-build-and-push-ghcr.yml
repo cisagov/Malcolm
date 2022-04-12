@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - suricata_merge
     paths:
       - 'suricata/**'
       - 'Dockerfiles/suricata.Dockerfile'
