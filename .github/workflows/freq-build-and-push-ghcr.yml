@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - suricata_merge
     paths:
       - 'freq-server/**'
       - 'Dockerfiles/freq.Dockerfile'

@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - suricata_merge
     paths:
       - 'pcap-monitor/**'
       - 'Dockerfiles/pcap-monitor.Dockerfile'
