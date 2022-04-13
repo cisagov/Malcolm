@@ -3,8 +3,6 @@ FROM debian:11-slim as builder
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV SURICATA_VER "6.0.0"
-ENV SRCDIR "/src"
-ENV SURICATADIR "/opt/suricata"
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -46,11 +44,11 @@ RUN apt-get -q update && \
         echo 'source $HOME/.cargo/env' >> $HOME/.bashrc && \
     python3 -m pip install --no-cache-dir --upgrade pip && \
         python3 -m pip install --no-cache-dir suricata-update && \
-    mkdir -p $SRCDIR/ $SURICATADIR/ && \
+    mkdir -p /src/ /suricatabld/ && \
         wget https://www.openinfosecfoundation.org/download/suricata-$SURICATA_VER.tar.gz && \
-        tar xvfz suricata-$SURICATA_VER.tar.gz --strip-components=1 -C $SRCDIR/ && \
+        tar xvfz suricata-$SURICATA_VER.tar.gz --strip-components=1 -C /src/ && \
         rm suricata-$SURICATA_VER.tar.gz && \
-    cd $SRCDIR/ && \
+    cd /src/ && \
     ./configure \
         --prefix=/usr \
         --sysconfdir=/etc \
@@ -67,13 +65,17 @@ RUN apt-get -q update && \
         --enable-luajit && \
     make && \
         make check && \
-        make install DESTDIR="$SURICATADIR" && \
-        make install-full DESTDIR="$SURICATADIR" && \
-        ldconfig "$SURICATADIR"/usr/local/lib && \
-        make install-conf DESTDIR="$SURICATADIR" && \
-        make install-rules DESTDIR="$SURICATADIR" && \
-    mkdir -p "$SURICATADIR"/usr/local/var/lib/suricata/ && \
-        cp -r /usr/local/var/lib/suricata/rules "$SURICATADIR"/usr/local/var/lib/suricata/
+        make install DESTDIR=/suricatabld && \
+        make install-full DESTDIR=/suricatabld && \
+        ldconfig /suricatabld/usr/local/lib && \
+        make install-conf DESTDIR=/suricatabld && \
+        make install-rules DESTDIR=/suricatabld && \
+    mkdir -p /suricatabld/var/lib/suricata/ && \
+        cp -r /var/lib/suricata/rules /suricatabld/var/lib/suricata/ && \
+    ( find /suricatabld -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
+    cd / && \
+        tar czf ./suricatabld.tar.gz /suricatabld && \
+        rm -rf /src /suricatabld
 
 FROM debian:11-slim
 
@@ -100,17 +102,22 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-COPY --from=builder /target /
+ENV YQ_VERSION "4.24.2"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+
+ENV SURICATA_CONFIG_FILE /etc/suricata/suricata.yaml
+
+COPY --from=builder /suricatabld.tar.gz /suricatabld.tar.gz
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
-        build-essential \
         curl \
         file \
         inotify-tools \
         libcap-ng0 \
         libevent-2.1-7 \
+        libevent-pthreads-2.1-7 \
         libgeoip1 \
         libhiredis0.14 \
         libhtp2 \
@@ -129,6 +136,7 @@ RUN apt-get -q update && \
         libpcap0.8 \
         libpcre3 \
         libyaml-0-2 \
+        moreutils \
         procps \
         psmisc \
         python3-pip \
@@ -143,20 +151,24 @@ RUN apt-get -q update && \
         chmod +x "$SUPERCRONIC" && \
         mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
         ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
+        chmod 755 /usr/bin/yq && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB}) && \
+    tar xf /suricatabld.tar.gz --strip-components=1 -C / && \
     apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /suricatabld.tar.gz
 
 COPY --chmod=755 shared/bin/pcap_processor.py /opt/
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/suricata_config_populate.sh /usr/local/bin/
 COPY --chmod=644 shared/bin/pcap_utils.py /opt/
 COPY --chmod=644 shared/pcaps/*.* /tmp/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 suricata/suricata.yaml /etc/suricata/suricata.yaml
+COPY --chmod=644 suricata/suricata.yaml $SURICATA_CONFIG_FILE
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
 
 ARG PCAP_PIPELINE_DEBUG=false

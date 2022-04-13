@@ -131,6 +131,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 ![opensearch-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/opensearch-build-and-push-ghcr/badge.svg)
 ![pcap-capture-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-capture-build-and-push-ghcr/badge.svg)
 ![pcap-monitor-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
+![suricata-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/suricata-build-and-push-ghcr/badge.svg)
 ![zeek-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/zeek-build-and-push-ghcr/badge.svg)
 ![malcolm-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
 ![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
@@ -174,6 +175,7 @@ Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
 Pulling pcap-monitor      ... done
+Pulling suricata          ... done
 Pulling upload            ... done
 Pulling zeek              ... done
 ```
@@ -197,6 +199,7 @@ malcolmnetsec/nginx-proxy                                      5.3.0           x
 malcolmnetsec/opensearch                                       5.3.0           xxxxxxxxxxxx   3 days ago   1.17GB
 malcolmnetsec/pcap-capture                                     5.3.0           xxxxxxxxxxxx   3 days ago   121MB
 malcolmnetsec/pcap-monitor                                     5.3.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         5.3.0           xxxxxxxxxxxx   3 days ago   278MB
 malcolmnetsec/zeek                                             5.3.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
@@ -375,6 +378,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
 * `sensor-iso` - code and configuration for building a [Hedgehog Linux](#Hedgehog) ISO
 * `shared` - miscellaneous code used by various Malcolm components 
+* `suricata` - code and configuration for the `suricata` container which handles PCAP processing using Suricata
 * `suricata-logs` - an initially empty directory for Suricata logs to be uploaded, processed, and stored
 * `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
@@ -3850,6 +3854,7 @@ Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
 Pulling pcap-monitor      ... done
+Pulling suricata          ... done
 Pulling upload            ... done
 Pulling zeek              ... done
 
@@ -3870,6 +3875,7 @@ malcolmnetsec/nginx-proxy                                      5.3.0           x
 malcolmnetsec/opensearch                                       5.3.0           xxxxxxxxxxxx   3 days ago   1.17GB
 malcolmnetsec/pcap-capture                                     5.3.0           xxxxxxxxxxxx   3 days ago   121MB
 malcolmnetsec/pcap-monitor                                     5.3.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         5.3.0           xxxxxxxxxxxx   3 days ago   278MB
 malcolmnetsec/zeek                                             5.3.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
@@ -3887,7 +3893,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
+Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_suricata_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
 …
 ```
 
