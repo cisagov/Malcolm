@@ -408,6 +408,7 @@ services:
     volumes:
       - ./suricata-logs:/var/log/suricata
       - ./pcap:/data/pcap
+      - ./suricata/rules:/opt/suricata/rules:ro
     expose:
       - 8711
     healthcheck:

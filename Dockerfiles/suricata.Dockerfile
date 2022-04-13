@@ -2,6 +2,10 @@ FROM debian:11-slim as builder
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
+
+# for download, compile and install
 ENV SURICATA_VER "6.0.0"
 
 RUN apt-get -q update && \
@@ -88,6 +92,10 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='malcolmnetsec/suricata'
 LABEL org.opencontainers.image.description='Malcolm container providing Suricata'
 
+ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
+
+# configure unprivileged user and runtime parameters
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
 ENV DEFAULT_UID $DEFAULT_UID
@@ -106,6 +114,11 @@ ENV YQ_VERSION "4.24.2"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
 ENV SURICATA_CONFIG_FILE /etc/suricata/suricata.yaml
+ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
+ENV SURICATA_LOG_DIR /var/log/suricata
+ENV SURICATA_MANAGED_DIR /var/lib/suricata
+ENV SURICATA_MANAGED_RULES_DIR "$SURICATA_MANAGED_DIR/rules"
+ENV SURICATA_RUN_DIR /var/run/suricata
 
 COPY --from=builder /suricatabld.tar.gz /suricatabld.tar.gz
 
@@ -159,6 +172,9 @@ RUN apt-get -q update && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB}) && \
     tar xf /suricatabld.tar.gz --strip-components=1 -C / && \
+        mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_MANAGED_DIR" && \
+        chown -R ${PUSER}:${PGROUP} \
+            "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_MANAGED_DIR" "$SURICATA_LOG_DIR" "$SURICATA_RUN_DIR" && \
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /suricatabld.tar.gz
 
@@ -168,13 +184,13 @@ COPY --chmod=755 shared/bin/suricata_config_populate.sh /usr/local/bin/
 COPY --chmod=644 shared/bin/pcap_utils.py /opt/
 COPY --chmod=644 shared/pcaps/*.* /tmp/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 suricata/suricata.yaml $SURICATA_CONFIG_FILE
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
+
+RUN /usr/local/bin/suricata_config_populate.sh
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
-#Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
 ARG SURICATA_AUTO_ANALYZE_PCAP_FILES=false
 ARG SURICATA_AUTO_ANALYZE_PCAP_THREADS=1
@@ -186,7 +202,10 @@ ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV SURICATA_AUTO_ANALYZE_PCAP_FILES $SURICATA_AUTO_ANALYZE_PCAP_FILES
 ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 
-#Move Suricata YML
+VOLUME ["$SURICATA_CUSTOM_RULES_DIR"]
+VOLUME ["$SURICATA_LOG_DIR"]
+VOLUME ["$SURICATA_MANAGED_DIR"]
+VOLUME ["$SURICATA_RUN_DIR"]
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

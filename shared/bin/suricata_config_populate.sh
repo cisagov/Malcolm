@@ -38,6 +38,14 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
   /usr/bin/yq eval --inplace ".\"coredump\"={\"max-dump\":0}" "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace 'del(."default-rule-path")' "$SURICATA_CONFIG_FILE"
   /usr/bin/yq eval --inplace ".\"default-rule-path\"=\"${SURICATA_MANAGED_RULES_DIR:-/var/lib/suricata/rules}\"" "$SURICATA_CONFIG_FILE"
+
+  /usr/bin/yq eval --inplace 'del(."rule-files")' "$SURICATA_CONFIG_FILE"
+  if [[ -n $SURICATA_CUSTOM_RULES_DIR ]]; then
+    /usr/bin/yq eval --inplace ".\"rule-files\"=[\"suricata.rules\", \"$SURICATA_CUSTOM_RULES_DIR/*.rules\"]" "$SURICATA_CONFIG_FILE"
+  else
+    /usr/bin/yq eval --inplace ".\"rule-files\"=[\"suricata.rules\"]" "$SURICATA_CONFIG_FILE"
+  fi
+
   if [[ -n $SUPERVISOR_PATH ]]; then
     /usr/bin/yq eval --inplace 'del(."unix-command")' "$SURICATA_CONFIG_FILE"
     /usr/bin/yq eval --inplace ".\"unix-command\"={\"enabled\":\"yes\",\"filename\":\"$SUPERVISOR_PATH/suricata/suricata-command.socket\"}" "$SURICATA_CONFIG_FILE"
