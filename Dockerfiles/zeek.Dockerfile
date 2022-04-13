@@ -152,7 +152,7 @@ RUN apt-get -q update && \
 
 # add configuration and scripts
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/
+ADD shared/bin/pcap_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
@@ -182,7 +182,7 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
-    ln -sfr /usr/local/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
+    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true

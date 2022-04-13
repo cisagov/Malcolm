@@ -189,7 +189,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 # add configuration and scripts
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD arkime/scripts /opt/
-ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
+ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
 ADD arkime/etc $ARKIMEDIR/etc/
@@ -216,7 +216,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIMEDIR $PUSER && \
       usermod -a -G tty $PUSER && \
     chmod 755 /opt/*.sh && \
-    ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_arkime_processor.py && \
+    ln -sfr /opt/pcap_processor.py /opt/pcap_arkime_processor.py && \
     cp -f /opt/arkime_update_geo.sh $ARKIMEDIR/bin/arkime_update_geo.sh && \
     chmod u+s $ARKIMEDIR/bin/capture && \
     mkdir -p /var/run/arkime && \

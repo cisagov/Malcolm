@@ -1,6 +1,81 @@
-FROM debian:11-slim
+FROM debian:11-slim as builder
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
+ENV SURICATA_VER "6.0.0"
+ENV SRCDIR "/src"
+ENV SURICATADIR "/opt/suricata"
+
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
+    apt-get install -q -y --no-install-recommends \
+        autoconf \
+        automake \
+        build-essential \
+        ca-certificates \
+        cargo \
+        curl \
+        libcap-ng-dev \
+        libevent-dev \
+        libgeoip-dev \
+        libhiredis-dev \
+        libhtp-dev \
+        libhyperscan-dev \
+        libjansson-dev \
+        liblua5.1-dev \
+        libluajit-5.1-dev \
+        liblz4-dev \
+        libmagic-dev \
+        libmaxminddb-dev \
+        libnet1-dev \
+        libnetfilter-log-dev \
+        libnetfilter-queue-dev \
+        libnfnetlink-dev \
+        libnss3-dev \
+        libpcap-dev \
+        libpcre3-dev \
+        python3-pip \
+        libtool \
+        libyaml-dev \
+        make \
+        python3-yaml \
+        zlib1g-dev \
+        wget \
+        zlib1g-dev && \
+    ( curl https://sh.rustup.rs -sSf | bash -s -- -y ) && \
+        echo 'source $HOME/.cargo/env' >> $HOME/.bashrc && \
+    python3 -m pip install --no-cache-dir --upgrade pip && \
+        python3 -m pip install --no-cache-dir suricata-update && \
+    mkdir -p $SRCDIR/ $SURICATADIR/ && \
+        wget https://www.openinfosecfoundation.org/download/suricata-$SURICATA_VER.tar.gz && \
+        tar xvfz suricata-$SURICATA_VER.tar.gz --strip-components=1 -C $SRCDIR/ && \
+        rm suricata-$SURICATA_VER.tar.gz && \
+    cd $SRCDIR/ && \
+    ./configure \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --mandir=/usr/share/man \
+        --localstatedir=/var \
+        --enable-non-bundled-htp \
+        --enable-nfqueue \
+        --enable-rust \
+        --disable-gccmarch-native \
+        --enable-hiredis \
+        --enable-geoip \
+        --enable-gccprotect \
+        --enable-pie \
+        --enable-luajit && \
+    make && \
+        make check && \
+        make install DESTDIR="$SURICATADIR" && \
+        make install-full DESTDIR="$SURICATADIR" && \
+        ldconfig "$SURICATADIR"/usr/local/lib && \
+        make install-conf DESTDIR="$SURICATADIR" && \
+        make install-rules DESTDIR="$SURICATADIR" && \
+    mkdir -p "$SURICATADIR"/usr/local/var/lib/suricata/ && \
+        cp -r /usr/local/var/lib/suricata/rules "$SURICATADIR"/usr/local/var/lib/suricata/
+
+FROM debian:11-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -25,123 +100,64 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV SURICATA_VER "6.0.0"
-ENV SURICATADIR "/opt/suricata"
+COPY --from=builder /target /
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
-        autoconf \
-        automake \
         build-essential \
-        bzip2 \
-        cpio \
         curl \
         file \
-        gzip \
         inotify-tools \
-        libcap-ng-dev \
         libcap-ng0 \
-        libevent-dev \
-        libgeoip-dev \
-        libhiredis-dev \
-        libhtp-dev \
-        libjansson-dev \
-        liblua5.1-dev \
-        libluajit-5.1-dev \
-        libmagic-dev \
-        libmaxminddb-dev \
-        libnet1-dev \
-        libnetfilter-log-dev \
+        libevent-2.1-7 \
+        libgeoip1 \
+        libhiredis0.14 \
+        libhtp2 \
+        libhyperscan5 \
+        libjansson4 \
+        liblua5.1-0 \
+        libluajit-5.1-2 \
+        liblz4-1 \
+        libmagic1 \
+        libmaxminddb0 \
+        libnet1 \
         libnetfilter-log1 \
-        libnetfilter-queue-dev \
         libnetfilter-queue1 \
-        libnfnetlink-dev \
         libnfnetlink0 \
-        libnss3-dev \
-        libpcap-dev \
+        libnss3 \
+        libpcap0.8 \
         libpcre3 \
-        libpcre3-dbg \
-        libpcre3-dev \
-        libtool \
         libyaml-0-2 \
-        libyaml-dev \
-        lzma \
-        make \
-        p7zip \
-        pkg-config cargo \
         procps \
         psmisc \
         python3-pip \
-        python3-setuptools \
+        python3-yaml \
         python3-zmq \
         supervisor \
-        tar \
-        unar \
-        unar \
-        unzip \
-        wget \
-        zlib1g \
-        zlib1g-dev
+        zlib1g && \
+    python3 -m pip install --no-cache-dir --upgrade pip && \
+        python3 -m pip install --no-cache-dir suricata-update && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+        echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+        chmod +x "$SUPERCRONIC" && \
+        mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+        ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
+      usermod -a -G tty ${PUSER} && \
+    ln -sfr /opt/pcap_processor.py /opt/pcap_suricata_processor.py && \
+        (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB}) && \
+    apt-get clean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#Install Rust
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
-RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
-
-#Upgrade pip
-RUN pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir suricata-update && \
-    pip3 install pyyaml
-
-#Build Suricata
-RUN mkdir -p $SURICATADIR/ && \
-    wget https://www.openinfosecfoundation.org/download/suricata-$SURICATA_VER.tar.gz && \
-    tar xvfz suricata-$SURICATA_VER.tar.gz --strip-components=1 -C $SURICATADIR/ && \
-    rm suricata-$SURICATA_VER.tar.gz && \
-    cd $SURICATADIR/ && \
-    ./configure \
-    --prefix=/usr \
-	--sysconfdir=/opt \
-	--mandir=/usr/share/man \
-	--localstatedir=/var \
-	--enable-non-bundled-htp \
-	--enable-nfqueue \
-    --enable-rust \
-	--disable-gccmarch-native \
-	--enable-hiredis \
-	--enable-geoip \
-	--enable-gccprotect \
-	--enable-pie \
-	--enable-luajit && \
-    make && \
-    make check && \
-    make install && \
-    make install-full
-
-#Install SuperCronic
-RUN curl -fsSLO "$SUPERCRONIC_URL" && \
-    echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-    chmod +x "$SUPERCRONIC" && \
-    mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-    ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
-
-ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/pcap_utils.py /opt/
-ADD shared/pcaps /tmp/
-ADD suricata/supervisord.conf /etc/supervisord.conf
-ADD suricata/rules/*.rules /var/lib/suricata/rules/
-ADD suricata/suricata.yaml $SURICATADIR/suricata.yaml
-ADD suricata/scripts/*.sh /opt/
-
-#Setup User, Groups, and Configs
-RUN addgroup --gid ${DEFAULT_GID} ${PUSER} && \
-    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
-    usermod -a -G tty ${PUSER} && \
-    chmod -R +rw $SURICATADIR && \
-    ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_suricata_processor.py && \
-    chmod 755 /opt/*.sh && \
-    (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB})
+COPY --chmod=755 shared/bin/pcap_processor.py /opt/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=644 shared/bin/pcap_utils.py /opt/
+COPY --chmod=644 shared/pcaps/*.* /tmp/
+COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
+COPY --chmod=644 suricata/suricata.yaml /etc/suricata/suricata.yaml
+COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
