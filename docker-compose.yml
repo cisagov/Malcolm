@@ -86,6 +86,9 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_TFTP : ''
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
+x-suricata-variables: &suricata-variables
+  SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
+
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
@@ -136,9 +139,6 @@ x-pcap-capture-variables: &pcap-capture-variables
   PCAP_ROTATE_MEGABYTES : 1024
   PCAP_ROTATE_MINUTES : 10
   PCAP_FILTER : ''
-
-x-suricata-variables: &suricata-variables
-  SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
 ################################################################################
 
 services:
