@@ -35,7 +35,9 @@ PCAP_PROCESSING_MODE_ZEEK = "zeek"
 PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
 SURICATA_AUTOSURICATA_TAG = True
-SURICATA_PATH = "/opt/suricata/src/suricata"
+SURICATA_PATH = "/usr/bin/suricata"
+SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
+SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
 
@@ -52,6 +54,7 @@ ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
 ZEEK_USERTAG_TAG = 'USERTAG'
 ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
 ZEEK_LOG_COMPRESSION_LEVEL = 6
+
 
 ###################################################################################################
 debug = False
@@ -71,6 +74,7 @@ arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
 def shutdown_handler(signum, frame):
     global shuttingDown
     shuttingDown = True
+
 
 ###################################################################################################
 # handle sigusr1 for a pdb breakpoint
@@ -344,6 +348,7 @@ def suricataFileWorker(suricataWorkerArgs):
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
 
+                # todo: figureout SURICATA_AUTOSURICATA_TAG
                 # if autosuricata or ((FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]):
 
                 if pcapBaseDir and os.path.isdir(pcapBaseDir):
@@ -364,12 +369,22 @@ def suricataFileWorker(suricataWorkerArgs):
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                     # put together suricata execution command
-                    cmd = [suricataBin, '-r', fileInfo[FILE_INFO_DICT_NAME], '-l', '/var/log/suricata/', '-c', '/opt/suricata/suricata.yaml']
+                    cmd = [
+                        suricataBin,
+                        '-r',
+                        fileInfo[FILE_INFO_DICT_NAME],
+                        '-l',
+                        SURICATA_LOG_DIR,
+                        '-c',
+                        SURICATA_CONFIG_FILE,
+                    ]
 
                     # execute suricata-capture for pcap file
                     retcode, output = run_process(cmd, debug=verboseDebug)
-                    unique_name = "/var/log/suricata/eve_" + str(datetime.now().strftime("%Y-%m-%d_%H:%M:%S")) + ".json"
-                    shutil.move('/var/log/suricata/eve.json', unique_name)
+                    shutil.move(
+                        f"{SURICATA_LOG_DIR}/eve.json",
+                        f"{SURICATA_LOG_DIR}/eve_{str(datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))}.json",
+                    )
                     if retcode == 0:
                         if debug:
                             eprint(
@@ -390,9 +405,9 @@ def suricataFileWorker(suricataWorkerArgs):
 def main():
 
     processingMode = None
-    if (PCAP_PROCESSING_MODE_ARKIME in scriptName) and ('zeek' in scriptName):
+    if 'pcap_processor' in scriptName:
         eprint(
-            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead."
+            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with the processor (e.g., arkime, suricata, zeek) in the name and run that instead."
         )
         exit(2)
     elif PCAP_PROCESSING_MODE_ARKIME in scriptName:
@@ -403,7 +418,7 @@ def main():
         processingMode = PCAP_PROCESSING_MODE_SURICATA
     else:
         eprint(
-            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead."
+            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with the processor (e.g., arkime, suricata, zeek) in the name and run that instead."
         )
         exit(2)
 
@@ -638,26 +653,26 @@ def main():
             ([newFileQueue, args.pcapBaseDir, args.autosuricata, args.executable, args.autotag],),
         )
 
-        while not shuttingDown:
-            # for debugging
-            if pdbFlagged:
-                pdbFlagged = False
-                breakpoint()
+    while not shuttingDown:
+        # for debugging
+        if pdbFlagged:
+            pdbFlagged = False
+            breakpoint()
 
-            # accept a file info dict from new_files_socket as json
-            try:
-                fileInfo = json.loads(new_files_socket.recv_string())
-            except zmq.Again as timeout:
-                # no file received due to timeout, we'll go around and try again
-                if verboseDebug:
-                    eprint(f"{scriptName}:\t🕑\t(recv)")
-                fileInfo = None
+        # accept a file info dict from new_files_socket as json
+        try:
+            fileInfo = json.loads(new_files_socket.recv_string())
+        except zmq.Again as timeout:
+            # no file received due to timeout, we'll go around and try again
+            if verboseDebug:
+                eprint(f"{scriptName}:\t🕑\t(recv)")
+            fileInfo = None
 
-            if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-                # queue for the workers to process with capture
-                newFileQueue.append(fileInfo)
-                if debug:
-                    eprint(f"{scriptName}:\t📨\t{fileInfo}")
+        if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+            # queue for the workers to process with capture
+            newFileQueue.append(fileInfo)
+            if debug:
+                eprint(f"{scriptName}:\t📨\t{fileInfo}")
 
     # graceful shutdown
     if debug:
