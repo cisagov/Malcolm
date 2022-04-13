@@ -115,12 +115,24 @@ x-logstash-variables: &logstash-variables
   # OS_EXTERNAL_USER : 'janedoe'
   # OS_EXTERNAL_PASSWORD : 'secret'
 
+x-filebeat-variables: &filebeat-variables
+  FILEBEAT_SCAN_FREQUENCY : '10s'
+  FILEBEAT_CLEAN_INACTIVE : '180m'
+  FILEBEAT_IGNORE_OLDER : '120m'
+  FILEBEAT_CLOSE_INACTIVE : '120s'
+  FILEBEAT_CLOSE_RENAMED : 'true'
+  FILEBEAT_CLOSE_REMOVED : 'true'
+  FILEBEAT_CLOSE_EOF : 'true'
+  FILEBEAT_CLEAN_REMOVED : 'true'
+
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
   PCAP_PIPELINE_DEBUG : 'false'
   PCAP_PIPELINE_DEBUG_EXTRA : 'false'
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
   PCAP_MONITOR_HOST : 'pcap-monitor'
+  LOG_CLEANUP_MINUTES : 360
+  ZIP_CLEANUP_MINUTES : 720
 
 x-common-lookup-variables: &common-lookup-variables
   FREQ_LOOKUP : 'true'
@@ -291,21 +303,12 @@ services:
     environment:
       << : *process-variables
       << : *nginx-variables
+      << : *filebeat-variables
       << : *common-upload-variables
       << : *common-beats-variables
       FILEBEAT_ZEEK_LOG_PATH : '/data/zeek/current'
       FILEBEAT_SURICATA_LOG_PATH : '/data/suricata'
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
-      FILEBEAT_LOG_CLEANUP_MINUTES : 360
-      FILEBEAT_ZIP_CLEANUP_MINUTES : 720
-      FILEBEAT_SCAN_FREQUENCY : '10s'
-      FILEBEAT_CLEAN_INACTIVE : '180m'
-      FILEBEAT_IGNORE_OLDER : '120m'
-      FILEBEAT_CLOSE_INACTIVE : '120s'
-      FILEBEAT_CLOSE_RENAMED : 'true'
-      FILEBEAT_CLOSE_REMOVED : 'true'
-      FILEBEAT_CLOSE_EOF : 'true'
-      FILEBEAT_CLEAN_REMOVED : 'true'
     depends_on:
       - logstash
     volumes:

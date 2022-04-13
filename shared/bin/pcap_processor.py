@@ -11,7 +11,6 @@
 ###################################################################################################
 
 import argparse
-from datetime import date, datetime
 import json
 import os
 import shutil
@@ -368,33 +367,55 @@ def suricataFileWorker(suricataWorkerArgs):
                     if debug:
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-                    # put together suricata execution command
-                    cmd = [
-                        suricataBin,
-                        '-r',
-                        fileInfo[FILE_INFO_DICT_NAME],
-                        '-l',
-                        SURICATA_LOG_DIR,
-                        '-c',
-                        SURICATA_CONFIG_FILE,
-                    ]
+                    # create a temporary work directory where suricata will be executed to generate the log files
+                    with tempfile.TemporaryDirectory() as tmpLogDir:
+                        if os.path.isdir(tmpLogDir):
 
-                    # execute suricata-capture for pcap file
-                    retcode, output = run_process(cmd, debug=verboseDebug)
-                    shutil.move(
-                        f"{SURICATA_LOG_DIR}/eve.json",
-                        f"{SURICATA_LOG_DIR}/eve_{str(datetime.now().strftime('%Y-%m-%d_%H:%M:%S'))}.json",
-                    )
-                    if retcode == 0:
-                        if debug:
-                            eprint(
-                                f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                            )
-                    else:
-                        if debug:
-                            eprint(
-                                f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}"
-                            )
+                            processTimeUsec = int(round(time.time() * 1000000))
+
+                            # put together suricata execution command
+                            cmd = [
+                                suricataBin,
+                                '-r',
+                                fileInfo[FILE_INFO_DICT_NAME],
+                                '-l',
+                                tmpLogDir,
+                                '-c',
+                                SURICATA_CONFIG_FILE,
+                            ]
+
+                            # execute suricata-capture for pcap file
+                            retcode, output = run_process(cmd, debug=verboseDebug)
+
+                            eveJsonFile = os.path.join(tmpLogDir, "eve.json")
+                            if os.path.isfile(eveJsonFile):
+                                # relocate the .json to be processed (do it this way instead of with a shutil.move because of
+                                # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
+                                # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
+                                shutil.copy(
+                                    eveJsonFile,
+                                    os.path.join(
+                                        SURICATA_LOG_DIR,
+                                        f"eve_{processTimeUsec}_{scanWorkerId}.json",
+                                    ),
+                                )
+
+                            if retcode == 0:
+                                if debug:
+                                    eprint(
+                                        f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                    )
+                            else:
+                                if debug:
+                                    eprint(
+                                        f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}"
+                                    )
+
+                        else:
+                            if debug:
+                                eprint(
+                                    f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                )
 
     if debug:
         eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
