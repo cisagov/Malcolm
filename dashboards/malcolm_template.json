@@ -380,7 +380,7 @@
         "suricata.dns.answers.rdata": { "type": "keyword" },
         "suricata.dns.answers.rrname": { "type": "keyword" },
         "suricata.dns.answers.rrtype": { "type": "keyword" },
-        "suricata.dns.answers.ttl": { "type": "integer" },
+        "suricata.dns.answers.ttl": { "type": "long" },
         "suricata.dns.authorities.rdata": { "type": "keyword" },
         "suricata.dns.authorities.rrname": { "type": "keyword" },
         "suricata.dns.authorities.rrtype": { "type": "keyword" },
