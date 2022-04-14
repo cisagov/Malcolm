@@ -29,7 +29,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "1.27.4"
+DOCKER_COMPOSE_INSTALL_VERSION = "1.29.2"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
@@ -538,10 +538,10 @@ class Installer(object):
                     'Determine oldest indices by name (instead of creation time)?', default=True
                 )
 
-        autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
+        autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
-            'Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False
+            'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
         )
         autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
         autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
@@ -550,7 +550,7 @@ class Installer(object):
         )
         logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
         logstashSsl = logstashOpen and InstallerYesOrNo(
-            'Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)',
+            'Should Logstash require SSL for forwarded logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)',
             default=True,
         )
         externalEsForward = InstallerYesOrNo('Forward Logstash logs to external OpenSearch instance?', default=False)
