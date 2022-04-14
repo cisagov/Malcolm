@@ -129,6 +129,7 @@ RUN apt-get -q update && \
         curl \
         file \
         inotify-tools \
+        less \
         libcap-ng0 \
         libevent-2.1-7 \
         libevent-pthreads-2.1-7 \
@@ -157,6 +158,7 @@ RUN apt-get -q update && \
         python3-yaml \
         python3-zmq \
         supervisor \
+        vim-tiny \
         zlib1g && \
     python3 -m pip install --no-cache-dir --upgrade pip && \
         python3 -m pip install --no-cache-dir suricata-update && \
