@@ -31,6 +31,7 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
     yq --inplace "(.outputs.[] | select(.$OUTPUT))[].enabled = \"yes\"" "$SURICATA_CONFIG_FILE"
   done
   yq --inplace '(.outputs.[] | select(.eve-log))[].community-id = true' "$SURICATA_CONFIG_FILE"
+  yq --inplace '(.outputs.[] | select(.eve-log))[].pcap-file = true' "$SURICATA_CONFIG_FILE"
 
   # don't dump payload, we can pivot to the payload with Arkime via community-id
   for DUMPER in payload payload-printable packet http-body http-body-printable; do
