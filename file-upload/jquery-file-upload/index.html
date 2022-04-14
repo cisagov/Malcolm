@@ -119,6 +119,8 @@ function toggle(checkboxID, toggleSelectID) {
             Tags: <input name="tags" type="text" value="" data-role="tagsinput" />
             <br>
             <br>
+            <label><input type="checkbox" name="auto-suricata" id="auto-suricata" value="enabled">&nbsp;Analyze with Suricata</label>
+            <br>
             <label><input type="checkbox" name="auto-zeek" id="auto-zeek" value="enabled" onClick="toggle('auto-zeek', 'auto-carve')">&nbsp;Analyze with Zeek</label>
             <br>
             <label>Zeek File Extraction&nbsp;&nbsp;<select disabled=true name="auto-carve" id="auto-carve">
@@ -128,6 +130,7 @@ function toggle(checkboxID, toggleSelectID) {
             <option value="known">Files for which any mime type can be determined</option>
             <option value="all">All files</option>
             </select></label>
+            <br>
           </div>
         </div>
         <br>

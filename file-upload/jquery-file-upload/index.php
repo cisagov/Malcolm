@@ -14,6 +14,9 @@ class CustomUploadHandler extends UploadHandler {
     if (isset($_POST["auto-zeek"]) && $_POST["auto-zeek"] == "enabled") {
       $name = "AUTOZEEK," . $name;
     }
+    if (isset($_POST["auto-suricata"]) && $_POST["auto-suricata"] == "enabled") {
+      $name = "AUTOSURICATA," . $name;
+    }
     return parent::trim_file_name($file_path, preg_replace("/[^a-zA-Z0-9\s_\(\)\.,-]/", "", $name), $size, $type, $error, $index, $content_range);
   }
 }

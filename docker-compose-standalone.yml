@@ -88,6 +88,7 @@ x-zeek-variables: &zeek-variables
 
 x-suricata-variables: &suricata-variables
   SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
+  SURICATA_AUTO_ANALYZE_PCAP_THREADS: 1
 
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
