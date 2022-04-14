@@ -50,11 +50,11 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     * [Temporary read-only interface](#ReadOnlyUI)
 * [Capture file and log archive upload](#Upload)
     - [Tagging](#Tagging)
-    - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek)
+    - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
 * [Live analysis](#LiveAnalysis)
     * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
-    * [Manually forwarding Zeek logs from an external source](#ZeekForward)
+    * [Manually forwarding logs from an external source](#ExternalForward)
 * [Arkime](#Arkime)
     * [Zeek log integration](#ArkimeZeek)
         - [Correlating Zeek logs and Arkime sessions](#ZeekArkimeFlowCorrelation)
@@ -534,6 +534,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
 
+* `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
+
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
 
 * `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](#ZeekIntel) files (defaults to empty, which disables automatic refresh)
@@ -549,6 +551,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 
 * `ARKIME_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
+
+* `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
 
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
 
@@ -933,9 +937,9 @@ In addition to be processed for uploading, Malcolm events will be tagged accordi
 
 Tags may also be specified manually with the [browser-based upload form](#Upload).
 
-### <a name="UploadPCAPZeek"></a>Processing uploaded PCAPs with Zeek
+### <a name="UploadPCAPProcessors"></a>Processing uploaded PCAPs with Zeek and Suricata
 
-The browser-based upload interface also provides the ability to specify tags for events extracted from the files uploaded. Additionally, an **Analyze with Zeek** checkbox may be used when uploading PCAP files to cause them to be analyzed by Zeek, similarly to the `ZEEK_AUTO_ANALYZE_PCAP_FILES` environment variable [described above](#DockerComposeYml), only on a per-upload basis. Zeek can also automatically carve out files from file transfers; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details.
+The **Analyze with Zeek** and **Analyze with Suricata** checkboxes may be used when uploading PCAP files to cause them to be analyzed by Zeek and Suricata, respectively. This is functionally equivalent to the `ZEEK_AUTO_ANALYZE_PCAP_FILES` and `SURICATA_AUTO_ANALYZE_PCAP_FILES` environment variables [described above](#DockerComposeYml), only on a per-upload basis. Zeek can also automatically carve out files from file transfers; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details.
 
 ## <a name="LiveAnalysis"></a>Live analysis
 
@@ -958,9 +962,9 @@ A remote network sensor appliance can be used to monitor network traffic, captur
 
 Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/main/sensor-iso/README.md) for more information.
 
-### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
+### <a name="ExternalForward"></a>Manually forwarding logs from an external source
 
-Malcolm's Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
+Malcolm's Logstash instance can also be configured to accept logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
 
 Configuring Filebeat to forward Zeek logs to Malcolm might look something like this example [`filebeat.yml`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html):
 ```

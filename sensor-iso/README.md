@@ -28,7 +28,7 @@ Hedgehog Linux is a Debian-based operating system built to
         + [Capture](#ConfigCapture)
             * [Automatic file extraction and scanning](#ZeekFileExtraction)
         + [Forwarding](#ConfigForwarding)
-            * [filebeat](#filebeat): Zeek log forwarding
+            * [filebeat](#filebeat): Zeek and Suricata log forwarding
             * [arkime-capture](#arkime-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
             * [auditbeat](#auditbeat): audit log forwarding
@@ -184,11 +184,11 @@ You will be presented with a list of network interfaces and prompted to select o
 
 ![Select capture interfaces](./docs/images/capture_iface_select.png)
 
-Upon choosing the capture interfaces and selecting OK, you may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([`tcpdump`](https://www.tcpdump.org/)) and the traffic analysis service ([`zeek`](https://www.zeek.org/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
+Upon choosing the capture interfaces and selecting OK, you may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([`tcpdump`](https://www.tcpdump.org/)) and the traffic analysis services ([`zeek`](https://www.zeek.org/) and [`suricata`](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
 
 ![Specify capture filters](./docs/images/capture_filter.png)
 
-Next you must specify the paths where captured PCAP files and Zeek logs will be stored locally on the sensor. If the installation worked as expected, these paths should be prepopulated to reflect paths on the volumes formatted at install time for the purpose storing these artifacts. Usually these paths will exist on separate storage volumes. Enabling the PCAP and Zeek log pruning autostart services (see the section on autostart services below) will enable monitoring of these paths to ensure that their contents do not consume more than 90% of their respective volumes' space. Choose **OK** to continue.
+Next you must specify the paths where captured PCAP files and logs will be stored locally on the sensor. If the installation worked as expected, these paths should be prepopulated to reflect paths on the volumes formatted at install time for the purpose storing these artifacts. Usually these paths will exist on separate storage volumes. Enabling the PCAP and log pruning autostart services (see the section on autostart services below) will enable monitoring of these paths to ensure that their contents do not consume more than 90% of their respective volumes' space. Choose **OK** to continue.
 
 ![Specify capture paths](./docs/images/capture_paths.png)
 
@@ -229,23 +229,23 @@ Select **Configure Forwarding** to set up forwarding logs and statistics from th
 
 There are five forwarder services used on the sensor, each for forwarding a different type of log or sensor metric.
 
-### <a name="filebeat"></a>filebeat: Zeek log forwarding
+### <a name="filebeat"></a>filebeat: Zeek and Suricata log forwarding
 
-[Filebeat](https://www.elastic.co/products/beats/filebeat) is used to forward [Zeek](https://www.zeek.org/) logs to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database.
+[Filebeat](https://www.elastic.co/products/beats/filebeat) is used to forward [Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/) logs to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database.
 
-To configure filebeat, first provide the log path (the same path previously configured for Zeek log file generation). You must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+To configure filebeat, first provide the log path (the same path previously configured for log file generation). You must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
 
-![Configure filebeat for Zeek log forwrding](./docs/images/filebeat_dest.png)
+![Configure filebeat for log forwrding](./docs/images/filebeat_dest.png)
 
-Next you are asked whether the connection used for Zeek log forwarding should be done **unencrypted** or over **SSL**. Unencrypted communication requires less processing overhead and is simpler to configure, but the contents of the logs may be visible to anyone who is able to intercept that traffic.
+Next you are asked whether the connection used for log forwarding should be done **unencrypted** or over **SSL**. Unencrypted communication requires less processing overhead and is simpler to configure, but the contents of the logs may be visible to anyone who is able to intercept that traffic.
 
 ![Filebeat SSL certificate verification](./docs/images/filebeat_ssl.png)
 
 If **SSL** is chosen, you must choose whether to enable [SSL certificate verification](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-ssl-logstash.html). If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
 
-![Unencrypted vs. SSL encryption for Zeek log forwarding](./docs/images/filebeat_ssl_verify.png)
+![Unencrypted vs. SSL encryption for log forwarding](./docs/images/filebeat_ssl_verify.png)
 
-The last step for SSL-encrypted Zeek log forwarding is to specify the SSL certificate authority, certificate, and key files. These files must match those used by the Logstash instance receiving the Zeek logs on the aggregator. If Malcolm's `auth_setup` script was used to generate these files they would be found in the `filebeat/certs/` subdirectory of the Malcolm installation and must be manually copied to the sensor (stored under `/opt/sensor/sensor_ctl/filebeat/` or in any other path accessible to the sensor account). Specify the location of the certificate authorities file (eg., `ca.crt`), the certificate file (eg., `client.crt`), and the key file (eg., `client.key`).
+The last step for SSL-encrypted log forwarding is to specify the SSL certificate authority, certificate, and key files. These files must match those used by the Logstash instance receiving the logs on the aggregator. If Malcolm's `auth_setup` script was used to generate these files they would be found in the `filebeat/certs/` subdirectory of the Malcolm installation and must be manually copied to the sensor (stored under `/opt/sensor/sensor_ctl/filebeat/` or in any other path accessible to the sensor account). Specify the location of the certificate authorities file (eg., `ca.crt`), the certificate file (eg., `client.crt`), and the key file (eg., `client.key`).
 
 ![SSL certificate files](./docs/images/filebeat_certs.png)
 
@@ -343,6 +343,8 @@ Despite configuring capture and/or forwarder services as described in previous s
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
+* **AUTOSTART_SURICATA** - [Suricata](https://suricata.io/) traffic analysis engine
+* **AUTOSTART_SURICATA_UPDATES** - Rule update service for Suricata (requires sensor to be connected to the internet)
 * **AUTOSTART_SYSLOGBEAT** – filebeat [system log forwarder](#syslogbeat)
 * *AUTOSTART_TCPDUMP* – [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_ZEEK** – [Zeek](https://www.zeek.org/) traffic analysis engine
