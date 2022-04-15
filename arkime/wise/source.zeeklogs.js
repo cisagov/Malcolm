@@ -31,7 +31,6 @@ class MalcolmSource extends WISESource {
 
     // add right-clicks
     var allFields = [
-      "malcolmDocId",
       "client.bytes",
       "client.domain",
       "destination.as.full",
@@ -68,6 +67,7 @@ class MalcolmSource extends WISESource {
       "event.freq_score_v1",
       "event.freq_score_v2",
       "event.hits",
+      "event.hash",
       "event.id",
       "event.ingested",
       "event.kind",
@@ -1224,12 +1224,13 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
 
     this.api.addView("malcolm_common",
-      "if (session.malcolmDocId)\n" +
+      "if (session.event.hash)\n" +
 
       // id information
       "  div.sessionDetailMeta.bold Malcolm Common Fields\n" +
       "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
       "    +arrayList(session.event, 'id', 'Log ID', 'event.id')\n" +
+      "    +arrayList(session.event, 'hash', 'Log Hash', 'event.hash')\n" +
       "    +arrayList(session.network, 'community_id', 'Connection Community ID', 'network.community_id')\n" +
       "    +arrayList(session.event, 'provider', 'Data Source', 'event.provider')\n" +
       "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +

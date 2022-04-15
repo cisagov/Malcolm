@@ -9,7 +9,6 @@
   "mappings": {
     "session": {
       "properties": {
-        "malcolmDocId": { "type": "keyword" },
         "firstPacket": { "type": "date" },
         "lastPacket": { "type": "date" },
         "timestamp": { "type": "date" },
@@ -55,6 +54,7 @@
         "event.freq_score_v1": { "type": "float" },
         "event.freq_score_v2": { "type": "float" },
         "event.hits": { "type": "long" },
+        "event.hash": { "type": "keyword" },
         "event.id": { "type": "keyword" },
         "event.ingested": { "type": "date" },
         "event.kind": { "type": "keyword" },

@@ -203,9 +203,9 @@ Logstash can then be easily extended to add more [`logstash/pipelines`](../../lo
 * each **parse pipeline** does what it needs to do to parse its logs then sends them to the [**enrichment pipeline**](#LogstashEnrichments)
 * the [**enrichment pipeline**](../../logstash/pipelines/enrichment) performs common lookups to the fields that have been normalized and indexes the logs into the OpenSearch data store
 
-So, in order to add a new **parse pipeline** for `cooltool` after tweaking [`filebeat.yml`](../../filebeat/filebeat.yml) as described above, create a `cooltool` directory under [`logstash/pipelines`](../../logstash/pipelines) which follows the same pattern as the `zeek` parse pipeline. This directory will have an input file (tiny), a filter file (possibly large), and an output file (tiny).
+So, in order to add a new **parse pipeline** for `cooltool` after tweaking [`filebeat.yml`](../../filebeat/filebeat.yml) as described above, create a `cooltool` directory under [`logstash/pipelines`](../../logstash/pipelines) which follows the same pattern as the `zeek` parse pipeline. This directory will have an input file (tiny), a filter file (possibly large), and an output file (tiny). In your filter file, be sure to set the field [`event.hash`](https://www.elastic.co/guide/en/ecs/master/ecs-event.html#field-event-hash) to a unique value to identify indexed documents in OpenSearch; the [fingerprint filter](https://www.elastic.co/guide/en/logstash/current/plugins-filters-fingerprint.html) may be useful for this.
 
-Finally, in your `docker-compose` files, set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable under `logstash-variables` to `cooltool-parse,zeek-parse` (assuming you named the pipeline address from the previous step `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to both parse pipelines.
+Finally, in your `docker-compose` files, set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable under `logstash-variables` to `cooltool-parse,zeek-parse,suricata-parse` (assuming you named the pipeline address from the previous step `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to all parse pipelines.
 
 ### <a name="LogstashZeek"></a>Parsing new Zeek logs
 
