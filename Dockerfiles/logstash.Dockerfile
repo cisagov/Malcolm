@@ -45,7 +45,7 @@ RUN yum install -y epel-release && \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
-                                       logstash-input-beats logstash-output-elasticsearch && \
+                                       logstash-filter-fingerprint logstash-input-beats logstash-output-elasticsearch && \
     rm -rf /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
