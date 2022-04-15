@@ -180,15 +180,14 @@ RUN apt-get -q update && \
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /suricatabld.tar.gz
 
-COPY --chmod=755 shared/bin/pcap_processor.py /opt/
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/suricata_config_populate.sh /usr/local/bin/
 COPY --chmod=644 shared/bin/pcap_utils.py /opt/
 COPY --chmod=644 shared/pcaps/*.* /tmp/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/pcap_processor.py /opt/
+COPY --chmod=755 shared/bin/suricata_config_populate.sh /usr/local/bin/
+COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
-
-RUN /usr/local/bin/suricata_config_populate.sh
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
@@ -214,6 +213,6 @@ VOLUME ["$SURICATA_LOG_DIR"]
 VOLUME ["$SURICATA_MANAGED_DIR"]
 VOLUME ["$SURICATA_RUN_DIR"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
