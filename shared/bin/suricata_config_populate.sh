@@ -267,6 +267,14 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
   pushd "$TEST_CONFIG_WORKDIR"/ >/dev/null 2>&1
   yq --inplace '.stats.enabled="yes"' "$SURICATA_CONFIG_FILE"
   yq eval --inplace 'del(."rule-files")' "$SURICATA_CONFIG_FILE"
+  if [[ -n $SURICATA_CUSTOM_RULES_DIR ]]; then
+    CUSTOM_RULES_FILES=$(shopt -s nullglob dotglob; echo "$SURICATA_CUSTOM_RULES_DIR"/*.rules)
+  else
+    CUSTOM_RULES_FILES=()
+  fi
+  if (( ${#CUSTOM_RULES_FILES} )) ; then
+    yq eval --inplace ".\"rule-files\"=[\"suricata.rules\", \"$SURICATA_CUSTOM_RULES_DIR/*.rules\"]" "$SURICATA_CONFIG_FILE"
+  fi
   restore_suricata_yaml_header "$SURICATA_CONFIG_FILE"
   suricata ${SURICATA_TEST_CONFIG_VERBOSITY:-} -c "$SURICATA_CONFIG_FILE" -T >&2
   popd >/dev/null 2>&1
