@@ -4,6 +4,12 @@
 
 # use YQ to modify suricata.yaml according to environment variables
 
+function restore_suricata_yaml_header() {
+  CONFIG_FILE="$1"
+  # restore YAML head that would have been stripped by yq
+  head -n 2 "$CONFIG_FILE" | grep -Pzq '^%YAML.*\n---' || (echo -e "%YAML 1.1\n---\n" ; cat "$CONFIG_FILE") | sponge "$CONFIG_FILE"
+}
+
 if [[ -z $SURICATA_CONFIG_FILE ]] && [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/suricata/suricata.yaml ]]; then
   SURICATA_CONFIG_FILE="$SUPERVISOR_PATH"/suricata/suricata.yaml
 fi
@@ -42,7 +48,6 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
   fi
 
   # disable all outputs, then enable only the ones we want
-  yq --inplace '.stats.enabled="no"' "$SURICATA_CONFIG_FILE"
   for OUTPUT in $(yq -M '... comments=""' "$SURICATA_CONFIG_FILE" | yq -M '(.outputs.[]|keys)' | sed "s/^- //"); do
     yq --inplace "(.outputs.[] | select(.$OUTPUT))[].enabled = \"no\"" "$SURICATA_CONFIG_FILE"
   done
@@ -245,20 +250,30 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
   yq eval --inplace 'del(."default-rule-path")' "$SURICATA_CONFIG_FILE"
   yq eval --inplace ".\"default-rule-path\"=\"${SURICATA_MANAGED_RULES_DIR:-/var/lib/suricata/rules}\"" "$SURICATA_CONFIG_FILE"
 
+  if [[ -n $SUPERVISOR_PATH ]]; then
+    yq eval --inplace 'del(."unix-command")' "$SURICATA_CONFIG_FILE"
+    yq eval --inplace ".\"unix-command\"={\"enabled\":\"yes\",\"filename\":\"$SUPERVISOR_PATH/suricata/suricata-command.socket\"}" "$SURICATA_CONFIG_FILE"
+  fi
+
+  # validate suricata config before setting our final settings
+  TEST_CONFIG_WORKDIR="$(mktemp -d)"
+  pushd "$TEST_CONFIG_WORKDIR"/ >/dev/null 2>&1
+  yq --inplace '.stats.enabled="yes"' "$SURICATA_CONFIG_FILE"
+  yq eval --inplace 'del(."rule-files")' "$SURICATA_CONFIG_FILE"
+  restore_suricata_yaml_header "$SURICATA_CONFIG_FILE"
+  suricata ${SURICATA_TEST_CONFIG_VERBOSITY:-} -c "$SURICATA_CONFIG_FILE" -T >&2
+  popd >/dev/null 2>&1
+  rm -rf "$TEST_CONFIG_WORKDIR"/
+
+  # finalize the config file
+  yq --inplace '.stats.enabled="no"' "$SURICATA_CONFIG_FILE"
   yq eval --inplace 'del(."rule-files")' "$SURICATA_CONFIG_FILE"
   if [[ -n $SURICATA_CUSTOM_RULES_DIR ]]; then
     yq eval --inplace ".\"rule-files\"=[\"suricata.rules\", \"$SURICATA_CUSTOM_RULES_DIR/*.rules\"]" "$SURICATA_CONFIG_FILE"
   else
     yq eval --inplace ".\"rule-files\"=[\"suricata.rules\"]" "$SURICATA_CONFIG_FILE"
   fi
-
-  if [[ -n $SUPERVISOR_PATH ]]; then
-    yq eval --inplace 'del(."unix-command")' "$SURICATA_CONFIG_FILE"
-    yq eval --inplace ".\"unix-command\"={\"enabled\":\"yes\",\"filename\":\"$SUPERVISOR_PATH/suricata/suricata-command.socket\"}" "$SURICATA_CONFIG_FILE"
-  fi
-
-  # restore YAML head that would have been stripped by yq
-  head -n 2 "$SURICATA_CONFIG_FILE" | grep -Pzq '^%YAML.*\n---' || (echo -e "%YAML 1.1\n---\n" ; cat "$SURICATA_CONFIG_FILE") | sponge "$SURICATA_CONFIG_FILE"
+  restore_suricata_yaml_header "$SURICATA_CONFIG_FILE"
 
   if [[ -n $SUPERVISOR_PATH ]]; then
     # remove the pidfile and command file for a new run (in case they weren't cleaned up before)
