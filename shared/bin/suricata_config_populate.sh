@@ -2,7 +2,14 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# use YQ to modify suricata.yaml according to environment variables
+# use YQ to modify suricata.yaml according to many environment variables
+
+#
+# suricata.yaml: https://suricata.readthedocs.io/en/suricata-6.0.0/configuration/suricata-yaml.html
+#                https://github.com/OISF/suricata/blob/master/suricata.yaml.in
+#
+# list the vars used here: grep -Po "\bSURICATA_\w+" suricata_config_populate.sh | sort -u
+#
 
 function restore_suricata_yaml_header() {
   CONFIG_FILE="$1"
