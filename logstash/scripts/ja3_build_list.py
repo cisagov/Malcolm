@@ -12,7 +12,11 @@ import re
 import requests
 import string
 import sys
-import yaml
+
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
 from collections import defaultdict
 
 ###################################################################################################

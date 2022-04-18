@@ -155,7 +155,7 @@ RUN apt-get -q update && \
         procps \
         psmisc \
         python3-pip \
-        python3-yaml \
+        python3-ruamel.yaml \
         python3-zmq \
         supervisor \
         vim-tiny \
@@ -185,7 +185,7 @@ COPY --chmod=644 shared/pcaps/*.* /tmp/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/pcap_processor.py /opt/
-COPY --chmod=755 shared/bin/suricata_config_populate.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
 

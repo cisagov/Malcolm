@@ -6,7 +6,11 @@ import csv
 import os
 import re
 import sys
-import yaml
+
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
 from netaddr import *
 from operator import itemgetter
 

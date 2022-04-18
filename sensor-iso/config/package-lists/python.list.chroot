@@ -11,10 +11,10 @@ python3-psutil
 python3-pycryptodome
 python3-pyinotify
 python3-requests
+python3-ruamel.yaml
 python3-semantic-version
 python3-setuptools
 python3-tz
 python3-wheel
-python3-yaml
 python3-yara
 python3-zmq
