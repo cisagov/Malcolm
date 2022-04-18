@@ -89,6 +89,7 @@ x-zeek-variables: &zeek-variables
 x-suricata-variables: &suricata-variables
   SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
   SURICATA_AUTO_ANALYZE_PCAP_THREADS: 1
+  SURICATA_CUSTOM_RULES_ONLY: 'false'
   # suricata_config_populate.sh can use MANY more environment variables to tweak
   # suricata.yaml (see https://github.com/OISF/suricata/blob/master/suricata.yaml.in and
   # https://suricata.readthedocs.io/en/suricata-6.0.0/configuration/suricata-yaml.html).

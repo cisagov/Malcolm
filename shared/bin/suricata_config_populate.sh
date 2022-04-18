@@ -11,10 +11,32 @@
 # list the vars used here: grep -Po "\bSURICATA_\w+" suricata_config_populate.sh | sort -u
 #
 
+function join_by { local IFS="$1"; shift; echo "$*"; }
+
 function restore_suricata_yaml_header() {
   CONFIG_FILE="$1"
   # restore YAML head that would have been stripped by yq
   head -n 2 "$CONFIG_FILE" | grep -Pzq '^%YAML.*\n---' || (echo -e "%YAML 1.1\n---\n" ; cat "$CONFIG_FILE") | sponge "$CONFIG_FILE"
+}
+
+function populate_suricata_yaml_rules_files() {
+  CONFIG_FILE="$1"
+  REQUIRE_RULES_EXIST="${2:-false}"
+  yq eval --inplace 'del(."rule-files")' "$CONFIG_FILE"
+
+  RULES_SOURCES=()
+  CUSTOM_RULES_ONLY=${SURICATA_CUSTOM_RULES_ONLY:-false}
+
+  if [[ -n $SURICATA_CUSTOM_RULES_DIR ]]; then
+    CUSTOM_RULES_FILES=$(shopt -s nullglob dotglob; echo "$SURICATA_CUSTOM_RULES_DIR"/*.rules)
+  else
+    CUSTOM_RULES_FILES=()
+  fi
+
+  [[ "${CUSTOM_RULES_ONLY,,}" == "false" ]] && RULES_SOURCES+=( "\"suricata.rules\"" )
+  ( (( ${#CUSTOM_RULES_FILES} )) || [[ "${REQUIRE_RULES_EXIST,,}" == "false" ]]) && RULES_SOURCES+=( "\"$SURICATA_CUSTOM_RULES_DIR/*.rules\"" )
+
+  yq eval --inplace ".\"rule-files\"=[$(join_by , "${RULES_SOURCES[@]}")]" "$CONFIG_FILE"
 }
 
 if [[ -z $SURICATA_CONFIG_FILE ]] && [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/suricata/suricata.yaml ]]; then
@@ -79,6 +101,7 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
     "dns.udp;${SURICATA_DNS_ENABLED:-yes};${SURICATA_DNS_PORTS:-53};"
     "enip;${SURICATA_ENIP_ENABLED:-yes};${SURICATA_ENIP_PORTS:-44818};${SURICATA_ENIP_PORTS:-44818}"
     "files;${SURICATA_FILES_ENABLED:-yes};;"
+    "flow;${SURICATA_FLOW_ENABLED:-yes};;"
     "ftp;${SURICATA_FTP_ENABLED:-yes};;"
     "http2;${SURICATA_HTTP2_ENABLED:-no};;"
     "http;${SURICATA_HTTP_ENABLED:-yes};;"
@@ -87,6 +110,7 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
     "krb5;${SURICATA_KRB5_ENABLED:-yes};;"
     "modbus;${SURICATA_MODBUS_ENABLED:-yes};${SURICATA_MODBUS_PORTS:-502};"
     "mqtt;${SURICATA_MQTT_ENABLED:-yes};;"
+    "netflow;${SURICATA_NETFLOW_ENABLED:-no};;"
     "nfs;${SURICATA_NFS_ENABLED:-yes};;"
     "ntp;${SURICATA_NTP_ENABLED:-yes};;"
     "rdp;${SURICATA_RDP_ENABLED:-yes};;"
@@ -266,15 +290,7 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
   TEST_CONFIG_WORKDIR="$(mktemp -d)"
   pushd "$TEST_CONFIG_WORKDIR"/ >/dev/null 2>&1
   yq --inplace '.stats.enabled="yes"' "$SURICATA_CONFIG_FILE"
-  yq eval --inplace 'del(."rule-files")' "$SURICATA_CONFIG_FILE"
-  if [[ -n $SURICATA_CUSTOM_RULES_DIR ]]; then
-    CUSTOM_RULES_FILES=$(shopt -s nullglob dotglob; echo "$SURICATA_CUSTOM_RULES_DIR"/*.rules)
-  else
-    CUSTOM_RULES_FILES=()
-  fi
-  if (( ${#CUSTOM_RULES_FILES} )) ; then
-    yq eval --inplace ".\"rule-files\"=[\"suricata.rules\", \"$SURICATA_CUSTOM_RULES_DIR/*.rules\"]" "$SURICATA_CONFIG_FILE"
-  fi
+  populate_suricata_yaml_rules_files "$SURICATA_CONFIG_FILE" true
   restore_suricata_yaml_header "$SURICATA_CONFIG_FILE"
   suricata ${SURICATA_TEST_CONFIG_VERBOSITY:-} -c "$SURICATA_CONFIG_FILE" -T >&2
   popd >/dev/null 2>&1
@@ -282,12 +298,7 @@ if [[ -n $SURICATA_CONFIG_FILE ]]; then
 
   # finalize the config file
   yq --inplace '.stats.enabled="no"' "$SURICATA_CONFIG_FILE"
-  yq eval --inplace 'del(."rule-files")' "$SURICATA_CONFIG_FILE"
-  if [[ -n $SURICATA_CUSTOM_RULES_DIR ]]; then
-    yq eval --inplace ".\"rule-files\"=[\"suricata.rules\", \"$SURICATA_CUSTOM_RULES_DIR/*.rules\"]" "$SURICATA_CONFIG_FILE"
-  else
-    yq eval --inplace ".\"rule-files\"=[\"suricata.rules\"]" "$SURICATA_CONFIG_FILE"
-  fi
+  populate_suricata_yaml_rules_files "$SURICATA_CONFIG_FILE" false
   restore_suricata_yaml_header "$SURICATA_CONFIG_FILE"
 
   if [[ -n $SUPERVISOR_PATH ]]; then
