@@ -52,7 +52,7 @@ filebeat.inputs:
 
 - type: log
   paths:
-    - ${FILEBEAT_SURICATA_LOG_PATH:/data/suricata}/eve_*.json
+    - ${FILEBEAT_SURICATA_LOG_PATH:/data/suricata}/eve-*.json
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata"]

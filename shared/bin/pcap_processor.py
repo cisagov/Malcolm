@@ -404,7 +404,7 @@ def suricataFileWorker(suricataWorkerArgs):
                                         eveJsonFile,
                                         os.path.join(
                                             uploadDir,
-                                            f"eve_{processTimeUsec}_{scanWorkerId}.json",
+                                            f"eve-{processTimeUsec}-{scanWorkerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])}).json",
                                         ),
                                     )
 
