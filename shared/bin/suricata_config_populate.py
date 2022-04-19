@@ -931,6 +931,7 @@ def main():
                 outTestYaml = YAML(typ='rt')
                 outTestYaml.preserve_quotes = False
                 outTestYaml.representer.ignore_aliases = lambda x: True
+                outTestYaml.representer.add_representer(type(None), NullRepresenter())
                 outTestYaml.boolean_representation = ['no', 'yes']
                 outTestYaml.version = YAML_VERSION
                 outTestYaml.dump(cfg, outTestFile)
@@ -945,6 +946,7 @@ def main():
                     '-T',
                 ]
             )
+            logging.info(f'suricata configuration test returned {script_return_code}')
             if script_return_code != 0:
                 logging.error(output)
 
