@@ -93,8 +93,8 @@ x-suricata-variables: &suricata-variables
   # suricata_config_populate.py can use MANY more environment variables to tweak
   # suricata.yaml (see https://github.com/OISF/suricata/blob/master/suricata.yaml.in and
   # https://suricata.readthedocs.io/en/suricata-6.0.0/configuration/suricata-yaml.html).
-  # list the vars used:
-  # $ grep -Po "\bSURICATA_\w+" shared/bin/suricata_config_populate.py | sort -u
+  # DEFAULT_VARS in that script defines those variables (albeit without the
+  # required `SURICATA_` prefixing each)
 
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
