@@ -13,16 +13,21 @@
 #
 
 import argparse
+import contextlib
+import fnmatch
 import logging
 import os
 import sys
+import tempfile
+from subprocess import PIPE, Popen
 from ruamel.yaml import YAML
-from shutil import move as MoveFile
+from shutil import move as MoveFile, copyfile as CopyFile
 from collections.abc import Iterable
 from collections import defaultdict, namedtuple
 
 ###################################################################################################
 args = None
+script_return_code = 0
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
@@ -46,6 +51,17 @@ def val2bool(v):
     except:
         # just pitch it back and let the caller worry about it
         return v
+
+
+###################################################################################################
+@contextlib.contextmanager
+def pushd(directory):
+    prevDir = os.getcwd()
+    os.chdir(directory)
+    try:
+        yield
+    finally:
+        os.chdir(prevDir)
 
 
 ###################################################################################################
@@ -76,6 +92,68 @@ def deep_set(d, keys, value, deleteIfNone=False):
     d[k[-1]] = value
     if (deleteIfNone == True) and (value is None):
         d.pop(k[-1], None)
+
+
+###################################################################################################
+# run command with arguments and return its exit code, stdout, and stderr
+def check_output_input(*popenargs, **kwargs):
+
+    if 'stdout' in kwargs:
+        raise ValueError('stdout argument not allowed, it will be overridden')
+
+    if 'stderr' in kwargs:
+        raise ValueError('stderr argument not allowed, it will be overridden')
+
+    if 'input' in kwargs and kwargs['input']:
+        if 'stdin' in kwargs:
+            raise ValueError('stdin and input arguments may not both be used')
+        inputdata = kwargs['input']
+        kwargs['stdin'] = PIPE
+    else:
+        inputdata = None
+    kwargs.pop('input', None)
+
+    process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
+    try:
+        output, errput = process.communicate(input=inputdata)
+    except:
+        process.kill()
+        process.wait()
+        raise
+
+    retcode = process.poll()
+
+    return retcode, output, errput
+
+
+###################################################################################################
+# run command with arguments and return its exit code and output
+def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None):
+
+    retcode = -1
+    output = []
+
+    try:
+        # run the command
+        retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
+
+        # split the output on newlines to return a list
+        if stderr and (len(cmderr) > 0):
+            output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
+        if stdout and (len(cmdout) > 0):
+            output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
+
+    except (FileNotFoundError, OSError, IOError) as e:
+        if stderr:
+            output.append("Command {} not found or unable to execute".format(command))
+
+    logging.debug(
+        "{}{} returned {}: {}".format(
+            command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output
+        )
+    )
+
+    return retcode, output
 
 
 ###################################################################################################
@@ -269,10 +347,33 @@ DECODER_CONFIGS.update(
     }
 )
 
+###################################################################################################
+def GetRuleSources(requireRulesExist=False):
+    global DEFAULT_VARS
+
+    ruleSources = []
+
+    if val2bool(DEFAULT_VARS['CUSTOM_RULES_ONLY']) == False:
+        ruleSources.append('suricata.rules')
+
+    customRuleFiles = (
+        fnmatch.filter(os.listdir(DEFAULT_VARS['CUSTOM_RULES_DIR']), '*.rules')
+        if DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None
+        else []
+    )
+
+    if (DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None) and ((requireRulesExist == False) or (len(customRuleFiles) > 0)):
+        ruleSources.append(os.path.join(DEFAULT_VARS['CUSTOM_RULES_DIR'], '*.rules'))
+
+    return ruleSources
+
 
 ###################################################################################################
 def main():
     global args
+    global DEFAULT_VARS
+    global PROTOCOL_CONFIGS
+    global DECODER_CONFIGS
 
     parser = argparse.ArgumentParser(
         description='\n'.join(
@@ -284,7 +385,13 @@ def main():
         add_help=False,
         usage='{} <arguments>'.format(script_name),
     )
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=1,
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
+    )
     parser.add_argument(
         '--inplace',
         dest='inplace',
@@ -333,6 +440,7 @@ def main():
         args.output if args.output else args.input if args.inplace else inFileParts[0] + "_new" + inFileParts[1]
     )
 
+    argsOrigVerbose = args.verbose
     args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
     logging.basicConfig(
         level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
@@ -344,12 +452,19 @@ def main():
         sys.tracebacklimit = 0
 
     ##################################################################################################
+    # back up the old YAML file if we need to first
+    if os.path.isfile(args.output) and os.path.samefile(args.input, args.output):
+        backupFile = inFileParts[0] + "_bak" + inFileParts[1]
+        CopyFile(args.input, backupFile)
+
+    ##################################################################################################
     # load input YAML
     cfg = None
     if args.input and os.path.isfile(args.input):
         with open(args.input, 'r') as f:
             inYaml = YAML(typ='rt')
             inYaml.preserve_quotes = False
+            inYaml.emitter.alt_null = None
             inYaml.representer.ignore_aliases = lambda x: True
             inYaml.boolean_representation = ['no', 'yes']
             cfg = inYaml.load(f)
@@ -756,24 +871,72 @@ def main():
         deep_set(
             cfg,
             ['unix-command', 'filename'],
-            os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], os.path.join('suricata', 'suricata-command.socket')),
+            os.path.join(os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata'), 'suricata-command.socket'),
         )
 
-    ##################################################################################################
-    # write output YAML
-    if os.path.isfile(args.output) and os.path.samefile(args.input, args.output):
-        backupFile = inFileParts[0] + "_bak" + inFileParts[1]
-        MoveFile(args.input, backupFile)
+    # validate suricata execution prior to calling it a day
+    with tempfile.TemporaryDirectory() as tmpLogDir:
+        with pushd(tmpLogDir):
+            deep_set(cfg, ['stats', 'enabled'], True)
+            cfg.pop('rule-files', None)
+            deep_set(cfg, ['rule-files'], GetRuleSources(requireRulesExist=True))
+            with open('suricata.yaml', 'w') as outTestFile:
+                outTestYaml = YAML(typ='rt')
+                outTestYaml.preserve_quotes = False
+                outTestYaml.representer.ignore_aliases = lambda x: True
+                outTestYaml.boolean_representation = ['no', 'yes']
+                outTestYaml.version = (1, 1)
+                outTestYaml.dump(cfg, outTestFile)
+            script_return_code, output = run_process(
+                [
+                    'suricata',
+                    f"-{('v' * (argsOrigVerbose-1)) if (argsOrigVerbose > 1) else 'v'}",
+                    '-c',
+                    os.path.join(tmpLogDir, 'suricata.yaml'),
+                    '-l',
+                    tmpLogDir,
+                    '-T',
+                ]
+            )
+            if script_return_code != 0:
+                logging.error(output)
 
+    # final tweaks
+    deep_set(cfg, ['stats', 'enabled'], False)
+    cfg.pop('rule-files', None)
+    deep_set(cfg, ['rule-files'], GetRuleSources(requireRulesExist=False))
+
+    ##################################################################################################
+
+    # write the new YAML file
     with open(args.output, 'w') as outfile:
         outYaml = YAML(typ='rt')
         outYaml.preserve_quotes = False
         outYaml.representer.ignore_aliases = lambda x: True
+        outYaml.emitter.alt_null = None
         outYaml.boolean_representation = ['no', 'yes']
         outYaml.version = (1, 1)
         outYaml.dump(cfg, outfile)
+
+    ##################################################################################################
+
+    # remove the pidfile and command file for a new run (in case they weren't cleaned up before)
+    if DEFAULT_VARS['SUPERVISOR_PATH'] is not None and os.path.isdir(
+        os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata')
+    ):
+        try:
+            os.remove(os.path.join(os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata'), 'suricata.pid'))
+        except:
+            pass
+        try:
+            os.remove(
+                os.path.join(os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata'), 'suricata-command.socket')
+            )
+        except:
+            pass
 
 
 ###################################################################################################
 if __name__ == '__main__':
     main()
+    sys.exit(script_return_code)
