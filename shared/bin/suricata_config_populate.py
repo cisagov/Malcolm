@@ -19,11 +19,13 @@ import logging
 import os
 import sys
 import tempfile
-from subprocess import PIPE, Popen
+
+from collections import defaultdict, namedtuple
+from collections.abc import Iterable
+from io import StringIO
 from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
-from collections.abc import Iterable
-from collections import defaultdict, namedtuple
+from subprocess import PIPE, Popen
 
 ###################################################################################################
 args = None
@@ -31,6 +33,9 @@ script_return_code = 0
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
+
+###################################################################################################
+YAML_VERSION = (1, 1)
 
 ###################################################################################################
 def val2bool(v):
@@ -157,6 +162,34 @@ def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=Non
 
 
 ###################################################################################################
+# run command with arguments and return its exit code and output
+class NullRepresenter:
+    def __call__(self, repr, data):
+        ret_val = repr.represent_scalar(u'tag:yaml.org,2002:null', u'')
+        return ret_val
+
+
+###################################################################################################
+def ObjToYamlStrLines(obj, options=None):
+    outputStr = None
+    if options == None:
+        options = {}
+
+    yaml = YAML()
+    yaml.preserve_quotes = False
+    yaml.representer.ignore_aliases = lambda x: True
+    yaml.representer.add_representer(type(None), NullRepresenter())
+    yaml.boolean_representation = ['no', 'yes']
+    yaml.version = YAML_VERSION
+
+    with StringIO() as stringStream:
+        yaml.dump(obj, stringStream, **options)
+        outputStr = stringStream.getvalue()
+
+    return outputStr.splitlines()
+
+
+###################################################################################################
 
 DEFAULT_VARS = defaultdict(lambda: None)
 DEFAULT_VARS.update(
@@ -198,10 +231,11 @@ DEFAULT_VARS.update(
         'DNS_PORTS': 53,
         'DNS_REQUESTS': True,
         'DNS_RESPONSES': True,
+        'DNS_VERSION': 2,
         'ENIP_ENABLED': True,
         'ENIP_PORTS': 44818,
         'EXTERNAL_NET': '!$HOME_NET',
-        'FILE_DATA_PORTS': ['$HTTP_PORTS', 110, 143],
+        'FILE_DATA_PORTS': "[$HTTP_PORTS,110,143]",
         'FILES_ENABLED': True,
         'FILES_FORCE_MAGIC': False,
         'FLOW_EMERGENCY_RECOVERY': 30,
@@ -214,7 +248,7 @@ DEFAULT_VARS.update(
         'FTP_PORTS': 21,
         'GENEVE_ENABLED': True,
         'GENEVE_PORTS': 6081,
-        'HOME_NET': ['192.168.0.0/16', '10.0.0.0/8', '172.16.0.0/12'],
+        'HOME_NET': "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]",
         'HOST_HASH_SIZE': 4096,
         'HOST_MEMCAP': '32mb',
         'HOST_PREALLOC': 1000,
@@ -241,12 +275,12 @@ DEFAULT_VARS.update(
         'PCRE_RECURSION': 1500,
         'RDP_ENABLED': True,
         'RFB_ENABLED': True,
-        'RFB_PORTS': [5900, 5901, 5902, 5903, 5904, 5905, 5906, 5907, 5908, 5909],
+        'RFB_PORTS': "[5900,5901,5902,5903,5904,5905,5906,5907,5908,5909]",
         'RUNMODE': 'autofp',
         'SHELLCODE_PORTS': '!80',
         'SIP_ENABLED': True,
         'SMB_ENABLED': True,
-        'SMB_PORTS': [139, 445],
+        'SMB_PORTS': "[139,445]",
         'SMB_STREAM_DEPTH': 0,
         'SMTP_BODY_MD5': False,
         'SMTP_DECODE_BASE64': False,
@@ -302,48 +336,58 @@ for varName, varVal in [
     DEFAULT_VARS[varName.removeprefix("SURICATA_")] = newVal
 
 ###################################################################################################
-ProtocolConfig = namedtuple("ProtocolConfig", ["subs", "enabled", "destination_ports", "source_ports"], rename=False)
-PROTOCOL_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, None, None))
+ProtocolConfig = namedtuple(
+    "ProtocolConfig", ["subs", "enabled", "eve", "destination_ports", "source_ports"], rename=False
+)
+PROTOCOL_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, True, None, None))
 PROTOCOL_CONFIGS.update(
     {
-        'anomaly': ProtocolConfig([], val2bool(DEFAULT_VARS['ANOMALY_ENABLED']), None, None),
-        'dcerpc': ProtocolConfig([], val2bool(DEFAULT_VARS['DCERPC_ENABLED']), None, None),
-        'dhcp': ProtocolConfig([], val2bool(DEFAULT_VARS['DHCP_ENABLED']), None, None),
-        'dnp3': ProtocolConfig([], val2bool(DEFAULT_VARS['DNP3_ENABLED']), DEFAULT_VARS['DNP3_PORTS'], None),
-        'dns': ProtocolConfig(['tcp', 'udp'], val2bool(DEFAULT_VARS['DNS_ENABLED']), DEFAULT_VARS['DNS_PORTS'], None),
-        'enip': ProtocolConfig(
-            [], val2bool(DEFAULT_VARS['ENIP_ENABLED']), DEFAULT_VARS['ENIP_PORTS'], DEFAULT_VARS['ENIP_PORTS']
+        'anomaly': ProtocolConfig([], val2bool(DEFAULT_VARS['ANOMALY_ENABLED']), True, None, None),
+        'dcerpc': ProtocolConfig([], val2bool(DEFAULT_VARS['DCERPC_ENABLED']), True, None, None),
+        'dhcp': ProtocolConfig([], val2bool(DEFAULT_VARS['DHCP_ENABLED']), True, None, None),
+        'dnp3': ProtocolConfig([], val2bool(DEFAULT_VARS['DNP3_ENABLED']), True, DEFAULT_VARS['DNP3_PORTS'], None),
+        'dns': ProtocolConfig(
+            ['tcp', 'udp'], val2bool(DEFAULT_VARS['DNS_ENABLED']), True, DEFAULT_VARS['DNS_PORTS'], None
         ),
-        'files': ProtocolConfig([], val2bool(DEFAULT_VARS['FILES_ENABLED']), None, None),
-        'flow': ProtocolConfig([], val2bool(DEFAULT_VARS['FLOW_ENABLED']), None, None),
-        'ftp': ProtocolConfig([], val2bool(DEFAULT_VARS['FTP_ENABLED']), None, None),
-        'http2': ProtocolConfig([], val2bool(DEFAULT_VARS['HTTP2_ENABLED']), None, None),
-        'http': ProtocolConfig([], val2bool(DEFAULT_VARS['HTTP_ENABLED']), None, None),
-        'ikev2': ProtocolConfig([], val2bool(DEFAULT_VARS['IKEV2_ENABLED']), None, None),
-        'imap': ProtocolConfig([], val2bool(DEFAULT_VARS['IMAP_ENABLED']), None, None),
-        'krb5': ProtocolConfig([], val2bool(DEFAULT_VARS['KRB5_ENABLED']), None, None),
-        'modbus': ProtocolConfig([], val2bool(DEFAULT_VARS['MODBUS_ENABLED']), DEFAULT_VARS['MODBUS_PORTS'], None),
-        'mqtt': ProtocolConfig([], val2bool(DEFAULT_VARS['MQTT_ENABLED']), None, None),
-        'netflow': ProtocolConfig([], val2bool(DEFAULT_VARS['NETFLOW_ENABLED']), None, None),
-        'nfs': ProtocolConfig([], val2bool(DEFAULT_VARS['NFS_ENABLED']), None, None),
-        'ntp': ProtocolConfig([], val2bool(DEFAULT_VARS['NTP_ENABLED']), None, None),
-        'rdp': ProtocolConfig([], val2bool(DEFAULT_VARS['RDP_ENABLED']), None, None),
-        'rfb': ProtocolConfig([], val2bool(DEFAULT_VARS['RFB_ENABLED']), DEFAULT_VARS['RFB_PORTS'], None),
-        'sip': ProtocolConfig([], val2bool(DEFAULT_VARS['SIP_ENABLED']), None, None),
-        'smb': ProtocolConfig([], val2bool(DEFAULT_VARS['SMB_ENABLED']), DEFAULT_VARS['SMB_PORTS'], None),
-        'smtp': ProtocolConfig([], val2bool(DEFAULT_VARS['SMTP_ENABLED']), None, None),
-        'snmp': ProtocolConfig([], val2bool(DEFAULT_VARS['SNMP_ENABLED']), None, None),
-        'ssh': ProtocolConfig([], val2bool(DEFAULT_VARS['SSH_ENABLED']), None, None),
-        'tftp': ProtocolConfig([], val2bool(DEFAULT_VARS['TFTP_ENABLED']), None, None),
-        'tls': ProtocolConfig([], val2bool(DEFAULT_VARS['TLS_ENABLED']), DEFAULT_VARS['TLS_PORTS'], None),
+        'enip': ProtocolConfig(
+            [], val2bool(DEFAULT_VARS['ENIP_ENABLED']), False, DEFAULT_VARS['ENIP_PORTS'], DEFAULT_VARS['ENIP_PORTS']
+        ),
+        'files': ProtocolConfig([], val2bool(DEFAULT_VARS['FILES_ENABLED']), True, None, None),
+        'flow': ProtocolConfig([], val2bool(DEFAULT_VARS['FLOW_ENABLED']), True, None, None),
+        'ftp': ProtocolConfig([], val2bool(DEFAULT_VARS['FTP_ENABLED']), True, None, None),
+        'http2': ProtocolConfig([], val2bool(DEFAULT_VARS['HTTP2_ENABLED']), True, None, None),
+        'http': ProtocolConfig([], val2bool(DEFAULT_VARS['HTTP_ENABLED']), True, None, None),
+        'ikev2': ProtocolConfig([], val2bool(DEFAULT_VARS['IKEV2_ENABLED']), True, None, None),
+        'imap': ProtocolConfig([], val2bool(DEFAULT_VARS['IMAP_ENABLED']), False, None, None),
+        'krb5': ProtocolConfig([], val2bool(DEFAULT_VARS['KRB5_ENABLED']), True, None, None),
+        'modbus': ProtocolConfig(
+            [], val2bool(DEFAULT_VARS['MODBUS_ENABLED']), False, DEFAULT_VARS['MODBUS_PORTS'], None
+        ),
+        'mqtt': ProtocolConfig([], val2bool(DEFAULT_VARS['MQTT_ENABLED']), True, None, None),
+        'netflow': ProtocolConfig([], val2bool(DEFAULT_VARS['NETFLOW_ENABLED']), True, None, None),
+        'nfs': ProtocolConfig([], val2bool(DEFAULT_VARS['NFS_ENABLED']), True, None, None),
+        'ntp': ProtocolConfig([], val2bool(DEFAULT_VARS['NTP_ENABLED']), False, None, None),
+        'rdp': ProtocolConfig([], val2bool(DEFAULT_VARS['RDP_ENABLED']), True, None, None),
+        'rfb': ProtocolConfig([], val2bool(DEFAULT_VARS['RFB_ENABLED']), True, DEFAULT_VARS['RFB_PORTS'], None),
+        'sip': ProtocolConfig([], val2bool(DEFAULT_VARS['SIP_ENABLED']), True, None, None),
+        'smb': ProtocolConfig([], val2bool(DEFAULT_VARS['SMB_ENABLED']), True, DEFAULT_VARS['SMB_PORTS'], None),
+        'smtp': ProtocolConfig([], val2bool(DEFAULT_VARS['SMTP_ENABLED']), True, None, None),
+        'snmp': ProtocolConfig([], val2bool(DEFAULT_VARS['SNMP_ENABLED']), True, None, None),
+        'ssh': ProtocolConfig([], val2bool(DEFAULT_VARS['SSH_ENABLED']), True, None, None),
+        'tftp': ProtocolConfig([], val2bool(DEFAULT_VARS['TFTP_ENABLED']), True, None, None),
+        'tls': ProtocolConfig([], val2bool(DEFAULT_VARS['TLS_ENABLED']), True, DEFAULT_VARS['TLS_PORTS'], None),
     }
 )
-DECODER_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, None, None))
+DECODER_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, False, None, None))
 DECODER_CONFIGS.update(
     {
-        'teredo': ProtocolConfig([], val2bool(DEFAULT_VARS['TEREDO_ENABLED']), DEFAULT_VARS['TEREDO_PORTS'], None),
-        'vxlan': ProtocolConfig([], val2bool(DEFAULT_VARS['VXLAN_ENABLED']), DEFAULT_VARS['VXLAN_PORTS'], None),
-        'geneve': ProtocolConfig([], val2bool(DEFAULT_VARS['GENEVE_ENABLED']), DEFAULT_VARS['VXLAN_PORTS'], None),
+        'teredo': ProtocolConfig(
+            [], val2bool(DEFAULT_VARS['TEREDO_ENABLED']), False, DEFAULT_VARS['TEREDO_PORTS'], None
+        ),
+        'vxlan': ProtocolConfig([], val2bool(DEFAULT_VARS['VXLAN_ENABLED']), False, DEFAULT_VARS['VXLAN_PORTS'], None),
+        'geneve': ProtocolConfig(
+            [], val2bool(DEFAULT_VARS['GENEVE_ENABLED']), False, DEFAULT_VARS['VXLAN_PORTS'], None
+        ),
     }
 )
 
@@ -595,6 +639,7 @@ def main():
                                         [dumperName, 'responses', 'DNS_RESPONSES'],
                                         [dumperName, 'types', 'DNS_TYPES'],
                                         [dumperName, 'formats', 'DNS_FORMATS'],
+                                        [dumperName, 'version', 'DNS_VERSION'],
                                     ):
                                         deep_set(
                                             cfg['outputs'][outputIdx][name]['types'][dumperIdx],
@@ -676,13 +721,15 @@ def main():
                             # eve.json alert type is scalar
                             dumperName = cfg['outputs'][outputIdx][name]['types'][dumperIdx]
                             remainingTypes.discard(dumperName)
-                            if not PROTOCOL_CONFIGS[dumperName].enabled:
+                            if (not PROTOCOL_CONFIGS[dumperName].enabled) or (not PROTOCOL_CONFIGS[dumperName].eve):
                                 # we "disable" these types by removing them from the list
                                 del cfg['outputs'][outputIdx][name]['types'][dumperIdx]
 
                     # handle the eve.json alert types that weren't handled above (were probably
                     # commented-out/missing and need to be added back in)
-                    for dumperName in [x for x in list(remainingTypes) if PROTOCOL_CONFIGS[x].enabled]:
+                    for dumperName in [
+                        x for x in list(remainingTypes) if PROTOCOL_CONFIGS[x].enabled and PROTOCOL_CONFIGS[x].eve
+                    ]:
                         cfg['outputs'][outputIdx][name]['types'].append(dumperName)
 
     # somewhat related to what we just did for the eve-log outputs, configure the app-layer.protocols
@@ -885,7 +932,7 @@ def main():
                 outTestYaml.preserve_quotes = False
                 outTestYaml.representer.ignore_aliases = lambda x: True
                 outTestYaml.boolean_representation = ['no', 'yes']
-                outTestYaml.version = (1, 1)
+                outTestYaml.version = YAML_VERSION
                 outTestYaml.dump(cfg, outTestFile)
             script_return_code, output = run_process(
                 [
@@ -913,9 +960,9 @@ def main():
         outYaml = YAML(typ='rt')
         outYaml.preserve_quotes = False
         outYaml.representer.ignore_aliases = lambda x: True
-        outYaml.emitter.alt_null = None
+        outYaml.representer.add_representer(type(None), NullRepresenter())
         outYaml.boolean_representation = ['no', 'yes']
-        outYaml.version = (1, 1)
+        outYaml.version = YAML_VERSION
         outYaml.dump(cfg, outfile)
 
     ##################################################################################################
