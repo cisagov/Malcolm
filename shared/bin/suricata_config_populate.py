@@ -18,6 +18,7 @@ import fnmatch
 import logging
 import os
 import sys
+import time
 import tempfile
 
 from collections import defaultdict, namedtuple
@@ -36,6 +37,7 @@ orig_path = os.getcwd()
 
 ###################################################################################################
 YAML_VERSION = (1, 1)
+BACKUP_FILES_MAX = 10
 
 ###################################################################################################
 def val2bool(v):
@@ -498,8 +500,13 @@ def main():
     ##################################################################################################
     # back up the old YAML file if we need to first
     if os.path.isfile(args.output) and os.path.samefile(args.input, args.output):
-        backupFile = inFileParts[0] + "_bak" + inFileParts[1]
+        backupFile = inFileParts[0] + "_bak_" + str(int(round(time.time()))) + inFileParts[1]
         CopyFile(args.input, backupFile)
+        backupFiles = sorted(fnmatch.filter(os.listdir(os.path.dirname(backupFile)), '*_bak_*'))
+        while len(backupFiles) > BACKUP_FILES_MAX:
+            toDeleteFileName = os.path.join(os.path.dirname(backupFile), backupFiles.pop(0))
+            logging.debug(f'Removing old backup file "{toDeleteFileName}"')
+            os.remove(toDeleteFileName)
 
     ##################################################################################################
     # load input YAML
