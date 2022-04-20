@@ -1450,9 +1450,9 @@
         "zeek.signatures.hits": {
           "type": "nested",
           "properties": {
+            "Capa": { "type": "keyword" },
             "ClamAV": { "type": "keyword" },
-            "Yara": { "type": "keyword" },
-            "Capa": { "type": "keyword" }
+            "Yara": { "type": "keyword" }
           }
         },
         "zeek.signatures.host_count": { "type": "integer" },
