@@ -148,6 +148,7 @@ if [ -d "$WORKDIR" ]; then
   sed -i "s/.png/.jpg/g" HedgehogLinux.jpg.md
   sed -i "s@/docs/logo/@/docs/images/@g" HedgehogLinux.jpg.md
   sed -i "s/^# Hedgehog Linux$//" HedgehogLinux.jpg.md
+  sed -i 's/\!\[.*\](.*\/badge.svg)//g' HedgehogLinux.jpg.md
   pandoc -s --self-contained --metadata title="Hedgehog Linux" --css doc.css -o HedgehogLinux.html HedgehogLinux.jpg.md
   rm -f HedgehogLinux.jpg.md
   popd >/dev/null 2>&1

@@ -63,6 +63,7 @@ RUN apt-get -q update && \
     sed -i '/./,$!d' README.md && \
     sed -i "s/.png/.jpg/g" README.md && \
     sed -i "s@docs/images@images@g" README.md && \
+    sed -i 's/\!\[.*\](.*\/badge.svg)//g' README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIMEDIR/doc/doc.css -o $ARKIMEDIR/doc/README.html $ARKIMEDIR/doc/README.md && \
   cd /opt && \
     git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
@@ -112,6 +113,7 @@ ARG OS_HOST=opensearch
 ARG OS_PORT=9200
 ARG MALCOLM_USERNAME=admin
 ARG ARKIME_ECS_PROVIDER=arkime
+ARG ARKIME_ECS_DATASET=session
 ARG ARKIME_INTERFACE=eth0
 ARG ARKIME_ANALYZE_PCAP_THREADS=1
 ARG WISE=off
@@ -134,6 +136,7 @@ ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
 ENV ARKIME_PASSWORD "ignored"
 ENV ARKIME_ECS_PROVIDER $ARKIME_ECS_PROVIDER
+ENV ARKIME_ECS_DATASET $ARKIME_ECS_DATASET
 ENV ARKIMEDIR "/opt/arkime"
 ENV ARKIME_ANALYZE_PCAP_THREADS $ARKIME_ANALYZE_PCAP_THREADS
 ENV WISE $WISE
