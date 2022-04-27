@@ -140,7 +140,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 
 For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
 
-The scripts to control Malcolm require Python 3.
+The scripts to control Malcolm require Python 3. The [`install.py`](#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
 #### Source code
 
@@ -181,22 +181,22 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.10           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           5.2.10           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       5.2.10           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                5.2.10           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     5.2.10           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     5.2.10           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      5.2.10           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             5.2.10           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.10           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.10           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      5.2.10           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      5.2.10           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       5.2.10           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     5.2.10           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     5.2.10           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/zeek                                             5.2.10           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              5.2.11           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           5.2.11           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                5.2.11           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      5.2.11           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             5.2.11           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.11           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      5.2.11           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      5.2.11           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     5.2.11           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/zeek                                             5.2.11           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 #### Import from pre-packaged tarballs
@@ -997,7 +997,7 @@ A stock installation of Arkime extracts all of its network connection ("session"
 
 In this way, when full packet capture is an option, analysis of PCAP files can be enhanced by the additional information Zeek provides. When full packet capture is not an option, similar analysis can still be performed using the same interfaces and processes using the Zeek logs alone.
 
-One value of particular mention is **Zeek Log Type** (`event.dataset` in OpenSearch). This value corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.dataset == conn`, or restricted to records from `weird.log` by searching `event.dataset == weird`. In this same way, to view *only* records from Zeek logs (excluding any from PCAP files), use the special Arkime `EXISTS` filter, as in `event.dataset == EXISTS!`. On the other hand, to exclude Zeek logs and only view Arkime Sessions, use `fileId != EXISTS!`. 
+A few values of particular mention include **Data Source** (`event.provider` in OpenSearch), which can be used to distinguish from among the sources of the network traffic metadata record (e.g., `zeek` for Zeek logs and `arkime` for Arkime sessions); and, **Log Type** (`event.dataset` in OpenSearch), which corresponds to the kind of Zeek `.log` file from which the record was created. In other words, a search could be restricted to records from `conn.log` by searching `event.provider == zeek && event.dataset == conn`, or restricted to records from `weird.log` by searching `event.provider == zeek && event.dataset == weird`.
 
 Click the icon of the owl **🦉** in the upper-left hand corner of to access the Arkime usage documentation (accessible at [https://localhost/help](https://localhost/help) if you are connecting locally), click the **Fields** label in the navigation pane, then search for `zeek` to see a list of the other Zeek log types and fields available to Malcolm.
 
@@ -3446,7 +3446,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.10.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.11.iso"
 …
 ```
 
@@ -3738,37 +3738,54 @@ user@host:~/Malcolm$ ./scripts/install.py --configure
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
-Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): 
+Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
 
 Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
 
-Restart Malcolm upon system or Docker daemon restart? (y/N): y
+Setting 3 workers for Logstash pipelines. Is this OK? (Y/n): y
 
-Select Malcolm restart behavior ('no', 'on-failure', 'always', 'unless-stopped'): unless-stopped
+Restart Malcolm upon system or Docker daemon restart? (y/N): y
+1: no
+2: on-failure
+3: always
+4: unless-stopped
+Select Malcolm restart behavior (unless-stopped): 4
 
 Require encrypted HTTPS connections? (Y/n): y
 
+Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y/N): n
+
+Specify external Docker network name (or leave blank for default networking) (): 
+
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Configure snapshot repository for OpenSearch index state management? (y/N): n
+Configure OpenSearch index state management? (y/N): n
 
-Store snapshots locally in /home/user/Malcolm/opensearch-backup? (Y/n): y
-
-Automatically analyze all PCAP files with Zeek? (y/N): y
+Automatically analyze all PCAP files with Zeek? (Y/n): y
 
 Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs? (y/N): n
 
 Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
+
+Perform string randomness scoring on some fields? (Y/n): y
+
+Expose OpenSearch port to external hosts? (y/N): n
 
 Expose Logstash port to external hosts? (y/N): n
 
 Forward Logstash logs to external OpenSearch instance? (y/N): n
 
 Enable file extraction with Zeek? (y/N): y
-
-Select file extraction behavior ('none', 'known', 'mapped', 'all', 'interesting'): interesting
-
-Select file preservation behavior ('quarantined', 'all', 'none'): quarantined
+1: none
+2: known
+3: mapped
+4: all
+5: interesting
+Select file extraction behavior (none): 5
+1: quarantined
+2: all
+3: none
+Select file preservation behavior (quarantined): 1
 
 Scan extracted files with ClamAV? (y/N): y
 
@@ -3835,22 +3852,22 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.10           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           5.2.10           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       5.2.10           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                5.2.10           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     5.2.10           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     5.2.10           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      5.2.10           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             5.2.10           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.10           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.10           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      5.2.10           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      5.2.10           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       5.2.10           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     5.2.10           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     5.2.10           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/zeek                                             5.2.10           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              5.2.11           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           5.2.11           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                5.2.11           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      5.2.11           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             5.2.11           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          5.2.11           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      5.2.11           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      5.2.11           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     5.2.11           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/zeek                                             5.2.11           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

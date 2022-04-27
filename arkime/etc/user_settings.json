@@ -51,6 +51,7 @@
         ],
         "visibleHeaders": [
           "protocol",
+          "event.provider",
           "event.dataset",
           "firstPacket",
           "lastPacket",

@@ -143,17 +143,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:5.2.10
+    image: malcolmnetsec/opensearch:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: opensearch
+    networks:
+      - default
     environment:
       << : *process-variables
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
-      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      OPENSEARCH_JAVA_OPTS : '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
@@ -184,11 +186,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:5.2.10
+    image: malcolmnetsec/dashboards-helper:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: dashboards-helper
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *dashboards-helper-variables
@@ -215,11 +219,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:5.2.10
+    image: malcolmnetsec/dashboards:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: dashboards
+    networks:
+      - default
     environment:
       << : *process-variables
       OPENSEARCH_URL : 'http://opensearch:9200'
@@ -239,11 +245,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:5.2.10
+    image: malcolmnetsec/logstash-oss:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: logstash
+    networks:
+      - default
     ulimits:
       memlock:
         soft: -1
@@ -256,13 +264,15 @@ services:
       << : *common-beats-variables
       << : *common-lookup-variables
       OS_HOSTS : 'opensearch:9200'
-      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
     expose:
       - 5044
       - 9001
       - 9600
+    ports:
+      - "127.0.0.1:5044:5044"
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.orig.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
@@ -285,11 +295,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:5.2.10
+    image: malcolmnetsec/filebeat-oss:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: filebeat
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *nginx-variables
@@ -297,12 +309,12 @@ services:
       << : *common-beats-variables
       FILEBEAT_ZEEK_LOG_PATH : '/data/zeek/current'
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
-      FILEBEAT_LOG_CLEANUP_MINUTES : 180
-      FILEBEAT_ZIP_CLEANUP_MINUTES : 360
+      FILEBEAT_LOG_CLEANUP_MINUTES : 360
+      FILEBEAT_ZIP_CLEANUP_MINUTES : 720
       FILEBEAT_SCAN_FREQUENCY : '10s'
-      FILEBEAT_CLEAN_INACTIVE : '45m'
-      FILEBEAT_IGNORE_OLDER : '30m'
-      FILEBEAT_CLOSE_INACTIVE : '30s'
+      FILEBEAT_CLEAN_INACTIVE : '180m'
+      FILEBEAT_IGNORE_OLDER : '120m'
+      FILEBEAT_CLOSE_INACTIVE : '120s'
       FILEBEAT_CLOSE_RENAMED : 'true'
       FILEBEAT_CLOSE_REMOVED : 'true'
       FILEBEAT_CLOSE_EOF : 'true'
@@ -326,11 +338,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:5.2.10
+    image: malcolmnetsec/arkime:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: arkime
+    networks:
+      - default
     env_file:
       - ./auth.env
     environment:
@@ -370,11 +384,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:5.2.10
+    image: malcolmnetsec/zeek:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: zeek
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *common-upload-variables
@@ -403,11 +419,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:5.2.10
+    image: malcolmnetsec/file-monitor:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: file-monitor
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *zeek-variables
@@ -429,7 +447,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:5.2.10
+    image: malcolmnetsec/pcap-capture:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
@@ -452,11 +470,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:5.2.10
+    image: malcolmnetsec/pcap-monitor:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: pcapmon
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *common-upload-variables
@@ -478,11 +498,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:5.2.10
+    image: malcolmnetsec/file-upload:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: upload
+    networks:
+      - default
     env_file:
       - ./auth.env
     environment:
@@ -504,7 +526,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:5.2.10
+    image: malcolmnetsec/htadmin:5.2.11
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -512,6 +534,8 @@ services:
     stdin_open: false
     tty: true
     hostname: htadmin
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *auth-variables
@@ -529,7 +553,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:5.2.10
+    image: malcolmnetsec/freq:5.2.11
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -537,6 +561,8 @@ services:
     stdin_open: false
     tty: true
     hostname: freq
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *common-lookup-variables
@@ -550,7 +576,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:5.2.10
+    image: malcolmnetsec/name-map-ui:5.2.11
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -558,6 +584,8 @@ services:
     stdin_open: false
     tty: true
     hostname: name-map-ui
+    networks:
+      - default
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
@@ -574,7 +602,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:5.2.10
+    image: malcolmnetsec/api:5.2.11
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -583,6 +611,8 @@ services:
     stdin_open: false
     tty: true
     hostname: api
+    networks:
+      - default
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'api.malcolm.local'
@@ -598,11 +628,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:5.2.10
+    image: malcolmnetsec/nginx-proxy:5.2.11
     restart: "no"
     stdin_open: false
     tty: true
     hostname: nginx-proxy
+    networks:
+      - default
     environment:
       << : *process-variables
       << : *auth-variables
@@ -618,8 +650,8 @@ services:
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:488:488"
-      - "0.0.0.0:5601:5601"
-      # - "0.0.0.0:9200:9200"
+      - "127.0.0.1:5601:5601"
+      - "127.0.0.1:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -634,7 +666,22 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
+    labels:
+      traefik.enable: "false"
+      # traefik.http.routers.osmalcolm.rule: 'Host(`opensearch.malcolm.example.org`)'
+      # traefik.http.routers.osmalcolm.entrypoints: 'websecure'
+      # traefik.http.routers.osmalcolm.tls.certresolver: 'myresolver'
+      # traefik.http.routers.osmalcolm.service: 'osmalcolm'
+      # traefik.http.services.osmalcolm.loadbalancer.server.port: '9200'
+      # traefik.http.routers.malcolm.rule: 'Host(`malcolm.example.org`)'
+      # traefik.http.routers.malcolm.entrypoints: 'websecure'
+      # traefik.http.routers.malcolm.tls.certresolver: 'myresolver'
+      # traefik.http.routers.malcolm.service: 'malcolm'
+      # traefik.http.services.malcolm.loadbalancer.server.port: '443'
 
 # shared named volume so filebeat can access nginx access logs
 volumes:
   nginx-log-path:
+
+networks:
+  default:

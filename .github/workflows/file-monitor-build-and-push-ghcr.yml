@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - suricata_merge
     paths:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'

@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:1.3.0
+FROM opensearchproject/opensearch:1.3.1
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -38,6 +38,8 @@ RUN yum install -y openssl util-linux procps && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\ncompatibility.override_main_response_version: true\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \
+  sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
+  sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/^\([[:space:]]*\)\(performance-analyzer-agent-cli\)/\1# \2/" /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/[^#].*OPENSEARCH_HOME\/bin\/opensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh

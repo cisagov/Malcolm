@@ -5,6 +5,7 @@
 
 import contextlib
 import getpass
+import importlib
 import json
 import os
 import platform
@@ -13,6 +14,7 @@ import sys
 import time
 
 from collections import defaultdict
+from enum import IntFlag, auto
 
 try:
     from pwd import getpwuid
@@ -20,20 +22,18 @@ except ImportError:
     getpwuid = None
 from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 
+try:
+    from dialog import Dialog
+
+    MainDialog = Dialog(dialog='dialog', autowidgetsize=True)
+except ImportError:
+    Dialog = None
+    MainDialog = None
+
 ###################################################################################################
 ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
-
-###################################################################################################
-
-# attempt to import requests, will cover failure later
-try:
-    import requests
-
-    RequestsImported = True
-except ImportError:
-    RequestsImported = False
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"
@@ -43,6 +43,18 @@ PLATFORM_LINUX_CENTOS = 'centos'
 PLATFORM_LINUX_DEBIAN = 'debian'
 PLATFORM_LINUX_FEDORA = 'fedora'
 PLATFORM_LINUX_UBUNTU = 'ubuntu'
+
+
+class UserInputDefaultsBehavior(IntFlag):
+    DefaultsPrompt = auto()
+    DefaultsAccept = auto()
+    DefaultsNonInteractive = auto()
+
+
+class UserInterfaceMode(IntFlag):
+    InteractionDialog = auto()
+    InteractionInput = auto()
+
 
 # URLS for figuring things out if something goes wrong
 DOCKER_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/install/')
@@ -86,63 +98,301 @@ def EscapeAnsi(line):
 
 
 ###################################################################################################
+# attempt to clear the screen
+def ClearScreen():
+    try:
+        os.system("clear" if platform.system() != PLATFORM_WINDOWS else "cls")
+    except Exception as e:
+        pass
+
+
+###################################################################################################
 # get interactive user response to Y/N question
-def YesOrNo(question, default=None, forceInteraction=False, acceptDefault=False):
+def YesOrNo(
+    question,
+    default=None,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+):
 
-    if default == True:
-        questionStr = f"\n{question} (Y/n): "
-    elif default == False:
-        questionStr = f"\n{question} (y/N): "
-    else:
-        questionStr = f"\n{question} (y/n): "
+    if (default is not None) and (
+        (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
+    ):
+        reply = ""
 
-    if acceptDefault and (default is not None) and (not forceInteraction):
-        reply = ''
-    else:
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        defaultYes = (default is not None) and str2bool(default)
+        reply = MainDialog.yesno(
+            question, yes_label='Yes' if defaultYes else 'No', no_label='no' if defaultYes else 'yes'
+        )
+        if defaultYes:
+            reply = 'y' if (reply == Dialog.OK) else 'n'
+        else:
+            reply = 'n' if (reply == Dialog.OK) else 'y'
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+
+        if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
+            if str2bool(default):
+                questionStr = f"\n{question} (Y/n): "
+            else:
+                questionStr = f"\n{question} (y/N): "
+        else:
+            questionStr = f"\n{question}: "
+
         while True:
             reply = str(input(questionStr)).lower().strip()
-            if (len(reply) > 0) or (default is not None):
+            if len(reply) > 0:
+                try:
+                    str2bool(reply)
+                    break
+                except ValueError as e:
+                    pass
+            elif (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (default is not None):
                 break
 
-    if len(reply) == 0:
-        reply = 'y' if default else 'n'
-
-    if reply[0] == 'y':
-        return True
-    elif reply[0] == 'n':
-        return False
     else:
-        return YesOrNo(question, default=default)
+        raise RuntimeError("No user interfaces available")
+
+    if (len(reply) == 0) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
+        reply = "y" if (default is not None) and str2bool(default) else "n"
+
+    if clearScreen == True:
+        ClearScreen()
+
+    try:
+        return str2bool(reply)
+    except ValueError as e:
+        return YesOrNo(
+            question,
+            default=default,
+            uiMode=uiMode,
+            defaultBehavior=defaultBehavior - UserInputDefaultsBehavior.DefaultsAccept,
+            clearScreen=clearScreen,
+        )
 
 
 ###################################################################################################
 # get interactive user response
-def AskForString(question, default=None, forceInteraction=False, acceptDefault=False):
+def AskForString(
+    question,
+    default=None,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+):
 
-    if acceptDefault and (default is not None) and (not forceInteraction):
+    if (default is not None) and (
+        (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
+    ):
         reply = default
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        code, reply = MainDialog.inputbox(
+            question,
+            init=default
+            if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
+            else "",
+        )
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise RuntimeError("Operation cancelled")
+        else:
+            reply = reply.strip()
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+        reply = str(
+            input(
+                f"\n{question}{f' ({default})' if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt) else ''}: "
+            )
+        ).strip()
+        if (len(reply) == 0) and (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
+            reply = default
+
     else:
-        reply = str(input(f'\n{question}: ')).strip()
+        raise RuntimeError("No user interfaces available")
+
+    if clearScreen == True:
+        ClearScreen()
 
     return reply
 
 
 ###################################################################################################
 # get interactive password (without echoing)
-def AskForPassword(prompt):
-    reply = getpass.getpass(prompt=prompt)
+def AskForPassword(
+    prompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+):
+
+    if (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        code, reply = MainDialog.passwordbox(prompt, insecure=True)
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise RuntimeError("Operation cancelled")
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+        reply = getpass.getpass(prompt=f"{prompt}: ")
+
+    else:
+        raise RuntimeError("No user interfaces available")
+
+    if clearScreen == True:
+        ClearScreen()
+
+    return reply
+
+
+###################################################################################################
+# Choose one of many.
+# choices - an iterable of (tag, item, status) tuples where status specifies the initial
+# selected/unselected state of each entry; can be True or False, 1 or 0, "on" or "off"
+# (True, 1 and "on" meaning selected), or any case variation of these two strings.
+# No more than one entry should be set to True.
+def ChooseOne(
+    prompt,
+    choices=[],
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+):
+
+    validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
+    defaulted = next(iter([x for x in validChoices if x[2] == True]), None)
+
+    if (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (
+        defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive
+    ):
+        reply = defaulted[0] if defaulted is not None else ""
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        code, reply = MainDialog.radiolist(
+            prompt,
+            choices=validChoices,
+        )
+        if code == Dialog.CANCEL or code == Dialog.ESC:
+            raise RuntimeError("Operation cancelled")
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+        index = 0
+        for choice in validChoices:
+            index = index + 1
+            print(
+                f"{index}: {choice[0]}{f' - {choice[1]}' if isinstance(choice[1], str) and len(choice[1]) > 0 else ''}"
+            )
+        while True:
+            inputRaw = input(
+                f"{prompt}{f' ({defaulted[0]})' if (defaulted is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt) else ''}: "
+            ).strip()
+            if (
+                (len(inputRaw) == 0)
+                and (defaulted is not None)
+                and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+            ):
+                reply = defaulted[0]
+                break
+            elif (len(inputRaw) > 0) and inputRaw.isnumeric():
+                inputIndex = int(inputRaw) - 1
+                if inputIndex > -1 and inputIndex < len(validChoices):
+                    reply = validChoices[inputIndex][0]
+                    break
+
+    else:
+        raise RuntimeError("No user interfaces available")
+
+    if clearScreen == True:
+        ClearScreen()
+
+    return reply
+
+
+###################################################################################################
+# Choose multiple of many
+# choices - an iterable of (tag, item, status) tuples where status specifies the initial
+# selected/unselected state of each entry; can be True or False, 1 or 0, "on" or "off"
+# (True, 1 and "on" meaning selected), or any case variation of these two strings.
+def ChooseMultiple(
+    prompt,
+    choices=[],
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+):
+
+    validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
+    defaulted = [x[0] for x in validChoices if x[2] == True]
+
+    if (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (
+        defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive
+    ):
+        reply = defaulted
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        code, reply = MainDialog.checklist(
+            prompt,
+            choices=validChoices,
+        )
+        if code == Dialog.CANCEL or code == Dialog.ESC:
+            raise RuntimeError("Operation cancelled")
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+        allowedChars = set(string.digits + ',' + ' ')
+        defaultValListStr = ",".join(defaulted)
+        print(f"0: NONE")
+        index = 0
+        for choice in validChoices:
+            index = index + 1
+            print(
+                f"{index}: {choice[0]}{f' - {choice[1]}' if isinstance(choice[1], str) and len(choice[1]) > 0 else ''}"
+            )
+        while True:
+            inputRaw = input(
+                f"{prompt}{f' ({defaultValListStr})' if (len(defaultValListStr) > 0) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt) else ''}: "
+            ).strip()
+            if (
+                (len(inputRaw) == 0)
+                and (len(defaulted) > 0)
+                and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+            ):
+                reply = defaulted
+                break
+            elif inputRaw == '0':
+                reply = []
+                break
+            elif (len(inputRaw) > 0) and (set(inputRaw) <= allowedChars):
+                reply = []
+                selectedIndexes = list(set([int(x.strip()) - 1 for x in inputRaw.split(',') if (len(x.strip())) > 0]))
+                for idx in selectedIndexes:
+                    if idx > -1 and idx < len(validChoices):
+                        reply.append(validChoices[idx][0])
+                if len(reply) > 0:
+                    break
+
+    else:
+        raise RuntimeError("No user interfaces available")
+
+    if clearScreen == True:
+        ClearScreen()
+
     return reply
 
 
 ###################################################################################################
 # convenient boolean argument parsing
 def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
+    if isinstance(v, bool):
+        return v
+    elif isinstance(v, str):
+        if v.lower() in ("yes", "true", "t", "y", "1"):
+            return True
+        elif v.lower() in ("no", "false", "f", "n", "0"):
+            return False
+        else:
+            raise ValueError("Boolean value expected")
     else:
-        raise ValueError('Boolean value expected')
+        raise ValueError("Boolean value expected")
 
 
 ###################################################################################################
@@ -242,70 +492,73 @@ def run_process(
 
 
 ###################################################################################################
-# make sure we can import requests properly and take care of it automatically if possible
-def ImportRequests(debug=False):
-    global RequestsImported
+# attempt dynamic imports, prompting for install via pip if possible
+DynImports = defaultdict(lambda: None)
 
-    if not RequestsImported:
-        # see if we can help out by installing the requests module
+
+def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
+    global DynImports
+
+    # see if we've already imported it
+    if not DynImports[importName]:
+
+        # if not, attempt the import
+        try:
+            tmpImport = importlib.import_module(importName)
+            if tmpImport:
+                DynImports[importName] = tmpImport
+                return DynImports[importName]
+        except ImportError as e:
+            pass
+
+        # see if we can help out by installing the module
 
         pyPlatform = platform.system()
         pyExec = sys.executable
-        pipCmd = 'pip3'
+        pipCmd = "pip3"
         if not Which(pipCmd, debug=debug):
-            pipCmd = 'pip'
+            pipCmd = "pip"
 
-        eprint(f'The requests module is required under Python {platform.python_version()} ({pyExec})')
+        eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
-        if Which(pipCmd, debug=debug):
-            if YesOrNo(f'Importing the requests module failed. Attempt to install via {pipCmd}?'):
+        if interactive and Which(pipCmd, debug=debug):
+            if YesOrNo(f"Importing the {pipPkgName} module failed. Attempt to install via {pipCmd}?"):
                 installCmd = None
 
                 if (pyPlatform == PLATFORM_LINUX) or (pyPlatform == PLATFORM_MAC):
                     # for linux/mac, we're going to try to figure out if this python is owned by root or the script user
                     if getpass.getuser() == getpwuid(os.stat(pyExec).st_uid).pw_name:
                         # we're running a user-owned python, regular pip should work
-                        installCmd = [pipCmd, 'install', 'requests']
+                        installCmd = [pipCmd, "install", pipPkgName]
                     else:
                         # python is owned by system, so make sure to pass the --user flag
-                        installCmd = [pipCmd, 'install', '--user', 'requests']
+                        installCmd = [pipCmd, "install", "--user", pipPkgName]
                 else:
                     # on windows (or whatever other platform this is) I don't know any other way other than pip
-                    installCmd = [pipCmd, 'install', 'requests']
+                    installCmd = [pipCmd, "install", pipPkgName]
 
                 err, out = run_process(installCmd, debug=debug)
                 if err == 0:
-                    eprint("Installation of requests module apparently succeeded")
+                    eprint(f"Installation of {pipPkgName} module apparently succeeded")
                     try:
-                        import requests
-
-                        RequestsImported = True
+                        tmpImport = importlib.import_module(importName)
+                        if tmpImport:
+                            DynImports[importName] = tmpImport
                     except ImportError as e:
-                        eprint(f"Importing the requests module still failed: {e}")
+                        eprint(f"Importing the {importName} module still failed: {e}")
                 else:
-                    eprint(f"Installation of requests module failed: {out}")
+                    eprint(f"Installation of {importName} module failed: {out}")
 
-    if not RequestsImported:
+    if not DynImports[importName]:
         eprint(
             "System-wide installation varies by platform and Python configuration. Please consult platform-specific documentation for installing Python modules."
         )
-        if platform.system() == PLATFORM_MAC:
-            eprint(
-                'You *may* be able to install pip and requests manually via: sudo sh -c "easy_install pip && pip install requests"'
-            )
-        elif pyPlatform == PLATFORM_LINUX:
-            if Which('apt-get', debug=debug):
-                eprint("You *may* be able to install requests manually via: sudo apt-get install python3-requests")
-            elif Which('apt', debug=debug):
-                eprint("You *may* be able to install requests manually via: sudo apt install python3-requests")
-            elif Which('dnf', debug=debug):
-                eprint("You *may* be able to install requests manually via: sudo dnf install python3-requests")
-            elif Which('yum', debug=debug):
-                eprint(
-                    'You *may* be able to install pip and requests manually via: sudo sh -c "yum install python3-pip && python3 -m pip install requests"'
-                )
 
-    return RequestsImported
+    return DynImports[importName]
+
+
+def RequestsDynamic(debug=False, forceInteraction=False):
+    return DoDynamicImport("requests", "requests", interactive=forceInteraction, debug=debug)
 
 
 ###################################################################################################
@@ -324,7 +577,7 @@ def MalcolmAuthFilesExist():
 ###################################################################################################
 # download to file
 def DownloadToFile(url, local_filename, debug=False):
-    r = requests.get(url, stream=True, allow_redirects=True)
+    r = RequestsDynamic.get(url, stream=True, allow_redirects=True)
     with open(local_filename, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:

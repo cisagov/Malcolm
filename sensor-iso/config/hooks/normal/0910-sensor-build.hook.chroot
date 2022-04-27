@@ -9,9 +9,9 @@ export CCACHE_COMPRESS=1
 NETSNIFF_VER="0.6.8"
 NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
 
-ZEEK_VERSION=4.2.0-0
+ZEEK_VERSION=4.2.1-0
 ZEEK_LTS=
-SPICY_VERSION=1.4.0
+SPICY_VERSION=1.4.1
 ZEEK_DIR="/opt/zeek"
 SPICY_DIR="/opt/spicy"
 export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH
@@ -21,7 +21,7 @@ BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
-YARA_VERSION="4.2.0"
+YARA_VERSION="4.2.1"
 YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"

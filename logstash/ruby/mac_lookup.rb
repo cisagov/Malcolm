@@ -7,7 +7,7 @@ def register(params)
   @target = params["target"]
   if File.exist?(params["map_path"])
     @macarray = Array.new
-    YAML.load(File.read(params["map_path"])).each do |mac|
+    YAML.safe_load(File.read(params["map_path"])).each do |mac|
       @macarray.push([mac_string_to_integer(mac['low']), mac_string_to_integer(mac['high']), mac['name']])
     end
     # Array.bsearch only works on a sorted array

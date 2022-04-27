@@ -35,13 +35,13 @@ fi
 function filesize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
-  $DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
+  $DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
 }
 
 function dirsize_in_image() {
   FILESPEC="$2"
   IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
-  KBYTES="$($DOCKER_BIN run --rm --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1")"
+  KBYTES="$($DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1")"
   echo $(($KBYTES * 1024))
 }
 
@@ -83,9 +83,9 @@ else
 fi
 
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND build --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND build --progress=plain --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND build --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND build --progress=plain --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly

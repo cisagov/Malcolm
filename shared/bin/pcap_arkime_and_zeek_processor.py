@@ -60,6 +60,7 @@ origPath = os.getcwd()
 shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
 arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
+arkimeDataset = os.getenv('ARKIME_ECS_DATASET', 'session')
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -91,6 +92,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
     global shuttingDown
     global scanWorkersCount
     global arkimeProvider
+    global arkimeDataset
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
@@ -140,6 +142,8 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         '--quiet',
                         '-o',
                         f'ecsEventProvider={arkimeProvider}',
+                        '-o',
+                        f'ecsEventDataset={arkimeDataset}',
                         '-r',
                         fileInfo[FILE_INFO_DICT_NAME],
                     ]

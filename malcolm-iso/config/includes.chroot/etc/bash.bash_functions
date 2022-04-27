@@ -482,6 +482,8 @@ function dregls () {
 ########################################################################
 function malcolmmonitor () {
   if [[ -d "$HOME"/Malcolm ]]; then
+    mkdir -p "$HOME"/Malcolm/.tmp
+    export TMPDIR="$HOME"/Malcolm/.tmp
     MAX_WIDTH=$(tput cols)
     MAX_HEIGHT=$(tput lines)
     /usr/bin/tmux new-session \; \
