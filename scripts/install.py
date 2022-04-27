@@ -661,7 +661,7 @@ class Installer(object):
                             currentService = serviceMatch.group(1).lower()
                             serviceStartLine = True
 
-                    if currentSection == None:
+                    if currentSection is None:
                         # variables defined in the sections at the top of the compose file
 
                         if 'PUID' in line:
