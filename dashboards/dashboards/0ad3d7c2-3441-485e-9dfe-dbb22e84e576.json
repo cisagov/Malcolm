@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T15:16:23.253Z",
-      "version": "WzExNjIsMV0=",
+      "updated_at": "2022-04-29T16:54:51.401Z",
+      "version": "WzExNTEsMV0=",
       "attributes": {
         "title": "Overview",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"1.3.1\",\"gridData\":{\"h\":31,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":13,\"i\":\"12\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"12\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_1\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":18,\"i\":\"19\",\"w\":36,\"x\":0,\"y\":31},\"panelIndex\":\"19\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":18,\"i\":\"21\",\"w\":14,\"x\":8,\"y\":13},\"panelIndex\":\"21\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":13,\"i\":\"32\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"32\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":18,\"i\":\"43\",\"w\":12,\"x\":36,\"y\":31},\"panelIndex\":\"43\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":18,\"i\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"w\":11,\"x\":22,\"y\":13},\"panelIndex\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}},\"table\":null},\"panelRefName\":\"panel_6\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":18,\"i\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"w\":15,\"x\":33,\"y\":13},\"panelIndex\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"1.3.1\",\"gridData\":{\"h\":27,\"i\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"w\":48,\"x\":0,\"y\":49},\"panelIndex\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":31,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":13,\"i\":\"12\",\"w\":21,\"x\":27,\"y\":0},\"panelIndex\":\"12\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"19\",\"w\":36,\"x\":0,\"y\":31},\"panelIndex\":\"19\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"21\",\"w\":14,\"x\":8,\"y\":13},\"panelIndex\":\"21\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"32\",\"w\":7,\"x\":8,\"y\":0},\"panelIndex\":\"32\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"43\",\"w\":12,\"x\":36,\"y\":31},\"panelIndex\":\"43\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":13,\"i\":\"4f869578-b143-4103-8804-f8b59688a5dd\",\"w\":12,\"x\":15,\"y\":0},\"panelIndex\":\"4f869578-b143-4103-8804-f8b59688a5dd\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"w\":11,\"x\":22,\"y\":13},\"panelIndex\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"w\":15,\"x\":33,\"y\":13},\"panelIndex\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":27,\"i\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"w\":48,\"x\":0,\"y\":49},\"panelIndex\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_9\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -55,15 +55,20 @@
         {
           "name": "panel_6",
           "type": "visualization",
-          "id": "750367f0-41f2-11ea-88fa-7151df485405"
+          "id": "74c4f480-c7dc-11ec-8c7e-e93fedca6b87"
         },
         {
           "name": "panel_7",
           "type": "visualization",
-          "id": "f38b3bd0-afd3-11ea-adcf-8bc6d9c94a96"
+          "id": "750367f0-41f2-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_8",
+          "type": "visualization",
+          "id": "f38b3bd0-afd3-11ea-adcf-8bc6d9c94a96"
+        },
+        {
+          "name": "panel_9",
           "type": "search",
           "id": "c97bc964-5319-41e7-ad22-db28156a2ac1"
         }
@@ -78,7 +83,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:19:15.821Z",
+      "updated_at": "2022-04-29T16:37:16.075Z",
       "version": "Wzc4NSwxXQ==",
       "attributes": {
         "title": "Zeek Logs",
@@ -101,11 +106,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:18:10.924Z",
-      "version": "WzYxLDFd",
+      "updated_at": "2022-04-29T16:54:35.867Z",
+      "version": "WzExMzcsMV0=",
       "attributes": {
         "title": "Total Log Count Over Time",
-        "visState": "{\"title\":\"Total Log Count Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"2021-02-17T15:16:53.823Z\",\"to\":\"2021-03-26T07:13:42.598Z\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\"},\"schema\":\"group\"}],\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 30 seconds\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"stacked\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"type\":\"line\",\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "visState": "{\"title\":\"Total Log Count Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-25y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\"},\"schema\":\"group\"}],\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 30 seconds\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"stacked\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"type\":\"line\",\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "",
         "version": 1,
@@ -131,7 +136,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:18:10.924Z",
+      "updated_at": "2022-04-29T16:36:11.034Z",
       "version": "WzYyLDFd",
       "attributes": {
         "title": "Connections - Service By Destination Country",
@@ -161,11 +166,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T15:15:43.148Z",
-      "version": "WzExNDcsMV0=",
+      "updated_at": "2022-04-29T16:47:58.632Z",
+      "version": "WzEwNDEsMV0=",
       "attributes": {
         "title": "Log Type",
-        "visState": "{\"title\":\"Log Type\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"node\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Capture Source\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Data Source\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
+        "visState": "{\"title\":\"Log Type\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Data Source\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
@@ -191,7 +196,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:18:51.456Z",
+      "updated_at": "2022-04-29T16:36:51.501Z",
       "version": "WzUyMCwxXQ==",
       "attributes": {
         "title": "Total Number of Logs",
@@ -220,7 +225,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:18:10.924Z",
+      "updated_at": "2022-04-29T16:36:11.034Z",
       "version": "WzY1LDFd",
       "attributes": {
         "title": "DNS - Queries",
@@ -245,12 +250,41 @@
       }
     },
     {
+      "id": "74c4f480-c7dc-11ec-8c7e-e93fedca6b87",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-04-29T16:52:52.762Z",
+      "version": "WzExMTQsMV0=",
+      "attributes": {
+        "title": "Capture Source",
+        "visState": "{\"title\":\"Capture Source\",\"type\":\"table\",\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"node\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Capture Source\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"@timestamp\",\"customLabel\":\"Last Timestamp\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"}],\"params\":{\"perPage\":5,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
       "id": "750367f0-41f2-11ea-88fa-7151df485405",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:18:10.924Z",
+      "updated_at": "2022-04-29T16:36:11.034Z",
       "version": "WzY2LDFd",
       "attributes": {
         "title": "Application Protocol",
@@ -279,7 +313,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:19:04.672Z",
+      "updated_at": "2022-04-29T16:37:04.846Z",
       "version": "WzY4MywxXQ==",
       "attributes": {
         "title": "Actions and Results",
@@ -308,7 +342,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:19:15.821Z",
+      "updated_at": "2022-04-29T16:37:16.075Z",
       "version": "Wzc5OCwxXQ==",
       "attributes": {
         "title": "All Logs",
@@ -353,7 +387,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:19:12.770Z",
+      "updated_at": "2022-04-29T16:37:13.019Z",
       "version": "Wzc2MCwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
@@ -397,7 +431,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-04-29T14:18:48.429Z",
+      "updated_at": "2022-04-29T16:36:48.431Z",
       "version": "WzQ5NywxXQ==",
       "attributes": {
         "title": "DNS - Logs",
