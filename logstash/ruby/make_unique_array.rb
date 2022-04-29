@@ -11,6 +11,12 @@ def register(params)
     _prune = _newPrune
   end
   @prune = _prune
+  _map = params["translate"]
+  if _map.is_a?(Hash) then
+    @translate = _map
+  else
+    @translate = Hash.new
+  end
 end
 
 def filter(event)
@@ -21,7 +27,10 @@ def filter(event)
       _newVals.push(_vals)
       _vals = _newVals
     end
-    event.set("#{@field}", _vals.uniq.reject {|x| @prune.include? x})
+    #                            v dedupe
+    #                            |    v prune unwanted values       v translate values when applicable
+    #                            |    |                             |                           v keep if not in translate hash
+    event.set("#{@field}", _vals.uniq.reject{|x| @prune.include? x}.map{|y| @translate.fetch(y, y) })
   end
   [event]
 end
@@ -50,6 +59,19 @@ test "has no duplicates" do
 
   expect("result to be equal") do |events|
     events.first.get("sourcefield").length == 3
+  end
+end
+
+test "translate" do
+  parameters do
+    { "field" => "sourcefield", "translate" => { "a" => "alpha",
+                                                 "c" => "charlie" } }
+  end
+
+  in_event { { "sourcefield" => [ "a", "b", "c" ] } }
+
+  expect("result to be equal") do |events|
+    Array(events.first.get("sourcefield")).to_set == ["alpha", "b", "charlie"].to_set
   end
 end
 

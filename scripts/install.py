@@ -39,6 +39,7 @@ MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
 origPath = os.getcwd()
+HostName = os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0]
 
 ###################################################################################################
 args = None
@@ -672,6 +673,10 @@ class Installer(object):
                         elif 'PGID' in line:
                             # process GID
                             line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
+
+                        elif 'PCAP_NODE_NAME' in line:
+                            # capture source "node name" for locally processed PCAP files
+                            line = re.sub(r'(PCAP_NODE_NAME\s*:\s*)(\S+)', fr"\g<1>'{HostName}'", line)
 
                         elif 'NGINX_SSL' in line:
                             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)

@@ -34,6 +34,7 @@ PCAP_PROCESSING_MODE_ZEEK = "zeek"
 PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
+DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 
 SURICATA_PATH = "/usr/bin/suricata"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
@@ -110,12 +111,13 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, arkimeBin, autoTag, notLocked = (
+    newFileQueue, pcapBaseDir, arkimeBin, nodeName, autoTag, notLocked = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
         arkimeWorkerArgs[2],
         arkimeWorkerArgs[3],
         arkimeWorkerArgs[4],
+        arkimeWorkerArgs[5],
     )
 
     if debug:
@@ -152,6 +154,8 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                     cmd = [
                         arkimeBin,
                         '--quiet',
+                        '-n',
+                        fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
                         '-o',
                         f'ecsEventProvider={arkimeProvider}',
                         '-o',
@@ -525,6 +529,15 @@ def main():
         default=False,
         required=False,
     )
+    parser.add_argument(
+        '--node',
+        required=False,
+        dest='nodeName',
+        help="PCAP source node name (may be overriden by publisher)",
+        metavar='<STR>',
+        type=str,
+        default=DEFAULT_NODE_NAME,
+    )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
         '--pcap-directory',
@@ -682,6 +695,7 @@ def main():
                     newFileQueue,
                     args.pcapBaseDir,
                     args.executable,
+                    args.nodeName,
                     args.autoTag,
                     args.notLocked,
                 ],

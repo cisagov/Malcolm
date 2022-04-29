@@ -21,6 +21,7 @@ FILE_INFO_DICT_TAGS = "tags"
 FILE_INFO_DICT_SIZE = "size"
 FILE_INFO_FILE_TYPE = "type"
 FILE_INFO_FILE_MIME = "mime"
+FILE_INFO_DICT_NODE = "node"
 
 ###################################################################################################
 # print to stderr

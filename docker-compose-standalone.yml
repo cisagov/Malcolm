@@ -134,6 +134,7 @@ x-filebeat-variables: &filebeat-variables
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
+  PCAP_NODE_NAME : 'malcolm'
   PCAP_PIPELINE_DEBUG : 'false'
   PCAP_PIPELINE_DEBUG_EXTRA : 'false'
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'

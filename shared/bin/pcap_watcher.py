@@ -47,6 +47,7 @@ scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
+DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 
 ###################################################################################################
 # watch files written to and moved to this directory
@@ -162,7 +163,7 @@ def event_process_generator(cls, method):
                     s = (
                         opensearch_dsl.Search(index=ARKIME_FILES_INDEX)
                         .filter("term", _type=ARKIME_FILE_TYPE)
-                        .filter("term", node=args.arkimeNode)
+                        .filter("term", node=args.nodeName)
                         .query("wildcard", name=f"*{os.path.sep}{relativePath}")
                     )
                     response = s.execute()
@@ -187,6 +188,7 @@ def event_process_generator(cls, method):
                             FILE_INFO_DICT_SIZE: fileSize,
                             FILE_INFO_FILE_MIME: fileMime,
                             FILE_INFO_FILE_TYPE: fileType,
+                            FILE_INFO_DICT_NODE: args.nodeName,
                             FILE_INFO_DICT_TAGS: tags_from_filename(relativePath),
                         }
                         self.topic_socket.send_string(json.dumps(fileInfo))
@@ -303,13 +305,13 @@ def main():
         required=False,
     )
     parser.add_argument(
-        '--arkime-node',
+        '--node',
         required=False,
-        dest='arkimeNode',
+        dest='nodeName',
         metavar='<STR>',
         type=str,
-        default='arkime',
-        help='Arkime node value for querying Arkime files index to ignore duplicates',
+        default=DEFAULT_NODE_NAME,
+        help='PCAP source node name',
     )
 
     parser.add_argument(
