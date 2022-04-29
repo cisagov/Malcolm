@@ -577,7 +577,7 @@ def MalcolmAuthFilesExist():
 ###################################################################################################
 # download to file
 def DownloadToFile(url, local_filename, debug=False):
-    r = RequestsDynamic.get(url, stream=True, allow_redirects=True)
+    r = RequestsDynamic().get(url, stream=True, allow_redirects=True)
     with open(local_filename, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
