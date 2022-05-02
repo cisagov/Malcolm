@@ -92,6 +92,7 @@ class MalcolmSource extends WISESource {
       "file.name",
       "file.path",
       "file.size",
+      "file.source",
       "file.type",
       "file.uid",
       "host.name",
@@ -421,7 +422,6 @@ class MalcolmSource extends WISESource {
       "zeek.files.seen_bytes",
       "zeek.files.sha1",
       "zeek.files.sha256",
-      "zeek.files.source",
       "zeek.files.timedout",
       "zeek.files.total_bytes",
       "zeek.files.tx_hosts",
@@ -1275,6 +1275,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
       "    +arrayList(session.file, 'path', 'File Path', 'file.path')\n" +
       "    +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
+      "    +arrayList(session.file, 'source', 'File Transport', 'file.source')\n" +
       "    +arrayList(session.related, 'hash', 'Related Hash', 'related.hash')\n" +
 
       // ####################################################################
