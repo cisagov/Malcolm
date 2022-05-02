@@ -658,7 +658,7 @@
         "suricata.snmp.community": { "type": "keyword" },
         "suricata.snmp.error": { "type": "keyword" },
         "suricata.snmp.pdu_type": { "type": "keyword" },
-        "suricata.snmp.trap_address": { "type": "keyword" },
+        "suricata.snmp.trap_address": { "type": "ip" },
         "suricata.snmp.trap_oid": { "type": "keyword" },
         "suricata.snmp.trap_type": { "type": "keyword" },
         "suricata.snmp.usm": { "type": "keyword" },
