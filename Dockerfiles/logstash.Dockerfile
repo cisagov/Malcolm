@@ -35,11 +35,12 @@ RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -
     /bin/bash -lc "rvm use jruby-9.3.1.0 --default" && \
     /bin/bash -lc "gem install bundler --no-document"
 
-ENV FINGERPRINT_URL "https://codeload.github.com/mmguero-dev/logstash-filter-fingerprint/tar.gz/main"
+ENV FINGERPRINT_URL "https://codeload.github.com/logstash-plugins/logstash-filter-fingerprint/tar.gz/main"
 
 RUN cd /opt && \
     mkdir -p ./logstash-filter-fingerprint && \
     curl -sSL "$FINGERPRINT_URL" | tar xzvf - -C ./logstash-filter-fingerprint --strip-components 1 && \
+    sed -i "s/\('logstash-mixin-ecs_compatibility_support'\),.*/\1/" ./logstash-filter-fingerprint/logstash-filter-fingerprint.gemspec && \
     /bin/bash -lc "export JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-fingerprint && ( bundle install || bundle install ) && gem build logstash-filter-fingerprint.gemspec && bundle info logstash-filter-fingerprint"
 
 FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
