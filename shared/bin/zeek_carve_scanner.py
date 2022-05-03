@@ -411,7 +411,7 @@ def main():
         sleepCount += 1
 
     # intialize objects for virus scanning engines
-    if isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.vtotReqLimit > 0):
+    if isinstance(args.vtotApi, str) and (len(args.vtotApi) > 1) and (args.reqLimit > 0):
         checkConnInfo = VirusTotalSearch(args.vtotApi, reqLimit=args.reqLimit)
     elif args.enableYara:
         yaraDirs = []
