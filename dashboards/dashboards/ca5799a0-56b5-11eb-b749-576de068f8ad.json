@@ -334,6 +334,8 @@
           "zeek.bsap_ip_rdb.app_func_code",
           "zeek.bsap_ip_rdb.func_code",
           "zeek.bsap_ip_rdb.node_status",
+          "zeek.bsap_ip_rdb.variable_count",
+          "zeek.bsap_ip_rdb.variables",
           "event.id"
         ],
         "sort": [
@@ -377,8 +379,10 @@
           "zeek.bsap_serial_header.type_name",
           "zeek.bsap_serial_header.sfun",
           "zeek.bsap_serial_header.dfun",
-          "zeek.bsap_serial_rdb.func_code",
           "zeek.bsap_serial_header.nsb",
+          "zeek.bsap_serial_rdb.func_code",
+          "zeek.bsap_serial_rdb.variable_count",
+          "zeek.bsap_serial_rdb.variables",
           "event.id"
         ],
         "sort": [

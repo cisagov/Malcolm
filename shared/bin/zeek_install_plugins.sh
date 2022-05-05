@@ -78,7 +78,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/amzn/zeek-plugin-s7comm|master"
   "https://github.com/amzn/zeek-plugin-tds|master"
   "https://github.com/cisagov/icsnpp-bacnet"
-  "https://github.com/cisagov/icsnpp-bsap"
+  "https://github.com/mmguero-dev/icsnpp-bsap|vector_vars"
   "https://github.com/cisagov/icsnpp-dnp3"
   "https://github.com/cisagov/icsnpp-enip"
   "https://github.com/cisagov/icsnpp-ethercat"
