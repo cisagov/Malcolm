@@ -750,15 +750,20 @@
         "zeek.bsap_ip_header.num_msg": { "type": "integer" },
         "zeek.bsap_ip_header.type_name": { "type": "keyword" },
         "zeek.bsap_ip_rdb.app_func_code": { "type": "keyword" },
-        "zeek.bsap_ip_rdb.data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
-        "zeek.bsap_ip_rdb.data_len": { "type": "integer" },
         "zeek.bsap_ip_rdb.func_code": { "type": "keyword" },
         "zeek.bsap_ip_rdb.header_size": { "type": "integer" },
         "zeek.bsap_ip_rdb.mes_seq": { "type": "integer" },
         "zeek.bsap_ip_rdb.node_status": { "type": "integer" },
         "zeek.bsap_ip_rdb.res_seq": { "type": "integer" },
         "zeek.bsap_ip_rdb.sequence": { "type": "integer" },
-        "zeek.bsap_ip_unknown.data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
+        "zeek.bsap_ip_rdb.variable_count": { "type": "integer" },
+        "zeek.bsap_ip_rdb.variables": {
+          "type": "nested",
+          "properties": {
+            "var": { "type": "keyword" },
+            "val": { "type": "keyword" }
+          }
+        },
         "zeek.bsap_serial_header.ctl": { "type": "integer" },
         "zeek.bsap_serial_header.dadd": { "type": "integer" },
         "zeek.bsap_serial_header.dfun": { "type": "keyword" },
@@ -768,15 +773,21 @@
         "zeek.bsap_serial_header.ser": { "type": "keyword" },
         "zeek.bsap_serial_header.sfun": { "type": "keyword" },
         "zeek.bsap_serial_header.type_name": { "type": "keyword" },
-        "zeek.bsap_serial_rdb.data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.bsap_serial_rdb.func_code": { "type": "keyword" },
+        "zeek.bsap_serial_rdb.variable_count": { "type": "integer" },
+        "zeek.bsap_serial_rdb.variables": {
+          "type": "nested",
+          "properties": {
+            "var": { "type": "keyword" },
+            "val": { "type": "keyword" }
+          }
+        },
         "zeek.bsap_serial_rdb_ext.data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.bsap_serial_rdb_ext.dfun": { "type": "keyword" },
         "zeek.bsap_serial_rdb_ext.extfun": { "type": "keyword" },
         "zeek.bsap_serial_rdb_ext.nsb": { "type": "integer" },
         "zeek.bsap_serial_rdb_ext.seq": { "type": "integer" },
         "zeek.bsap_serial_rdb_ext.sfun": { "type": "keyword" },
-        "zeek.bsap_serial_unknown.data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.cip.attribute_id": { "type": "keyword" },
         "zeek.cip.cip_sequence_count": { "type": "integer" },
         "zeek.cip.cip_service": { "type": "keyword" },
