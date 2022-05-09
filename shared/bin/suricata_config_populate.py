@@ -209,7 +209,8 @@ DEFAULT_VARS.update(
         'AF_PACKET_USE_MMAP': True,
         'ANOMALY_APPLAYER': True,
         'ANOMALY_DECODE': False,
-        'ANOMALY_ENABLED': True,
+        'ANOMALY_ENABLED': False,
+        'ANOMALY_EVE_ENABLED': False,
         'ANOMALY_PACKETHDR': False,
         'ANOMALY_STREAM': False,
         'ASN1_MAX_FRAMES': 256,
@@ -218,6 +219,7 @@ DEFAULT_VARS.update(
         'CAPTURE_DISABLE_OFFLOADING': True,
         'CUSTOM_RULES_ONLY': False,
         'DCERPC_ENABLED': True,
+        'DCERPC_EVE_ENABLED': False,
         'DEFRAG_HASH_SIZE': 65536,
         'DEFRAG_MAX_FRAGS': 65535,
         'DEFRAG_MEMCAP': '32mb',
@@ -225,62 +227,84 @@ DEFAULT_VARS.update(
         'DEFRAG_TIMEOUT': 60,
         'DEFRAG_TRACKERS': 65535,
         'DHCP_ENABLED': True,
+        'DHCP_EVE_ENABLED': False,
         'DHCP_EXTENDED': False,
         'DNP3_ENABLED': True,
+        'DNP3_EVE_ENABLED': False,
         'DNP3_PORTS': 20000,
         'DNS_ENABLED': True,
+        'DNS_EVE_ENABLED': False,
         'DNS_PORTS': 53,
         'DNS_REQUESTS': True,
         'DNS_RESPONSES': True,
         'DNS_VERSION': 2,
         'ENIP_ENABLED': True,
+        'ENIP_EVE_ENABLED': False,
         'ENIP_PORTS': 44818,
         'EXTERNAL_NET': '!$HOME_NET',
         'FILE_DATA_PORTS': "[$HTTP_PORTS,110,143]",
         'FILES_ENABLED': True,
+        'FILES_EVE_ENABLED': False,
         'FILES_FORCE_MAGIC': False,
         'FLOW_EMERGENCY_RECOVERY': 30,
         'FLOW_ENABLED': False,
+        'FLOW_EVE_ENABLED': False,
         'FLOW_HASH_SIZE': 65536,
         'FLOW_MEMCAP': '128mb',
         'FLOW_PREALLOC': 10000,
         'FTP_ENABLED': True,
+        'FTP_EVE_ENABLED': False,
         'FTP_MEMCAP': '64mb',
         'FTP_PORTS': 21,
-        'GENEVE_ENABLED': True,
+        'GENEVE_ENABLED': False,
+        'GENEVE_EVE_ENABLED': False,
         'GENEVE_PORTS': 6081,
         'HOME_NET': "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]",
         'HOST_HASH_SIZE': 4096,
         'HOST_MEMCAP': '32mb',
         'HOST_PREALLOC': 1000,
         'HTTP2_ENABLED': False,
+        'HTTP2_EVE_ENABLED': False,
         'HTTP_ENABLED': True,
-        'HTTP_EXTENDED': True,
+        'HTTP_EVE_ENABLED': False,
+        'HTTP_EXTENDED': False,
         'HTTP_PORTS': 80,
         'IKEV2_ENABLED': True,
+        'IKEV2_EVE_ENABLED': False,
         'IMAP_ENABLED': 'detection-only',
+        'IMAP_EVE_ENABLED': False,
         'KRB5_ENABLED': True,
+        'KRB5_EVE_ENABLED': False,
         'MANAGED_RULES_DIR': '/var/lib/suricata/rules',
         'MODBUS_ENABLED': True,
+        'MODBUS_EVE_ENABLED': False,
         'MODBUS_PORTS': 502,
         'MODBUS_STREAM_DEPTH': 0,
         'MQTT_ENABLED': True,
+        'MQTT_EVE_ENABLED': False,
         'MQTT_MAX_MSG_LENGTH': '1mb',
         'MQTT_PASSWORDS': False,
         'NETFLOW_ENABLED': False,
+        'NETFLOW_EVE_ENABLED': False,
         'NFS_ENABLED': True,
+        'NFS_EVE_ENABLED': False,
         'NTP_ENABLED': True,
+        'NTP_EVE_ENABLED': False,
         'ORACLE_PORTS': 1521,
         'PACKET_SIZE': 1514,
         'PCRE_MATCH_LIMIT': 3500,
         'PCRE_RECURSION': 1500,
         'RDP_ENABLED': True,
+        'RDP_EVE_ENABLED': False,
         'RFB_ENABLED': True,
+        'RFB_EVE_ENABLED': False,
         'RFB_PORTS': "[5900,5901,5902,5903,5904,5905,5906,5907,5908,5909]",
         'RUNMODE': 'autofp',
         'SHELLCODE_PORTS': '!80',
         'SIP_ENABLED': True,
+        'SIP_EVE_ENABLED': False,
         'SMB_ENABLED': True,
+        'SMB_EVE_ENABLED': False,
         'SMB_PORTS': "[139,445]",
         'SMB_STREAM_DEPTH': 0,
         'SMTP_BODY_MD5': False,
@@ -288,7 +312,8 @@ DEFAULT_VARS.update(
         'SMTP_DECODE_MIME': False,
         'SMTP_DECODE_QUOTED_PRINTABLE': False,
         'SMTP_ENABLED': True,
-        'SMTP_EXTENDED': True,
+        'SMTP_EVE_ENABLED': False,
+        'SMTP_EXTENDED': False,
         'SMTP_EXTRACT_URLS': True,
         'SMTP_HEADER_VALUE_DEPTH': 2000,
         'SMTP_INSPECTED_TRACKER_CONTENT_INSPECT_MIN_SIZE': 32768,
@@ -296,7 +321,9 @@ DEFAULT_VARS.update(
         'SMTP_INSPECTED_TRACKER_CONTENT_LIMIT': 100000,
         'SMTP_RAW_EXTRACTION': False,
         'SNMP_ENABLED': True,
+        'SNMP_EVE_ENABLED': False,
         'SSH_ENABLED': True,
+        'SSH_EVE_ENABLED': False,
         'SSH_HASSH': True,
         'SSH_PORTS': 22,
         'STREAM_CHECKSUM_VALIDATION': False,
@@ -308,17 +335,21 @@ DEFAULT_VARS.update(
         'STREAM_REASSEMBLY_TOCLIENT_CHUNK_SIZE': 2560,
         'STREAM_REASSEMBLY_TOSERVER_CHUNK_SIZE': 2560,
         'TEREDO_ENABLED': True,
+        'TEREDO_EVE_ENABLED': False,
         'TEREDO_PORTS': 3544,
         'TEST_CONFIG_VERBOSITY': '',
         'TFTP_ENABLED': True,
+        'TFTP_EVE_ENABLED': False,
         'TLS_ENABLED': True,
+        'TLS_EVE_ENABLED': False,
         'TLS_ENCRYPTION_HANDLING': 'bypass',
-        'TLS_EXTENDED': True,
+        'TLS_EXTENDED': False,
         'TLS_JA3': 'auto',
         'TLS_PORTS': 443,
         'TLS_SESSION_RESUMPTION': False,
         'VLAN_USE_FOR_TRACKING': True,
         'VXLAN_ENABLED': True,
+        'VXLAN_EVE_ENABLED': False,
         'VXLAN_PORTS': 4789,
     }
 )
@@ -338,56 +369,272 @@ for varName, varVal in [
 
 ###################################################################################################
 ProtocolConfig = namedtuple(
-    "ProtocolConfig", ["subs", "enabled", "eve", "destination_ports", "source_ports"], rename=False
+    "ProtocolConfig", ["subs", "enabled", "eve_enabled", "in_eve", "destination_ports", "source_ports"], rename=False
 )
-PROTOCOL_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, True, None, None))
+PROTOCOL_CONFIGS = defaultdict(
+    lambda: ProtocolConfig(
+        [],
+        True,
+        False,
+        True,
+        None,
+        None,
+    )
+)
 PROTOCOL_CONFIGS.update(
     {
-        'anomaly': ProtocolConfig([], val2bool(DEFAULT_VARS['ANOMALY_ENABLED']), True, None, None),
-        'dcerpc': ProtocolConfig([], val2bool(DEFAULT_VARS['DCERPC_ENABLED']), True, None, None),
-        'dhcp': ProtocolConfig([], val2bool(DEFAULT_VARS['DHCP_ENABLED']), True, None, None),
-        'dnp3': ProtocolConfig([], val2bool(DEFAULT_VARS['DNP3_ENABLED']), True, DEFAULT_VARS['DNP3_PORTS'], None),
+        'anomaly': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['ANOMALY_ENABLED']),
+            val2bool(DEFAULT_VARS['ANOMALY_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'dcerpc': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['DCERPC_ENABLED']),
+            val2bool(DEFAULT_VARS['DCERPC_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'dhcp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['DHCP_ENABLED']),
+            val2bool(DEFAULT_VARS['DHCP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'dnp3': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['DNP3_ENABLED']),
+            val2bool(DEFAULT_VARS['DNP3_EVE_ENABLED']),
+            True,
+            DEFAULT_VARS['DNP3_PORTS'],
+            None,
+        ),
         'dns': ProtocolConfig(
-            ['tcp', 'udp'], val2bool(DEFAULT_VARS['DNS_ENABLED']), True, DEFAULT_VARS['DNS_PORTS'], None
+            ['tcp', 'udp'],
+            val2bool(DEFAULT_VARS['DNS_ENABLED']),
+            val2bool(DEFAULT_VARS['DNS_EVE_ENABLED']),
+            True,
+            DEFAULT_VARS['DNS_PORTS'],
+            None,
         ),
         'enip': ProtocolConfig(
-            [], val2bool(DEFAULT_VARS['ENIP_ENABLED']), False, DEFAULT_VARS['ENIP_PORTS'], DEFAULT_VARS['ENIP_PORTS']
+            [],
+            val2bool(DEFAULT_VARS['ENIP_ENABLED']),
+            val2bool(DEFAULT_VARS['ENIP_EVE_ENABLED']),
+            False,
+            DEFAULT_VARS['ENIP_PORTS'],
+            DEFAULT_VARS['ENIP_PORTS'],
         ),
-        'files': ProtocolConfig([], val2bool(DEFAULT_VARS['FILES_ENABLED']), True, None, None),
-        'flow': ProtocolConfig([], val2bool(DEFAULT_VARS['FLOW_ENABLED']), True, None, None),
-        'ftp': ProtocolConfig([], val2bool(DEFAULT_VARS['FTP_ENABLED']), True, None, None),
-        'http2': ProtocolConfig([], val2bool(DEFAULT_VARS['HTTP2_ENABLED']), True, None, None),
-        'http': ProtocolConfig([], val2bool(DEFAULT_VARS['HTTP_ENABLED']), True, None, None),
-        'ikev2': ProtocolConfig([], val2bool(DEFAULT_VARS['IKEV2_ENABLED']), True, None, None),
-        'imap': ProtocolConfig([], val2bool(DEFAULT_VARS['IMAP_ENABLED']), False, None, None),
-        'krb5': ProtocolConfig([], val2bool(DEFAULT_VARS['KRB5_ENABLED']), True, None, None),
+        'files': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['FILES_ENABLED']),
+            val2bool(DEFAULT_VARS['FILES_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'flow': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['FLOW_ENABLED']),
+            val2bool(DEFAULT_VARS['FLOW_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'ftp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['FTP_ENABLED']),
+            val2bool(DEFAULT_VARS['FTP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'http2': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['HTTP2_ENABLED']),
+            val2bool(DEFAULT_VARS['HTTP2_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'http': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['HTTP_ENABLED']),
+            val2bool(DEFAULT_VARS['HTTP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'ikev2': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['IKEV2_ENABLED']),
+            val2bool(DEFAULT_VARS['IKEV2_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'imap': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['IMAP_ENABLED']),
+            val2bool(DEFAULT_VARS['IMAP_EVE_ENABLED']),
+            False,
+            None,
+            None,
+        ),
+        'krb5': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['KRB5_ENABLED']),
+            val2bool(DEFAULT_VARS['KRB5_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
         'modbus': ProtocolConfig(
-            [], val2bool(DEFAULT_VARS['MODBUS_ENABLED']), False, DEFAULT_VARS['MODBUS_PORTS'], None
+            [],
+            val2bool(DEFAULT_VARS['MODBUS_ENABLED']),
+            val2bool(DEFAULT_VARS['MODBUS_EVE_ENABLED']),
+            False,
+            DEFAULT_VARS['MODBUS_PORTS'],
+            None,
         ),
-        'mqtt': ProtocolConfig([], val2bool(DEFAULT_VARS['MQTT_ENABLED']), True, None, None),
-        'netflow': ProtocolConfig([], val2bool(DEFAULT_VARS['NETFLOW_ENABLED']), True, None, None),
-        'nfs': ProtocolConfig([], val2bool(DEFAULT_VARS['NFS_ENABLED']), True, None, None),
-        'ntp': ProtocolConfig([], val2bool(DEFAULT_VARS['NTP_ENABLED']), False, None, None),
-        'rdp': ProtocolConfig([], val2bool(DEFAULT_VARS['RDP_ENABLED']), True, None, None),
-        'rfb': ProtocolConfig([], val2bool(DEFAULT_VARS['RFB_ENABLED']), True, DEFAULT_VARS['RFB_PORTS'], None),
-        'sip': ProtocolConfig([], val2bool(DEFAULT_VARS['SIP_ENABLED']), True, None, None),
-        'smb': ProtocolConfig([], val2bool(DEFAULT_VARS['SMB_ENABLED']), True, DEFAULT_VARS['SMB_PORTS'], None),
-        'smtp': ProtocolConfig([], val2bool(DEFAULT_VARS['SMTP_ENABLED']), True, None, None),
-        'snmp': ProtocolConfig([], val2bool(DEFAULT_VARS['SNMP_ENABLED']), True, None, None),
-        'ssh': ProtocolConfig([], val2bool(DEFAULT_VARS['SSH_ENABLED']), True, None, None),
-        'tftp': ProtocolConfig([], val2bool(DEFAULT_VARS['TFTP_ENABLED']), True, None, None),
-        'tls': ProtocolConfig([], val2bool(DEFAULT_VARS['TLS_ENABLED']), True, DEFAULT_VARS['TLS_PORTS'], None),
+        'mqtt': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['MQTT_ENABLED']),
+            val2bool(DEFAULT_VARS['MQTT_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'netflow': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['NETFLOW_ENABLED']),
+            val2bool(DEFAULT_VARS['NETFLOW_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'nfs': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['NFS_ENABLED']),
+            val2bool(DEFAULT_VARS['NFS_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'ntp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['NTP_ENABLED']),
+            val2bool(DEFAULT_VARS['NTP_EVE_ENABLED']),
+            False,
+            None,
+            None,
+        ),
+        'rdp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['RDP_ENABLED']),
+            val2bool(DEFAULT_VARS['RDP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'rfb': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['RFB_ENABLED']),
+            val2bool(DEFAULT_VARS['RFB_EVE_ENABLED']),
+            True,
+            DEFAULT_VARS['RFB_PORTS'],
+            None,
+        ),
+        'sip': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['SIP_ENABLED']),
+            val2bool(DEFAULT_VARS['SIP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'smb': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['SMB_ENABLED']),
+            val2bool(DEFAULT_VARS['SMB_EVE_ENABLED']),
+            True,
+            DEFAULT_VARS['SMB_PORTS'],
+            None,
+        ),
+        'smtp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['SMTP_ENABLED']),
+            val2bool(DEFAULT_VARS['SMTP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'snmp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['SNMP_ENABLED']),
+            val2bool(DEFAULT_VARS['SNMP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'ssh': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['SSH_ENABLED']),
+            val2bool(DEFAULT_VARS['SSH_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'tftp': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['TFTP_ENABLED']),
+            val2bool(DEFAULT_VARS['TFTP_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'tls': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['TLS_ENABLED']),
+            val2bool(DEFAULT_VARS['TLS_EVE_ENABLED']),
+            True,
+            DEFAULT_VARS['TLS_PORTS'],
+            None,
+        ),
     }
 )
-DECODER_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, False, None, None))
+DECODER_CONFIGS = defaultdict(lambda: ProtocolConfig([], True, False, False, None, None))
 DECODER_CONFIGS.update(
     {
         'teredo': ProtocolConfig(
-            [], val2bool(DEFAULT_VARS['TEREDO_ENABLED']), False, DEFAULT_VARS['TEREDO_PORTS'], None
+            [],
+            val2bool(DEFAULT_VARS['TEREDO_ENABLED']),
+            False,
+            False,
+            DEFAULT_VARS['TEREDO_PORTS'],
+            None,
         ),
-        'vxlan': ProtocolConfig([], val2bool(DEFAULT_VARS['VXLAN_ENABLED']), False, DEFAULT_VARS['VXLAN_PORTS'], None),
+        'vxlan': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['VXLAN_ENABLED']),
+            False,
+            False,
+            DEFAULT_VARS['VXLAN_PORTS'],
+            None,
+        ),
         'geneve': ProtocolConfig(
-            [], val2bool(DEFAULT_VARS['GENEVE_ENABLED']), False, DEFAULT_VARS['VXLAN_PORTS'], None
+            [],
+            val2bool(DEFAULT_VARS['GENEVE_ENABLED']),
+            False,
+            False,
+            DEFAULT_VARS['GENEVE_PORTS'],
+            None,
         ),
     }
 )
@@ -609,7 +856,11 @@ def main():
                                 deep_set(
                                     cfg['outputs'][outputIdx][name]['types'][dumperIdx],
                                     [dumperName, 'enabled'],
-                                    PROTOCOL_CONFIGS[dumperName].enabled,
+                                    (dumperName == 'alert')
+                                    or (
+                                        PROTOCOL_CONFIGS[dumperName].enabled
+                                        and PROTOCOL_CONFIGS[dumperName].eve_enabled
+                                    ),
                                 )
 
                                 if dumperName == 'alert':
@@ -727,14 +978,22 @@ def main():
                             # eve.json alert type is scalar
                             dumperName = cfg['outputs'][outputIdx][name]['types'][dumperIdx]
                             remainingTypes.discard(dumperName)
-                            if (not PROTOCOL_CONFIGS[dumperName].enabled) or (not PROTOCOL_CONFIGS[dumperName].eve):
+                            if (
+                                (not PROTOCOL_CONFIGS[dumperName].enabled)
+                                or (not PROTOCOL_CONFIGS[dumperName].eve_enabled)
+                                or (not PROTOCOL_CONFIGS[dumperName].in_eve)
+                            ):
                                 # we "disable" these types by removing them from the list
                                 del cfg['outputs'][outputIdx][name]['types'][dumperIdx]
 
                     # handle the eve.json alert types that weren't handled above (were probably
                     # commented-out/missing and need to be added back in)
                     for dumperName in [
-                        x for x in list(remainingTypes) if PROTOCOL_CONFIGS[x].enabled and PROTOCOL_CONFIGS[x].eve
+                        x
+                        for x in list(remainingTypes)
+                        if PROTOCOL_CONFIGS[x].enabled
+                        and PROTOCOL_CONFIGS[x].eve_enabled
+                        and PROTOCOL_CONFIGS[x].in_eve
                     ]:
                         cfg['outputs'][outputIdx][name]['types'].append(dumperName)
 
