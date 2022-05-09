@@ -134,6 +134,7 @@ class MalcolmSource extends WISESource {
       "rule.author",
       "rule.category",
       "rule.description",
+      "rule.id",
       "rule.license",
       "rule.name",
       "rule.reference",
@@ -1643,11 +1644,8 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
       "    +arrayList(session.rule, 'name', 'Event Name', 'rule.name')\n" +
       "    +arrayList(session.rule, 'category', 'Event Category', 'rule.category')\n" +
+      "    +arrayList(session.rule, 'id', 'Rule ID', 'rule.id')\n" +
       "    +arrayList(session.vulnerability, 'category', 'Vulnerability Category', 'vulnerability.category')\n" +
-      "    +arrayList(session.threat.tactic, 'id', 'Tactic ID', 'threat.tactic.id')\n" +
-      "    +arrayList(session.threat.tactic, 'name', 'Tactic', 'threat.tactic.name')\n" +
-      "    +arrayList(session.threat.technique, 'id', 'Technique ID', 'threat.technique.id')\n" +
-      "    +arrayList(session.threat.technique, 'name', 'Technique', 'threat.technique.name')\n" +
       "    +arrayList(session.file, 'path', 'File Path', 'file.path')\n" +
       "    +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
       "    +arrayList(session.file, 'source', 'File Transport', 'file.source')\n" +
