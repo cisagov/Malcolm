@@ -987,6 +987,18 @@
         "zeek.ftp.reply_code": { "type": "short" },
         "zeek.ftp.reply_msg": { "type": "keyword" },
         "zeek.fuid": { "type": "keyword" },
+        "zeek.genisys.header": { "type": "keyword" },
+        "zeek.genisys.server": { "type": "integer" },
+        "zeek.genisys.direction": { "type": "keyword" },
+        "zeek.genisys.crc_transmitted": { "type": "keyword" },
+        "zeek.genisys.crc_calculated": { "type": "keyword" },
+        "zeek.genisys.payload": {
+          "type": "nested",
+          "properties": {
+            "address": { "type": "integer" },
+            "data": { "type": "integer" }
+          }
+        },
         "zeek.gquic.cyu": { "type": "keyword" },
         "zeek.gquic.cyutags": { "type": "keyword" },
         "zeek.gquic.server_name": { "type": "keyword" },

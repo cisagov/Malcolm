@@ -82,6 +82,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-dnp3"
   "https://github.com/cisagov/icsnpp-enip"
   "https://github.com/cisagov/icsnpp-ethercat"
+  "https://github.com/cisagov/icsnpp-genisys"
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/corelight/callstranger-detector"
@@ -120,7 +121,7 @@ ZKG_GITHUB_URLS=(
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
-  [[ -d "$SRC_DIR" ]] && zkg install --force --skiptests "$SRC_DIR"
+  [[ -d "$SRC_DIR" ]] && zkg install --nodeps --force --skiptests "$SRC_DIR"
 done
 
 find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \;
