@@ -36,12 +36,11 @@ RUN apt-get -q update && \
         libnss3-dev \
         libpcap-dev \
         libpcre3-dev \
-        python3-pip \
         libtool \
         libyaml-dev \
         make \
+        python3-pip \
         python3-yaml \
-        zlib1g-dev \
         wget \
         zlib1g-dev && \
     ( curl https://sh.rustup.rs -sSf | bash -s -- -y ) && \
@@ -129,6 +128,7 @@ RUN apt-get -q update && \
         curl \
         file \
         inotify-tools \
+        jq \
         less \
         libcap-ng0 \
         libevent-2.1-7 \
