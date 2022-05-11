@@ -97,6 +97,7 @@
         "http.response.mime_type": { "type": "keyword" },
         "http.response.status_code": { "type": "long" },
         "http.version": { "type": "keyword" },
+        "log.file.path": { "type": "keyword" },
         "network.application": { "type": "keyword" },
         "network.bytes": { "type": "long" },
         "network.community_id": { "type": "keyword" },

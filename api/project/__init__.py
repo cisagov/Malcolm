@@ -20,7 +20,7 @@ from flask import Flask, jsonify, request
 fields_to_urls = []
 fields_to_urls.append(
     [
-        r'^event\.(risk|severity)\w*$',
+        r'^(event\.(risk|severity)\w*|(rule|vulnerability|threat)\.*)$',
         ['DASH:d2dd0180-06b1-11ec-8c6b-353266ade330', 'DASH:95479950-41f2-11ea-88fa-7151df485405'],
     ]
 )
@@ -33,6 +33,7 @@ fields_to_urls.append(
         ['DASH:abdd7550-2c7c-40dc-947e-f6d186a158c4'],
     ]
 )
+fields_to_urls.append([r'^suricata\.', ['DASH:5694ca60-cbdf-11ec-a50a-5fedd672f5c5']])
 fields_to_urls.append(
     [r'^zeek\.bacnet.*\.', ['DASH:2bec1490-eb94-11e9-a384-0fcf32210194', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
 )
@@ -96,7 +97,10 @@ fields_to_urls.append(
     ]
 )
 fields_to_urls.append(
-    [r'^zeek\.signatures\.', ['DASH:665d1610-523d-11e9-a30e-e3576242f3ed', 'DASH:95479950-41f2-11ea-88fa-7151df485405']]
+    [
+        r'^(zeek\.signatures|rule)\.',
+        ['DASH:665d1610-523d-11e9-a30e-e3576242f3ed', 'DASH:95479950-41f2-11ea-88fa-7151df485405'],
+    ]
 )
 fields_to_urls.append([r'^zeek\.sip\.', ['DASH:0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa']])
 fields_to_urls.append([r'^zeek\.smb.*\.', ['DASH:42e831b9-41a9-4f35-8b7d-e1566d368773']])
