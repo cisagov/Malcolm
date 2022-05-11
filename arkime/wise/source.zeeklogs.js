@@ -713,6 +713,7 @@ class MalcolmSource extends WISESource {
       "vulnerability.category",
       "vulnerability.description",
       "vulnerability.enumeration",
+      "vulnerability.id",
       "vulnerability.reference",
       "vulnerability.scanner.vendor",
       "zeek.bacnet.bvlc_function",
@@ -1774,6 +1775,15 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
       "    +arrayList(session.event, 'action', 'Action', 'event.action')\n" +
       "    +arrayList(session.event, 'result', 'Result', 'event.result')\n" +
+      "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
+      "    +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
+      "    +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
+      "    +arrayList(session.rule, 'category', 'Event Category', 'rule.category')\n" +
+      "    +arrayList(session.rule, 'name', 'Event Name', 'rule.name')\n" +
+      "    +arrayList(session.rule, 'id', 'Rule ID', 'rule.id')\n" +
+      "    +arrayList(session.vulnerability, 'category', 'Vulnerability Category', 'vulnerability.category')\n" +
+      "    +arrayList(session.vulnerability, 'enumeration', 'Vulnerability Enumeration', 'vulnerability.enumeration')\n" +
+      "    +arrayList(session.vulnerability, 'id', 'Vulnerability ID', 'vulnerability.id')\n" +
       "    +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
       "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
@@ -1801,13 +1811,6 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.user_agent, 'original', 'User Agent', 'user_agent.original')\n" +
       "    +arrayList(session.event, 'freq_score_v1', 'Freq Score v1', 'event.freq_score_v1')\n" +
       "    +arrayList(session.event, 'freq_score_v2', 'Freq Score v2', 'event.freq_score_v2')\n" +
-      "    +arrayList(session.event, 'severity', 'Severity', 'event.severity')\n" +
-      "    +arrayList(session.event, 'risk_score', 'Risk Score', 'event.risk_score')\n" +
-      "    +arrayList(session.event, 'severity_tags', 'Severity Tags', 'event.severity_tags')\n" +
-      "    +arrayList(session.rule, 'name', 'Event Name', 'rule.name')\n" +
-      "    +arrayList(session.rule, 'category', 'Event Category', 'rule.category')\n" +
-      "    +arrayList(session.rule, 'id', 'Rule ID', 'rule.id')\n" +
-      "    +arrayList(session.vulnerability, 'category', 'Vulnerability Category', 'vulnerability.category')\n" +
       "    +arrayList(session.file, 'path', 'File Path', 'file.path')\n" +
       "    +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
       "    +arrayList(session.file, 'source', 'File Transport', 'file.source')\n" +
