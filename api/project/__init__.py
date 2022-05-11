@@ -33,7 +33,7 @@ fields_to_urls.append(
         ['DASH:abdd7550-2c7c-40dc-947e-f6d186a158c4'],
     ]
 )
-fields_to_urls.append([r'^suricata\.', ['DASH:5694ca60-cbdf-11ec-a50a-5fedd672f5c5']])
+fields_to_urls.append([r'^(suricata|rule)\.', ['DASH:5694ca60-cbdf-11ec-a50a-5fedd672f5c5']])
 fields_to_urls.append(
     [r'^zeek\.bacnet.*\.', ['DASH:2bec1490-eb94-11e9-a384-0fcf32210194', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
 )
@@ -49,7 +49,7 @@ fields_to_urls.append(
     [r'^zeek\.dnp3.*\.', ['DASH:870a5862-6c26-4a08-99fd-0c06cda85ba3', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
 )
 fields_to_urls.append(
-    [r'^((source|destination)\.ip_reverse_dns|zeek\.dns\.)', ['DASH:2cf94cd0-ecab-40a5-95a7-8419f3a39cd9']]
+    [r'^((source|destination)\.ip_reverse_dns|(zeek\.)?dns\.)', ['DASH:2cf94cd0-ecab-40a5-95a7-8419f3a39cd9']]
 )
 fields_to_urls.append(
     [r'^zeek\.ecat.*\.', ['DASH:4a073440-b286-11eb-a4d4-09fa12a6ebd4', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
@@ -99,7 +99,11 @@ fields_to_urls.append(
 fields_to_urls.append(
     [
         r'^(zeek\.signatures|rule)\.',
-        ['DASH:665d1610-523d-11e9-a30e-e3576242f3ed', 'DASH:95479950-41f2-11ea-88fa-7151df485405'],
+        [
+            'DASH:665d1610-523d-11e9-a30e-e3576242f3ed',
+            'DASH:95479950-41f2-11ea-88fa-7151df485405',
+            'DASH:f1f09567-fc7f-450b-a341-19d2f2bb468b',
+        ],
     ]
 )
 fields_to_urls.append([r'^zeek\.sip\.', ['DASH:0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa']])
