@@ -10,6 +10,7 @@ on:
       - 'sensor-iso/**'
       - 'shared/bin/*'
       - '.trigger_workflow_build'
+      - '.github/workflows/sensor-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
 
