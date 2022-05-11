@@ -1716,7 +1716,7 @@ Lists [information related to the underlying OpenSearch indices](https://opensea
 
 #### Field Aggregations
 
-`GET` - /mapi/agg/`<fieldname>`
+`GET` or `POST` - /mapi/agg/`<fieldname>`
 
 Executes an OpenSearch [bucket aggregation](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the requested fields across all of Malcolm's indexed network traffic metadata.
 
@@ -1728,20 +1728,20 @@ Parameters:
 * `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
 * `filter` (query parameter) - field filters formatted as a JSON dictionary
 
-The `from`, `to`, and `filter` parameters can be used to further restrict the range of documents returned. The `filter` dictionary should be formatted such that its keys are field names and its values are the values for which to filter. A field name may be prepended with a `!` to negate the filter (e.g., `filter={"event.provider":"zeek"}` vs. `filter={"!event.provider":"zeek"}`). Filtering for value `null` implies "is not set" or "does not exist" (e.g., `filter={"event.dataset":null}` means "the field `event.dataset` is `null`/is not set" while `filter={"!event.dataset":null}` means "the field `event.dataset` is not `null`/is set").
+The `from`, `to`, and `filter` parameters can be used to further restrict the range of documents returned. The `filter` dictionary should be formatted such that its keys are field names and its values are the values for which to filter. A field name may be prepended with a `!` to negate the filter (e.g., `{"event.provider":"zeek"}` vs. `{"!event.provider":"zeek"}`). Filtering for value `null` implies "is not set" or "does not exist" (e.g., `{"event.dataset":null}` means "the field `event.dataset` is `null`/is not set" while `{"!event.dataset":null}` means "the field `event.dataset` is not `null`/is set").
 
-Examples of `filter` URL query parameter:
+Examples of `filter` parameter:
 
-* `filter={"!network.transport":"icmp"}` - `network.transport` is not `icmp`
-* `filter={"network.direction":["inbound","outbound"]}` - `network.direction` is either `inbound` or `outbound`
-* `filter={"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
-* `filter={"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
+* `{"!network.transport":"icmp"}` - `network.transport` is not `icmp`
+* `{"network.direction":["inbound","outbound"]}` - `network.direction` is either `inbound` or `outbound`
+* `{"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
+* `{"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
 
 See [Examples](#APIExamples) for more examples of `filter` and corresponding output.
 
 #### Document Lookup
 
-`GET` - /mapi/document
+`GET` or `POST` - /mapi/document
 
 Executes an OpenSearch [query](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the matching documents across all of Malcolm's indexed network traffic metadata.
 
@@ -1753,10 +1753,12 @@ Parameters:
 * `filter` (query parameter) - field filters formatted as a JSON dictionary (see **Field Aggregations** for examples)
 
 <details>
-<summary>Example URL and output:</summary>
+<summary>Example cURL command and output:</summary>
 
 ```
-https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/document' \
+    -d '{"limit": 10, filter":{"zeek.uid":"CYeji2z7CKmPRGyga"}}'
 ```
 
 ```json
@@ -2714,7 +2716,9 @@ Some security-related API examples:
 <summary>External traffic (outbound/inbound)</summary>
 
 ```
-/mapi/agg/network.protocol?filter={"network.direction":["inbound","outbound"]}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/network.protocol' \
+    -d '{"filter":{"network.direction":["inbound","outbound"]}}'
 ```
 
 ```json
@@ -2772,7 +2776,9 @@ Some security-related API examples:
 <summary>Cross-segment traffic</summary>
 
 ```
-/mapi/agg/source.segment,destination.segment,network.protocol?filter={"tags":"cross_segment"}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/source.segment,destination.segment,network.protocol' \
+    -d '{"filter":{"tags":"cross_segment"}}'
 ```
 
 ```json
@@ -2953,7 +2959,9 @@ Some security-related API examples:
 <summary>Plaintext password</summary>
 
 ```
-/mapi/agg/network.protocol?filter={"!related.password":null}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/network.protocol' \
+    -d '{"filter":{"!related.password":null}}'
 ```
 
 ```json
@@ -2988,7 +2996,9 @@ Some security-related API examples:
 <summary>Insecure/outdated protocols</summary>
 
 ```
-/mapi/agg/network.protocol,network.protocol_version?filter={"event.severity_tags":"Insecure or outdated protocol"}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/network.protocol,network.protocol_version' \
+    -d '{"filter":{"event.severity_tags":"Insecure or outdated protocol"}}'
 ```
 
 ```json

@@ -507,9 +507,9 @@ def document(index):
     )
 
 
-@app.route("/index")
-@app.route("/indexes")
-@app.route("/indices")
+@app.route("/index", methods=['GET'])
+@app.route("/indexes", methods=['GET'])
+@app.route("/indices", methods=['GET'])
 def indices():
     """Provide a list of indices in the OpenSearch data store
 
@@ -524,7 +524,7 @@ def indices():
     return jsonify(indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json())
 
 
-@app.route("/fields")
+@app.route("/fields", methods=['GET'])
 def fields():
     """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
     OpenSearch template for the sessions indices, and Kibana's field list
@@ -578,8 +578,8 @@ def fields():
     return jsonify(fields=fields, total=len(fields))
 
 
-@app.route("/")
-@app.route("/version")
+@app.route("/", methods=['GET'])
+@app.route("/version", methods=['GET'])
 def version():
     """Provides version information about Malcolm and the underlying OpenSearch instance
 
@@ -608,7 +608,7 @@ def version():
     )
 
 
-@app.route("/ping")
+@app.route("/ping", methods=['GET'])
 def ping():
     """Says 'pong' (for a simple health check)
 
