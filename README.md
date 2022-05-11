@@ -1179,9 +1179,11 @@ Many of Malcolm's prebuilt visualizations for Zeek logs were originally inspired
 
 ![OpenSearch Dashboards includes both coordinate and region map types](./docs/images/screenshots/dashboards_region_map.png)
 
-![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/dashboards_notices.png)
+![The Suricata Alerts dashboard highlights traffic which matched Suricata signatures](./docs/images/screenshots/dashboards_suricata_alerts.png)
 
-![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/dashboards_signatures.png)
+![The Zeek Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/dashboards_notices.png)
+
+![The Zeek Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/dashboards_signatures.png)
 
 ![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/dashboards_software.png)
 
