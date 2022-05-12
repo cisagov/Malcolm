@@ -428,7 +428,7 @@ function sensorwatch () {
     if [ -d "$ZEEK_LOG_PATH" ] && [ -d "$PCAP_PATH" ] ; then
       while true; do
         clear
-        find "$PCAP_PATH" "$ZEEK_LOG_PATH" -type f \( -name "*.pcap*" -o -name "*.log*" \) -print0 | \
+        find "$PCAP_PATH" "$ZEEK_LOG_PATH" -type f \( -name "*.pcap*" -o -name "*.log*" -o -name "eve*.json*" \) -print0 | \
           xargs -0 stat --format '%Y: %y %s %n' | \
           sort -nr | \
           cut -d: -f2- | \

@@ -108,11 +108,14 @@ class Constants:
     BEAT_DASHBOARDS_SSL_VERIFY = "BEAT_DASHBOARDS_SSL_VERIFY"
 
     # specific to filebeat
-    BEAT_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
-    BEAT_LOG_PATTERN_KEY = 'BEAT_LOG_PATTERN'
-    BEAT_STATIC_LOG_PATH_SUBDIR = os.path.join('logs', 'static')
-    BEAT_STATIC_LOG_PATTERN_KEY = 'BEAT_STATIC_LOG_PATTERN'
-    BEAT_LOG_PATTERN_VAL = '*.log'
+    BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
+    BEAT_ZEEK_LOG_PATTERN_KEY = 'BEAT_LOG_PATTERN'
+    BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'static')
+    BEAT_STATIC_ZEEK_LOG_PATTERN_KEY = 'BEAT_STATIC_LOG_PATTERN'
+    BEAT_SURICATA_LOG_PATH_SUBDIR = 'suricata'
+    BEAT_SURICATA_LOG_PATTERN_KEY = 'BEAT_SURICATA_LOG_PATTERN'
+    BEAT_ZEEK_LOG_PATTERN_VAL = '*.log'
+    BEAT_SURICATA_LOG_PATTERN_VAL = 'eve*.json'
 
     # specific to metricbeat
     BEAT_INTERVAL = "BEAT_INTERVAL"
@@ -1087,13 +1090,17 @@ def main():
                                 code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
 
                             else:
-                                forwarder_dict[Constants.BEAT_LOG_PATTERN_KEY] = os.path.join(
-                                    os.path.join(values[0], Constants.BEAT_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_LOG_PATTERN_VAL,
+                                forwarder_dict[Constants.BEAT_ZEEK_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(values[0], Constants.BEAT_ZEEK_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
                                 )
-                                forwarder_dict[Constants.BEAT_STATIC_LOG_PATTERN_KEY] = os.path.join(
-                                    os.path.join(values[0], Constants.BEAT_STATIC_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_LOG_PATTERN_VAL,
+                                forwarder_dict[Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(values[0], Constants.BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
+                                )
+                                forwarder_dict[Constants.BEAT_SURICATA_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(values[0], Constants.BEAT_SURICATA_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_SURICATA_LOG_PATTERN_VAL,
                                 )
                                 forwarder_dict[Constants.BEAT_LS_HOST] = values[1]
                                 forwarder_dict[Constants.BEAT_LS_PORT] = values[2]

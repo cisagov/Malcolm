@@ -24,6 +24,25 @@ filebeat.inputs:
   clean_renamed: ${BEAT_CLEAN_RENAMED:true}
   clean_removed: ${BEAT_CLEAN_REMOVED:true}
 
+- type: log
+  paths:
+    - ${BEAT_SURICATA_LOG_PATTERN:/home/sensor/bro_logs/suricata/eve*.json}
+  symlinks: true
+  fields_under_root: true
+  tags: ["_filebeat_suricata"]
+  fields:
+    type: "session"
+  compression_level: 0
+  scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${BEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${BEAT_IGNORE_OLDER:120m}
+  close_inactive: ${BEAT_CLOSE_INACTIVE:90m}
+  close_renamed: ${BEAT_CLOSE_RENAMED:true}
+  close_removed: ${BEAT_CLOSE_REMOVED:true}
+  close_eof: ${BEAT_CLOSE_EOF:false}
+  clean_renamed: ${BEAT_CLEAN_RENAMED:true}
+  clean_removed: ${BEAT_CLEAN_REMOVED:true}
+
 output.logstash:
   hosts: ["${BEAT_LS_HOST}:${BEAT_LS_PORT}"]
   ssl.enabled: ${BEAT_LS_SSL:false}
