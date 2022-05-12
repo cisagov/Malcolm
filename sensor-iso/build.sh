@@ -96,7 +96,6 @@ if [ -d "$WORKDIR" ]; then
   # copy shared scripts
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
-  mv ./config/includes.chroot/usr/local/bin/suricata_config_populate.py ./config/includes.chroot/opt/sensor/sensor_ctl/supervisor.init/
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info
