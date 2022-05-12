@@ -26,6 +26,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     find /opt/sensor/ -type f -exec chmod 640 "{}" \;
     find /opt/sensor/ -type f -name "*.sh" -exec chmod 750 "{}" \;
     find /opt/sensor/ -type f -name "*.keystore" -exec chmod 600 "{}" \;
+    [[ -d /opt/sensor/sensor_ctl/supervisor.init/ ]] && chmod 750 /opt/sensor/sensor_ctl/supervisor.init/*
 
     if [[ -f /opt/sensor/sensor_ctl/control_vars.conf ]]; then
       # if the capture interface hasn't been set in control_vars.conf, set it now

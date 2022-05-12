@@ -704,7 +704,7 @@ def main():
         type=str,
         default=os.getenv(
             'SURICATA_CONFIG_FILE',
-            os.path.join(os.path.join(os.getenv('SUPERVISOR_PATH', '/etc'), 'suricata'), 'suricata.yml'),
+            os.path.join(os.path.join(os.getenv('SUPERVISOR_PATH', '/etc'), 'suricata'), 'suricata.yaml'),
         ),
         required=False,
         metavar='<string>',
