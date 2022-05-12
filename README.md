@@ -233,6 +233,8 @@ Malcolm parses the network session data and enriches it with additional lookups 
 
 The enriched data is stored in an [OpenSearch](https://opensearch.org/) document store in a format suitable for analysis through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
 
+![Malcolm Data Pipeline](./docs/images/malcolm_data_pipeline.png)
+
 For smaller networks, use at home by network security enthusiasts, or in the field for incident response engagements, Malcolm can also easily be deployed locally on an ordinary consumer workstation or laptop. Malcolm can process local artifacts such as locally-generated Zeek logs, locally-captured PCAP files, and PCAP files collected offline without the use of a dedicated sensor appliance.
 
 ## <a name="Components"></a>Components
@@ -1003,7 +1005,7 @@ The **Sessions** view contains many controls for filtering the sessions displaye
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
 * views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including filtering on the `event.dataset` field. 
 
-![Malcolm views](./docs/images/screenshots/arkime_log_filter.png)
+![Malcolm views](./docs/images/screenshots/arkime_apply_view.png)
 
 * map: A global map can be expanded by clicking the globe **🌎** icon. This allows filtering sessions by IP-based geolocation when possible.
 
@@ -1223,9 +1225,9 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/7.10
 
 ## <a name="SearchCheatSheet"></a>Search Queries in Arkime and OpenSearch Dashboards
 
-OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
+OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Dashboards Query Language (DQL)](https://opensearch.org/docs/1.2/dashboards/dql/), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
 
-| | [Arkime Search String](https://localhost/help#search) | [OpenSearch Dashboards Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [OpenSearch Dashboards Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
+| | [Arkime Search String](https://localhost/help#search) | [OpenSearch Dashboards Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [OpenSearch Dashboards Search String (DQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
 |---|:---:|:---:|:---:|
 | Field exists |`event.dataset == EXISTS!`|`_exists_:event.dataset`|`event.dataset:*`|
 | Field does not exist |`event.dataset != EXISTS!`|`NOT _exists_:event.dataset`|`NOT event.dataset:*`|
@@ -1239,7 +1241,7 @@ OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://w
 | Match any search terms (OR) |`(zeek.ftp.password == EXISTS!) || (zeek.http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek.ftp.password OR _exists_:zeek.http.password OR related.user:"anonymous"`|`zeek.ftp.password:* or zeek.http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|KQL does not support regex|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|DQL does not support regex|
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|

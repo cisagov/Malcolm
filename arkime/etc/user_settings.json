@@ -31,6 +31,12 @@
       "Arkime Sessions": {
         "expression": "event.provider == arkime"
       },
+      "Suricata Logs": {
+        "expression": "event.provider == suricata"
+      },
+      "Suricata Alerts": {
+        "expression": "event.provider == suricata && event.dataset == alert"
+      },
       "Zeek Logs": {
         "expression": "event.provider == zeek"
       },
