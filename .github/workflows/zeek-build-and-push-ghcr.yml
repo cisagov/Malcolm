@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - development
-      - suricata_merge
     paths:
       - 'zeek/**'
       - 'Dockerfiles/zeek.Dockerfile'
