@@ -7,6 +7,10 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r /usr/local/bin/suricata_config_populate.py
         mv -f "$ZEEK_LOG_PATH/suricata/eve.json" \
               "$ZEEK_LOG_PATH/suricata/eve.json.$(date -d @$(stat -c%Y "$ZEEK_LOG_PATH/suricata/eve.json") +'%Y%m%d%H%M%S')"
 
+    # if there's no configuration files to modify, start with the defaults
+    [[ ! -f "$SUPERVISOR_PATH"/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml "$SUPERVISOR_PATH"/suricata/suricata.yaml
+    [[ ! -f "$SUPERVISOR_PATH"/suricata/update.yaml ]] && cp "$(dpkg -L suricata-update | grep 'update\.yaml' | head -n 1)" "$SUPERVISOR_PATH"/suricata/update.yaml
+
     # specify the custom rules directory relative to the supervisor path
     SURICATA_CUSTOM_RULES_DIR="$SUPERVISOR_PATH"/suricata/rules
     [[ -d "$SURICATA_CUSTOM_RULES_DIR" ]] && export SURICATA_CUSTOM_RULES_DIR
