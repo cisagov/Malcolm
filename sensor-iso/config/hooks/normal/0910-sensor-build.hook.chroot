@@ -86,7 +86,7 @@ dpkg -i ./*.deb
 # plugins
 cd /tmp
 zkg autoconfig --force
-zkg install --force --skiptests zeek/spicy-plugin
+zkg install --force --skiptests --version c9ca2d93aaf7bfb75fb282eaa7214a9057d4666e zeek/spicy-plugin
 bash /usr/local/bin/zeek_install_plugins.sh
 for FILE in /opt/zeek/var/lib/zkg/logs/*; do
   [[ -r "$FILE" ]] && echo "$FILE" && cat "$FILE" && echo ""
