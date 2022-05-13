@@ -163,7 +163,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   opensearch:
-    image: malcolmnetsec/opensearch:6.0.0
+    image: malcolmnetsec/opensearch:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -203,7 +203,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: malcolmnetsec/dashboards-helper:6.0.0
+    image: malcolmnetsec/dashboards-helper:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -233,7 +233,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: malcolmnetsec/dashboards:6.0.0
+    image: malcolmnetsec/dashboards:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -256,7 +256,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:6.0.0
+    image: malcolmnetsec/logstash-oss:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -301,7 +301,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:6.0.0
+    image: malcolmnetsec/filebeat-oss:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -333,7 +333,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:6.0.0
+    image: malcolmnetsec/arkime:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -373,7 +373,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:6.0.0
+    image: malcolmnetsec/zeek:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -404,7 +404,7 @@ services:
       retries: 3
       start_period: 60s
   suricata:
-    image: malcolmnetsec/suricata:6.0.0
+    image: malcolmnetsec/suricata:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -429,7 +429,7 @@ services:
       retries: 3
       start_period: 120s
   file-monitor:
-    image: malcolmnetsec/file-monitor:6.0.0
+    image: malcolmnetsec/file-monitor:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -454,7 +454,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:6.0.0
+    image: malcolmnetsec/pcap-capture:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -474,7 +474,7 @@ services:
     volumes:
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:6.0.0
+    image: malcolmnetsec/pcap-monitor:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -499,7 +499,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:6.0.0
+    image: malcolmnetsec/file-upload:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -527,7 +527,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.0.0
+    image: malcolmnetsec/htadmin:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -551,7 +551,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.0.0
+    image: malcolmnetsec/freq:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -571,7 +571,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.0.0
+    image: malcolmnetsec/name-map-ui:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -594,7 +594,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:6.0.0
+    image: malcolmnetsec/api:6.0.1
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -614,7 +614,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:6.0.0
+    image: malcolmnetsec/nginx-proxy:6.0.1
     restart: "no"
     stdin_open: false
     tty: true
