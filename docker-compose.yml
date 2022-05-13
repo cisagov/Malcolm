@@ -344,7 +344,6 @@ services:
       - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
       - ./filebeat/certs/client.crt:/certs/client.crt:ro
       - ./filebeat/certs/client.key:/certs/client.key:ro
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "filebeat"]
       interval: 30s
@@ -699,7 +698,6 @@ services:
       - "127.0.0.1:9200:9200"
     volumes:
       - nginx-log-path:/var/log/nginx:rw
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx/ca-trust:/etc/nginx/ca-trust:ro

@@ -285,8 +285,8 @@ services:
     ports:
       - "127.0.0.1:5044:5044"
     volumes:
-      - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
+      - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
       - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
