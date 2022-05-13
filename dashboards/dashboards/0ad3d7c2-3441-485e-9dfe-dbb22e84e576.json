@@ -1,5 +1,5 @@
 {
-  "version": "7.10.0",
+  "version": "1.3.1",
   "objects": [
     {
       "id": "0ad3d7c2-3441-485e-9dfe-dbb22e84e576",
@@ -7,18 +7,18 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzEwOSwxXQ==",
+      "updated_at": "2022-05-04T20:30:33.149Z",
+      "version": "WzEzNjIsMV0=",
       "attributes": {
         "title": "Overview",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":8,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":26,\"w\":36,\"h\":18,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":8,\"w\":9,\"h\":18,\"i\":\"21\"},\"panelIndex\":\"21\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":8,\"i\":\"32\"},\"panelIndex\":\"32\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":36,\"y\":26,\"w\":12,\"h\":18,\"i\":\"43\"},\"panelIndex\":\"43\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":17,\"y\":8,\"w\":11,\"h\":18,\"i\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\"},\"panelIndex\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":28,\"y\":8,\"w\":20,\"h\":18,\"i\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\"},\"panelIndex\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.6.2\",\"gridData\":{\"x\":0,\"y\":44,\"w\":48,\"h\":27,\"i\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\"},\"panelIndex\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":31,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":13,\"i\":\"12\",\"w\":21,\"x\":27,\"y\":0},\"panelIndex\":\"12\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"19\",\"w\":36,\"x\":0,\"y\":31},\"panelIndex\":\"19\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"21\",\"w\":14,\"x\":8,\"y\":13},\"panelIndex\":\"21\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"32\",\"w\":7,\"x\":8,\"y\":0},\"panelIndex\":\"32\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"43\",\"w\":12,\"x\":36,\"y\":31},\"panelIndex\":\"43\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":13,\"i\":\"4f869578-b143-4103-8804-f8b59688a5dd\",\"w\":12,\"x\":15,\"y\":0},\"panelIndex\":\"4f869578-b143-4103-8804-f8b59688a5dd\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"w\":11,\"x\":22,\"y\":13},\"panelIndex\":\"2aab2ae5-2520-4b78-9735-04c32b22b71e\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"w\":15,\"x\":33,\"y\":13},\"panelIndex\":\"f92ea81f-8f7e-4a79-abde-e5d8aaf7a39a\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":27,\"i\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"w\":48,\"x\":0,\"y\":49},\"panelIndex\":\"4c077648-488a-4fd8-9fcd-3042ec1bfa4d\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_9\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\"}}}}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         }
       },
       "references": [
@@ -55,15 +55,20 @@
         {
           "name": "panel_6",
           "type": "visualization",
-          "id": "750367f0-41f2-11ea-88fa-7151df485405"
+          "id": "74c4f480-c7dc-11ec-8c7e-e93fedca6b87"
         },
         {
           "name": "panel_7",
           "type": "visualization",
-          "id": "f38b3bd0-afd3-11ea-adcf-8bc6d9c94a96"
+          "id": "750367f0-41f2-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_8",
+          "type": "visualization",
+          "id": "f38b3bd0-afd3-11ea-adcf-8bc6d9c94a96"
+        },
+        {
+          "name": "panel_9",
           "type": "search",
           "id": "c97bc964-5319-41e7-ad22-db28156a2ac1"
         }
@@ -78,11 +83,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:09.616Z",
-      "version": "Wzg3MiwxXQ==",
+      "updated_at": "2022-05-04T20:07:16.386Z",
+      "version": "Wzc5NSwxXQ==",
       "attributes": {
-        "title": "Zeek Logs",
-        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "title": "Network Logs",
+        "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -101,23 +106,23 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzExMSwxXQ==",
+      "updated_at": "2022-05-04T20:06:10.844Z",
+      "version": "WzYxLDFd",
       "attributes": {
-        "visState": "{\"title\":\"Total Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 30 seconds\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"line\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
-        "description": "",
         "title": "Total Log Count Over Time",
-        "uiStateJSON": "{}",
+        "visState": "{\"title\":\"Total Log Count Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-25y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\"},\"schema\":\"group\"}],\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 30 seconds\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"stacked\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"type\":\"histogram\",\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "c97bc964-5319-41e7-ad22-db28156a2ac1"
         }
       ],
@@ -131,16 +136,16 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzExMiwxXQ==",
+      "updated_at": "2022-05-04T20:28:37.178Z",
+      "version": "WzEzNDcsMV0=",
       "attributes": {
         "title": "Connections - Service By Destination Country",
-        "visState": "{\"title\":\"Connections - Service By Destination Country\",\"type\":\"pie\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"top\",\"isDonut\":true,\"type\":\"pie\",\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"},\"buckets\":[{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}],\"splitColumn\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]},\"row\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\",\"params\":{\"field\":\"destination.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":8,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Service\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "visState": "{\"title\":\"Connections - Service By Destination Country\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":8,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\" \"},\"schema\":\"split\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Service\"},\"schema\":\"segment\"}],\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"type\":\"pie\",\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"},\"buckets\":[{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}],\"splitColumn\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]},\"row\":false}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
@@ -161,23 +166,23 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzExMywxXQ==",
+      "updated_at": "2022-05-04T20:06:10.844Z",
+      "version": "WzYzLDFd",
       "attributes": {
         "title": "Log Type",
-        "visState": "{\"title\":\"Log Type\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.dataset\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Log Type(s)\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "visState": "{\"title\":\"Log Type\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Data Source\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "c97bc964-5319-41e7-ad22-db28156a2ac1"
         }
       ],
@@ -191,16 +196,16 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:48.278Z",
-      "version": "WzY1NywxXQ==",
+      "updated_at": "2022-05-04T20:06:52.191Z",
+      "version": "WzUzMCwxXQ==",
       "attributes": {
         "title": "Total Number of Logs",
-        "visState": "{\"title\":\"Total Number of Logs\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Number of Logs\"}}],\"listeners\":{}}",
+        "visState": "{\"title\":\"Total Number of Logs\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Logs\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Data Source\"},\"schema\":\"group\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"colorSchema\":\"Green to Red\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":true,\"color\":\"black\"},\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"},\"metricColorMode\":\"None\"}}}",
         "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"NOT event.provider:arkime\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -220,8 +225,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzExNSwxXQ==",
+      "updated_at": "2022-05-04T20:06:10.844Z",
+      "version": "WzY1LDFd",
       "attributes": {
         "title": "DNS - Queries",
         "visState": "{\"title\":\"DNS - Queries\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.dns.query\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":250,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Query\"}}]}",
@@ -245,13 +250,42 @@
       }
     },
     {
+      "id": "74c4f480-c7dc-11ec-8c7e-e93fedca6b87",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-04T20:06:10.844Z",
+      "version": "WzY2LDFd",
+      "attributes": {
+        "title": "Capture Source",
+        "visState": "{\"title\":\"Capture Source\",\"type\":\"table\",\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"node\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Capture Source\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"event.ingested\",\"customLabel\":\"Last Ingested\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"}],\"params\":{\"perPage\":5,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
       "id": "750367f0-41f2-11ea-88fa-7151df485405",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzExNiwxXQ==",
+      "updated_at": "2022-05-04T20:06:10.844Z",
+      "version": "WzY3LDFd",
       "attributes": {
         "title": "Application Protocol",
         "visState": "{\"title\":\"Application Protocol\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Application Protocol\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Protocol Version\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Application Protocol\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Protocol Version\"}}]}",
@@ -279,8 +313,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:09.796Z",
-      "version": "WzExNywxXQ==",
+      "updated_at": "2022-05-04T20:07:05.320Z",
+      "version": "WzY5MywxXQ==",
       "attributes": {
         "title": "Actions and Results",
         "visState": "{\"title\":\"Actions and Results\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Protocol\",\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\"}},\"params\":{},\"label\":\"Action\",\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"-\"}},\"params\":{},\"label\":\"Result\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Protocol\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Action\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Result\"}}]}",
@@ -308,13 +342,14 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:59.492Z",
-      "version": "Wzc4NiwxXQ==",
+      "updated_at": "2022-05-04T20:07:16.386Z",
+      "version": "WzgwOCwxXQ==",
       "attributes": {
         "title": "All Logs",
         "description": "",
         "hits": 0,
         "columns": [
+          "event.provider",
           "event.dataset",
           "network.protocol",
           "event.action",
@@ -332,7 +367,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:*\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"NOT event.provider:arkime\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -352,8 +387,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:07.590Z",
-      "version": "Wzg1NiwxXQ==",
+      "updated_at": "2022-05-04T20:07:13.356Z",
+      "version": "Wzc3MCwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
         "description": "",
@@ -376,7 +411,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"(event.provider:zeek AND event.dataset:conn) OR (event.provider:suricata AND event.dataset:flow)\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -396,8 +431,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:45.233Z",
-      "version": "WzYzNSwxXQ==",
+      "updated_at": "2022-05-04T20:06:49.169Z",
+      "version": "WzUwOCwxXQ==",
       "attributes": {
         "title": "DNS - Logs",
         "description": "",

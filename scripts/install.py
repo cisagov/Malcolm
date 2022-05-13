@@ -29,7 +29,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "1.27.4"
+DOCKER_COMPOSE_INSTALL_VERSION = "1.29.2"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
@@ -39,6 +39,7 @@ MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
 origPath = os.getcwd()
+HostName = os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0]
 
 ###################################################################################################
 args = None
@@ -538,9 +539,10 @@ class Installer(object):
                     'Determine oldest indices by name (instead of creation time)?', default=True
                 )
 
+        autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
-            'Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs?', default=False
+            'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
         )
         autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
         autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
@@ -549,7 +551,7 @@ class Installer(object):
         )
         logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
         logstashSsl = logstashOpen and InstallerYesOrNo(
-            'Should Logstash require SSL for Zeek logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)',
+            'Should Logstash require SSL for forwarded logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)',
             default=True,
         )
         externalEsForward = InstallerYesOrNo('Forward Logstash logs to external OpenSearch instance?', default=False)
@@ -672,6 +674,10 @@ class Installer(object):
                             # process GID
                             line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
 
+                        elif 'PCAP_NODE_NAME' in line:
+                            # capture source "node name" for locally processed PCAP files
+                            line = re.sub(r'(PCAP_NODE_NAME\s*:\s*)(\S+)', fr"\g<1>'{HostName}'", line)
+
                         elif 'NGINX_SSL' in line:
                             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
                             line = re.sub(r'(NGINX_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(nginxSSL)}", line)
@@ -753,6 +759,14 @@ class Installer(object):
                             line = re.sub(
                                 r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(autoZeek)}",
+                                line,
+                            )
+
+                        elif 'SURICATA_AUTO_ANALYZE_PCAP_FILES' in line:
+                            # automatic pcap analysis with suricata
+                            line = re.sub(
+                                r'(SURICATA_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoSuricata)}",
                                 line,
                             )
 

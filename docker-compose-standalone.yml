@@ -86,14 +86,24 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_TFTP : ''
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
+x-suricata-variables: &suricata-variables
+  SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
+  SURICATA_AUTO_ANALYZE_PCAP_THREADS: 1
+  SURICATA_CUSTOM_RULES_ONLY: 'false'
+  # suricata_config_populate.py can use MANY more environment variables to tweak
+  # suricata.yaml (see https://github.com/OISF/suricata/blob/master/suricata.yaml.in and
+  # https://suricata.readthedocs.io/en/suricata-6.0.0/configuration/suricata-yaml.html).
+  # DEFAULT_VARS in that script defines those variables (albeit without the
+  # required `SURICATA_` prefixing each)
+
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
-  ISM_CLOSE_AGE : '60d'
-  ISM_COLD_AGE : '30d'
-  ISM_DELETE_AGE : '365d'
+  ISM_CLOSE_AGE : '0'
+  ISM_COLD_AGE : '0'
+  ISM_DELETE_AGE : '0'
   ISM_POLICY_NAME : 'session_index_policy'
-  ISM_SNAPSHOT_AGE : '1d'
+  ISM_SNAPSHOT_AGE : '0'
   ISM_SNAPSHOT_COMPRESSED : 'false'
   ISM_SNAPSHOT_REPO : 'logs'
 
@@ -104,23 +114,36 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
   LOGSTASH_REVERSE_DNS      : 'false'
-  # OS_EXTERNAL_HOSTS : '10.0.0.123:9200'
-  # OS_EXTERNAL_SSL : 'true'
-  # OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
+  OS_EXTERNAL_HOSTS : ''
+  OS_EXTERNAL_SSL : 'false'
+  OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
   # For security, OS_EXTERNAL_USER and OS_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
   #   See also volume mount for logstash.keystore below.
   # OS_EXTERNAL_USER : 'janedoe'
   # OS_EXTERNAL_PASSWORD : 'secret'
 
+x-filebeat-variables: &filebeat-variables
+  FILEBEAT_SCAN_FREQUENCY : '10s'
+  FILEBEAT_CLEAN_INACTIVE : '180m'
+  FILEBEAT_IGNORE_OLDER : '120m'
+  FILEBEAT_CLOSE_INACTIVE : '120s'
+  FILEBEAT_CLOSE_RENAMED : 'true'
+  FILEBEAT_CLOSE_REMOVED : 'true'
+  FILEBEAT_CLOSE_EOF : 'true'
+  FILEBEAT_CLEAN_REMOVED : 'true'
+
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
+  PCAP_NODE_NAME : 'malcolm'
   PCAP_PIPELINE_DEBUG : 'false'
   PCAP_PIPELINE_DEBUG_EXTRA : 'false'
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
   PCAP_MONITOR_HOST : 'pcap-monitor'
+  LOG_CLEANUP_MINUTES : 360
+  ZIP_CLEANUP_MINUTES : 720
 
 x-common-lookup-variables: &common-lookup-variables
-  FREQ_LOOKUP : 'false'
+  FREQ_LOOKUP : 'true'
   FREQ_SEVERITY_THRESHOLD : '2.0'
   TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
   CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
@@ -132,7 +155,7 @@ x-common-beats-variables: &common-beats-variables
 x-pcap-capture-variables: &pcap-capture-variables
   PCAP_ENABLE_NETSNIFF : 'false'
   PCAP_ENABLE_TCPDUMP : 'false'
-  PCAP_IFACE : 'eth0'
+  PCAP_IFACE : 'lo'
   PCAP_ROTATE_MEGABYTES : 1024
   PCAP_ROTATE_MINUTES : 10
   PCAP_FILTER : ''
@@ -140,7 +163,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   opensearch:
-    image: malcolmnetsec/opensearch:5.2.11
+    image: malcolmnetsec/opensearch:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -152,7 +175,7 @@ services:
       logger.level : 'WARN'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
-      OPENSEARCH_JAVA_OPTS : '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
@@ -180,7 +203,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: malcolmnetsec/dashboards-helper:5.2.11
+    image: malcolmnetsec/dashboards-helper:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -210,7 +233,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: malcolmnetsec/dashboards:5.2.11
+    image: malcolmnetsec/dashboards:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -233,7 +256,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:5.2.11
+    image: malcolmnetsec/logstash-oss:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -252,7 +275,7 @@ services:
       << : *common-beats-variables
       << : *common-lookup-variables
       OS_HOSTS : 'opensearch:9200'
-      LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
     expose:
@@ -278,7 +301,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:5.2.11
+    image: malcolmnetsec/filebeat-oss:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -288,25 +311,18 @@ services:
     environment:
       << : *process-variables
       << : *nginx-variables
+      << : *filebeat-variables
       << : *common-upload-variables
       << : *common-beats-variables
       FILEBEAT_ZEEK_LOG_PATH : '/data/zeek/current'
+      FILEBEAT_SURICATA_LOG_PATH : '/data/suricata'
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
-      FILEBEAT_LOG_CLEANUP_MINUTES : 360
-      FILEBEAT_ZIP_CLEANUP_MINUTES : 720
-      FILEBEAT_SCAN_FREQUENCY : '10s'
-      FILEBEAT_CLEAN_INACTIVE : '180m'
-      FILEBEAT_IGNORE_OLDER : '120m'
-      FILEBEAT_CLOSE_INACTIVE : '120s'
-      FILEBEAT_CLOSE_RENAMED : 'true'
-      FILEBEAT_CLOSE_REMOVED : 'true'
-      FILEBEAT_CLOSE_EOF : 'true'
-      FILEBEAT_CLEAN_REMOVED : 'true'
     depends_on:
       - logstash
     volumes:
       - nginx-log-path:/data/nginx:ro
       - ./zeek-logs:/data/zeek
+      - ./suricata-logs:/data/suricata
       - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
       - ./filebeat/certs/client.crt:/certs/client.crt:ro
       - ./filebeat/certs/client.key:/certs/client.key:ro
@@ -317,7 +333,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:5.2.11
+    image: malcolmnetsec/arkime:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -357,7 +373,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:5.2.11
+    image: malcolmnetsec/zeek:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -387,8 +403,33 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  suricata:
+    image: malcolmnetsec/suricata:6.0.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: suricata
+    environment:
+      << : *process-variables
+      << : *logstash-variables
+      << : *common-upload-variables
+      << : *suricata-variables
+    depends_on:
+      - logstash
+    volumes:
+      - ./suricata-logs:/var/log/suricata
+      - ./pcap:/data/pcap
+      - ./suricata/rules:/opt/suricata/rules:ro
+    expose:
+      - 8711
+    healthcheck:
+      test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
   file-monitor:
-    image: malcolmnetsec/file-monitor:5.2.11
+    image: malcolmnetsec/file-monitor:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -413,7 +454,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:5.2.11
+    image: malcolmnetsec/pcap-capture:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -433,7 +474,7 @@ services:
     volumes:
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:5.2.11
+    image: malcolmnetsec/pcap-monitor:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -458,7 +499,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:5.2.11
+    image: malcolmnetsec/file-upload:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -486,7 +527,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:5.2.11
+    image: malcolmnetsec/htadmin:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -510,7 +551,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:5.2.11
+    image: malcolmnetsec/freq:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -530,7 +571,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:5.2.11
+    image: malcolmnetsec/name-map-ui:6.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -553,7 +594,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:5.2.11
+    image: malcolmnetsec/api:6.0.0
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -573,7 +614,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:5.2.11
+    image: malcolmnetsec/nginx-proxy:6.0.0
     restart: "no"
     stdin_open: false
     tty: true

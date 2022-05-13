@@ -20,7 +20,7 @@ from flask import Flask, jsonify, request
 fields_to_urls = []
 fields_to_urls.append(
     [
-        r'^event\.(risk|severity)\w*$',
+        r'^(event\.(risk|severity)\w*|(rule|vulnerability|threat)\.*)$',
         ['DASH:d2dd0180-06b1-11ec-8c6b-353266ade330', 'DASH:95479950-41f2-11ea-88fa-7151df485405'],
     ]
 )
@@ -33,6 +33,7 @@ fields_to_urls.append(
         ['DASH:abdd7550-2c7c-40dc-947e-f6d186a158c4'],
     ]
 )
+fields_to_urls.append([r'^(suricata|rule)\.', ['DASH:5694ca60-cbdf-11ec-a50a-5fedd672f5c5']])
 fields_to_urls.append(
     [r'^zeek\.bacnet.*\.', ['DASH:2bec1490-eb94-11e9-a384-0fcf32210194', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
 )
@@ -48,7 +49,7 @@ fields_to_urls.append(
     [r'^zeek\.dnp3.*\.', ['DASH:870a5862-6c26-4a08-99fd-0c06cda85ba3', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
 )
 fields_to_urls.append(
-    [r'^((source|destination)\.ip_reverse_dns|zeek\.dns\.)', ['DASH:2cf94cd0-ecab-40a5-95a7-8419f3a39cd9']]
+    [r'^((source|destination)\.ip_reverse_dns|(zeek\.)?dns\.)', ['DASH:2cf94cd0-ecab-40a5-95a7-8419f3a39cd9']]
 )
 fields_to_urls.append(
     [r'^zeek\.ecat.*\.', ['DASH:4a073440-b286-11eb-a4d4-09fa12a6ebd4', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
@@ -96,7 +97,14 @@ fields_to_urls.append(
     ]
 )
 fields_to_urls.append(
-    [r'^zeek\.signatures\.', ['DASH:665d1610-523d-11e9-a30e-e3576242f3ed', 'DASH:95479950-41f2-11ea-88fa-7151df485405']]
+    [
+        r'^(zeek\.signatures|rule)\.',
+        [
+            'DASH:665d1610-523d-11e9-a30e-e3576242f3ed',
+            'DASH:95479950-41f2-11ea-88fa-7151df485405',
+            'DASH:f1f09567-fc7f-450b-a341-19d2f2bb468b',
+        ],
+    ]
 )
 fields_to_urls.append([r'^zeek\.sip\.', ['DASH:0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa']])
 fields_to_urls.append([r'^zeek\.smb.*\.', ['DASH:42e831b9-41a9-4f35-8b7d-e1566d368773']])
@@ -165,6 +173,18 @@ def random_id(length=20):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
+def get_request_arguments(req):
+    arguments = {}
+    if 'POST' in get_iterable(req.method):
+        if (data := req.get_json() if req.is_json else None) and isinstance(data, dict):
+            arguments.update(data)
+    if 'GET' in get_iterable(req.method):
+        arguments.update(request.args)
+    if debugApi:
+        print(f"{req.method} {req.path} arguments: {json.dumps(arguments)}")
+    return arguments
+
+
 def gettimes(args):
     """Parses 'from' and 'to' times out of the provided dictionary, returning
     two datetime objects
@@ -173,8 +193,8 @@ def gettimes(args):
     ----------
     args : dict
         The dictionary which should contain 'from' and 'to' times. Missing
-        times are returned as None. e.g., gettimes(request.args). Times
-        can be UNIX time integers represented as strings or strings
+        times are returned as None.
+        Time can be UNIX time integers represented as strings or strings
         of various formats, in which case a "best guess" conversion is done.
         If no time zone information is provided, UTC is assumed.
 
@@ -220,11 +240,18 @@ def getfilters(args):
         dict containing the filters, e.g., { "fieldname1": "value", "fieldname2": 1234, "fieldname3": ["abc", "123"] }
     """
     try:
-        if (filters := args.get("filter")) and (filters := json.loads(filters)) and isinstance(filters, dict):
-            return filters
+        if filters := args.get("filter"):
+            if isinstance(filters, str):
+                filters = json.loads(filters)
+            if isinstance(filters, dict):
+                return filters
+            else:
+                return None
         else:
             return None
-    except ValueError:
+    except ValueError as ve:
+        if debugApi:
+            print(f"Error {type(ve).__name__}: {str(ve)} for {type(filters).__name__} filter: {filters})")
         return None
 
 
@@ -359,6 +386,8 @@ def filtervalues(search, args):
                     # field does not exist ("is null")
                     s = s.filter('bool', must_not=opensearch_dsl.Q('exists', field=fieldname))
 
+    if debugApi:
+        print(f'filtervalues: {json.dumps(s.to_dict())}')
     return (filters, s)
 
 
@@ -371,7 +400,7 @@ def bucketfield(fieldname, current_request, urls=None):
         The name of the field(s) on which to perform the aggregation
     current_request : Request
         The flask Request object being processed (see gettimes/filtertime and getfilters/filtervalues)
-        Uses 'from', 'to', 'limit', and 'filter' from current_request.args
+        Uses 'from', 'to', 'limit', and 'filter' from current_request arguments
 
     Returns
     -------
@@ -387,9 +416,10 @@ def bucketfield(fieldname, current_request, urls=None):
     s = opensearch_dsl.Search(
         using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
     ).extra(size=0)
-    start_time_ms, end_time_ms, s = filtertime(s, current_request.args)
-    filters, s = filtervalues(s, current_request.args)
-    bucket_limit = int(deep_get(current_request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
+    args = get_request_arguments(current_request)
+    start_time_ms, end_time_ms, s = filtertime(s, args)
+    filters, s = filtervalues(s, args)
+    bucket_limit = int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"]))
     last_bucket = s.aggs
     for fname in get_iterable(fieldname):
         last_bucket = last_bucket.bucket(
@@ -417,8 +447,8 @@ def bucketfield(fieldname, current_request, urls=None):
         )
 
 
-@app.route("/agg", defaults={'fieldname': 'event.provider'})
-@app.route("/agg/<fieldname>")
+@app.route("/agg", defaults={'fieldname': 'event.provider'}, methods=['GET', 'POST'])
+@app.route("/agg/<fieldname>", methods=['GET', 'POST'])
 def aggregate(fieldname):
     """Returns the aggregated values and counts for a given field name, see bucketfield
 
@@ -436,7 +466,7 @@ def aggregate(fieldname):
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
-    start_time, end_time = gettimes(request.args)
+    start_time, end_time = gettimes(get_request_arguments(request))
     fields = fieldname.split(",")
     return bucketfield(
         fields,
@@ -445,8 +475,8 @@ def aggregate(fieldname):
     )
 
 
-@app.route("/document", defaults={'index': app.config["ARKIME_INDEX_PATTERN"]})
-@app.route("/document/<index>")
+@app.route("/document", defaults={'index': app.config["ARKIME_INDEX_PATTERN"]}, methods=['GET', 'POST'])
+@app.route("/document/<index>", methods=['GET', 'POST'])
 def document(index):
     """Returns the matching document(s) from the specified index
 
@@ -455,7 +485,7 @@ def document(index):
     index : string
         the name of the index from which to retrieve the document (defaults: arkime_sessions3-*)
     request : Request
-        Uses 'from', 'to', 'limit', and 'filter' from current_request.args
+        Uses 'from', 'to', 'limit', and 'filter' from request arguments
 
     Returns
     -------
@@ -464,11 +494,12 @@ def document(index):
     results
         array of the documents retrieved (up to 'limit')
     """
+    args = get_request_arguments(request)
     s = opensearch_dsl.Search(using=opensearch_dsl.connections.get_connection(), index=index).extra(
-        size=int(deep_get(request.args, ["limit"], app.config["RESULT_SET_LIMIT"]))
+        size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"]))
     )
-    start_time_ms, end_time_ms, s = filtertime(s, request.args, default_from="1970-1-1", default_to="now")
-    filters, s = filtervalues(s, request.args)
+    start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
+    filters, s = filtervalues(s, args)
     return jsonify(
         results=s.execute().to_dict()['hits']['hits'],
         range=(start_time_ms // 1000, end_time_ms // 1000),
@@ -476,9 +507,9 @@ def document(index):
     )
 
 
-@app.route("/index")
-@app.route("/indexes")
-@app.route("/indices")
+@app.route("/index", methods=['GET'])
+@app.route("/indexes", methods=['GET'])
+@app.route("/indices", methods=['GET'])
 def indices():
     """Provide a list of indices in the OpenSearch data store
 
@@ -493,7 +524,7 @@ def indices():
     return jsonify(indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json())
 
 
-@app.route("/fields")
+@app.route("/fields", methods=['GET'])
 def fields():
     """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
     OpenSearch template for the sessions indices, and Kibana's field list
@@ -547,8 +578,8 @@ def fields():
     return jsonify(fields=fields, total=len(fields))
 
 
-@app.route("/")
-@app.route("/version")
+@app.route("/", methods=['GET'])
+@app.route("/version", methods=['GET'])
 def version():
     """Provides version information about Malcolm and the underlying OpenSearch instance
 
@@ -577,7 +608,7 @@ def version():
     )
 
 
-@app.route("/ping")
+@app.route("/ping", methods=['GET'])
 def ping():
     """Says 'pong' (for a simple health check)
 
@@ -652,108 +683,106 @@ def event():
     """
     alert = {}
     idxResponse = {}
-    if request.method == 'POST':
-        data = request.get_json() if request.is_json else None
-        if data:
-            nowTimeStr = datetime.now().astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')
-            if 'alert' in data:
-                alert['@timestamp'] = deep_get(
-                    data,
-                    [
-                        'alert',
-                        'period',
-                        'start',
-                    ],
-                    nowTimeStr,
-                )
-                alert['firstPacket'] = alert['@timestamp']
-                alert['lastPacket'] = deep_get(
-                    data,
-                    [
-                        'alert',
-                        'period',
-                        'end',
-                    ],
-                    nowTimeStr,
-                )
-                alert['ecs'] = {}
-                alert['ecs']['version'] = '1.6.0'
-                alert['event'] = {}
-                alert['event']['kind'] = 'alert'
-                alert['event']['start'] = alert['firstPacket']
-                alert['event']['end'] = alert['lastPacket']
-                alert['event']['ingested'] = nowTimeStr
-                alert['event']['provider'] = 'malcolm'
-                alert['event']['dataset'] = 'alerting'
-                alert['event']['module'] = 'alerting'
-                alert['event']['url'] = '/dashboards/app/alerting#/dashboard'
-                alertId = deep_get(
-                    data,
-                    [
-                        'alert',
-                        'alert',
-                    ],
-                )
-                alert['event']['id'] = alertId if alertId else random_id()
-                if alertBody := deep_get(
-                    data,
-                    [
-                        'alert',
-                        'body',
-                    ],
-                ):
-                    alert['event']['original'] = alertBody
-                if triggerName := deep_get(
-                    data,
-                    [
-                        'alert',
-                        'trigger',
-                        'name',
-                    ],
-                ):
-                    alert['event']['reason'] = triggerName
-                if monitorName := deep_get(
-                    data,
-                    [
-                        'alert',
-                        'monitor',
-                        'name',
-                    ],
-                ):
-                    alert['rule'] = {}
-                    alert['rule']['name'] = monitorName
-                if alertSeverity := str(
-                    deep_get(
-                        data,
-                        [
-                            'alert',
-                            'trigger',
-                            'severity',
-                        ],
-                    )
-                ):
-                    sevnum = 100 - ((int(alertSeverity) - 1) * 20) if alertSeverity.isdigit() else 40
-                    alert['event']['risk_score'] = sevnum
-                    alert['event']['risk_score_norm'] = sevnum
-                    alert['event']['severity'] = sevnum
-                    alert['event']['severity_tags'] = 'Alert'
-                if alertResults := deep_get(
-                    data,
-                    [
-                        'alert',
-                        'results',
-                    ],
-                ):
-                    if len(alertResults) > 0:
-                        if hitCount := deep_get(alertResults[0], ['hits', 'total', 'value'], 0):
-                            alert['event']['hits'] = hitCount
+    data = get_request_arguments(request)
+    nowTimeStr = datetime.now().astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')
+    if 'alert' in data:
+        alert['@timestamp'] = deep_get(
+            data,
+            [
+                'alert',
+                'period',
+                'start',
+            ],
+            nowTimeStr,
+        )
+        alert['firstPacket'] = alert['@timestamp']
+        alert['lastPacket'] = deep_get(
+            data,
+            [
+                'alert',
+                'period',
+                'end',
+            ],
+            nowTimeStr,
+        )
+        alert['ecs'] = {}
+        alert['ecs']['version'] = '1.6.0'
+        alert['event'] = {}
+        alert['event']['kind'] = 'alert'
+        alert['event']['start'] = alert['firstPacket']
+        alert['event']['end'] = alert['lastPacket']
+        alert['event']['ingested'] = nowTimeStr
+        alert['event']['provider'] = 'malcolm'
+        alert['event']['dataset'] = 'alerting'
+        alert['event']['module'] = 'alerting'
+        alert['event']['url'] = '/dashboards/app/alerting#/dashboard'
+        alertId = deep_get(
+            data,
+            [
+                'alert',
+                'alert',
+            ],
+        )
+        alert['event']['id'] = alertId if alertId else random_id()
+        if alertBody := deep_get(
+            data,
+            [
+                'alert',
+                'body',
+            ],
+        ):
+            alert['event']['original'] = alertBody
+        if triggerName := deep_get(
+            data,
+            [
+                'alert',
+                'trigger',
+                'name',
+            ],
+        ):
+            alert['event']['reason'] = triggerName
+        if monitorName := deep_get(
+            data,
+            [
+                'alert',
+                'monitor',
+                'name',
+            ],
+        ):
+            alert['rule'] = {}
+            alert['rule']['name'] = monitorName
+        if alertSeverity := str(
+            deep_get(
+                data,
+                [
+                    'alert',
+                    'trigger',
+                    'severity',
+                ],
+            )
+        ):
+            sevnum = 100 - ((int(alertSeverity) - 1) * 20) if alertSeverity.isdigit() else 40
+            alert['event']['risk_score'] = sevnum
+            alert['event']['risk_score_norm'] = sevnum
+            alert['event']['severity'] = sevnum
+            alert['event']['severity_tags'] = 'Alert'
+        if alertResults := deep_get(
+            data,
+            [
+                'alert',
+                'results',
+            ],
+        ):
+            if len(alertResults) > 0:
+                if hitCount := deep_get(alertResults[0], ['hits', 'total', 'value'], 0):
+                    alert['event']['hits'] = hitCount
 
-                docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
-                idxResponse = opensearch_dsl.connections.get_connection().index(
-                    index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
-                    id=f"{docDateStr}-{alert['event']['id']}",
-                    body=alert,
-                )
+        docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
+        idxResponse = opensearch_dsl.connections.get_connection().index(
+            index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
+            id=f"{docDateStr}-{alert['event']['id']}",
+            body=alert,
+        )
 
     if debugApi:
         print(json.dumps(data))

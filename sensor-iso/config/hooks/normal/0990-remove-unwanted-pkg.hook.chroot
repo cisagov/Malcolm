@@ -20,8 +20,6 @@ apt-get -y --purge remove \
   gdb \
   gnome-accessibility-themes \
   libasound2-plugins \
-  libgphoto2-6 \
-  libgphoto2-port12 \
   libx264* \
   libx265* \
   lintian \

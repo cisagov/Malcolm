@@ -26,7 +26,7 @@ INPUT_MIXED_MAP="/usr/share/logstash/config/net-map.json"
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 
 # the name of the pipeline(s) to which input will send logs for parsing (comma-separated list, no quotes)
-PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse"}
+PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse,suricata-parse"}
 
 # pipeline addresses for forwarding from Logstash to OpenSearch (both "internal" and "external" pipelines)
 export OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-os"}

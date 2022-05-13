@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - development
-      - suricata_merge
     paths:
       - 'pcap-capture/**'
       - 'Dockerfiles/pcap-capture.Dockerfile'

@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - development
-      - suricata_merge
     paths:
       - 'name-map-ui/**'
       - 'Dockerfiles/name-map-ui.Dockerfile'

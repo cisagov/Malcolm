@@ -8,7 +8,11 @@ import re
 import requests
 import sys
 import tempfile
-import yaml
+
+try:
+    import ruamel.yaml as yaml
+except ImportError:
+    import yaml
 
 DEFAULT_MANUF_URL = "https://gitlab.com/wireshark/wireshark/raw/master/manuf"
 padded_mac_low = '00:00:00:00:00:00'

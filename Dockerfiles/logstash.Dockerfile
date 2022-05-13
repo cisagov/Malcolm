@@ -1,6 +1,49 @@
-FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
+FROM amazonlinux:2 AS build
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
+RUN amazon-linux-extras install -y epel && \
+    yum install -y \
+      autoconf \
+      automake \
+      bison \
+      bzip2 \
+      curl \
+      gcc-c++ \
+      glibc-devel \
+      glibc-headers \
+      java-latest-openjdk-devel \
+      libffi-devel \
+      libtool \
+      libyaml-devel \
+      make \
+      openssl-devel \
+      patch \
+      procps \
+      readline-devel \
+      tar \
+      wget \
+      which \
+      zlib-devel
+
+RUN /bin/bash -lc "command curl -sSL https://rvm.io/mpapis.asc | gpg2 --import -" && \
+    /bin/bash -lc "command curl -sSL https://rvm.io/pkuczynski.asc | gpg2 --import -" && \
+    /bin/bash -lc "curl -L get.rvm.io | bash -s stable" && \
+    /bin/bash -lc "rvm autolibs fail" && \
+    /bin/bash -lc "rvm get head" && \
+    /bin/bash -lc "rvm install jruby-9.3.1.0" && \
+    /bin/bash -lc "rvm use jruby-9.3.1.0 --default" && \
+    /bin/bash -lc "gem install bundler --no-document"
+
+ENV FINGERPRINT_URL "https://codeload.github.com/logstash-plugins/logstash-filter-fingerprint/tar.gz/main"
+
+RUN cd /opt && \
+    mkdir -p ./logstash-filter-fingerprint && \
+    curl -sSL "$FINGERPRINT_URL" | tar xzvf - -C ./logstash-filter-fingerprint --strip-components 1 && \
+    sed -i "s/\('logstash-mixin-ecs_compatibility_support'\),.*/\1/" ./logstash-filter-fingerprint/logstash-filter-fingerprint.gemspec && \
+    /bin/bash -lc "export JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-fingerprint && ( bundle install || bundle install ) && gem build logstash-filter-fingerprint.gemspec && bundle info logstash-filter-fingerprint"
+
+FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -22,7 +65,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
-ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse
+ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-os
 ARG LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-os,external-os
@@ -36,6 +79,8 @@ ENV JAVA_HOME=/usr/share/logstash/jdk
 
 USER root
 
+COPY --from=build /opt/logstash-filter-fingerprint /opt/logstash-filter-fingerprint
+
 RUN yum install -y epel-release && \
     yum upgrade -y && \
     yum install -y curl gettext patch python3-setuptools python3-pip python3-requests openssl && \
@@ -46,7 +91,8 @@ RUN yum install -y epel-release && \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                                        logstash-input-beats logstash-output-elasticsearch && \
-    rm -rf /root/.cache /root/.gem /root/.bundle
+    logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-3.4.0.gem && \
+    rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/manuf-oui-parse.py /usr/local/bin/

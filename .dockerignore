@@ -22,3 +22,4 @@ nginx/nginx_ldap.conf
 pcap
 scripts
 zeek-logs
+suricata-logs

@@ -428,7 +428,7 @@ function sensorwatch () {
     if [ -d "$ZEEK_LOG_PATH" ] && [ -d "$PCAP_PATH" ] ; then
       while true; do
         clear
-        find "$PCAP_PATH" "$ZEEK_LOG_PATH" -type f \( -name "*.pcap*" -o -name "*.log*" \) -print0 | \
+        find "$PCAP_PATH" "$ZEEK_LOG_PATH" -type f \( -name "*.pcap*" -o -name "*.log*" -o -name "eve*.json*" \) -print0 | \
           xargs -0 stat --format '%Y: %y %s %n' | \
           sort -nr | \
           cut -d: -f2- | \
@@ -467,4 +467,46 @@ function sensormonitor () {
     send-keys 'while true; do clear; /opt/sensor/sensor_ctl/status | grep -v "Not started" | sed "s/pid.* //"; sleep 60; done' C-m \; \
     select-pane -t 3 \; \
     send-keys 'tail -F /opt/sensor/sensor_ctl/log/*' C-m
+}
+
+function suricata-update () {
+  SURICATA_DIR=/opt/sensor/sensor_ctl/suricata
+  SURICATA_CONFIG_FILE="$SURICATA_DIR"/suricata.yaml
+  SURICATA_UPDATE_CONFIG_FILE="$SURICATA_DIR"/update.yaml
+
+  if [[ -f "$SURICATA_CONFIG_FILE" ]] && [[ -f "$SURICATA_UPDATE_CONFIG_FILE" ]]; then
+
+    [[ -f /opt/sensor/sensor_ctl/control_vars.conf ]] && . /opt/sensor/sensor_ctl/control_vars.conf
+
+    if [[ -n "$1" ]]; then
+      OPERATION="$1"; shift
+    else
+      OPERATION=update
+    fi
+
+    if [[ "$OPERATION" == "update" ]]; then
+      /usr/bin/suricata-update "$OPERATION" \
+        --config "$SURICATA_UPDATE_CONFIG_FILE" \
+        --suricata-conf "$SURICATA_CONFIG_FILE" \
+        --data-dir "${SURICATA_MANAGED_DIR:-/var/lib/suricata}" \
+        --disable-conf "$SURICATA_DIR"/disable.conf \
+        --enable-conf "$SURICATA_DIR"/enable.conf \
+        --modify-conf "$SURICATA_DIR"/modify.conf \
+        --drop-conf "$SURICATA_DIR"/drop.conf \
+        --reload-command "kill -USR2 \$(pidof suricata) 2>/dev/null" \
+        --local "/etc/suricata/rules" \
+        --local "$SURICATA_DIR"/rules \
+        "$@" 2>&1 | grep -v --line-buffered "Found duplicate rule"
+
+    else
+      /usr/bin/suricata-update "$OPERATION" \
+        --config "$SURICATA_UPDATE_CONFIG_FILE" \
+        --suricata-conf "$SURICATA_CONFIG_FILE" \
+        --data-dir "${SURICATA_MANAGED_DIR:-/var/lib/suricata}" \
+        "$@" 2>&1
+    fi
+
+  else
+    /usr/bin/suricata-update "$@"
+  fi
 }

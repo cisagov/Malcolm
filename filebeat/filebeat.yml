@@ -1,5 +1,7 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+name: "${PCAP_NODE_NAME:malcolm}"
+
 logging.metrics.enabled: false
 
 filebeat.inputs:
@@ -49,6 +51,24 @@ filebeat.inputs:
   close_removed: true
   close_eof: false
   clean_removed: true
+
+- type: log
+  paths:
+    - ${FILEBEAT_SURICATA_LOG_PATH:/data/suricata}/eve-*.json
+  symlinks: true
+  fields_under_root: true
+  tags: ["_filebeat_suricata"]
+  fields:
+    type: "session"
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:45m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:30m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:30s}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 output.logstash:
   hosts: ["logstash:5044"]

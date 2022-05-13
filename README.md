@@ -50,11 +50,11 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     * [Temporary read-only interface](#ReadOnlyUI)
 * [Capture file and log archive upload](#Upload)
     - [Tagging](#Tagging)
-    - [Processing uploaded PCAPs with Zeek](#UploadPCAPZeek)
+    - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
 * [Live analysis](#LiveAnalysis)
     * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
-    * [Manually forwarding Zeek logs from an external source](#ZeekForward)
+    * [Manually forwarding logs from an external source](#ExternalForward)
 * [Arkime](#Arkime)
     * [Zeek log integration](#ArkimeZeek)
         - [Correlating Zeek logs and Arkime sessions](#ZeekArkimeFlowCorrelation)
@@ -130,6 +130,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 ![opensearch-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/opensearch-build-and-push-ghcr/badge.svg)
 ![pcap-capture-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/pcap-capture-build-and-push-ghcr/badge.svg)
 ![pcap-monitor-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
+![suricata-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/suricata-build-and-push-ghcr/badge.svg)
 ![zeek-build-and-push-ghcr](https://github.com/cisagov/Malcolm/workflows/zeek-build-and-push-ghcr/badge.svg)
 ![malcolm-iso-build-docker-wrap-push-ghcr](https://github.com/cisagov/Malcolm/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
 ![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/cisagov/Malcolm/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
@@ -173,6 +174,7 @@ Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
 Pulling pcap-monitor      ... done
+Pulling suricata          ... done
 Pulling upload            ... done
 Pulling zeek              ... done
 ```
@@ -181,22 +183,23 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.11           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           5.2.11           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                5.2.11           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      5.2.11           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             5.2.11           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.11           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      5.2.11           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      5.2.11           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     5.2.11           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/zeek                                             5.2.11           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.0.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.0.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.0.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.0.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.0.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.0.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.0.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.0.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.0.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.0.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.0.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 #### Import from pre-packaged tarballs
@@ -229,6 +232,8 @@ Malcolm parses the network session data and enriches it with additional lookups 
 
 The enriched data is stored in an [OpenSearch](https://opensearch.org/) document store in a format suitable for analysis through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
 
+![Malcolm Data Pipeline](./docs/images/malcolm_data_pipeline.png)
+
 For smaller networks, use at home by network security enthusiasts, or in the field for incident response engagements, Malcolm can also easily be deployed locally on an ordinary consumer workstation or laptop. Malcolm can process local artifacts such as locally-generated Zeek logs, locally-captured PCAP files, and PCAP files collected offline without the use of a dedicated sensor appliance.
 
 ## <a name="Components"></a>Components
@@ -242,6 +247,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
+* [Suricata](https://suricata.io/) - an IDS and threat detection engine
 * [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
 * [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
@@ -299,6 +305,7 @@ Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analy
 |EtherCAT|[🔗](https://en.wikipedia.org/wiki/EtherCAT)|[🔗](https://www.ethercat.org/en/downloads/downloads_A02E436C7A97479F9261FDFA8A6D71E5.htm)||[✓](https://github.com/cisagov/icsnpp-ethercat)|
 |EtherNet/IP / Common Industrial Protocol (CIP)|[🔗](https://en.wikipedia.org/wiki/EtherNet/IP) [🔗](https://en.wikipedia.org/wiki/Common_Industrial_Protocol)|[🔗](https://www.odva.org/Technology-Standards/EtherNet-IP/Overview)||[✓](https://github.com/cisagov/icsnpp-enip)|
 |FTP (File Transfer Protocol)|[🔗](https://en.wikipedia.org/wiki/File_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc959)||[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/ftp/info.zeek.html#type-FTP::Info)|
+|GENISYS||[🔗](https://manualzz.com/doc/6363274/genisys-2000---ansaldo-sts---product-support#93)[🔗](https://gitlab.com/wireshark/wireshark/-/issues/3422)||[✓](https://github.com/cisagov/icsnpp-genisys)|
 |Google Quick UDP Internet Connections (gQUIC)|[🔗](https://en.wikipedia.org/wiki/QUIC#Google_QUIC_(gQUIC))|[🔗](https://www.chromium.org/quic)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/quic.c)|[✓](https://github.com/salesforce/GQUIC_Protocol_Analyzer/blob/master/scripts/Salesforce/GQUIC/main.bro)|
 |Hypertext Transfer Protocol (HTTP)|[🔗](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)|[🔗](https://tools.ietf.org/html/rfc7230)|[✓](https://github.com/arkime/arkime/blob/master/capture/parsers/http.c)|[✓](https://docs.zeek.org/en/stable/scripts/base/protocols/http/main.zeek.html#type-HTTP::Info)|
 |IPsec|[🔗](https://en.wikipedia.org/wiki/IPsec)|[🔗](https://zeek.org/2021/04/20/zeeks-ipsec-protocol-analyzer/)||[✓](https://github.com/corelight/zeek-spicy-ipsec)|
@@ -374,6 +381,8 @@ Checking out the [Malcolm source code](https://github.com/cisagov/Malcolm/tree/m
 * `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
 * `sensor-iso` - code and configuration for building a [Hedgehog Linux](#Hedgehog) ISO
 * `shared` - miscellaneous code used by various Malcolm components 
+* `suricata` - code and configuration for the `suricata` container which handles PCAP processing using Suricata
+* `suricata-logs` - an initially empty directory for Suricata logs to be uploaded, processed, and stored
 * `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
 
@@ -398,8 +407,8 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 
 * `malcolmnetsec/api` (based on `python:3-slim`)
 * `malcolmnetsec/arkime` (based on `debian:11-slim`)
-* `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/dashboards-helper` (based on `alpine:3.15`)
+* `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/file-monitor` (based on `debian:11-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:11-slim`)
 * `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
@@ -411,7 +420,8 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
 * `malcolmnetsec/pcap-capture` (based on `debian:11-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:11-slim`)
-* `malcolmnetsec/pcap-zeek` (based on `debian:11-slim`)
+* `malcolmnetsec/suricata` (based on `debian:11-slim`)
+* `malcolmnetsec/zeek` (based on `debian:11-slim`)
 
 Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](#Hedgehog) and [Malcolm](#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 
@@ -516,99 +526,57 @@ Edit `docker-compose.yml` and search for the `OPENSEARCH_JAVA_OPTS` key. Edit th
 
 Various other environment variables inside of `docker-compose.yml` can be tweaked to control aspects of how Malcolm behaves, particularly with regards to processing PCAP files and Zeek logs. The environment variables of particular interest are located near the top of that file under **Commonly tweaked configuration options**, which include:
 
-* `PUID` and `PGID` - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
-
-* `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
-
-* `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy like Traefik, Caddy, etc.)
-
-* `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
-
-* `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
-
-* `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
-
-* `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](#ZeekIntel) files (defaults to empty, which disables automatic refresh)
-
-* `ZEEK_INTEL_ITEM_EXPIRATION` - specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](#ZeekIntel) (default `-1min`, which disables item expiration)
-
-* `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](#ZeekIntelSTIX) or [MISP](#ZeekIntelMISP) feed, only process threat indicators that have been created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2021`) or relative interval (`30 days ago`)
-
-* `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
-
-* `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
-
-* `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
-
 * `ARKIME_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
-
-* `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
-
-* `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
-
-* `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
-
-* `LOGSTASH_SEVERITY_SCORING` - if set to `true`, Logstash will perform [severity scoring](#Severity) when analyzing Zeek logs (default `true`)
-
-* `pipeline.workers`, `pipeline.batch.size` and `pipeline.batch.delay` - these settings are used to tune the performance and resource utilization of the the `logstash` container; see [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html)
-
-* `FREQ_LOOKUP` - if set to `true`, domain names (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq) (default `false`)
-
-* `FREQ_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the entropy threshold for assigning severity to events with entropy scores calculated by [`freq`](https://github.com/MarkBaggett/freq); a lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`) (default `2.0`)
-
-* `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the size threshold (in megabytes) for assigning severity to large connections or file transfers (default `1000`)
-
-* `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
-
-* `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
-
-* `OS_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external OpenSearch instance in addition to the one maintained locally by Malcolm
-
-* `OS_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external OpenSearch instances specified in `OS_EXTERNAL_HOSTS`
-
-* `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full TLS certificate validation; this may fail if using self-signed certificates (default `false`)
-
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
-
 * `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external Beats-based forwarders from which it will accept logs; if Malcolm is being used as a standalone tool then this can safely be set to `false`, but if external log feeds are to be accepted then setting it to true is recommended (default `false`)
-
-* `ZEEK_EXTRACTOR_MODE` – determines the file extraction behavior for file transfers detected by Zeek; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details
-
-* `EXTRACTED_FILE_IGNORE_EXISTING` – if set to `true`, files extant in `./zeek-logs/extract_files/`  directory will be ignored on startup rather than scanned
-
-* `EXTRACTED_FILE_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](#ZeekFileExtraction)
-
-* `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
-
-* `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [Yara](https://github.com/VirusTotal/yara)
-
-* `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default [Yara ruleset](https://github.com/Neo23x0/signature-base) and use only user-defined rules in `./yara/rules`
-
-* `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
-
+* `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
 * `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
-
+* `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
 * `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
-
-* `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions
-
+* `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) will be scanned with [Yara](https://github.com/VirusTotal/yara)
 * `EXTRACTED_FILE_HTTP_SERVER_ENABLE` – if set to `true`, the directory containing [Zeek-extracted files](#ZeekFileExtraction) will be served over HTTP at `./extracted-files/` (e.g., [https://localhost/extracted-files/](https://localhost/extracted-files/) if you are connecting locally)
-
 * `EXTRACTED_FILE_HTTP_SERVER_ENCRYPT` – if set to `true`, those Zeek-extracted files will be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`)
-
 * `EXTRACTED_FILE_HTTP_SERVER_KEY` – specifies the AES-256-CBC decryption password for encrypted Zeek-extracted files; used in conjunction with `EXTRACTED_FILE_HTTP_SERVER_ENCRYPT`
-
+* `EXTRACTED_FILE_IGNORE_EXISTING` – if set to `true`, files extant in `./zeek-logs/extract_files/`  directory will be ignored on startup rather than scanned
+* `EXTRACTED_FILE_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](#ZeekFileExtraction)
+* `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions
+* `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default [Yara ruleset](https://github.com/Neo23x0/signature-base) and use only user-defined rules in `./yara/rules`
+* `FREQ_LOOKUP` - if set to `true`, domain names (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq) (default `false`)
+* `FREQ_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the entropy threshold for assigning severity to events with entropy scores calculated by [`freq`](https://github.com/MarkBaggett/freq); a lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`) (default `2.0`)
+* `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
+* `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)
+* `LOGSTASH_SEVERITY_SCORING` - if set to `true`, Logstash will perform [severity scoring](#Severity) when analyzing Zeek logs (default `true`)
+* `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
+* `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
+* `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
+* `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
+* `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy like Traefik, Caddy, etc.)
+* `OS_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external OpenSearch instance in addition to the one maintained locally by Malcolm
+* `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full TLS certificate validation; this may fail if using self-signed certificates (default `false`)
+* `OS_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external OpenSearch instances specified in `OS_EXTERNAL_HOSTS`
 * `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
-
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
-
-* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
-
-* `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it closed for processing and a new PCAP file created 
-
-* `PCAP_ROTATE_MINUTES` – used to specify an time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
-
 * `PCAP_FILTER` – specifies a tcpdump-style filter expression for local packet capture; leave blank to capture all traffic
+* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
+* `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it closed for processing and a new PCAP file created 
+* `PCAP_ROTATE_MINUTES` – used to specify an time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
+* `pipeline.workers`, `pipeline.batch.size` and `pipeline.batch.delay` - these settings are used to tune the performance and resource utilization of the the `logstash` container; see [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html)
+* `PUID` and `PGID` - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
+* `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
+* `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
+* `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
+* `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`).
+* `SURICATA_…` - the [`suricata` container entrypoint script](shared/bin/suricata_config_populate.py) can use **many** more environment variables to tweak [suricata.yaml](https://github.com/OISF/suricata/blob/master/suricata.yaml.in); in that script, `DEFAULT_VARS` defines those variables (albeit without the `SURICATA_` prefix you must add to each for use)
+* `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the size threshold (in megabytes) for assigning severity to large connections or file transfers (default `1000`)
+* `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
+* `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
+* `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
+* `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
+* `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
+* `ZEEK_EXTRACTOR_MODE` – determines the file extraction behavior for file transfers detected by Zeek; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details
+* `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](#ZeekIntelSTIX) or [MISP](#ZeekIntelMISP) feed, only process threat indicators that have been created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2021`) or relative interval (`30 days ago`)
+* `ZEEK_INTEL_ITEM_EXPIRATION` - specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](#ZeekIntel) (default `-1min`, which disables item expiration)
+* `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](#ZeekIntel) files (defaults to empty, which disables automatic refresh)
 
 #### <a name="HostSystemConfigLinux"></a>Linux host system configuration
 
@@ -925,15 +893,15 @@ In addition to be processed for uploading, Malcolm events will be tagged accordi
 
 Tags may also be specified manually with the [browser-based upload form](#Upload).
 
-### <a name="UploadPCAPZeek"></a>Processing uploaded PCAPs with Zeek
+### <a name="UploadPCAPProcessors"></a>Processing uploaded PCAPs with Zeek and Suricata
 
-The browser-based upload interface also provides the ability to specify tags for events extracted from the files uploaded. Additionally, an **Analyze with Zeek** checkbox may be used when uploading PCAP files to cause them to be analyzed by Zeek, similarly to the `ZEEK_AUTO_ANALYZE_PCAP_FILES` environment variable [described above](#DockerComposeYml), only on a per-upload basis. Zeek can also automatically carve out files from file transfers; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details.
+The **Analyze with Zeek** and **Analyze with Suricata** checkboxes may be used when uploading PCAP files to cause them to be analyzed by Zeek and Suricata, respectively. This is functionally equivalent to the `ZEEK_AUTO_ANALYZE_PCAP_FILES` and `SURICATA_AUTO_ANALYZE_PCAP_FILES` environment variables [described above](#DockerComposeYml), only on a per-upload basis. Zeek can also automatically carve out files from file transfers; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details.
 
 ## <a name="LiveAnalysis"></a>Live analysis
 
 ### <a name="LocalPCAP"></a>Capturing traffic on local network interfaces
 
-Malcolm's `pcap-capture` container can capture traffic on one or more local network interfaces and periodically rotate these files for processing with Arkime and Zeek. The `pcap-capture` Docker container is started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) in order for it to be able to open network interfaces in promiscuous mode for capture.
+Malcolm's `pcap-capture` container can capture traffic on one or more local network interfaces and periodically rotate these files for processing. The `pcap-capture` Docker container is started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) in order for it to be able to open network interfaces in promiscuous mode for capture.
 
 The environment variables prefixed with `PCAP_` in the [`docker-compose.yml`](#DockerComposeYml) file determine local packet capture behavior. Local capture can also be configured by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Should Malcolm capture network traffic to PCAP files?`."
 
@@ -950,9 +918,9 @@ A remote network sensor appliance can be used to monitor network traffic, captur
 
 Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/main/sensor-iso/README.md) for more information.
 
-### <a name="ZeekForward"></a>Manually forwarding Zeek logs from an external source
+### <a name="ExternalForward"></a>Manually forwarding logs from an external source
 
-Malcolm's Logstash instance can also be configured to accept Zeek logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
+Malcolm's Logstash instance can also be configured to accept logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`." Enabling encrypted transport of these logs files is discussed in [Configure authentication](#AuthSetup) and the description of the `BEATS_SSL` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file.
 
 Configuring Filebeat to forward Zeek logs to Malcolm might look something like this example [`filebeat.yml`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html):
 ```
@@ -1009,7 +977,7 @@ The values of records created from Zeek logs can be expanded and viewed like any
 
 The Arkime interface displays both Zeek logs and Arkime sessions alongside each other. Using fields common to both data sources, one can [craft queries](#SearchCheatSheet) to filter results matching desired criteria.
 
-A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id` and `network.community_id` in Arkime and Zeek, respectively) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to both Arkime's `rootId` field and the [ECS](https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-id) `event.id` field.
+A few fields of particular mention that help limit returned results to those Zeek logs and Arkime session records generated from the same network connection are [Community ID](https://github.com/corelight/community-id-spec) (`network.community_id`) and Zeek's [connection UID](https://docs.zeek.org/en/stable/examples/logs/#using-uids) (`zeek.uid`), which Malcolm maps to both Arkime's `rootId` field and the [ECS](https://www.elastic.co/guide/en/ecs/current/ecs-event.html#field-event-id) `event.id` field.
 
 Community ID is specification for standard flow hashing [published by Corelight](https://github.com/corelight/community-id-spec) with the intent of making it easier to pivot from one dataset (e.g., Arkime sessions) to another (e.g., Zeek `conn.log` entries). In Malcolm both Arkime and [Zeek](https://github.com/corelight/zeek-community-id) populate this value, which makes it possible to filter for a specific network connection and see both data sources' results for that connection.
 
@@ -1036,7 +1004,7 @@ The **Sessions** view contains many controls for filtering the sessions displaye
 * search button: The **Search** button re-runs the sessions query with the filters currently specified.
 * views button: Indicated by the eyeball **👁** icon, views allow overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including filtering on the `event.dataset` field. 
 
-![Malcolm views](./docs/images/screenshots/arkime_log_filter.png)
+![Malcolm views](./docs/images/screenshots/arkime_apply_view.png)
 
 * map: A global map can be expanded by clicking the globe **🌎** icon. This allows filtering sessions by IP-based geolocation when possible.
 
@@ -1064,7 +1032,7 @@ See the [issues](#Issues) section of this document for an error that can occur u
 
 ### <a name="ArkimeSPIView"></a>SPIView
 
-Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (e.g., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network understood by Arkime and Zeek. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
+Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a quick and easy-to-use interface for  exploring session/log metrics. The SPIView page lists categories for general session metrics (e.g., protocol, source and destination IP addresses, sort and destination ports, etc.) as well as for all of various types of network traffic understood by Malcolm. These categories can be expanded and the top *n* values displayed, along with each value's cardinality, for the fields of interest they contain.
 
 ![Arkime's SPIView](./docs/images/screenshots/arkime_spiview.png)
 
@@ -1092,7 +1060,7 @@ The **Connections** page presents network communications via a force-directed gr
 
 Controls are available for specifying the query size (where smaller values will execute more quickly but may only contain an incomplete representation of the top *n* sessions, and larger values may take longer to execute but will be more complete), which fields to use as the source and destination for node values, a minimum connections threshold, and the method for determining the "weight" of the link between two nodes. As is the case with most other visualizations in Arkime, the graph is interactive: clicking on a node or the link between two nodes can be used to modify query filters, and the nodes themselves may be repositioned by dragging and dropping them. A node's color indicates whether it communicated as a source/originator, a destination/responder, or both.
 
-While the default source and destination fields are *Src IP* and *Dst IP:Dst Port*, the Connections view is able to use any combination of any of the fields populated by Arkime and Zeek. For example:
+While the default source and destination fields are *Src IP* and *Dst IP:Dst Port*, the Connections view is able to use any combination of fields. For example:
 
 * *Src OUI* and *Dst OUI* (hardware manufacturers)
 * *Src IP* and *Protocols*
@@ -1212,9 +1180,11 @@ Many of Malcolm's prebuilt visualizations for Zeek logs were originally inspired
 
 ![OpenSearch Dashboards includes both coordinate and region map types](./docs/images/screenshots/dashboards_region_map.png)
 
-![The Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/dashboards_notices.png)
+![The Suricata Alerts dashboard highlights traffic which matched Suricata signatures](./docs/images/screenshots/dashboards_suricata_alerts.png)
 
-![The Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/dashboards_signatures.png)
+![The Zeek Notices dashboard highlights things which Zeek determine are potentially bad](./docs/images/screenshots/dashboards_notices.png)
+
+![The Zeek Signatures dashboard displays signature hits, such as antivirus hits on files extracted from network traffic](./docs/images/screenshots/dashboards_signatures.png)
 
 ![The Software dashboard displays the type, name, and version of software seen communicating on the network](./docs/images/screenshots/dashboards_software.png)
 
@@ -1254,9 +1224,9 @@ See the official [Kibana User Guide](https://www.elastic.co/guide/en/kibana/7.10
 
 ## <a name="SearchCheatSheet"></a>Search Queries in Arkime and OpenSearch Dashboards
 
-OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Kibana Query Language (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
+OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Dashboards Query Language (DQL)](https://opensearch.org/docs/1.2/dashboards/dql/), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
 
-| | [Arkime Search String](https://localhost/help#search) | [OpenSearch Dashboards Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [OpenSearch Dashboards Search String (KQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
+| | [Arkime Search String](https://localhost/help#search) | [OpenSearch Dashboards Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [OpenSearch Dashboards Search String (DQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
 |---|:---:|:---:|:---:|
 | Field exists |`event.dataset == EXISTS!`|`_exists_:event.dataset`|`event.dataset:*`|
 | Field does not exist |`event.dataset != EXISTS!`|`NOT _exists_:event.dataset`|`NOT event.dataset:*`|
@@ -1270,7 +1240,7 @@ OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://w
 | Match any search terms (OR) |`(zeek.ftp.password == EXISTS!) || (zeek.http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek.ftp.password OR _exists_:zeek.http.password OR related.user:"anonymous"`|`zeek.ftp.password:* or zeek.http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|
-| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|KQL does not support regex|
+| Regex |`host.http == /.*www\.f.*k\.com.*/`|`zeek.http.host:/.*www\.f.*k\.com.*/`|DQL does not support regex|
 | IPv4 values |`ip == 0.0.0.0/0`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|`source.ip:"0.0.0.0/0" OR destination.ip:"0.0.0.0/0"`|
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
@@ -1747,7 +1717,7 @@ Lists [information related to the underlying OpenSearch indices](https://opensea
 
 #### Field Aggregations
 
-`GET` - /mapi/agg/`<fieldname>`
+`GET` or `POST` - /mapi/agg/`<fieldname>`
 
 Executes an OpenSearch [bucket aggregation](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the requested fields across all of Malcolm's indexed network traffic metadata.
 
@@ -1759,20 +1729,20 @@ Parameters:
 * `to` (query parameter) - the time frame ([`lte`](https://opensearch.org/docs/latest/opensearch/query-dsl/term/#range)) for the beginning of the search based on the session's `firstPacket` field value in a format supported by the [dateparser](https://github.com/scrapinghub/dateparser) library (default: "now")
 * `filter` (query parameter) - field filters formatted as a JSON dictionary
 
-The `from`, `to`, and `filter` parameters can be used to further restrict the range of documents returned. The `filter` dictionary should be formatted such that its keys are field names and its values are the values for which to filter. A field name may be prepended with a `!` to negate the filter (e.g., `filter={"event.provider":"zeek"}` vs. `filter={"!event.provider":"zeek"}`). Filtering for value `null` implies "is not set" or "does not exist" (e.g., `filter={"event.dataset":null}` means "the field `event.dataset` is `null`/is not set" while `filter={"!event.dataset":null}` means "the field `event.dataset` is not `null`/is set").
+The `from`, `to`, and `filter` parameters can be used to further restrict the range of documents returned. The `filter` dictionary should be formatted such that its keys are field names and its values are the values for which to filter. A field name may be prepended with a `!` to negate the filter (e.g., `{"event.provider":"zeek"}` vs. `{"!event.provider":"zeek"}`). Filtering for value `null` implies "is not set" or "does not exist" (e.g., `{"event.dataset":null}` means "the field `event.dataset` is `null`/is not set" while `{"!event.dataset":null}` means "the field `event.dataset` is not `null`/is set").
 
-Examples of `filter` URL query parameter:
+Examples of `filter` parameter:
 
-* `filter={"!network.transport":"icmp"}` - `network.transport` is not `icmp`
-* `filter={"network.direction":["inbound","outbound"]}` - `network.direction` is either `inbound` or `outbound`
-* `filter={"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
-* `filter={"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
+* `{"!network.transport":"icmp"}` - `network.transport` is not `icmp`
+* `{"network.direction":["inbound","outbound"]}` - `network.direction` is either `inbound` or `outbound`
+* `{"event.provider":"zeek","event.dataset":["conn","dns"]}` - "`event.provider` is `zeek` and `event.dataset` is either `conn` or `dns`"
+* `{"!event.dataset":null}` - "`event.dataset` is set (is not `null`)"
 
 See [Examples](#APIExamples) for more examples of `filter` and corresponding output.
 
 #### Document Lookup
 
-`GET` - /mapi/document
+`GET` or `POST` - /mapi/document
 
 Executes an OpenSearch [query](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the matching documents across all of Malcolm's indexed network traffic metadata.
 
@@ -1784,10 +1754,12 @@ Parameters:
 * `filter` (query parameter) - field filters formatted as a JSON dictionary (see **Field Aggregations** for examples)
 
 <details>
-<summary>Example URL and output:</summary>
+<summary>Example cURL command and output:</summary>
 
 ```
-https://localhost/mapi/document?filter={"zeek.uid":"CYeji2z7CKmPRGyga"}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/document' \
+    -d '{"limit": 10, filter":{"zeek.uid":"CYeji2z7CKmPRGyga"}}'
 ```
 
 ```json
@@ -2745,7 +2717,9 @@ Some security-related API examples:
 <summary>External traffic (outbound/inbound)</summary>
 
 ```
-/mapi/agg/network.protocol?filter={"network.direction":["inbound","outbound"]}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/network.protocol' \
+    -d '{"filter":{"network.direction":["inbound","outbound"]}}'
 ```
 
 ```json
@@ -2803,7 +2777,9 @@ Some security-related API examples:
 <summary>Cross-segment traffic</summary>
 
 ```
-/mapi/agg/source.segment,destination.segment,network.protocol?filter={"tags":"cross_segment"}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/source.segment,destination.segment,network.protocol' \
+    -d '{"filter":{"tags":"cross_segment"}}'
 ```
 
 ```json
@@ -2984,7 +2960,9 @@ Some security-related API examples:
 <summary>Plaintext password</summary>
 
 ```
-/mapi/agg/network.protocol?filter={"!related.password":null}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/network.protocol' \
+    -d '{"filter":{"!related.password":null}}'
 ```
 
 ```json
@@ -3019,7 +2997,9 @@ Some security-related API examples:
 <summary>Insecure/outdated protocols</summary>
 
 ```
-/mapi/agg/network.protocol,network.protocol_version?filter={"event.severity_tags":"Insecure or outdated protocol"}
+$ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
+    'https://localhost/mapi/agg/network.protocol,network.protocol_version' \
+    -d '{"filter":{"event.severity_tags":"Insecure or outdated protocol"}}'
 ```
 
 ```json
@@ -3446,7 +3426,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-5.2.11.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-6.0.0.iso"
 …
 ```
 
@@ -3847,27 +3827,29 @@ Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
 Pulling pcap-monitor      ... done
+Pulling suricata          ... done
 Pulling upload            ... done
 Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              5.2.11           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           5.2.11           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                5.2.11           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      5.2.11           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             5.2.11           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          5.2.11           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     5.2.11           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      5.2.11           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      5.2.11           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       5.2.11           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     5.2.11           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     5.2.11           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/zeek                                             5.2.11           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.0.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.0.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.0.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.0.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.0.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.0.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.0.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.0.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.0.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.0.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.0.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -3884,7 +3866,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
 …
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 …
-Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
+Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_suricata_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
 …
 ```
 

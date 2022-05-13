@@ -2,11 +2,16 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
-if [ -z "$CAPTURE_PATH" ]; then
-  CAPTURE_PATH="$HOME/bro_logs"
+if [[ -z "$ZEEK_CAPTURE_PATH" ]]; then
+  ZEEK_CAPTURE_PATH="$HOME/bro_logs"
 fi
-export CAPTURE_PATH
-export BEAT_LOG_PATTERN="${CAPTURE_PATH}/*.log"
+if [[ -z "$SURICATA_CAPTURE_PATH" ]]; then
+  SURICATA_CAPTURE_PATH="$HOME/bro_logs/suricata"
+fi
+export ZEEK_CAPTURE_PATH
+export SURICATA_CAPTURE_PATH
+export BEAT_LOG_PATTERN="${ZEEK_CAPTURE_PATH}/*.log"
+export BEAT_SURICATA_LOG_PATTERN="${SURICATA_CAPTURE_PATH}/eve*.json"
 export BEAT_SCAN_FREQUENCY="10s"
 export BEAT_CLEAN_INACTIVE="180m"
 export BEAT_IGNORE_OLDER="120m"

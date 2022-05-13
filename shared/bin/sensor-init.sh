@@ -26,6 +26,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     find /opt/sensor/ -type f -exec chmod 640 "{}" \;
     find /opt/sensor/ -type f -name "*.sh" -exec chmod 750 "{}" \;
     find /opt/sensor/ -type f -name "*.keystore" -exec chmod 600 "{}" \;
+    [[ -d /opt/sensor/sensor_ctl/supervisor.init/ ]] && chmod 750 /opt/sensor/sensor_ctl/supervisor.init/*
 
     if [[ -f /opt/sensor/sensor_ctl/control_vars.conf ]]; then
       # if the capture interface hasn't been set in control_vars.conf, set it now
@@ -53,17 +54,21 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     chown -R 1000:1000 /opt/zeek/*
     [[ -f /opt/zeek/bin/zeek ]] && setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
   fi
-  if [[ -d /opt/yara-rules ]]; then
-    mkdir -p /opt/yara-rules/custom
-    chown -R 1000:1000 /opt/yara-rules/custom
-    chmod -R 750 /opt/yara-rules/custom
+  [[ -d /opt/yara-rules ]] && mkdir -p /opt/yara-rules/custom
+
+  # configure suricata
+  if dpkg -s suricata >/dev/null 2>&1 ; then
+    mkdir -p /etc/suricata/rules /var/log/suricata /var/lib/suricata/rules
+    if [[ -d /opt/sensor/sensor_ctl ]]; then
+      mkdir -p /opt/sensor/sensor_ctl/suricata/rules
+      [[ ! -f /opt/sensor/sensor_ctl/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml /opt/sensor/sensor_ctl/suricata/suricata.yaml
+      [[ ! -f /opt/sensor/sensor_ctl/suricata/update.yaml ]] && cp "$(dpkg -L suricata-update | grep 'update\.yaml' | head -n 1)" /opt/sensor/sensor_ctl/suricata/update.yaml
+    fi
   fi
 
   # if the sensor needs to do clamav scanning, configure it to run as the sensor user
   if dpkg -s clamav >/dev/null 2>&1 ; then
     mkdir -p /var/log/clamav /var/lib/clamav
-    chown -R 1000:1000 /var/log/clamav  /var/lib/clamav
-    chmod -R 750 /var/log/clamav  /var/lib/clamav
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf
     if [[ -d /opt/sensor/sensor_ctl ]]; then
@@ -72,8 +77,6 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
       sed -i 's@^LogFile .*$@#LogFile /var/log/clamav/clamd.log@g' /etc/clamav/clamd.conf
       # use local directory for socket file
       mkdir -p /opt/sensor/sensor_ctl/clamav
-      chown -R 1000:1000 /opt/sensor/sensor_ctl/clamav
-      chmod -R 750 /opt/sensor/sensor_ctl/clamav
       sed -i 's@^LocalSocket .*$@LocalSocket /opt/sensor/sensor_ctl/clamav/clamd.ctl@g' /etc/clamav/clamd.conf
     fi
     if [[ -n $MAIN_USER ]]; then
@@ -87,6 +90,25 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     sed -i "s/^MaxScanSize .*$/MaxScanSize $(echo "$EXTRACTED_FILE_MAX_BYTES * 4" | bc)/g" /etc/clamav/clamd.conf
     grep -q "^TCPSocket" /etc/clamav/clamd.conf && (sed -i 's/^TCPSocket .*$/TCPSocket 3310/g' /etc/clamav/clamd.conf) || (echo "TCPSocket 3310" >> /etc/clamav/clamd.conf)
   fi
+
+  # set permissions on some directories that we might have just created
+  for DIR in \
+    /etc/suricata/rules \
+    /opt/sensor/sensor_ctl/clamav \
+    /opt/sensor/sensor_ctl/suricata \
+    /opt/yara-rules/custom \
+    /var/lib/clamav \
+    /var/lib/suricata \
+    /var/log/clamav \
+    /var/log/suricata \
+  ; do
+    if [[ -d "$DIR" ]]; then
+      chown -R 1000:1000 "$DIR"
+      chmod 750 "$DIR"
+      find "$DIR" -type d -exec chmod 750 "{}" \;
+      find "$DIR" -type f -exec chmod 640 "{}" \;
+    fi
+  done
 
   # if the network configuration files for the interfaces haven't been set to come up on boot, configure that now.
   InitializeSensorNetworking

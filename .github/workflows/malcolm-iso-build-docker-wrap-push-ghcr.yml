@@ -5,11 +5,11 @@ on:
     branches:
       - main
       - development
-      - suricata_merge
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
       - '.trigger_workflow_build'
+      - '.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
 
@@ -69,7 +69,9 @@ jobs:
             git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
             cd /tmp/live-build
             dpkg-buildpackage -b -uc -us
+            cd /tmp
             sudo dpkg -i /tmp/live-build*.deb
+            rm -rf /tmp/live-build
       -
         name: Checkout
         uses: actions/checkout@v2
@@ -99,7 +101,10 @@ jobs:
               docker rmi "$REPO_IMAGE"
           done
           DEST_IMAGES_TGZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_short_hash.outputs.hash }}_images.tar.gz
-          docker save "${IMAGES[@]}" | gzip > "$DEST_IMAGES_TGZ"
+          docker save "${IMAGES[@]}" | gzip --best > "$DEST_IMAGES_TGZ"
+          for IMAGE in "${IMAGES[@]}"; do
+            docker rmi "$IMAGE"
+          done
           pushd ./malcolm-iso
           sudo /usr/bin/env bash ./build.sh -d "$DEST_IMAGES_TGZ"
           rm -rf ./shared/

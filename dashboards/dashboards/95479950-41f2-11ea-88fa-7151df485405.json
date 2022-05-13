@@ -1,5 +1,5 @@
 {
-  "version": "7.10.2",
+  "version": "1.3.1",
   "objects": [
     {
       "id": "95479950-41f2-11ea-88fa-7151df485405",
@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T18:29:56.691Z",
-      "version": "WzkwNiwxXQ==",
+      "updated_at": "2022-05-11T16:31:25.103Z",
+      "version": "WzExMjYsMV0=",
       "attributes": {
         "title": "Security Overview",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":23,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":8,\"y\":0,\"w\":12,\"h\":23,\"i\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\"},\"panelIndex\":\"320b8bf0-6567-4d0b-b7d1-7402baf830d4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":20,\"y\":0,\"w\":15,\"h\":23,\"i\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\"},\"panelIndex\":\"8f421b7e-8ea9-4d52-a165-8e2a4fa78fd0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":35,\"y\":0,\"w\":13,\"h\":23,\"i\":\"119a8b45-c803-4c71-93b4-a9514803021a\"},\"panelIndex\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":23,\"w\":15,\"h\":18,\"i\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\"},\"panelIndex\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":15,\"y\":23,\"w\":15,\"h\":38,\"i\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\"},\"panelIndex\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":null},\"panelRefName\":\"panel_5\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":30,\"y\":23,\"w\":9,\"h\":18,\"i\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\"},\"panelIndex\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":39,\"y\":23,\"w\":9,\"h\":18,\"i\":\"61f158d0-8c28-499f-af09-4df087948d42\"},\"panelIndex\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":41,\"w\":15,\"h\":20,\"i\":\"071a1c98-695f-4708-92c9-2c950e515131\"},\"panelIndex\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":null}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":30,\"y\":41,\"w\":18,\"h\":20,\"i\":\"6beedf2b-5d72-48af-a90f-f56781764efe\"},\"panelIndex\":\"6beedf2b-5d72-48af-a90f-f56781764efe\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":0,\"y\":61,\"w\":15,\"h\":20,\"i\":\"c2035f3c-4ff1-4f36-bde9-5b6476974633\"},\"panelIndex\":\"c2035f3c-4ff1-4f36-bde9-5b6476974633\",\"embeddableConfig\":{\"title\":\"X.509 Certificate Revocation\",\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"title\":\"X.509 Certificate Revocation\",\"panelRefName\":\"panel_10\"},{\"version\":\"7.10.2\",\"gridData\":{\"x\":15,\"y\":61,\"w\":33,\"h\":20,\"i\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\"},\"panelIndex\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_11\"}]",
+        "panelsJSON": "[{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":32,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":17,\"h\":32,\"i\":\"e8718353-4f86-4746-9ac0-8a755bd3813a\"},\"panelIndex\":\"e8718353-4f86-4746-9ac0-8a755bd3813a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":25,\"y\":0,\"w\":23,\"h\":32,\"i\":\"172d3708-82e7-4cb1-84ad-010955614e8b\"},\"panelIndex\":\"172d3708-82e7-4cb1-84ad-010955614e8b\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":32,\"w\":12,\"h\":18,\"i\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\"},\"panelIndex\":\"1789e54a-db27-4e5e-92d3-2f44b3f9f96e\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":12,\"y\":32,\"w\":21,\"h\":18,\"i\":\"e1779497-5073-4664-9f4a-474aebfa2c78\"},\"panelIndex\":\"e1779497-5073-4664-9f4a-474aebfa2c78\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":33,\"y\":32,\"w\":15,\"h\":18,\"i\":\"119a8b45-c803-4c71-93b4-a9514803021a\"},\"panelIndex\":\"119a8b45-c803-4c71-93b4-a9514803021a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":50,\"w\":28,\"h\":18,\"i\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\"},\"panelIndex\":\"2231b6ad-9e0d-4524-a359-bdc2c8332991\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_6\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":28,\"y\":50,\"w\":10,\"h\":18,\"i\":\"61f158d0-8c28-499f-af09-4df087948d42\"},\"panelIndex\":\"61f158d0-8c28-499f-af09-4df087948d42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":38,\"y\":50,\"w\":10,\"h\":18,\"i\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\"},\"panelIndex\":\"4cdbaf8d-bb32-457f-a198-e9734168c5eb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":68,\"w\":26,\"h\":29,\"i\":\"6beedf2b-5d72-48af-a90f-f56781764efe\"},\"panelIndex\":\"6beedf2b-5d72-48af-a90f-f56781764efe\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":26,\"y\":68,\"w\":22,\"h\":29,\"i\":\"071a1c98-695f-4708-92c9-2c950e515131\"},\"panelIndex\":\"071a1c98-695f-4708-92c9-2c950e515131\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":null}},\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"asc\"}}}},\"panelRefName\":\"panel_10\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":97,\"w\":48,\"h\":33,\"i\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\"},\"panelIndex\":\"9df4498d-9d4d-4613-bc54-8fca34ade25c\",\"embeddableConfig\":{\"mapCenter\":null,\"mapZoom\":3},\"panelRefName\":\"panel_11\"},{\"version\":\"1.3.1\",\"gridData\":{\"x\":0,\"y\":130,\"w\":48,\"h\":31,\"i\":\"ad7c7773-e54a-4da3-8e6e-7da232febdef\"},\"panelIndex\":\"ad7c7773-e54a-4da3-8e6e-7da232febdef\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -30,32 +30,32 @@
         {
           "name": "panel_1",
           "type": "visualization",
-          "id": "a4f6eba0-41f5-11ea-88fa-7151df485405"
+          "id": "8f673450-cbd9-11ec-a50a-5fedd672f5c5"
         },
         {
           "name": "panel_2",
           "type": "visualization",
-          "id": "0e9b1a00-525e-11e9-9bd7-13d6d1bafa75"
+          "id": "a5acf7f0-cbdd-11ec-a50a-5fedd672f5c5"
         },
         {
           "name": "panel_3",
           "type": "visualization",
-          "id": "c5b1e590-41f3-11ea-88fa-7151df485405"
+          "id": "e9f27fa0-41f8-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_4",
           "type": "visualization",
-          "id": "e9f27fa0-41f8-11ea-88fa-7151df485405"
+          "id": "596d20d0-d147-11ec-ab4e-83a83b5e27a4"
         },
         {
           "name": "panel_5",
           "type": "visualization",
-          "id": "f7b3ba60-41f7-11ea-88fa-7151df485405"
+          "id": "c5b1e590-41f3-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_6",
           "type": "visualization",
-          "id": "0ffb5790-41f3-11ea-88fa-7151df485405"
+          "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_7",
@@ -65,7 +65,7 @@
         {
           "name": "panel_8",
           "type": "visualization",
-          "id": "69241a80-421d-11ea-9084-41ab7c5fff2e"
+          "id": "0ffb5790-41f3-11ea-88fa-7151df485405"
         },
         {
           "name": "panel_9",
@@ -75,12 +75,17 @@
         {
           "name": "panel_10",
           "type": "visualization",
-          "id": "61410dd0-2b89-11ec-a9f2-3911c8571bfd"
+          "id": "69241a80-421d-11ea-9084-41ab7c5fff2e"
         },
         {
           "name": "panel_11",
           "type": "visualization",
-          "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405"
+          "id": "f7b3ba60-41f7-11ea-88fa-7151df485405"
+        },
+        {
+          "name": "panel_12",
+          "type": "search",
+          "id": "33ba96c0-cbdd-11ec-a50a-5fedd672f5c5"
         }
       ],
       "migrationVersion": {
@@ -93,11 +98,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:35:08.437Z",
-      "version": "Wzc0MiwxXQ==",
+      "updated_at": "2022-05-11T16:09:14.850Z",
+      "version": "WzgwNiwxXQ==",
       "attributes": {
-        "title": "Zeek Logs",
-        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "title": "Network Logs",
+        "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -111,81 +116,21 @@
       }
     },
     {
-      "id": "a4f6eba0-41f5-11ea-88fa-7151df485405",
+      "id": "8f673450-cbd9-11ec-a50a-5fedd672f5c5",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ2NywxXQ==",
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUwNywxXQ==",
       "attributes": {
-        "title": "Notices by Category",
-        "visState": "{\"title\":\"Notices by Category\",\"type\":\"table\",\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.notice.note\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Notice Category\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "title": "Normalized Event Category",
+        "visState": "{\"title\":\"Normalized Event Category\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\" \"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Transport\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":40},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\" \"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\" \",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "8f003748-a6f8-4244-9d4e-e38e4a48da4c"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "0e9b1a00-525e-11e9-9bd7-13d6d1bafa75",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ2OCwxXQ==",
-      "attributes": {
-        "title": "Signatures - Signature IDs",
-        "visState": "{\"title\":\"Signatures - Signature IDs\",\"type\":\"horizontal_bar\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":40},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":20},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Signature ID\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.signatures.signature_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Signature ID\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "c5b1e590-41f3-11ea-88fa-7151df485405",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ2OSwxXQ==",
-      "attributes": {
-        "title": "Clear-text Transmission of Passwords ",
-        "visState": "{\"title\":\"Clear-text Transmission of Passwords \",\"type\":\"table\",\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Application Protocol\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"related.user\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Username\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\\\\*password:*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"rule.category:*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -200,13 +145,43 @@
       }
     },
     {
+      "id": "a5acf7f0-cbdd-11ec-a50a-5fedd672f5c5",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUwOCwxXQ==",
+      "attributes": {
+        "title": "Notice, Alert, Signature and Weird - Summary",
+        "visState": "{\"title\":\"Notice, Alert, Signature and Weird - Summary\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Provider\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dataset\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Category\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Name\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "33ba96c0-cbdd-11ec-a50a-5fedd672f5c5"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
       "id": "e9f27fa0-41f8-11ea-88fa-7151df485405",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3MCwxXQ==",
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUwOSwxXQ==",
       "attributes": {
         "title": "Outdated/Insecure Application Protocols",
         "visState": "{\"title\":\"Outdated/Insecure Application Protocols\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Application Protocol\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Protocol Version\"}}]}",
@@ -229,13 +204,219 @@
       }
     },
     {
+      "id": "596d20d0-d147-11ec-ab4e-83a83b5e27a4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:28:11.485Z",
+      "version": "WzEwOTksMV0=",
+      "attributes": {
+        "title": "Vulnerabilities",
+        "visState": "{\"title\":\"Vulnerabilities\",\"type\":\"table\",\"aggs\":[{\"id\":\"5\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"firstPacket\",\"customLabel\":\"Last Seen\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Data Source\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Log Type\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"vulnerability.id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Vulnerability ID\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "33ba96c0-cbdd-11ec-a50a-5fedd672f5c5"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "c5b1e590-41f3-11ea-88fa-7151df485405",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxMiwxXQ==",
+      "attributes": {
+        "title": "Clear-text Transmission of Passwords ",
+        "visState": "{\"title\":\"Clear-text Transmission of Passwords \",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Application Protocol\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.user\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Username\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\\\\*password:*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxNCwxXQ==",
+      "attributes": {
+        "title": "Inbound Access By Protocol Over Time",
+        "visState": "{\"title\":\"Inbound Access By Protocol Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-15y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Protocol\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#34130C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY-MM-DD\"}},\"params\":{\"date\":true,\"interval\":\"P30D\",\"intervalESValue\":30,\"intervalESUnit\":\"d\",\"format\":\"YYYY-MM-DD\",\"bounds\":{\"min\":\"1976-01-28T18:52:45.953Z\",\"max\":\"2020-01-28T18:52:45.953Z\"}},\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"network.protocol:(ssh OR rdp OR rfb OR telnet OR rlogin OR rsh OR openvpn OR ipsec OR wireguard) AND tags:(external_source OR external_destination)\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "4a183420-41f3-11ea-88fa-7151df485405",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxMSwxXQ==",
+      "attributes": {
+        "title": "Outbound Internal Traffic by Country",
+        "visState": "{\"title\":\"Outbound Internal Traffic by Country\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Responding Country\"}}]}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"tags:internal_source AND tags:external_destination\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "0ffb5790-41f3-11ea-88fa-7151df485405",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxMCwxXQ==",
+      "attributes": {
+        "title": "Inbound External Traffic by Country",
+        "visState": "{\"title\":\"Inbound External Traffic by Country\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Originating Country\"}}]}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"tags:external_source AND tags:internal_destination\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "3a582cc0-6fab-11eb-958c-51e33b5cae2a",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxMywxXQ==",
+      "attributes": {
+        "title": "File Transfers",
+        "visState": "{\"title\":\"File Transfers\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.mime_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Type\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":42,\"showLabel\":false}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "69241a80-421d-11ea-9084-41ab7c5fff2e",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxNSwxXQ==",
+      "attributes": {
+        "title": "DNS Queries by Randomness",
+        "visState": "{\"title\":\"DNS Queries by Randomness\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"dns.host\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"DNS Query\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.freq_score_v1\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Randomness Score (method 1)\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.freq_score_v2\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Randomness Score (method 2)\"},\"schema\":\"bucket\"}],\"params\":{\"dimensions\":{\"buckets\":[{\"accessor\":0,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}},{\"accessor\":1,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"number\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}}],\"metrics\":[{\"accessor\":2,\"aggType\":\"count\",\"format\":{\"id\":\"number\"},\"params\":{}}]},\"perPage\":20,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"},\"totalFunc\":\"sum\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
       "id": "f7b3ba60-41f7-11ea-88fa-7151df485405",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3MSwxXQ==",
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxNiwxXQ==",
       "attributes": {
         "title": "Connections by Destination Country (region map)",
         "visState": "{\"title\":\"Connections by Destination Country (region map)\",\"type\":\"region_map\",\"params\":{\"legendPosition\":\"bottomright\",\"addTooltip\":true,\"colorSchema\":\"Blues\",\"emsHotLink\":\"\",\"isDisplayWarning\":false,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"selectedTmsLayer\":{\"origin\":\"elastic_maps_service\",\"id\":\"road_map\",\"minZoom\":0,\"maxZoom\":10,\"attribution\":\"<p><a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap contributors</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://openmaptiles.org\\\">OpenMapTiles</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.maptiler.com\\\">MapTiler</a> | <a rel=\\\"noreferrer noopener\\\" href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>\"}},\"mapZoom\":2,\"mapCenter\":[0,0],\"outlineWeight\":1,\"showAllShapes\":true,\"selectedLayer\":{\"name\":\"World (offline)\",\"url\":\"/world.geojson\",\"attribution\":\"https://exploratory.io/maps\",\"fields\":[{\"name\":\"ISO_A2\",\"description\":\"Country Code\"},{\"name\":\"WB_A2\",\"description\":\"Country Code2\"},{\"name\":\"NAME\",\"description\":\"Country Name\"}],\"format\":{\"type\":\"geojson\"},\"meta\":{\"feature_collection_path\":\"data\"},\"layerId\":\"self_hosted.World (offline)\",\"isEMS\":false},\"selectedJoinField\":{\"name\":\"WB_A2\",\"description\":\"Country Code2\"},\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"},\"bucket\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Connections\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.geo.country_code2\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Country\"}}]}",
@@ -259,251 +440,33 @@
       }
     },
     {
-      "id": "0ffb5790-41f3-11ea-88fa-7151df485405",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3MiwxXQ==",
-      "attributes": {
-        "title": "Inbound External Traffic by Country",
-        "visState": "{\"title\":\"Inbound External Traffic by Country\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Originating Country\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"tags:external_source AND tags:internal_destination\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "4a183420-41f3-11ea-88fa-7151df485405",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3MywxXQ==",
-      "attributes": {
-        "title": "Outbound Internal Traffic by Country",
-        "visState": "{\"title\":\"Outbound Internal Traffic by Country\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Responding Country\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"tags:internal_source AND tags:external_destination\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "69241a80-421d-11ea-9084-41ab7c5fff2e",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3NCwxXQ==",
-      "attributes": {
-        "title": "DNS Queries by Randomness",
-        "visState": "{\"title\":\"DNS Queries by Randomness\",\"type\":\"table\",\"params\":{\"dimensions\":{\"buckets\":[{\"accessor\":0,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}},{\"accessor\":1,\"aggType\":\"terms\",\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"number\",\"missingBucketLabel\":\"Missing\",\"otherBucketLabel\":\"Other\"}},\"params\":{}}],\"metrics\":[{\"accessor\":2,\"aggType\":\"count\",\"format\":{\"id\":\"number\"},\"params\":{}}]},\"perPage\":10,\"percentageCol\":\"\",\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dns.host\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"DNS Query\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.freq_score_v1\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Randomness Score (method 1)\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.freq_score_v2\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Randomness Score (method 2)\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "0b971165-4c39-42ed-b80d-8a8f5658a38e"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "3a582cc0-6fab-11eb-958c-51e33b5cae2a",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3NiwxXQ==",
-      "attributes": {
-        "title": "File Types Observed",
-        "visState": "{\"title\":\"File Types Observed\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.mime_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Type\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":42,\"showLabel\":true}}",
-        "uiStateJSON": "{}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "61410dd0-2b89-11ec-a9f2-3911c8571bfd",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T18:22:38.381Z",
-      "version": "Wzg2MSwxXQ==",
-      "attributes": {
-        "title": "OCSP - Certificate Revocation",
-        "visState": "{\"title\":\"OCSP - Certificate Revocation\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ocsp.certStatus\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Certificate Status\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ocsp.revokereason\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Revocation Reason\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"NOT zeek.ocsp.certStatus:good\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "9c2ec460-2b88-11ec-a9f2-3911c8571bfd"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "d8b8a6a0-41fe-11ea-88fa-7151df485405",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3NSwxXQ==",
-      "attributes": {
-        "title": "External Remote Access Over Time",
-        "visState": "{\"title\":\"External Remote Access Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#34130C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY-MM-DD\"}},\"params\":{\"date\":true,\"interval\":\"P30D\",\"intervalESValue\":30,\"intervalESUnit\":\"d\",\"format\":\"YYYY-MM-DD\",\"bounds\":{\"min\":\"1976-01-28T18:52:45.953Z\",\"max\":\"2020-01-28T18:52:45.953Z\"}},\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-44y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Protocol\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"network.protocol:(ssh OR rdp OR rfb OR telnet OR rlogin OR rsh OR openvpn OR ipsec OR wireguard) AND tags:(external_source OR external_destination)\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "8f003748-a6f8-4244-9d4e-e38e4a48da4c",
+      "id": "33ba96c0-cbdd-11ec-a50a-5fedd672f5c5",
       "type": "search",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:35:05.414Z",
-      "version": "WzcxNywxXQ==",
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxNywxXQ==",
       "attributes": {
-        "title": "Notices - Logs",
+        "title": "Notice, Alert, Signature and Weird - Logs",
         "description": "",
         "hits": 0,
         "columns": [
-          "zeek.notice.category",
-          "zeek.notice.sub_category",
-          "zeek.notice.msg",
+          "event.provider",
+          "event.dataset",
+          "event.module",
+          "rule.category",
+          "rule.name",
+          "network.protocol",
           "source.ip",
           "destination.ip",
+          "event.severity_tags",
           "event.id"
         ],
-        "sort": [
-          [
-            "firstPacket",
-            "desc"
-          ]
-        ],
+        "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"event.dataset:notice\",\"default_field\":\"*\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "34dd33c0-523f-11e9-a30e-e3576242f3ed",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ3OCwxXQ==",
-      "attributes": {
-        "title": "Signatures - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "zeek.signatures.note",
-          "zeek.signatures.signature_id",
-          "zeek.signatures.signature_count",
-          "event.id"
-        ],
-        "sort": [
-          [
-            "firstPacket",
-            "desc"
-          ]
-        ],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":\"event.dataset:signatures\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"(event.provider:zeek AND event.dataset:(notice OR signatures OR weird)) OR (event.provider:suricata AND event.dataset:alert)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -523,8 +486,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:35:06.417Z",
-      "version": "WzcyNiwxXQ==",
+      "updated_at": "2022-05-11T16:09:11.826Z",
+      "version": "Wzc4MSwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
         "description": "",
@@ -547,7 +510,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"(event.provider:zeek AND event.dataset:conn) OR (event.provider:suricata AND event.dataset:flow)\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -567,8 +530,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-10-12T17:34:43.096Z",
-      "version": "WzQ4MCwxXQ==",
+      "updated_at": "2022-05-11T16:08:47.608Z",
+      "version": "WzUxOSwxXQ==",
       "attributes": {
         "title": "DNS - Logs",
         "description": "",
@@ -589,44 +552,6 @@
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"event.dataset:dns\"}}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "9c2ec460-2b88-11ec-a9f2-3911c8571bfd",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2021-10-12T18:17:07.749Z",
-      "version": "WzgyOSwxXQ==",
-      "attributes": {
-        "title": "OCSP - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "zeek.ocsp.thisUpdate",
-          "zeek.ocsp.nextUpdate",
-          "zeek.ocsp.certStatus",
-          "zeek.ocsp.revokereason",
-          "zeek.ocsp.revoketime",
-          "zeek.ocsp.serialNumber",
-          "event.id"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.dataset:ocsp\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

@@ -31,8 +31,15 @@ MAX_WORKER_PROCESSES_DEFAULT = 1
 
 PCAP_PROCESSING_MODE_ARKIME = "arkime"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
+PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
+DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
+
+SURICATA_PATH = "/usr/bin/suricata"
+SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
+SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
+SURICATA_AUTOSURICATA_TAG = 'AUTOSURICATA'
 
 ZEEK_PATH = "/opt/zeek/bin/zeek"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
@@ -44,9 +51,17 @@ ZEEK_LOCAL_SCRIPT = 'local'
 ZEEK_STATE_DIR = '.state'
 ZEEK_AUTOZEEK_TAG = 'AUTOZEEK'
 ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
-ZEEK_USERTAG_TAG = 'USERTAG'
 ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
 ZEEK_LOG_COMPRESSION_LEVEL = 6
+
+USERTAG_TAG = 'USERTAG'
+
+TAGS_NOSHOW = (
+    USERTAG_TAG,
+    SURICATA_AUTOSURICATA_TAG,
+    ZEEK_AUTOZEEK_TAG,
+)
+
 
 ###################################################################################################
 debug = False
@@ -96,12 +111,13 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, arkimeBin, autotag, notLocked = (
+    newFileQueue, pcapBaseDir, arkimeBin, nodeName, autoTag, notLocked = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
         arkimeWorkerArgs[2],
         arkimeWorkerArgs[3],
         arkimeWorkerArgs[4],
+        arkimeWorkerArgs[5],
     )
 
     if debug:
@@ -126,11 +142,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         [
                             x
                             for x in fileInfo[FILE_INFO_DICT_TAGS]
-                            if (x != ZEEK_AUTOZEEK_TAG)
-                            and (x != ZEEK_USERTAG_TAG)
-                            and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                            if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
                         ]
-                        if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag)
+                        if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                         else list()
                     )
                     if debug:
@@ -140,6 +154,8 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                     cmd = [
                         arkimeBin,
                         '--quiet',
+                        '-n',
+                        fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
                         '-o',
                         f'ecsEventProvider={arkimeProvider}',
                         '-o',
@@ -177,7 +193,7 @@ def zeekFileWorker(zeekWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, zeekBin, autozeek, autotag, uploadDir, defaultExtractFileMode = (
+    newFileQueue, pcapBaseDir, zeekBin, autoZeek, autoTag, uploadDir, defaultExtractFileMode = (
         zeekWorkerArgs[0],
         zeekWorkerArgs[1],
         zeekWorkerArgs[2],
@@ -204,8 +220,8 @@ def zeekFileWorker(zeekWorkerArgs):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-                    # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autozeek flag is turned on
-                    if autozeek or (
+                    # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autoZeek flag is turned on
+                    if autoZeek or (
                         (FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS]
                     ):
 
@@ -221,16 +237,14 @@ def zeekFileWorker(zeekWorkerArgs):
 
                         extractFileMode = extractFileMode.lower() if extractFileMode else ZEEK_EXTRACTOR_MODE_NONE
 
-                        # finalize tags list (removing AUTOZEEK and AUTOCARVE*)
+                        # finalize tags list
                         fileInfo[FILE_INFO_DICT_TAGS] = (
                             [
                                 x
                                 for x in fileInfo[FILE_INFO_DICT_TAGS]
-                                if (x != ZEEK_AUTOZEEK_TAG)
-                                and (x != ZEEK_USERTAG_TAG)
-                                and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
                             ]
-                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autotag)
+                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                             else list()
                         )
                         if debug:
@@ -315,22 +329,133 @@ def zeekFileWorker(zeekWorkerArgs):
 
 
 ###################################################################################################
+def suricataFileWorker(suricataWorkerArgs):
+    global debug
+    global verboseDebug
+    global shuttingDown
+    global scanWorkersCount
+
+    scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
+
+    newFileQueue, pcapBaseDir, autoSuricata, suricataBin, autoTag, uploadDir, suricataConfig = (
+        suricataWorkerArgs[0],
+        suricataWorkerArgs[1],
+        suricataWorkerArgs[2],
+        suricataWorkerArgs[3],
+        suricataWorkerArgs[4],
+        suricataWorkerArgs[5],
+        suricataWorkerArgs[6],
+    )
+
+    if debug:
+        eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
+
+    # loop forever, or until we're told to shut down
+    while not shuttingDown:
+        try:
+            # pull an item from the queue of files that need to be processed
+            fileInfo = newFileQueue.popleft()
+        except IndexError:
+            time.sleep(1)
+        else:
+            if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+
+                # suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on
+                if autoSuricata or (
+                    (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                ):
+
+                    if pcapBaseDir and os.path.isdir(pcapBaseDir):
+                        fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                    if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+
+                        # finalize tags list
+                        fileInfo[FILE_INFO_DICT_TAGS] = (
+                            [
+                                x
+                                for x in fileInfo[FILE_INFO_DICT_TAGS]
+                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                            ]
+                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
+                            else list()
+                        )
+                        if debug:
+                            eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+
+                        # create a temporary work directory where suricata will be executed to generate the log files
+                        with tempfile.TemporaryDirectory() as tmpLogDir:
+                            if os.path.isdir(tmpLogDir):
+
+                                processTimeUsec = int(round(time.time() * 1000000))
+
+                                # put together suricata execution command
+                                cmd = [
+                                    suricataBin,
+                                    '-r',
+                                    fileInfo[FILE_INFO_DICT_NAME],
+                                    '-l',
+                                    tmpLogDir,
+                                    '-c',
+                                    suricataConfig,
+                                ]
+
+                                # execute suricata-capture for pcap file
+                                retcode, output = run_process(cmd, debug=verboseDebug)
+
+                                eveJsonFile = os.path.join(tmpLogDir, "eve.json")
+                                if os.path.isfile(eveJsonFile):
+                                    # relocate the .json to be processed (do it this way instead of with a shutil.move because of
+                                    # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
+                                    # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
+                                    shutil.copy(
+                                        eveJsonFile,
+                                        os.path.join(
+                                            uploadDir,
+                                            f"eve-{processTimeUsec}-{scanWorkerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])}).json",
+                                        ),
+                                    )
+
+                                if retcode == 0:
+                                    if debug:
+                                        eprint(
+                                            f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                        )
+                                else:
+                                    if debug:
+                                        eprint(
+                                            f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}"
+                                        )
+
+                            else:
+                                if debug:
+                                    eprint(
+                                        f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                    )
+
+    if debug:
+        eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
+
+
+###################################################################################################
 # main
 def main():
 
     processingMode = None
-    if (PCAP_PROCESSING_MODE_ARKIME in scriptName) and ('zeek' in scriptName):
+    if 'pcap_processor' in scriptName:
         eprint(
-            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead."
+            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with the processor (e.g., arkime, suricata, zeek) in the name and run that instead."
         )
         exit(2)
     elif PCAP_PROCESSING_MODE_ARKIME in scriptName:
         processingMode = PCAP_PROCESSING_MODE_ARKIME
     elif PCAP_PROCESSING_MODE_ZEEK in scriptName:
         processingMode = PCAP_PROCESSING_MODE_ZEEK
+    elif PCAP_PROCESSING_MODE_SURICATA in scriptName:
+        processingMode = PCAP_PROCESSING_MODE_SURICATA
     else:
         eprint(
-            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with either '{PCAP_PROCESSING_MODE_ARKIME}' or '{PCAP_PROCESSING_MODE_ZEEK}' in the name and run that instead."
+            f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with the processor (e.g., arkime, suricata, zeek) in the name and run that instead."
         )
         exit(2)
 
@@ -395,7 +520,7 @@ def main():
     )
     parser.add_argument(
         '--autotag',
-        dest='autotag',
+        dest='autoTag',
         help="Autotag logs based on PCAP file names",
         metavar='true|false',
         type=str2bool,
@@ -403,6 +528,15 @@ def main():
         const=True,
         default=False,
         required=False,
+    )
+    parser.add_argument(
+        '--node',
+        required=False,
+        dest='nodeName',
+        help="PCAP source node name (may be overriden by publisher)",
+        metavar='<STR>',
+        type=str,
+        default=DEFAULT_NODE_NAME,
     )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
@@ -446,7 +580,7 @@ def main():
         )
         parser.add_argument(
             '--autozeek',
-            dest='autozeek',
+            dest='autoZeek',
             help="Autoanalyze all PCAP file with Zeek",
             metavar='true|false',
             type=str2bool,
@@ -470,6 +604,43 @@ def main():
             metavar='<directory>',
             type=str,
             required=True,
+        )
+    elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
+        parser.add_argument(
+            '--suricata',
+            required=False,
+            dest='executable',
+            help="suricata executable path",
+            metavar='<STR>',
+            type=str,
+            default=SURICATA_PATH,
+        )
+        parser.add_argument(
+            '--autosuricata',
+            dest='autoSuricata',
+            help="Autoanalyze all PCAP file with Suricata",
+            metavar='true|false',
+            type=str2bool,
+            nargs='?',
+            const=True,
+            default=False,
+            required=False,
+        )
+        requiredNamed.add_argument(
+            '--suricata-config',
+            dest='suricataConfigFile',
+            help='Suricata configuration YAML file',
+            metavar='<STR>',
+            type=str,
+            default=SURICATA_CONFIG_FILE,
+        )
+        requiredNamed.add_argument(
+            '--suricata-directory',
+            dest='suricataUploadDir',
+            help='Destination directory for Suricata EVE JSON log files',
+            metavar='<directory>',
+            type=str,
+            default=SURICATA_LOG_DIR,
         )
     try:
         parser.error = parser.exit
@@ -519,7 +690,16 @@ def main():
         scannerThreads = ThreadPool(
             args.threads,
             arkimeCaptureFileWorker,
-            ([newFileQueue, args.pcapBaseDir, args.executable, args.autotag, args.notLocked],),
+            (
+                [
+                    newFileQueue,
+                    args.pcapBaseDir,
+                    args.executable,
+                    args.nodeName,
+                    args.autoTag,
+                    args.notLocked,
+                ],
+            ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
         scannerThreads = ThreadPool(
@@ -530,10 +710,26 @@ def main():
                     newFileQueue,
                     args.pcapBaseDir,
                     args.executable,
-                    args.autozeek,
-                    args.autotag,
+                    args.autoZeek,
+                    args.autoTag,
                     args.zeekUploadDir,
                     args.zeekExtractFileMode,
+                ],
+            ),
+        )
+    elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
+        scannerThreads = ThreadPool(
+            args.threads,
+            suricataFileWorker,
+            (
+                [
+                    newFileQueue,
+                    args.pcapBaseDir,
+                    args.autoSuricata,
+                    args.executable,
+                    args.autoTag,
+                    args.suricataUploadDir,
+                    args.suricataConfigFile,
                 ],
             ),
         )

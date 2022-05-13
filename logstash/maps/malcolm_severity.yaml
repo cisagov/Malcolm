@@ -30,4 +30,6 @@
 "Signature (ClamAV)": 90
 "Signature": 75
 "Signature (YARA)": 90
+# the severity value for Suricata Alert is superceded by suricata.alert.severity
+"Suricata Alert": 30
 "Weird": 30

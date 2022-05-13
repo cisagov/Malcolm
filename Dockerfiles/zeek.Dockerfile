@@ -127,7 +127,7 @@ RUN apt-get -q update && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
-    zkg install --force --skiptests zeek/spicy-plugin && \
+    zkg install --force --skiptests --version c9ca2d93aaf7bfb75fb282eaa7214a9057d4666e zeek/spicy-plugin && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
     ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
@@ -152,7 +152,7 @@ RUN apt-get -q update && \
 
 # add configuration and scripts
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/
+ADD shared/bin/pcap_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
@@ -163,8 +163,8 @@ ADD shared/bin/zeek_intel_setup.sh /usr/local/bin/entrypoint.sh
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 21
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(_Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY__OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_LDAP_TCP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 22
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY__OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_LDAP_TCP|ANALYZER_SPICY_GENISYS_TCP|Corelight::CommunityID|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::S7comm|Zeek::TDS)"
 ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 20
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|hassh/hassh|http-more-files-names/main|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
@@ -182,7 +182,7 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
-    ln -sfr /usr/local/bin/pcap_arkime_and_zeek_processor.py /usr/local/bin/pcap_zeek_processor.py
+    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true

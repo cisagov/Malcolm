@@ -1,5 +1,5 @@
 {
-  "version": "7.10.0",
+  "version": "1.3.1",
   "objects": [
     {
       "id": "abdd7550-2c7c-40dc-947e-f6d186a158c4",
@@ -7,18 +7,18 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY3NCwxXQ==",
+      "updated_at": "2022-04-29T20:10:44.437Z",
+      "version": "WzEzMjMsMV0=",
       "attributes": {
         "title": "Connections",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"7.6.2\",\"gridData\":{\"h\":24,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"3\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":22,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":61},\"panelIndex\":\"5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":21,\"i\":\"8\",\"w\":16,\"x\":0,\"y\":131},\"panelIndex\":\"8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":21,\"i\":\"9\",\"w\":16,\"x\":16,\"y\":131},\"panelIndex\":\"9\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"11\",\"w\":16,\"x\":0,\"y\":192},\"panelIndex\":\"11\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"12\",\"w\":16,\"x\":16,\"y\":192},\"panelIndex\":\"12\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"13\",\"w\":16,\"x\":32,\"y\":192},\"panelIndex\":\"13\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_7\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":25,\"i\":\"19\",\"w\":25,\"x\":23,\"y\":106},\"panelIndex\":\"19\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":29,\"i\":\"21\",\"w\":19,\"x\":29,\"y\":8},\"panelIndex\":\"21\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_9\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":23,\"i\":\"22\",\"w\":17,\"x\":16,\"y\":83},\"panelIndex\":\"22\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":23,\"i\":\"23\",\"w\":15,\"x\":33,\"y\":83},\"panelIndex\":\"23\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":23,\"i\":\"24\",\"w\":16,\"x\":0,\"y\":83},\"panelIndex\":\"24\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":13,\"i\":\"26\",\"w\":8,\"x\":0,\"y\":24},\"panelIndex\":\"26\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":8,\"i\":\"29\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"29\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_14\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":25,\"i\":\"30\",\"w\":23,\"x\":0,\"y\":106},\"panelIndex\":\"30\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":21,\"i\":\"31\",\"w\":16,\"x\":32,\"y\":131},\"panelIndex\":\"31\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"32\",\"w\":24,\"x\":0,\"y\":172},\"panelIndex\":\"32\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"33\",\"w\":24,\"x\":24,\"y\":172},\"panelIndex\":\"33\",\"embeddableConfig\":{},\"panelRefName\":\"panel_18\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"34\",\"w\":24,\"x\":0,\"y\":152},\"panelIndex\":\"34\",\"embeddableConfig\":{},\"panelRefName\":\"panel_19\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":20,\"i\":\"35\",\"w\":24,\"x\":24,\"y\":152},\"panelIndex\":\"35\",\"embeddableConfig\":{},\"panelRefName\":\"panel_20\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":24,\"i\":\"36\",\"w\":24,\"x\":0,\"y\":37},\"panelIndex\":\"36\",\"embeddableConfig\":{},\"panelRefName\":\"panel_21\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":24,\"i\":\"37\",\"w\":24,\"x\":24,\"y\":37},\"panelIndex\":\"37\",\"embeddableConfig\":{},\"panelRefName\":\"panel_22\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":29,\"i\":\"38\",\"w\":12,\"x\":17,\"y\":8},\"panelIndex\":\"38\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false},\"legendOpen\":true},\"panelRefName\":\"panel_23\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":29,\"i\":\"cbba4b14-342c-4e8e-9afd-f4da9e4b8f00\",\"w\":9,\"x\":8,\"y\":8},\"panelIndex\":\"cbba4b14-342c-4e8e-9afd-f4da9e4b8f00\",\"embeddableConfig\":{},\"panelRefName\":\"panel_24\"},{\"version\":\"7.6.2\",\"gridData\":{\"h\":37,\"i\":\"82da0128-4dcd-4f8b-9275-aad74435296f\",\"w\":48,\"x\":0,\"y\":212},\"panelIndex\":\"82da0128-4dcd-4f8b-9275-aad74435296f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_25\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":8,\"i\":\"3\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"3\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":61},\"panelIndex\":\"5\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":21,\"i\":\"8\",\"w\":16,\"x\":0,\"y\":131},\"panelIndex\":\"8\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":21,\"i\":\"9\",\"w\":16,\"x\":16,\"y\":131},\"panelIndex\":\"9\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":20,\"i\":\"11\",\"w\":16,\"x\":0,\"y\":192},\"panelIndex\":\"11\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":20,\"i\":\"12\",\"w\":16,\"x\":16,\"y\":192},\"panelIndex\":\"12\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":20,\"i\":\"13\",\"w\":16,\"x\":32,\"y\":192},\"panelIndex\":\"13\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":25,\"i\":\"19\",\"w\":25,\"x\":23,\"y\":106},\"panelIndex\":\"19\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":29,\"i\":\"21\",\"w\":19,\"x\":29,\"y\":8},\"panelIndex\":\"21\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"22\",\"w\":17,\"x\":16,\"y\":83},\"panelIndex\":\"22\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"23\",\"w\":15,\"x\":33,\"y\":83},\"panelIndex\":\"23\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"24\",\"w\":16,\"x\":0,\"y\":83},\"panelIndex\":\"24\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"26\",\"w\":8,\"x\":0,\"y\":24},\"panelIndex\":\"26\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":8,\"i\":\"29\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"29\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":25,\"i\":\"30\",\"w\":23,\"x\":0,\"y\":106},\"panelIndex\":\"30\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_15\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":21,\"i\":\"31\",\"w\":16,\"x\":32,\"y\":131},\"panelIndex\":\"31\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_16\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"32\",\"w\":24,\"x\":0,\"y\":172},\"panelIndex\":\"32\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_17\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"33\",\"w\":24,\"x\":24,\"y\":172},\"panelIndex\":\"33\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_18\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"34\",\"w\":24,\"x\":0,\"y\":152},\"panelIndex\":\"34\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_19\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"35\",\"w\":24,\"x\":24,\"y\":152},\"panelIndex\":\"35\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_20\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"36\",\"w\":24,\"x\":0,\"y\":37},\"panelIndex\":\"36\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_21\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"37\",\"w\":24,\"x\":24,\"y\":37},\"panelIndex\":\"37\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_22\"},{\"embeddableConfig\":{\"legendOpen\":true,\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":29,\"i\":\"38\",\"w\":12,\"x\":17,\"y\":8},\"panelIndex\":\"38\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_23\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"cbba4b14-342c-4e8e-9afd-f4da9e4b8f00\",\"w\":9,\"x\":8,\"y\":8},\"panelIndex\":\"cbba4b14-342c-4e8e-9afd-f4da9e4b8f00\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_24\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":37,\"i\":\"82da0128-4dcd-4f8b-9275-aad74435296f\",\"w\":48,\"x\":0,\"y\":212},\"panelIndex\":\"82da0128-4dcd-4f8b-9275-aad74435296f\",\"version\":\"1.3.1\",\"panelRefName\":\"panel_25\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"default_field\":\"*\",\"query\":\"*\"}}}}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         }
       },
       "references": [
@@ -163,11 +163,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:09.616Z",
-      "version": "Wzg3MiwxXQ==",
+      "updated_at": "2022-04-29T19:57:16.086Z",
+      "version": "Wzc4NiwxXQ==",
       "attributes": {
-        "title": "Zeek Logs",
-        "visState": "{\"title\":\"Zeek Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "title": "Network Logs",
+        "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -186,23 +186,23 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY3NiwxXQ==",
+      "updated_at": "2022-04-29T20:10:39.465Z",
+      "version": "WzEzMDIsMV0=",
       "attributes": {
-        "visState": "{\"title\":\"Connections - Log Count Over Time\",\"type\":\"line\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"line\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}",
-        "description": "",
         "title": "Connections - Log Count Over Time",
-        "uiStateJSON": "{}",
+        "visState": "{\"title\":\"Connections - Log Count Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-25y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"}],\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"firstPacket per 12 hours\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"mode\":\"normal\",\"type\":\"histogram\",\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"showCircles\":true,\"interpolate\":\"linear\",\"scale\":\"linear\",\"drawLinesBetweenPoints\":true,\"radiusRatio\":9,\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"type\":\"histogram\",\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
       "references": [
         {
-          "type": "search",
           "name": "search_0",
+          "type": "search",
           "id": "52570870-e9d4-444f-a3df-e44c6757ed9f"
         }
       ],
@@ -216,8 +216,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY3NywxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0MiwxXQ==",
       "attributes": {
         "title": "Connections - Service By Destination Country",
         "visState": "{\"title\":\"Connections - Service By Destination Country\",\"type\":\"pie\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"type\":\"pie\",\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\",\"params\":{\"field\":\"destination.geo.country_name\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Country\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"network.protocol\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Service\"}}]}",
@@ -246,8 +246,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY3OCwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0MywxXQ==",
       "attributes": {
         "visState": "{\"title\":\"Connections - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -276,8 +276,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY3OSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0NCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"Connections - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -306,8 +306,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4MCwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0NSwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"Connections - Source Country\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.geo.country_code2\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Country\"}}],\"listeners\":{}}",
         "description": "",
@@ -336,10 +336,10 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4MSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0NiwxXQ==",
       "attributes": {
-        "visState": "{\"title\":\"Connections - Responder Bytes\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.conn.resp_bytes\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Responder Bytes\"}}],\"listeners\":{}}",
+        "visState": "{\"title\":\"Connections - Responder Bytes\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"server.bytes\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Responder Bytes\"}}],\"listeners\":{}}",
         "description": "",
         "title": "Connections - Responder Bytes",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
@@ -366,8 +366,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4MiwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0NywxXQ==",
       "attributes": {
         "visState": "{\"title\":\"Connections - Missed Bytes\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.conn.missed_bytes\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Missed Bytes\"}}],\"listeners\":{}}",
         "description": "",
@@ -396,8 +396,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4MywxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0OCwxXQ==",
       "attributes": {
         "title": "Connections - Connection State",
         "visState": "{\"title\":\"Connections - Connection State\",\"type\":\"table\",\"params\":{\"perPage\":15,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Connection State Description\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.conn.conn_state_description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Connection State Description\"}}]}",
@@ -426,8 +426,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4NCwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU0OSwxXQ==",
       "attributes": {
         "title": "Connections - Top 10 - Total Bytes By Connection",
         "visState": "{\"title\":\"Connections - Top 10 - Total Bytes By Connection\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":false,\"truncate\":100,\"rotate\":75},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Connection ID\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"orderBucketsBySum\":false,\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Total Bytes\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total Bytes\"},\"type\":\"value\"}],\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Connection ID\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\",\"params\":{}},\"params\":{},\"label\":\"Total Bytes\",\"aggType\":\"max\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Connection ID\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"network.bytes\",\"customLabel\":\"Total Bytes\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"event.id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Connection ID\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Connection ID\"}}]}",
@@ -456,8 +456,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4NSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1MCwxXQ==",
       "attributes": {
         "title": "Connections - Top 10 - Total Bytes By Destination IP",
         "visState": "{\"title\":\"Connections - Top 10 - Total Bytes By Destination IP\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100,\"rotate\":75},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Destination IP Address\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"orderBucketsBySum\":false,\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Total Bytes\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total Bytes\"},\"type\":\"value\"}],\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination IP Address\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\",\"params\":{}},\"params\":{},\"label\":\"Total Bytes\",\"aggType\":\"max\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination IP Address\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"network.bytes\",\"customLabel\":\"Total Bytes\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP Address\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP Address\"}}]}",
@@ -486,8 +486,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4NiwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1MSwxXQ==",
       "attributes": {
         "title": "Connections - Top 10 - Total Bytes By Destination Port",
         "visState": "{\"title\":\"Connections - Top 10 - Total Bytes By Destination Port\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100,\"rotate\":0},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Destination Port\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"orderBucketsBySum\":false,\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Max network.bytes\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total Bytes\"},\"type\":\"value\"}],\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"number\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination Port\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\",\"params\":{}},\"params\":{},\"label\":\"Max network.bytes\",\"aggType\":\"max\"}],\"series\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"number\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination Port\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"network.bytes\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"}}]}",
@@ -516,8 +516,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4NywxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1MiwxXQ==",
       "attributes": {
         "title": "Connections - Top 10 - Total Bytes By Source IP",
         "visState": "{\"title\":\"Connections - Top 10 - Total Bytes By Source IP\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100,\"rotate\":75},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Source IP Address\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"left\",\"orderBucketsBySum\":false,\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Total Bytes\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total Bytes\"},\"type\":\"value\"}],\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source IP Address\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\",\"params\":{}},\"params\":{},\"label\":\"Total Bytes\",\"aggType\":\"max\"}],\"series\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source IP Address\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"network.bytes\",\"customLabel\":\"Total Bytes\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP Address\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP Address\"}}]}",
@@ -546,8 +546,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:07.590Z",
-      "version": "Wzg1NSwxXQ==",
+      "updated_at": "2022-04-29T19:57:13.041Z",
+      "version": "Wzc2MCwxXQ==",
       "attributes": {
         "title": "Connections - Maps",
         "visState": "{\"title\":\"Connections - Maps\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"markdown\":\"#### Coordinate Maps\\n[Source - Originator Bytes](/dashboards/app/dashboards#/view/b50c8d17-6ed3-4de6-aed4-5181032810b2) ● [Destination - Responder Bytes](/dashboards/app/dashboards#/view/d4fd6afd-15cb-42bf-8a25-03dd8e59b327) ● [Source - Sum of Total Bytes](/dashboards/app/dashboards#/view/f394057d-1b16-4174-b994-7045f423a416) ● [Destination - Sum of Total Bytes](/dashboards/app/dashboards#/view/60d78fbd-471c-4f59-a9e3-189b33a13644) ● [Source - Top Connection Duration](/dashboards/app/dashboards#/view/e09a4b86-29b5-4256-bb3b-802ac9f90404) ● [Destination - Top Connection Duration](/dashboards/app/dashboards#/view/0aed0e23-c8ac-4f2b-9f68-d04b6e7666b0)   \\n#### Region Maps\\n[Source - Originator Bytes ](/dashboards/app/dashboards#/view/d41fe630-3f98-11e9-a58e-8bdedb0915e8) ● [Destination - Responder Bytes ](/dashboards/app/dashboards#/view/77fc9960-3f99-11e9-a58e-8bdedb0915e8) ● [Source - Sum of Total Bytes ](/dashboards/app/dashboards#/view/1ce42250-3f99-11e9-a58e-8bdedb0915e8) ● [Destination - Sum of Total Bytes ](/dashboards/app/dashboards#/view/a16110b0-3f99-11e9-a58e-8bdedb0915e8) ● [Source - Top Connection Duration ](/dashboards/app/dashboards#/view/39abfe30-3f99-11e9-a58e-8bdedb0915e8) ● [Destination - Top Connection Duration ](/dashboards/app/dashboards#/view/b9f247c0-3f99-11e9-a58e-8bdedb0915e8)\",\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -569,8 +569,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY4OSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1NCwxXQ==",
       "attributes": {
         "title": "Connections - Log Count",
         "visState": "{\"title\":\"Connections - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
@@ -599,8 +599,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5MCwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1NSwxXQ==",
       "attributes": {
         "title": "Connections - Total Bytes Per Source/Destination IP Pair",
         "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"4\",\"params\":{\"customLabel\":\"Total Bytes\",\"field\":\"network.bytes\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderBy\":\"_key\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":100},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"customLabel\":\"Source IP\",\"field\":\"source.ip\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderAgg\":{\"enabled\":true,\"id\":\"2-orderAgg\",\"params\":{\"field\":\"network.bytes\"},\"schema\":{\"aggFilter\":[\"!top_hits\",\"!percentiles\",\"!median\",\"!std_dev\",\"!derivative\",\"!moving_avg\",\"!serial_diff\",\"!cumulative_sum\",\"!avg_bucket\",\"!max_bucket\",\"!min_bucket\",\"!sum_bucket\"],\"deprecate\":false,\"editor\":false,\"group\":\"none\",\"hideCustomLabel\":true,\"max\":null,\"min\":0,\"name\":\"orderAgg\",\"params\":[],\"title\":\"Order Agg\"},\"type\":\"cardinality\"},\"orderBy\":\"custom\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":100},\"schema\":\"bucket\",\"type\":\"terms\"},{\"enabled\":true,\"id\":\"3\",\"params\":{\"customLabel\":\"Destination IP\",\"field\":\"destination.ip\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"order\":\"desc\",\"orderAgg\":{\"enabled\":true,\"id\":\"3-orderAgg\",\"params\":{\"field\":\"network.bytes\"},\"schema\":{\"aggFilter\":[\"!top_hits\",\"!percentiles\",\"!median\",\"!std_dev\",\"!derivative\",\"!moving_avg\",\"!serial_diff\",\"!cumulative_sum\",\"!avg_bucket\",\"!max_bucket\",\"!min_bucket\",\"!sum_bucket\"],\"deprecate\":false,\"editor\":false,\"group\":\"none\",\"hideCustomLabel\":true,\"max\":null,\"min\":0,\"name\":\"orderAgg\",\"params\":[],\"title\":\"Order Agg\"},\"type\":\"cardinality\"},\"orderBy\":\"custom\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"size\":100},\"schema\":\"bucket\",\"type\":\"terms\"}],\"params\":{\"perPage\":15,\"showMetricsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"title\":\"Connections - Total Bytes Per Source/Destination IP Pair\",\"type\":\"table\"}",
@@ -629,8 +629,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5MSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1NiwxXQ==",
       "attributes": {
         "title": "Connections - Destination Port",
         "visState": "{\"title\":\"Connections - Destination Port\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.port\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Destination Port\"}}]}",
@@ -659,8 +659,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5MiwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1NywxXQ==",
       "attributes": {
         "title": "Connections - Source MAC OUI",
         "visState": "{\"title\":\"Connections - Source MAC OUI\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.oui\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source MAC OUI\"}}]}",
@@ -689,8 +689,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5MywxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1OCwxXQ==",
       "attributes": {
         "title": "Connections - Destination MAC OUI",
         "visState": "{\"title\":\"Connections - Destination MAC OUI\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.oui\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination MAC OUI\"}}]}",
@@ -719,8 +719,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5NCwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU1OSwxXQ==",
       "attributes": {
         "title": "Connections - Source MAC Address",
         "visState": "{\"title\":\"Connections - Source MAC Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.mac\",\"size\":500,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"MAC Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"srcOui\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Organizational Unique Identifier\"}}]}",
@@ -749,8 +749,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5NSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU2MCwxXQ==",
       "attributes": {
         "title": "Connections - Destination MAC Address",
         "visState": "{\"title\":\"Connections - Destination MAC Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.mac\",\"size\":500,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"MAC Address\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"dstOui\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Organizational Unique Identifier\"}}]}",
@@ -779,8 +779,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5NiwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU2MSwxXQ==",
       "attributes": {
         "title": "Connections - Top 10 - Total Bytes By Source MAC OUI",
         "visState": "{\"title\":\"Connections - Top 10 - Total Bytes By Source MAC OUI\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":false,\"truncate\":100,\"rotate\":75},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Destination IP Address\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"orderBucketsBySum\":false,\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Total Bytes\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total Bytes\"},\"type\":\"value\"}],\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source MAC OUI\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\",\"params\":{}},\"params\":{},\"label\":\"Total Bytes\",\"aggType\":\"max\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Source MAC OUI\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"network.bytes\",\"customLabel\":\"Total Bytes\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"srcOui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source MAC OUI\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"srcOui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source MAC OUI\"}}]}",
@@ -809,8 +809,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5NywxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU2MiwxXQ==",
       "attributes": {
         "title": "Connections - Top 10 - Total Bytes By Destination MAC OUI",
         "visState": "{\"title\":\"Connections - Top 10 - Total Bytes By Destination MAC OUI\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":false,\"truncate\":100,\"rotate\":75},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Destination IP Address\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"orderBucketsBySum\":false,\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Total Bytes\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total Bytes\"},\"type\":\"value\"}],\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination MAC OUI\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\",\"params\":{}},\"params\":{},\"label\":\"Total Bytes\",\"aggType\":\"max\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination MAC OUI\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"network.bytes\",\"customLabel\":\"Total Bytes\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"dstOui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination MAC OUI\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"dstOui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination MAC OUI\"}}]}",
@@ -839,8 +839,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5OCwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU2MywxXQ==",
       "attributes": {
         "title": "Connections - Protocol",
         "visState": "{\"title\":\"Connections - Protocol\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":false,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Protocol\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Protocol\"}}]}",
@@ -869,8 +869,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:24:50.357Z",
-      "version": "WzY5OSwxXQ==",
+      "updated_at": "2022-04-29T19:56:53.664Z",
+      "version": "WzU2NCwxXQ==",
       "attributes": {
         "title": "Network Layer",
         "visState": "{\"title\":\"Network Layer\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Network Layer\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"network.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Network Layer\"}}]}",
@@ -899,8 +899,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-10T21:25:07.590Z",
-      "version": "Wzg1NiwxXQ==",
+      "updated_at": "2022-04-29T19:57:13.041Z",
+      "version": "Wzc2MSwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
         "description": "",
@@ -923,7 +923,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"event.dataset:conn\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"(event.provider:zeek AND event.dataset:conn) OR (event.provider:suricata AND event.dataset:flow)\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

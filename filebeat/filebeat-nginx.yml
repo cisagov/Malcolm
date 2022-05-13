@@ -1,5 +1,7 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+name: "${PCAP_NODE_NAME:malcolm}"
+
 #================================ Modules ======================================
 filebeat.modules:
 - module: nginx

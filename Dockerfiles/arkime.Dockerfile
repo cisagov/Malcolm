@@ -77,7 +77,7 @@ RUN apt-get -q update && \
     python3 /opt/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     sed -i 's/v-if.*password.*"/v-if="false"/g' ./viewer/vueapp/src/components/settings/Settings.vue && \
-    rm -rf ./viewer/vueapp/src/components/upload && \
+    rm -rf ./viewer/vueapp/src/components/upload ./capture/plugins/suricata* && \
     sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
     ./easybutton-build.sh && \
@@ -192,7 +192,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 # add configuration and scripts
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD arkime/scripts /opt/
-ADD shared/bin/pcap_arkime_and_zeek_processor.py /opt/
+ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
 ADD arkime/etc $ARKIMEDIR/etc/
@@ -219,7 +219,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIMEDIR $PUSER && \
       usermod -a -G tty $PUSER && \
     chmod 755 /opt/*.sh && \
-    ln -sfr /opt/pcap_arkime_and_zeek_processor.py /opt/pcap_arkime_processor.py && \
+    ln -sfr /opt/pcap_processor.py /opt/pcap_arkime_processor.py && \
     cp -f /opt/arkime_update_geo.sh $ARKIMEDIR/bin/arkime_update_geo.sh && \
     chmod u+s $ARKIMEDIR/bin/capture && \
     mkdir -p /var/run/arkime && \

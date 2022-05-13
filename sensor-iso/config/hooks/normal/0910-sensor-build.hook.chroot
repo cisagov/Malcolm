@@ -26,10 +26,19 @@ YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
+SURICATA_RULES_DIR="/etc/suricata/rules"
+
 CAPA_VERSION="3.2.0"
 CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 CAPA_DIR="/usr/local/bin"
 CAPA_BIN="${CAPA_DIR}/capa"
+
+YQ_VERSION="4.24.2"
+YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+
+SUPERCRONIC_VERSION="0.1.12"
+SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
+SUPERCRONIC="supercronic-linux-amd64"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
@@ -116,6 +125,17 @@ mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/spicy-packages /tmp/zeek-packages /opt/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
+# suricata
+apt-get -qqy update
+apt-get install -t bullseye-backports --no-install-recommends -y -q suricata suricata-update
+
+/usr/bin/suricata-update -v -D /var/lib/suricata --etopen
+
+cd "${SURICATA_RULES_DIR}"/..
+tar czf suricata-rules-hedgehog.tar.gz "$(basename "${SURICATA_RULES_DIR}")"
+mv ./suricata-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+###
+
 # yara
 mkdir -p usr/local/src
 cd /usr/local/src
@@ -154,6 +174,17 @@ mv ./capa "${CAPA_BIN}"
 rm -rf /tmp/capa*
 
 cp "${CAPA_BIN}" /opt/hedgehog_install_artifacts/
+###
+
+# yq
+curl -fsSL -o /usr/bin/yq "${YQ_URL}"
+chmod 755 /usr/bin/yq
+###
+
+# supercronic
+curl -fsSL -o /usr/local/bin/supercronic "$SUPERCRONIC_URL"
+chmod 755 /usr/local/bin/supercronic
+###
 
 # update clamav signatures
 freshclam --stdout --quiet --no-warnings
@@ -211,6 +242,8 @@ chown root:netdev "${ZEEK_DIR}"/bin/capstats && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats
 chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
+chown root:netdev /usr/bin/suricata && \
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata
 chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
