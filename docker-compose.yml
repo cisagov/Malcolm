@@ -99,11 +99,11 @@ x-suricata-variables: &suricata-variables
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
-  ISM_CLOSE_AGE : '0'
-  ISM_COLD_AGE : '0'
-  ISM_DELETE_AGE : '0'
+  ISM_CLOSE_AGE : '60d'
+  ISM_COLD_AGE : '30d'
+  ISM_DELETE_AGE : '365d'
   ISM_POLICY_NAME : 'session_index_policy'
-  ISM_SNAPSHOT_AGE : '0'
+  ISM_SNAPSHOT_AGE : '1d'
   ISM_SNAPSHOT_COMPRESSED : 'false'
   ISM_SNAPSHOT_REPO : 'logs'
 
@@ -114,9 +114,9 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_OUI_LOOKUP       : 'true'
   LOGSTASH_SEVERITY_SCORING : 'true'
   LOGSTASH_REVERSE_DNS      : 'false'
-  OS_EXTERNAL_HOSTS : ''
-  OS_EXTERNAL_SSL : 'false'
-  OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
+  # OS_EXTERNAL_HOSTS : ''
+  # OS_EXTERNAL_SSL : 'true'
+  # OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
   # For security, OS_EXTERNAL_USER and OS_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
   #   See also volume mount for logstash.keystore below.
   # OS_EXTERNAL_USER : 'janedoe'
@@ -135,8 +135,8 @@ x-filebeat-variables: &filebeat-variables
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
   PCAP_NODE_NAME : 'malcolm'
-  PCAP_PIPELINE_DEBUG : 'true'
-  PCAP_PIPELINE_DEBUG_EXTRA : 'true'
+  PCAP_PIPELINE_DEBUG : 'false'
+  PCAP_PIPELINE_DEBUG_EXTRA : 'false'
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
   PCAP_MONITOR_HOST : 'pcap-monitor'
   LOG_CLEANUP_MINUTES : 360
@@ -178,7 +178,7 @@ services:
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
-      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      OPENSEARCH_JAVA_OPTS : '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
       discovery.zen.minimum_master_nodes : 1
@@ -287,7 +287,7 @@ services:
       << : *common-beats-variables
       << : *common-lookup-variables
       OS_HOSTS : 'opensearch:9200'
-      LS_JAVA_OPTS : '-Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+      LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
     expose:
