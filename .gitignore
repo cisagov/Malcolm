@@ -17,6 +17,8 @@
 /htadmin/metadata
 
 # development
+.envrc
+.direnv
 .vagrant
 malcolm_*images.tar.gz
 *.iso

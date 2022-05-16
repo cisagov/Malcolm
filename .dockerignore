@@ -10,6 +10,8 @@
 **/.ldap_config_defaults
 **/htpasswd
 **/malcolm_*images.tar.gz
+.envrc
+.direnv
 .trigger_workflow_build
 .tmp
 docker-compose*yml
