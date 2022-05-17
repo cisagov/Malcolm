@@ -29,7 +29,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "1.29.2"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.5.0"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
@@ -1372,8 +1372,11 @@ class LinuxInstaller(Installer):
         result = False
 
         dockerComposeCmd = 'docker-compose'
-        if not Which(dockerComposeCmd, debug=self.debug) and os.path.isfile('/usr/local/bin/docker-compose'):
-            dockerComposeCmd = '/usr/local/bin/docker-compose'
+        if not Which(dockerComposeCmd, debug=self.debug):
+            if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
+            elif os.path.isfile('/usr/local/bin/docker-compose'):
+                dockerComposeCmd = '/usr/local/bin/docker-compose'
 
         # first see if docker-compose is already installed and runnable (try non-root and root)
         err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
@@ -1391,14 +1394,14 @@ class LinuxInstaller(Installer):
                 unames = []
                 err, out = self.run_process((['uname', '-s']))
                 if (err == 0) and (len(out) > 0):
-                    unames.append(out[0])
+                    unames.append(out[0].lower())
                 err, out = self.run_process((['uname', '-m']))
                 if (err == 0) and (len(out) > 0):
-                    unames.append(out[0])
+                    unames.append(out[0].lower())
                 if len(unames) == 2:
                     # download docker-compose from github and save it to a temporary file
                     tempFileName = os.path.join(self.tempDirName, dockerComposeCmd)
-                    dockerComposeUrl = f"https://github.com/docker/compose/releases/download/{DOCKER_COMPOSE_INSTALL_VERSION}/docker-compose-{unames[0]}-{unames[1]}"
+                    dockerComposeUrl = f"https://github.com/docker/compose/releases/download/v{DOCKER_COMPOSE_INSTALL_VERSION}/docker-compose-{unames[0]}-{unames[1]}"
                     if DownloadToFile(dockerComposeUrl, tempFileName, debug=self.debug):
                         os.chmod(tempFileName, 493)  # 493 = 0o755, mark as executable
                         # put docker-compose into /usr/local/bin
