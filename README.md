@@ -3869,7 +3869,7 @@ Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, ma
 It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
 ```
 …
-logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>4, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
+logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>5, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-suricata", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
 logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
 …
 ```
