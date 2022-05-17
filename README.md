@@ -105,7 +105,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
         * [STIG compliance exceptions](#STIGExceptions)
         * [CIS benchmark compliance exceptions](#CISExceptions)
 * [Known issues](#Issues)
-* [Installation example using Ubuntu 20.04 LTS](#InstallationExample)
+* [Installation example using Ubuntu 22.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
 * [Modifying or Contributing to Malcolm](#Contributing)
 * [Forks](#Forks)
@@ -140,7 +140,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 
 ### <a name="GetMalcolm"></a>Getting Malcolm
 
-For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
+For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 22.04 LTS](#InstallationExample).
 
 The scripts to control Malcolm require Python 3. The [`install.py`](#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
@@ -3614,7 +3614,7 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 ![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
 
-## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
+## <a name="InstallationExample"></a>Installation example using Ubuntu 22.04 LTS
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/main), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
@@ -3645,27 +3645,26 @@ user@host:~$ cd Malcolm/
 
 Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
-user@host:~/Downloads$ sudo ./install.py
-Installing required packages: ['apache2-utils', 'make', 'openssl']
+user@host:~/Malcolm$ sudo ./scripts/install.py
+Installing required packages: ['apache2-utils', 'make', 'openssl', 'python3-dialog']
 
-"docker info" failed, attempt to install Docker? (Y/n): y
+"docker info" failed, attempt to install Docker? (Y/n): y  
 
 Attempt to install Docker using official repositories? (Y/n): y
 Installing required packages: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
 Installing docker packages: ['docker-ce', 'docker-ce-cli', 'containerd.io']
 Installation of docker packages apparently succeeded
 
-Add a non-root user to the "docker" group? (y/n): y
+Add a non-root user to the "docker" group?: y   
 
 Enter user account: user
 
-Add another non-root user to the "docker" group? (y/n): n
+Add another non-root user to the "docker" group?: n
 
 "docker-compose version" failed, attempt to install docker-compose? (Y/n): y
 
 Install docker-compose directly from docker github? (Y/n): y
 Download and installation of docker-compose apparently succeeded
-
 
 fs.file-max increases allowed maximum for file handles
 fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
@@ -3679,42 +3678,36 @@ fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, appen
 fs.inotify.max_user_instances increases allowed maximum monitor file watchers
 fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
-
 vm.max_map_count increases allowed maximum for memory segments
 vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
-
 
 net.core.somaxconn increases allowed maximum for socket connections
 net.core.somaxconn= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
-
 vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages
 vm.swappiness= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
-
 
 vm.dirty_background_ratio defines the percentage of system memory fillable with "dirty" pages before flushing
 vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
-
 vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything
 vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
-
 
 /etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
 /etc/security/limits.d/limits.conf does not exist, create it? (Y/n): y
 ```
 
-At this point, **if you are installing from the a release tarball** you will be asked if you would like to extract the contents of the tarball and to specify the installation directory:
+If you are configuring Malcolm from within a git working copy, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode.
+```
+user@host:~/Malcolm$ ./scripts/install.py --configure
+```
+
+Alternately, if you are configuring Malcolm from the release tarball you will be asked if you would like to extract the contents of the tarball and to specify the installation directory and `install.py` will continue:
 ```
 Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y/n): y
 
 Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/Malcolm
 Malcolm runtime files extracted to /home/user/Malcolm
-```
-
-Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
-```
-user@host:~/Malcolm$ ./scripts/install.py --configure
 ```
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
@@ -3742,9 +3735,11 @@ Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N):
 
 Configure OpenSearch index state management? (y/N): n
 
+Automatically analyze all PCAP files with Suricata? (Y/n): y
+
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
-Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs? (y/N): n
+Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
 
 Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
 
@@ -3778,7 +3773,7 @@ Lookup extracted file hashes with VirusTotal? (y/N): n
 
 Download updated scanner signatures periodically? (Y/n): y
 
-Should Malcolm capture network traffic to PCAP files? (y/N): y
+Should Malcolm capture network traffic to PCAP files? (y/N): y  
 
 Specify capture interface(s) (comma-separated): eth0
 
@@ -3787,28 +3782,28 @@ Capture packets using netsniff-ng? (Y/n): y
 Capture packets using tcpdump? (y/N): n
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
-Scripts for starting and stopping Malcolm and changing authentication-related settings can be found
-in /home/user/Malcolm/scripts.
+Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
 ```
 
 At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
 
 Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed TLS certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
-user@host:~/Malcolm$ ./scripts/auth_setup
-Store administrator username/password for local Malcolm access? (Y/n): 
+user@host:~/Malcolm$ ./scripts/auth_setup 
+
+Store administrator username/password for local Malcolm access? (Y/n): y
 
 Administrator username: analyst
-analyst password: 
-analyst password (again): 
+analyst password:
+analyst password (again):
 
-(Re)generate self-signed certificates for HTTPS access (Y/n): 
+(Re)generate self-signed certificates for HTTPS access (Y/n): y
 
-(Re)generate self-signed certificates for a remote log forwarder (Y/n): 
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): y
 
-Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): 
+Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): n
 
-Store username/password for email alert sender account (y/N): 
+Store username/password for email alert sender account (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) (y/N): n
 ```
 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
