@@ -114,6 +114,7 @@ ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
+ENV SURICATA_UPDATE_CONFIG_FILE "$SURICATA_CONFIG_DIR"/update.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
 ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
@@ -177,6 +178,8 @@ RUN apt-get -q update && \
     tar xf /suricatabld.tar.gz --strip-components=1 -C / && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
+    cp "$(python3 -m pip show --no-cache-dir suricata-update | grep 'Location:' | head -n 1 | awk '{print $2}')/$(python3 -m pip show --no-cache-dir -f suricata-update | grep '/update.yaml$' | head -n 1 | awk '{print $1}')" \
+        "$SURICATA_UPDATE_CONFIG_FILE" && \
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /suricatabld.tar.gz
 
