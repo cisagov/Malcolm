@@ -266,19 +266,21 @@ Malcolm leverages the following excellent open source tools, among others.
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
-    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
     * Corelight's ["Log4Shell" (CVE-2021-44228)](https://github.com/corelight/cve-2021-44228) plugin
-    * Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
+    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
     * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+    * Corelight's [DCE/RPC remote code execution vulnerability (CVE-2022-26809)](https://github.com/corelight/cve-2022-26809) plugin
+    * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
     * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
     * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
+    * Corelight's [VMware Workspace ONE Access and Identity Manager RCE vulnerability (CVE-2022-22954)](https://github.com/corelight/cve-2022-22954) plugin
     * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
-    * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
+* Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
