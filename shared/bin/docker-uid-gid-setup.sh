@@ -36,7 +36,7 @@ else
 fi
 
 # execute the entrypoint command specified
-su --shell /bin/bash --preserve-environment ${EXEC_USER} << EOF
+su -s /bin/bash -p ${EXEC_USER} << EOF
 export USER="${EXEC_USER}"
 export HOME="${USER_HOME}"
 whoami
