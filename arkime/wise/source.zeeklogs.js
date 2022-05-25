@@ -29,7 +29,7 @@ class MalcolmSource extends WISESource {
     // todo: look at expressions for things that have parents (tunnelling, parent files, etc.)
     // todo: look at IP types and use ipPrint?
 
-    // add right-clicks
+    // add field actions and value actions
     var allFields = [
       "client.bytes",
       "client.domain",
@@ -1693,42 +1693,42 @@ class MalcolmSource extends WISESource {
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_proto", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
 
-    // add right-click for searching IANA for services
+    // add value action for searching IANA for services
     var serviceFieldsStr = allFields.filter(value => /^(protocols?|network\.protocol)$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_service", { name: "Service Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: serviceFieldsStr });
 
-    // add right-click for searching VirusTotal for other IP addresses
+    // add value action for searching VirusTotal for other IP addresses
     var ipFieldsStr = allFields.filter(value => /[_\.-](h|ip)$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_ip", { name: "VirusTotal IP", url: "https://www.virustotal.com/en/ip-address/%TEXT%/information", fields: ipFieldsStr });
 
-    // add right-click for searching IANA for ports
+    // add value action for searching IANA for ports
     var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_port", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: portFieldsStr });
     this.api.addValueAction("malcolm_websearch_port_arkime", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category: "port" });
 
-    // add right-click for searching VirusTotal for hash signatures
+    // add value action for searching VirusTotal for hash signatures
     var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
     this.api.addValueAction("malcolm_vt_fields_hash", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", fields: hashFieldsStr });
     this.api.addValueAction("malcolm_vt_fields_hash_arkime", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", category: "md5" });
 
-    // add right-click for searching the web for signature IDs
+    // add value action for searching the web for signature IDs
     var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_sig", { name: "Web Search", url: 'https://duckduckgo.com/?q="%TEXT%"', fields: sigFieldsStr });
 
-    // add right-click for searching ARIN for ASN
+    // add value action for searching ARIN for ASN
     var asnFieldsStr = allFields.filter(value => /(as\.number|(src|dst)ASN|asn\.(src|dst))$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_asn", { name: "ARIN ASN", url: 'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields: asnFieldsStr });
 
-    // add right-click for searching mime/media/content types
+    // add value action for searching mime/media/content types
     var mimeFieldsStr = allFields.filter(value => /mime[_\.-]?type/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
-    // add right-click for extracted/quarantined files from zeek
+    // add value action for extracted/quarantined files from zeek
     var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download (if quarantined)", url: "/dl-extracted-files/quarantine/%TEXT%", fields: carvedFieldsStr });
     this.api.addValueAction("malcolm_carved_file_preserved", { name: "Download (if preserved)", url: "/dl-extracted-files/preserved/%TEXT%", fields: carvedFieldsStr });
 
-    // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
+    // add value actions for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
     var filterUrl = "idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
 
@@ -1740,18 +1740,18 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_dashboards_cat_user", { name: filterLabel, url: filterUrl, category: "user" });
     this.api.addValueAction("malcolm_dashboards_fields_zeek", { name: filterLabel, url: filterUrl, fields: allFieldsStr });
 
-    // add rick-click for opening malcolm agg api
+    // add field action for opening malcolm agg api
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
-    this.api.addValueAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
-    this.api.addValueAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
-    this.api.addValueAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
-    this.api.addValueAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
-    this.api.addValueAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
-    this.api.addValueAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
-    this.api.addValueAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
+    this.api.addFieldAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
+    this.api.addFieldAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
+    this.api.addFieldAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
+    this.api.addFieldAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
+    this.api.addFieldAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
+    this.api.addFieldAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
+    this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
 
-    // add right-click for viewing original JSON document
+    // add value action for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
 
     this.api.addView("malcolm_common",
