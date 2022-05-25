@@ -41,7 +41,7 @@ RUN cd /opt && \
     mkdir -p ./logstash-filter-fingerprint && \
     curl -sSL "$FINGERPRINT_URL" | tar xzvf - -C ./logstash-filter-fingerprint --strip-components 1 && \
     sed -i "s/\('logstash-mixin-ecs_compatibility_support'\),.*/\1/" ./logstash-filter-fingerprint/logstash-filter-fingerprint.gemspec && \
-    /bin/bash -lc "export JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-fingerprint && ( bundle install || bundle install ) && gem build logstash-filter-fingerprint.gemspec && bundle info logstash-filter-fingerprint"
+    /bin/bash -lc "export LS_JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-fingerprint && ( bundle install || bundle install ) && gem build logstash-filter-fingerprint.gemspec && bundle info logstash-filter-fingerprint"
 
 FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
 
@@ -75,7 +75,7 @@ ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES
-ENV JAVA_HOME=/usr/share/logstash/jdk
+ENV LS_JAVA_HOME=/usr/share/logstash/jdk
 
 USER root
 
