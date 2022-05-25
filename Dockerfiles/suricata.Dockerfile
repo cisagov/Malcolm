@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 # for download, compile and install
-ENV SURICATA_VER "6.0.0"
+ENV SURICATA_VER "6.0.5"
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
