@@ -1248,7 +1248,7 @@ OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://w
 | IPv6 values |`(ip.src == EXISTS! || ip.dst == EXISTS!) && (ip != 0.0.0.0/0)`|`(_exists_:source.ip AND NOT source.ip:"0.0.0.0/0") OR (_exists_:destination.ip AND NOT destination.ip:"0.0.0.0/0")`|`(source.ip:* and not source.ip:"0.0.0.0/0") or (destination.ip:* and not destination.ip:"0.0.0.0/0")`|
 | GeoIP information available |`country == EXISTS!`|`_exists_:destination.geo OR _exists_:source.geo`|`destination.geo:* or source.geo:*`|
 | Zeek log type |`event.dataset == notice`|`event.dataset:notice`|`event.dataset:notice`|
-| IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
+| IP CIDR Subnets |`ip.src == 172.1/12`|`source.ip:"172.1/12"`|`source.ip:"172.1/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use OpenSearch Dashboards time range controls in the upper right-hand corner|Use OpenSearch Dashboards time range controls in the upper right-hand corner|
 
 When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
@@ -1384,7 +1384,7 @@ Each non-comment line (not beginning with a `#`), defines an subnet-to-name mapp
 192.168.50.0/24,192.168.40.0/24,10.0.0.0/8|corporate|
 192.168.100.0/24|control|
 192.168.200.0/24|dmz|
-172.16.0.0/12|virtualized|testbed
+172.1/12|virtualized|testbed
 ```
 Each line consists of three `|`-separated fields: CIDR-formatted subnet IP range(s), subnet name, and, optionally, a tag which, if specified, must belong to a log for the matching to occur.
 
@@ -1627,7 +1627,7 @@ Returns version information about Malcolm and version/[health](https://opensearc
             "build_snapshot": false,
             "build_type": "tar",
             "lucene_version": "8.10.1",
-            "minimum_index_compatibility_version": "6.0.0-beta1",
+            "minimum_index_compatibility_version": "-beta1",
             "minimum_wire_compatibility_version": "6.8.0",
             "number": "7.10.2"
         }
