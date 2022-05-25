@@ -1,85 +1,3 @@
-FROM debian:11-slim as builder
-
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
-
-# for download, compile and install
-ENV SURICATA_VER "6.0.5"
-
-RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y --no-install-recommends \
-        autoconf \
-        automake \
-        build-essential \
-        ca-certificates \
-        cargo \
-        curl \
-        libcap-ng-dev \
-        libevent-dev \
-        libgeoip-dev \
-        libhiredis-dev \
-        libhtp-dev \
-        libhyperscan-dev \
-        libjansson-dev \
-        liblua5.1-dev \
-        libluajit-5.1-dev \
-        liblz4-dev \
-        libmagic-dev \
-        libmaxminddb-dev \
-        libnet1-dev \
-        libnetfilter-log-dev \
-        libnetfilter-queue-dev \
-        libnfnetlink-dev \
-        libnss3-dev \
-        libpcap-dev \
-        libpcre3-dev \
-        libtool \
-        libyaml-dev \
-        make \
-        python3-pip \
-        python3-yaml \
-        wget \
-        zlib1g-dev && \
-    ( curl https://sh.rustup.rs -sSf | bash -s -- -y ) && \
-        echo 'source $HOME/.cargo/env' >> $HOME/.bashrc && \
-    python3 -m pip install --no-cache-dir --upgrade pip && \
-        python3 -m pip install --no-cache-dir suricata-update && \
-    mkdir -p /src/ /suricatabld/ && \
-        wget https://www.openinfosecfoundation.org/download/suricata-$SURICATA_VER.tar.gz && \
-        tar xvfz suricata-$SURICATA_VER.tar.gz --strip-components=1 -C /src/ && \
-        rm suricata-$SURICATA_VER.tar.gz && \
-    cd /src/ && \
-    ./configure \
-        --prefix=/usr \
-        --sysconfdir=/etc \
-        --mandir=/usr/share/man \
-        --localstatedir=/var \
-        --enable-non-bundled-htp \
-        --enable-nfqueue \
-        --enable-rust \
-        --disable-gccmarch-native \
-        --enable-hiredis \
-        --enable-geoip \
-        --enable-gccprotect \
-        --enable-pie \
-        --enable-luajit && \
-    make && \
-        make check && \
-        make install DESTDIR=/suricatabld && \
-        make install-full DESTDIR=/suricatabld && \
-        ldconfig /suricatabld/usr/local/lib && \
-        make install-conf DESTDIR=/suricatabld && \
-        make install-rules DESTDIR=/suricatabld && \
-    mkdir -p /suricatabld/var/lib/suricata/ && \
-        cp -r /var/lib/suricata/rules /suricatabld/var/lib/suricata/ && \
-    ( find /suricatabld -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
-    cd / && \
-        tar czf ./suricatabld.tar.gz /suricatabld && \
-        rm -rf /src /suricatabld
-
 FROM debian:11-slim
 
 LABEL maintainer="malcolm@inl.gov"
@@ -121,10 +39,15 @@ ENV SURICATA_MANAGED_DIR /var/lib/suricata
 ENV SURICATA_MANAGED_RULES_DIR "$SURICATA_MANAGED_DIR/rules"
 ENV SURICATA_RUN_DIR /var/run/suricata
 
-COPY --from=builder /suricatabld.tar.gz /suricatabld.tar.gz
 
-RUN apt-get -q update && \
+RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list && \
+    apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
+    apt-get install -q -y -t bullseye-backports --no-install-recommends \
+        libhtp2 \
+        suricata \
+        suricata-update && \
     apt-get install -q -y --no-install-recommends \
         curl \
         file \
@@ -155,14 +78,11 @@ RUN apt-get -q update && \
         moreutils \
         procps \
         psmisc \
-        python3-pip \
         python3-ruamel.yaml \
         python3-zmq \
         supervisor \
         vim-tiny \
         zlib1g && \
-    python3 -m pip install --no-cache-dir --upgrade pip && \
-        python3 -m pip install --no-cache-dir suricata-update && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \
@@ -175,13 +95,12 @@ RUN apt-get -q update && \
       usermod -a -G tty ${PUSER} && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB}) && \
-    tar xf /suricatabld.tar.gz --strip-components=1 -C / && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
-    cp "$(python3 -m pip show --no-cache-dir suricata-update | grep 'Location:' | head -n 1 | awk '{print $2}')/$(python3 -m pip show --no-cache-dir -f suricata-update | grep '/update.yaml$' | head -n 1 | awk '{print $1}')" \
+    cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
     apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /suricatabld.tar.gz
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --chmod=644 shared/bin/pcap_utils.py /opt/
 COPY --chmod=644 shared/pcaps/*.* /tmp/
