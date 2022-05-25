@@ -99,6 +99,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
+    suricata-update && \
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
