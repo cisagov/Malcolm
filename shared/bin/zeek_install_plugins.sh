@@ -92,6 +92,8 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/CVE-2021-41773"
   "https://github.com/corelight/CVE-2021-42292"
   "https://github.com/corelight/cve-2021-44228"
+  "https://github.com/corelight/cve-2022-22954"
+  "https://github.com/corelight/cve-2022-26809"
   "https://github.com/corelight/http-more-files-names"
   "https://github.com/corelight/pingback"
   "https://github.com/corelight/ripple20"

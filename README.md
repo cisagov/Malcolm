@@ -105,7 +105,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
         * [STIG compliance exceptions](#STIGExceptions)
         * [CIS benchmark compliance exceptions](#CISExceptions)
 * [Known issues](#Issues)
-* [Installation example using Ubuntu 20.04 LTS](#InstallationExample)
+* [Installation example using Ubuntu 22.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
 * [Modifying or Contributing to Malcolm](#Contributing)
 * [Copyright](#Footer)
@@ -139,7 +139,7 @@ See [**Building from source**](#Build) to read how you can use GitHub [workflow 
 
 ### <a name="GetMalcolm"></a>Getting Malcolm
 
-For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 20.04 LTS](#InstallationExample).
+For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 22.04 LTS](#InstallationExample).
 
 The scripts to control Malcolm require Python 3. The [`install.py`](#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
@@ -183,23 +183,23 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.0.0           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.0.0           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.0.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.0.0           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.0.0           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.0.0           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.0.0           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.0.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.0.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.0.0           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.0.0           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.0.1           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.0.1           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.0.1           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.0.1           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.0.1           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.0.1           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.0.1           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.0.1           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.0.1           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.0.1           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.0.1           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 #### Import from pre-packaged tarballs
@@ -265,19 +265,21 @@ Malcolm leverages the following excellent open source tools, among others.
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
     * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
-    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
     * Corelight's ["Log4Shell" (CVE-2021-44228)](https://github.com/corelight/cve-2021-44228) plugin
-    * Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
+    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
     * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
     * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
+    * Corelight's [DCE/RPC remote code execution vulnerability (CVE-2022-26809)](https://github.com/corelight/cve-2022-26809) plugin
+    * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
     * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
     * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
+    * Corelight's [VMware Workspace ONE Access and Identity Manager RCE vulnerability (CVE-2022-22954)](https://github.com/corelight/cve-2022-22954) plugin
     * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
-    * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
+* Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
@@ -407,7 +409,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 
 * `malcolmnetsec/api` (based on `python:3-slim`)
 * `malcolmnetsec/arkime` (based on `debian:11-slim`)
-* `malcolmnetsec/dashboards-helper` (based on `alpine:3.15`)
+* `malcolmnetsec/dashboards-helper` (based on `alpine:3.16`)
 * `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `malcolmnetsec/file-monitor` (based on `debian:11-slim`)
 * `malcolmnetsec/file-upload` (based on `debian:11-slim`)
@@ -415,8 +417,8 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/freq` (based on `debian:11-slim`)
 * `malcolmnetsec/htadmin` (based on `debian:11-slim`)
 * `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
-* `malcolmnetsec/name-map-ui` (based on `alpine:3.15`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.15`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.16`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.16`)
 * `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
 * `malcolmnetsec/pcap-capture` (based on `debian:11-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:11-slim`)
@@ -3426,7 +3428,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-6.0.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-6.0.1.iso"
 …
 ```
 
@@ -3613,7 +3615,7 @@ After Malcolm ingests your data (or, more specifically, after it has ingested a 
 
 ![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
 
-## <a name="InstallationExample"></a>Installation example using Ubuntu 20.04 LTS
+## <a name="InstallationExample"></a>Installation example using Ubuntu 22.04 LTS
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/cisagov/Malcolm/tree/main), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
@@ -3644,27 +3646,26 @@ user@host:~$ cd Malcolm/
 
 Next, run the `install.py` script to configure your system. Replace `user` in this example with your local account username, and follow the prompts. Most questions have an acceptable default you can accept by pressing the `Enter` key. Depending on whether you are installing Malcolm from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
-user@host:~/Downloads$ sudo ./install.py
-Installing required packages: ['apache2-utils', 'make', 'openssl']
+user@host:~/Malcolm$ sudo ./scripts/install.py
+Installing required packages: ['apache2-utils', 'make', 'openssl', 'python3-dialog']
 
-"docker info" failed, attempt to install Docker? (Y/n): y
+"docker info" failed, attempt to install Docker? (Y/n): y  
 
 Attempt to install Docker using official repositories? (Y/n): y
 Installing required packages: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
 Installing docker packages: ['docker-ce', 'docker-ce-cli', 'containerd.io']
 Installation of docker packages apparently succeeded
 
-Add a non-root user to the "docker" group? (y/n): y
+Add a non-root user to the "docker" group?: y   
 
 Enter user account: user
 
-Add another non-root user to the "docker" group? (y/n): n
+Add another non-root user to the "docker" group?: n
 
 "docker-compose version" failed, attempt to install docker-compose? (Y/n): y
 
 Install docker-compose directly from docker github? (Y/n): y
 Download and installation of docker-compose apparently succeeded
-
 
 fs.file-max increases allowed maximum for file handles
 fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
@@ -3678,42 +3679,36 @@ fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, appen
 fs.inotify.max_user_instances increases allowed maximum monitor file watchers
 fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
-
 vm.max_map_count increases allowed maximum for memory segments
 vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
-
 
 net.core.somaxconn increases allowed maximum for socket connections
 net.core.somaxconn= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
-
 vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages
 vm.swappiness= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
-
 
 vm.dirty_background_ratio defines the percentage of system memory fillable with "dirty" pages before flushing
 vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 
-
 vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything
 vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
-
 
 /etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
 /etc/security/limits.d/limits.conf does not exist, create it? (Y/n): y
 ```
 
-At this point, **if you are installing from the a release tarball** you will be asked if you would like to extract the contents of the tarball and to specify the installation directory:
+If you are configuring Malcolm from within a git working copy, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode.
+```
+user@host:~/Malcolm$ ./scripts/install.py --configure
+```
+
+Alternately, if you are configuring Malcolm from the release tarball you will be asked if you would like to extract the contents of the tarball and to specify the installation directory and `install.py` will continue:
 ```
 Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y/n): y
 
 Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/Malcolm
 Malcolm runtime files extracted to /home/user/Malcolm
-```
-
-Alternatively, **if you are configuring Malcolm from within a git working copy**, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode. 
-```
-user@host:~/Malcolm$ ./scripts/install.py --configure
 ```
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
@@ -3741,9 +3736,11 @@ Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N):
 
 Configure OpenSearch index state management? (y/N): n
 
+Automatically analyze all PCAP files with Suricata? (Y/n): y
+
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
-Perform reverse DNS lookup locally for source and destination IP addresses in Zeek logs? (y/N): n
+Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
 
 Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
 
@@ -3777,7 +3774,7 @@ Lookup extracted file hashes with VirusTotal? (y/N): n
 
 Download updated scanner signatures periodically? (Y/n): y
 
-Should Malcolm capture network traffic to PCAP files? (y/N): y
+Should Malcolm capture network traffic to PCAP files? (y/N): y  
 
 Specify capture interface(s) (comma-separated): eth0
 
@@ -3786,28 +3783,28 @@ Capture packets using netsniff-ng? (Y/n): y
 Capture packets using tcpdump? (y/N): n
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
-Scripts for starting and stopping Malcolm and changing authentication-related settings can be found
-in /home/user/Malcolm/scripts.
+Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
 ```
 
 At this point you should **reboot your computer** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
 
 Now we need to [set up authentication](#AuthSetup) and generate some unique self-signed TLS certificates. You can replace `analyst` in this example with whatever username you wish to use to log in to the Malcolm web interface.
 ```
-user@host:~/Malcolm$ ./scripts/auth_setup
-Store administrator username/password for local Malcolm access? (Y/n): 
+user@host:~/Malcolm$ ./scripts/auth_setup 
+
+Store administrator username/password for local Malcolm access? (Y/n): y
 
 Administrator username: analyst
-analyst password: 
-analyst password (again): 
+analyst password:
+analyst password (again):
 
-(Re)generate self-signed certificates for HTTPS access (Y/n): 
+(Re)generate self-signed certificates for HTTPS access (Y/n): y
 
-(Re)generate self-signed certificates for a remote log forwarder (Y/n): 
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): y
 
-Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): 
+Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): n
 
-Store username/password for email alert sender account (y/N): 
+Store username/password for email alert sender account (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) (y/N): n
 ```
 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
@@ -3833,23 +3830,23 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.0.0           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.0.0           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.0.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.0.0           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.0.0           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.0.0           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.0.0           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.0.0           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.0.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.0.0           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.0.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.0.0           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.0.0           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.0.0           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.0.1           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.0.1           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.0.1           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.0.1           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.0.1           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.0.1           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.0.1           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.0.1           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.0.1           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.0.1           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.0.1           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -3873,7 +3870,7 @@ Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, ma
 It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
 ```
 …
-logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>4, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
+logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>5, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-suricata", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
 logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
 …
 ```

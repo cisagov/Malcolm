@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DOCKER_COMPOSE_VER="1.29.2"
-DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VER/docker-compose-$(uname -s)-$(uname -m)"
+DOCKER_COMPOSE_VER="2.5.0"
+DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VER/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
 
 # install docker-compose
 curl -o /usr/local/bin/docker-compose -sSL "$DOCKER_COMPOSE_URL" && chmod 755 /usr/local/bin/docker-compose
