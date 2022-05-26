@@ -96,7 +96,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
-        (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
+        (echo -e "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
@@ -106,10 +106,10 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --chmod=644 shared/bin/pcap_utils.py /opt/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
+COPY --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
