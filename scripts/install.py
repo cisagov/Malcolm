@@ -540,6 +540,9 @@ class Installer(object):
                 )
 
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
+        suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
+            'Download updated Suricata signatures periodically?', default=autoSuricata
+        )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
@@ -577,7 +580,7 @@ class Installer(object):
         yaraScan = False
         capaScan = False
         clamAvScan = False
-        ruleUpdate = False
+        fileScanRuleUpdate = False
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
             while fileCarveMode not in allowedFileCarveModes:
@@ -600,7 +603,9 @@ class Installer(object):
                 if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
                     while len(vtotApiKey) <= 1:
                         vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
-                ruleUpdate = InstallerYesOrNo('Download updated scanner signatures periodically?', default=True)
+                fileScanRuleUpdate = InstallerYesOrNo(
+                    'Download updated file scanner signatures periodically?', default=True
+                )
 
         if fileCarveMode not in allowedFileCarveModes:
             fileCarveMode = allowedFileCarveModes[0]
@@ -734,7 +739,15 @@ class Installer(object):
                             # rule updates (yara/capa via git, clamav via freshclam)
                             line = re.sub(
                                 r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(ruleUpdate)}",
+                                fr"\g<1>{TrueOrFalseQuote(fileScanRuleUpdate)}",
+                                line,
+                            )
+
+                        elif 'SURICATA_UPDATE_RULES' in line:
+                            # Suricata signature updates (via suricata-update)
+                            line = re.sub(
+                                r'(SURICATA_UPDATE_RULES\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(suricataRuleUpdate)}",
                                 line,
                             )
 
