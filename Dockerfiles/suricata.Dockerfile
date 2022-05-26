@@ -38,7 +38,6 @@ ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
-ENV SURICATA_UPDATE_CONFIG_FILE "$SURICATA_CONFIG_DIR"/update.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
 ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
@@ -129,6 +128,8 @@ COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
+COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
+COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
