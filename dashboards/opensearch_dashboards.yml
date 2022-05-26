@@ -1,8 +1,8 @@
 ---
 # Default OpenSearch dashboards configuration from github.
 
-server.name: dashboards
-server.host: "0"
+server.name: "dashboards"
+server.host: "0.0.0.0"
 server.basePath: "/dashboards"
 server.rewriteBasePath: true
 server.maxPayloadBytes: 8388608
