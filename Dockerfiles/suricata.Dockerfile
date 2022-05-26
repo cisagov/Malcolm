@@ -96,7 +96,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
-        (echo -e "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
+        (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
