@@ -440,7 +440,7 @@ def stop(wipe=False):
                 'arkime',
                 'bash',
                 '-c',
-                'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_template/malcolm_template"',
+                'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_index_template/malcolm_template"',
             ],
             env=osEnv,
             debug=args.debug,

@@ -84,7 +84,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
         if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]]; then
           # insert OpenSearch ISM stuff into index template settings
-          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".settings += {\"index.plugins.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
+          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".template.settings += {\"index.plugins.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
         fi
       fi
 
@@ -96,7 +96,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # load malcolm_template containing malcolm data source field type mappings (merged from /data/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
       curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
-        "$OS_URL/_template/malcolm_template?include_type_name=true" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
+        "$OS_URL/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
 
       echo "Importing index pattern..."
 
