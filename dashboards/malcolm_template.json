@@ -46,6 +46,7 @@
           }
         },
         "dns.header_flags": { "type": "keyword" },
+        "dns.host": { "type": "keyword" },
         "dns.id": { "type": "keyword" },
         "dns.op_code": { "type": "keyword" },
         "dns.question.class": { "type": "keyword" },
@@ -111,6 +112,7 @@
         "network.transport": { "type": "keyword" },
         "network.type": { "type": "keyword" },
         "network.vlan.id": { "type": "keyword" },
+        "node": { "type": "keyword" },
         "related.hash": { "type": "keyword" },
         "related.hosts": { "type": "keyword" },
         "related.ip": { "type": "ip" },
