@@ -13,8 +13,6 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek"]
-  fields:
-    type: "session"
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
@@ -39,8 +37,6 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek"]
-  fields:
-    type: "session"
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
@@ -58,8 +54,6 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata"]
-  fields:
-    type: "session"
   compression_level: 0
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:45m}

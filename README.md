@@ -933,8 +933,6 @@ filebeat.inputs:
   paths:
     - /var/zeek/*.log
   fields_under_root: true
-  fields:
-    type: "session"
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: 10s

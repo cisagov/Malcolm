@@ -1,13 +1,12 @@
 {
   "index_patterns" : ["arkime_sessions3-*"],
-  "order" : 0,
-  "settings" : {
-    "index" : {
-      "mapping.total_fields.limit" : "3000"
-    }
-  },
-  "mappings": {
-    "session": {
+  "template" :{
+    "settings" : {
+      "index" : {
+        "mapping.total_fields.limit" : "3000"
+      }
+    },
+    "mappings": {
       "properties": {
         "firstPacket": { "type": "date" },
         "lastPacket": { "type": "date" },

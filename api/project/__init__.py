@@ -8,6 +8,7 @@ import random
 import re
 import requests
 import string
+import traceback
 import warnings
 
 from collections import defaultdict
@@ -551,12 +552,16 @@ def fields():
             }
 
     # get fields from OpenSearch template
-    for fieldname, fieldinfo in deep_get(
-        requests.get(f'{app.config["OPENSEARCH_URL"]}/_template/{app.config["MALCOLM_TEMPLATE"]}').json(),
-        [app.config["MALCOLM_TEMPLATE"], "mappings", "properties"],
-    ).items():
-        if 'type' in fieldinfo:
-            fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+    for template in deep_get(
+        requests.get(f'{app.config["OPENSEARCH_URL"]}/_index_template/{app.config["MALCOLM_TEMPLATE"]}').json(),
+        ["index_templates"],
+    ):
+        for fieldname, fieldinfo in deep_get(
+            template,
+            ["index_template", "template", "mappings", "properties"],
+        ).items():
+            if 'type' in fieldinfo:
+                fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
 
     # get fields from OpenSearch dashboards
     for field in requests.get(
@@ -806,4 +811,5 @@ def basic_error(e):
     errorStr = f"{type(e).__name__}: {str(e)}"
     if debugApi:
         print(errorStr)
+        print(traceback.format_exc())
     return jsonify(error=errorStr)
