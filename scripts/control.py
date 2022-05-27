@@ -430,7 +430,7 @@ def stop(wipe=False):
     osEnv['TMPDIR'] = MalcolmTmpPath
 
     if wipe:
-        # attempt to DELETE _template/malcolm_template in OpenSearch
+        # attempt to DELETE _index_template/malcolm_template in OpenSearch
         err, out = run_process(
             [
                 dockerComposeBin,

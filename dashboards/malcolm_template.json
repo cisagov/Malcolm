@@ -10,6 +10,7 @@
       "properties": {
         "firstPacket": { "type": "date" },
         "lastPacket": { "type": "date" },
+        "@timestamp": { "type": "date" },
         "timestamp": { "type": "date" },
         "client.domain": { "type": "keyword" },
         "destination.domain": { "type": "keyword" },
