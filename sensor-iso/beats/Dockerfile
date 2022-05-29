@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:10.12-slim
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
