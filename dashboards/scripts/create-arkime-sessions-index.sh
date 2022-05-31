@@ -80,7 +80,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       if [[ -f "$INDEX_POLICY_FILE" ]]; then
         # make API call to define index management policy
         # https://opensearch.org/docs/latest/im-plugin/ism/api/#create-policy
-        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_plugins/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
+        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_opendistro/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
 
         if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]]; then
           # insert OpenSearch ISM stuff into index template settings
@@ -163,7 +163,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # Create anomaly detectors here
       for i in /opt/anomaly_detectors/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
@@ -176,15 +176,15 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       DUMMY_DETECTOR_ID=""
       until [[ -n "$DUMMY_DETECTOR_ID" ]]; do
         sleep 5
-        DUMMY_DETECTOR_ID="$(curl -L --fail --silent --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/_search" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
+        DUMMY_DETECTOR_ID="$(curl -L --fail --silent --show-error -XPOST "$OS_URL/_opendistro/_anomaly_detection/detectors/_search" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
       done
       set -e
       if [[ -n "$DUMMY_DETECTOR_ID" ]]; then
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_start" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_start" -H 'osd-xsrf:true' -H 'Content-type:application/json'
         sleep 10
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_stop" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_stop" -H 'osd-xsrf:true' -H 'Content-type:application/json'
         sleep 10
-        curl -L --silent --output /dev/null --show-error -XDELETE "$OS_URL/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID" -H 'osd-xsrf:true' -H 'Content-type:application/json'
+        curl -L --silent --output /dev/null --show-error -XDELETE "$OS_URL/_opendistro/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID" -H 'osd-xsrf:true' -H 'Content-type:application/json'
       fi
 
       echo "OpenSearch anomaly detectors creation complete!"
@@ -195,11 +195,11 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       # destinations
       for i in /opt/alerting/destinations/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/destinations" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_alerting/destinations" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
       # get example destination ID
       ALERTING_EXAMPLE_DESTINATION_ID=$(curl -L --silent --show-error -XGET -H 'osd-xsrf:true' -H 'Content-type:application/json' \
-          "$OS_URL/_plugins/_alerting/destinations" | \
+          "$OS_URL/_opendistro/_alerting/destinations" | \
             jq -r ".destinations[] | select(.name == \"$ALERTING_EXAMPLE_DESTINATION_NAME\").id" | \
             head -n 1)
 
@@ -210,11 +210,11 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # replace example destination ID in monitor definition
           TMP_MONITOR_FILENAME="$(mktemp)"
           sed "s/ALERTING_EXAMPLE_DESTINATION_ID/$ALERTING_EXAMPLE_DESTINATION_ID/g" "$i" > "$TMP_MONITOR_FILENAME"
-          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$TMP_MONITOR_FILENAME"
+          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$TMP_MONITOR_FILENAME"
           rm -f "$TMP_MONITOR_FILENAME"
         else
           # insert monitor as defined
-          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_opendistro/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
         fi
       done
 
