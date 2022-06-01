@@ -90,6 +90,7 @@ RUN yum install -y epel-release && \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
+                                       logstash-filter-useragent \
                                        logstash-input-beats logstash-output-elasticsearch && \
     logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-3.4.0.gem && \
     rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle
