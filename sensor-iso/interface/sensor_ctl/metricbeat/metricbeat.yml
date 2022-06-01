@@ -42,37 +42,21 @@ metricbeat.modules:
 #================================ General ======================================
 fields_under_root: true
 
+processors:
+  - add_tags:
+      tags: [_malcolm_beats]
+
 #================================ Outputs ======================================
 
-#-------------------------- Elasticsearch output -------------------------------
-output.elasticsearch:
-  enabled: true
-  hosts: ["${BEAT_OS_HOST}:${BEAT_OS_PORT}"]
-  protocol: "${BEAT_OS_PROTOCOL}"
-  username: "${BEAT_HTTP_USERNAME}"
-  password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_OS_SSL_VERIFY}"
-
-setup.template.enabled: true
-setup.template.overwrite: false
-setup.template.settings:
-  index.number_of_shards: 1
-  index.number_of_replicas: 0
-
-#============================== Dashboards =====================================
-# setup.dashboards.enabled: "${BEAT_DASHBOARDS_ENABLED}"
-# "setup.dashboards.enabled: false" now because Beats won't import dashboards
-# into OpenSearch dashboards (see opensearch-project/OpenSearch-Dashboards#656
-# and opensearch-project/OpenSearch-Dashboards#831). setup.template.enabled
-# seems to be okay, however.
-setup.dashboards.enabled: false
-setup.dashboards.directory: "${BEAT_DASHBOARDS_PATH}"
-setup.kibana:
-  host: "${BEAT_DASHBOARDS_HOST}:${BEAT_DASHBOARDS_PORT}"
-  protocol: "${BEAT_DASHBOARDS_PROTOCOL}"
-  username: "${BEAT_HTTP_USERNAME}"
-  password: "${BEAT_HTTP_PASSWORD}"
-  ssl.verification_mode: "${BEAT_DASHBOARDS_SSL_VERIFY}"
+#-------------------------- Logstash Output ------------------------------------
+output.logstash:
+  hosts: ["${BEAT_LS_HOST}:${BEAT_LS_PORT}"]
+  ssl.enabled: ${BEAT_LS_SSL:false}
+  ssl.certificate_authorities: ["${BEAT_LS_SSL_CA_CRT}"]
+  ssl.certificate: "${BEAT_LS_SSL_CLIENT_CRT}"
+  ssl.key: "${BEAT_LS_SSL_CLIENT_KEY}"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "${BEAT_LS_SSL_VERIFY}"
 
 #================================ Logging ======================================
 logging.metrics.enabled: false

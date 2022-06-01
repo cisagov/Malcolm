@@ -20,6 +20,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # set up some sensor-specific stuff
   if [[ -d /opt/sensor ]]; then
 
+    [[ -d /opt/sensor/sensor_ctl/ ]] && mkdir -p /opt/sensor/sensor_ctl/logstash-client-certificates
+
     # set ownership for /opt/sensor files for sensor UID:GID
     chown -R 1000:1000 /opt/sensor
     find /opt/sensor/ -type d -exec chmod 750 "{}" \;
