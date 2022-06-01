@@ -314,6 +314,17 @@ def logs():
         re.VERBOSE | re.IGNORECASE,
     )
 
+    # logs we don't want to eliminate, but we don't want to repeat ad-nauseum
+    # TODO: not implemented yet
+    dupeRegEx = re.compile(
+        r"""
+    .+(
+        Maybe the destination pipeline is down or stopping
+    )
+  """,
+        re.VERBOSE | re.IGNORECASE,
+    )
+
     serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
 
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output

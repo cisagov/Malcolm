@@ -24,7 +24,7 @@ class MalcolmSource extends WISESource {
     // there are several files where the definitions of fields live: make sure to keep them in sync
     // - source.malcolm.js (this file)
     // - Arkime's config.ini
-    // - Opensearch Dashboards's malcolm_template.json
+    // - Malcolm's Opensearch malcolm_template.json
 
     // todo: look at expressions for things that have parents (tunnelling, parent files, etc.)
     // todo: look at IP types and use ipPrint?

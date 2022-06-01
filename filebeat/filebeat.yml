@@ -4,6 +4,9 @@ name: "${PCAP_NODE_NAME:malcolm}"
 
 logging.metrics.enabled: false
 
+#================================ Inputs =======================================
+
+#-------------------------- Current "real" Zeek logs ---------------------------
 filebeat.inputs:
 - type: log
   paths:
@@ -24,6 +27,7 @@ filebeat.inputs:
   close_eof: ${FILEBEAT_CLOSE_EOF:true}
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
+#-------------------------- Carved file signature hit log ----------------------
 # signatures(_carved).log is different, as it comes from file carving and is
 # "live" regardless of whether the other *.log files that may be processed
 # after the fact. The most important difference is close_eof, as
@@ -48,6 +52,7 @@ filebeat.inputs:
   close_eof: false
   clean_removed: true
 
+#-------------------------- Suricata EVE JSON logs -----------------------------
 - type: log
   paths:
     - ${FILEBEAT_SURICATA_LOG_PATH:/data/suricata}/eve-*.json
@@ -64,6 +69,9 @@ filebeat.inputs:
   close_eof: ${FILEBEAT_CLOSE_EOF:true}
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
+#================================ Outputs ======================================
+
+#-------------------------- Logstash Output ------------------------------------
 output.logstash:
   hosts: ["logstash:5044"]
   ssl.enabled: ${BEATS_SSL:false}

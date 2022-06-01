@@ -65,7 +65,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
-ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse
+ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse,beats-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-os
 ARG LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-os,external-os
@@ -101,6 +101,7 @@ ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
+ADD logstash/patterns/ /usr/share/logstash/malcolm-patterns/
 ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
 ADD logstash/supervisord.conf /etc/supervisord.conf
@@ -113,6 +114,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     chown --silent -R ${PUSER}:root \
         /usr/share/logstash/config/logstash*.yml \
         /usr/share/logstash/malcolm-pipelines \
+        /usr/share/logstash/malcolm-patterns \
         /usr/share/logstash/malcolm-ruby \
         /logstash-persistent-queue && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
