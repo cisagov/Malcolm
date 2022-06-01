@@ -281,7 +281,7 @@ Finally, you'll be given the opportunity to review the all of the Arkime `captur
 
 ### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
 
-The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an OpenSearch database using a RESTful API using HTTP/HTTPS as the transport protocol. Select **metricbeat** from the forwarding configuration mode options.
+The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an OpenSearch database by way of Logstash in the same manner as [filebeat](#filebeat). Select **metricbeat** from the forwarding configuration mode options.
 
 Metricbeat gathers system resource metrics at an interval you specify. The default interval is 30 seconds, but it can be set to any value between 1 and 60 seconds.
 
@@ -289,43 +289,23 @@ Metricbeat gathers system resource metrics at an interval you specify. The defau
 
 Next, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
 
-![OpenSearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![OpenSearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
-
-Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an OpenSearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
-
-![OpenSearch host and port](./docs/images/metricbeat_elastic_host.png)
-
-Next, you will be asked if you wish to configure **OpenSearch Dashboards** connectivity. [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) is an open source general-purpose data visualization tool for OpenSearch. If you choose **Yes** and proceed to configure Dashboards connectivity, metricbeat will create custom search indexes, visualizations, and dashboards for Dashboards to display the sensor's resource metrics.
-
-You will be prompted to specify the **connection protocol** and (for HTTPS) **SSL verification** for Dashboards. These values should probably be the same ones you chose for OpenSearch. You will also be prompted for the **Dashboards host** IP address and **port**. The IP address will probably be the same one you specified for OpenSearch. The default Dashboards port is 5601.
-
-The final settings required to configure Dashboards are whether or not to configure **OpenSearch Dashboards** and the local directory on the sensor containing the dashboards to be imported. The default values are probably what you want.
-
-Finally, you will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch and Dashboards APIs.
-
-After you've entered the username and the password, the sensor will attempt test connections to the OpenSearch and Dashboards APIs using the connection information provided.
-
-![OpenSearch/Dashboards username](./docs/images/metricbeat_elastic_username.png) ![OpenSearch/Dashboards password](./docs/images/metricbeat_elastic_password.png) ![Successful OpenSearch connection](./docs/images/metricbeat_elasticsearch_success.png) ![Successful Dashboards connection](./docs/images/metricbeat_kibana_success.png)
-
-Finally, you'll be given the opportunity to review the all of the metricbeat options you've specified. Selecting **OK** will cause the parameters to be written to metricbeat's configuration keystore under `/opt/sensor/sensor_ctl/metricbeat` and you will be returned to the configuration tool's welcome screen.
-
-![Metricbeat settings confirmation](./docs/images/metricbeat_confirm.png) ![Metricbeat settings applied successfully](./docs/images/metricbeat_success.png)
+The remainder of the configuration for metricbeat will proceed as described in the [filebeat](#filebeat) steps outlined above.
 
 ### <a name="auditbeat"></a>auditbeat: audit log forwarding
 
-The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to forward auditd logs, process and socket statistics, and sensor system file integrity information to an OpenSearch database. Its configuration is almost identical to that of metricbeat in the previous section. Select **auditbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to forward auditd logs, process and socket statistics, and sensor system file integrity information to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
 
 The sensor implements STIG (Security Technical Implementation Guidelines) rules according to DISA RHEL 7 STIG V1 R1, ported to a Debian 9 base platform. Enabling audit log forwarding via auditbeat is required to satisfy the requirements regarding forwarding audit logs to a remote log server as defined in that specification.
 
 ### <a name="syslogbeat"></a>filebeat-syslog: syslog forwarding
 
-The sensor uses [filebeat's syslog input](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) to forward the sensor's system logs to an OpenSearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **filebeat-syslog** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+The sensor uses [filebeat's syslog input](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) to forward the sensor's system logs to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
 
 Enabling syslog forwarding via filebeat is required to satisfy the STIG requirements regarding sending system logs to a remote log server as defined in that specification.
 
 ### <a name="heatbeat"></a>heatbeat: temperature forwarding
 
-The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **heatbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
 
 ### <a name="ConfigAutostart"></a>Autostart services
 
