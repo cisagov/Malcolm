@@ -63,7 +63,7 @@ ADD dashboards/alerting /opt/alerting
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
-ADD dashboards/malcolm_template.json /data/malcolm_template.json
+ADD dashboards/templates /opt/templates
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /data/
 ADD shared/bin/opensearch_index_size_prune.py /data/
@@ -84,7 +84,7 @@ RUN apk update --no-cache && \
       addgroup ${PUSER} tty ; \
       addgroup ${PUSER} shadow ; \
     mkdir -p /data/init && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/maps /data/init /opt/anomaly_detectors && \
+    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
     (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */6 * * * /data/refresh-auxiliary-index-patterns.sh\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})

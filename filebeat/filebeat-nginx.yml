@@ -2,7 +2,11 @@
 
 name: "${PCAP_NODE_NAME:malcolm}"
 
-#================================ Modules ======================================
+logging.metrics.enabled: false
+
+#================================ Modules and Processors =======================
+
+#-------------------------- NGINX access and error logs ------------------------
 filebeat.modules:
 - module: nginx
   access:
@@ -12,33 +16,18 @@ filebeat.modules:
     enabled: true
     var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/data/nginx}/error.log*"]
 
+processors:
+  - add_tags:
+      tags: [_malcolm_beats]
+
 #================================ Outputs ======================================
 
-#-------------------------- Elasticsearch output -------------------------------
-output.elasticsearch:
-  enabled: true
-  hosts: ["opensearch:9200"]
-  indices:
-    - index: "filebeat-%{[agent.version]}-nginx-%{+yyyy.MM.dd}"
-      when.equals:
-        event.module: "nginx"
-
-setup.template.enabled: true
-setup.template.overwrite: false
-setup.template.settings:
-  index.number_of_shards: 1
-  index.number_of_replicas: 0
-
-#============================== Dashboards =====================================
-# "setup.dashboards.enabled: false" now because Beats won't import dashboards
-# into OpenSearch dashboards (see opensearch-project/OpenSearch-Dashboards#656
-# and opensearch-project/OpenSearch-Dashboards#831). setup.template.enabled
-# seems to be okay, however.
-setup.dashboards.enabled: false
-setup.dashboards.directory: "/usr/share/filebeat/kibana"
-setup.kibana:
-  host: "dashboards:5601"
-  path: "/dashboards"
-
-#================================ Logging ======================================
-logging.metrics.enabled: false
+#-------------------------- Logstash Output ------------------------------------
+output.logstash:
+  hosts: ["logstash:5044"]
+  ssl.enabled: ${BEATS_SSL:false}
+  ssl.certificate_authorities: ["/certs/ca.crt"]
+  ssl.certificate: "/certs/client.crt"
+  ssl.key: "/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"

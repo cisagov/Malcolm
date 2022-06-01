@@ -36,8 +36,9 @@ OTHER_INDEX_PATTERNS=(
 
 INDEX_POLICY_FILE="/data/init/index-management-policy.json"
 INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
+MALCOLM_TEMPLATES_DIR="/opt/templates"
+MALCOLM_TEMPLATE_FILE_ORIG="$MALCOLM_TEMPLATES_DIR/malcolm_template.json"
 MALCOLM_TEMPLATE_FILE="/data/init/malcolm_template.json"
-MALCOLM_TEMPLATE_FILE_ORIG="/data/malcolm_template.json"
 INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 DEFAULT_DASHBOARD=${OPENSEARCH_DEFAULT_DASHBOARD:-"0ad3d7c2-3441-485e-9dfe-dbb22e84e576"}
 
@@ -94,9 +95,23 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
       fi
 
-      # load malcolm_template containing malcolm data source field type mappings (merged from /data/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
+      # load malcolm_template containing malcolm data source field type mappings (merged from /opt/templates/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
       curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
         "$OS_URL/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
+
+      # import other templates as well (and get info for creating their index patterns)
+      for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
+        TEMP_BASENAME="$(basename "$i")"
+        TEMP_FILENAME="${TEMP_BASENAME%.*}"
+        if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
+          echo "Importing template \"$TEMP_FILENAME\"..."
+          if curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1; then
+            for TEMPLATE_INDEX_PATTERN in $(jq '.index_patterns[]' "$i" | tr -d '"'); do
+              OTHER_INDEX_PATTERNS+=("$TEMPLATE_INDEX_PATTERN;$TEMPLATE_INDEX_PATTERN;@timestamp")
+            done
+          fi
+        fi
+      done
 
       echo "Importing index pattern..."
 
@@ -113,11 +128,11 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         "$DASHB_URL/api/opensearch-dashboards/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
 
-      echo "Creating other index patterns..."
       for i in ${OTHER_INDEX_PATTERNS[@]}; do
         IDX_ID="$(echo "$i" | cut -d';' -f1)"
         IDX_NAME="$(echo "$i" | cut -d';' -f2)"
         IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
+        echo "Creating index pattern \"$IDX_NAME\"..."
         curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
           "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
           -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1
@@ -125,14 +140,15 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "Importing OpenSearch Dashboards saved objects..."
 
-      # install default dashboards, index patterns, etc.
+      # install default dashboards
       for i in /opt/dashboards/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
-      # At the moment Beats won't import dashboards into OpenSearch dashboards
+
+      # beats will no longer import its dashbaords into OpenSearch
       # (see opensearch-project/OpenSearch-Dashboards#656 and
       # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
-      # manually add load those dashboards in /opt/dashboards/beats as well.
+      # manually add load our dashboards in /opt/dashboards/beats as well.
       for i in /opt/dashboards/beats/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done

@@ -1658,7 +1658,7 @@ Returns version information about Malcolm and version/[health](https://opensearc
 
 `GET` - /mapi/fields
 
-Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
+Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/templates/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
 
 <details>
 <summary>Example output:</summary>

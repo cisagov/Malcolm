@@ -1,0 +1,36 @@
+{
+  "index_patterns" : ["malcolm_beats_-*"],
+  "template" :{
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "timestamp": { "type": "date" },
+        "client.address": { "type": "keyword" },
+        "ecs.version": { "type": "keyword" },
+        "event.category": { "type": "keyword" },
+        "event.dataset": { "type": "keyword" },
+        "event.hash": { "type": "keyword" },
+        "event.id": { "type": "keyword" },
+        "event.ingested": { "type": "date" },
+        "event.kind": { "type": "keyword" },
+        "event.module": { "type": "keyword" },
+        "event.original": { "type": "keyword", "index": false, "doc_values": false, "ignore_above": 16384, "fields": { "text": { "type": "text", "norms": false } } },
+        "event.outcome": { "type": "keyword" },
+        "event.provider": { "type": "keyword" },
+        "http.request.body.bytes": { "type": "long" },
+        "http.request.method": { "type": "keyword" },
+        "http.request.mime_type": { "type": "keyword" },
+        "http.request.referrer": { "type": "keyword" },
+        "http.response.body.bytes": { "type": "long" },
+        "http.response.mime_type": { "type": "keyword" },
+        "http.response.status_code": { "type": "long" },
+        "http.version": { "type": "keyword" },
+        "log.file.path": { "type": "keyword" },
+        "node": { "type": "keyword" },
+        "related.user": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
+        "url.original": { "type": "keyword" },
+        "user_agent.original": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } }
+      }
+    }
+  }
+}
