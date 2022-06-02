@@ -169,7 +169,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.0.2
+    image: malcolmnetsec/opensearch:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -211,7 +211,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.0.2
+    image: malcolmnetsec/dashboards-helper:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -244,7 +244,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.0.2
+    image: malcolmnetsec/dashboards:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -270,7 +270,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.0.2
+    image: malcolmnetsec/logstash-oss:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -322,7 +322,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.0.2
+    image: malcolmnetsec/filebeat-oss:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -357,7 +357,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.0.2
+    image: malcolmnetsec/arkime:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -403,7 +403,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.0.2
+    image: malcolmnetsec/zeek:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -438,7 +438,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.0.2
+    image: malcolmnetsec/suricata:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -466,7 +466,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.0.2
+    image: malcolmnetsec/file-monitor:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -494,7 +494,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.0.2
+    image: malcolmnetsec/pcap-capture:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -517,7 +517,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.0.2
+    image: malcolmnetsec/pcap-monitor:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -545,7 +545,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.0.2
+    image: malcolmnetsec/file-upload:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -573,7 +573,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.0.2
+    image: malcolmnetsec/htadmin:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -600,7 +600,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.0.2
+    image: malcolmnetsec/freq:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -623,7 +623,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.0.2
+    image: malcolmnetsec/name-map-ui:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -649,7 +649,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:6.0.2
+    image: malcolmnetsec/api:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -675,7 +675,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.0.2
+    image: malcolmnetsec/nginx-proxy:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
