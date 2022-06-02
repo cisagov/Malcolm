@@ -52,14 +52,6 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
 
 ADD dashboards/dashboards /opt/dashboards
-# At the moment Beats won't import dashboards into OpenSearch dashboards
-# (see opensearch-project/OpenSearch-Dashboards#656 and
-# opensearch-project/OpenSearch-Dashboards#831), although the templates/index
-# patterns work ok. As such, we're going to manually add the dashboards we care about to
-# /opt/dashboards/beats and load them when the container starts up.
-ADD sensor-iso/config/includes.chroot/usr/share/filebeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
-ADD sensor-iso/config/includes.chroot/usr/share/auditbeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
-ADD sensor-iso/config/includes.chroot/usr/share/protologbeat/kibana/7/dashboard/*.json /opt/dashboards/beats
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 ADD dashboards/alerting /opt/alerting
 ADD dashboards/maps /opt/maps
