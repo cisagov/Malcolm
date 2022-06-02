@@ -18,7 +18,6 @@
     "ecs_source",
     "ecs_threat",
     "ecs_url",
-    "ecs_user",
     "ecs_user_agent"
   ],
   "template" :{
@@ -609,6 +608,7 @@
         "suricata.tx_id": { "type": "keyword" },
         "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "tls.server.ja3s_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "user": { "type": "keyword" },
         "zeek.bacnet.bvlc_function": { "type": "keyword" },
         "zeek.bacnet.invoke_id": { "type": "integer" },
         "zeek.bacnet.pdu_service": { "type": "keyword" },
