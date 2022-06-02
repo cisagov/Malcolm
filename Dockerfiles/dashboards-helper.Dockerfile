@@ -49,6 +49,8 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
+
 ADD dashboards/dashboards /opt/dashboards
 # At the moment Beats won't import dashboards into OpenSearch dashboards
 # (see opensearch-project/OpenSearch-Dashboards#656 and
@@ -83,8 +85,16 @@ RUN apk update --no-cache && \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty ; \
       addgroup ${PUSER} shadow ; \
-    mkdir -p /data/init && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/maps /data/init /opt/anomaly_detectors && \
+    mkdir -p /data/init /opt/ecs && \
+      cd /opt && \
+      curl -sSL "$(curl -sSL "$ECS_RELEASES_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./ecs --strip-components 1 && \
+      mv /opt/ecs/generated/elasticsearch /opt/ecs-templates && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"constant_keyword"/\1"keyword"/' "{}" \; && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"wildcard"/\1"keyword"/' "{}" \; && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"object"/' "{}" \; && \
+      rm -rf /opt/ecs && \
+    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
     (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */6 * * * /data/refresh-auxiliary-index-patterns.sh\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
