@@ -708,7 +708,7 @@ class MalcolmSource extends WISESource {
       "url.port",
       "url.query",
       "url.scheme",
-      "url.user",
+      "url.username",
       "user_agent.original",
       "vulnerability.category",
       "vulnerability.description",

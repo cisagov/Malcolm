@@ -27,12 +27,7 @@ INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 ALERTING_EXAMPLE_DESTINATION_NAME=${ALERTING_EXAMPLE_DESTINATION_NAME:-"Malcolm API Loopback Webhook"}
 
-OTHER_INDEX_PATTERNS=(
-  "filebeat-*;filebeat-*;@timestamp"
-  "metricbeat-*;metricbeat-*;@timestamp"
-  "auditbeat-*;auditbeat-*;@timestamp"
-  "packetbeat-*;packetbeat-*;@timestamp"
-)
+
 
 INDEX_POLICY_FILE="/data/init/index-management-policy.json"
 INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
@@ -89,6 +84,16 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         fi
       fi
 
+      if [[ -d /opt/ecs-templates/composable/component ]]; then
+        echo "Importing ECS composable templates..."
+        for i in /opt/ecs-templates/composable/component/*.json; do
+          TEMP_BASENAME="$(basename "$i")"
+          TEMP_FILENAME="${TEMP_BASENAME%.*}"
+          echo "Importing ECS composable templates $TEMP_FILENAME ..."
+          curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+        done
+      fi
+
       echo "Importing malcolm_template..."
 
       if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
@@ -100,6 +105,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         "$OS_URL/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
 
       # import other templates as well (and get info for creating their index patterns)
+      OTHER_INDEX_PATTERNS=()
       for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
         TEMP_BASENAME="$(basename "$i")"
         TEMP_FILENAME="${TEMP_BASENAME%.*}"
