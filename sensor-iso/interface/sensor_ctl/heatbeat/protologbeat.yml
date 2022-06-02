@@ -14,17 +14,6 @@ processors:
   - add_tags:
       tags: [_malcolm_beats]
 
-#============================== Template =======================================
-
-setup.template.enabled: true
-setup.template.overwrite: false
-setup.template.settings:
-  index.number_of_shards: 1
-  index.number_of_replicas: 0
-setup.template.json.enabled: true
-setup.template.json.path: "${path.config}/protologbeat.template.json"
-setup.template.json.name: "protologbeat"
-
 #================================ Outputs ======================================
 
 #-------------------------- Logstash Output ------------------------------------
