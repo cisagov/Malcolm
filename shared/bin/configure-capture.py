@@ -88,6 +88,14 @@ class Constants:
 
     # since the OpenSearch fork from ElasticSearch, we're no longer using beats forwarding directly to OpenSearch
 
+    # however, Arkime does connect directly to opensearch
+    BEAT_OS_HOST = "BEAT_OS_HOST"
+    BEAT_OS_PORT = "BEAT_OS_PORT"
+    BEAT_OS_PROTOCOL = "BEAT_OS_PROTOCOL"
+    BEAT_OS_SSL_VERIFY = "BEAT_OS_SSL_VERIFY"
+    BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
+    BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
+
     # specific to filebeat
     BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
     BEAT_ZEEK_LOG_PATTERN_KEY = 'BEAT_LOG_PATTERN'
@@ -791,8 +799,8 @@ def main():
                 code, fwd_mode = d.menu(
                     Constants.MSG_CONFIG_MODE,
                     choices=[
-                        Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_ARKIME,
+                        Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_METRICBEAT,
                         Constants.MSG_CONFIG_AUDITBEAT,
                         Constants.MSG_CONFIG_SYSLOGBEAT,
@@ -958,7 +966,7 @@ def main():
                         if not forwarder_config_error:
                             # host/port for LogStash
                             code, values = d.form(
-                                Constants.MSG_CONFIG_GENERIC.format(forwarder),
+                                Constants.MSG_CONFIG_GENERIC.format(fwd_mode),
                                 [
                                     (
                                         'Logstash Host',
@@ -1050,7 +1058,7 @@ def main():
                                         1,
                                         previous_config_values[Constants.BEAT_LS_SSL_CA_CRT]
                                         if Constants.BEAT_LS_SSL_CA_CRT in previous_config_values
-                                        else f"{BEAT_LS_CERT_DIR_DEFAULT}/ca.crt",
+                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt",
                                         1,
                                         35,
                                         30,
@@ -1062,7 +1070,7 @@ def main():
                                         1,
                                         previous_config_values[Constants.BEAT_LS_SSL_CLIENT_CRT]
                                         if Constants.BEAT_LS_SSL_CLIENT_CRT in previous_config_values
-                                        else f"{BEAT_LS_CERT_DIR_DEFAULT}/client.crt",
+                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt",
                                         2,
                                         35,
                                         30,
@@ -1074,7 +1082,7 @@ def main():
                                         1,
                                         previous_config_values[Constants.BEAT_LS_SSL_CLIENT_KEY]
                                         if Constants.BEAT_LS_SSL_CLIENT_KEY in previous_config_values
-                                        else f"{BEAT_LS_CERT_DIR_DEFAULT}/client.key",
+                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key",
                                         3,
                                         35,
                                         30,
