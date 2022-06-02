@@ -127,7 +127,7 @@ RUN apt-get -q update && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
-    zkg install --force --skiptests --version c9ca2d93aaf7bfb75fb282eaa7214a9057d4666e zeek/spicy-plugin && \
+    zkg install --force --skiptests zeek/spicy-plugin && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
     ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
