@@ -1,0 +1,16 @@
+{
+  "config_id": "malcolm-api-loopback-webook",
+  "name": "malcolm-api-loopback-webook",
+  "config": {
+    "name": "Malcolm API Loopback Webhook",
+    "description": "Malcolm API webhook to index OpenSearch alerts as session documents",
+    "config_type": "webhook",
+    "webhook": {
+      "url": "http://api:5000/alert",
+      "method": "POST",
+      "header_params": {
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}

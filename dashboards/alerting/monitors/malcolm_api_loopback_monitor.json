@@ -56,7 +56,7 @@
         "actions": [
           {
             "name": "Malcolm API Loopback Action",
-            "destination_id": "ALERTING_EXAMPLE_DESTINATION_ID",
+            "destination_id": "malcolm-api-loopback-webook",
             "message_template": {
               "source": "{\n  \"alert\": {\n    \"monitor\": {\n      \"name\": \"{{ctx.monitor.name}}\"\n    },\n    \"trigger\": {\n      \"name\": \"{{ctx.trigger.name}}\",\n      \"severity\": {{ctx.trigger.severity}}\n    },\n    \"period\": {\n      \"start\": \"{{ctx.periodStart}}\",\n      \"end\": \"{{ctx.periodEnd}}\"\n    },\n    \"results\": {{#toJson}}ctx.results{{/toJson}},\n    \"body\": \"{{#toJson}}ctx.payload{{/toJson}}\",\n    \"alert\": \"{{ctx.alert.id}}\",\n    \"error\": \"{{ctx.error}}\"\n  }\n}",
               "lang": "mustache"
