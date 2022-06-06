@@ -12,7 +12,7 @@ fields_under_root: true
 
 processors:
   - add_tags:
-      tags: [_malcolm_beats]
+      tags: [_malcolm_beats, _malcolm_protologbeat]
 
 #================================ Outputs ======================================
 
