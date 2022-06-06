@@ -2,6 +2,17 @@
   "template": {
     "mappings": {
       "properties": {
+        "metricset": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "period": {
+              "type": "long"
+            }
+          }
+        },
         "system": {
           "properties": {
             "core": {
