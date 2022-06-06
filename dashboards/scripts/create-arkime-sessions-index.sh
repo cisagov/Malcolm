@@ -87,8 +87,18 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         for i in /opt/ecs-templates/composable/component/*.json; do
           TEMP_BASENAME="$(basename "$i")"
           TEMP_FILENAME="${TEMP_BASENAME%.*}"
-          echo "Importing ECS composable templates $TEMP_FILENAME ..."
+          echo "Importing ECS composable template $TEMP_FILENAME ..."
           curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+        done
+      fi
+
+      if [[ -d "$MALCOLM_TEMPLATES_DIR"/composable/component ]]; then
+        echo "Importing custom ECS composable templates..."
+        for i in "$MALCOLM_TEMPLATES_DIR"/composable/component/*.json; do
+          TEMP_BASENAME="$(basename "$i")"
+          TEMP_FILENAME="${TEMP_BASENAME%.*}"
+          echo "Importing custom ECS composable template $TEMP_FILENAME ..."
+          curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
         done
       fi
 

@@ -1,0 +1,26 @@
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "syslog": {
+          "properties": {
+            "facility": {
+              "type": "long"
+            },
+            "facility_label": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "priority": {
+              "type": "long"
+            },
+            "severity_label": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

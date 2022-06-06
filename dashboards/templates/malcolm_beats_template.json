@@ -19,7 +19,11 @@
     "ecs_threat",
     "ecs_url",
     "ecs_user",
-    "ecs_user_agent"
+    "ecs_user_agent",
+    "custom_auditd",
+    "custom_heatbeat",
+    "custom_syslog",
+    "custom_system"
   ],
   "template" :{
     "settings" : {
@@ -30,60 +34,7 @@
     "mappings": {
       "properties": {
         "timestamp": { "type": "date" },
-        "node": { "type": "keyword" },
-        "cpu_rpm_avg": {
-          "type": "float"
-        },
-        "cpu_volt_avg": {
-          "type": "float"
-        },
-        "cpu_temp_avg": {
-          "type": "float"
-        },
-        "gpu_rpm_avg": {
-          "type": "float"
-        },
-        "gpu_volt_avg": {
-          "type": "float"
-        },
-        "gpu_temp_avg": {
-          "type": "float"
-        },
-        "hdd_temp_avg": {
-          "type": "float"
-        },
-        "other_volt_avg": {
-          "type": "float"
-        },
-        "other_rpm_avg": {
-          "type": "float"
-        },
-        "other_temp_avg": {
-          "type": "float"
-        },
-        "sensors.adapter": {
-          "type": "keyword",
-          "norms": false
-        },
-        "sensors.class": {
-          "type": "keyword",
-          "norms": false
-        },
-        "sensors.label": {
-          "type": "keyword",
-          "norms": false
-        },
-        "sensors.name": {
-          "type": "keyword",
-          "norms": false
-        },
-        "sensors.units": {
-          "type": "keyword",
-          "norms": false
-        },
-        "sensors.value": {
-          "type": "float"
-        }
+        "node": { "type": "keyword" }
       }
     }
   }
