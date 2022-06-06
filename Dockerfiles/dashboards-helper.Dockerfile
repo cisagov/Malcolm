@@ -54,6 +54,7 @@ ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
 ADD dashboards/dashboards /opt/dashboards
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 ADD dashboards/alerting /opt/alerting
+ADD dashboards/notifications /opt/notifications
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
