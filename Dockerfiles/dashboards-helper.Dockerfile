@@ -90,7 +90,7 @@ RUN apk update --no-cache && \
     chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */6 * * * /data/refresh-auxiliary-index-patterns.sh\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index 'malcolm_beats_*' --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
