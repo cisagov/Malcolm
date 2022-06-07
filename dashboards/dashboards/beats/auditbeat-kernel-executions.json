@@ -7,10 +7,10 @@
                     "searchSourceJSON": "{\"filter\": [], \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "d382f5b0-c1c6-11e7-8995-936807a28b16-ecs",
-                "title": "Error Codes [Auditbeat Auditd] ECS",
+                "title": "auditd Executions - Error Codes",
                 "uiStateJSON": "{}",
                 "version": 1,
-                "visState": "{\"title\": \"Error Codes [Auditbeat Auditd] ECS\", \"type\": \"pie\", \"aggs\": [{\"type\": \"count\", \"schema\": \"metric\", \"id\": \"1\", \"params\": {}, \"enabled\": true}, {\"type\": \"terms\", \"schema\": \"segment\", \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"exclude\": \"0\", \"size\": 10, \"field\": \"auditd.data.exit\", \"order\": \"desc\"}, \"enabled\": true}], \"params\": {\"type\": \"pie\", \"isDonut\": true, \"legendPosition\": \"right\", \"addTooltip\": true, \"addLegend\": true}}"
+                "visState": "{\"title\": \"auditd Executions - Error Codes\", \"type\": \"pie\", \"aggs\": [{\"type\": \"count\", \"schema\": \"metric\", \"id\": \"1\", \"params\": {}, \"enabled\": true}, {\"type\": \"terms\", \"schema\": \"segment\", \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"exclude\": \"0\", \"size\": 10, \"field\": \"auditd.data.exit\", \"order\": \"desc\"}, \"enabled\": true}], \"params\": {\"type\": \"pie\", \"isDonut\": true, \"legendPosition\": \"right\", \"addTooltip\": true, \"addLegend\": true}}"
             },
             "id": "20a8e8d0-c1c8-11e7-8995-936807a28b16-ecs",
             "type": "visualization",
@@ -23,10 +23,10 @@
                 "kibanaSavedObjectMeta": {
                     "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
-                "title": "Primary Username Tag Cloud [Auditbeat Auditd] ECS",
+                "title": "auditd Executions - Primary Username Tag Cloud",
                 "uiStateJSON": "{}",
                 "version": 1,
-                "visState": "{\"title\": \"Primary Username Tag Cloud [Auditbeat Auditd] ECS\", \"type\": \"tagcloud\", \"aggs\": [{\"type\": \"count\", \"schema\": \"metric\", \"id\": \"1\", \"params\": {}, \"enabled\": true}, {\"type\": \"terms\", \"schema\": \"segment\", \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"size\": 10, \"field\": \"auditd.summary.actor.primary\", \"order\": \"desc\"}, \"enabled\": true}], \"params\": {\"maxFontSize\": 45, \"minFontSize\": 18, \"orientation\": \"single\", \"scale\": \"linear\"}}"
+                "visState": "{\"title\": \"auditd Executions - Primary Username Tag Cloud\", \"type\": \"tagcloud\", \"aggs\": [{\"type\": \"count\", \"schema\": \"metric\", \"id\": \"1\", \"params\": {}, \"enabled\": true}, {\"type\": \"terms\", \"schema\": \"segment\", \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"size\": 10, \"field\": \"auditd.summary.actor.primary\", \"order\": \"desc\"}, \"enabled\": true}], \"params\": {\"maxFontSize\": 45, \"minFontSize\": 18, \"orientation\": \"single\", \"scale\": \"linear\"}}"
             },
             "id": "f81a6de0-c1c1-11e7-8995-936807a28b16-ecs",
             "type": "visualization",
@@ -40,10 +40,10 @@
                     "searchSourceJSON": "{\"filter\": [], \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "d382f5b0-c1c6-11e7-8995-936807a28b16-ecs",
-                "title": "Exe Name Tag Cloud [Auditbeat Auditd] ECS",
+                "title": "auditd Executions - Exe Name Tag Cloud",
                 "uiStateJSON": "{}",
                 "version": 1,
-                "visState": "{\"title\": \"Exe Name Tag Cloud [Auditbeat Auditd] ECS\", \"type\": \"tagcloud\", \"aggs\": [{\"type\": \"count\", \"schema\": \"metric\", \"id\": \"1\", \"params\": {}, \"enabled\": true}, {\"type\": \"terms\", \"schema\": \"segment\", \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"size\": 10, \"field\": \"process.executable\", \"order\": \"desc\"}, \"enabled\": true}], \"params\": {\"maxFontSize\": 45, \"minFontSize\": 14, \"orientation\": \"single\", \"scale\": \"linear\"}}"
+                "visState": "{\"title\": \"auditd Executions - Exe Name Tag Cloud\", \"type\": \"tagcloud\", \"aggs\": [{\"type\": \"count\", \"schema\": \"metric\", \"id\": \"1\", \"params\": {}, \"enabled\": true}, {\"type\": \"terms\", \"schema\": \"segment\", \"id\": \"2\", \"params\": {\"orderBy\": \"1\", \"size\": 10, \"field\": \"process.executable\", \"order\": \"desc\"}, \"enabled\": true}], \"params\": {\"maxFontSize\": 45, \"minFontSize\": 14, \"orientation\": \"single\", \"scale\": \"linear\"}}"
             },
             "id": "2efac370-c1ca-11e7-8995-936807a28b16-ecs",
             "type": "visualization",
@@ -53,7 +53,7 @@
         {
             "attributes": {
                 "columns": [
-                    "agent.hostname",
+                    "host.name",
                     "process.args",
                     "auditd.summary.actor.primary",
                     "auditd.summary.actor.secondary",
@@ -68,7 +68,7 @@
                     "@timestamp",
                     "desc"
                 ],
-                "title": "Process Executions [Auditbeat Auditd] ECS",
+                "title": "auditd Executions - Process Executions",
                 "version": 1
             },
             "id": "d382f5b0-c1c6-11e7-8995-936807a28b16-ecs",
@@ -78,15 +78,15 @@
         },
         {
             "attributes": {
-                "description": "Overview of kernel executions",
+                "description": "auditd Overview of kernel executions on Malcolm sensors",
                 "hits": 0,
                 "kibanaSavedObjectMeta": {
                     "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [], \"version\": true, \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "optionsJSON": "{\"darkTheme\": false, \"useMargins\": false}",
-                "panelsJSON": "[{\"type\": \"visualization\", \"id\": \"20a8e8d0-c1c8-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"1\", \"gridData\": {\"w\": 4, \"i\": \"1\", \"h\": 3, \"x\": 4, \"y\": 0}}, {\"type\": \"visualization\", \"id\": \"f81a6de0-c1c1-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"3\", \"gridData\": {\"w\": 4, \"i\": \"3\", \"h\": 3, \"x\": 8, \"y\": 0}}, {\"type\": \"visualization\", \"id\": \"2efac370-c1ca-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"5\", \"gridData\": {\"w\": 4, \"i\": \"5\", \"h\": 3, \"x\": 0, \"y\": 0}}, {\"type\": \"search\", \"id\": \"d382f5b0-c1c6-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"6\", \"gridData\": {\"w\": 12, \"i\": \"6\", \"h\": 5, \"x\": 0, \"y\": 3}}]",
+                "panelsJSON": "[{\"type\": \"visualization\", \"id\": \"20a8e8d0-c1c8-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"1\", \"gridData\": {\"w\": 4, \"i\": \"1\", \"h\": 6, \"x\": 4, \"y\": 0}}, {\"type\": \"visualization\", \"id\": \"f81a6de0-c1c1-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"3\", \"gridData\": {\"w\": 4, \"i\": \"3\", \"h\": 6, \"x\": 8, \"y\": 0}}, {\"type\": \"visualization\", \"id\": \"2efac370-c1ca-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"5\", \"gridData\": {\"w\": 4, \"i\": \"5\", \"h\": 6, \"x\": 0, \"y\": 0}}, {\"type\": \"search\", \"id\": \"d382f5b0-c1c6-11e7-8995-936807a28b16-ecs\", \"version\": \"6.2.4\", \"panelIndex\": \"6\", \"gridData\": {\"w\": 12, \"i\": \"6\", \"h\": 6, \"x\": 0, \"y\": 3}}]",
                 "timeRestore": false,
-                "title": "[Auditbeat Auditd] Executions ECS",
+                "title": "Malcolm Sensor auditd Executions Overview",
                 "version": 1
             },
             "id": "7de391b0-c1ca-11e7-8995-936807a28b16-ecs",

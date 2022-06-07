@@ -2,7 +2,7 @@
     "objects": [
         {
             "attributes": {
-                "description": "Overview of system metrics",
+                "description": "Malcolm sensor system resources overview",
                 "hits": 0,
                 "kibanaSavedObjectMeta": {
                     "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"version\": true, \"filter\": [], \"highlightAll\": true}"
@@ -10,7 +10,7 @@
                 "optionsJSON": "{\"darkTheme\": false}",
                 "panelsJSON": "[{\"panelRefName\": \"panel_0\", \"panelIndex\": \"9\", \"embeddableConfig\": {}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 0, \"i\": \"9\", \"w\": 48, \"y\": 0, \"h\": 4}}, {\"panelRefName\": \"panel_1\", \"panelIndex\": \"11\", \"embeddableConfig\": {\"vis\": {\"defaultColors\": {\"0 - 100\": \"rgb(0,104,55)\"}}}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 0, \"i\": \"11\", \"w\": 8, \"y\": 4, \"h\": 8}}, {\"panelRefName\": \"panel_2\", \"panelIndex\": \"12\", \"embeddableConfig\": {\"vis\": {\"defaultColors\": {\"0 - 100\": \"rgb(0,104,55)\"}}}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 24, \"i\": \"12\", \"w\": 24, \"y\": 12, \"h\": 20}}, {\"panelRefName\": \"panel_3\", \"panelIndex\": \"13\", \"embeddableConfig\": {}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 0, \"i\": \"13\", \"w\": 24, \"y\": 12, \"h\": 20}}, {\"panelRefName\": \"panel_4\", \"panelIndex\": \"14\", \"embeddableConfig\": {\"vis\": {\"defaultColors\": {\"45% - 60%\": \"rgb(35,139,69)\", \"0% - 15%\": \"rgb(247,252,245)\", \"15% - 30%\": \"rgb(199,233,192)\", \"30% - 45%\": \"rgb(116,196,118)\"}}}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 0, \"i\": \"14\", \"w\": 48, \"y\": 32, \"h\": 24}}, {\"panelRefName\": \"panel_5\", \"panelIndex\": \"16\", \"embeddableConfig\": {\"vis\": {\"defaultColors\": {\"0 - 100\": \"rgb(0,104,55)\"}}}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 32, \"i\": \"16\", \"w\": 8, \"y\": 4, \"h\": 8}}, {\"panelRefName\": \"panel_6\", \"panelIndex\": \"17\", \"embeddableConfig\": {}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 40, \"i\": \"17\", \"w\": 8, \"y\": 4, \"h\": 8}}, {\"panelRefName\": \"panel_7\", \"panelIndex\": \"18\", \"embeddableConfig\": {}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 24, \"i\": \"18\", \"w\": 8, \"y\": 4, \"h\": 8}}, {\"panelRefName\": \"panel_8\", \"panelIndex\": \"19\", \"embeddableConfig\": {}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 16, \"i\": \"19\", \"w\": 8, \"y\": 4, \"h\": 8}}, {\"panelRefName\": \"panel_9\", \"panelIndex\": \"20\", \"embeddableConfig\": {}, \"version\": \"7.6.0\", \"gridData\": {\"x\": 8, \"i\": \"20\", \"w\": 8, \"y\": 4, \"h\": 8}}]",
                 "timeRestore": false,
-                "title": "Metricbeat System Overview",
+                "title": "Malcolm Sensor Resources - System Overview",
                 "version": 1
             },
             "id": "Metricbeat-system-overview-ecs",
@@ -82,7 +82,7 @@
                 "title": "System Navigation",
                 "uiStateJSON": "{}",
                 "version": 1,
-                "visState": "{\"aggs\": [], \"title\": \"System Navigation\", \"params\": {\"markdown\": \"[System Overview](#/dashboard/Metricbeat-system-overview-ecs)  | [Host Overview](#/dashboard/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs) |\\n[Containers overview](#/dashboard/CPU-slash-Memory-per-container-ecs)\", \"fontSize\": 12}, \"type\": \"markdown\"}"
+                "visState": "{\"aggs\": [], \"title\": \"System Navigation\", \"params\": {\"markdown\": \"[System Overview](#/dashboard/Metricbeat-system-overview-ecs)  | [Host Overview](#/dashboard/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs)\", \"fontSize\": 12}, \"type\": \"markdown\"}"
             },
             "id": "System-Navigation-ecs",
             "migrationVersion": {
