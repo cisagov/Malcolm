@@ -191,8 +191,8 @@ freshclam --stdout --quiet --no-warnings
 
 ###
 
-# tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat
-for BEAT in filebeat metricbeat auditbeat packetbeat; do
+# tweak some dashboards for, then install filebeat/metricbeat/auditbeat
+for BEAT in filebeat metricbeat auditbeat; do
   BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
   BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
   BEATS_NEW_DEB="$BEAT-tweaked-$BEATS_VER-amd64.deb"
@@ -211,24 +211,6 @@ for BEAT in filebeat metricbeat auditbeat packetbeat; do
     popd
 done
 
-# add symlinks to our custom dashboards
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/filebeat/kibana/7/dashboard-custom/* /usr/share/filebeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/metricbeat/kibana/7/dashboard-custom/* /usr/share/metricbeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/auditbeat/kibana/7/dashboard-custom/* /usr/share/auditbeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/packetbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/packetbeat/kibana/7/dashboard-custom/* /usr/share/packetbeat/kibana/7/dashboard/
-fi
-
 ###
 
 # set up capabilities for network-related tools
@@ -246,8 +228,6 @@ chown root:netdev /usr/bin/suricata && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata
 chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
-chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
 chown root:netdev /opt/arkime/bin/capture && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 

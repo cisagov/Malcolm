@@ -9,7 +9,7 @@
                 "title": "Event Actions [Auditbeat Auditd] ECS",
                 "uiStateJSON": "{}",
                 "version": 1,
-                "visState": "{\"title\": \"Event Actions [Auditbeat Auditd] ECS\", \"type\": \"metrics\", \"aggs\": [], \"params\": {\"gauge_color_rules\": [{\"id\": \"5d20a650-c1bd-11e7-938f-ab0645b6c431\"}], \"axis_position\": \"left\", \"axis_formatter\": \"number\", \"background_color_rules\": [{\"id\": \"58c95a20-c1bd-11e7-938f-ab0645b6c431\"}], \"gauge_width\": 10, \"index_pattern\": \"auditbeat-*\", \"filter\": \"event.module:auditd\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"show_legend\": 1, \"legend_position\": \"left\", \"series\": [{\"axis_position\": \"right\", \"metrics\": [{\"type\": \"count\", \"id\": \"6b9fb2d0-c1bc-11e7-938f-ab0645b6c431\"}], \"formatter\": \"number\", \"seperate_axis\": 0, \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"terms_field\": \"event.action\", \"chart_type\": \"line\", \"line_width\": 1, \"label\": \"Actions\", \"split_mode\": \"terms\", \"color\": \"#68BC00\", \"fill\": 0.5, \"point_size\": 1, \"stacked\": \"none\"}], \"gauge_style\": \"half\", \"time_field\": \"@timestamp\", \"bar_color_rules\": [{\"id\": \"5bfc71a0-c1bd-11e7-938f-ab0645b6c431\"}], \"show_grid\": 1, \"interval\": \"auto\", \"gauge_inner_width\": 10, \"type\": \"timeseries\"}}"
+                "visState": "{\"title\": \"Event Actions [Auditbeat Auditd] ECS\", \"type\": \"metrics\", \"aggs\": [], \"params\": {\"gauge_color_rules\": [{\"id\": \"5d20a650-c1bd-11e7-938f-ab0645b6c431\"}], \"axis_position\": \"left\", \"axis_formatter\": \"number\", \"background_color_rules\": [{\"id\": \"58c95a20-c1bd-11e7-938f-ab0645b6c431\"}], \"gauge_width\": 10, \"index_pattern\": \"malcolm_beats_*\", \"filter\": \"event.module:auditd\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"show_legend\": 1, \"legend_position\": \"left\", \"series\": [{\"axis_position\": \"right\", \"metrics\": [{\"type\": \"count\", \"id\": \"6b9fb2d0-c1bc-11e7-938f-ab0645b6c431\"}], \"formatter\": \"number\", \"seperate_axis\": 0, \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"terms_field\": \"event.action\", \"chart_type\": \"line\", \"line_width\": 1, \"label\": \"Actions\", \"split_mode\": \"terms\", \"color\": \"#68BC00\", \"fill\": 0.5, \"point_size\": 1, \"stacked\": \"none\"}], \"gauge_style\": \"half\", \"time_field\": \"@timestamp\", \"bar_color_rules\": [{\"id\": \"5bfc71a0-c1bd-11e7-938f-ab0645b6c431\"}], \"show_grid\": 1, \"interval\": \"auto\", \"gauge_inner_width\": 10, \"type\": \"timeseries\"}}"
             },
             "id": "97680df0-c1c0-11e7-8995-936807a28b16-ecs",
             "type": "visualization",
@@ -20,7 +20,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "0f10c430-c1c3-11e7-8995-936807a28b16-ecs",
                 "title": "Event Categories [Auditbeat Auditd] ECS",
@@ -49,7 +49,7 @@
                 "description": "",
                 "hits": 0,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [{\"meta\": {\"value\": \"auditd\", \"params\": {\"type\": \"phrase\", \"query\": \"auditd\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"auditbeat-*\", \"key\": \"event.module\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.module\": {\"type\": \"phrase\", \"query\": \"auditd\"}}}}], \"version\": true, \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [{\"meta\": {\"value\": \"auditd\", \"params\": {\"type\": \"phrase\", \"query\": \"auditd\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"malcolm_beats_*\", \"key\": \"event.module\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.module\": {\"type\": \"phrase\", \"query\": \"auditd\"}}}}], \"version\": true, \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "sort": [
                     "@timestamp",
