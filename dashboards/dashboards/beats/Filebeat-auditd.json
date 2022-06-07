@@ -4,7 +4,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"filebeat-*\"}"
+                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"malcolm_beats_*\"}"
                 },
                 "title": "Event types breakdown [Filebeat Auditd] ECS",
                 "uiStateJSON": "{}",
@@ -19,7 +19,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"query\": {\"query\": \"event.action:EXECVE\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"filebeat-*\"}"
+                    "searchSourceJSON": "{\"query\": {\"query\": \"event.action:EXECVE\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"malcolm_beats_*\"}"
                 },
                 "title": "Top Exec Commands [Filebeat Auditd] ECS",
                 "uiStateJSON": "{\"vis\": {\"params\": {\"sort\": {\"direction\": null, \"columnIndex\": null}}}}",
@@ -49,7 +49,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"filebeat-*\"}"
+                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"malcolm_beats_*\"}"
                 },
                 "title": "Event Address Geo Location [Filebeat Auditd] ECS",
                 "uiStateJSON": "{}",
@@ -64,7 +64,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"filebeat-*\"}"
+                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"index\": \"malcolm_beats_*\"}"
                 },
                 "title": "Event Account Tag Cloud [Filebeat Auditd] ECS",
                 "uiStateJSON": "{}",
@@ -85,7 +85,7 @@
                 "description": "",
                 "hits": 0,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"query\": {\"query\": \"event.dataset:auditd.log\", \"language\": \"kuery\"}, \"filter\": [], \"version\": true, \"index\": \"filebeat-*\", \"highlightAll\": true}"
+                    "searchSourceJSON": "{\"query\": {\"query\": \"event.dataset:auditd.log\", \"language\": \"kuery\"}, \"filter\": [], \"version\": true, \"index\": \"malcolm_beats_*\", \"highlightAll\": true}"
                 },
                 "sort": [
                     "@timestamp",

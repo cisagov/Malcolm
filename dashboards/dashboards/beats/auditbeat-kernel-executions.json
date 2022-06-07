@@ -21,7 +21,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "title": "Primary Username Tag Cloud [Auditbeat Auditd] ECS",
                 "uiStateJSON": "{}",
@@ -62,7 +62,7 @@
                 "description": "",
                 "hits": 0,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [{\"meta\": {\"value\": \"auditd\", \"params\": {\"type\": \"phrase\", \"query\": \"auditd\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"auditbeat-*\", \"key\": \"event.module\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.module\": {\"type\": \"phrase\", \"query\": \"auditd\"}}}}, {\"meta\": {\"value\": \"executed\", \"params\": {\"type\": \"phrase\", \"query\": \"executed\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"auditbeat-*\", \"key\": \"event.action\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.action\": {\"type\": \"phrase\", \"query\": \"executed\"}}}}], \"version\": true, \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [{\"meta\": {\"value\": \"auditd\", \"params\": {\"type\": \"phrase\", \"query\": \"auditd\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"malcolm_beats_*\", \"key\": \"event.module\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.module\": {\"type\": \"phrase\", \"query\": \"auditd\"}}}}, {\"meta\": {\"value\": \"executed\", \"params\": {\"type\": \"phrase\", \"query\": \"executed\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"malcolm_beats_*\", \"key\": \"event.action\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.action\": {\"type\": \"phrase\", \"query\": \"executed\"}}}}], \"version\": true, \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "sort": [
                     "@timestamp",

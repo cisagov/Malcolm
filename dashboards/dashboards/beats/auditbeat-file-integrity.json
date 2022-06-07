@@ -4,7 +4,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Actions [Auditbeat File Integrity] ECS",
@@ -21,7 +21,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Events Over Time [Auditbeat File Integrity] ECS",
@@ -38,7 +38,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Top owners [Auditbeat File Integrity] ECS",
@@ -55,7 +55,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Top groups [Auditbeat File Integrity] ECS",
@@ -72,7 +72,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"event.action:updated OR event.action:attributes_modified\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"event.action:updated OR event.action:attributes_modified\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Top updated [Auditbeat File Integrity] ECS",
@@ -89,7 +89,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"lucene\", \"query\": \"file.mode:/0..[2367]/ NOT file.type:symlink\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"lucene\", \"query\": \"file.mode:/0..[2367]/ NOT file.type:symlink\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "World Writable File Count [Auditbeat File Integrity] ECS",
@@ -106,7 +106,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [{\"meta\": {\"value\": \"file\", \"params\": {\"type\": \"phrase\", \"query\": \"file\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"auditbeat-*\", \"key\": \"file.type\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"file.type\": {\"type\": \"phrase\", \"query\": \"file\"}}}}], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [{\"meta\": {\"value\": \"file\", \"params\": {\"type\": \"phrase\", \"query\": \"file\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"malcolm_beats_*\", \"key\": \"file.type\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"file.type\": {\"type\": \"phrase\", \"query\": \"file\"}}}}], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Most changed file by count [Auditbeat File Integrity] ECS",
@@ -123,7 +123,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Most common mode by count [Auditbeat File Integrity] ECS",
@@ -140,7 +140,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "File Event Summary By Host [Auditbeat File Integrity] ECS",
@@ -157,7 +157,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"event.action:deleted\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"event.action:deleted\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Top deleted [Auditbeat File Integrity] ECS",
@@ -174,7 +174,7 @@
             "attributes": {
                 "description": "",
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"event.action:created\"}}"
+                    "searchSourceJSON": "{\"filter\": [], \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"event.action:created\"}}"
                 },
                 "savedSearchId": "a380a060-cb44-11e7-9835-2f31fe08873b-ecs",
                 "title": "Top created [Auditbeat File Integrity] ECS",
@@ -196,7 +196,7 @@
                 "description": "",
                 "hits": 0,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [{\"meta\": {\"value\": \"file_integrity\", \"params\": {\"type\": \"phrase\", \"query\": \"file_integrity\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"auditbeat-*\", \"key\": \"event.module\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.module\": {\"type\": \"phrase\", \"query\": \"file_integrity\"}}}}], \"version\": true, \"index\": \"auditbeat-*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
+                    "searchSourceJSON": "{\"highlightAll\": true, \"filter\": [{\"meta\": {\"value\": \"file_integrity\", \"params\": {\"type\": \"phrase\", \"query\": \"file_integrity\"}, \"negate\": false, \"disabled\": false, \"alias\": null, \"type\": \"phrase\", \"index\": \"malcolm_beats_*\", \"key\": \"event.module\"}, \"$state\": {\"store\": \"appState\"}, \"query\": {\"match\": {\"event.module\": {\"type\": \"phrase\", \"query\": \"file_integrity\"}}}}], \"version\": true, \"index\": \"malcolm_beats_*\", \"query\": {\"language\": \"kuery\", \"query\": \"\"}}"
                 },
                 "sort": [
                     "@timestamp",
