@@ -91,7 +91,7 @@
     },
     {
       "attributes": {
-        "description": "",
+        "description": "Malcolm sensor hardware component temperature summary",
         "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
@@ -99,7 +99,7 @@
         "optionsJSON": "{\"darkTheme\":true,\"hidePanelTitles\":false,\"useMargins\":false}",
         "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":31,\"w\":48,\"h\":35,\"i\":\"1\"},\"id\":\"752a7e30-03af-11e9-bf7f-6138c205dfb3\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.5.3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":20,\"h\":11,\"i\":\"2\"},\"id\":\"293d13a0-03c5-11e9-b42b-a7822d24ca20\",\"panelIndex\":\"2\",\"title\":\"Sensor Filter\",\"type\":\"visualization\",\"version\":\"6.5.3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":66,\"w\":48,\"h\":29,\"i\":\"3\"},\"id\":\"65345580-03c5-11e9-b42b-a7822d24ca20\",\"panelIndex\":\"3\",\"title\":\"Sensor Metrics\",\"type\":\"search\",\"version\":\"6.5.3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":11,\"w\":20,\"h\":20,\"i\":\"4\"},\"id\":\"db628ba0-03c5-11e9-b42b-a7822d24ca20\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"6.5.3\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":20,\"y\":0,\"w\":28,\"h\":31,\"i\":\"5\"},\"id\":\"923c3ce0-03c6-11e9-b42b-a7822d24ca20\",\"panelIndex\":\"5\",\"type\":\"visualization\",\"version\":\"6.5.3\"}]",
         "timeRestore": false,
-        "title": "Sensor Temperature dashboard",
+        "title": "Malcolm Sensor Temperature Summary",
         "version": 1
       },
       "id": "3c519150-03c5-11e9-b42b-a7822d24ca20",

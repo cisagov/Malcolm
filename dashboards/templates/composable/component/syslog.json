@@ -2,6 +2,14 @@
   "template": {
     "mappings": {
       "properties": {
+        "process": {
+          "properties": {
+            "program": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
         "syslog": {
           "properties": {
             "facility": {
