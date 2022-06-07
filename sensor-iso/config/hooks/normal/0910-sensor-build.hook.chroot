@@ -191,23 +191,15 @@ freshclam --stdout --quiet --no-warnings
 
 ###
 
-# tweak some dashboards for, then install filebeat/metricbeat/auditbeat
+# install filebeat/metricbeat/auditbeat
 for BEAT in filebeat metricbeat auditbeat; do
   BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
   BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
-  BEATS_NEW_DEB="$BEAT-tweaked-$BEATS_VER-amd64.deb"
-  BEATS_TMP_DIR="$BEAT-deb"
   pushd /tmp && \
     curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
-    dpkg-deb -x "$BEATS_DEB" "$BEATS_TMP_DIR" && \
-    dpkg-deb -e "$BEATS_DEB" "$BEATS_TMP_DIR/DEBIAN" && \
-    ( [[ "$BEAT" == "metricbeat" ]] && sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/* || true ) && \
-    pushd "$BEATS_TMP_DIR" && ( rm -f DEBIAN/md5sums && find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -l -0 md5sum >> DEBIAN/md5sums ) && popd && \
-    dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
-    rm -rf "$BEATS_TMP_DIR" && \
-    dpkg -i "$BEATS_NEW_DEB" && \
-    cp "$BEATS_NEW_DEB" /opt/hedgehog_install_artifacts/ && \
-    rm -rf "$BEATS_TMP_DIR" "$BEATS_DEB" "$BEATS_NEW_DEB" && \
+    dpkg -i "$BEATS_DEB" && \
+    cp "$BEATS_DEB" /opt/hedgehog_install_artifacts/ && \
+    rm -rf "$BEATS_DEB" && \
     popd
 done
 
