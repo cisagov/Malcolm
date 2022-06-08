@@ -1,0 +1,31 @@
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "destination.geo.country_code2": { "type": "keyword" },
+        "destination.geo.country_code3": { "type": "keyword" },
+        "destination.geo.dma_code": { "type": "short" },
+        "destination.geo.ip": { "type": "ip" },
+        "destination.geo.latitude": { "type": "float" },
+        "destination.geo.location": { "type": "geo_point" },
+        "destination.geo.longitude": { "type": "float" },
+        "dns.host": { "type": "keyword" },
+        "firstPacket": { "type": "date" },
+        "lastPacket": { "type": "date" },
+        "node": { "type": "keyword" },
+        "protocol": { "type": "keyword" },
+        "quic.host": { "type": "keyword" },
+        "quic.version": { "type": "keyword" },
+        "source.geo.country_code2": { "type": "keyword" },
+        "source.geo.country_code3": { "type": "keyword" },
+        "source.geo.dma_code": { "type": "short" },
+        "source.geo.ip": { "type": "ip" },
+        "source.geo.latitude": { "type": "float" },
+        "source.geo.location": { "type": "geo_point" },
+        "source.geo.longitude": { "type": "float" },
+        "timestamp": { "type": "date" },
+        "user": { "type": "keyword" }
+      }
+    }
+  }
+}
