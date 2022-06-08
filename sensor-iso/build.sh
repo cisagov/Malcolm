@@ -107,6 +107,10 @@ if [ -d "$WORKDIR" ]; then
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
   echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
 
+  # environment variables to pass into chroot
+  [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
+    cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
+
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
   pushd "$SCRIPT_PATH/arkime/etc"

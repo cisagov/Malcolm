@@ -137,6 +137,10 @@ if [ -d "$WORKDIR" ]; then
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> "$MALCOLM_DEST_DIR"/.os-info
   echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
 
+  # environment variables to pass into chroot
+  [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
+    cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
+
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/

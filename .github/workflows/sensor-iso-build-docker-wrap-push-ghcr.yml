@@ -91,6 +91,7 @@ jobs:
           pushd ./sensor-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
           sudo /usr/bin/env bash ./build.sh
           rm -rf ./shared/
           sudo chmod 644 ./hedgehog-*.*
