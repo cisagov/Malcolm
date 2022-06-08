@@ -1,14 +1,13 @@
 protologbeat:
   address: "127.0.0.1"
   port: ${MISCBEAT_PORT:9516}
-  protocol: tcp
+  protocol: "tcp"
   json_mode: true
   merge_fields_to_root: true
+  fields_parent: "miscbeat"
   max_msg_size: 16384
 
 #================================ General ======================================
-fields_under_root: true
-
 processors:
   - add_tags:
       tags: [_malcolm_beats, _malcolm_miscbeat]

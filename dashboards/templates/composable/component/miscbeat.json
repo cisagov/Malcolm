@@ -2,11 +2,15 @@
   "template": {
     "mappings": {
       "properties": {
-        "fluentbit": {
+        "miscbeat": {
           "properties": {
-            "input": {
-              "ignore_above": 1024,
-              "type": "keyword"
+            "fluentbit": {
+              "properties": {
+                "input": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         }
