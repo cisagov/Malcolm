@@ -1,14 +1,13 @@
 protologbeat:
   address: "127.0.0.1"
   port: ${HEATBEAT_PORT:9515}
-  protocol: udp
+  protocol: "udp"
   json_mode: true
-  merge_fields_to_root: true
+  merge_fields_to_root: false
+  fields_parent: "heatbeat"
   max_msg_size: 8192
 
 #================================ General ======================================
-fields_under_root: true
-
 processors:
   - add_tags:
       tags: [_malcolm_beats, _malcolm_heatbeat]
