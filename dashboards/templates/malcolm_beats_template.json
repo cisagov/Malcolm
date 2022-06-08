@@ -23,6 +23,7 @@
     "ecs_user_agent",
     "custom_auditd",
     "custom_heatbeat",
+    "custom_miscbeat",
     "custom_syslog",
     "custom_system"
   ],

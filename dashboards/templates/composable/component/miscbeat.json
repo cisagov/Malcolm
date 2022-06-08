@@ -1,0 +1,16 @@
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "fluentbit": {
+          "properties": {
+            "input": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
