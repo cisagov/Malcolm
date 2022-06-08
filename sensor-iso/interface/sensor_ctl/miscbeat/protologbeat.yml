@@ -1,18 +1,18 @@
 protologbeat:
   address: "127.0.0.1"
-  port: ${HEATBEAT_PORT:9515}
-  protocol: udp
+  port: ${MISCBEAT_PORT:9516}
+  protocol: tcp
   json_mode: true
   merge_fields_to_root: true
-  max_msg_size: 8192
-  default_es_log_type: heatbeat
+  max_msg_size: 16384
+  default_es_log_type: miscbeat
 
 #================================ General ======================================
 fields_under_root: true
 
 processors:
   - add_tags:
-      tags: [_malcolm_beats, _malcolm_heatbeat]
+      tags: [_malcolm_beats, _malcolm_miscbeat]
 
 #================================ Outputs ======================================
 
