@@ -5,7 +5,6 @@ protologbeat:
   json_mode: true
   merge_fields_to_root: true
   max_msg_size: 8192
-  default_es_log_type: heatbeat
 
 #================================ General ======================================
 fields_under_root: true
