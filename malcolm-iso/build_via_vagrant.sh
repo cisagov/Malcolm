@@ -29,6 +29,10 @@ function vm_execute() {
   vagrant ssh --no-tty --command "$1"
 }
 
+function cleanup_shared {
+  rm -rf "$SCRIPT_PATH"/shared
+}
+
 pushd "$SCRIPT_PATH"/vagrant
 
 VM_NAME="$(grep "config.vm.box" Vagrantfile | tr -d "[:space:]" | sed "s/.*=//")"
@@ -59,6 +63,12 @@ until vm_execute 'sudo whoami' | grep -q "root" ; do
   sleep 1
 done
 echo "SSH available." >&2
+
+# pass a few things across to the vagrant environment in a "shared" directory (and clean it up when done)
+cleanup_shared
+mkdir -p "$SCRIPT_PATH"/shared
+[[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
+trap cleanup_shared EXIT
 
 if [[ -r "$DOCKER_IMAGES_TGZ" ]]; then
   DOCKER_IMAGES_LOCAL="$SCRIPT_PATH/../$(basename "$DOCKER_IMAGES_TGZ")"
