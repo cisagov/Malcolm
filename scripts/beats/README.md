@@ -1,3 +1,5 @@
+NOTE: Now that Malcolm uses OpenSearch instead of ElasticSearch, the information in this document is out-of-date. A similar outcome can be achieved by forwarding to Logstash (which Malcolm still uses, for now).
+
 # Using Beats to forward host logs to Malcolm
 
 Because Malcolm uses components of the open source data analysis platform [Elastic Stack](https://www.elastic.co/elastic-stack), it can accept various host logs sent from [Beats](https://www.elastic.co/beats/#the-beats-family), Elastic Stack's lightweight data shippers. These Beats generally include prebuilt Kibana dashboards for each of their respective data sets.
