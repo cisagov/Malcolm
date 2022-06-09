@@ -4,13 +4,51 @@
       "properties": {
         "miscbeat": {
           "properties": {
-            "fluentbit": {
-              "properties": {
-                "input": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
+            "Mem.free": {
+                "type": "long"
+            },
+            "Mem.total": {
+                "type": "long"
+            },
+            "Mem.used": {
+                "type": "long"
+            },
+            "Mem.used_p": {
+                "type": "float"
+            },
+            "Swap.free": {
+                "type": "long"
+            },
+            "Swap.total": {
+                "type": "long"
+            },
+            "Swap.used": {
+                "type": "long"
+            },
+            "date": {
+                "type": "date"
+            },
+            "cpu_p": {
+                "type": "float"
+            },
+            "exec": {
+                "type": "keyword",
+                "ignore_above": 1024
+            },
+            "module": {
+                "type": "keyword"
+            },
+            "read_size": {
+                "type": "long"
+            },
+            "system_p": {
+                "type": "float"
+            },
+            "user_p": {
+                "type": "float"
+            },
+            "write_size": {
+                "type": "long"
             }
           }
         }
