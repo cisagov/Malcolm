@@ -1,0 +1,212 @@
+{
+  "version": "2.0.0",
+  "objects": [
+    {
+      "id": "db0312a0-e842-11ec-88e0-67bf497b7120",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-09T23:00:39.461Z",
+      "version": "WzkyMywxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Syslog",
+        "hits": 0,
+        "description": "Syslog logs from Malcolm sensors",
+        "panelsJSON": "[{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":9,\"h\":19,\"i\":\"e1d6d345-c417-4f95-8907-17806a08cc34\"},\"panelIndex\":\"e1d6d345-c417-4f95-8907-17806a08cc34\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":9,\"y\":0,\"w\":9,\"h\":19,\"i\":\"ec19724f-f84a-4dde-acff-f539df5afef4\"},\"panelIndex\":\"ec19724f-f84a-4dde-acff-f539df5afef4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":15,\"h\":19,\"i\":\"ff1d5bec-24fd-43b1-8a7b-e1b6942aa306\"},\"panelIndex\":\"ff1d5bec-24fd-43b1-8a7b-e1b6942aa306\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":33,\"y\":0,\"w\":15,\"h\":19,\"i\":\"6874104c-2a3e-432f-9cf1-3324dce134c9\"},\"panelIndex\":\"6874104c-2a3e-432f-9cf1-3324dce134c9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":19,\"w\":48,\"h\":19,\"i\":\"f8d075cc-f2fc-4da7-8c0b-c1e691386eaf\"},\"panelIndex\":\"f8d075cc-f2fc-4da7-8c0b-c1e691386eaf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "visualization",
+          "id": "6ccdb970-e842-11ec-88e0-67bf497b7120"
+        },
+        {
+          "name": "panel_1",
+          "type": "visualization",
+          "id": "a6549790-e842-11ec-88e0-67bf497b7120"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "42bd0a50-e847-11ec-8b84-87a2d75f23b1"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "8e4a7890-e847-11ec-8b84-87a2d75f23b1"
+        },
+        {
+          "name": "panel_4",
+          "type": "search",
+          "id": "37139ac0-e842-11ec-88e0-67bf497b7120"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "6ccdb970-e842-11ec-88e0-67bf497b7120",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-09T22:51:27.963Z",
+      "version": "WzkxMywxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Syslog - Host",
+        "visState": "{\"title\":\"Malcolm Sensor Syslog - Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"log.syslog.hostname\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "37139ac0-e842-11ec-88e0-67bf497b7120"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "a6549790-e842-11ec-88e0-67bf497b7120",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-09T22:51:27.963Z",
+      "version": "WzkxNCwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Syslog - Program",
+        "visState": "{\"title\":\"Malcolm Sensor Syslog - Program\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"log.syslog.appname\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Program\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "37139ac0-e842-11ec-88e0-67bf497b7120"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "42bd0a50-e847-11ec-8b84-87a2d75f23b1",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-09T22:55:30.164Z",
+      "version": "WzkyMSwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Syslog - Severity",
+        "visState": "{\"title\":\"Malcolm Sensor Syslog - Severity\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"log.syslog.severity.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":8,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "37139ac0-e842-11ec-88e0-67bf497b7120"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "8e4a7890-e847-11ec-8b84-87a2d75f23b1",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-09T22:57:36.921Z",
+      "version": "WzkyMiwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Syslog - Facility",
+        "visState": "{\"title\":\"Malcolm Sensor Syslog - Facility\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"log.syslog.facility.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Facility\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"log.syslog.facility.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Facility\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "37139ac0-e842-11ec-88e0-67bf497b7120"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "37139ac0-e842-11ec-88e0-67bf497b7120",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-09T22:51:27.963Z",
+      "version": "WzkxNSwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Syslog - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "log.syslog.hostname",
+          "log.syslog.severity.name",
+          "log.syslog.facility.name",
+          "log.syslog.appname",
+          "event.original"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"log.syslog:*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    }
+  ]
+}

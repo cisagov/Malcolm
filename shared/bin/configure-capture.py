@@ -58,14 +58,12 @@ class Constants:
     AUDITBEAT = 'auditbeat'
     HEATBEAT = 'heatbeat'  # protologbeat to log temperature and other misc. stuff
     MISCBEAT = 'miscbeat'  # protologbeat to log from fluent-bit as we investigate that tool
-    SYSLOGBEAT = 'filebeat-syslog'  # another filebeat instance for syslog
     ARKIMECAP = 'arkime-capture'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
         METRICBEAT: f'/opt/sensor/sensor_ctl/{METRICBEAT}',
         AUDITBEAT: f'/opt/sensor/sensor_ctl/{AUDITBEAT}',
-        SYSLOGBEAT: f'/opt/sensor/sensor_ctl/{SYSLOGBEAT}',
         HEATBEAT: f'/opt/sensor/sensor_ctl/{HEATBEAT}',
         MISCBEAT: f'/opt/sensor/sensor_ctl/{MISCBEAT}',
     }
@@ -74,12 +72,11 @@ class Constants:
         FILEBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[FILEBEAT]}" --path.config "{BEAT_DIR[FILEBEAT]}" --path.data "{BEAT_DIR[FILEBEAT]}/data" --path.logs "{BEAT_DIR[FILEBEAT]}/logs" -c "{BEAT_DIR[FILEBEAT]}/{FILEBEAT}.yml"',
         METRICBEAT: f'{METRICBEAT} --path.home "{BEAT_DIR[METRICBEAT]}" --path.config "{BEAT_DIR[METRICBEAT]}" --path.data "{BEAT_DIR[METRICBEAT]}/data" --path.logs "{BEAT_DIR[METRICBEAT]}/logs" -c "{BEAT_DIR[METRICBEAT]}/{METRICBEAT}.yml"',
         AUDITBEAT: f'{AUDITBEAT} --path.home "{BEAT_DIR[AUDITBEAT]}" --path.config "{BEAT_DIR[AUDITBEAT]}" --path.data "{BEAT_DIR[AUDITBEAT]}/data" --path.logs "{BEAT_DIR[AUDITBEAT]}/logs" -c "{BEAT_DIR[AUDITBEAT]}/{AUDITBEAT}.yml"',
-        SYSLOGBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[SYSLOGBEAT]}" --path.config "{BEAT_DIR[SYSLOGBEAT]}" --path.data "{BEAT_DIR[SYSLOGBEAT]}/data" --path.logs "{BEAT_DIR[SYSLOGBEAT]}/logs" -c "{BEAT_DIR[SYSLOGBEAT]}/{SYSLOGBEAT}.yml"',
         HEATBEAT: f'protologbeat --path.home "{BEAT_DIR[HEATBEAT]}" --path.config "{BEAT_DIR[HEATBEAT]}" --path.data "{BEAT_DIR[HEATBEAT]}/data" --path.logs "{BEAT_DIR[HEATBEAT]}/logs" -c "{BEAT_DIR[HEATBEAT]}/protologbeat.yml"',
         MISCBEAT: f'protologbeat --path.home "{BEAT_DIR[MISCBEAT]}" --path.config "{BEAT_DIR[MISCBEAT]}" --path.data "{BEAT_DIR[MISCBEAT]}/data" --path.logs "{BEAT_DIR[MISCBEAT]}/logs" -c "{BEAT_DIR[MISCBEAT]}/protologbeat.yml"',
     }
 
-    # specific to beats forwarded to logstash (eg., filebeat, metricbeat, auditbeat, filebeat-syslog)
+    # specific to beats forwarded to logstash (eg., filebeat, metricbeat, auditbeat, etc.)
     BEAT_LS_HOST = 'BEAT_LS_HOST'
     BEAT_LS_PORT = 'BEAT_LS_PORT'
     BEAT_LS_SSL = 'BEAT_LS_SSL'
@@ -124,7 +121,6 @@ class Constants:
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
     MSG_CONFIG_METRICBEAT = (f'{METRICBEAT}', f'Configure resource metrics forwarding via {METRICBEAT}')
     MSG_CONFIG_AUDITBEAT = (f'{AUDITBEAT}', f'Configure audit log forwarding via {AUDITBEAT}')
-    MSG_CONFIG_SYSLOGBEAT = (f'{SYSLOGBEAT}', f'Configure syslog forwarding via {FILEBEAT}')
     MSG_CONFIG_HEATBEAT = (f'{HEATBEAT}', f'Configure hardware metrics (temperature, etc.) forwarding via protologbeat')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f'Configure miscellaneous log forwarding via protologbeat')
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
@@ -807,7 +803,6 @@ def main():
                         Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_METRICBEAT,
                         Constants.MSG_CONFIG_AUDITBEAT,
-                        Constants.MSG_CONFIG_SYSLOGBEAT,
                         Constants.MSG_CONFIG_HEATBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
                     ],
@@ -900,7 +895,6 @@ def main():
                     (fwd_mode == Constants.FILEBEAT)
                     or (fwd_mode == Constants.METRICBEAT)
                     or (fwd_mode == Constants.AUDITBEAT)
-                    or (fwd_mode == Constants.SYSLOGBEAT)
                     or (fwd_mode == Constants.HEATBEAT)
                     or (fwd_mode == Constants.MISCBEAT)
                 ):

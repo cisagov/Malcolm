@@ -1,3 +1,5 @@
+TODO: update for beats replaced by fluentd
+
 # Hedgehog Linux 
 ## Network Traffic Capture Appliance
 
@@ -32,7 +34,6 @@ Hedgehog Linux is a Debian-based operating system built to
             * [arkime-capture](#arkime-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
             * [auditbeat](#auditbeat): audit log forwarding
-            * [filebeat-syslog](#syslogbeat): syslog forwarding
             * [heatbeat](#heatbeat): temperature forwarding
         + [Autostart services](#ConfigAutostart)
         + [Zeek Intelligence Framework](#ZeekIntel)
@@ -297,12 +298,6 @@ The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to 
 
 The sensor implements STIG (Security Technical Implementation Guidelines) rules according to DISA RHEL 7 STIG V1 R1, ported to a Debian 9 base platform. Enabling audit log forwarding via auditbeat is required to satisfy the requirements regarding forwarding audit logs to a remote log server as defined in that specification.
 
-### <a name="syslogbeat"></a>filebeat-syslog: syslog forwarding
-
-The sensor uses [filebeat's syslog input](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) to forward the sensor's system logs to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
-
-Enabling syslog forwarding via filebeat is required to satisfy the STIG requirements regarding sending system logs to a remote log server as defined in that specification.
-
 ### <a name="heatbeat"></a>heatbeat: temperature forwarding
 
 The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
@@ -325,7 +320,6 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
 * **AUTOSTART_SURICATA** - [Suricata](https://suricata.io/) traffic analysis engine
 * **AUTOSTART_SURICATA_UPDATES** - Rule update service for Suricata (requires sensor to be connected to the internet)
-* **AUTOSTART_SYSLOGBEAT** – filebeat [system log forwarder](#syslogbeat)
 * *AUTOSTART_TCPDUMP* – [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_ZEEK** – [Zeek](https://www.zeek.org/) traffic analysis engine
 
@@ -352,7 +346,6 @@ beats:filebeat                   RUNNING   pid 14460, uptime 8 days, 20:22:32
 beats:heatbeat                   RUNNING   pid 14481, uptime 8 days, 20:22:32
 beats:metricbeat                 RUNNING   pid 14476, uptime 8 days, 20:22:32
 beats:sensors                    RUNNING   pid 14484, uptime 8 days, 20:22:32
-beats:syslogbeat                 RUNNING   pid 14471, uptime 8 days, 20:22:32
 clamav:clamav-service            RUNNING   pid 14454, uptime 8 days, 20:22:32
 clamav:clamav-updates            RUNNING   pid 14450, uptime 8 days, 20:22:32
 arkime:arkime-capture            RUNNING   pid 14432, uptime 8 days, 20:22:32
