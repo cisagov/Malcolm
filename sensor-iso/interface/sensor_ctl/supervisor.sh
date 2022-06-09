@@ -17,7 +17,9 @@ function join_by { local IFS="$1"; shift; echo "$*"; }
 # we can use load balancing
 function CreateCaptureConfigs() {
 
-  declare -a CAPTURE_PROGS=("tcpdump" "netsniff")
+  # fluentbit's netif module isn't really a capture program, but it does monitor an invididual interface
+  # in a similar way, so we'll handle it here with these
+  declare -a CAPTURE_PROGS=("tcpdump" "netsniff" "fluentbit-netif")
 
   if [[ -d ./"$CONFIG_DIR" ]]; then
     rm -f ./"$CONFIG_DIR"/"$CAPTURE_GROUPS_FILE"

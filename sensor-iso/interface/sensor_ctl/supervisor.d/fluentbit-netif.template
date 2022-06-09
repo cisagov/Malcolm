@@ -1,0 +1,14 @@
+[program:fluentbit-netif-$IFACE]
+command=/opt/fluent-bit/bin/fluent-bit
+  -i netif
+  -p interface=$IFACE
+  -p Interval_Sec=%(ENV_FLUENTBIT_METRIC_INTERVAL)s
+  -o tcp://localhost:%(ENV_MISCBEAT_PORT)s
+  -p format=json_lines
+  -F record_modifier -p "Record=module netif" -m '*'
+  -f 1
+startsecs=20
+startretries=3
+stopasgroup=true
+killasgroup=true
+autostart=%(ENV_AUTOSTART_FLUENTBIT_METRIC)s
