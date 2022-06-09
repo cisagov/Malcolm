@@ -4,52 +4,26 @@
       "properties": {
         "miscbeat": {
           "properties": {
-            "Mem.free": {
-                "type": "long"
-            },
-            "Mem.total": {
-                "type": "long"
-            },
-            "Mem.used": {
-                "type": "long"
-            },
-            "Mem.used_p": {
-                "type": "float"
-            },
-            "Swap.free": {
-                "type": "long"
-            },
-            "Swap.total": {
-                "type": "long"
-            },
-            "Swap.used": {
-                "type": "long"
-            },
-            "date": {
-                "type": "date"
-            },
-            "cpu_p": {
-                "type": "float"
-            },
-            "exec": {
-                "type": "keyword",
-                "ignore_above": 1024
-            },
-            "module": {
-                "type": "keyword"
-            },
-            "read_size": {
-                "type": "long"
-            },
-            "system_p": {
-                "type": "float"
-            },
-            "user_p": {
-                "type": "float"
-            },
-            "write_size": {
-                "type": "long"
-            }
+            "cpu_p": { "type": "float" },
+            "date": { "type": "date" },
+            "exec": { "type": "keyword", "ignore_above": 1024 },
+            "host": { "type": "keyword" },
+            "ident": { "type": "keyword" },
+            "Mem.free": { "type": "long" },
+            "Mem.total": { "type": "long" },
+            "Mem.used": { "type": "long" },
+            "Mem.used_p": { "type": "float" },
+            "message": { "type": "keyword", "ignore_above": 1024 },
+            "module": { "type": "keyword" },
+            "pid": { "type": "integer" },
+            "pri": { "type": "long" },
+            "read_size": { "type": "long" },
+            "Swap.free": { "type": "long" },
+            "Swap.total": { "type": "long" },
+            "Swap.used": { "type": "long" },
+            "system_p": { "type": "float" },
+            "user_p": { "type": "float" },
+            "write_size": { "type": "long" }
           }
         }
       }
