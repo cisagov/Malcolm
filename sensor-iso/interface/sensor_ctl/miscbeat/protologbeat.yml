@@ -3,7 +3,7 @@ protologbeat:
   port: ${MISCBEAT_PORT:9516}
   protocol: "tcp"
   json_mode: true
-  merge_fields_to_root: true
+  merge_fields_to_root: false
   fields_parent: "miscbeat"
   max_msg_size: 16384
 
