@@ -11,4 +11,4 @@ startsecs=20
 startretries=3
 stopasgroup=true
 killasgroup=true
-autostart=%(ENV_AUTOSTART_FLUENTBIT_METRIC)s
+autostart=%(ENV_AUTOSTART_FLUENTBIT_NETIF)s
