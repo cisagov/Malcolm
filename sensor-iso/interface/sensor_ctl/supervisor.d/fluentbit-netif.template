@@ -2,9 +2,10 @@
 command=/opt/fluent-bit/bin/fluent-bit
   -i netif
   -p interface=$IFACE
-  -p Interval_Sec=%(ENV_FLUENTBIT_METRIC_INTERVAL)s
+  -p Interval_Sec=%(ENV_FLUENTBIT_METRICS_INTERVAL)s
   -o tcp://localhost:%(ENV_MISCBEAT_PORT)s
   -p format=json_lines
+  -F nest -p Operation=nest -p Nested_under=netif -p WildCard='*' -m '*'
   -F record_modifier -p "Record=module netif" -m '*'
   -f 1
 startsecs=20

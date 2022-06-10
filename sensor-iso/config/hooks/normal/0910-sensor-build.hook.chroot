@@ -111,7 +111,7 @@ EOF
 
 # set up default zeek local policy
 cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/zeek/site/
-mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP
+mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP /opt/sensor/sensor_ctl/fluentbit
 touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
 [[ -f /usr/local/bin/zeek_intel_setup.sh ]] && mv /usr/local/bin/zeek_intel_setup.sh "${ZEEK_DIR}"/bin/
 [[ -f /usr/local/bin/zeek_intel_from_threat_feed.py ]] && mv /usr/local/bin/zeek*threat*.py "${ZEEK_DIR}"/bin/
@@ -205,8 +205,8 @@ freshclam --stdout --quiet --no-warnings
 
 ###
 
-# install filebeat/metricbeat/auditbeat
-for BEAT in filebeat metricbeat auditbeat; do
+# install filebeat/metricbeat
+for BEAT in filebeat metricbeat; do
   BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
   BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
   pushd /tmp && \
@@ -232,8 +232,6 @@ chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 chown root:netdev /usr/bin/suricata && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata
-chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
-  setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
 chown root:netdev /opt/arkime/bin/capture && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 

@@ -4,22 +4,43 @@
       "properties": {
         "miscbeat": {
           "properties": {
-            "cpu_p": { "type": "float" },
-            "date": { "type": "date" },
             "exec": { "type": "keyword", "ignore_above": 1024 },
-            "Mem.free": { "type": "long" },
-            "Mem.total": { "type": "long" },
-            "Mem.used": { "type": "long" },
-            "Mem.used_p": { "type": "float" },
-            "message": { "type": "keyword", "ignore_above": 1024 },
-            "module": { "type": "keyword" },
-            "read_size": { "type": "long" },
-            "Swap.free": { "type": "long" },
-            "Swap.total": { "type": "long" },
-            "Swap.used": { "type": "long" },
-            "system_p": { "type": "float" },
-            "user_p": { "type": "float" },
-            "write_size": { "type": "long" }
+            "cpu": {
+              "properties": {
+                "cpu_p": { "type": "float" },
+                "system_p": { "type": "float" },
+                "user_p": { "type": "float" }
+              }
+            },
+            "mem": {
+              "properties": {
+                "Mem.free": { "type": "long" },
+                "Mem.total": { "type": "long" },
+                "Mem.used": { "type": "long" },
+                "Swap.free": { "type": "long" },
+                "Swap.total": { "type": "long" },
+                "Swap.used": { "type": "long" },
+                "Mem.used_p": { "type": "float" }
+              }
+            },
+            "disk": {
+              "properties": {
+                "read_size": { "type": "long" },
+                "write_size": { "type": "long" }
+              }
+            },
+            "netif": {
+              "properties": {
+              }
+            },
+            "syslog": {
+              "properties": {
+              }
+            },
+            "auditlog": {
+              "properties": {
+              }
+            }
           }
         }
       }

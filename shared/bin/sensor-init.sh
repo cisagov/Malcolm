@@ -45,6 +45,10 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
   fi
 
+  dpkg -s fluent-bit >/dev/null 2>&1 && \
+    [[ -d /opt/sensor/sensor_ctl/ ]] && \
+    mkdir -p /opt/sensor/sensor_ctl/fluentbit
+
   # zeekctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user
   if [[ -d /opt/zeek.orig ]]; then
     # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
