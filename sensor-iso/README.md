@@ -1,4 +1,4 @@
-TODO: update for beats replaced by fluentd
+TODO: update for beats replaced by fluentd. make sure you include wording about STIG
 
 # Hedgehog Linux 
 ## Network Traffic Capture Appliance
@@ -33,7 +33,6 @@ Hedgehog Linux is a Debian-based operating system built to
             * [filebeat](#filebeat): Zeek and Suricata log forwarding
             * [arkime-capture](#arkime-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
-            * [auditbeat](#auditbeat): audit log forwarding
             * [heatbeat](#heatbeat): temperature forwarding
         + [Autostart services](#ConfigAutostart)
         + [Zeek Intelligence Framework](#ZeekIntel)
@@ -292,12 +291,6 @@ Next, select the OpenSearch connection transport protocol, either **HTTPS** or *
 
 The remainder of the configuration for metricbeat will proceed as described in the [filebeat](#filebeat) steps outlined above.
 
-### <a name="auditbeat"></a>auditbeat: audit log forwarding
-
-The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to forward auditd logs, process and socket statistics, and sensor system file integrity information to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
-
-The sensor implements STIG (Security Technical Implementation Guidelines) rules according to DISA RHEL 7 STIG V1 R1, ported to a Debian 9 base platform. Enabling audit log forwarding via auditbeat is required to satisfy the requirements regarding forwarding audit logs to a remote log server as defined in that specification.
-
 ### <a name="heatbeat"></a>heatbeat: temperature forwarding
 
 The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
@@ -308,7 +301,8 @@ Once the forwarders have been configured, the final step is to **Configure Autos
 
 Despite configuring capture and/or forwarder services as described in previous sections, only services enabled in the autostart configuration will run when the sensor starts up. The available autostart processes are as follows (recommended services are in **bold text**):
 
-* **AUTOSTART_AUDITBEAT** – [auditbeat](#auditbeat) audit log forwarder
+TODO: update this:
+
 * **AUTOSTART_CLAMAV_UPDATES** – Virus database update service for ClamAV (requires sensor to be connected to the internet)
 * **AUTOSTART_FILEBEAT** – [filebeat](#filebeat) Zeek log forwarder 
 * **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
@@ -338,6 +332,8 @@ After you have completed configuring the sensor it is recommended that you reboo
 ```
 
 This will cause the sensor services controller to stop, wait a few seconds, and restart. You can check the status of the sensor's processes by choosing **Sensor Status** from the sensor's kiosk mode, double-clicking the **Sensor Service Status** desktop icon, or running `/opt/sensor/sensor_ctl/status` from the command line:
+
+* TODO: update this
 
 ```
 $ /opt/sensor/sensor_ctl/status 
@@ -492,6 +488,9 @@ Hedgehog Linux claims the following exceptions to STIG compliance:
 
 Please review the notes for these additional rules. While not claiming an exception, they may be implemented or checked in a different way than outlined by the RHEL STIG as Hedgehog Linux is not built on RHEL or for other reasons.
 
+* TODO: auditbeat has been removed in favor of fluentbit, check what needs to be added here
+
+
 | # | ID  | Title | Note |
 | --- | --- | --- | --- |
 | 1 | [SV-86585r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71961) | Systems with a Basic Input/Output System (BIOS) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
@@ -551,7 +550,7 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - Hedgehog Linux **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
 
-**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. Because Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications about its status are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [CIS benchmark compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening). Local logs are generated when the network connection is broken, and it resumes automatically. Syslog messages are also similarly forwarded.
+**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. Because Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications about its status are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. [Fluent Bit](https://fluentbit.io) offloads audit records to an OpenSearch database on another system, though this is not detected by the [CIS benchmark compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening). Local logs are generated when the network connection is broken, and it resumes automatically. Syslog messages are also similarly forwarded.
 
 **8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` utility.
 
