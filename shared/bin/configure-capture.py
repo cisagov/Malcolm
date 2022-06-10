@@ -55,21 +55,18 @@ class Constants:
 
     FILEBEAT = 'filebeat'
     METRICBEAT = 'metricbeat'
-    HEATBEAT = 'heatbeat'  # protologbeat to log temperature and other misc. stuff
     MISCBEAT = 'miscbeat'  # protologbeat to log from fluent-bit as we investigate that tool
     ARKIMECAP = 'arkime-capture'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
         METRICBEAT: f'/opt/sensor/sensor_ctl/{METRICBEAT}',
-        HEATBEAT: f'/opt/sensor/sensor_ctl/{HEATBEAT}',
         MISCBEAT: f'/opt/sensor/sensor_ctl/{MISCBEAT}',
     }
 
     BEAT_CMD = {
         FILEBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[FILEBEAT]}" --path.config "{BEAT_DIR[FILEBEAT]}" --path.data "{BEAT_DIR[FILEBEAT]}/data" --path.logs "{BEAT_DIR[FILEBEAT]}/logs" -c "{BEAT_DIR[FILEBEAT]}/{FILEBEAT}.yml"',
         METRICBEAT: f'{METRICBEAT} --path.home "{BEAT_DIR[METRICBEAT]}" --path.config "{BEAT_DIR[METRICBEAT]}" --path.data "{BEAT_DIR[METRICBEAT]}/data" --path.logs "{BEAT_DIR[METRICBEAT]}/logs" -c "{BEAT_DIR[METRICBEAT]}/{METRICBEAT}.yml"',
-        HEATBEAT: f'protologbeat --path.home "{BEAT_DIR[HEATBEAT]}" --path.config "{BEAT_DIR[HEATBEAT]}" --path.data "{BEAT_DIR[HEATBEAT]}/data" --path.logs "{BEAT_DIR[HEATBEAT]}/logs" -c "{BEAT_DIR[HEATBEAT]}/protologbeat.yml"',
         MISCBEAT: f'protologbeat --path.home "{BEAT_DIR[MISCBEAT]}" --path.config "{BEAT_DIR[MISCBEAT]}" --path.data "{BEAT_DIR[MISCBEAT]}/data" --path.logs "{BEAT_DIR[MISCBEAT]}/logs" -c "{BEAT_DIR[MISCBEAT]}/protologbeat.yml"',
     }
 
@@ -117,7 +114,6 @@ class Constants:
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
     MSG_CONFIG_METRICBEAT = (f'{METRICBEAT}', f'Configure resource metrics forwarding via {METRICBEAT}')
-    MSG_CONFIG_HEATBEAT = (f'{HEATBEAT}', f'Configure hardware metrics (temperature, etc.) forwarding via protologbeat')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f'Configure miscellaneous log forwarding via protologbeat')
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
@@ -798,7 +794,6 @@ def main():
                         Constants.MSG_CONFIG_ARKIME,
                         Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_METRICBEAT,
-                        Constants.MSG_CONFIG_HEATBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
                     ],
                 )
@@ -889,7 +884,6 @@ def main():
                 elif (
                     (fwd_mode == Constants.FILEBEAT)
                     or (fwd_mode == Constants.METRICBEAT)
-                    or (fwd_mode == Constants.HEATBEAT)
                     or (fwd_mode == Constants.MISCBEAT)
                 ):
                     # forwarder configuration for beats -> logstash

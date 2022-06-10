@@ -21,7 +21,6 @@
     "ecs_url",
     "ecs_user",
     "ecs_user_agent",
-    "custom_heatbeat",
     "custom_miscbeat",
     "custom_system"
   ],
