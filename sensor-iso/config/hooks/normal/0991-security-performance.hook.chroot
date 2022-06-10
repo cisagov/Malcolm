@@ -120,6 +120,7 @@ EOF
 
 # tweak some auditd settings
 sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
+sed -r -i "s/(log_group\s*=\s*).*/\1 sensor/" /etc/audit/auditd.conf
 sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
 
 # tweak some apparmor settings (allow clamd to scan)
