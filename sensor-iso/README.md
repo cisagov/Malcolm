@@ -33,7 +33,6 @@ Hedgehog Linux is a Debian-based operating system built to
             * [filebeat](#filebeat): Zeek and Suricata log forwarding
             * [arkime-capture](#arkime-capture): Arkime session forwarding
             * [metricbeat](#metricbeat): resource statistics forwarding
-            * [heatbeat](#heatbeat): temperature forwarding
         + [Autostart services](#ConfigAutostart)
         + [Zeek Intelligence Framework](#ZeekIntel)
 * [Appendix A - Generating the ISO](#ISOBuild)
@@ -291,10 +290,6 @@ Next, select the OpenSearch connection transport protocol, either **HTTPS** or *
 
 The remainder of the configuration for metricbeat will proceed as described in the [filebeat](#filebeat) steps outlined above.
 
-### <a name="heatbeat"></a>heatbeat: temperature forwarding
-
-The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database by way of Logstash. Its configuration is almost identical to that of the [filebeat](#filebeat) outlined above.
-
 ### <a name="ConfigAutostart"></a>Autostart services
 
 Once the forwarders have been configured, the final step is to **Configure Autostart Services**. Choose this option from the configuration mode menu after the welcome screen of the sensor configuration tool.
@@ -305,8 +300,6 @@ TODO: update this:
 
 * **AUTOSTART_CLAMAV_UPDATES** – Virus database update service for ClamAV (requires sensor to be connected to the internet)
 * **AUTOSTART_FILEBEAT** – [filebeat](#filebeat) Zeek log forwarder 
-* **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
-* **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
 * **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
 * **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
@@ -337,11 +330,8 @@ This will cause the sensor services controller to stop, wait a few seconds, and 
 
 ```
 $ /opt/sensor/sensor_ctl/status 
-beats:auditbeat                  RUNNING   pid 14470, uptime 8 days, 20:22:32
 beats:filebeat                   RUNNING   pid 14460, uptime 8 days, 20:22:32
-beats:heatbeat                   RUNNING   pid 14481, uptime 8 days, 20:22:32
 beats:metricbeat                 RUNNING   pid 14476, uptime 8 days, 20:22:32
-beats:sensors                    RUNNING   pid 14484, uptime 8 days, 20:22:32
 clamav:clamav-service            RUNNING   pid 14454, uptime 8 days, 20:22:32
 clamav:clamav-updates            RUNNING   pid 14450, uptime 8 days, 20:22:32
 arkime:arkime-capture            RUNNING   pid 14432, uptime 8 days, 20:22:32
@@ -913,7 +903,7 @@ If there are major differences or new variables, continue on to the next step, i
 
 24. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
 ```
-sensor@hedgehog:opt$ for BEAT in auditbeat filebeat filebeat-syslog heatbeat metricbeat; do cp /opt/sensor_upgrade_backup_2020-05-08/sensor_ctl/$BEAT/data/* /opt/sensor/sensor_ctl/$BEAT/data/; done
+sensor@hedgehog:opt$ for BEAT in filebeat metricbeat miscbeat; do cp /opt/sensor_upgrade_backup_2020-05-08/sensor_ctl/$BEAT/data/* /opt/sensor/sensor_ctl/$BEAT/data/; done
 
 sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/filebeat/
 ```

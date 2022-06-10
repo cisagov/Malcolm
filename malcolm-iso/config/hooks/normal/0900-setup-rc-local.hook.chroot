@@ -7,9 +7,6 @@ cat << 'EOF' >> /etc/rc.local
 # other agg-specific initialization prior to starting up
 /usr/local/bin/agg-init.sh
 
-# hddtemp daemon for querying HDD temperatures
-/usr/sbin/hddtemp --daemon --numeric --quiet --unit=C -4 --listen=127.0.0.1 --port=7634 /dev/sd?
-
 systemctl mask ctrl-alt-del.target
 
 exit 0

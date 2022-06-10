@@ -29,11 +29,23 @@
                 "write_size": { "type": "long" }
               }
             },
-            "netif": {
+            "network": {
               "properties": {
+                "interface": { "type": "keyword" },
+                "tx.bytes.total": { "type": "long" },
+                "tx.errors.total": { "type": "long" },
+                "tx.packets.total": { "type": "long" },
+                "rx.bytes.total": { "type": "long" },
+                "rx.errors.total": { "type": "long" },
+                "rx.packets.total": { "type": "long" },
+                "details": { "type": "nested" }
               }
             },
             "syslog": {
+              "properties": {
+              }
+            },
+            "thermal": {
               "properties": {
               }
             },
