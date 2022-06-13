@@ -2,7 +2,7 @@
 
 df --exclude-type=tmpfs --exclude-type=devtmpfs --block-size=1 --local --no-sync --output=target,size,used,avail 2>/dev/null | \
   jq -R -c -M -s '
-    {df: [
+    {df: { details: [
       split("\n") |
       .[] |
       if test("^/") then
@@ -10,4 +10,4 @@ df --exclude-type=tmpfs --exclude-type=devtmpfs --block-size=1 --local --no-sync
       else
         empty
       end
-    ]}'
+    ]}}'

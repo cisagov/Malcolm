@@ -28,12 +28,19 @@
                 "read_size": { "type": "long" },
                 "write_size": { "type": "long" },
                 "df": {
-                  "type": "nested",
                   "properties": {
-                    "target": { "type": "keyword" },
                     "size": { "type": "long" },
                     "used": { "type": "long" },
-                    "avail": { "type": "long" }
+                    "avail": { "type": "long" },
+                    "details": {
+                      "type": "nested",
+                      "properties": {
+                        "target": { "type": "keyword" },
+                        "size": { "type": "long" },
+                        "used": { "type": "long" },
+                        "avail": { "type": "long" }
+                      }
+                    }
                   }
                 }
               }
