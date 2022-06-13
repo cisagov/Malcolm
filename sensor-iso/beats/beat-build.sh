@@ -17,7 +17,7 @@ if [[ -z $BEAT || -z $VERSION || -z $THIRD_PARTY_BRANCH ]] ; then
   echo "  beat-build.sh -b <BEAT> [-v <BEAT_VERSION>] [-v <THIRD_PARTY_BEAT_BRANCH>]" >&2
   echo "" >&2
   echo "example:" >&2
-  echo "  beat-build.sh -b metricbeat -v $VERSION" >&2
+  echo "  beat-build.sh -b filebeat -v $VERSION" >&2
   exit 1
 fi
 

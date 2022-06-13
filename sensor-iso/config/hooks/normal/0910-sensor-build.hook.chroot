@@ -205,8 +205,8 @@ freshclam --stdout --quiet --no-warnings
 
 ###
 
-# install filebeat/metricbeat
-for BEAT in filebeat metricbeat; do
+# install filebeat
+for BEAT in filebeat; do
   BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
   BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
   pushd /tmp && \

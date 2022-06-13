@@ -32,8 +32,7 @@ Hedgehog Linux is a Debian-based operating system built to
         + [Forwarding](#ConfigForwarding)
             * [filebeat](#filebeat): Zeek and Suricata log forwarding
             * [arkime-capture](#arkime-capture): Arkime session forwarding
-            * [metricbeat](#metricbeat): resource statistics forwarding
-        + [Autostart services](#ConfigAutostart)
++ [Autostart services](#ConfigAutostart)
         + [Zeek Intelligence Framework](#ZeekIntel)
 * [Appendix A - Generating the ISO](#ISOBuild)
 * [Appendix B - Configuring SSH access](#ConfigSSH)
@@ -278,18 +277,6 @@ Finally, you'll be given the opportunity to review the all of the Arkime `captur
 
 ![capture settings confirmation](./docs/images/arkime_confirm.png) ![capture settings applied successfully](./docs/images/arkime_success.png)
 
-### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
-
-The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an OpenSearch database by way of Logstash in the same manner as [filebeat](#filebeat). Select **metricbeat** from the forwarding configuration mode options.
-
-Metricbeat gathers system resource metrics at an interval you specify. The default interval is 30 seconds, but it can be set to any value between 1 and 60 seconds.
-
-![Metricbeat interval](./docs/images/metricbeat_interval.png)
-
-Next, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/idaholab/Malcolm#configure-authentication), choose **None**.
-
-The remainder of the configuration for metricbeat will proceed as described in the [filebeat](#filebeat) steps outlined above.
-
 ### <a name="ConfigAutostart"></a>Autostart services
 
 Once the forwarders have been configured, the final step is to **Configure Autostart Services**. Choose this option from the configuration mode menu after the welcome screen of the sensor configuration tool.
@@ -300,7 +287,6 @@ TODO: update this:
 
 * **AUTOSTART_CLAMAV_UPDATES** – Virus database update service for ClamAV (requires sensor to be connected to the internet)
 * **AUTOSTART_FILEBEAT** – [filebeat](#filebeat) Zeek log forwarder 
-* **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
 * **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
