@@ -33,7 +33,7 @@
                     "target": { "type": "keyword" },
                     "size": { "type": "long" },
                     "used": { "type": "long" },
-                    "available": { "type": "long" }
+                    "avail": { "type": "long" }
                   }
                 }
               }
