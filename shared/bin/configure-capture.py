@@ -54,23 +54,20 @@ class Constants:
     }
 
     FILEBEAT = 'filebeat'
-    METRICBEAT = 'metricbeat'
-    MISCBEAT = 'miscbeat'  # protologbeat to log from fluent-bit as we investigate that tool
+    MISCBEAT = 'miscbeat'
     ARKIMECAP = 'arkime-capture'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
-        METRICBEAT: f'/opt/sensor/sensor_ctl/{METRICBEAT}',
         MISCBEAT: f'/opt/sensor/sensor_ctl/{MISCBEAT}',
     }
 
     BEAT_CMD = {
         FILEBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[FILEBEAT]}" --path.config "{BEAT_DIR[FILEBEAT]}" --path.data "{BEAT_DIR[FILEBEAT]}/data" --path.logs "{BEAT_DIR[FILEBEAT]}/logs" -c "{BEAT_DIR[FILEBEAT]}/{FILEBEAT}.yml"',
-        METRICBEAT: f'{METRICBEAT} --path.home "{BEAT_DIR[METRICBEAT]}" --path.config "{BEAT_DIR[METRICBEAT]}" --path.data "{BEAT_DIR[METRICBEAT]}/data" --path.logs "{BEAT_DIR[METRICBEAT]}/logs" -c "{BEAT_DIR[METRICBEAT]}/{METRICBEAT}.yml"',
         MISCBEAT: f'protologbeat --path.home "{BEAT_DIR[MISCBEAT]}" --path.config "{BEAT_DIR[MISCBEAT]}" --path.data "{BEAT_DIR[MISCBEAT]}/data" --path.logs "{BEAT_DIR[MISCBEAT]}/logs" -c "{BEAT_DIR[MISCBEAT]}/protologbeat.yml"',
     }
 
-    # specific to beats forwarded to logstash (eg., filebeat, metricbeat, etc.)
+    # specific to beats forwarded to logstash (eg., filebeat, etc.)
     BEAT_LS_HOST = 'BEAT_LS_HOST'
     BEAT_LS_PORT = 'BEAT_LS_PORT'
     BEAT_LS_SSL = 'BEAT_LS_SSL'
@@ -100,9 +97,6 @@ class Constants:
     BEAT_ZEEK_LOG_PATTERN_VAL = '*.log'
     BEAT_SURICATA_LOG_PATTERN_VAL = 'eve*.json'
 
-    # specific to metricbeat
-    BEAT_INTERVAL = "BEAT_INTERVAL"
-
     # specific to arkime
     ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
 
@@ -113,7 +107,6 @@ class Constants:
     MSG_CONFIG_GENERIC = 'Configure {}'
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
-    MSG_CONFIG_METRICBEAT = (f'{METRICBEAT}', f'Configure resource metrics forwarding via {METRICBEAT}')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f'Configure miscellaneous log forwarding via protologbeat')
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
@@ -793,7 +786,6 @@ def main():
                     choices=[
                         Constants.MSG_CONFIG_ARKIME,
                         Constants.MSG_CONFIG_FILEBEAT,
-                        Constants.MSG_CONFIG_METRICBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
                     ],
                 )
@@ -881,11 +873,7 @@ def main():
                         text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(fwd_mode, "\n".join(list_results))
                     )
 
-                elif (
-                    (fwd_mode == Constants.FILEBEAT)
-                    or (fwd_mode == Constants.METRICBEAT)
-                    or (fwd_mode == Constants.MISCBEAT)
-                ):
+                elif (fwd_mode == Constants.FILEBEAT) or (fwd_mode == Constants.MISCBEAT):
                     # forwarder configuration for beats -> logstash
 
                     if not os.path.isdir(Constants.BEAT_DIR[fwd_mode]):
@@ -920,7 +908,6 @@ def main():
                         log_path = None
                         logstash_host = None
                         logstash_port = None
-                        beat_interval = None
 
                         if fwd_mode == Constants.FILEBEAT:
                             # zeek log dir is filebeat only
@@ -938,18 +925,6 @@ def main():
                                 forwarder_config_error = True
                             else:
                                 log_path = values[0]
-
-                        elif fwd_mode == Constants.METRICBEAT:
-                            # interval is metricbeat only
-                            code, beat_interval = d.rangebox(
-                                f"{Constants.MSG_CONFIG_GENERIC.format(fwd_mode)} interval (seconds)",
-                                width=60,
-                                min=1,
-                                max=60,
-                                init=30,
-                            )
-                            if code == Dialog.CANCEL or code == Dialog.ESC:
-                                raise CancelledError
 
                         if not forwarder_config_error:
                             # host/port for LogStash
@@ -992,9 +967,6 @@ def main():
 
                         if not forwarder_config_error:
                             # store inputted items into the configuration dictionary for the forwarder
-
-                            if beat_interval is not None:
-                                forwarder_dict[Constants.BEAT_INTERVAL] = f"{beat_interval}s"
 
                             if log_path is not None:
                                 forwarder_dict[Constants.BEAT_ZEEK_LOG_PATTERN_KEY] = os.path.join(
