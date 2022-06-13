@@ -26,7 +26,16 @@
             "disk": {
               "properties": {
                 "read_size": { "type": "long" },
-                "write_size": { "type": "long" }
+                "write_size": { "type": "long" },
+                "df": {
+                  "type": "nested",
+                  "properties": {
+                    "target": { "type": "keyword" },
+                    "size": { "type": "long" },
+                    "used": { "type": "long" },
+                    "available": { "type": "long" }
+                  }
+                }
               }
             },
             "network": {
@@ -50,6 +59,9 @@
             },
             "thermal": {
               "properties": {
+                "name": { "type": "keyword"},
+                "temp": { "type": "float"},
+                "type": { "type": "keyword"}
               }
             },
             "auditlog": {
