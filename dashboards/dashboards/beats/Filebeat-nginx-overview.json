@@ -10,7 +10,7 @@
       "updated_at": "2022-06-01T19:41:23.453Z",
       "version": "Wzg0NywxXQ==",
       "attributes": {
-        "description": "",
+        "description": "Overview of logs from Malcolm's own nginx instance",
         "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"version\":true,\"highlightAll\":true}"
