@@ -562,7 +562,7 @@ Until that work is complete, Hedgehog Linux is not in compliance with the follow
 
 * **CIS**
 
-**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` utility.
+**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity**
 
 # <a name="UpgradePlan"></a>Appendix E - Upgrades
 
