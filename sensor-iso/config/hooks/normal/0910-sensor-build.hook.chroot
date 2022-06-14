@@ -39,6 +39,8 @@ YARA_RULES_DIR="/opt/yara-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
+apt-get -qqy update
+
 # an arkime .deb is built and installed in a different context
 
 # Install netsniff-ng
@@ -123,8 +125,11 @@ mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/spicy-packages /tmp/zeek-packages /opt/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
+# aide
+apt-get install --no-install-recommends -y -q aide
+###
+
 # suricata
-apt-get -qqy update
 apt-get install -t bullseye-backports --no-install-recommends -y -q suricata suricata-update
 
 /usr/bin/suricata-update -v -D /var/lib/suricata --etopen
