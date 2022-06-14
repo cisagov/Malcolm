@@ -7,14 +7,14 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:30:29.021Z",
-      "version": "WzkzMiwxXQ==",
+      "updated_at": "2022-06-14T15:28:28.457Z",
+      "version": "WzEwMTEsMV0=",
       "attributes": {
         "title": "Malcolm Sensor Resources - Hosts Overview",
         "hits": 0,
         "description": "Malcolm sensor hosts' resources overview",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"1\",\"w\":24,\"x\":0,\"y\":58},\"panelIndex\":\"1\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"3\",\"w\":24,\"x\":0,\"y\":40},\"panelIndex\":\"3\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"4\",\"w\":24,\"x\":24,\"y\":20},\"panelIndex\":\"4\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"7\",\"w\":24,\"x\":24,\"y\":5},\"panelIndex\":\"7\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"8\",\"w\":24,\"x\":24,\"y\":35},\"panelIndex\":\"8\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"10\",\"w\":12,\"x\":0,\"y\":5},\"panelIndex\":\"10\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"11\",\"w\":12,\"x\":12,\"y\":5},\"panelIndex\":\"11\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"12\",\"w\":8,\"x\":0,\"y\":30},\"panelIndex\":\"12\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"13\",\"w\":8,\"x\":8,\"y\":30},\"panelIndex\":\"13\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":5,\"i\":\"16\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"16\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"21\",\"w\":8,\"x\":0,\"y\":18},\"panelIndex\":\"21\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"22\",\"w\":8,\"x\":8,\"y\":18},\"panelIndex\":\"22\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"23\",\"w\":8,\"x\":16,\"y\":18},\"panelIndex\":\"23\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"25\",\"w\":8,\"x\":16,\"y\":30},\"panelIndex\":\"25\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"27\",\"w\":24,\"x\":24,\"y\":50},\"panelIndex\":\"27\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"28\",\"w\":24,\"x\":24,\"y\":63},\"panelIndex\":\"28\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_15\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":5,\"i\":\"30\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"30\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_16\"}]",
-        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":false}",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"1\",\"w\":24,\"x\":24,\"y\":57},\"panelIndex\":\"1\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"3\",\"w\":24,\"x\":0,\"y\":57},\"panelIndex\":\"3\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":17,\"i\":\"4\",\"w\":24,\"x\":24,\"y\":22},\"panelIndex\":\"4\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":17,\"i\":\"7\",\"w\":24,\"x\":24,\"y\":5},\"panelIndex\":\"7\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"8\",\"w\":24,\"x\":24,\"y\":39},\"panelIndex\":\"8\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":13,\"i\":\"10\",\"w\":12,\"x\":0,\"y\":5},\"panelIndex\":\"10\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":13,\"i\":\"11\",\"w\":12,\"x\":12,\"y\":5},\"panelIndex\":\"11\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":13,\"i\":\"12\",\"w\":12,\"x\":0,\"y\":30},\"panelIndex\":\"12\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":13,\"i\":\"13\",\"w\":12,\"x\":12,\"y\":30},\"panelIndex\":\"13\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":5,\"i\":\"16\",\"w\":24,\"x\":0,\"y\":0},\"panelIndex\":\"16\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":12,\"i\":\"21\",\"w\":8,\"x\":0,\"y\":18},\"panelIndex\":\"21\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":12,\"i\":\"22\",\"w\":8,\"x\":8,\"y\":18},\"panelIndex\":\"22\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":12,\"i\":\"23\",\"w\":8,\"x\":16,\"y\":18},\"panelIndex\":\"23\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"27\",\"w\":24,\"x\":0,\"y\":75},\"panelIndex\":\"27\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"28\",\"w\":24,\"x\":24,\"y\":75},\"panelIndex\":\"28\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":5,\"i\":\"30\",\"w\":24,\"x\":24,\"y\":0},\"panelIndex\":\"30\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_15\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":14,\"i\":\"b751999d-6577-4995-95e6-b7276ab6388d\",\"w\":24,\"x\":0,\"y\":43},\"panelIndex\":\"b751999d-6577-4995-95e6-b7276ab6388d\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_16\"}]",
+        "optionsJSON": "{\"darkTheme\":false}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
@@ -90,22 +90,22 @@
         {
           "name": "panel_13",
           "type": "visualization",
-          "id": "96976150-4d5d-11e7-aa29-87a97a796de6-ecs"
+          "id": "99381c80-4d60-11e7-9a4c-ed99bbcaa42b-ecs"
         },
         {
           "name": "panel_14",
           "type": "visualization",
-          "id": "99381c80-4d60-11e7-9a4c-ed99bbcaa42b-ecs"
+          "id": "c5e3cf90-4d60-11e7-9a4c-ed99bbcaa42b-ecs"
         },
         {
           "name": "panel_15",
           "type": "visualization",
-          "id": "c5e3cf90-4d60-11e7-9a4c-ed99bbcaa42b-ecs"
+          "id": "3d65d450-a9c3-11e7-af20-67db8aecb295-ecs"
         },
         {
           "name": "panel_16",
           "type": "visualization",
-          "id": "3d65d450-a9c3-11e7-af20-67db8aecb295-ecs"
+          "id": "1a357a70-ebf5-11ec-a044-713f3297b517"
         }
       ],
       "migrationVersion": {
@@ -118,11 +118,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
-      "version": "Wzg0OCwxXQ==",
+      "updated_at": "2022-06-14T15:08:38.631Z",
+      "version": "Wzg5OSwxXQ==",
       "attributes": {
         "title": "Network Traffic (Packets)",
-        "visState": "{\"title\":\"Network Traffic (Packets)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"filter\":{\"query\":\"\",\"language\":\"lucene\"},\"series\":[{\"id\":\"da1046f1-faa0-11e6-86b1-cd7735ff7e23\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(0,156,224,1)\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"da1046f2-faa0-11e6-86b1-cd7735ff7e23\",\"field\":\"miscbeat.network.packets.rx\",\"type\":\"sum\"}],\"formatter\":\"0.[00]a\",\"split_mode\":\"terms\",\"fill\":\"1\",\"line_width\":\"0\",\"label\":\"Inbound\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"terms_size\":\"10\",\"terms_order_by\":\"da1046f2-faa0-11e6-86b1-cd7735ff7e23\"},{\"id\":\"fbbd5720-faa0-11e6-86b1-cd7735ff7e23\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(250,40,255,1)\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"fbbd7e30-faa0-11e6-86b1-cd7735ff7e23\",\"field\":\"miscbeat.network.packets.tx\",\"type\":\"sum\"},{\"id\":\"f25a1460-eb55-11ec-ae08-f703744a0ba1\",\"type\":\"math\",\"variables\":[{\"id\":\"f61d5df0-eb55-11ec-ae08-f703744a0ba1\",\"name\":\"sumtx\",\"field\":\"fbbd7e30-faa0-11e6-86b1-cd7735ff7e23\"}],\"script\":\"0 - params.sumtx\"}],\"formatter\":\"0.[00]a\",\"split_mode\":\"terms\",\"fill\":\"1\",\"line_width\":\"0\",\"label\":\"Outbound\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"terms_size\":\"10\",\"terms_order_by\":\"fbbd7e30-faa0-11e6-86b1-cd7735ff7e23\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"index_pattern\":\"malcolm_beats_*\",\"type\":\"timeseries\",\"show_legend\":1,\"axis_scale\":\"normal\",\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Network Traffic (Packets)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"filter\":{\"language\":\"lucene\",\"query\":\"\"},\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(0,133,255,1)\",\"fill\":\"1\",\"formatter\":\"'0a'\",\"id\":\"49931900-ebf3-11ec-a401-f5db2d59e6af\",\"label\":\"Inbound\",\"line_width\":1,\"metrics\":[{\"unit\":\"1s\",\"id\":\"49931901-ebf3-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.packets.rx\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"type\":\"timeseries\",\"terms_field\":\"miscbeat.network.interface\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\",\"value_template\":\"{{value}}/s\",\"split_color_mode\":\"gradient\"},{\"id\":\"75fba890-ebf3-11ec-a401-f5db2d59e6af\",\"color\":\"rgba(13,212,26,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"unit\":\"1s\",\"id\":\"75fba891-ebf3-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.packets.tx\"},{\"id\":\"96daba60-ebf3-11ec-a401-f5db2d59e6af\",\"type\":\"math\",\"variables\":[{\"id\":\"98e138c0-ebf3-11ec-a401-f5db2d59e6af\",\"name\":\"rate\",\"field\":\"75fba891-ebf3-11ec-a401-f5db2d59e6af\"}],\"script\":\"params.rate*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"'0a'\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"none\",\"label\":\"Outbound\",\"type\":\"timeseries\",\"terms_size\":\"3\",\"terms_field\":\"miscbeat.network.interface\",\"terms_order_by\":\"_key\",\"split_color_mode\":\"gradient\",\"value_template\":\"{{value}}/s\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"tooltip_mode\":\"show_all\",\"type\":\"timeseries\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -141,11 +141,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
-      "version": "Wzg0OSwxXQ==",
+      "updated_at": "2022-06-14T15:03:59.318Z",
+      "version": "Wzg5NywxXQ==",
       "attributes": {
         "title": "Network Traffic (Bytes)",
-        "visState": "{\"title\":\"Network Traffic (Bytes)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"filter\":{\"query\":\"\",\"language\":\"lucene\"},\"series\":[{\"id\":\"da1046f1-faa0-11e6-86b1-cd7735ff7e23\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(0,156,224,1)\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"da1046f2-faa0-11e6-86b1-cd7735ff7e23\",\"field\":\"miscbeat.network.bytes.rx\",\"type\":\"sum\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":\"1\",\"line_width\":\"0\",\"label\":\"Inbound \",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"terms_order_by\":\"da1046f2-faa0-11e6-86b1-cd7735ff7e23\"},{\"id\":\"fbbd5720-faa0-11e6-86b1-cd7735ff7e23\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(250,40,255,1)\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"533da9b0-2c2d-11e7-be71-3162da85303f\",\"function\":\"sum\",\"type\":\"sum\",\"field\":\"miscbeat.network.bytes.tx\"},{\"id\":\"ce5e8050-eb55-11ec-ae08-f703744a0ba1\",\"type\":\"math\",\"variables\":[{\"id\":\"d2773ce0-eb55-11ec-ae08-f703744a0ba1\",\"name\":\"sumtx\",\"field\":\"533da9b0-2c2d-11e7-be71-3162da85303f\"}],\"script\":\"0 - params.sumtx\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":\"1\",\"line_width\":\"0\",\"label\":\"Outbound \",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"terms_order_by\":\"533da9b0-2c2d-11e7-be71-3162da85303f\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"index_pattern\":\"malcolm_beats_*\",\"type\":\"timeseries\",\"show_legend\":1,\"axis_scale\":\"normal\",\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Network Traffic (Bytes)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"filter\":{\"language\":\"lucene\",\"query\":\"\"},\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(0,133,255,1)\",\"fill\":\"1\",\"formatter\":\"bytes\",\"id\":\"6d8b8ab0-ebf1-11ec-a401-f5db2d59e6af\",\"line_width\":1,\"metrics\":[{\"unit\":\"1s\",\"id\":\"6d8b8ab1-ebf1-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.bytes.rx\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"label\":\"Inbound\",\"type\":\"timeseries\",\"terms_field\":\"miscbeat.network.interface\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\",\"value_template\":\"{{value}}/s\",\"split_color_mode\":\"gradient\"},{\"id\":\"b5977de0-ebf2-11ec-a401-f5db2d59e6af\",\"color\":\"rgba(13,212,26,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"unit\":\"1s\",\"id\":\"b5977de1-ebf2-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.bytes.tx\"},{\"id\":\"cdfb1540-ebf2-11ec-a401-f5db2d59e6af\",\"type\":\"math\",\"variables\":[{\"id\":\"d1b9caf0-ebf2-11ec-a401-f5db2d59e6af\",\"name\":\"rate\",\"field\":\"b5977de1-ebf2-11ec-a401-f5db2d59e6af\"}],\"script\":\"params.rate*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"none\",\"label\":\"Outbound\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\",\"terms_field\":\"miscbeat.network.interface\",\"value_template\":\"{{value}}/s\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"tooltip_mode\":\"show_all\",\"type\":\"timeseries\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -164,7 +164,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
+      "updated_at": "2022-06-14T14:41:21.347Z",
       "version": "Wzg1MCwxXQ==",
       "attributes": {
         "title": "Memory Usage",
@@ -187,11 +187,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
+      "updated_at": "2022-06-14T14:41:21.347Z",
       "version": "Wzg1MSwxXQ==",
       "attributes": {
         "title": "CPU Usage",
-        "visState": "{\"title\":\"CPU Usage\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"80a04950-1b19-11e7-b09e-037021c4f8df\",\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"id\":\"80a04951-1b19-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"axis_position\":\"right\",\"point_size\":\"0\",\"metrics\":[{\"id\":\"80a04952-1b19-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.cpu.user_p\",\"type\":\"avg\"}],\"formatter\":\"percent\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"user\",\"stacked\":\"stacked\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\"},{\"id\":\"993acf30-1b19-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(211,49,21,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"metrics\":[{\"id\":\"993acf31-1b19-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.cpu.system_p\",\"type\":\"avg\"}],\"formatter\":\"percent\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"system\",\"stacked\":\"stacked\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\"}],\"axis_formatter\":\"number\",\"interval\":\"auto\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"type\":\"timeseries\",\"show_grid\":1,\"show_legend\":1,\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"CPU Usage\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"80a04950-1b19-11e7-b09e-037021c4f8df\",\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"id\":\"993acf30-1b19-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(211,49,21,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"metrics\":[{\"id\":\"993acf31-1b19-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.cpu.system_p\",\"type\":\"avg\"}],\"formatter\":\"'0.'\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"system\",\"stacked\":\"stacked\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"value_template\":\"{{value}}%\"},{\"id\":\"80a04951-1b19-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"axis_position\":\"right\",\"point_size\":\"0\",\"metrics\":[{\"id\":\"80a04952-1b19-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.cpu.user_p\",\"type\":\"avg\"}],\"formatter\":\"'0.'\",\"split_mode\":\"everything\",\"fill\":\"0.9\",\"line_width\":1,\"label\":\"user\",\"stacked\":\"stacked\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"steps\":0,\"value_template\":\"{{value}}%\"},{\"id\":\"4eb3d7b0-eb9b-11ec-8afc-039f20728581\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(46,88,242,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"metrics\":[{\"id\":\"4eb3d7b1-eb9b-11ec-8afc-039f20728581\",\"field\":\"miscbeat.cpu.cpu_p\",\"type\":\"avg\"}],\"formatter\":\"'0.'\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"total\",\"stacked\":\"stacked\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"steps\":0,\"value_template\":\"{{value}}%\",\"hidden\":false}],\"axis_formatter\":\"number\",\"interval\":\"auto\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"type\":\"timeseries\",\"show_grid\":1,\"show_legend\":1,\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -210,11 +210,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
+      "updated_at": "2022-06-14T14:41:21.347Z",
       "version": "Wzg1MiwxXQ==",
       "attributes": {
         "title": "Disk IO (Bytes)",
-        "visState": "{\"title\":\"Disk IO (Bytes)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"d3c67db0-1b1a-11e7-b09e-037021c4f8df\",\"filter\":\"\",\"series\":[{\"id\":\"d3c67db1-1b1a-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(22,165,165,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"d3c67db2-1b1a-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.disk.read_size\",\"type\":\"sum\"}],\"formatter\":\"bytes\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"reads\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\"},{\"id\":\"144124d0-1b1b-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(251,158,0,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"144124d1-1b1b-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.disk.write_size\",\"type\":\"sum\"}],\"formatter\":\"bytes\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"writes\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"index_pattern\":\"malcolm_beats_*\",\"type\":\"timeseries\",\"show_grid\":1,\"show_legend\":1,\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Disk IO (Bytes)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"d3c67db0-1b1a-11e7-b09e-037021c4f8df\",\"filter\":\"\",\"series\":[{\"id\":\"d3c67db1-1b1a-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(22,165,165,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"d3c67db2-1b1a-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.disk.read_size\",\"type\":\"sum\"},{\"id\":\"3be3ef00-eb99-11ec-8afc-039f20728581\",\"type\":\"math\",\"variables\":[{\"id\":\"40f00c40-eb99-11ec-8afc-039f20728581\",\"name\":\"readsize\",\"field\":\"d3c67db2-1b1a-11e7-b09e-037021c4f8df\"}],\"script\":\"0 - params.readsize\"}],\"formatter\":\"bytes\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"reads\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\"},{\"id\":\"144124d0-1b1b-11e7-b09e-037021c4f8df\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"rgba(251,158,0,1)\",\"axis_position\":\"right\",\"point_size\":\"0\",\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"144124d1-1b1b-11e7-b09e-037021c4f8df\",\"field\":\"miscbeat.disk.write_size\",\"type\":\"sum\"}],\"formatter\":\"bytes\",\"split_mode\":\"everything\",\"fill\":\"1\",\"line_width\":1,\"label\":\"writes\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"index_pattern\":\"malcolm_beats_*\",\"type\":\"timeseries\",\"show_grid\":1,\"show_legend\":1,\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -233,7 +233,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:23.358Z",
+      "updated_at": "2022-06-14T14:41:22.401Z",
       "version": "Wzg3NSwxXQ==",
       "attributes": {
         "title": "CPU Usage Gauge",
@@ -256,7 +256,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:23.358Z",
+      "updated_at": "2022-06-14T14:41:22.401Z",
       "version": "Wzg3NCwxXQ==",
       "attributes": {
         "title": "Memory Usage Gauge",
@@ -279,11 +279,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:26:32.675Z",
-      "version": "WzkxMiwxXQ==",
+      "updated_at": "2022-06-14T15:10:45.271Z",
+      "version": "WzkwMywxXQ==",
       "attributes": {
         "title": "Inbound Traffic",
-        "visState": "{\"title\":\"Inbound Traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"background_color_rules\":[{\"id\":\"0e346760-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"bar_color_rules\":[{\"id\":\"a6f39dd0-eb4f-11ec-ae08-f703744a0ba1\"}],\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"filter\":{\"query\":\"\",\"language\":\"lucene\"},\"id\":\"0c761590-1b92-11e7-bec4-a5e9ec5cab8b\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"pivot_id\":\"miscbeat.network.interface\",\"pivot_type\":\"string\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"0c761591-1b92-11e7-bec4-a5e9ec5cab8b\",\"label\":\"Inbound Traffic\",\"line_width\":1,\"metrics\":[{\"field\":\"miscbeat.network.bytes.rx\",\"id\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\",\"percentiles\":[{\"id\":\"2bd83990-eb4e-11ec-ae08-f703744a0ba1\",\"mode\":\"line\",\"shade\":0.2,\"value\":50}],\"type\":\"sum\",\"unit\":\"\"},{\"id\":\"e24047d0-eb4f-11ec-ae08-f703744a0ba1\",\"type\":\"math\",\"variables\":[{\"id\":\"e4687f00-eb4f-11ec-ae08-f703744a0ba1\",\"name\":\"bytesrx\",\"field\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"script\":\"params.bytesrx / ((params._timestamp - params._all.bytesrx.timestamps[0] + params._interval) / 1000)\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"miscbeat.network.interface\",\"terms_order_by\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\",\"terms_size\":\"3\",\"value_template\":\"{{value}}/s\",\"color_rules\":[{\"id\":\"b3b298e0-eb50-11ec-ae08-f703744a0ba1\"}]},{\"id\":\"697b0130-eb51-11ec-ae08-f703744a0ba1\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"697b0131-eb51-11ec-ae08-f703744a0ba1\",\"type\":\"sum\",\"field\":\"miscbeat.network.bytes.rx\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Transferred\",\"terms_field\":\"miscbeat.network.interface\",\"terms_size\":\"3\",\"terms_order_by\":\"697b0131-eb51-11ec-ae08-f703744a0ba1\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"tooltip_mode\":\"show_all\",\"type\":\"metric\"}}",
+        "visState": "{\"title\":\"Inbound Traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"background_color_rules\":[{\"id\":\"0e346760-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"bar_color_rules\":[{\"id\":\"a6f39dd0-eb4f-11ec-ae08-f703744a0ba1\"}],\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"filter\":{\"query\":\"\",\"language\":\"lucene\"},\"id\":\"0c761590-1b92-11e7-bec4-a5e9ec5cab8b\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"pivot_id\":\"miscbeat.network.interface\",\"pivot_type\":\"string\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"bytes\",\"id\":\"0c761591-1b92-11e7-bec4-a5e9ec5cab8b\",\"label\":\"Inbound Traffic\",\"line_width\":1,\"metrics\":[{\"unit\":\"1s\",\"field\":\"miscbeat.network.bytes.rx\",\"id\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\",\"percentiles\":[{\"id\":\"2bd83990-eb4e-11ec-ae08-f703744a0ba1\",\"mode\":\"line\",\"shade\":0.2,\"value\":50}],\"type\":\"positive_rate\"}],\"point_size\":1,\"seperate_axis\":0,\"split_color_mode\":\"gradient\",\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"miscbeat.network.interface\",\"terms_order_by\":\"_key\",\"terms_size\":\"3\",\"value_template\":\"{{value}}/s\",\"color_rules\":[{\"id\":\"b3b298e0-eb50-11ec-ae08-f703744a0ba1\"}]},{\"id\":\"697b0130-eb51-11ec-ae08-f703744a0ba1\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"697b0131-eb51-11ec-ae08-f703744a0ba1\",\"type\":\"top_hit\",\"field\":\"miscbeat.network.bytes.rx\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Transferred\",\"terms_field\":\"miscbeat.network.interface\",\"terms_size\":\"3\",\"terms_order_by\":\"697b0131-eb51-11ec-ae08-f703744a0ba1\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"tooltip_mode\":\"show_all\",\"type\":\"metric\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -302,11 +302,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:27:10.045Z",
-      "version": "WzkxNCwxXQ==",
+      "updated_at": "2022-06-14T15:11:30.952Z",
+      "version": "WzkwOSwxXQ==",
       "attributes": {
         "title": "Outbound Traffic",
-        "visState": "{\"title\":\"Outbound Traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"0c761590-1b92-11e7-bec4-a5e9ec5cab8b\",\"filter\":{\"query\":\"\",\"language\":\"lucene\"},\"series\":[{\"id\":\"0c761591-1b92-11e7-bec4-a5e9ec5cab8b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"value_template\":\"{{value}}/s\",\"metrics\":[{\"id\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\",\"field\":\"miscbeat.network.bytes.tx\",\"type\":\"sum\"},{\"id\":\"a8cf9ee0-eb51-11ec-ae08-f703744a0ba1\",\"type\":\"math\",\"variables\":[{\"id\":\"aabe4f80-eb51-11ec-ae08-f703744a0ba1\",\"name\":\"bytestx\",\"field\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"script\":\"params.bytestx / ((params._timestamp - params._all.bytestx.timestamps[0] + params._interval) / 1000)\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Outbound Traffic\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"terms_size\":\"3\",\"terms_order_by\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\"},{\"id\":\"37f70440-1b92-11e7-bec4-a5e9ec5cab8b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"value_template\":\"{{value}}\",\"metrics\":[{\"id\":\"37f72b50-1b92-11e7-bec4-a5e9ec5cab8b\",\"field\":\"miscbeat.network.bytes.tx\",\"type\":\"sum\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Total Transferred\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"terms_size\":\"3\",\"terms_order_by\":\"37f72b50-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"background_color_rules\":[{\"id\":\"0e346760-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"show_grid\":1,\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"show_legend\":1,\"interval\":\"auto\",\"type\":\"metric\",\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Outbound Traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"0c761590-1b92-11e7-bec4-a5e9ec5cab8b\",\"filter\":{\"query\":\"\",\"language\":\"lucene\"},\"series\":[{\"id\":\"0c761591-1b92-11e7-bec4-a5e9ec5cab8b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"value_template\":\"{{value}}/s\",\"metrics\":[{\"unit\":\"1s\",\"id\":\"0c761592-1b92-11e7-bec4-a5e9ec5cab8b\",\"field\":\"miscbeat.network.bytes.tx\",\"type\":\"positive_rate\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Outbound Traffic\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\"},{\"id\":\"37f70440-1b92-11e7-bec4-a5e9ec5cab8b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"value_template\":\"{{value}}\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"37f72b50-1b92-11e7-bec4-a5e9ec5cab8b\",\"field\":\"miscbeat.network.bytes.tx\",\"type\":\"top_hit\",\"order_by\":\"@timestamp\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Total Transferred\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\"}],\"background_color_rules\":[{\"id\":\"0e346760-1b92-11e7-bec4-a5e9ec5cab8b\"}],\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"show_grid\":1,\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"show_legend\":1,\"interval\":\"auto\",\"type\":\"metric\",\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -325,7 +325,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:23.358Z",
+      "updated_at": "2022-06-14T14:41:22.401Z",
       "version": "Wzg2NiwxXQ==",
       "attributes": {
         "description": "",
@@ -348,7 +348,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
+      "updated_at": "2022-06-14T14:41:21.347Z",
       "version": "Wzg1OCwxXQ==",
       "attributes": {
         "title": "Swap usage",
@@ -371,7 +371,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
+      "updated_at": "2022-06-14T14:41:21.347Z",
       "version": "Wzg1OSwxXQ==",
       "attributes": {
         "title": "Memory usage vs total",
@@ -394,34 +394,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:23.358Z",
-      "version": "Wzg3MywxXQ==",
+      "updated_at": "2022-06-14T15:27:52.939Z",
+      "version": "WzEwMDQsMV0=",
       "attributes": {
         "title": "Disk used",
-        "visState": "{\"title\":\"Disk used\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"4e4dc780-4d1d-11e7-b5f2-2b7c1895bf32\",\"filter\":\"\",\"interval\":\"auto\",\"default_index_pattern\":\"arkime_sessions3-*\",\"axis_formatter\":\"number\",\"show_legend\":1,\"axis_position\":\"left\",\"index_pattern\":\"malcolm_beats_*\",\"time_range_mode\":\"entire_time_range\",\"show_grid\":1,\"time_field\":\"@timestamp\",\"gauge_max\":\"1\",\"default_timefield\":\"firstPacket\",\"gauge_color_rules\":[{\"operator\":\"gte\",\"id\":\"51921d10-4d1d-11e7-b5f2-2b7c1895bf32\",\"value\":0,\"gauge\":\"rgba(104,188,0,1)\"},{\"operator\":\"gte\",\"id\":\"f26de750-4d54-11e7-b5f2-2b7c1895bf32\",\"value\":0.7,\"gauge\":\"rgba(251,158,0,1)\"},{\"operator\":\"gte\",\"id\":\"fa31d190-4d54-11e7-b5f2-2b7c1895bf32\",\"value\":0.85,\"gauge\":\"rgba(211,49,21,1)\"}],\"gauge_inner_width\":10,\"series\":[{\"id\":\"4e4dee90-4d1d-11e7-b5f2-2b7c1895bf32\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"size\":1,\"agg_with\":\"avg\",\"order\":\"desc\",\"id\":\"4e4dee91-4d1d-11e7-b5f2-2b7c1895bf32\",\"order_by\":\"@timestamp\",\"type\":\"top_hit\",\"field\":\"miscbeat.disk.df.used\"},{\"size\":1,\"agg_with\":\"avg\",\"order\":\"desc\",\"id\":\"57c96ee0-4d54-11e7-b5f2-2b7c1895bf32\",\"order_by\":\"@timestamp\",\"type\":\"top_hit\",\"field\":\"miscbeat.disk.df.size\"},{\"id\":\"6304cca0-4d54-11e7-b5f2-2b7c1895bf32\",\"variables\":[{\"id\":\"6da10430-4d54-11e7-b5f2-2b7c1895bf32\",\"field\":\"4e4dee91-4d1d-11e7-b5f2-2b7c1895bf32\",\"name\":\"used\"},{\"id\":\"73b8c510-4d54-11e7-b5f2-2b7c1895bf32\",\"field\":\"57c96ee0-4d54-11e7-b5f2-2b7c1895bf32\",\"name\":\"total\"}],\"script\":\"params.used/params.total \",\"type\":\"math\"}],\"formatter\":\"percent\",\"split_mode\":\"everything\",\"fill\":0.5,\"line_width\":1,\"label\":\"Disk used\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"isModelInvalid\":false,\"axis_scale\":\"normal\",\"type\":\"gauge\",\"gauge_style\":\"half\",\"gauge_width\":10,\"tooltip_mode\":\"show_all\"}}",
-        "uiStateJSON": "{}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        }
-      },
-      "references": [],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "96976150-4d5d-11e7-aa29-87a97a796de6-ecs",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
-      "version": "Wzg2MSwxXQ==",
-      "attributes": {
-        "title": "Network Errors",
-        "visState": "{\"title\":\"Network Errors\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"6984af10-4d5d-11e7-aa29-87a97a796de6\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"background_color_rules\":[{\"id\":\"6ba9b1f0-4d5d-11e7-aa29-87a97a796de6\"}],\"axis_formatter\":\"number\",\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"series\":[{\"id\":\"6984af11-4d5d-11e7-aa29-87a97a796de6\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"id\":\"6984af12-4d5d-11e7-aa29-87a97a796de6\",\"field\":\"miscbeat.network.errors.rx\",\"type\":\"sum\"}],\"formatter\":\"number\",\"split_mode\":\"everything\",\"fill\":0.5,\"line_width\":1,\"label\":\"Network Errors In\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"},{\"id\":\"ac2e6b30-4d5d-11e7-aa29-87a97a796de6\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"id\":\"ac2e6b31-4d5d-11e7-aa29-87a97a796de6\",\"field\":\"miscbeat.network.errors.tx\",\"type\":\"sum\"}],\"formatter\":\"number\",\"split_mode\":\"everything\",\"fill\":0.5,\"line_width\":1,\"label\":\"Network Errors Out\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"type\":\"metric\",\"show_grid\":1,\"show_legend\":1,\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Disk used\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"4e4dc780-4d1d-11e7-b5f2-2b7c1895bf32\",\"filter\":\"\",\"interval\":\"auto\",\"default_index_pattern\":\"arkime_sessions3-*\",\"axis_formatter\":\"number\",\"show_legend\":1,\"axis_position\":\"left\",\"index_pattern\":\"malcolm_beats_*\",\"time_range_mode\":\"entire_time_range\",\"show_grid\":1,\"time_field\":\"@timestamp\",\"gauge_max\":\"1\",\"default_timefield\":\"firstPacket\",\"gauge_color_rules\":[{\"operator\":\"gte\",\"id\":\"51921d10-4d1d-11e7-b5f2-2b7c1895bf32\",\"value\":0,\"gauge\":\"rgba(104,188,0,1)\"},{\"operator\":\"gte\",\"id\":\"f26de750-4d54-11e7-b5f2-2b7c1895bf32\",\"value\":0.7,\"gauge\":\"rgba(251,158,0,1)\"},{\"operator\":\"gte\",\"id\":\"fa31d190-4d54-11e7-b5f2-2b7c1895bf32\",\"value\":0.85,\"gauge\":\"rgba(211,49,21,1)\"}],\"gauge_inner_width\":10,\"series\":[{\"id\":\"4e4dee90-4d1d-11e7-b5f2-2b7c1895bf32\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"size\":1,\"agg_with\":\"avg\",\"order\":\"desc\",\"id\":\"4e4dee91-4d1d-11e7-b5f2-2b7c1895bf32\",\"order_by\":\"@timestamp\",\"type\":\"top_hit\",\"field\":\"miscbeat.disk.df.used\"},{\"size\":1,\"agg_with\":\"avg\",\"order\":\"desc\",\"id\":\"57c96ee0-4d54-11e7-b5f2-2b7c1895bf32\",\"order_by\":\"@timestamp\",\"type\":\"top_hit\",\"field\":\"miscbeat.disk.df.size\"},{\"id\":\"6304cca0-4d54-11e7-b5f2-2b7c1895bf32\",\"variables\":[{\"id\":\"6da10430-4d54-11e7-b5f2-2b7c1895bf32\",\"field\":\"4e4dee91-4d1d-11e7-b5f2-2b7c1895bf32\",\"name\":\"used\"},{\"id\":\"73b8c510-4d54-11e7-b5f2-2b7c1895bf32\",\"field\":\"57c96ee0-4d54-11e7-b5f2-2b7c1895bf32\",\"name\":\"total\"}],\"script\":\"params.used/params.total \",\"type\":\"math\"}],\"formatter\":\"'0%'\",\"split_mode\":\"everything\",\"fill\":0.5,\"line_width\":1,\"label\":\"Disk used\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"isModelInvalid\":false,\"axis_scale\":\"normal\",\"type\":\"gauge\",\"gauge_style\":\"half\",\"gauge_width\":10,\"tooltip_mode\":\"show_all\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -440,11 +417,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
-      "version": "Wzg2MiwxXQ==",
+      "updated_at": "2022-06-14T15:19:06.927Z",
+      "version": "Wzk3MiwxXQ==",
       "attributes": {
         "title": "Interfaces by Incoming traffic",
-        "visState": "{\"title\":\"Interfaces by Incoming traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"42ceae90-4d60-11e7-9a4c-ed99bbcaa42b\",\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"id\":\"42ced5a0-4d60-11e7-9a4c-ed99bbcaa42b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"id\":\"42ced5a1-4d60-11e7-9a4c-ed99bbcaa42b\",\"field\":\"miscbeat.network.bytes.rx\",\"type\":\"avg\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Interfaces by Incoming traffic\",\"terms_order_by\":\"42ced5a1-4d60-11e7-9a4c-ed99bbcaa42b\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"show_legend\":1,\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"type\":\"top_n\",\"show_grid\":1,\"bar_color_rules\":[{\"id\":\"44596d40-4d60-11e7-9a4c-ed99bbcaa42b\"}],\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Interfaces by Incoming traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"42ceae90-4d60-11e7-9a4c-ed99bbcaa42b\",\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"id\":\"42ced5a0-4d60-11e7-9a4c-ed99bbcaa42b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"42ced5a1-4d60-11e7-9a4c-ed99bbcaa42b\",\"field\":\"miscbeat.network.bytes.rx\",\"type\":\"top_hit\",\"order_by\":\"@timestamp\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Interfaces by Incoming traffic\",\"terms_order_by\":\"_key\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"show_legend\":1,\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"type\":\"top_n\",\"show_grid\":1,\"bar_color_rules\":[{\"id\":\"44596d40-4d60-11e7-9a4c-ed99bbcaa42b\"}],\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -463,11 +440,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
-      "version": "Wzg2MywxXQ==",
+      "updated_at": "2022-06-14T15:19:28.677Z",
+      "version": "Wzk4MSwxXQ==",
       "attributes": {
         "title": "Interfaces by Outgoing traffic",
-        "visState": "{\"title\":\"Interfaces by Outgoing traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"9cdba910-4d60-11e7-9a4c-ed99bbcaa42b\",\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"id\":\"9cdba911-4d60-11e7-9a4c-ed99bbcaa42b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"id\":\"9cdba912-4d60-11e7-9a4c-ed99bbcaa42b\",\"field\":\"miscbeat.network.bytes.tx\",\"type\":\"avg\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Interfaces by Outgoing traffic\",\"terms_order_by\":\"9cdba912-4d60-11e7-9a4c-ed99bbcaa42b\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"show_legend\":1,\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"type\":\"top_n\",\"show_grid\":1,\"bar_color_rules\":[{\"id\":\"9db20be0-4d60-11e7-9a4c-ed99bbcaa42b\"}],\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
+        "visState": "{\"title\":\"Interfaces by Outgoing traffic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"9cdba910-4d60-11e7-9a4c-ed99bbcaa42b\",\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"id\":\"9cdba911-4d60-11e7-9a4c-ed99bbcaa42b\",\"chart_type\":\"line\",\"seperate_axis\":0,\"color\":\"#68BC00\",\"terms_field\":\"miscbeat.network.interface\",\"axis_position\":\"right\",\"point_size\":1,\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"9cdba912-4d60-11e7-9a4c-ed99bbcaa42b\",\"field\":\"miscbeat.network.bytes.tx\",\"type\":\"top_hit\",\"order_by\":\"@timestamp\"}],\"formatter\":\"bytes\",\"split_mode\":\"terms\",\"fill\":0.5,\"line_width\":1,\"label\":\"Interfaces by Outgoing traffic\",\"terms_order_by\":\"_key\",\"stacked\":\"none\",\"split_color_mode\":\"gradient\"}],\"interval\":\"auto\",\"axis_formatter\":\"number\",\"show_legend\":1,\"time_field\":\"@timestamp\",\"axis_position\":\"left\",\"type\":\"top_n\",\"show_grid\":1,\"bar_color_rules\":[{\"id\":\"9db20be0-4d60-11e7-9a4c-ed99bbcaa42b\"}],\"axis_scale\":\"normal\",\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -486,7 +463,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-13T21:19:22.353Z",
+      "updated_at": "2022-06-14T14:41:21.347Z",
       "version": "Wzg2NCwxXQ==",
       "attributes": {
         "description": "",
@@ -496,7 +473,30 @@
         "title": "Tip",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"aggs\":[],\"title\":\"Tip\",\"params\":{\"markdown\":\"**TIP:** To select another host, go to the [System Overview](#/dashboard/Metricbeat-system-overview-ecs) dashboard and double-click a host name.\",\"fontSize\":12},\"type\":\"markdown\"}"
+        "visState": "{\"aggs\":[],\"title\":\"Tip\",\"params\":{\"markdown\":\"**TIP:** To select another host, go to the [System Overview](#/dashboard/Metricbeat-system-overview-ecs) dashboard and click a host name.\",\"fontSize\":12},\"type\":\"markdown\"}"
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "1a357a70-ebf5-11ec-a044-713f3297b517",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-14T15:17:28.087Z",
+      "version": "Wzk2NCwxXQ==",
+      "attributes": {
+        "title": "Network Traffic (Drops and Errors)",
+        "visState": "{\"title\":\"Network Traffic (Drops and Errors)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"table\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"miscbeat.network.drops.rx\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"color_rules\":[{\"id\":\"77170e30-ebf4-11ec-a401-f5db2d59e6af\"}],\"label\":\"Drops In\"},{\"id\":\"e5fec770-ebf4-11ec-a401-f5db2d59e6af\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"e5fec771-ebf4-11ec-a401-f5db2d59e6af\",\"type\":\"top_hit\",\"field\":\"miscbeat.network.errors.rx\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Errors In\"},{\"id\":\"ce173de0-ebf4-11ec-a401-f5db2d59e6af\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"ce173de1-ebf4-11ec-a401-f5db2d59e6af\",\"type\":\"top_hit\",\"field\":\"miscbeat.network.drops.tx\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Drops Out\",\"color_rules\":[{\"id\":\"e3795510-ebf4-11ec-a401-f5db2d59e6af\"}]},{\"id\":\"f381f250-ebf4-11ec-a401-f5db2d59e6af\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"f381f251-ebf4-11ec-a401-f5db2d59e6af\",\"type\":\"top_hit\",\"field\":\"miscbeat.network.errors.tx\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Errors Out\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"bar_color_rules\":[{\"id\":\"5eab8790-ebf4-11ec-a401-f5db2d59e6af\"}],\"pivot_id\":\"miscbeat.network.interface\",\"pivot_type\":\"string\",\"pivot_label\":\"Interface\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
       },
       "references": [],
       "migrationVersion": {
