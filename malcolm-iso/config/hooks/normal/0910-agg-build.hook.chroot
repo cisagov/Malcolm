@@ -1,5 +1,11 @@
 #!/bin/bash
 
+apt-get -qqy update
+
+# aide
+apt-get install --no-install-recommends -y -q aide
+###
+
 # we'll use cURL to get release information and assets from GitHub using the GitHub API
 GITHUB_API_CURL_ARGS=()
 GITHUB_API_CURL_ARGS+=( -fsSL )

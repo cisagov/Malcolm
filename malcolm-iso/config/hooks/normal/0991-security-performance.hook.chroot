@@ -153,6 +153,17 @@ sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
 sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
 usermod -d /var/lib/ntp ntp
 
+# disable default fluentbit configuration
+systemctl disable fluent-bit || true
+
+# add fluentbit logfmt parser
+cat << 'EOF' >> /etc/fluent-bit/parsers.conf
+
+[PARSER]
+    Name logfmt
+    Format logfmt
+EOF
+
 # disable htpdate service, we're going to use cron instead
 systemctl disable htpdate || true
 sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
