@@ -21,8 +21,7 @@
     "ecs_url",
     "ecs_user",
     "ecs_user_agent",
-    "custom_miscbeat",
-    "custom_system"
+    "custom_miscbeat"
   ],
   "template" :{
     "settings" : {

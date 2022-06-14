@@ -56,6 +56,9 @@
                 "errors.tx": { "type": "long" },
                 "errors.rx": { "type": "long" },
                 "errors.total": { "type": "long" },
+                "drops.tx": { "type": "long" },
+                "drops.rx": { "type": "long" },
+                "drops.total": { "type": "long" },
                 "interface": { "type": "keyword" },
                 "details": { "type": "nested" }
               }
