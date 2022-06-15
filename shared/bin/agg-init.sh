@@ -37,6 +37,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # block some call-homes
   BadTelemetry
 
+  # initialize AIDE database if it's not been done yet
+  InitAIDE
+
   # if we need to import prebuilt Malcolm docker images, do so now (but not if we're in a live-usb boot)
   DOCKER_DRIVER="$(docker info 2>/dev/null | grep 'Storage Driver' | cut -d' ' -f3)"
   if [[ -n $DOCKER_DRIVER ]] && [[ "$DOCKER_DRIVER" != "vfs" ]] && [[ -r /malcolm_images.tar.gz ]]; then
