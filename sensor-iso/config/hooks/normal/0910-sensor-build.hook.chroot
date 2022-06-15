@@ -129,6 +129,43 @@ rm -Rf zeek-$ZEEK_VER*
 apt-get install --no-install-recommends -y -q aide aide-common
 chmod a-x /etc/cron.daily/aide
 chattr +i /etc/cron.daily/aide
+mkdir -p /etc/aide/aide.conf.d /var/lib/aide
+touch /var/lib/aide/aide.db
+chmod 600 /var/lib/aide/aide.db
+sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
+cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
+!/capture/
+!/dev/console
+!/dev/disk/
+!/dev/pts/
+!/etc/aide/.aide.conf.swp
+!/etc/aide/.aide.conf.swp
+!/etc/ld.so.cache
+!/etc/lvm/archive
+!/etc/lvm/backup
+!/etc/suricata/rules/
+!/home/
+!/opt/sensor/
+!/opt/yara-rules/
+!/opt/zeek/
+!/root/.*
+!/run/
+!/tmp/
+!/var/backups/
+!/var/cache/
+!/var/lib/apt/daily_lock
+!/var/lib/clamav/
+!/var/lib/dpkg/triggers/Lock
+!/var/lib/logrotate
+!/var/lib/suricata/
+!/var/log/
+!/var/run/
+!/var/spool/
+!/var/lib/dpkg/info/
+!/var/tmp/
+/var/lib/aide/aide\.db(\.new)?$ VarFile
+/var/lib/aide$ VarDir
+EOF
 ###
 
 # suricata

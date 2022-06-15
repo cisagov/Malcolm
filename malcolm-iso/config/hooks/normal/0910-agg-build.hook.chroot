@@ -6,6 +6,39 @@ apt-get -qqy update
 apt-get install --no-install-recommends -y -q aide aide-common
 chmod a-x /etc/cron.daily/aide
 chattr +i /etc/cron.daily/aide
+mkdir -p /etc/aide/aide.conf.d /var/lib/aide
+touch /var/lib/aide/aide.db
+chmod 600 /var/lib/aide/aide.db
+sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
+cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
+!/dev/console
+!/dev/disk/
+!/dev/pts/
+!/etc/aide/.aide.conf.swp
+!/etc/aide/.aide.conf.swp
+!/etc/ld.so.cache
+!/etc/lvm/archive
+!/etc/lvm/backup
+!/home/
+!/malcolm_images.tar.gz
+!/root/.*
+!/run/
+!/tmp/
+!/var/backups/
+!/var/cache/
+!/var/lib/apt/daily_lock
+!/var/lib/clamav/
+!/var/lib/docker/
+!/var/lib/dpkg/triggers/Lock
+!/var/lib/logrotate
+!/var/log/
+!/var/run/
+!/var/spool/
+!/var/lib/dpkg/info/
+!/var/tmp/
+/var/lib/aide/aide\.db(\.new)?$ VarFile
+/var/lib/aide$ VarDir
+EOF
 ###
 
 # we'll use cURL to get release information and assets from GitHub using the GitHub API

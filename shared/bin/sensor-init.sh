@@ -125,6 +125,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # block some call-homes
   BadTelemetry
 
+  # initialize AIDE database if it's not been done yet
+  InitAIDE
+
   exit 0
 else
   exit 1

@@ -2,5 +2,4 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# create AIDE db
-/usr/sbin/aideinit --yes --force
+/usr/bin/aide --config=/etc/aide/aide.conf --check
