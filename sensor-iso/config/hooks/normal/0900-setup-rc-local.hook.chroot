@@ -34,7 +34,7 @@ fi
 
 systemctl mask ctrl-alt-del.target
 
-if [ -s /var/lib/aide/aide.db ]; then
+if [ ! -s /var/lib/aide/aide.db ]; then
     /usr/sbin/aideinit --yes --force
 fi
 
