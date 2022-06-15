@@ -21,7 +21,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/etc/lvm/backup
 !/home/
 !/malcolm_images.tar.gz
-!/root/.*
+!/root/
 !/run/
 !/tmp/
 !/var/backups/

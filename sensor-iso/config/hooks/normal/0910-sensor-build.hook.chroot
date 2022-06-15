@@ -148,7 +148,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/opt/sensor/
 !/opt/yara-rules/
 !/opt/zeek/
-!/root/.*
+!/root/
 !/run/
 !/tmp/
 !/var/backups/
