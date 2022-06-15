@@ -126,7 +126,9 @@ rm -Rf zeek-$ZEEK_VER*
 ###
 
 # aide
-apt-get install --no-install-recommends -y -q aide
+apt-get install --no-install-recommends -y -q aide aide-common
+chmod a-x /etc/cron.daily/aide
+chattr +i /etc/cron.daily/aide
 ###
 
 # suricata
