@@ -35,6 +35,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/var/run/
 !/var/spool/
 !/var/lib/dpkg/info/
+!/var/lib/systemd-coredump
 !/var/tmp/
 /var/lib/aide/aide\.db(\.new)?$ VarFile
 /var/lib/aide$ VarDir
