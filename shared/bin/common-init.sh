@@ -128,10 +128,3 @@ function BadTelemetry() {
     echo '127.0.0.1 detectportal.prod.mozaws.net' >> /etc/hosts
   fi
 }
-
-# init AIDE DB
-function InitAIDE() {
-  if [[ ! -s /var/lib/aide/aide.db ]]; then
-    /usr/sbin/aideinit --yes --force
-  fi
-}
