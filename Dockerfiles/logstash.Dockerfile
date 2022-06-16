@@ -92,7 +92,7 @@ RUN yum install -y epel-release && \
                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                                        logstash-filter-useragent \
                                        logstash-input-beats logstash-output-elasticsearch && \
-    logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-3.4.0.gem && \
+    logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-*.gem && \
     rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
