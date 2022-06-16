@@ -134,53 +134,60 @@ touch /var/lib/aide/aide.db
 chmod 600 /var/lib/aide/aide.db
 sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
 cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
-!.*/__pycache__/
-!/capture/
-!/dev/console
-!/dev/disk/
-!/dev/pts/
-!/etc/aide/.aide.conf.swp
-!/etc/aide/.aide.conf.swp
-!/etc/ld.so.cache
-!/etc/lvm/archive
-!/etc/lvm/backup
-!/etc/suricata/rules/
-!/home/
-!/opt/sensor/
-!/opt/yara-rules/
-!/opt/zeek/
-!/root/
-!/run/
-!/tmp/
-!/var/backups/
-!/var/cache/
-!/var/lib/apt/daily_lock
-!/var/lib/apt/lists/
-!/var/lib/clamav/
-!/var/lib/dhcp/
-!/var/lib/dpkg/info/
-!/var/lib/dpkg/triggers/Lock
-!/var/lib/logrotate
-!/var/lib/sudo/lectured/
-!/var/lib/suricata/
-!/var/lib/systemd-coredump
-!/var/log/
-!/var/mail/
-!/var/run/
-!/var/spool/
-!/var/tmp/
-
 /etc/cron\.d$ d VarDir-n-c-m
 /etc/hostname$ f VarFile
 /etc/hosts$ f VarFile
-/etc/network/interfaces.d$ d VarDir
-/etc/NetworkManager/system-connections$ d VarDir
-/usr/lib/python3/dist-packages$ d VarDirTime-n
+/etc/ntp\.conf$ f VarFile
+/etc/rc\d*\.d$ d VarDir-n-c-m
+/etc/rc\d*\.d/.+$ l VarInode
+/etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
+/etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
 /usr/local/bin$ d VarDirTime-n
-/usr/local/lib/python3.9/dist-packages$ d VarDirTime-n
+/usr/local/lib/python3\.9/dist-packages$ d VarDir-n-c-m
 /var/lib/aide$ d VarDir
 /var/lib/aide/aide\.db(\.new)?$ f VarFile
 /var/lib/samba$ d VarDir-n-c-m
+
+!/.*/__pycache__(/|$)
+!/capture(/|$)
+!/dev/console$
+!/dev/disk(/|$)
+!/dev/pts(/|$)
+!/etc/.*\.bak$
+!/etc/aide/\.aide\.conf\.swp$
+!/etc/ld\.so\.cache$
+!/etc/lvm/archive(/|$)
+!/etc/lvm/backup(/|$)
+!/etc/network/interfaces.d(/|$)
+!/etc/NetworkManager/system-connections(/|$)
+!/etc/suricata/rules(/|$)
+!/home(/|$)
+!/opt/sensor(/|$)
+!/opt/yara-rules(/|$)
+!/opt/zeek(/|$)
+!/root(/|$)
+!/run(/|$)
+!/tmp(/|$)
+!/var/backups(/|$)
+!/var/cache(/|$)
+!/var/lib/apt/daily_lock$
+!/var/lib/apt/lists(/|$)
+!/var/lib/clamav(/|$)
+!/var/lib/dhcp(/|$)
+!/var/lib/docker(/|$)
+!/var/lib/dpkg/info(/|$)
+!/var/lib/dpkg/triggers/Lock$
+!/var/lib/logrotate$
+!/var/lib/samba(/|$)
+!/var/lib/sudo/lectured(/|$)
+!/var/lib/suricata(/|$)
+!/var/lib/systemd-coredump$
+!/var/log(/|$)
+!/var/mail(/|$)
+!/var/run(/|$)
+!/var/spool(/|$)
+!/var/tmp(/|$)
+
 EOF
 ###
 
