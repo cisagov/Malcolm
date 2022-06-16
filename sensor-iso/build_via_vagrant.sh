@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+unset SSH_AUTH_SOCK
 
 function vm_state() {
   vagrant status --machine-readable | grep ",state," | egrep -o '([a-z_]*)$'

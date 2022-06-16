@@ -1,5 +1,6 @@
 #!/bin/bash
 
+unset SSH_AUTH_SOCK
 unset FORCE_PROVISION
 DOCKER_IMAGES_TGZ=""
 while getopts fd: opts; do
