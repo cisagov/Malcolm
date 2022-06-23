@@ -116,6 +116,7 @@ sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
 echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
 echo "umask 077" >> /etc/profile
 echo "export UMASK=077" >> /etc/profile
+echo "export PYTHONDONTWRITEBYTECODE=1" >> /etc/profile
 
 # enable cron logging
 sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
