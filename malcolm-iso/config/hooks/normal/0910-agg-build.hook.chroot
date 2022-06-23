@@ -28,7 +28,6 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
 /etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
 /usr/local/bin$ d VarDirTime-n
-/usr/local/lib/python\d+\.\d+/dist-packages/.+(/|$) d VarDir-n-c-m
 /var/lib/aide$ d VarDir-n-c-m
 /var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m
 /var/lib/samba$ d VarDir-n-c-m
@@ -51,6 +50,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/root(/|$)
 !/run(/|$)
 !/tmp(/|$)
+!/usr/local/lib/python\d+\.\d+/dist-packages/debinterface(/|$)
 !/var/backups(/|$)
 !/var/cache(/|$)
 !/var/lib/AccountsService(/|$)
