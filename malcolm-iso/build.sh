@@ -140,6 +140,7 @@ if [ -d "$WORKDIR" ]; then
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
+  echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/

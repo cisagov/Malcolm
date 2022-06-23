@@ -110,6 +110,7 @@ if [ -d "$WORKDIR" ]; then
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
+  echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"

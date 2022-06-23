@@ -20,7 +20,6 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
 /etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
 /usr/local/bin$ d VarDirTime-n
-/usr/local/lib/python3\.9/dist-packages$ d VarDir-n-c-m
 /var/lib/aide$ d VarDir
 /var/lib/aide/aide\.db(\.new)?$ f VarFile
 /var/lib/samba$ d VarDir-n-c-m
@@ -36,6 +35,8 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/etc/lvm/backup(/|$)
 !/etc/network/interfaces.d(/|$)
 !/etc/NetworkManager/system-connections(/|$)
+!/etc/rc\d*\.d/.*ntp$
+!/etc/systemd/system/multi-user\.target\.wants/ntp.service$
 !/home(/|$)
 !/malcolm_images\.tar\.gz$
 !/root(/|$)
