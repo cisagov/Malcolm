@@ -134,17 +134,25 @@ touch /var/lib/aide/aide.db
 chmod 600 /var/lib/aide/aide.db
 sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
 cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
-/etc/cron\.d$ d VarDir-n-c-m
-/etc/hostname$ f VarFile
-/etc/hosts$ f VarFile
-/etc/ntp\.conf$ f VarFile
+/etc/at\.allow$ f Full-n-c-m
+/etc/cron\.\w+$ d VarDir-n-c-m
+/etc/cron\.allow$ f Full-n-c-m
+/etc/crontab$ f VarFile-n-c-m
+/etc/group-?$ f VarFile-n-c-m
+/etc/gshadow-?$ f VarFile-n-c-m
+/etc/hostname$ f VarFile-n-c-m
+/etc/hosts$ f VarFile-n-c-m
+/etc/installer-?$ f Full-n-c-m
+/etc/ntp\.conf$ f VarFile-n-c-m
+/etc/passwd-?$ f VarFile-n-c-m
 /etc/rc\d*\.d$ d VarDir-n-c-m
 /etc/rc\d*\.d/.+$ l VarInode
+/etc/shadow-?$ f VarFile-n-c-m
 /etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
 /etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
 /usr/local/bin$ d VarDirTime-n
-/var/lib/aide$ d VarDir
-/var/lib/aide/aide\.db(\.new)?$ f VarFile
+/var/lib/aide$ d VarDir-n-c-m
+/var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m
 /var/lib/samba$ d VarDir-n-c-m
 
 !/.*/__pycache__(/|$)
@@ -171,14 +179,20 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/tmp(/|$)
 !/var/backups(/|$)
 !/var/cache(/|$)
+!/var/lib/AccountsService(/|$)
 !/var/lib/apt/daily_lock$
 !/var/lib/apt/lists(/|$)
 !/var/lib/clamav(/|$)
+!/var/lib/colord(/|$)
+!/var/lib/containerd(/|$)
 !/var/lib/dhcp(/|$)
 !/var/lib/docker(/|$)
 !/var/lib/dpkg/info(/|$)
 !/var/lib/dpkg/triggers/Lock$
+!/var/lib/lightdm(/|$)
 !/var/lib/logrotate$
+!/var/lib/NetworkManager(/|$)
+!/var/lib/plymouth(/|$)
 !/var/lib/samba(/|$)
 !/var/lib/sudo/lectured(/|$)
 !/var/lib/suricata(/|$)
