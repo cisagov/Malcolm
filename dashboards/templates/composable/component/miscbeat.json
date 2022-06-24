@@ -5,6 +5,27 @@
         "miscbeat": {
           "properties": {
             "exec": { "type": "keyword", "ignore_above": 1024 },
+            "aide": {
+              "properties": {
+                "start_time": { "type": "date" },
+                "end_time": { "type": "date" },
+                "run_time_seconds": { "type": "integer" },
+                "aide_version": { "type": "keyword" },
+                "outline": { "type": "keyword" },
+                "number_of_entries": {
+                  "properties": {
+                    "total": { "type": "integer" },
+                    "added": { "type": "integer" },
+                    "removed": { "type": "integer" },
+                    "changed": { "type": "integer" }
+                  }
+                },
+                "added": { "type": "nested" },
+                "changed": { "type": "nested" },
+                "details": { "type": "nested" },
+                "databases": { "type": "nested" }
+              }
+            },
             "cpu": {
               "properties": {
                 "cpu_p": { "type": "float" },

@@ -54,6 +54,8 @@ if [ -d "$WORKDIR" ]; then
 
   chown -R root:root *
 
+  mkdir -p ./config/packages.chroot/
+
   # configure installation options
   YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
@@ -141,6 +143,11 @@ if [ -d "$WORKDIR" ]; then
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
   echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
+
+  # clone and build aide .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/../shared/aide/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/../shared/aide:/build aide-build:latest -o /build
+  mv "$SCRIPT_PATH/../shared/aide"/*.deb ./config/packages.chroot/
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/

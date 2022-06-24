@@ -112,6 +112,12 @@ if [ -d "$WORKDIR" ]; then
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
   echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
 
+  # clone and build aide .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/shared/aide/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/shared/aide:/build aide-build:latest -o /build
+  cp "$SCRIPT_PATH/shared/aide"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
+  mv "$SCRIPT_PATH/shared/aide"/*.deb ./config/packages.chroot/
+
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
   pushd "$SCRIPT_PATH/arkime/etc"

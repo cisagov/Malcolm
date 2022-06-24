@@ -125,8 +125,8 @@ mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/spicy-packages /tmp/zeek-packages /opt/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
-# aide
-apt-get install --no-install-recommends -y -q aide aide-common
+# aide itself was built from github master branch (for JSON output)
+apt-get install --no-install-recommends -y -q aide-common
 chmod a-x /etc/cron.daily/aide
 chattr +i /etc/cron.daily/aide
 mkdir -p /etc/aide/aide.conf.d /var/lib/aide
@@ -162,6 +162,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/dev/pts(/|$)
 !/etc/.*\.bak$
 !/etc/aide/\.aide\.conf\.swp$
+!/etc/cron\.d/htpdate$
 !/etc/ld\.so\.cache$
 !/etc/lvm/archive(/|$)
 !/etc/lvm/backup(/|$)
@@ -177,7 +178,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/root(/|$)
 !/run(/|$)
 !/tmp(/|$)
-!/usr/local/lib/python\d+\.\d+/dist-packages/debinterface(/|$)
+!/usr/local/lib/python.*/dist-packages/debinterface(/|$)
 !/var/backups(/|$)
 !/var/cache(/|$)
 !/var/lib/AccountsService(/|$)
