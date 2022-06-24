@@ -1,5 +1,10 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+set -euo pipefail
 
-/usr/bin/aide --config=/etc/aide/aide.conf --check
+aide \
+    --config=/etc/aide/aide.conf \
+    --log-level=error \
+    --after="report_format=json" \
+    --check \
+  | jq -c -M

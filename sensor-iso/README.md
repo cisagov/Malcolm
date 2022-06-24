@@ -294,6 +294,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_ARKIME** - [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/idaholab/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
 * **AUTOSTART_CLAMAV_UPDATES** - Virus database update service for ClamAV (requires sensor to be connected to the internet)
 * **AUTOSTART_FILEBEAT** - [filebeat](#filebeat) Zeek and Suricata log forwarder 
+* **AUTOSTART_FLUENTBIT_AIDE** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/exec) [AIDE](https://aide.github.io/) file system integrity checks
 * **AUTOSTART_FLUENTBIT_AUDITLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/tail) [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs
 * *AUTOSTART_FLUENTBIT_KMSG* - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/kernel-logs) the Linux kernel log buffer (these are generally reflected in syslog as well, which may make this agent redundant)
 * **AUTOSTART_FLUENTBIT_METRICS** - [Fluent Bit](https://fluentbit.io/) agent for collecting [various](https://docs.fluentbit.io/manual/pipeline/inputs) system resource and performance metrics
@@ -547,7 +548,7 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 ## <a name="ComplianceWIP"></a>Hardening compliance issues - work in progress
 
-Hedgehog Linux has recently replaced several [Beats](https://www.elastic.co/beats/) forwarders, including [auditbeat](https://www.elastic.co/beats/auditbeat), with [Fluent Bit](https://fluentbit.io/). While [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs can be configured to be forwarded to an OpenSearch database on an external aggregator, requirements for file integrity checks have not yet been implemented in [AIDE](https://aide.github.io/).
+Hedgehog Linux has recently replaced several [Beats](https://www.elastic.co/beats/) forwarders, including [auditbeat](https://www.elastic.co/beats/auditbeat), with [Fluent Bit](https://fluentbit.io/). While [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs can be configured to be forwarded to an OpenSearch database on an external aggregator, requirements for file integrity checks are in the progress of being implemented with [AIDE](https://aide.github.io/).
 
 Until that work is complete, Hedgehog Linux is not in compliance with the following items:
 
