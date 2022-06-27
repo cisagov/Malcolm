@@ -135,6 +135,8 @@ chmod 600 /var/lib/aide/aide.db
 sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
 cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /etc/at\.allow$ f Full-n-c-m
+/etc/clamav$ d VarDir-n-c-m
+/etc/clamav/.+\.conf$ f VarFile-n-c-m
 /etc/cron\.\w+$ d VarDir-n-c-m
 /etc/cron\.allow$ f Full-n-c-m
 /etc/crontab$ f VarFile-n-c-m
@@ -150,6 +152,9 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /etc/shadow-?$ f VarFile-n-c-m
 /etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
 /etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
+/etc/ufw$ d VarDir-n-c-m
+/etc/ufw/.+\.rules$ f VarFile-n-c-m
+/opt$ d VarDir-n-c-m
 /usr/local/bin$ d VarDirTime-n
 /var/lib/aide$ d VarDir-n-c-m
 /var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m
