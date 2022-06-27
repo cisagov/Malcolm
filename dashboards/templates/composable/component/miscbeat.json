@@ -4,7 +4,7 @@
       "properties": {
         "miscbeat": {
           "properties": {
-            "exec": { "type": "keyword", "ignore_above": 1024 },
+            "exec": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
             "aide": {
               "properties": {
                 "start_time": { "type": "date" },
@@ -19,7 +19,12 @@
                     "changed": { "type": "integer" }
                   }
                 },
-                "details": { "type": "nested" },
+                "details": {
+                  "type": "nested",
+                  "properties": {
+                    "path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
+                  }
+                },
                 "databases": { "type": "nested" }
               }
             },
