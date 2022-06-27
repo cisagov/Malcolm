@@ -11,7 +11,6 @@
                 "end_time": { "type": "date" },
                 "run_time_seconds": { "type": "integer" },
                 "aide_version": { "type": "keyword" },
-                "outline": { "type": "keyword" },
                 "number_of_entries": {
                   "properties": {
                     "total": { "type": "integer" },
@@ -20,8 +19,6 @@
                     "changed": { "type": "integer" }
                   }
                 },
-                "added": { "type": "nested" },
-                "changed": { "type": "nested" },
                 "details": { "type": "nested" },
                 "databases": { "type": "nested" }
               }
