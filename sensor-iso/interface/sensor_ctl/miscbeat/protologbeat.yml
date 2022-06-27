@@ -5,7 +5,7 @@ protologbeat:
   json_mode: true
   merge_fields_to_root: false
   fields_parent: "miscbeat"
-  max_msg_size: 16384
+  max_msg_size: 2097152
 
 #================================ General ======================================
 processors:
