@@ -32,7 +32,8 @@
     "mappings": {
       "properties": {
         "timestamp": { "type": "date" },
-        "node": { "type": "keyword" }
+        "node": { "type": "keyword" },
+        "event.result": { "type": "keyword" }
       }
     }
   }
