@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-27T16:19:44.260Z",
-      "version": "Wzk1MywxXQ==",
+      "updated_at": "2022-06-27T19:43:07.018Z",
+      "version": "Wzk0NywxXQ==",
       "attributes": {
         "title": "Malcolm Sensor File/Directory Integrity",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":7,\"i\":\"1b520d1b-b30e-4216-8c83-3eff88564503\",\"w\":11,\"x\":0,\"y\":0},\"panelIndex\":\"1b520d1b-b30e-4216-8c83-3eff88564503\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":7,\"i\":\"716b7949-a2e4-437b-954b-7d8b13f33b60\",\"w\":18,\"x\":11,\"y\":0},\"panelIndex\":\"716b7949-a2e4-437b-954b-7d8b13f33b60\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":25,\"i\":\"4c570390-7394-4129-b637-81e58e3fa066\",\"w\":19,\"x\":29,\"y\":0},\"panelIndex\":\"4c570390-7394-4129-b637-81e58e3fa066\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\",\"w\":29,\"x\":0,\"y\":7},\"panelIndex\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\",\"w\":48,\"x\":0,\"y\":25},\"panelIndex\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\",\"version\":\"2.0.0\",\"panelRefName\":\"panel_4\"}]",
+        "panelsJSON": "[{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":18,\"h\":7,\"i\":\"1b520d1b-b30e-4216-8c83-3eff88564503\"},\"panelIndex\":\"1b520d1b-b30e-4216-8c83-3eff88564503\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_0\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":14,\"i\":\"1a09a091-d27c-48df-a145-5a33ecc33ffb\"},\"panelIndex\":\"1a09a091-d27c-48df-a145-5a33ecc33ffb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":7,\"w\":18,\"h\":28,\"i\":\"4c570390-7394-4129-b637-81e58e3fa066\"},\"panelIndex\":\"4c570390-7394-4129-b637-81e58e3fa066\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":18,\"y\":14,\"w\":30,\"h\":21,\"i\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\"},\"panelIndex\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":48,\"h\":22,\"i\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\"},\"panelIndex\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -30,7 +30,7 @@
         {
           "name": "panel_1",
           "type": "visualization",
-          "id": "612512a0-f632-11ec-828d-2fb7a4a26e1f"
+          "id": "50e28ff0-f64e-11ec-bc92-999adcbc4e7d"
         },
         {
           "name": "panel_2",
@@ -58,8 +58,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-27T16:05:07.199Z",
-      "version": "WzkzNywxXQ==",
+      "updated_at": "2022-06-27T18:37:24.902Z",
+      "version": "WzgzMywxXQ==",
       "attributes": {
         "title": "Malcolm Sensor File Integrity - Host Chooser",
         "visState": "{\"title\":\"Malcolm Sensor File Integrity - Host Chooser\",\"type\":\"input_control_vis\",\"aggs\":[],\"params\":{\"controls\":[{\"id\":\"1656345860825\",\"fieldName\":\"host.name\",\"parent\":\"\",\"label\":\"Host\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false}}",
@@ -82,24 +82,31 @@
       }
     },
     {
-      "id": "612512a0-f632-11ec-828d-2fb7a4a26e1f",
+      "id": "50e28ff0-f64e-11ec-bc92-999adcbc4e7d",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-27T16:03:44.336Z",
-      "version": "WzkzNSwxXQ==",
+      "updated_at": "2022-06-27T19:28:35.199Z",
+      "version": "Wzk0NSwxXQ==",
       "attributes": {
-        "title": "Malcolm Sensor File Integrity - Files/Directories Checked",
-        "visState": "{\"title\":\"Malcolm Sensor File Integrity - Files/Directories Checked\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"miscbeat.aide.number_of_entries.total\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Files/Directories Checked\",\"terms_field\":\"host.name\",\"filter\":{\"query\":\"miscbeat.aide.number_of_entries.total>0\",\"language\":\"kuery\"},\"value_template\":\"\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"1385b450-f632-11ec-85ab-bf01ffe25cae\"}]}}",
-        "uiStateJSON": "{}",
+        "title": "Malcolm Sensor File/Directory Integrity - Host Check Summary",
+        "visState": "{\"title\":\"Malcolm Sensor File/Directory Integrity - Host Check Summary\",\"type\":\"table\",\"aggs\":[{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.changed\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Changes\"},\"schema\":\"metric\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.removed\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Removals\"},\"schema\":\"metric\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.added\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Additions\"},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"miscbeat.aide.number_of_entries.total\",\"aggregate\":\"max\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Files/Directories Checked\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"@timestamp\",\"customLabel\":\"Last Reported\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":5,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        }
+        },
+        "savedSearchRefName": "search_0"
       },
-      "references": [],
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "d0d5ddb0-f631-11ec-828d-2fb7a4a26e1f"
+        }
+      ],
       "migrationVersion": {
         "visualization": "7.10.0"
       }
@@ -110,8 +117,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-27T16:19:39.203Z",
-      "version": "Wzk1MSwxXQ==",
+      "updated_at": "2022-06-27T18:37:24.902Z",
+      "version": "WzgzNSwxXQ==",
       "attributes": {
         "title": "Malcolm Sensor File/Directory Integrity - Event Type",
         "visState": "{\"title\":\"Malcolm Sensor File/Directory Integrity - Event Type\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Event\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File/Directory Event\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
@@ -140,8 +147,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-27T16:16:07.824Z",
-      "version": "Wzk0NiwxXQ==",
+      "updated_at": "2022-06-27T18:37:24.902Z",
+      "version": "WzgzNiwxXQ==",
       "attributes": {
         "title": "Malcolm Sensor File/Directory Integrity - Path",
         "visState": "{\"title\":\"Malcolm Sensor File/Directory Integrity - Path\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"min\",\"params\":{\"field\":\"@timestamp\",\"customLabel\":\"First Reported\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"unknown\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.path\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Path\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"@timestamp\",\"customLabel\":\"Last Reported\"},\"schema\":\"metric\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
@@ -170,8 +177,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-27T15:57:15.913Z",
-      "version": "WzkwMSwxXQ==",
+      "updated_at": "2022-06-27T18:37:24.902Z",
+      "version": "WzgzNywxXQ==",
       "attributes": {
         "title": "AIDE File Integrity Check - Logs",
         "description": "",
