@@ -162,9 +162,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 
 !/.*/__pycache__(/|$)
 !/capture(/|$)
-!/dev/console$
-!/dev/disk(/|$)
-!/dev/pts(/|$)
+!/dev(/|$)
 !/etc/.*\.bak$
 !/etc/aide/\.aide\.conf\.swp$
 !/etc/cron\.d/htpdate$
