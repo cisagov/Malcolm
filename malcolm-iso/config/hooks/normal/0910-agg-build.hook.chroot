@@ -38,9 +38,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /var/lib/samba$ d VarDir-n-c-m
 
 !/.*/__pycache__(/|$)
-!/dev/console$
-!/dev/disk(/|$)
-!/dev/pts(/|$)
+!/dev(/|$)
 !/etc/.*\.bak$
 !/etc/aide/\.aide\.conf\.swp$
 !/etc/cron\.d/htpdate$
