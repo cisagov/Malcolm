@@ -25,6 +25,9 @@
                     "path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
                   }
                 },
+                "added": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+                "changed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+                "removed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "databases": { "type": "nested" }
               }
             },
