@@ -1,14 +1,24 @@
-protologbeat:
-  address: "127.0.0.1"
-  port: ${MISCBEAT_PORT:9516}
-  protocol: "tcp"
-  json_mode: true
-  merge_fields_to_root: false
-  fields_parent: "miscbeat"
-  max_msg_size: 8912896
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+filebeat.inputs:
+- type: tcp
+  host: "127.0.0.1:${MISCBEAT_PORT:9516}"
+  max_connections: 32
+  
 #================================ General ======================================
 processors:
+  - decode_json_fields:
+      fields: [ "message" ]
+      process_array: false
+      max_depth: 1
+      target: "miscbeat"
+      overwrite_keys: false
+      add_error_key: true
+  - drop_fields:
+      when:
+        has_fields: [ "miscbeat" ]
+      fields: [ "message" ]
+      ignore_missing: true
   - add_tags:
       tags: [_malcolm_beats, _malcolm_miscbeat]
 
