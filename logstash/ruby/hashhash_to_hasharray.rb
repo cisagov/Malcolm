@@ -18,8 +18,8 @@ end
 def filter(event)
   _source_hash = event.get("#{@source}")
   if !_source_hash.nil? and _source_hash.is_a?(Hash) then
-    event.set("#{@target_keys_array}", _source_hash.keys) unless @target_keys_array.nil? and @target_keys_array.empty?
-    event.set("#{@target_hash_array}", _source_hash.map { |k, v| v.merge(@name_key => k) }) unless @target_hash_array.nil? and @target_hash_array.empty?
+    event.set("#{@target_keys_array}", _source_hash.keys) unless @target_keys_array.nil? or @target_keys_array.empty?
+    event.set("#{@target_hash_array}", _source_hash.map { |k, v| v.merge(@name_key => k) }) unless @target_hash_array.nil? or @target_hash_array.empty?
   end
   [event]
 end
