@@ -64,7 +64,7 @@ class Constants:
 
     BEAT_CMD = {
         FILEBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[FILEBEAT]}" --path.config "{BEAT_DIR[FILEBEAT]}" --path.data "{BEAT_DIR[FILEBEAT]}/data" --path.logs "{BEAT_DIR[FILEBEAT]}/logs" -c "{BEAT_DIR[FILEBEAT]}/{FILEBEAT}.yml"',
-        MISCBEAT: f'protologbeat --path.home "{BEAT_DIR[MISCBEAT]}" --path.config "{BEAT_DIR[MISCBEAT]}" --path.data "{BEAT_DIR[MISCBEAT]}/data" --path.logs "{BEAT_DIR[MISCBEAT]}/logs" -c "{BEAT_DIR[MISCBEAT]}/protologbeat.yml"',
+        MISCBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[MISCBEAT]}" --path.config "{BEAT_DIR[MISCBEAT]}" --path.data "{BEAT_DIR[MISCBEAT]}/data" --path.logs "{BEAT_DIR[MISCBEAT]}/logs" -c "{BEAT_DIR[MISCBEAT]}/{FILEBEAT}.yml"',
     }
 
     # specific to beats forwarded to logstash (eg., filebeat, etc.)
@@ -107,7 +107,7 @@ class Constants:
     MSG_CONFIG_GENERIC = 'Configure {}'
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
-    MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f'Configure miscellaneous log forwarding via protologbeat')
+    MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'

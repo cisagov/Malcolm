@@ -14,6 +14,6 @@ pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
 mkdir -p "$SCRIPT_PATH/data"
 
-protologbeat --path.home "$SCRIPT_PATH" --path.config "$SCRIPT_PATH" --path.data "$SCRIPT_PATH/data" -c "$SCRIPT_PATH/protologbeat.yml" -e
+filebeat --path.home "$SCRIPT_PATH" --path.config "$SCRIPT_PATH" --path.data "$SCRIPT_PATH/data" -c "$SCRIPT_PATH/filebeat.yml" -e
 
 popd  >/dev/null 2>&1

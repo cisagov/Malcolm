@@ -281,7 +281,7 @@ Once you have specified all of the filebeat parameters, you will be presented wi
 
 ### <a name="miscbeat"></a>miscbeat: System metrics forwarding
 
-The sensor uses [Fluent Bit](https://fluentbit.io/) to gather miscellaneous system resource metrics (CPU, network I/O, disk I/O, memory utilization, temperature, etc.) and the [Beats](https://github.com/mmguero-dev/protologbeat) protocol to forward these metrics to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database. Metrics categories can be enabled/disabled as described in the [autostart services](#ConfigAutostart) section of this document.
+The sensor uses [Fluent Bit](https://fluentbit.io/) to gather miscellaneous system resource metrics (CPU, network I/O, disk I/O, memory utilization, temperature, etc.) and the [Beats](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) protocol to forward these metrics to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database. Metrics categories can be enabled/disabled as described in the [autostart services](#ConfigAutostart) section of this document.
 
 This forwarder's configuration is almost identical to that of [filebeat](#filebeat) in the previous section. Select `miscbeat` from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
@@ -300,7 +300,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_FLUENTBIT_METRICS** - [Fluent Bit](https://fluentbit.io/) agent for collecting [various](https://docs.fluentbit.io/manual/pipeline/inputs) system resource and performance metrics
 * **AUTOSTART_FLUENTBIT_SYSLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/syslog) Linux syslog messages
 * **AUTOSTART_FLUENTBIT_THERMAL** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/thermal) system temperatures
-* **AUTOSTART_MISCBEAT** - [protologbeat](https://github.com/mmguero-dev/protologbeat) forwarder which sends system metrics collected by [Fluent Bit](https://fluentbit.io/) to a remote Logstash instance (e.g., [Malcolm](https://github.com/idaholab/Malcolm)'s)
+* **AUTOSTART_MISCBEAT** - [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) forwarder which sends system metrics collected by [Fluent Bit](https://fluentbit.io/) to a remote Logstash instance (e.g., [Malcolm](https://github.com/idaholab/Malcolm)'s)
 * *AUTOSTART_NETSNIFF* - [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
 * **AUTOSTART_PRUNE_PCAP** - storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
 * **AUTOSTART_PRUNE_ZEEK** - storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
@@ -496,7 +496,7 @@ Please review the notes for these additional rules. While not claiming an except
 | [SV-86623r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71999) | Vendor packaged system security patches and updates must be installed and up to date. | When the Hedgehog Linux sensor appliance software is built, all of the latest applicable security patches and updates are included in it. How future updates are to be handled is still in design. |
 | [SV-86833r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72209) | The system must send rsyslog output to a log aggregation server. | Syslogs are forwarded to an OpenSearch database running on another system via [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-syslog.html), though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
 | [SV-86691r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72067) | The operating system must implement NIST FIPS-validated cryptography for the following: to provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Hedgehog Linux does use FIPS-compatible libraries for cryptographic functions. However, the kernel parameter being checked by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is incompatible with some of the systems initialization scripts.|
-| [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | Hedgehog Linux uses uses [Fluent Bit](https://fluentbit.io/) to monitor audit logs and [Beats](https://github.com/mmguero-dev/protologbeat) to securely forward them for storage in an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). Local logs are generated when this network connection is broken, and it resumes automatically. |
+| [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | Hedgehog Linux uses uses [Fluent Bit](https://fluentbit.io/) to monitor audit logs and [Beats](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to securely forward them for storage in an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). Local logs are generated when this network connection is broken, and it resumes automatically. |
 
 In addition, DISA STIG rules SV-86663r1, SV-86695r2, SV-86759r3, SV-86761r3, SV-86763r3, SV-86765r3, SV-86595r1, and SV-86615r2 relate to the SELinux kernel which is not used in Hedgehog Linux, and are thus skipped.
 
@@ -645,24 +645,10 @@ user@otherbox's password:
 filebeat-tweaked-7.6.2-amd64.deb                                                100%   13MB  65.9MB/s   00:00    
 arkime_2.2.3-1_amd64.deb                                                        100%  113MB  32.2MB/s   00:03    
 netsniff-ng_0.6.6-1_amd64.deb                                                   100%  330KB  52.1MB/s   00:00    
-protologbeat                                                                    100%   56MB  38.1MB/s   00:01    
 zeek_3.0.20-1_amd64.deb                                                         100%   26MB  63.1MB/s   00:00
 ```
 
-12. Replace the old `/usr/local/bin/protologbeat` with the new one:
-```
-root@hedgehog:/tmp# cp -biv hedgehog_install_artifacts/protologbeat /usr/local/bin/protologbeat 
-cp: overwrite '/usr/local/bin/protologbeat'? y
-'hedgehog_install_artifacts/protologbeat' -> '/usr/local/bin/protologbeat' (backup: '/usr/local/bin/protologbeat~')
-
-root@hedgehog:/tmp# ls -l /usr/local/bin/protologbeat
--rwxr-xr-x 1 root root 58895456 May  8 15:45 /usr/local/bin/protologbeat
-
-root@hedgehog:/tmp# /usr/local/bin/protologbeat version
-protologbeat version 7.6.0 (amd64), libbeat 7.6.0 [unknown built unknown]
-```
-
-13. Blow away the old `zeek` package, we're going to start clean with that one particularly. The others should be fine to upgrade in place.
+12. Blow away the old `zeek` package, we're going to start clean with that one particularly. The others should be fine to upgrade in place.
 ```
 root@hedgehog:/opt# apt-get --purge remove zeek
 Reading package lists... Done
@@ -682,7 +668,7 @@ dpkg: warning: while removing zeek, directory '/opt/zeek/bin' not empty so not r
 root@hedgehog:/opt# rm -rf /opt/zeek*
 ```
 
-14. Install the new .deb files. You're going to have some warnings, but that's okay.
+13. Install the new .deb files. You're going to have some warnings, but that's okay.
 ```
 root@hedgehog:/tmp# dpkg -i hedgehog_install_artifacts/*.deb
 (Reading database ... 118149 files and directories currently installed.)
@@ -707,10 +693,10 @@ Processing triggers for systemd (232-25+deb9u12) ...
 Processing triggers for man-db (2.7.6.1-2) ...
 ```
 
-15. Fix anything that might need fixing as far as the deb package requirements go
+14. Fix anything that might need fixing as far as the deb package requirements go
     - `apt-get -f install`
 
-16. We just installed a Zeek .deb, but the third-part plugins packages and local config weren't part of that package. So we're going to `rsync` those from the other box where we have the ISO and `filesystem.squashfs` mounted as well:
+15. We just installed a Zeek .deb, but the third-part plugins packages and local config weren't part of that package. So we're going to `rsync` those from the other box where we have the ISO and `filesystem.squashfs` mounted as well:
 ```
 root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/opt/zeek/ /opt/zeek 
 user@otherbox's password: 
@@ -734,7 +720,7 @@ lrwxrwxrwx  1 root root    27 May  6 21:52 zeek-plugin-s7comm -> packages/zeek-p
 lrwxrwxrwx  1 root root    24 May  6 21:52 zeek-plugin-tds -> packages/zeek-plugin-tds
 ```
 
-17. The `zeekctl` component of zeek doesn't like being run by an unprivileged user unless the whole directory is owned by that user. As Hedgehog Linux runs everything it can as an unprivileged user, we're going to reset zeek to a "clean" state after each reboot. Zeek's config files will get regenerated when Zeek itself is started. So, now make a complete backup of `/opt/zeek` as it's going to have its ownership changed during runtime:
+16. The `zeekctl` component of zeek doesn't like being run by an unprivileged user unless the whole directory is owned by that user. As Hedgehog Linux runs everything it can as an unprivileged user, we're going to reset zeek to a "clean" state after each reboot. Zeek's config files will get regenerated when Zeek itself is started. So, now make a complete backup of `/opt/zeek` as it's going to have its ownership changed during runtime:
 ```
 root@hedgehog:/tmp# rsync -a /opt/zeek/ /opt/zeek.orig
 
@@ -747,7 +733,7 @@ drwxr-xr-x  8 root   root    4096 May  8 15:48 zeek
 drwxr-xr-x  8 root   root    4096 May  8 15:48 zeek.orig
 ```
 
-18. Grab other new scripts and stuff from our mount of the ISO using `rsync`:
+17. Grab other new scripts and stuff from our mount of the ISO using `rsync`:
 ```
 root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/usr/local/bin/ /usr/local/bin
 user@otherbox's password: 
@@ -770,7 +756,7 @@ root@hedgehog:/tmp# ls -l /opt/ | grep '\-rules'
 drwxr-xr-x  8 root   root    4096 May  8 15:48 capa-rules
 drwxr-xr-x  8 root   root  24576  May  8 15:48 yara-rules
 
-root@hedgehog:/tmp# for BEAT in filebeat protologbeat; do rsync -a user@otherbox:/media/squash/usr/share/$BEAT/kibana/ /usr/share/$BEAT/kibana; done
+root@hedgehog:/tmp# for BEAT in filebeat; do rsync -a user@otherbox:/media/squash/usr/share/$BEAT/kibana/ /usr/share/$BEAT/kibana; done
 user@otherbox's password: 
 user@otherbox's password: 
 
@@ -783,7 +769,7 @@ user@otherbox's password:
 root@hedgehog:/tmp# chmod 400 /etc/sudoers.d/*
 ```
 
-19. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
+18. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
 
 commands:
 
@@ -834,10 +820,10 @@ root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/node /usr/local/bin
 root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/npx /usr/local/bin
 ```
 
-20. Back up unprivileged user sensor-specific config and scripts:
+19. Back up unprivileged user sensor-specific config and scripts:
     - `mv /opt/sensor/ /opt/sensor_upgrade_backup_$(date +%Y-%m-%d)`
 
-21. Grab unprivileged user sensor-specific config and scripts from our mount of the ISO using `rsync` and change its ownership to the unprivileged user:
+20. Grab unprivileged user sensor-specific config and scripts from our mount of the ISO using `rsync` and change its ownership to the unprivileged user:
 ```
 root@hedgehog:/tmp# rsync -av user@otherbox:/media/squash/opt/sensor /opt/
 user@otherbox's password: 
@@ -856,7 +842,7 @@ drwxr-xr-x  4 sensor sensor  4096 May  6 22:00 sensor
 drwxr-x---  4 sensor sensor  4096 May  8 14:33 sensor_upgrade_backup_2020-05-08
 ```
 
-22. Leave the root shell and `cd` to `/opt`
+21. Leave the root shell and `cd` to `/opt`
 ```
 root@hedgehog:~# exit
 logout
@@ -867,7 +853,7 @@ sensor
 sensor@hedgehog:~$ cd /opt
 ```
 
-23. Compare the old and new `control_vars.conf` files
+22. Compare the old and new `control_vars.conf` files
 ```
 sensor@hedgehog:opt$ diff sensor_upgrade_backup_2020-05-08/sensor_ctl/control_vars.conf sensor/sensor_ctl/control_vars.conf 
 1,2c1,2
@@ -889,16 +875,16 @@ cp: overwrite 'sensor/sensor_ctl/control_vars.conf'? y
 
 If there are major differences or new variables, continue on to the next step, in a minute you'll need to run `capture-config` to configure from scratch anyway.
 
-24. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
+23. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
 ```
 sensor@hedgehog:opt$ for BEAT in filebeat miscbeat; do cp /opt/sensor_upgrade_backup_2020-05-08/sensor_ctl/$BEAT/data/* /opt/sensor/sensor_ctl/$BEAT/data/; done
 
 sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/logstash-client-certificates/
 ```
 
-25. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
+24. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
 
-26. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
+25. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
 
 ## Post-upgrade
 
