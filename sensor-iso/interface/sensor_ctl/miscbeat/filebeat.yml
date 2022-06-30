@@ -3,6 +3,7 @@
 filebeat.inputs:
 - type: tcp
   host: "127.0.0.1:${MISCBEAT_PORT:9516}"
+  max_message_size: 20MB
   max_connections: 32
   
 #================================ General ======================================
