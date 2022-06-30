@@ -15,7 +15,7 @@ GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 
 ZEEK_VER=4.2.2-0
 ZEEK_LTS=
-SPICY_VER=1.4.1
+SPICY_VER=1.5.0
 ZEEK_DIR="/opt/zeek"
 SPICY_DIR="/opt/spicy"
 export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH

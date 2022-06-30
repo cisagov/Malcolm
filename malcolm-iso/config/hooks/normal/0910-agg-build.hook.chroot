@@ -103,6 +103,7 @@ RELEASE_FILE_REGEX="Linux-64bit\\\.tar\\\.gz$"
 cd /usr/local/bin
 curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxvf - croc
 chmod 755 ./croc
+chown root:root ./croc
 ###
 
 # step
@@ -113,5 +114,6 @@ mkdir -p ./step
 curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./step --strip-components 1
 mv ./step/bin/step /usr/local/bin/step
 chmod 755 /usr/local/bin/step
+chown root:root /usr/local/bin/step
 rm -rf /tmp/step*
 ###
