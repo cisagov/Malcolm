@@ -25,12 +25,10 @@ ENV PUSER_PRIV_DROP true
 
 # for download and install
 ARG ZEEK_LTS=
-ARG ZEEK_VERSION=4.2.2-0
-ARG SPICY_VERSION=1.5.0
+ARG ZEEK_VERSION=5.0.0-0
 
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
-ENV SPICY_VERSION $SPICY_VERSION
 
 ENV SUPERCRONIC_VERSION "0.2.1"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
@@ -107,15 +105,14 @@ RUN apt-get -q update && \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_all.deb" && \
       dpkg -i ./*.deb && \
-    mkdir -p /tmp/spicy-packages && \
-      cd /tmp/spicy-packages && \
     curl -sSL --remote-name-all \
       "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb" && \
       dpkg -i ./*.deb && \
@@ -127,6 +124,7 @@ RUN apt-get -q update && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
+    rm -f /opt/zeek/bin/spicyz && \
     zkg install --force --skiptests zeek/spicy-plugin && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
     ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
@@ -136,9 +134,11 @@ RUN apt-get -q update && \
     rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
     ( find "${ZEEK_DIR}/" "${SPICY_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
     mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/ && \
+      rm -f "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/bin/spicyz \
                "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz && \
     mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
+      rm -f "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
       ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
                "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
