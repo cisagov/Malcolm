@@ -7,7 +7,6 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
-SPICY_DIR=${SPICY_DIR:-/opt/spicy}
 ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
 
 # going to clone under /usr/local/src
