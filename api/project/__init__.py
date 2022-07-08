@@ -542,9 +542,9 @@ def fields():
     """
     args = get_request_arguments(request)
 
-    template = args['template'] if 'template' in args else app.config["MALCOLM_TEMPLATE"]
+    templateName = args['template'] if 'template' in args else app.config["MALCOLM_TEMPLATE"]
     pattern = args['pattern'] if 'pattern' in args else app.config["ARKIME_INDEX_PATTERN"]
-    arkimeFields = (template == app.config["MALCOLM_TEMPLATE"]) and (pattern == app.config["ARKIME_INDEX_PATTERN"])
+    arkimeFields = (templateName == app.config["MALCOLM_TEMPLATE"]) and (pattern == app.config["ARKIME_INDEX_PATTERN"])
 
     fields = defaultdict(dict)
 
@@ -556,26 +556,52 @@ def fields():
             ).extra(size=3000)
             for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
                 if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
+                    if debugApi:
+                        hit['source'] = 'arkime'
                     fields[fieldname] = {
                         'description': deep_get(hit, ['help']),
                         'type': field_type_map[deep_get(hit, ['type'])],
                     }
+                    if debugApi:
+                        fields[fieldname]['original'] = [hit]
         except Exception as e:
             if debugApi:
                 print(f"{type(e).__name__}: {str(e)} getting Arkime fields")
 
-    # get fields from OpenSearch template
+    # get fields from OpenSearch template (and descendant components)
     try:
-        for template in deep_get(
-            requests.get(f'{app.config["OPENSEARCH_URL"]}/_index_template/{template}').json(),
-            ["index_templates"],
-        ):
+        getTemplateResponseJson = requests.get(f'{app.config["OPENSEARCH_URL"]}/_index_template/{templateName}').json()
+
+        for template in deep_get(getTemplateResponseJson, ["index_templates"]):
+            # top-level fields
             for fieldname, fieldinfo in deep_get(
                 template,
                 ["index_template", "template", "mappings", "properties"],
             ).items():
+                if debugApi:
+                    fieldinfo['source'] = f'opensearch.{templateName}'
                 if 'type' in fieldinfo:
                     fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+                if debugApi:
+                    fields[fieldname]['original'] = fields[fieldname].get('original', []) + [fieldinfo]
+
+            # descendant component fields
+            for componentName in get_iterable(deep_get(template, ["index_template", "composed_of"])):
+                getComponentResponseJson = requests.get(
+                    f'{app.config["OPENSEARCH_URL"]}/_component_template/{componentName}'
+                ).json()
+                for component in get_iterable(deep_get(getComponentResponseJson, ["component_templates"])):
+                    for fieldname, fieldinfo in deep_get(
+                        component,
+                        ["component_template", "template", "mappings", "properties"],
+                    ).items():
+                        if debugApi:
+                            fieldinfo['source'] = f'opensearch.{templateName}.{componentName}'
+                        if 'type' in fieldinfo:
+                            fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+                        if debugApi:
+                            fields[fieldname]['original'] = fields[fieldname].get('original', []) + [fieldinfo]
+
     except Exception as e:
         if debugApi:
             print(f"{type(e).__name__}: {str(e)} getting OpenSearch index template fields")
@@ -590,10 +616,14 @@ def fields():
             },
         ).json()['fields']:
             if fieldname := deep_get(field, ['name']):
+                if debugApi:
+                    field['source'] = 'dashboards'
                 field_types = deep_get(field, ['esTypes'], [])
                 fields[fieldname]['type'] = field_type_map[
                     field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
                 ]
+                if debugApi:
+                    fields[fieldname]['original'] = fields[fieldname].get('original', []) + [field]
     except Exception as e:
         if debugApi:
             print(f"{type(e).__name__}: {str(e)} getting OpenSearch Dashboards index pattern fields")
