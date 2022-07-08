@@ -549,42 +549,54 @@ def fields():
     fields = defaultdict(dict)
 
     if arkimeFields:
-        # get fields from Arkime's field's table
-        s = opensearch_dsl.Search(
-            using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
-        ).extra(size=3000)
-        for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
-            if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
-                fields[fieldname] = {
-                    'description': deep_get(hit, ['help']),
-                    'type': field_type_map[deep_get(hit, ['type'])],
-                }
+        try:
+            # get fields from Arkime's field's table
+            s = opensearch_dsl.Search(
+                using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
+            ).extra(size=3000)
+            for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
+                if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
+                    fields[fieldname] = {
+                        'description': deep_get(hit, ['help']),
+                        'type': field_type_map[deep_get(hit, ['type'])],
+                    }
+        except Exception as e:
+            if debugApi:
+                print(f"{type(e).__name__}: {str(e)} getting Arkime fields")
 
     # get fields from OpenSearch template
-    for template in deep_get(
-        requests.get(f'{app.config["OPENSEARCH_URL"]}/_index_template/{template}').json(),
-        ["index_templates"],
-    ):
-        for fieldname, fieldinfo in deep_get(
-            template,
-            ["index_template", "template", "mappings", "properties"],
-        ).items():
-            if 'type' in fieldinfo:
-                fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+    try:
+        for template in deep_get(
+            requests.get(f'{app.config["OPENSEARCH_URL"]}/_index_template/{template}').json(),
+            ["index_templates"],
+        ):
+            for fieldname, fieldinfo in deep_get(
+                template,
+                ["index_template", "template", "mappings", "properties"],
+            ).items():
+                if 'type' in fieldinfo:
+                    fields[fieldname]['type'] = field_type_map[deep_get(fieldinfo, ['type'])]
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting OpenSearch index template fields")
 
     # get fields from OpenSearch dashboards
-    for field in requests.get(
-        f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
-        params={
-            'pattern': pattern,
-            'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
-        },
-    ).json()['fields']:
-        if fieldname := deep_get(field, ['name']):
-            field_types = deep_get(field, ['esTypes'], [])
-            fields[fieldname]['type'] = field_type_map[
-                field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
-            ]
+    try:
+        for field in requests.get(
+            f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
+            params={
+                'pattern': pattern,
+                'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+            },
+        ).json()['fields']:
+            if fieldname := deep_get(field, ['name']):
+                field_types = deep_get(field, ['esTypes'], [])
+                fields[fieldname]['type'] = field_type_map[
+                    field_types[0] if len(field_types) > 0 else deep_get(fields[fieldname], ['type'])
+                ]
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting OpenSearch Dashboards index pattern fields")
 
     for fieldname in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
         fields.pop(fieldname, None)
