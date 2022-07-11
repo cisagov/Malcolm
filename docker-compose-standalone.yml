@@ -318,6 +318,10 @@ services:
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
     depends_on:
       - logstash
+    expose:
+      - 5045
+    ports:
+      - "127.0.0.1:5045:5045"
     volumes:
       - nginx-log-path:/data/nginx:ro
       - ./zeek-logs:/data/zeek
