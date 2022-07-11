@@ -3747,6 +3747,8 @@ Expose Logstash port to external hosts? (y/N): n
 
 Forward Logstash logs to external OpenSearch instance? (y/N): n
 
+Expose Filebeat TCP port to external hosts? (y/N): n
+
 Enable file extraction with Zeek? (y/N): y
 1: none
 2: known
