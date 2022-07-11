@@ -307,6 +307,7 @@ class Installer(object):
         malcolm_install_path,
         expose_opensearch_default=False,
         expose_logstash_default=False,
+        expose_filebeat_default=False,
         restart_mode_default=False,
     ):
         global args
@@ -568,6 +569,9 @@ class Installer(object):
             externalEsHost = ""
             externalEsSsl = False
             externalEsSslVerify = False
+        filebeatTcpOpen = InstallerYesOrNo(
+            'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
+        )
 
         # input file extraction parameters
         allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
@@ -905,6 +909,16 @@ class Installer(object):
                                 line = re.sub(
                                     r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
                                     fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
+                                    line,
+                                )
+
+                        elif currentService == 'filebeat':
+                            # stuff specifically in the filebeat section
+                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IP based on whether it should be externally exposed or not
+                                line = re.sub(
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
 
@@ -1919,6 +1933,16 @@ def main():
         help="Expose OpenSearch port to external hosts",
     )
     parser.add_argument(
+        '-t',
+        '--filebeat-tcp-expose',
+        dest='exposeFilebeatTcp',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Expose Filebeat TCP port to external hosts",
+    )
+    parser.add_argument(
         '-r',
         '--restart-malcolm',
         dest='malcolmAutoRestart',
@@ -2025,6 +2049,7 @@ def main():
             installPath,
             expose_opensearch_default=args.exposeOpenSearch,
             expose_logstash_default=args.exposeLogstash,
+            expose_filebeat_default=args.exposeFilebeatTcp,
             restart_mode_default=args.malcolmAutoRestart,
         )
         eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
