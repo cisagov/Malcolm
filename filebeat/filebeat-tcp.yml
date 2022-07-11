@@ -14,6 +14,12 @@ filebeat.inputs:
   fields:
     tcp_log_format: "${FILEBEAT_TCP_LOG_FORMAT:raw}"
   fields_under_root: true
+  ssl.enabled: ${BEATS_SSL:false}
+  ssl.certificate_authorities: ["/certs/ca.crt"]
+  ssl.certificate: "/certs/client.crt"
+  ssl.key: "/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"
 
 #================================ Processors ===================================
 processors:
