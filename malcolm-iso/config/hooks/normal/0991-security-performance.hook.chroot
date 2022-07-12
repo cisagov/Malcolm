@@ -21,7 +21,8 @@ UFW_ALLOW_RULES=(
   https
   ntp
   ssh
-  5044
+  5044/tcp
+  5045/tcp
   5601/tcp
   9200/tcp
 )
