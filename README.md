@@ -95,7 +95,6 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
         + [Examples](#APIExamples)
-* [Using Beats to forward host logs to Malcolm](#OtherBeats)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
     * [Generating the ISO](#ISOBuild)
@@ -183,23 +182,23 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.0.1           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.0.1           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.0.1           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.0.1           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.0.1           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.0.1           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.0.1           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.0.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.0.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.0.1           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.0.1           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.1.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.1.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.1.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.1.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.1.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.1.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.1.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.1.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.1.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.1.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.1.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 #### Import from pre-packaged tarballs
@@ -257,6 +256,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
+* [Fluent Bit](https://fluentbit.io/) - for forwarding metrics to Malcolm from [network sensors](#Hedgehog) (packet capture appliances)
 * [Mark Baggett](https://github.com/MarkBaggett)'s [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings
 * [Florian Roth](https://github.com/Neo23x0)'s [Signature-Base](https://github.com/Neo23x0/signature-base) Yara ruleset
 * These Zeek plugins:
@@ -530,7 +530,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `ARKIME_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
-* `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external Beats-based forwarders from which it will accept logs; if Malcolm is being used as a standalone tool then this can safely be set to `false`, but if external log feeds are to be accepted then setting it to true is recommended (default `false`)
+* `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external [Beats](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html)-based forwarders from which it will accept logs; if Malcolm is being used as a standalone tool then this can safely be set to `false`, but if external log feeds are to be accepted then setting it to true is recommended (default `false`)
 * `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
 * `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
 * `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
@@ -745,7 +745,7 @@ In either case, you **must** run `./scripts/auth_setup` before starting Malcolm 
     * key and certificate files are located in the `nginx/certs/` directory
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
     * certificate authority, certificate, and key files for Malcolm's Logstash instance are located in the `logstash/certs/` directory
-    * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory
+    * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory; if using [Hedgehog Linux](#Hedgehog), these certificates should be copied to the `/opt/sensor/sensor_ctl/logstash-client-certificates` directory on the sensor
 * specify whether or not to store the username/password for forwarding Logstash events to a secondary, external OpenSearch instance (see the `OS_EXTERNAL_HOSTS`, `OS_EXTERNAL_SSL`, and `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
     * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
 * specify whether or not to [store the username/password](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) for [email alert senders](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#create-destinations)
@@ -931,8 +931,6 @@ filebeat.inputs:
   paths:
     - /var/zeek/*.log
   fields_under_root: true
-  fields:
-    type: "session"
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: 10s
@@ -1421,9 +1419,11 @@ Restarting Logstash may take several minutes, after which log ingestion will be 
 
 ### <a name="IndexManagement"></a>OpenSearch index management
 
-See [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) in the OpenSearch documentation on Index State Management [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/), [managed indices](https://opensearch.org/docs/latest/im-plugin/ism/managedindices/), [settings](https://opensearch.org/docs/latest/im-plugin/ism/settings/) and [APIs](https://opensearch.org/docs/latest/im-plugin/ism/api/).
+Malcolm releases prior to v6.1.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
 
-OpenSearch index management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
+Since then, OpenSearch Dashboards has developed and released plugins with UIs for [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/). Because these plugins provide a more comprehensive and user-friendly interfaces for these features, the old environment variable-based configuration code has been removed from Malcolm, with the exception of the code that uses `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` and `OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT` which deals with deleting the oldest network session metadata indices when the database exceeds a certain size.
+
+Note that OpenSearch index state management and snapshot management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
 ### <a name="Severity"></a>Event severity scoring
 
@@ -1659,7 +1659,7 @@ Returns version information about Malcolm and version/[health](https://opensearc
 
 `GET` - /mapi/fields
 
-Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
+Returns the (very long) list of fields known to Malcolm, comprised of data from Arkime's [`fields` table](https://arkime.com/apiv3#fields-api), the Malcolm [OpenSearch template](./dashboards/templates/malcolm_template.json) and the OpenSearch Dashboards index pattern API.
 
 <details>
 <summary>Example output:</summary>
@@ -3387,10 +3387,6 @@ A webhook that accepts alert data to be reindexed into OpenSearch as session rec
 ```
 </details>
 
-## <a name="OtherBeats"></a>Using Beats to forward host logs to Malcolm
-
-Because Malcolm uses components of the open source data analysis platform [OpenSearch](https://opensearch.org/), it can also accept various host logs sent from [Beats](https://www.elastic.co/beats/#the-beats-family), Elastic Stack's lightweight data shippers. See [./scripts/beats](./scripts/beats) for more information.
-
 ## <a name="ISO"></a>Malcolm installer ISO
 
 Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
@@ -3428,7 +3424,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-6.0.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-6.1.0.iso"
 …
 ```
 
@@ -3514,7 +3510,7 @@ The Malcolm aggregator base operating system claims the following exceptions to 
 | 14 | [SV-86705r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72081) | The operating system must shut down upon audit processing failure, unless availability is an overriding concern. If availability is a concern, the system must alert the designated staff (System Administrator [SA] and Information System Security Officer [ISSO] at a minimum) in the event of an audit processing failure. | As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. |
 | 15 | [SV-86713r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72089) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | same as above |
 | 16 | [SV-86715r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72093) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer (ISSO) (at a minimum) when the threshold for the repository maximum audit record storage capacity is reached. | same as above |
-| 17 | [SV-86597r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71973) | A file integrity tool must verify the baseline operating system configuration at least weekly. | This functionality is not configured by default, but it could be configured post-install using [Auditbeat](https://www.elastic.co/products/beats/auditbeat) or `aide` |
+| 17 | [SV-86597r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71973) | A file integrity tool must verify the baseline operating system configuration at least weekly. | This functionality is not configured by default, but it can be configured post-install using the `aide` tool |
 | 18 | [SV-86697r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72073) | The file integrity tool must use FIPS 140-2 approved cryptographic hashes for validating file contents and directories. | same as above |
 | 19 | [SV-86707r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72083) | The operating system must off-load audit records onto a different system or media from the system being audited. | same as above |
 | 20 | [SV-86709r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72085) | The operating system must encrypt the transfer of audit records off-loaded onto a different system or media from the system being audited. | same as above  |
@@ -3575,7 +3571,7 @@ The Malcolm aggregator base operating system claims exceptions from the recommen
 
 **7.2.4 Log Suspicious Packets**, **7.2.7 Enable RFC-recommended Source Route Validation**, **7.4.1 Install TCP Wrappers** - As Malcolm may operate as a network traffic capture appliance sniffing packets on a network interface configured in promiscuous mode, these recommendations do not apply.
 
-**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - This functionality is not configured by default, but it could be configured post-install using [Auditbeat](https://www.elastic.co/products/beats/auditbeat) or `aide`.
+**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - This functionality is not configured by default, but it could be configured post-install using `aide`.
 
 **8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote_server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. `auditd` is set up to syslog when its local storage capacity is reached.
 
@@ -3734,7 +3730,11 @@ Specify external Docker network name (or leave blank for default networking) ():
 
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Configure OpenSearch index state management? (y/N): n
+Store OpenSearch index snapshots locally in /home/user/Malcolm/opensearch-backup? (Y/n): y
+
+Compress OpenSearch index snapshots? (y/N): n
+
+Delete the oldest indices when the database exceeds a certain size? (y/N): n
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
@@ -3751,6 +3751,8 @@ Expose OpenSearch port to external hosts? (y/N): n
 Expose Logstash port to external hosts? (y/N): n
 
 Forward Logstash logs to external OpenSearch instance? (y/N): n
+
+Expose Filebeat TCP port to external hosts? (y/N): n
 
 Enable file extraction with Zeek? (y/N): y
 1: none
@@ -3781,6 +3783,8 @@ Specify capture interface(s) (comma-separated): eth0
 Capture packets using netsniff-ng? (Y/n): y
 
 Capture packets using tcpdump? (y/N): n
+
+PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
@@ -3830,23 +3834,23 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.0.1           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.0.1           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.0.1           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.0.1           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.0.1           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.0.1           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.0.1           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.0.1           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.0.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.0.1           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.0.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.0.1           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.0.1           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.0.1           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.1.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.1.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.1.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.1.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.1.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.1.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.1.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.1.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.1.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.1.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.1.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

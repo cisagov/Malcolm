@@ -10,8 +10,6 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek"]
-  fields:
-    type: "session"
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
@@ -30,8 +28,6 @@ filebeat.inputs:
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata"]
-  fields:
-    type: "session"
   compression_level: 0
   scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${BEAT_CLEAN_INACTIVE:180m}
@@ -51,4 +47,3 @@ output.logstash:
   ssl.key: "${BEAT_LS_SSL_CLIENT_KEY}"
   ssl.supported_protocols: "TLSv1.2"
   ssl.verification_mode: "${BEAT_LS_SSL_VERIFY}"
-

@@ -1,7 +1,119 @@
 #!/bin/bash
 
-DOCKER_COMPOSE_VER="2.5.0"
-DOCKER_COMPOSE_URL="https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VER/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+apt-get -qqy update
 
-# install docker-compose
-curl -o /usr/local/bin/docker-compose -sSL "$DOCKER_COMPOSE_URL" && chmod 755 /usr/local/bin/docker-compose
+# aide itself was built from github master branch (for JSON output)
+apt-get install --no-install-recommends -y -q aide-common
+chmod a-x /etc/cron.daily/aide
+chattr +i /etc/cron.daily/aide
+mkdir -p /etc/aide/aide.conf.d /var/lib/aide
+touch /var/lib/aide/aide.db
+chmod 600 /var/lib/aide/aide.db
+sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
+cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
+/etc/at\.allow$ f Full-n-c-m
+/etc/clamav/.+\.conf$ f VarFile-n-c-m
+/etc/clamav$ d VarDir-n-c-m
+/etc/cron\.allow$ f Full-n-c-m
+/etc/cron\.\w+$ d VarDir-n-c-m
+/etc/crontab$ f VarFile-n-c-m
+/etc/group-?$ f VarFile-n-c-m
+/etc/gshadow-?$ f VarFile-n-c-m
+/etc/hostname$ f VarFile-n-c-m
+/etc/hosts$ f VarFile-n-c-m
+/etc/installer-?$ f Full-n-c-m
+/etc/ntp\.conf$ f VarFile-n-c-m
+/etc/passwd-?$ f VarFile-n-c-m
+/etc/rc\d*\.d/.+$ l VarInode
+/etc/rc\d*\.d$ d VarDir-n-c-m
+/etc/shadow-?$ f VarFile-n-c-m
+/etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
+/etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
+/etc/ufw/.+\.rules$ f VarFile-n-c-m
+/etc/ufw$ d VarDir-n-c-m
+/opt$ d VarDir-n-c-m
+/usr/local/bin$ d VarDirTime-n
+/var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m-i
+/var/lib/aide$ d VarDirInode-n-c-m
+/var/lib/samba$ d VarDir-n-c-m
+
+!/(.+/)?__pycache__(/|$)
+!/dev(/|$)
+!/etc/.*\.bak$
+!/etc/aide/.*\.swp$
+!/etc/cron\.d/htpdate$
+!/etc/ld\.so\.cache$
+!/etc/lvm/archive(/|$)
+!/etc/lvm/backup(/|$)
+!/etc/network/interfaces.d(/|$)
+!/etc/NetworkManager/system-connections(/|$)
+!/etc/rc\d*\.d/.*ntp$
+!/etc/systemd/system/multi-user\.target\.wants/ntp.service$
+!/home(/|$)
+!/malcolm_images\.tar\.gz$
+!/root(/|$)
+!/run(/|$)
+!/tmp(/|$)
+!/usr/local/lib/python.*/dist-packages/debinterface(/|$)
+!/var/backups(/|$)
+!/var/cache(/|$)
+!/var/lib/AccountsService(/|$)
+!/var/lib/apt/daily_lock$
+!/var/lib/apt/lists(/|$)
+!/var/lib/clamav(/|$)
+!/var/lib/colord(/|$)
+!/var/lib/containerd(/|$)
+!/var/lib/dhcp(/|$)
+!/var/lib/docker(/|$)
+!/var/lib/dpkg/info(/|$)
+!/var/lib/dpkg/triggers/Lock$
+!/var/lib/lightdm(/|$)
+!/var/lib/logrotate$
+!/var/lib/NetworkManager(/|$)
+!/var/lib/plymouth(/|$)
+!/var/lib/samba(/|$)
+!/var/lib/sudo/lectured(/|$)
+!/var/lib/systemd-coredump$
+!/var/log(/|$)
+!/var/mail(/|$)
+!/var/run(/|$)
+!/var/spool(/|$)
+!/var/tmp(/|$)
+
+EOF
+###
+
+# we'll use cURL to get release information and assets from GitHub using the GitHub API
+GITHUB_API_CURL_ARGS=()
+GITHUB_API_CURL_ARGS+=( -fsSL )
+GITHUB_API_CURL_ARGS+=( -H )
+GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
+[[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
+
+# docker-compose
+RELEASE_URL="https://api.github.com/repos/docker/compose/releases/latest"
+OUTPUT_FILENAME="/usr/local/bin/docker-compose"
+RELEASE_FILE_REGEX="docker-compose-linux-x86_64$"
+curl -o "$OUTPUT_FILENAME" "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')"
+chmod 755 "$OUTPUT_FILENAME"
+
+# croc
+RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
+RELEASE_FILE_REGEX="Linux-64bit\\\.tar\\\.gz$"
+cd /usr/local/bin
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxvf - croc
+chmod 755 ./croc
+chown root:root ./croc
+###
+
+# step
+RELEASE_URL="https://api.github.com/repos/smallstep/cli/releases/latest"
+RELEASE_FILE_REGEX="_linux_.+amd64\\\.tar\\\.gz$"
+cd /tmp
+mkdir -p ./step
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./step --strip-components 1
+mv ./step/bin/step /usr/local/bin/step
+chmod 755 /usr/local/bin/step
+chown root:root /usr/local/bin/step
+rm -rf /tmp/step*
+###

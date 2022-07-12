@@ -1,0 +1,53 @@
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
+name: "${PCAP_NODE_NAME:malcolm}"
+
+logging.metrics.enabled: false
+
+#================================ Inputs =======================================
+
+filebeat.inputs:
+- type: tcp
+  host: "0.0.0.0:${FILEBEAT_TCP_PORT:5045}"
+  max_message_size: "${FILEBEAT_TCP_MAX_MESSAGE_SIZE:20MB}"
+  max_connections: ${FILEBEAT_TCP_MAX_CONNECTIONS:32}
+  fields:
+    tcp_log_format: "${FILEBEAT_TCP_LOG_FORMAT:raw}"
+  fields_under_root: true
+  ssl.enabled: ${BEATS_SSL:false}
+  ssl.certificate_authorities: ["/certs/ca.crt"]
+  ssl.certificate: "/certs/client.crt"
+  ssl.key: "/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"
+
+#================================ Processors ===================================
+processors:
+  - decode_json_fields:
+      when:
+        equals:
+          tcp_log_format: "json"
+      fields: [ "${FILEBEAT_TCP_PARSE_SOURCE_FIELD:message}" ]
+      process_array: ${FILEBEAT_TCP_PARSE_PROCESS_ARRAY:false}
+      max_depth: ${FILEBEAT_TCP_PARSE_MAX_DEPTH:1}
+      target: "${FILEBEAT_TCP_PARSE_TARGET_FIELD:}"
+      overwrite_keys: ${FILEBEAT_TCP_PARSE_OVERWRITE_KEYS:false}
+      add_error_key: ${FILEBEAT_TCP_PARSE_ADD_ERROR_KEY:false}
+      document_id: "${FILEBEAT_TCP_PARSE_DOCUMENT_ID_FIELD:}"
+  - drop_fields:
+      fields: [ "tcp_log_format", "${FILEBEAT_TCP_PARSE_DROP_FIELD:}" ]
+      ignore_missing: true
+  - add_tags:
+      tags: [ "_malcolm_beats", "${FILEBEAT_TCP_TAG:}" ]
+
+#================================ Outputs ======================================
+
+#-------------------------- Logstash Output ------------------------------------
+output.logstash:
+  hosts: ["logstash:5044"]
+  ssl.enabled: ${BEATS_SSL:false}
+  ssl.certificate_authorities: ["/certs/ca.crt"]
+  ssl.certificate: "/certs/client.crt"
+  ssl.key: "/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"

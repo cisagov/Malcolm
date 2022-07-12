@@ -33,12 +33,24 @@ pushd "$SCRIPT_PATH" >/dev/null 2>&1
 WORKDIR="$(mktemp -d -t malcolm-XXXXXX)"
 
 function cleanup {
+  echo "Cleaning up..." 1>&2
+
   # unmount any chroot stuff left behind after an error
   (umount -f $(mount | grep chroot | cut -d ' ' -f 3) >/dev/null 2>&1) && sleep 5
 
+  # if there are any "Immutable" chattr'd files, unset them before trying to do the delete.
+  # this is a little slow but lsattr is unreliable with strange or long path names
+  find "$WORKDIR" -xdev -exec sh -c '
+    for i do
+       attrs=$(lsattr -d "$i" 2>/dev/null); attrs=${attrs%% *}
+       case $attrs in
+         *i*) printf "%s\0" "$i";;
+       esac
+    done' sh {} + | xargs -r -0 -l chattr -i
+
   # clean up the temporary build directory
   if ! rm -rf "$WORKDIR"; then
-    echo "Failed to remove temporary directory '$WORKDIR'"
+    echo "Failed to remove temporary directory '$WORKDIR'" 1>&2
     exit $BUILD_ERROR_CODE
   fi
 }
@@ -51,6 +63,8 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
   rsync -a "$SCRIPT_PATH/config" .
+
+  mkdir -p ./config/packages.chroot/
 
   chown -R root:root *
 
@@ -102,7 +116,6 @@ if [ -d "$WORKDIR" ]; then
   cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
   cp ./host-map.txt "$MALCOLM_DEST_DIR/"
   cp ./net-map.json "$MALCOLM_DEST_DIR/"
-  cp ./index-management-policy.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
@@ -136,6 +149,16 @@ if [ -d "$WORKDIR" ]; then
   echo "DOCUMENTATION_URL=\"https://malcolm.fyi/documentation/\""                 >> "$MALCOLM_DEST_DIR"/.os-info
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> "$MALCOLM_DEST_DIR"/.os-info
   echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
+
+  # environment variables to pass into chroot
+  [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
+    cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
+  echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
+
+  # clone and build aide .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/../shared/aide/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/../shared/aide:/build aide-build:latest -o /build
+  mv "$SCRIPT_PATH/../shared/aide"/*.deb ./config/packages.chroot/
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
@@ -190,10 +213,10 @@ if [ -d "$WORKDIR" ]; then
   lb build 2>&1 | tee "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log"
   if [ -f "$IMAGE_NAME-amd64.hybrid.iso" ]; then
     mv "$IMAGE_NAME-amd64.hybrid.iso" "$RUN_PATH/$IMAGE_NAME-$IMAGE_VERSION.iso" && \
-      echo "Finished, created \"$RUN_PATH/$IMAGE_NAME-$IMAGE_VERSION.iso\""
+      echo "Finished, created \"$RUN_PATH/$IMAGE_NAME-$IMAGE_VERSION.iso\"" 1>&2
     BUILD_ERROR_CODE=0
   else
-    echo "Error creating ISO, see log file"
+    echo "Error creating ISO, see log file" 1>&2
     BUILD_ERROR_CODE=2
   fi
   mv "$WORKDIR/output/$IMAGE_NAME-$IMAGE_VERSION-build.log" "$RUN_PATH/"
@@ -202,7 +225,7 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
 else
-  echo "Unable to create temporary directory \"$WORKDIR\""
+  echo "Unable to create temporary directory \"$WORKDIR\"" 1>&2
 fi
 
 popd  >/dev/null 2>&1

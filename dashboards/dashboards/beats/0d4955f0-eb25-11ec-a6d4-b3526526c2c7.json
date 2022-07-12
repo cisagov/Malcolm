@@ -1,0 +1,209 @@
+{
+  "version": "2.0.0",
+  "objects": [
+    {
+      "id": "0d4955f0-eb25-11ec-a6d4-b3526526c2c7",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-13T14:30:49.985Z",
+      "version": "WzkxMSwyXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Temperature",
+        "hits": 0,
+        "description": "Malcolm sensor hardware component temperature summary",
+        "panelsJSON": "[{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":13,\"h\":9,\"i\":\"0a9ba334-b226-4245-b00e-ad8fcabf0e00\"},\"panelIndex\":\"0a9ba334-b226-4245-b00e-ad8fcabf0e00\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_0\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":13,\"y\":0,\"w\":35,\"h\":18,\"i\":\"47ef4d93-d7d5-41c3-a3f4-d3b543ad22bc\"},\"panelIndex\":\"47ef4d93-d7d5-41c3-a3f4-d3b543ad22bc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":9,\"w\":13,\"h\":9,\"i\":\"970e9ca1-f3a4-4660-8f3e-8879e53cc63e\"},\"panelIndex\":\"970e9ca1-f3a4-4660-8f3e-8879e53cc63e\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_2\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":18,\"w\":48,\"h\":15,\"i\":\"594e7e58-e32d-4a2d-b492-a97541a2a2d4\"},\"panelIndex\":\"594e7e58-e32d-4a2d-b492-a97541a2a2d4\",\"embeddableConfig\":{\"hidePanelTitles\":false,\"vis\":null},\"panelRefName\":\"panel_3\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":33,\"w\":48,\"h\":35,\"i\":\"aae9ec90-dea9-4a53-b4a7-99c5a6c91b55\"},\"panelIndex\":\"aae9ec90-dea9-4a53-b4a7-99c5a6c91b55\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":false}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "visualization",
+          "id": "d2e979c0-eb20-11ec-a6d4-b3526526c2c7"
+        },
+        {
+          "name": "panel_1",
+          "type": "visualization",
+          "id": "6edfd120-eb22-11ec-a6d4-b3526526c2c7"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "ff1a4590-eb22-11ec-a6d4-b3526526c2c7"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "71e9cae0-eb24-11ec-a6d4-b3526526c2c7"
+        },
+        {
+          "name": "panel_4",
+          "type": "search",
+          "id": "4866d670-eb21-11ec-a6d4-b3526526c2c7"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "d2e979c0-eb20-11ec-a6d4-b3526526c2c7",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-13T13:57:55.163Z",
+      "version": "Wzg5NiwyXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Temperatures - Host Chooser",
+        "visState": "{\"title\":\"Malcolm Sensor Temperatures - Host Chooser\",\"type\":\"input_control_vis\",\"aggs\":[],\"params\":{\"controls\":[{\"id\":\"1655127648591\",\"fieldName\":\"host.name\",\"parent\":\"\",\"label\":\"Host Chooser\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "control_0_index_pattern",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "6edfd120-eb22-11ec-a6d4-b3526526c2c7",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-13T14:26:58.711Z",
+      "version": "WzkwOCwyXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Temperature - Over Time",
+        "visState": "{\"title\":\"Malcolm Sensor Temperature - Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"miscbeat.thermal.temp\",\"customLabel\":\"High °C\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"@timestamp\",\"timeRange\":{\"from\":\"now-30m\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":8,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Host\"},\"schema\":\"group\"}],\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"filter\":true,\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{},\"type\":\"category\"}],\"grid\":{\"categoryLines\":true,\"valueAxis\":\"ValueAxis-1\"},\"labels\":{},\"legendPosition\":\"bottom\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"High °C\"},\"drawLinesBetweenPoints\":true,\"interpolate\":\"cardinal\",\"lineWidth\":1.5,\"mode\":\"normal\",\"show\":true,\"showCircles\":false,\"type\":\"line\",\"valueAxis\":\"ValueAxis-1\"}],\"thresholdLine\":{\"color\":\"#E7664C\",\"show\":true,\"style\":\"full\",\"value\":95,\"width\":1},\"times\":[],\"type\":\"line\",\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"defaultYExtents\":true,\"mode\":\"normal\",\"type\":\"linear\",\"setYExtents\":true,\"min\":35,\"max\":115},\"show\":true,\"style\":{},\"title\":{\"text\":\"High °C\"},\"type\":\"value\"}]}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "4866d670-eb21-11ec-a6d4-b3526526c2c7"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "ff1a4590-eb22-11ec-a6d4-b3526526c2c7",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-13T14:13:28.297Z",
+      "version": "WzkwNCwyXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Temprature - Sensor Chooser",
+        "visState": "{\"title\":\"Malcolm Sensor Temprature - Sensor Chooser\",\"type\":\"input_control_vis\",\"aggs\":[],\"params\":{\"controls\":[{\"id\":\"1655129580950\",\"fieldName\":\"miscbeat.thermal.type\",\"parent\":\"\",\"label\":\"Sensor Type\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"dynamicOptions\":true,\"size\":5,\"order\":\"desc\"},\"indexPatternRefName\":\"control_0_index_pattern\"}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "control_0_index_pattern",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "71e9cae0-eb24-11ec-a6d4-b3526526c2c7",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-13T14:24:35.386Z",
+      "version": "WzkwNiwyXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Temperature - Sensor Type",
+        "visState": "{\"title\":\"Malcolm Sensor Temperature - Sensor Type\",\"type\":\"gauge\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"miscbeat.thermal.temp\",\"customLabel\":\" \"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.thermal.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":6,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Sensor Type\"},\"schema\":\"group\"}],\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":false,\"isDisplayWarning\":false,\"gauge\":{\"alignment\":\"automatic\",\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":45},{\"from\":45,\"to\":60},{\"from\":60,\"to\":80},{\"from\":80,\"to\":90},{\"from\":90,\"to\":110}],\"invertColors\":false,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"rgba(105,112,125,0.2)\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"rgba(105,112,125,0.2)\",\"bgColor\":true,\"subText\":\"\",\"fontSize\":60}}}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "4866d670-eb21-11ec-a6d4-b3526526c2c7"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "4866d670-eb21-11ec-a6d4-b3526526c2c7",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-13T14:01:12.279Z",
+      "version": "WzkwMSwyXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Temperature - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "host.name",
+          "miscbeat.thermal.type",
+          "miscbeat.thermal.name",
+          "miscbeat.thermal.temp"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.module:thermal\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    }
+  ]
+}

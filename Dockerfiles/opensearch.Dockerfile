@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:1.3.2
+FROM opensearchproject/opensearch:2.1.0
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -37,7 +37,7 @@ RUN yum install -y openssl util-linux procps && \
   yum upgrade -y && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
-  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\ncompatibility.override_main_response_version: true\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \
+  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
   mkdir -p /usr/share/opensearch/ca-trust && \

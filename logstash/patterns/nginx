@@ -1,0 +1,2 @@
+NGINX_ACCESS %{IPORHOST:[client][address]} - %{DATA:[related][user]} \[%{HTTPDATE:[timestamp]}\] "%{WORD:[http][request][method]} %{DATA:[url][original]} HTTP/%{NUMBER:[http][version]}" %{NUMBER:[http][response][status_code]} %{NUMBER:[http][response][body][bytes]} "%{DATA:[http][request][referrer]}" "%{DATA:[user_agent][original]}"
+NGINX_ERROR (?<timestamp>%{YEAR}[./]%{MONTHNUM}[./]%{MONTHDAY} %{TIME}) \[%{LOGLEVEL:[log][level]}\] %{POSINT:[process][pid]}#%{NUMBER:[process][thread][id]}: %{GREEDYDATA:[error][message]}

@@ -249,35 +249,3 @@ def identify_adapter(adapter, duration=NIC_BLINK_SECONDS, background=False):
             f"/sbin/ethtool --identify {adapter} {duration}", stdout=False, stderr=False, timeout=duration * 2
         )
         return retCode == 0
-
-
-###################################################################################################
-# client that writes to the local instance of protologbeat listening on the configured host/port/protocol
-class HeatBeatLogger:
-    def __init__(self, host='127.0.0.1', port=9515, proto='udp', format='plain', debug=False):
-        self.host = host
-        self.port = port
-        if proto == 'udp':
-            self.proto = 'udp'
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        else:
-            self.proto = 'tcp'
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.format = format
-        if self.format not in ['plain', 'json']:
-            self.format = 'plain'
-        self.debug = debug
-        if self.debug:
-            print("Creating instance of logger via {} on {}:{}".format(self.proto, self.host, self.port))
-
-    def enable_debug(self):
-        self.debug = True
-
-    def send_message(self, msg):
-        if self.format == 'json':
-            payload = json.dumps(msg)
-        else:
-            payload = msg
-        if self.debug:
-            print("Sending message: {}".format(payload.encode('utf-8')))
-        self.socket.sendto(payload.encode('utf-8'), (self.host, self.port))

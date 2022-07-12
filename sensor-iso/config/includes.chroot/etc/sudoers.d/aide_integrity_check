@@ -1,0 +1,2 @@
+# allow AIDE file integrity check by unprivileged sensor user
+%sensor ALL=(root) NOPASSWD: /usr/local/bin/aide_integrity_check.sh

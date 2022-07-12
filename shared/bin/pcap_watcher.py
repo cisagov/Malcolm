@@ -35,7 +35,6 @@ MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 32 * 1024 * 1024 * 1024
 # for querying the Arkime's "arkime_files" OpenSearch index to avoid re-processing (duplicating sessions for)
 # files that have already been processed
 ARKIME_FILES_INDEX = "arkime_files"
-ARKIME_FILE_TYPE = "file"
 ARKIME_FILE_SIZE_FIELD = "filesize"
 
 ###################################################################################################
@@ -162,7 +161,6 @@ def event_process_generator(cls, method):
                 if self.useOpenSearch:
                     s = (
                         opensearch_dsl.Search(index=ARKIME_FILES_INDEX)
-                        .filter("term", _type=ARKIME_FILE_TYPE)
                         .filter("term", node=args.nodeName)
                         .query("wildcard", name=f"*{os.path.sep}{relativePath}")
                     )

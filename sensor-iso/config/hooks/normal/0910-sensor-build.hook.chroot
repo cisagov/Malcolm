@@ -6,87 +6,79 @@
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
 
-NETSNIFF_VER="0.6.8"
-NETSNIFF_URL="https://github.com/netsniff-ng/netsniff-ng/archive/v$NETSNIFF_VER.tar.gz"
+# we'll use cURL to get release information and assets from GitHub using the GitHub API
+GITHUB_API_CURL_ARGS=()
+GITHUB_API_CURL_ARGS+=( -fsSL )
+GITHUB_API_CURL_ARGS+=( -H )
+GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
+[[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-ZEEK_VERSION=4.2.1-0
+ZEEK_VER=5.0.0-0
 ZEEK_LTS=
-SPICY_VERSION=1.4.1
 ZEEK_DIR="/opt/zeek"
-SPICY_DIR="/opt/spicy"
-export PATH="${ZEEK_DIR}"/bin:"${SPICY_DIR}"/bin:$PATH
+export PATH="${ZEEK_DIR}"/bin:$PATH
+
+SURICATA_RULES_DIR="/etc/suricata/rules"
 
 BEATS_VER="7.10.2"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
 
-YARA_VERSION="4.2.1"
-YARA_URL="https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
+NETSNIFF_RELEASE_URL="https://api.github.com/repos/netsniff-ng/netsniff-ng/releases/latest"
+CAPA_RELEASE_URL="https://api.github.com/repos/fireeye/capa/releases/latest"
+YQ_RELEASE_URL="https://api.github.com/repos/mikefarah/yq/releases/latest"
+SUPERCRONIC_RELEASE_URL="https://api.github.com/repos/aptible/supercronic/releases/latest"
+CROC_RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
+STEP_RELEASE_URL="https://api.github.com/repos/smallstep/cli/releases/latest"
+YARA_RELEASE_URL="https://api.github.com/repos/VirusTotal/yara/releases/latest"
 YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
 YARA_RULES_DIR="/opt/yara-rules"
 
-SURICATA_RULES_DIR="/etc/suricata/rules"
-
-CAPA_VERSION="3.2.0"
-CAPA_URL="https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
-CAPA_DIR="/usr/local/bin"
-CAPA_BIN="${CAPA_DIR}/capa"
-
-YQ_VERSION="4.24.2"
-YQ_URL="https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
-
-SUPERCRONIC_VERSION="0.1.12"
-SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-SUPERCRONIC="supercronic-linux-amd64"
-
 mkdir -p /opt/hedgehog_install_artifacts/
+
+apt-get -qqy update
 
 # an arkime .deb is built and installed in a different context
 
 # Install netsniff-ng
 cd /tmp
-curl -L -o netsniff-$NETSNIFF_VER.tar.gz "$NETSNIFF_URL"
-tar -xzvf netsniff-$NETSNIFF_VER.tar.gz
-cd netsniff-ng-$NETSNIFF_VER
+mkdir ./netsniff-ng
+NETSNIFF_VER="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$NETSNIFF_RELEASE_URL" | jq '.tag_name' | tr -d '"' | sed 's/^v//')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$NETSNIFF_RELEASE_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./netsniff-ng --strip-components 1
+cd ./netsniff-ng
 ./configure --prefix=/usr --disable-geoip
 make netsniff-ng
 # make netsniff-ng_install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="netsniff-ng" --pkgversion="$NETSNIFF_VER" --pkgarch="amd64" --pkgsource="$NETSNIFF_URL" make netsniff-ng_install
 cp *.deb /opt/hedgehog_install_artifacts/
 
-cd ..
-rm -Rf netsniff-$NETSNIFF_VER.tar.gz netsniff-ng-$NETSNIFF_VER
+cd /tmp
+rm -Rf ./netsniff-ng
 ##
 
 # Download and install zeek, spicy and 3rd-party zeek plugins
-mkdir -p /tmp/zeek-packages /tmp/spicy-packages "${CCACHE_DIR}"
+mkdir -p /tmp/zeek-packages "${CCACHE_DIR}"
 
 # zeek
 cd /tmp/zeek-packages
 if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
 curl -sSL --remote-name-all \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb"
-dpkg -i ./*.deb
-
-# spicy
-cd /tmp/spicy-packages
-curl -sSL --remote-name-all \
-  "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb"
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
+  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
 dpkg -i ./*.deb
 
 # plugins
 cd /tmp
 zkg autoconfig --force
-zkg install --force --skiptests --version c9ca2d93aaf7bfb75fb282eaa7214a9057d4666e zeek/spicy-plugin
 bash /usr/local/bin/zeek_install_plugins.sh
 for FILE in /opt/zeek/var/lib/zkg/logs/*; do
   [[ -r "$FILE" ]] && echo "$FILE" && cat "$FILE" && echo ""
@@ -97,13 +89,7 @@ find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "
 find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \;
 rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch
 rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__
-find "${ZEEK_DIR}/" "${SPICY_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded
-mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/ && \
-  ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/bin/spicyz \
-           "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz
-mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
-  ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
-           "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif
+find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded
 
 cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
 # all interfaces using lb_method=custom should use AF_PACKET
@@ -111,9 +97,9 @@ lb_custom.InterfacePrefix=af_packet::
 
 EOF
 
-# set up default zeek local policy
+# set up default zeek local policy and sensor-related directories
 cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/zeek/site/
-mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP
+mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP /opt/sensor/sensor_ctl/fluentbit
 touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
 [[ -f /usr/local/bin/zeek_intel_setup.sh ]] && mv /usr/local/bin/zeek_intel_setup.sh "${ZEEK_DIR}"/bin/
 [[ -f /usr/local/bin/zeek_intel_from_threat_feed.py ]] && mv /usr/local/bin/zeek*threat*.py "${ZEEK_DIR}"/bin/
@@ -121,12 +107,97 @@ touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
 # cleanup
 cd /usr/local/src
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
-mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/spicy-packages /tmp/zeek-packages /opt/hedgehog_install_artifacts/
+mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/zeek-packages /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
+# aide itself was built from github master branch (for JSON output)
+apt-get install --no-install-recommends -y -q aide-common
+chmod a-x /etc/cron.daily/aide
+chattr +i /etc/cron.daily/aide
+mkdir -p /etc/aide/aide.conf.d /var/lib/aide
+touch /var/lib/aide/aide.db
+chmod 600 /var/lib/aide/aide.db
+sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
+cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
+/etc/at\.allow$ f Full-n-c-m
+/etc/clamav/.+\.conf$ f VarFile-n-c-m
+/etc/clamav$ d VarDir-n-c-m
+/etc/cron\.allow$ f Full-n-c-m
+/etc/cron\.\w+$ d VarDir-n-c-m
+/etc/crontab$ f VarFile-n-c-m
+/etc/group-?$ f VarFile-n-c-m
+/etc/gshadow-?$ f VarFile-n-c-m
+/etc/hostname$ f VarFile-n-c-m
+/etc/hosts$ f VarFile-n-c-m
+/etc/installer-?$ f Full-n-c-m
+/etc/ntp\.conf$ f VarFile-n-c-m
+/etc/passwd-?$ f VarFile-n-c-m
+/etc/rc\d*\.d/.+$ l VarInode
+/etc/rc\d*\.d$ d VarDir-n-c-m
+/etc/shadow-?$ f VarFile-n-c-m
+/etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
+/etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
+/etc/ufw/.+\.rules$ f VarFile-n-c-m
+/etc/ufw$ d VarDir-n-c-m
+/opt$ d VarDir-n-c-m
+/usr/local/bin$ d VarDirTime-n
+/var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m-i
+/var/lib/aide$ d VarDirInode-n-c-m
+/var/lib/samba$ d VarDir-n-c-m
+
+!/(.+/)?__pycache__(/|$)
+!/capture(/|$)
+!/dev(/|$)
+!/etc/.*\.bak$
+!/etc/aide/.*\.swp$
+!/etc/cron\.d/htpdate$
+!/etc/ld\.so\.cache$
+!/etc/lvm/archive(/|$)
+!/etc/lvm/backup(/|$)
+!/etc/network/interfaces.d(/|$)
+!/etc/NetworkManager/system-connections(/|$)
+!/etc/rc\d*\.d/.*ntp$
+!/etc/suricata/rules(/|$)
+!/etc/systemd/system/multi-user\.target\.wants/ntp.service$
+!/home(/|$)
+!/opt/sensor(/|$)
+!/opt/yara-rules(/|$)
+!/opt/zeek(/|$)
+!/root(/|$)
+!/run(/|$)
+!/tmp(/|$)
+!/usr/local/lib/python.*/dist-packages/debinterface(/|$)
+!/var/backups(/|$)
+!/var/cache(/|$)
+!/var/lib/AccountsService(/|$)
+!/var/lib/apt/daily_lock$
+!/var/lib/apt/lists(/|$)
+!/var/lib/clamav(/|$)
+!/var/lib/colord(/|$)
+!/var/lib/containerd(/|$)
+!/var/lib/dhcp(/|$)
+!/var/lib/docker(/|$)
+!/var/lib/dpkg/info(/|$)
+!/var/lib/dpkg/triggers/Lock$
+!/var/lib/lightdm(/|$)
+!/var/lib/logrotate$
+!/var/lib/NetworkManager(/|$)
+!/var/lib/plymouth(/|$)
+!/var/lib/samba(/|$)
+!/var/lib/sudo/lectured(/|$)
+!/var/lib/suricata(/|$)
+!/var/lib/systemd-coredump$
+!/var/log(/|$)
+!/var/mail(/|$)
+!/var/run(/|$)
+!/var/spool(/|$)
+!/var/tmp(/|$)
+
+EOF
+###
+
 # suricata
-apt-get -qqy update
 apt-get install -t bullseye-backports --no-install-recommends -y -q suricata suricata-update
 
 /usr/bin/suricata-update -v -D /var/lib/suricata --etopen
@@ -137,19 +208,19 @@ mv ./suricata-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # yara
-mkdir -p usr/local/src
-cd /usr/local/src
-
-curl -sSL "${YARA_URL}" | tar xzf - -C /usr/local/src/
-cd "./yara-${YARA_VERSION}"
+cd /tmp
+mkdir ./yara
+YARA_VER="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YARA_RELEASE_URL" | jq '.tag_name' | tr -d '"' | sed 's/^v//')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YARA_RELEASE_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./yara --strip-components 1
+cd ./yara
 ./bootstrap.sh
 ./configure --prefix=/usr --with-crypto --enable-magic --enable-cuckoo --enable-dotnet
 make
 #make install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VERSION" --pkgarch="amd64" --pkgsource="$YARA_URL"
+checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VER" --pkgarch="amd64" --pkgsource="$YARA_URL"
 cp *.deb /opt/hedgehog_install_artifacts/
 cd /tmp
-rm -rf /usr/local/src/yara*
+rm -rf /yara
 
 mkdir -p ./Neo23x0
 curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1
@@ -165,25 +236,41 @@ mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 
 # capa
 cd /tmp
-rm -rf /tmp/capa*
-curl -fsSL -o ./capa.zip "${CAPA_URL}"
+curl -o ./capa.zip "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CAPA_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("-linux\\.zip$")) | .browser_download_url' | tr -d '"')"
 unzip ./capa.zip
-chmod 755 ./capa
-mkdir -p "${CAPA_DIR}"
-mv ./capa "${CAPA_BIN}"
+mv ./capa /usr/local/bin/capa
+chmod 755 /usr/local/bin/capa
 rm -rf /tmp/capa*
 
-cp "${CAPA_BIN}" /opt/hedgehog_install_artifacts/
+cp /usr/local/bin/capa /opt/hedgehog_install_artifacts/
 ###
 
 # yq
-curl -fsSL -o /usr/bin/yq "${YQ_URL}"
+cd /tmp
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YQ_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("linux_amd64\\.tar\\.gz$")) | .browser_download_url' | tr -d '"')" | tar zxvf - ./yq_linux_amd64
+mv ./yq_linux_amd64 /usr/bin/yq
 chmod 755 /usr/bin/yq
 ###
 
 # supercronic
-curl -fsSL -o /usr/local/bin/supercronic "$SUPERCRONIC_URL"
+curl -o /usr/local/bin/supercronic "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$SUPERCRONIC_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("-linux-amd64$")) | .browser_download_url' | tr -d '"')"
 chmod 755 /usr/local/bin/supercronic
+###
+
+# croc
+cd /tmp
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CROC_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("Linux-64bit\\.tar\\.gz$")) | .browser_download_url' | tr -d '"')" | tar zxvf - croc
+mv ./croc /usr/local/bin/croc
+chmod 755 /usr/local/bin/croc
+###
+
+# step
+cd /tmp
+mkdir -p ./step
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$STEP_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("_linux_.+amd64\\.tar\\.gz$")) | .browser_download_url' | tr -d '"')" | tar xzf - -C ./step --strip-components 1
+mv ./step/bin/step /usr/local/bin/step
+chmod 755 /usr/local/bin/step
+rm -rf /tmp/step*
 ###
 
 # update clamav signatures
@@ -191,43 +278,17 @@ freshclam --stdout --quiet --no-warnings
 
 ###
 
-# tweak some dashboards for, then install filebeat/metricbeat/auditbeat/packetbeat
-for BEAT in filebeat metricbeat auditbeat packetbeat; do
+# install filebeat
+for BEAT in filebeat; do
   BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
   BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
-  BEATS_NEW_DEB="$BEAT-tweaked-$BEATS_VER-amd64.deb"
-  BEATS_TMP_DIR="$BEAT-deb"
   pushd /tmp && \
     curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
-    dpkg-deb -x "$BEATS_DEB" "$BEATS_TMP_DIR" && \
-    dpkg-deb -e "$BEATS_DEB" "$BEATS_TMP_DIR/DEBIAN" && \
-    ( [[ "$BEAT" == "metricbeat" ]] && sed -i -e "s@ |\\\\\\\n\[Containers overview\](#/dashboard/CPU-slash-Memory-per-container)@@g" "$BEATS_TMP_DIR"/usr/share/$BEAT/kibana/?/dashboard/* || true ) && \
-    pushd "$BEATS_TMP_DIR" && ( rm -f DEBIAN/md5sums && find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -print0 | xargs -l -0 md5sum >> DEBIAN/md5sums ) && popd && \
-    dpkg-deb -b "$BEATS_TMP_DIR" "$BEATS_NEW_DEB" && \
-    rm -rf "$BEATS_TMP_DIR" && \
-    dpkg -i "$BEATS_NEW_DEB" && \
-    cp "$BEATS_NEW_DEB" /opt/hedgehog_install_artifacts/ && \
-    rm -rf "$BEATS_TMP_DIR" "$BEATS_DEB" "$BEATS_NEW_DEB" && \
+    dpkg -i "$BEATS_DEB" && \
+    cp "$BEATS_DEB" /opt/hedgehog_install_artifacts/ && \
+    rm -rf "$BEATS_DEB" && \
     popd
 done
-
-# add symlinks to our custom dashboards
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/filebeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/filebeat/kibana/7/dashboard-custom/* /usr/share/filebeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/metricbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/metricbeat/kibana/7/dashboard-custom/* /usr/share/metricbeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/auditbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/auditbeat/kibana/7/dashboard-custom/* /usr/share/auditbeat/kibana/7/dashboard/
-fi
-FILES=$(shopt -s nullglob dotglob; echo /usr/share/packetbeat/kibana/7/dashboard-custom/*)
-if (( ${#FILES} )) ; then
-  ln -s -r -f /usr/share/packetbeat/kibana/7/dashboard-custom/* /usr/share/packetbeat/kibana/7/dashboard/
-fi
 
 ###
 
@@ -244,10 +305,6 @@ chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 chown root:netdev /usr/bin/suricata && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata
-chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
-  setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
-chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
 chown root:netdev /opt/arkime/bin/capture && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 
@@ -295,7 +352,6 @@ if [ -d /opt/sensor/sensor_ctl/scripts ]; then
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-*/10 * * * * root /opt/sensor/sensor_ctl/scripts/log_temperature.sh
 2 0 * * 0 root rm -f /var/lib/clamav/mirrors.dat
 EOF
 fi

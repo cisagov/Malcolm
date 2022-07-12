@@ -25,21 +25,14 @@ INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
-ALERTING_EXAMPLE_DESTINATION_NAME=${ALERTING_EXAMPLE_DESTINATION_NAME:-"Malcolm API Loopback Webhook"}
 
-OTHER_INDEX_PATTERNS=(
-  "filebeat-*;filebeat-*;@timestamp"
-  "metricbeat-*;metricbeat-*;@timestamp"
-  "auditbeat-*;auditbeat-*;@timestamp"
-  "packetbeat-*;packetbeat-*;@timestamp"
-)
-
-INDEX_POLICY_FILE="/data/init/index-management-policy.json"
-INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
+MALCOLM_TEMPLATES_DIR="/opt/templates"
+MALCOLM_TEMPLATE_FILE_ORIG="$MALCOLM_TEMPLATES_DIR/malcolm_template.json"
 MALCOLM_TEMPLATE_FILE="/data/init/malcolm_template.json"
-MALCOLM_TEMPLATE_FILE_ORIG="/data/malcolm_template.json"
-INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 DEFAULT_DASHBOARD=${OPENSEARCH_DEFAULT_DASHBOARD:-"0ad3d7c2-3441-485e-9dfe-dbb22e84e576"}
+
+ISM_SNAPSHOT_REPO=${ISM_SNAPSHOT_REPO:-"logs"}
+ISM_SNAPSHOT_COMPRESSED=${ISM_SNAPSHOT_COMPRESSED:-"false"}
 
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
@@ -53,39 +46,33 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     # have we not not already created the index pattern?
     if ! curl -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
 
-      echo "OpenSearch is running! Setting up index management policies..."
+      echo "OpenSearch is running!"
 
-      # register the repo location for opensearch snapshots
-      /data/register-opensearch-snapshot-repo.sh
+      # register the repo name/path for opensearch snapshots
+      echo "Registering index snapshot repository..."
+      curl -w "\n" -H "Accept: application/json" \
+        -H "Content-type: application/json" \
+        -XPUT -fsSL "$OS_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
+        -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }"
 
-      # tweak the sessions template (arkime_sessions3-* template file) to use the index management policy
-      if [[ -f "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
-        # user has provided a file for index management, use it
-        cp "$INDEX_POLICY_FILE_HOST" "$INDEX_POLICY_FILE"
-        INDEX_POLICY_NAME="$(cat "$INDEX_POLICY_FILE" | jq '..|objects|.policy_id//empty' | tr -d '"')"
-
-      else
-        # need to generate index management file based on environment variables
-        /data/opensearch_index_policy_create.py \
-          --policy "$INDEX_POLICY_NAME" \
-          --index-pattern "$INDEX_PATTERN" \
-          --priority 100 \
-          --snapshot ${ISM_SNAPSHOT_AGE:-"0"} \
-          --cold ${ISM_COLD_AGE:-"0"} \
-          --close ${ISM_CLOSE_AGE:-"0"} \
-          --delete ${ISM_DELETE_AGE:-"0"} \
-        > "$INDEX_POLICY_FILE"
+      if [[ -d /opt/ecs-templates/composable/component ]]; then
+        echo "Importing ECS composable templates..."
+        for i in /opt/ecs-templates/composable/component/*.json; do
+          TEMP_BASENAME="$(basename "$i")"
+          TEMP_FILENAME="${TEMP_BASENAME%.*}"
+          echo "Importing ECS composable template $TEMP_FILENAME ..."
+          curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+        done
       fi
 
-      if [[ -f "$INDEX_POLICY_FILE" ]]; then
-        # make API call to define index management policy
-        # https://opensearch.org/docs/latest/im-plugin/ism/api/#create-policy
-        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_plugins/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
-
-        if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]]; then
-          # insert OpenSearch ISM stuff into index template settings
-          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".settings += {\"index.plugins.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
-        fi
+      if [[ -d "$MALCOLM_TEMPLATES_DIR"/composable/component ]]; then
+        echo "Importing custom ECS composable templates..."
+        for i in "$MALCOLM_TEMPLATES_DIR"/composable/component/*.json; do
+          TEMP_BASENAME="$(basename "$i")"
+          TEMP_FILENAME="${TEMP_BASENAME%.*}"
+          echo "Importing custom ECS composable template $TEMP_FILENAME ..."
+          curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+        done
       fi
 
       echo "Importing malcolm_template..."
@@ -94,9 +81,24 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
       fi
 
-      # load malcolm_template containing malcolm data source field type mappings (merged from /data/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
+      # load malcolm_template containing malcolm data source field type mappings (merged from /opt/templates/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
       curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
-        "$OS_URL/_template/malcolm_template?include_type_name=true" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
+        "$OS_URL/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
+
+      # import other templates as well (and get info for creating their index patterns)
+      OTHER_INDEX_PATTERNS=()
+      for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
+        TEMP_BASENAME="$(basename "$i")"
+        TEMP_FILENAME="${TEMP_BASENAME%.*}"
+        if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
+          echo "Importing template \"$TEMP_FILENAME\"..."
+          if curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OS_URL/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1; then
+            for TEMPLATE_INDEX_PATTERN in $(jq '.index_patterns[]' "$i" | tr -d '"'); do
+              OTHER_INDEX_PATTERNS+=("$TEMPLATE_INDEX_PATTERN;$TEMPLATE_INDEX_PATTERN;@timestamp")
+            done
+          fi
+        fi
+      done
 
       echo "Importing index pattern..."
 
@@ -113,11 +115,11 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         "$DASHB_URL/api/opensearch-dashboards/settings/defaultIndex" \
         -d"{\"value\":\"$INDEX_PATTERN_ID\"}"
 
-      echo "Creating other index patterns..."
       for i in ${OTHER_INDEX_PATTERNS[@]}; do
         IDX_ID="$(echo "$i" | cut -d';' -f1)"
         IDX_NAME="$(echo "$i" | cut -d';' -f2)"
         IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
+        echo "Creating index pattern \"$IDX_NAME\"..."
         curl -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
           "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
           -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1
@@ -125,14 +127,15 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "Importing OpenSearch Dashboards saved objects..."
 
-      # install default dashboards, index patterns, etc.
+      # install default dashboards
       for i in /opt/dashboards/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
-      # At the moment Beats won't import dashboards into OpenSearch dashboards
+
+      # beats will no longer import its dashbaords into OpenSearch
       # (see opensearch-project/OpenSearch-Dashboards#656 and
       # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
-      # manually add load those dashboards in /opt/dashboards/beats as well.
+      # manually add load our dashboards in /opt/dashboards/beats as well.
       for i in /opt/dashboards/beats/*.json; do
         curl -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
@@ -191,31 +194,16 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "Creating OpenSearch alerting objects..."
 
-      # Create alerting objects here
+      # Create notification/alerting objects here
 
-      # destinations
-      for i in /opt/alerting/destinations/*.json; do
-        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/destinations" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+      # notification channels
+      for i in /opt/notifications/channels/*.json; do
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_notifications/configs" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
-      # get example destination ID
-      ALERTING_EXAMPLE_DESTINATION_ID=$(curl -L --silent --show-error -XGET -H 'osd-xsrf:true' -H 'Content-type:application/json' \
-          "$OS_URL/_plugins/_alerting/destinations" | \
-            jq -r ".destinations[] | select(.name == \"$ALERTING_EXAMPLE_DESTINATION_NAME\").id" | \
-            head -n 1)
 
       # monitors
       for i in /opt/alerting/monitors/*.json; do
-        if [[ -n "$ALERTING_EXAMPLE_DESTINATION_ID" ]] && \
-           grep -q ALERTING_EXAMPLE_DESTINATION_ID "$i"; then
-          # replace example destination ID in monitor definition
-          TMP_MONITOR_FILENAME="$(mktemp)"
-          sed "s/ALERTING_EXAMPLE_DESTINATION_ID/$ALERTING_EXAMPLE_DESTINATION_ID/g" "$i" > "$TMP_MONITOR_FILENAME"
-          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$TMP_MONITOR_FILENAME"
-          rm -f "$TMP_MONITOR_FILENAME"
-        else
-          # insert monitor as defined
-          curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
-        fi
+        curl -L --silent --output /dev/null --show-error -XPOST "$OS_URL/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
       done
 
       echo "OpenSearch alerting objects creation complete!"

@@ -1,5 +1,5 @@
 {
-  "version": "7.10.2",
+  "version": "2.1.0",
   "objects": [
     {
       "id": "37041ee1-79c0-4684-a436-3173b0e89876",
@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T19:45:04.554Z",
-      "version": "WzE3OTMsMV0=",
+      "updated_at": "2022-07-08T20:29:05.468Z",
+      "version": "Wzg5NiwxXQ==",
       "attributes": {
         "title": "HTTP",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":30,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":19,\"i\":\"3\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"3\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"5\",\"w\":14,\"x\":20,\"y\":48},\"panelIndex\":\"5\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"6\",\"w\":14,\"x\":34,\"y\":48},\"panelIndex\":\"6\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"8\",\"w\":24,\"x\":24,\"y\":117},\"panelIndex\":\"8\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"14\",\"w\":10,\"x\":10,\"y\":48},\"panelIndex\":\"14\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"15\",\"w\":10,\"x\":0,\"y\":48},\"panelIndex\":\"15\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"16\",\"w\":48,\"x\":0,\"y\":99},\"panelIndex\":\"16\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"17\",\"w\":24,\"x\":0,\"y\":117},\"panelIndex\":\"17\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":20,\"i\":\"20\",\"w\":24,\"x\":24,\"y\":66},\"panelIndex\":\"20\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#629E51\"}}},\"gridData\":{\"h\":20,\"i\":\"21\",\"w\":24,\"x\":0,\"y\":66},\"panelIndex\":\"21\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":7,\"i\":\"23\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"23\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"24\",\"w\":16,\"x\":32,\"y\":19},\"panelIndex\":\"24\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"w\":8,\"x\":8,\"y\":7},\"panelIndex\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"e2ba3677-11c6-4cd9-87f3-fb3473718d10\",\"w\":24,\"x\":8,\"y\":19},\"panelIndex\":\"e2ba3677-11c6-4cd9-87f3-fb3473718d10\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"w\":8,\"x\":0,\"y\":30},\"panelIndex\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_15\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"w\":48,\"x\":0,\"y\":86},\"panelIndex\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_16\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":42,\"i\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"w\":48,\"x\":0,\"y\":135},\"panelIndex\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"version\":\"7.10.2\",\"panelRefName\":\"panel_17\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":30,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":19,\"i\":\"3\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"3\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"5\",\"w\":14,\"x\":20,\"y\":48},\"panelIndex\":\"5\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"6\",\"w\":14,\"x\":34,\"y\":48},\"panelIndex\":\"6\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"8\",\"w\":24,\"x\":24,\"y\":117},\"panelIndex\":\"8\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"14\",\"w\":10,\"x\":10,\"y\":48},\"panelIndex\":\"14\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"15\",\"w\":10,\"x\":0,\"y\":48},\"panelIndex\":\"15\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"16\",\"w\":48,\"x\":0,\"y\":99},\"panelIndex\":\"16\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"17\",\"w\":24,\"x\":0,\"y\":117},\"panelIndex\":\"17\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":20,\"i\":\"20\",\"w\":24,\"x\":24,\"y\":66},\"panelIndex\":\"20\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#629E51\"}}},\"gridData\":{\"h\":20,\"i\":\"21\",\"w\":24,\"x\":0,\"y\":66},\"panelIndex\":\"21\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":7,\"i\":\"23\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"23\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"24\",\"w\":16,\"x\":32,\"y\":19},\"panelIndex\":\"24\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"w\":8,\"x\":8,\"y\":7},\"panelIndex\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"e2ba3677-11c6-4cd9-87f3-fb3473718d10\",\"w\":24,\"x\":8,\"y\":19},\"panelIndex\":\"e2ba3677-11c6-4cd9-87f3-fb3473718d10\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"w\":8,\"x\":0,\"y\":30},\"panelIndex\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_15\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"w\":48,\"x\":0,\"y\":86},\"panelIndex\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_16\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":42,\"i\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"w\":48,\"x\":0,\"y\":135},\"panelIndex\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_17\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -123,8 +123,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:47:06.069Z",
-      "version": "Wzg3NCwxXQ==",
+      "updated_at": "2022-07-08T19:51:04.273Z",
+      "version": "WzgwNSwxXQ==",
       "attributes": {
         "title": "Network Logs",
         "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -146,8 +146,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzM5OCwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI1NSwxXQ==",
       "attributes": {
         "title": "HTTP - Status Over Time",
         "visState": "{\"title\":\"HTTP - Status Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-25y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.status_msg\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Status Code\"},\"schema\":\"group\"}],\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"firstPacket per 12 hours\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY-MM-DD\"}},\"params\":{\"date\":true,\"interval\":\"P30D\",\"intervalESValue\":30,\"intervalESUnit\":\"d\",\"format\":\"YYYY-MM-DD\",\"bounds\":{\"min\":\"1976-02-12T16:47:29.688Z\",\"max\":\"2020-02-12T16:47:29.689Z\"}},\"label\":\"firstPacket per 30 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Status Code\",\"aggType\":\"terms\"}]},\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"labels\":{\"show\":true},\"legendPosition\":\"bottom\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"drawLinesBetweenPoints\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"mode\":\"stacked\",\"show\":true,\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"thresholdLine\":{\"color\":\"#E7664C\",\"show\":false,\"style\":\"full\",\"value\":10,\"width\":1},\"times\":[],\"type\":\"histogram\",\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"\"},\"type\":\"value\"}]}}",
@@ -176,8 +176,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzM5OSwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI1NiwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Sites\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.host\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Site\"}}],\"listeners\":{}}",
         "description": "",
@@ -206,16 +206,16 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwMCwxXQ==",
+      "updated_at": "2022-07-08T20:28:57.331Z",
+      "version": "Wzg5NSwxXQ==",
       "attributes": {
-        "visState": "{\"title\":\"HTTP - Sites Hosting EXEs\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.host\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Site\"}}],\"listeners\":{}}",
-        "description": "",
         "title": "HTTP - Sites Hosting EXEs",
+        "visState": "{\"title\":\"HTTP - Sites Hosting EXEs\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.host\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Site\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"version\":true,\"query\":{\"query_string\":{\"query\":\"\\\"application/x-dosexec\\\"\",\"analyze_wildcard\":true}},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"file.mime_type:\\\"application/x-dosexec\\\"\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -235,8 +235,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwMSwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI1OCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - URIs\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.uri\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"URI\"}}],\"listeners\":{}}",
         "description": "",
@@ -265,8 +265,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwMiwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI1OSwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -295,8 +295,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwMywxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2MCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -325,8 +325,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwNCwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2MSwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - User Agent\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"user_agent.original\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"User Agent\"}}],\"listeners\":{}}",
         "description": "",
@@ -355,8 +355,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwNSwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2MiwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Referrer\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.referrer\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
         "description": "",
@@ -385,8 +385,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwNiwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2MywxXQ==",
       "attributes": {
         "title": "HTTP - Destination Port",
         "visState": "{\"title\":\"HTTP - Destination Port\",\"type\":\"histogram\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100,\"rotate\":75},\"title\":{\"text\":\"Port\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Port\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"}}]}",
@@ -415,8 +415,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwNywxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2NCwxXQ==",
       "attributes": {
         "title": "HTTP - Destination Country",
         "visState": "{\"title\":\"HTTP - Destination Country\",\"type\":\"histogram\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"Country\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":false,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Country\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Country\"}}]}",
@@ -445,8 +445,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQwOCwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2NSwxXQ==",
       "attributes": {
         "title": "HTTP - Log Count",
         "visState": "{\"title\":\"HTTP - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
@@ -475,8 +475,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T19:39:48.451Z",
-      "version": "WzE2NzAsMV0=",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2NiwxXQ==",
       "attributes": {
         "title": "HTTP  - Status and Method",
         "visState": "{\"title\":\"HTTP  - Status and Method\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.status_msg\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Status Message\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.method\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Method\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
@@ -505,8 +505,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQxMCwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2NywxXQ==",
       "attributes": {
         "title": "HTTP - Unique Usernames and Passwords",
         "visState": "{\"title\":\"HTTP - Unique Usernames and Passwords\",\"type\":\"metric\",\"params\":{\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"type\":\"range\",\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":48}},\"dimensions\":{\"metrics\":[{\"type\":\"vis_dimension\",\"accessor\":0,\"format\":{\"id\":\"number\",\"params\":{}}},{\"type\":\"vis_dimension\",\"accessor\":1,\"format\":{\"id\":\"number\",\"params\":{}}}]},\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"related.user\",\"customLabel\":\"Unique Usernames\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"related.password\",\"customLabel\":\"Unique Cleartext Passwords\"}}]}",
@@ -535,8 +535,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T19:32:24.930Z",
-      "version": "WzE1NzgsMV0=",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2OCwxXQ==",
       "attributes": {
         "title": "HTTP - Method and Status",
         "visState": "{\"title\":\"HTTP - Method and Status\",\"type\":\"kbn_sankey\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":40,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Method\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":40,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Status\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"computedColumns\":[],\"computedColsPerSplitCol\":false,\"hideExportLinks\":false,\"csvExportWithTotal\":false,\"stripedRows\":false,\"addRowNumberColumn\":false,\"csvEncoding\":\"utf-8\",\"showFilterBar\":false,\"filterCaseSensitive\":false,\"filterBarHideable\":false,\"filterAsYouType\":false,\"filterTermsSeparately\":false,\"filterHighlightResults\":false,\"filterBarWidth\":\"25%\"}}",
@@ -565,8 +565,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T19:44:37.021Z",
-      "version": "WzE3NzAsMV0=",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI2OSwxXQ==",
       "attributes": {
         "title": "HTTP - Version",
         "visState": "{\"title\":\"HTTP - Version\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"HTTP Version\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100}}}",
@@ -595,8 +595,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQxMSwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI3MCwxXQ==",
       "attributes": {
         "title": "HTTP - File Type",
         "visState": "{\"title\":\"HTTP - File Type\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.mime_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Type\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":42,\"showLabel\":false}}",
@@ -625,8 +625,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2021-02-23T18:46:21.647Z",
-      "version": "WzQxMiwxXQ==",
+      "updated_at": "2022-07-08T19:50:26.471Z",
+      "version": "WzI3MSwxXQ==",
       "attributes": {
         "title": "HTTP - Logs",
         "description": "",

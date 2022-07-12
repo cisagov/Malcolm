@@ -54,37 +54,20 @@ class Constants:
     }
 
     FILEBEAT = 'filebeat'
-    METRICBEAT = 'metricbeat'
-    AUDITBEAT = 'auditbeat'
-    HEATBEAT = 'heatbeat'  # protologbeat to log temperature and other misc. stuff
-    SYSLOGBEAT = 'filebeat-syslog'  # another filebeat instance for syslog
+    MISCBEAT = 'miscbeat'
     ARKIMECAP = 'arkime-capture'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
-        METRICBEAT: f'/opt/sensor/sensor_ctl/{METRICBEAT}',
-        AUDITBEAT: f'/opt/sensor/sensor_ctl/{AUDITBEAT}',
-        SYSLOGBEAT: f'/opt/sensor/sensor_ctl/{SYSLOGBEAT}',
-        HEATBEAT: f'/opt/sensor/sensor_ctl/{HEATBEAT}',
-    }
-
-    BEAT_DASHBOARDS_DIR = {
-        FILEBEAT: f'/usr/share/{FILEBEAT}/kibana',
-        METRICBEAT: f'/usr/share/{METRICBEAT}/kibana',
-        AUDITBEAT: f'/usr/share/{AUDITBEAT}/kibana',
-        SYSLOGBEAT: f'/usr/share/{FILEBEAT}/kibana',
-        HEATBEAT: f'/usr/share/protologbeat/kibana/',
+        MISCBEAT: f'/opt/sensor/sensor_ctl/{MISCBEAT}',
     }
 
     BEAT_CMD = {
         FILEBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[FILEBEAT]}" --path.config "{BEAT_DIR[FILEBEAT]}" --path.data "{BEAT_DIR[FILEBEAT]}/data" --path.logs "{BEAT_DIR[FILEBEAT]}/logs" -c "{BEAT_DIR[FILEBEAT]}/{FILEBEAT}.yml"',
-        METRICBEAT: f'{METRICBEAT} --path.home "{BEAT_DIR[METRICBEAT]}" --path.config "{BEAT_DIR[METRICBEAT]}" --path.data "{BEAT_DIR[METRICBEAT]}/data" --path.logs "{BEAT_DIR[METRICBEAT]}/logs" -c "{BEAT_DIR[METRICBEAT]}/{METRICBEAT}.yml"',
-        AUDITBEAT: f'{AUDITBEAT} --path.home "{BEAT_DIR[AUDITBEAT]}" --path.config "{BEAT_DIR[AUDITBEAT]}" --path.data "{BEAT_DIR[AUDITBEAT]}/data" --path.logs "{BEAT_DIR[AUDITBEAT]}/logs" -c "{BEAT_DIR[AUDITBEAT]}/{AUDITBEAT}.yml"',
-        SYSLOGBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[SYSLOGBEAT]}" --path.config "{BEAT_DIR[SYSLOGBEAT]}" --path.data "{BEAT_DIR[SYSLOGBEAT]}/data" --path.logs "{BEAT_DIR[SYSLOGBEAT]}/logs" -c "{BEAT_DIR[SYSLOGBEAT]}/{SYSLOGBEAT}.yml"',
-        HEATBEAT: f'protologbeat --path.home "{BEAT_DIR[HEATBEAT]}" --path.config "{BEAT_DIR[HEATBEAT]}" --path.data "{BEAT_DIR[HEATBEAT]}/data" --path.logs "{BEAT_DIR[HEATBEAT]}/logs" -c "{BEAT_DIR[HEATBEAT]}/protologbeat.yml"',
+        MISCBEAT: f'{FILEBEAT} --path.home "{BEAT_DIR[MISCBEAT]}" --path.config "{BEAT_DIR[MISCBEAT]}" --path.data "{BEAT_DIR[MISCBEAT]}/data" --path.logs "{BEAT_DIR[MISCBEAT]}/logs" -c "{BEAT_DIR[MISCBEAT]}/{FILEBEAT}.yml"',
     }
 
-    # specific to beats forwarded to logstash (eg., filebeat)
+    # specific to beats forwarded to logstash (eg., filebeat, etc.)
     BEAT_LS_HOST = 'BEAT_LS_HOST'
     BEAT_LS_PORT = 'BEAT_LS_PORT'
     BEAT_LS_SSL = 'BEAT_LS_SSL'
@@ -92,20 +75,17 @@ class Constants:
     BEAT_LS_SSL_CLIENT_CRT = 'BEAT_LS_SSL_CLIENT_CRT'
     BEAT_LS_SSL_CLIENT_KEY = 'BEAT_LS_SSL_CLIENT_KEY'
     BEAT_LS_SSL_VERIFY = 'BEAT_LS_SSL_VERIFY'
+    BEAT_LS_CERT_DIR_DEFAULT = "/opt/sensor/sensor_ctl/logstash-client-certificates"
 
-    # specific to beats forwarded to OpenSearch (eg., metricbeat, auditbeat, filebeat-syslog)
+    # since the OpenSearch fork from ElasticSearch, we're no longer using beats forwarding directly to OpenSearch
+
+    # however, Arkime does connect directly to opensearch
     BEAT_OS_HOST = "BEAT_OS_HOST"
     BEAT_OS_PORT = "BEAT_OS_PORT"
     BEAT_OS_PROTOCOL = "BEAT_OS_PROTOCOL"
     BEAT_OS_SSL_VERIFY = "BEAT_OS_SSL_VERIFY"
     BEAT_HTTP_PASSWORD = "BEAT_HTTP_PASSWORD"
     BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
-    BEAT_DASHBOARDS_ENABLED = "BEAT_DASHBOARDS_ENABLED"
-    BEAT_DASHBOARDS_PATH = "BEAT_DASHBOARDS_PATH"
-    BEAT_DASHBOARDS_HOST = "BEAT_DASHBOARDS_HOST"
-    BEAT_DASHBOARDS_PORT = "BEAT_DASHBOARDS_PORT"
-    BEAT_DASHBOARDS_PROTOCOL = "BEAT_DASHBOARDS_PROTOCOL"
-    BEAT_DASHBOARDS_SSL_VERIFY = "BEAT_DASHBOARDS_SSL_VERIFY"
 
     # specific to filebeat
     BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
@@ -117,9 +97,6 @@ class Constants:
     BEAT_ZEEK_LOG_PATTERN_VAL = '*.log'
     BEAT_SURICATA_LOG_PATTERN_VAL = 'eve*.json'
 
-    # specific to metricbeat
-    BEAT_INTERVAL = "BEAT_INTERVAL"
-
     # specific to arkime
     ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
 
@@ -130,10 +107,7 @@ class Constants:
     MSG_CONFIG_GENERIC = 'Configure {}'
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
-    MSG_CONFIG_METRICBEAT = (f'{METRICBEAT}', f'Configure resource metrics forwarding via {METRICBEAT}')
-    MSG_CONFIG_AUDITBEAT = (f'{AUDITBEAT}', f'Configure audit log forwarding via {AUDITBEAT}')
-    MSG_CONFIG_SYSLOGBEAT = (f'{SYSLOGBEAT}', f'Configure syslog forwarding via {FILEBEAT}')
-    MSG_CONFIG_HEATBEAT = (f'{HEATBEAT}', f'Configure hardware metrics (temperature, etc.) forwarding via protologbeat')
+    MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
@@ -164,6 +138,7 @@ class Constants:
     )
     MSG_MESSAGE_ERROR = 'Error: {}\n\nPlease try again.'
     MSG_CANCEL_ERROR = 'Operation cancelled, goodbye!'
+    MSG_INVALID_FORWARDING_TYPE = "Invalid forwarder selected"
     MSG_EMPTY_CONFIG_ERROR = "No configuration values were supplied"
     MSG_SELECT_INTERFACE = 'Select capture interface(s)'
     MSG_SELECT_BLINK_INTERFACE = 'Select capture interface to identify'
@@ -210,8 +185,6 @@ def input_opensearch_connection_info(
     forwarder,
     default_os_host=None,
     default_os_port=None,
-    default_dashboards_host=None,
-    default_dashboards_port=None,
     default_username=None,
     default_password=None,
 ):
@@ -251,72 +224,8 @@ def input_opensearch_connection_info(
             return_dict[Constants.BEAT_OS_PORT] = values[1]
             break
 
-    # Dashboards configuration (if supported by forwarder)
-    if (forwarder in Constants.BEAT_DASHBOARDS_DIR.keys()) and (
-        d.yesno(f"Configure {forwarder} Dashboards connectivity?") == Dialog.OK
-    ):
-        # opensearch protocol and SSL verification mode
-        dashboards_protocol = "http"
-        dashboards_ssl_verify = "none"
-        if d.yesno("Dashboards connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK:
-            dashboards_protocol = "https"
-            if d.yesno("Dashboards SSL verification", yes_label="None", no_label="Full") != Dialog.OK:
-                dashboards_ssl_verify = "full"
-        return_dict[Constants.BEAT_DASHBOARDS_PROTOCOL] = dashboards_protocol
-        return_dict[Constants.BEAT_DASHBOARDS_SSL_VERIFY] = dashboards_ssl_verify
-
-        while True:
-            # host/port for Dashboards
-            code, values = d.form(
-                Constants.MSG_CONFIG_GENERIC.format(forwarder),
-                [
-                    ('Dashboards Host', 1, 1, default_dashboards_host or "", 1, 20, 30, 255),
-                    ('Dashboards Port', 2, 1, default_dashboards_port or "5601", 2, 20, 6, 5),
-                ],
-            )
-            values = [x.strip() for x in values]
-
-            if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                raise CancelledError
-
-            elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
-                code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
-
-            else:
-                return_dict[Constants.BEAT_DASHBOARDS_HOST] = values[0]
-                return_dict[Constants.BEAT_DASHBOARDS_PORT] = values[1]
-                break
-
-        if d.yesno(f"Configure {forwarder} Dashboards dashboards?") == Dialog.OK:
-            dashboards_enabled = "true"
-        else:
-            dashboards_enabled = "false"
-        return_dict[Constants.BEAT_DASHBOARDS_ENABLED] = dashboards_enabled
-
-        if dashboards_enabled == "true":
-            while True:
-                code, values = d.form(
-                    Constants.MSG_CONFIG_GENERIC.format(forwarder),
-                    [('Dashboards Dashboards Path', 1, 1, Constants.BEAT_DASHBOARDS_DIR[forwarder], 1, 30, 30, 255)],
-                )
-                values = [x.strip() for x in values]
-
-                if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                    raise CancelledError
-
-                elif (len(values[0]) <= 0) or (not os.path.isdir(values[0])):
-                    code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
-
-                else:
-                    return_dict[Constants.BEAT_DASHBOARDS_PATH] = values[0]
-                    break
-
-    server_display_name = (
-        "OpenSearch/Dashboards" if Constants.BEAT_DASHBOARDS_HOST in return_dict.keys() else "OpenSearch"
-    )
-
     # HTTP/HTTPS authentication
-    code, http_username = d.inputbox(f"{server_display_name} HTTP/HTTPS server username", init=default_username)
+    code, http_username = d.inputbox(f"OpenSearch HTTP/HTTPS server username", init=default_username)
     if (code == Dialog.CANCEL) or (code == Dialog.ESC):
         raise CancelledError
     return_dict[Constants.BEAT_HTTP_USERNAME] = http_username.strip()
@@ -324,13 +233,13 @@ def input_opensearch_connection_info(
     # make them enter the password twice
     while True:
         code, http_password = d.passwordbox(
-            f"{server_display_name} HTTP/HTTPS server password", insecure=True, init=default_password
+            f"OpenSearch HTTP/HTTPS server password", insecure=True, init=default_password
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise CancelledError
 
         code, http_password2 = d.passwordbox(
-            f"{server_display_name} HTTP/HTTPS server password (again)",
+            f"OpenSearch HTTP/HTTPS server password (again)",
             insecure=True,
             init=default_password if (http_password == default_password) else "",
         )
@@ -367,33 +276,6 @@ def input_opensearch_connection_info(
         )
         if code != Dialog.OK:
             raise CancelledError
-
-    # test Dashboards connection
-    if Constants.BEAT_DASHBOARDS_HOST in return_dict.keys():
-        code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Dashboards"))
-        retcode, message, output = test_connection(
-            protocol=return_dict[Constants.BEAT_DASHBOARDS_PROTOCOL],
-            host=return_dict[Constants.BEAT_DASHBOARDS_HOST],
-            port=return_dict[Constants.BEAT_DASHBOARDS_PORT],
-            uri="api/status",
-            username=return_dict[Constants.BEAT_HTTP_USERNAME]
-            if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0)
-            else None,
-            password=return_dict[Constants.BEAT_HTTP_PASSWORD]
-            if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0)
-            else None,
-            ssl_verify=return_dict[Constants.BEAT_DASHBOARDS_SSL_VERIFY],
-        )
-        if retcode == 200:
-            code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("Dashboards", retcode, message))
-        else:
-            code = d.yesno(
-                text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("Dashboards", retcode, message, "\n".join(output)),
-                yes_label="Ignore Error",
-                no_label="Start Over",
-            )
-            if code != Dialog.OK:
-                raise CancelledError
 
     return return_dict
 
@@ -456,7 +338,6 @@ def main():
                 "OS_HOST" in capture_config_dict.keys()
             ):
                 previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["OS_HOST"]
-                previous_config_values[Constants.BEAT_DASHBOARDS_HOST] = capture_config_dict["OS_HOST"]
             if (Constants.BEAT_OS_PORT not in previous_config_values.keys()) and (
                 "OS_PORT" in capture_config_dict.keys()
             ):
@@ -903,12 +784,9 @@ def main():
                 code, fwd_mode = d.menu(
                     Constants.MSG_CONFIG_MODE,
                     choices=[
-                        Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_ARKIME,
-                        Constants.MSG_CONFIG_METRICBEAT,
-                        Constants.MSG_CONFIG_AUDITBEAT,
-                        Constants.MSG_CONFIG_SYSLOGBEAT,
-                        Constants.MSG_CONFIG_HEATBEAT,
+                        Constants.MSG_CONFIG_FILEBEAT,
+                        Constants.MSG_CONFIG_MISCBEAT,
                     ],
                 )
                 if code != Dialog.OK:
@@ -917,7 +795,7 @@ def main():
                 if fwd_mode == Constants.ARKIMECAP:
                     # forwarding configuration for arkime capture
 
-                    # get opensearch/dashboards connection information from user
+                    # get opensearch connection information from user
                     opensearch_config_dict = input_opensearch_connection_info(
                         forwarder=fwd_mode,
                         default_os_host=previous_config_values[Constants.BEAT_OS_HOST],
@@ -995,14 +873,8 @@ def main():
                         text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(fwd_mode, "\n".join(list_results))
                     )
 
-                elif (
-                    (fwd_mode == Constants.FILEBEAT)
-                    or (fwd_mode == Constants.METRICBEAT)
-                    or (fwd_mode == Constants.AUDITBEAT)
-                    or (fwd_mode == Constants.SYSLOGBEAT)
-                    or (fwd_mode == Constants.HEATBEAT)
-                ):
-                    # forwarder configuration for beats
+                elif (fwd_mode == Constants.FILEBEAT) or (fwd_mode == Constants.MISCBEAT):
+                    # forwarder configuration for beats -> logstash
 
                     if not os.path.isdir(Constants.BEAT_DIR[fwd_mode]):
                         # beat dir not found, give up
@@ -1029,53 +901,153 @@ def main():
 
                     forwarder_dict = defaultdict(str)
 
-                    if (
-                        (fwd_mode == Constants.METRICBEAT)
-                        or (fwd_mode == Constants.AUDITBEAT)
-                        or (fwd_mode == Constants.SYSLOGBEAT)
-                        or (fwd_mode == Constants.HEATBEAT)
-                    ):
-                        #### auditbeat/metricbeat/filebeat-syslog ###################################################################
-                        # enter beat configuration (in a few steps)
+                    while True:
+                        forwarder_dict = defaultdict(str)
 
-                        if fwd_mode == Constants.METRICBEAT:
-                            # interval is metricbeat only, the rest is used by both
-                            code, beat_interval = d.rangebox(
-                                f"{Constants.MSG_CONFIG_GENERIC.format(fwd_mode)} interval (seconds)",
-                                width=60,
-                                min=1,
-                                max=60,
-                                init=30,
-                            )
-                            if code == Dialog.CANCEL or code == Dialog.ESC:
-                                raise CancelledError
-                            forwarder_dict[Constants.BEAT_INTERVAL] = f"{beat_interval}s"
+                        forwarder_config_error = False
+                        log_path = None
+                        logstash_host = None
+                        logstash_port = None
 
-                        # get opensearch/dashboards connection information from user
-                        forwarder_dict.update(
-                            input_opensearch_connection_info(
-                                forwarder=fwd_mode,
-                                default_os_host=previous_config_values[Constants.BEAT_OS_HOST],
-                                default_os_port=previous_config_values[Constants.BEAT_OS_PORT],
-                                default_dashboards_host=previous_config_values[Constants.BEAT_DASHBOARDS_HOST],
-                                default_dashboards_port=previous_config_values[Constants.BEAT_DASHBOARDS_PORT],
-                                default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
-                                default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD],
-                            )
-                        )
-
-                    elif fwd_mode == Constants.FILEBEAT:
-                        #### filebeat #############################################################################################
-                        while True:
-                            forwarder_dict = defaultdict(str)
-
-                            # enter main filebeat configuration
+                        if fwd_mode == Constants.FILEBEAT:
+                            # zeek log dir is filebeat only
                             code, values = d.form(
                                 Constants.MSG_CONFIG_GENERIC.format(fwd_mode),
                                 [
                                     ('Log Path', 1, 1, capture_config_dict["ZEEK_LOG_PATH"], 1, 20, 30, 255),
-                                    ('Destination Host', 2, 1, "", 2, 20, 30, 255),
-                                    ('Destination Port', 3, 1, "5044", 3, 20, 6, 5),
+                                ],
+                            )
+                            if code == Dialog.CANCEL or code == Dialog.ESC:
+                                raise CancelledError
+                            values = [x.strip() for x in values]
+                            if (len(values[0]) <= 0) or (not os.path.isdir(values[0])):
+                                code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
+                                forwarder_config_error = True
+                            else:
+                                log_path = values[0]
+
+                        if not forwarder_config_error:
+                            # host/port for LogStash
+                            code, values = d.form(
+                                Constants.MSG_CONFIG_GENERIC.format(fwd_mode),
+                                [
+                                    (
+                                        'Logstash Host',
+                                        1,
+                                        1,
+                                        previous_config_values[Constants.BEAT_LS_HOST],
+                                        1,
+                                        25,
+                                        30,
+                                        255,
+                                    ),
+                                    (
+                                        'Logstash Port',
+                                        2,
+                                        1,
+                                        previous_config_values[Constants.BEAT_LS_PORT]
+                                        if Constants.BEAT_LS_PORT in previous_config_values
+                                        else "5044",
+                                        2,
+                                        25,
+                                        6,
+                                        5,
+                                    ),
+                                ],
+                            )
+                            if code == Dialog.CANCEL or code == Dialog.ESC:
+                                raise CancelledError
+                            values = [x.strip() for x in values]
+                            if (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
+                                code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
+                                forwarder_config_error = True
+                            else:
+                                logstash_host = values[0]
+                                logstash_port = values[1]
+
+                        if not forwarder_config_error:
+                            # store inputted items into the configuration dictionary for the forwarder
+
+                            if log_path is not None:
+                                forwarder_dict[Constants.BEAT_ZEEK_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(log_path, Constants.BEAT_ZEEK_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
+                                )
+                                forwarder_dict[Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(log_path, Constants.BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
+                                )
+                                forwarder_dict[Constants.BEAT_SURICATA_LOG_PATTERN_KEY] = os.path.join(
+                                    os.path.join(log_path, Constants.BEAT_SURICATA_LOG_PATH_SUBDIR),
+                                    Constants.BEAT_SURICATA_LOG_PATTERN_VAL,
+                                )
+
+                            if logstash_host is not None:
+                                forwarder_dict[Constants.BEAT_LS_HOST] = logstash_host
+
+                            if logstash_port is not None:
+                                forwarder_dict[Constants.BEAT_LS_PORT] = logstash_port
+
+                            break
+
+                    # optionally, filebeat can use SSL if Logstash is configured for it
+                    logstash_ssl = "false"
+                    logstash_ssl_verify = "none"
+                    if (
+                        d.yesno(
+                            "Forward to Logstash over SSL? (Note: This requires the destination to be similarly configured and a corresponding copy of the client SSL files.)",
+                            yes_label="SSL",
+                            no_label="Unencrypted",
+                        )
+                        == Dialog.OK
+                    ):
+                        logstash_ssl = "true"
+                        if d.yesno("Logstash SSL verification", yes_label="None", no_label="Force Peer") != Dialog.OK:
+                            logstash_ssl_verify = "force_peer"
+                    forwarder_dict[Constants.BEAT_LS_SSL] = logstash_ssl
+                    forwarder_dict[Constants.BEAT_LS_SSL_VERIFY] = logstash_ssl_verify
+
+                    if forwarder_dict[Constants.BEAT_LS_SSL] == "true":
+                        while True:
+                            code, values = d.form(
+                                Constants.MSG_CONFIG_GENERIC.format(fwd_mode),
+                                [
+                                    (
+                                        'SSL Certificate Authorities File',
+                                        1,
+                                        1,
+                                        previous_config_values[Constants.BEAT_LS_SSL_CA_CRT]
+                                        if Constants.BEAT_LS_SSL_CA_CRT in previous_config_values
+                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt",
+                                        1,
+                                        35,
+                                        30,
+                                        255,
+                                    ),
+                                    (
+                                        'SSL Certificate File',
+                                        2,
+                                        1,
+                                        previous_config_values[Constants.BEAT_LS_SSL_CLIENT_CRT]
+                                        if Constants.BEAT_LS_SSL_CLIENT_CRT in previous_config_values
+                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt",
+                                        2,
+                                        35,
+                                        30,
+                                        255,
+                                    ),
+                                    (
+                                        'SSL Key File',
+                                        3,
+                                        1,
+                                        previous_config_values[Constants.BEAT_LS_SSL_CLIENT_KEY]
+                                        if Constants.BEAT_LS_SSL_CLIENT_KEY in previous_config_values
+                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key",
+                                        3,
+                                        35,
+                                        30,
+                                        255,
+                                    ),
                                 ],
                             )
                             values = [x.strip() for x in values]
@@ -1083,144 +1055,81 @@ def main():
                             if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                                 raise CancelledError
 
-                            elif (len(values[0]) <= 0) or (not os.path.isdir(values[0])):
-                                code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
-
-                            elif (len(values[1]) <= 0) or (len(values[2]) <= 0) or (not values[2].isnumeric()):
-                                code = d.msgbox(text=Constants.MSG_ERROR_BAD_HOST)
+                            elif (
+                                (len(values[0]) <= 0)
+                                or (not os.path.isfile(values[0]))
+                                or (len(values[1]) <= 0)
+                                or (not os.path.isfile(values[1]))
+                                or (len(values[2]) <= 0)
+                                or (not os.path.isfile(values[2]))
+                            ):
+                                code = d.msgbox(text=Constants.MSG_ERROR_FILE_NOT_FOUND)
 
                             else:
-                                forwarder_dict[Constants.BEAT_ZEEK_LOG_PATTERN_KEY] = os.path.join(
-                                    os.path.join(values[0], Constants.BEAT_ZEEK_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
-                                )
-                                forwarder_dict[Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_KEY] = os.path.join(
-                                    os.path.join(values[0], Constants.BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
-                                )
-                                forwarder_dict[Constants.BEAT_SURICATA_LOG_PATTERN_KEY] = os.path.join(
-                                    os.path.join(values[0], Constants.BEAT_SURICATA_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_SURICATA_LOG_PATTERN_VAL,
-                                )
-                                forwarder_dict[Constants.BEAT_LS_HOST] = values[1]
-                                forwarder_dict[Constants.BEAT_LS_PORT] = values[2]
+                                forwarder_dict[Constants.BEAT_LS_SSL_CA_CRT] = values[0]
+                                forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_CRT] = values[1]
+                                forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_KEY] = values[2]
                                 break
 
-                        # optionally, filebeat can use SSL if Logstash is configured for it
-                        logstash_ssl = "false"
-                        logstash_ssl_verify = "none"
-                        if (
-                            d.yesno(
-                                "Forward Zeek logs over SSL? (Note: This requires the destination to be similarly configured and a corresponding copy of the client SSL files.)",
-                                yes_label="SSL",
-                                no_label="Unencrypted",
-                            )
-                            == Dialog.OK
-                        ):
-                            logstash_ssl = "true"
-                            if (
-                                d.yesno("Logstash SSL verification", yes_label="None", no_label="Force Peer")
-                                != Dialog.OK
-                            ):
-                                logstash_ssl_verify = "force_peer"
-                        forwarder_dict[Constants.BEAT_LS_SSL] = logstash_ssl
-                        forwarder_dict[Constants.BEAT_LS_SSL_VERIFY] = logstash_ssl_verify
+                    else:
+                        forwarder_dict[Constants.BEAT_LS_SSL_CA_CRT] = ""
+                        forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_CRT] = ""
+                        forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_KEY] = ""
 
-                        if forwarder_dict[Constants.BEAT_LS_SSL] == "true":
-                            while True:
-                                code, values = d.form(
-                                    Constants.MSG_CONFIG_GENERIC.format(fwd_mode),
-                                    [
-                                        ('SSL Certificate Authorities File', 1, 1, "", 1, 35, 30, 255),
-                                        ('SSL Certificate File', 2, 1, "", 2, 35, 30, 255),
-                                        ('SSL Key File', 3, 1, "", 3, 35, 30, 255),
-                                    ],
-                                )
-                                values = [x.strip() for x in values]
-
-                                if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                                    raise CancelledError
-
-                                elif (
-                                    (len(values[0]) <= 0)
-                                    or (not os.path.isfile(values[0]))
-                                    or (len(values[1]) <= 0)
-                                    or (not os.path.isfile(values[1]))
-                                    or (len(values[2]) <= 0)
-                                    or (not os.path.isfile(values[2]))
-                                ):
-                                    code = d.msgbox(text=Constants.MSG_ERROR_FILE_NOT_FOUND)
-
-                                else:
-                                    forwarder_dict[Constants.BEAT_LS_SSL_CA_CRT] = values[0]
-                                    forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_CRT] = values[1]
-                                    forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_KEY] = values[2]
-                                    break
-
-                        else:
-                            forwarder_dict[Constants.BEAT_LS_SSL_CA_CRT] = ""
-                            forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_CRT] = ""
-                            forwarder_dict[Constants.BEAT_LS_SSL_CLIENT_KEY] = ""
-
-                        # see if logstash port is open (not a great connection test, but better than nothing!)
-                        code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Logstash"))
-                        if not check_socket(
-                            forwarder_dict[Constants.BEAT_LS_HOST], int(forwarder_dict[Constants.BEAT_LS_PORT])
-                        ):
-                            code = d.yesno(
-                                text=Constants.MSG_TESTING_CONNECTION_FAILURE_LOGSTASH.format(
-                                    "Logstash",
-                                    forwarder_dict[Constants.BEAT_LS_HOST],
-                                    forwarder_dict[Constants.BEAT_LS_PORT],
-                                ),
-                                yes_label="Ignore Error",
-                                no_label="Start Over",
-                            )
-                            if code != Dialog.OK:
-                                raise CancelledError
-
-                    # outside of filebeat/metricbeat if/else, get confirmation and write out the values to the keystore
-                    if forwarder_dict:
-
-                        # get confirmation of parameters before we pull the trigger
+                    # see if logstash port is open (not a great connection test, but better than nothing!)
+                    code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("Logstash"))
+                    if not check_socket(
+                        forwarder_dict[Constants.BEAT_LS_HOST], int(forwarder_dict[Constants.BEAT_LS_PORT])
+                    ):
                         code = d.yesno(
-                            Constants.MSG_CONFIG_FORWARDING_CONFIRM.format(
-                                fwd_mode,
-                                "\n".join(
-                                    sorted([f"{k}={v}" for k, v in forwarder_dict.items() if "PASSWORD" not in k])
-                                ),
+                            text=Constants.MSG_TESTING_CONNECTION_FAILURE_LOGSTASH.format(
+                                "Logstash",
+                                forwarder_dict[Constants.BEAT_LS_HOST],
+                                forwarder_dict[Constants.BEAT_LS_PORT],
                             ),
-                            yes_label="OK",
-                            no_label="Cancel",
+                            yes_label="Ignore Error",
+                            no_label="Start Over",
                         )
                         if code != Dialog.OK:
                             raise CancelledError
 
-                        previous_config_values = forwarder_dict.copy()
+                    # get confirmation of parameters before we pull the trigger
+                    code = d.yesno(
+                        Constants.MSG_CONFIG_FORWARDING_CONFIRM.format(
+                            fwd_mode,
+                            "\n".join(sorted([f"{k}={v}" for k, v in forwarder_dict.items() if "PASSWORD" not in k])),
+                        ),
+                        yes_label="OK",
+                        no_label="Cancel",
+                    )
+                    if code != Dialog.OK:
+                        raise CancelledError
 
-                        # it's go time, call keystore add for each item
-                        for k, v in sorted(forwarder_dict.items()):
-                            ecode, add_results = run_process(
-                                f"{Constants.BEAT_CMD[fwd_mode]} keystore add {k} --stdin --force", stdin=v, stderr=True
-                            )
-                            if ecode != 0:
-                                # keystore creation failed
-                                raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
+                    previous_config_values = forwarder_dict.copy()
 
-                        # get a final list of parameters that were set to show the user that stuff happened
-                        ecode, list_results = run_process(f"{Constants.BEAT_CMD[fwd_mode]} keystore list")
-                        if ecode == 0:
-                            code = d.msgbox(
-                                text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(fwd_mode, "\n".join(list_results))
-                            )
-
-                        else:
-                            # keystore list failed
+                    # it's go time, call keystore add for each item
+                    for k, v in sorted(forwarder_dict.items()):
+                        ecode, add_results = run_process(
+                            f"{Constants.BEAT_CMD[fwd_mode]} keystore add {k} --stdin --force", stdin=v, stderr=True
+                        )
+                        if ecode != 0:
+                            # keystore creation failed
                             raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
 
+                    # get a final list of parameters that were set to show the user that stuff happened
+                    ecode, list_results = run_process(f"{Constants.BEAT_CMD[fwd_mode]} keystore list")
+                    if ecode == 0:
+                        code = d.msgbox(
+                            text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(fwd_mode, "\n".join(list_results))
+                        )
+
                     else:
-                        # we got through the config but ended up with no values for configuration!
-                        raise Exception(Constants.MSG_MESSAGE_ERROR.format(Constants.MSG_EMPTY_CONFIG_ERROR))
+                        # keystore list failed
+                        raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
+
+                else:
+                    # we're here without a valid forwarding type selection?!?
+                    raise Exception(Constants.MSG_MESSAGE_ERROR.format(Constants.MSG_INVALID_FORWARDING_TYPE))
 
         except CancelledError as c:
             # d.msgbox(text=Constants.MSG_CANCEL_ERROR)

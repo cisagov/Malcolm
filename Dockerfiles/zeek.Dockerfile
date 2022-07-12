@@ -25,17 +25,15 @@ ENV PUSER_PRIV_DROP true
 
 # for download and install
 ARG ZEEK_LTS=
-ARG ZEEK_VERSION=4.2.1-0
-ARG SPICY_VERSION=1.4.1
+ARG ZEEK_VERSION=5.0.0-0
 
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
-ENV SPICY_VERSION $SPICY_VERSION
 
-ENV SUPERCRONIC_VERSION "0.1.12"
+ENV SUPERCRONIC_VERSION "0.2.1"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
+ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for build
@@ -44,8 +42,7 @@ ENV CCACHE_COMPRESS 1
 
 # put Zeek and Spicy in PATH
 ENV ZEEK_DIR "/opt/zeek"
-ENV SPICY_DIR "/opt/spicy"
-ENV PATH "${ZEEK_DIR}/bin:${SPICY_DIR}/bin:${ZEEK_DIR}/lib/zeek/plugins/packages/spicy-plugin/bin:${PATH}"
+ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 
 # add script for building 3rd-party plugins
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
@@ -107,17 +104,13 @@ RUN apt-get -q update && \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-libcaf-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VERSION}_amd64.deb" \
         "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" && \
-      dpkg -i ./*.deb && \
-    mkdir -p /tmp/spicy-packages && \
-      cd /tmp/spicy-packages && \
-    curl -sSL --remote-name-all \
-      "https://github.com/zeek/spicy/releases/download/v${SPICY_VERSION}/spicy_linux_debian11.deb" && \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_all.deb" && \
       dpkg -i ./*.deb && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
@@ -127,20 +120,13 @@ RUN apt-get -q update && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
-    zkg install --force --skiptests --version c9ca2d93aaf7bfb75fb282eaa7214a9057d4666e zeek/spicy-plugin && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
-    ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
     ( find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \; ) && \
     rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch && \
     rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
-    ( find "${ZEEK_DIR}/" "${SPICY_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
-    mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/ && \
-      ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/bin/spicyz \
-               "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz && \
-    mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
-      ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
-               "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
+    ( find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
+    ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \

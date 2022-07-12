@@ -1,99 +1,176 @@
 {
-    "objects": [
-        {
-            "attributes": {
-                "columns": [
-                    "log.level",
-                    "message"
-                ],
-                "description": "",
-                "hits": 0,
-                "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"query\": {\"query\": \"event.module:nginx AND message:*\", \"language\": \"kuery\"}, \"version\": true, \"highlight\": {\"post_tags\": [\"@/kibana-highlighted-field@\"], \"fields\": {\"*\": {}}, \"pre_tags\": [\"@kibana-highlighted-field@\"], \"require_field_match\": false, \"fragment_size\": 2147483647}, \"index\": \"filebeat-*\"}"
-                },
-                "sort": [
-                    "@timestamp",
-                    "desc"
-                ],
-                "title": "Nginx error logs [Filebeat Nginx] ECS",
-                "version": 1
-            },
-            "id": "9eb25600-a1f0-11e7-928f-5dbe6f6f5519-ecs",
-            "type": "search",
-            "version": 1
-        },
-        {
-            "attributes": {
-                "columns": [
-                    "url.original",
-                    "http.request.method",
-                    "http.response.status_code",
-                    "http.response.body.bytes"
-                ],
-                "description": "",
-                "hits": 0,
-                "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"query\": {\"query\": \"event.module:nginx AND url.original:*\", \"language\": \"kuery\"}, \"version\": true, \"highlight\": {\"post_tags\": [\"@/kibana-highlighted-field@\"], \"fields\": {\"*\": {}}, \"pre_tags\": [\"@kibana-highlighted-field@\"], \"require_field_match\": false, \"fragment_size\": 2147483647}, \"index\": \"filebeat-*\"}"
-                },
-                "sort": [
-                    "@timestamp",
-                    "desc"
-                ],
-                "title": "Nginx access logs [Filebeat Nginx] ECS",
-                "version": 1
-            },
-            "id": "6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519-ecs",
-            "type": "search",
-            "version": 4
-        },
-        {
-            "attributes": {
-                "description": "",
-                "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{}"
-                },
-                "title": "Access logs over time [Filebeat Nginx] ECS",
-                "uiStateJSON": "{}",
-                "version": 1,
-                "visState": "{\"type\": \"metrics\", \"params\": {\"axis_formatter\": \"number\", \"series\": [{\"formatter\": \"number\", \"chart_type\": \"line\", \"split_filters\": [{\"color\": \"#68BC00\", \"id\": \"1db649a0-a1f3-11e7-a062-a1c3587f4874\"}], \"seperate_axis\": 0, \"point_size\": 1, \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"metrics\": [{\"type\": \"count\", \"id\": \"61ca57f2-469d-11e7-af02-69e470af7417\"}], \"label\": \"Access logs\", \"axis_position\": \"right\", \"split_mode\": \"everything\", \"fill\": 0.5, \"stacked\": \"none\", \"terms_field\": \"url.original\", \"color\": \"#68BC00\", \"line_width\": 1, \"terms_order_by\": \"61ca57f2-469d-11e7-af02-69e470af7417\"}], \"time_field\": \"@timestamp\", \"filter\": \"event.module:nginx AND fileset.name:access\", \"show_grid\": 1, \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"show_legend\": 1, \"type\": \"timeseries\", \"index_pattern\": \"filebeat-*\", \"axis_position\": \"left\", \"annotations\": [{\"index_pattern\": \"filebeat-*\", \"ignore_global_filters\": 1, \"id\": \"970b1420-a1f3-11e7-a062-a1c3587f4874\", \"time_field\": \"@timestamp\", \"icon\": \"fa-tag\", \"color\": \"#F00\", \"ignore_panel_filters\": 1}], \"background_color_rules\": [{\"id\": \"3189aa80-a1f3-11e7-a062-a1c3587f4874\"}], \"interval\": \"auto\", \"legend_position\": \"bottom\"}, \"aggs\": [], \"title\": \"Access logs over time [Filebeat Nginx] ECS\"}"
-            },
-            "id": "1cfb1a80-a1f4-11e7-928f-5dbe6f6f5519-ecs",
-            "type": "visualization",
-            "version": 2
-        },
-        {
-            "attributes": {
-                "description": "",
-                "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{}"
-                },
-                "title": "Dashboards [Filebeat Nginx] ECS",
-                "uiStateJSON": "{}",
-                "version": 1,
-                "visState": "{\"type\": \"markdown\", \"params\": {\"markdown\": \"[Nginx logs overview](#/dashboard/55a9e6e0-a29e-11e7-928f-5dbe6f6f5519-ecs) | [Nginx access and error logs](#/dashboard/046212a0-a2a1-11e7-928f-5dbe6f6f5519-ecs)\", \"fontSize\": 12}, \"aggs\": [], \"title\": \"Dashboards [Filebeat Nginx] ECS\"}"
-            },
-            "id": "97109780-a2a5-11e7-928f-5dbe6f6f5519-ecs",
-            "type": "visualization",
-            "version": 1
-        },
-        {
-            "attributes": {
-                "description": "Dashboard for the Filebeat Nginx module",
-                "hits": 0,
-                "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"query\": {\"query\": \"\", \"language\": \"kuery\"}, \"filter\": [], \"version\": true, \"highlightAll\": true}"
-                },
-                "optionsJSON": "{\"darkTheme\": false}",
-                "panelsJSON": "[{\"type\": \"search\", \"columns\": [\"log.level\", \"message\"], \"size_x\": 12, \"size_y\": 3, \"panelIndex\": 11, \"sort\": [\"@timestamp\", \"desc\"], \"id\": \"9eb25600-a1f0-11e7-928f-5dbe6f6f5519-ecs\", \"col\": 1, \"row\": 5}, {\"type\": \"search\", \"columns\": [\"url.original\", \"http.request.method\", \"http.response.status_code\", \"http.response.body.bytes\"], \"size_x\": 12, \"size_y\": 7, \"panelIndex\": 16, \"sort\": [\"@timestamp\", \"desc\"], \"id\": \"6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519-ecs\", \"col\": 1, \"row\": 8}, {\"type\": \"visualization\", \"size_x\": 12, \"size_y\": 3, \"panelIndex\": 18, \"id\": \"1cfb1a80-a1f4-11e7-928f-5dbe6f6f5519-ecs\", \"col\": 1, \"row\": 2}, {\"type\": \"visualization\", \"size_x\": 12, \"size_y\": 1, \"panelIndex\": 19, \"id\": \"97109780-a2a5-11e7-928f-5dbe6f6f5519-ecs\", \"col\": 1, \"row\": 1}]",
-                "timeRestore": false,
-                "title": "[Filebeat Nginx] Access and error logs ECS",
-                "uiStateJSON": "{}",
-                "version": 1
-            },
-            "id": "046212a0-a2a1-11e7-928f-5dbe6f6f5519-ecs",
-            "type": "dashboard",
-            "version": 2
+  "version": "2.0.0",
+  "objects": [
+    {
+      "id": "046212a0-a2a1-11e7-928f-5dbe6f6f5519-ecs",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-01T19:53:27.884Z",
+      "version": "WzEwMTgsMV0=",
+      "attributes": {
+        "title": "Malcolm nginx Access and Error Logs",
+        "description": "Logs from Malcolm's own nginx instance",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":16,\"w\":48,\"h\":15,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{\"columns\":[\"log.level\",\"error.message\"],\"sort\":[\"@timestamp\",\"desc\"]},\"panelRefName\":\"panel_0\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":31,\"w\":48,\"h\":23,\"i\":\"16\"},\"panelIndex\":\"16\",\"embeddableConfig\":{\"columns\":[\"url.original\",\"http.request.method\",\"http.response.status_code\",\"http.response.body.bytes\"],\"sort\":[\"@timestamp\",\"desc\"]},\"panelRefName\":\"panel_1\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":4,\"w\":48,\"h\":12,\"i\":\"18\"},\"panelIndex\":\"18\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "optionsJSON": "{\"darkTheme\":false}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"version\":true,\"highlightAll\":true,\"filter\":[]}"
         }
-    ],
-    "version": "6.0.0-beta2"
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "search",
+          "id": "9eb25600-a1f0-11e7-928f-5dbe6f6f5519-ecs"
+        },
+        {
+          "name": "panel_1",
+          "type": "search",
+          "id": "6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519-ecs"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "1cfb1a80-a1f4-11e7-928f-5dbe6f6f5519-ecs"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "97109780-a2a5-11e7-928f-5dbe6f6f5519-ecs"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "9eb25600-a1f0-11e7-928f-5dbe6f6f5519-ecs",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-01T19:41:22.455Z",
+      "version": "WzgzMywxXQ==",
+      "attributes": {
+        "columns": [
+          "log.level",
+          "error.message"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"query\":\"event.module:nginx AND error.message:*\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "@timestamp",
+            "desc"
+          ]
+        ],
+        "title": "nginx Error Logs",
+        "version": 1
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519-ecs",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-01T19:41:22.455Z",
+      "version": "WzgzNCwxXQ==",
+      "attributes": {
+        "columns": [
+          "url.original",
+          "http.request.method",
+          "http.response.status_code",
+          "http.response.body.bytes"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"query\":\"event.module:nginx AND url.original:*\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "@timestamp",
+            "desc"
+          ]
+        ],
+        "title": "nginx Access Logs",
+        "version": 1
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "1cfb1a80-a1f4-11e7-928f-5dbe6f6f5519-ecs",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-01T19:41:22.455Z",
+      "version": "WzgzNSwxXQ==",
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "title": "nginx Access Over Time",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"line\",\"split_filters\":[{\"color\":\"#68BC00\",\"id\":\"1db649a0-a1f3-11e7-a062-a1c3587f4874\"}],\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"label\":\"Access logs\",\"axis_position\":\"right\",\"split_mode\":\"everything\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"url.original\",\"color\":\"#68BC00\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"index_pattern\":\"malcolm_beats_*\",\"axis_position\":\"left\",\"annotations\":[{\"index_pattern\":\"malcolm_beats_*\",\"ignore_global_filters\":1,\"id\":\"970b1420-a1f3-11e7-a062-a1c3587f4874\",\"time_field\":\"@timestamp\",\"icon\":\"fa-tag\",\"color\":\"#F00\",\"ignore_panel_filters\":1}],\"background_color_rules\":[{\"id\":\"3189aa80-a1f3-11e7-a062-a1c3587f4874\"}],\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Access Over Time\"}"
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "97109780-a2a5-11e7-928f-5dbe6f6f5519-ecs",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-06-01T19:41:23.453Z",
+      "version": "Wzg0NSwxXQ==",
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "title": "nginx Dashboards",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"type\":\"markdown\",\"params\":{\"markdown\":\"[Nginx logs overview](#/dashboard/55a9e6e0-a29e-11e7-928f-5dbe6f6f5519-ecs) | [Nginx access and error logs](#/dashboard/046212a0-a2a1-11e7-928f-5dbe6f6f5519-ecs)\",\"fontSize\":12},\"aggs\":[],\"title\":\"nginx Dashboards\"}"
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    }
+  ]
 }

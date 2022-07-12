@@ -307,6 +307,7 @@ class Installer(object):
         malcolm_install_path,
         expose_opensearch_default=False,
         expose_logstash_default=False,
+        expose_filebeat_default=False,
         restart_mode_default=False,
     ):
         global args
@@ -478,66 +479,33 @@ class Installer(object):
             except:
                 pass
 
-        indexSnapshotDir = None
-        indexSnapshotCompressed = False
-        indexSnapshotAge = '0'
-        indexColdAge = '0'
-        indexCloseAge = '0'
-        indexDeleteAge = '0'
+        # snapshot repository directory and compression
+        indexSnapshotDir = './opensearch-backup'
+        if not InstallerYesOrNo(
+            'Store OpenSearch index snapshots locally in {}?'.format(
+                os.path.join(malcolm_install_path, 'opensearch-backup')
+            ),
+            default=True,
+        ):
+            while True:
+                indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
+                if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
+                    indexSnapshotDir = os.path.realpath(indexSnapshotDir)
+                    break
+        indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
+
+        # delete oldest indexes based on index pattern size
         indexPruneSizeLimit = '0'
         indexPruneNameSort = False
-
-        if InstallerYesOrNo('Configure OpenSearch index state management?', default=False):
-
-            # configure snapshots
-            if InstallerYesOrNo('Configure index snapshots?', default=False):
-
-                # snapshot repository directory and compression
-                indexSnapshotDir = './opensearch-backup'
-                if not InstallerYesOrNo(
-                    'Store snapshots locally in {}?'.format(os.path.join(malcolm_install_path, 'opensearch-backup')),
-                    default=True,
-                ):
-                    while True:
-                        indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
-                        if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
-                            indexSnapshotDir = os.path.realpath(indexSnapshotDir)
-                            break
-                indexSnapshotCompressed = InstallerYesOrNo('Compress index snapshots?', default=False)
-
-                # index age for snapshot
-                indexSnapshotAge = ''
-                while (not re.match(r'^\d+[dhms]$', indexSnapshotAge)) and (indexSnapshotAge != '0'):
-                    indexSnapshotAge = InstallerAskForString('Enter index age for snapshot (e.g., 1d)')
-
-            # cold state age
-            if InstallerYesOrNo('Mark indices read-only as they age?', default=False):
-                indexColdAge = ''
-                while (not re.match(r'^\d+[dhms]$', indexColdAge)) and (indexColdAge != '0'):
-                    indexColdAge = InstallerAskForString('Enter index age for "read-only" transition (e.g., 30d)')
-
-            # close state age
-            if InstallerYesOrNo('Close indices as they age?', default=False):
-                indexCloseAge = ''
-                while (not re.match(r'^\d+[dhms]$', indexCloseAge)) and (indexCloseAge != '0'):
-                    indexCloseAge = InstallerAskForString('Enter index age for "close" transition (e.g., 60d)')
-
-            # delete state age
-            if InstallerYesOrNo('Delete indices as they age?', default=False):
-                indexDeleteAge = ''
-                while (not re.match(r'^\d+[dhms]$', indexDeleteAge)) and (indexDeleteAge != '0'):
-                    indexDeleteAge = InstallerAskForString('Enter index age for "delete" transition (e.g., 365d)')
-
-            # delete based on index pattern size
-            if InstallerYesOrNo('Delete the oldest indices when the database exceeds a certain size?', default=False):
-                indexPruneSizeLimit = ''
-                while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
-                    indexPruneSizeLimit != '0'
-                ):
-                    indexPruneSizeLimit = InstallerAskForString('Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)')
-                indexPruneNameSort = InstallerYesOrNo(
-                    'Determine oldest indices by name (instead of creation time)?', default=True
-                )
+        if InstallerYesOrNo('Delete the oldest indices when the database exceeds a certain size?', default=False):
+            indexPruneSizeLimit = ''
+            while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
+                indexPruneSizeLimit != '0'
+            ):
+                indexPruneSizeLimit = InstallerAskForString('Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)')
+            indexPruneNameSort = InstallerYesOrNo(
+                'Determine oldest indices by name (instead of creation time)?', default=True
+            )
 
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
@@ -565,6 +533,9 @@ class Installer(object):
             externalEsHost = ""
             externalEsSsl = False
             externalEsSslVerify = False
+        filebeatTcpOpen = InstallerYesOrNo(
+            'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
+        )
 
         # input file extraction parameters
         allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
@@ -613,12 +584,16 @@ class Installer(object):
         pcapNetSniff = False
         pcapTcpDump = False
         pcapIface = 'lo'
+        pcapFilter = ''
         if InstallerYesOrNo('Should Malcolm capture network traffic to PCAP files?', default=False):
             pcapIface = ''
             while len(pcapIface) <= 0:
                 pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
             pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
             pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
+            pcapFilter = InstallerAskForString(
+                'PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
+            )
 
         # modify specified values in-place in docker-compose files
         for composeFile in composeFiles:
@@ -754,6 +729,10 @@ class Installer(object):
                             # capture interface(s)
                             line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
 
+                        elif 'PCAP_FILTER' in line:
+                            # capture filter
+                            line = re.sub(r'(PCAP_FILTER\s*:)(.*)', fr"\g<1> '{pcapFilter}'", line)
+
                         elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
                             # automatic pcap analysis with Zeek
                             line = re.sub(
@@ -797,22 +776,6 @@ class Installer(object):
                                 fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}",
                                 line,
                             )
-
-                        elif 'ISM_SNAPSHOT_AGE' in line:
-                            # OpenSearch index state management snapshot age
-                            line = re.sub(r'(ISM_SNAPSHOT_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexSnapshotAge}'", line)
-
-                        elif 'ISM_COLD_AGE' in line:
-                            # OpenSearch index state management cold (read-only) age
-                            line = re.sub(r'(ISM_COLD_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexColdAge}'", line)
-
-                        elif 'ISM_CLOSE_AGE' in line:
-                            # OpenSearch index state management close age
-                            line = re.sub(r'(ISM_CLOSE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexCloseAge}'", line)
-
-                        elif 'ISM_DELETE_AGE' in line:
-                            # OpenSearch index state management close age
-                            line = re.sub(r'(ISM_DELETE_AGE\s*:\s*)(\S+)', fr"\g<1>'{indexDeleteAge}'", line)
 
                         elif 'ISM_SNAPSHOT_COMPRESSED' in line:
                             # OpenSearch index state management snapshot compression
@@ -892,6 +855,16 @@ class Installer(object):
                                 line = re.sub(
                                     r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
                                     fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
+                                    line,
+                                )
+
+                        elif currentService == 'filebeat':
+                            # stuff specifically in the filebeat section
+                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IP based on whether it should be externally exposed or not
+                                line = re.sub(
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
 
@@ -1906,6 +1879,16 @@ def main():
         help="Expose OpenSearch port to external hosts",
     )
     parser.add_argument(
+        '-t',
+        '--filebeat-tcp-expose',
+        dest='exposeFilebeatTcp',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Expose Filebeat TCP port to external hosts",
+    )
+    parser.add_argument(
         '-r',
         '--restart-malcolm',
         dest='malcolmAutoRestart',
@@ -2012,6 +1995,7 @@ def main():
             installPath,
             expose_opensearch_default=args.exposeOpenSearch,
             expose_logstash_default=args.exposeLogstash,
+            expose_filebeat_default=args.exposeFilebeatTcp,
             restart_mode_default=args.malcolmAutoRestart,
         )
         eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")

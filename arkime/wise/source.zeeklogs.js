@@ -24,7 +24,7 @@ class MalcolmSource extends WISESource {
     // there are several files where the definitions of fields live: make sure to keep them in sync
     // - source.malcolm.js (this file)
     // - Arkime's config.ini
-    // - Opensearch Dashboards's malcolm_template.json
+    // - Malcolm's Opensearch malcolm_template.json
 
     // todo: look at expressions for things that have parents (tunnelling, parent files, etc.)
     // todo: look at IP types and use ipPrint?
@@ -708,7 +708,7 @@ class MalcolmSource extends WISESource {
       "url.port",
       "url.query",
       "url.scheme",
-      "url.user",
+      "url.username",
       "user_agent.original",
       "vulnerability.category",
       "vulnerability.description",
@@ -1007,6 +1007,7 @@ class MalcolmSource extends WISESource {
       "zeek.intel.seen_where",
       "zeek.intel.sources",
       "zeek.ipsec.certificates",
+      "zeek.ipsec.doi",
       "zeek.ipsec.exchange_type",
       "zeek.ipsec.flag_a",
       "zeek.ipsec.flag_c",
@@ -1025,7 +1026,9 @@ class MalcolmSource extends WISESource {
       "zeek.ipsec.min_ver",
       "zeek.ipsec.notify_messages",
       "zeek.ipsec.proposals",
+      "zeek.ipsec.protocol_id",
       "zeek.ipsec.responder_spi",
+      "zeek.ipsec.situation",
       "zeek.ipsec.transform_attributes",
       "zeek.ipsec.transforms",
       "zeek.ipsec.vendor_ids",

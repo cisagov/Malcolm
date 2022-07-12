@@ -40,7 +40,7 @@ fi
 ###############################################################################
 # PATH
 ###############################################################################
-PATH=/opt/zeek/bin:/opt/spicy/bin:/opt/arkime/bin:/usr/sbin:$PATH
+PATH=/opt/zeek/bin:opt/arkime/bin:/opt/fluent-bit/bin:/usr/sbin:$PATH
 
 if [ -d ~/bin ]; then
   PATH=~/bin:$PATH
