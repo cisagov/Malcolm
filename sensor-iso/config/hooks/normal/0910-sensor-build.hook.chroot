@@ -79,8 +79,6 @@ dpkg -i ./*.deb
 # plugins
 cd /tmp
 zkg autoconfig --force
-rm -f /opt/zeek/bin/spicyz
-zkg install --force --skiptests zeek/spicy-plugin
 bash /usr/local/bin/zeek_install_plugins.sh
 for FILE in /opt/zeek/var/lib/zkg/logs/*; do
   [[ -r "$FILE" ]] && echo "$FILE" && cat "$FILE" && echo ""
@@ -92,14 +90,6 @@ find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; 
 rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch
 rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__
 find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded
-mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/ && \
-  rm -f "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz && \
-  ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/bin/spicyz \
-           "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/build/plugin/bin/spicyz
-mkdir -p "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/ && \
-  rm -f "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif && \
-  ln -s -r "${ZEEK_DIR}"/lib/zeek/plugins/packages/spicy-plugin/lib/bif \
-           "${ZEEK_DIR}"/var/lib/zkg/clones/package/spicy-plugin/plugin/lib/bif
 
 cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
 # all interfaces using lb_method=custom should use AF_PACKET
@@ -107,7 +97,7 @@ lb_custom.InterfacePrefix=af_packet::
 
 EOF
 
-# set up default zeek local policy
+# set up default zeek local policy and sensor-related directories
 cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/zeek/site/
 mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP /opt/sensor/sensor_ctl/fluentbit
 touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
