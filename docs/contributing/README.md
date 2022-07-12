@@ -42,7 +42,6 @@ opensearch:
     - ./opensearch:/usr/share/opensearch/data:delegated
     - ./opensearch-backup:/opt/opensearch/backup:delegated
 dashboards-helper:
-    - ./index-management-policy.json:/data/index-management-policy.json:ro
 dashboards:
 logstash:
     - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
