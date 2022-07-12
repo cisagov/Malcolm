@@ -99,11 +99,6 @@ x-suricata-variables: &suricata-variables
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
-  ISM_CLOSE_AGE : '60d'
-  ISM_COLD_AGE : '30d'
-  ISM_DELETE_AGE : '365d'
-  ISM_POLICY_NAME : 'session_index_policy'
-  ISM_SNAPSHOT_AGE : '1d'
   ISM_SNAPSHOT_COMPRESSED : 'false'
   ISM_SNAPSHOT_REPO : 'logs'
 
@@ -131,6 +126,12 @@ x-filebeat-variables: &filebeat-variables
   FILEBEAT_CLOSE_REMOVED : 'true'
   FILEBEAT_CLOSE_EOF : 'true'
   FILEBEAT_CLEAN_REMOVED : 'true'
+  FILEBEAT_TCP_LISTEN : 'false'
+  FILEBEAT_TCP_LOG_FORMAT : 'raw'
+  FILEBEAT_TCP_PARSE_SOURCE_FIELD : 'message'
+  FILEBEAT_TCP_PARSE_TARGET_FIELD : ''
+  FILEBEAT_TCP_PARSE_DROP_FIELD : ''
+  FILEBEAT_TCP_TAG : ''
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
@@ -229,8 +230,6 @@ services:
       - opensearch
     expose:
       - 28991
-    volumes:
-      - ./index-management-policy.json:/data/index-management-policy.json:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s

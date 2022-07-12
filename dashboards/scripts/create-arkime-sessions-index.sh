@@ -26,14 +26,13 @@ INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 
-
-INDEX_POLICY_FILE="/data/init/index-management-policy.json"
-INDEX_POLICY_FILE_HOST="/data/index-management-policy.json"
 MALCOLM_TEMPLATES_DIR="/opt/templates"
 MALCOLM_TEMPLATE_FILE_ORIG="$MALCOLM_TEMPLATES_DIR/malcolm_template.json"
 MALCOLM_TEMPLATE_FILE="/data/init/malcolm_template.json"
-INDEX_POLICY_NAME=${ISM_POLICY_NAME:-"session_index_policy"}
 DEFAULT_DASHBOARD=${OPENSEARCH_DEFAULT_DASHBOARD:-"0ad3d7c2-3441-485e-9dfe-dbb22e84e576"}
+
+ISM_SNAPSHOT_REPO=${ISM_SNAPSHOT_REPO:-"logs"}
+ISM_SNAPSHOT_COMPRESSED=${ISM_SNAPSHOT_COMPRESSED:-"false"}
 
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
@@ -47,40 +46,14 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     # have we not not already created the index pattern?
     if ! curl -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
 
-      echo "OpenSearch is running! Setting up index management policies..."
+      echo "OpenSearch is running!"
 
-      # register the repo location for opensearch snapshots
-      /data/register-opensearch-snapshot-repo.sh
-
-      # tweak the sessions template (arkime_sessions3-* template file) to use the index management policy
-      if [[ -f "$INDEX_POLICY_FILE_HOST" ]] && (( $(jq length "$INDEX_POLICY_FILE_HOST") > 0 )); then
-        # user has provided a file for index management, use it
-        cp "$INDEX_POLICY_FILE_HOST" "$INDEX_POLICY_FILE"
-        INDEX_POLICY_NAME="$(cat "$INDEX_POLICY_FILE" | jq '..|objects|.policy_id//empty' | tr -d '"')"
-
-      else
-        # need to generate index management file based on environment variables
-        /data/opensearch_index_policy_create.py \
-          --policy "$INDEX_POLICY_NAME" \
-          --index-pattern "$INDEX_PATTERN" \
-          --priority 100 \
-          --snapshot ${ISM_SNAPSHOT_AGE:-"0"} \
-          --cold ${ISM_COLD_AGE:-"0"} \
-          --close ${ISM_CLOSE_AGE:-"0"} \
-          --delete ${ISM_DELETE_AGE:-"0"} \
-        > "$INDEX_POLICY_FILE"
-      fi
-
-      if [[ -f "$INDEX_POLICY_FILE" ]]; then
-        # make API call to define index management policy
-        # https://opensearch.org/docs/latest/im-plugin/ism/api/#create-policy
-        curl -w "\n" -L --silent --output /dev/null --show-error -XPUT -H "Content-Type: application/json" "$OS_URL/_plugins/_ism/policies/$INDEX_POLICY_NAME" -d "@$INDEX_POLICY_FILE"
-
-        if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]]; then
-          # insert OpenSearch ISM stuff into index template settings
-          cat "$MALCOLM_TEMPLATE_FILE_ORIG" | jq ".template.settings += {\"index.plugins.index_state_management.policy_id\": \"$INDEX_POLICY_NAME\"}" > "$MALCOLM_TEMPLATE_FILE"
-        fi
-      fi
+      # register the repo name/path for opensearch snapshots
+      echo "Registering index snapshot repository..."
+      curl -w "\n" -H "Accept: application/json" \
+        -H "Content-type: application/json" \
+        -XPUT -fsSL "$OS_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
+        -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }"
 
       if [[ -d /opt/ecs-templates/composable/component ]]; then
         echo "Importing ECS composable templates..."

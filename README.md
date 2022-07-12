@@ -1420,9 +1420,11 @@ Restarting Logstash may take several minutes, after which log ingestion will be 
 
 ### <a name="IndexManagement"></a>OpenSearch index management
 
-See [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) in the OpenSearch documentation on Index State Management [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/), [managed indices](https://opensearch.org/docs/latest/im-plugin/ism/managedindices/), [settings](https://opensearch.org/docs/latest/im-plugin/ism/settings/) and [APIs](https://opensearch.org/docs/latest/im-plugin/ism/api/).
+Malcolm releases prior to v6.1.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
 
-OpenSearch index management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
+Since then, OpenSearch Dashboards has developed and released plugins with UIs for [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/). Because these plugins provide a more comprehensive and user-friendly interfaces for these features, the old environment variable-based configuration code has been removed from Malcolm, with the exception of the code that uses `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` and `OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT` which deals with deleting the oldest network session metadata indices when the database exceeds a certain size.
+
+Note that OpenSearch index state management and snapshot management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.
 
 ### <a name="Severity"></a>Event severity scoring
 
@@ -3729,7 +3731,11 @@ Specify external Docker network name (or leave blank for default networking) ():
 
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Configure OpenSearch index state management? (y/N): n
+Store OpenSearch index snapshots locally in /home/user/Malcolm/opensearch-backup? (Y/n): y
+
+Compress OpenSearch index snapshots? (y/N): n
+
+Delete the oldest indices when the database exceeds a certain size? (y/N): n
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
@@ -3778,6 +3784,8 @@ Specify capture interface(s) (comma-separated): eth0
 Capture packets using netsniff-ng? (Y/n): y
 
 Capture packets using tcpdump? (y/N): n
+
+PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
