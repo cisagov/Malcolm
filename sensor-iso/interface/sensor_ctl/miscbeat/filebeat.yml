@@ -1,0 +1,39 @@
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
+filebeat.inputs:
+- type: tcp
+  host: "127.0.0.1:${MISCBEAT_PORT:9516}"
+  max_message_size: 20MB
+  max_connections: 32
+  
+#================================ General ======================================
+processors:
+  - decode_json_fields:
+      fields: [ "message" ]
+      process_array: false
+      max_depth: 1
+      target: "miscbeat"
+      overwrite_keys: false
+      add_error_key: true
+  - drop_fields:
+      when:
+        has_fields: [ "miscbeat" ]
+      fields: [ "message" ]
+      ignore_missing: true
+  - add_tags:
+      tags: [_malcolm_beats, _malcolm_miscbeat]
+
+#================================ Outputs ======================================
+
+#-------------------------- Logstash Output ------------------------------------
+output.logstash:
+  hosts: ["${BEAT_LS_HOST}:${BEAT_LS_PORT}"]
+  ssl.enabled: ${BEAT_LS_SSL:false}
+  ssl.certificate_authorities: ["${BEAT_LS_SSL_CA_CRT}"]
+  ssl.certificate: "${BEAT_LS_SSL_CLIENT_CRT}"
+  ssl.key: "${BEAT_LS_SSL_CLIENT_KEY}"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "${BEAT_LS_SSL_VERIFY}"
+
+#================================ Logging ======================================
+logging.metrics.enabled: false

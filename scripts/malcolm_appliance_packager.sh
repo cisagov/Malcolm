@@ -88,7 +88,6 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
   cp $VERBOSE ./host-map.txt "$DESTDIR/"
   cp $VERBOSE ./net-map.json "$DESTDIR/"
-  cp $VERBOSE ./index-management-policy.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"

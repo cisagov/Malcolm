@@ -314,6 +314,17 @@ def logs():
         re.VERBOSE | re.IGNORECASE,
     )
 
+    # logs we don't want to eliminate, but we don't want to repeat ad-nauseum
+    # TODO: not implemented yet
+    dupeRegEx = re.compile(
+        r"""
+    .+(
+        Maybe the destination pipeline is down or stopping
+    )
+  """,
+        re.VERBOSE | re.IGNORECASE,
+    )
+
     serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
 
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
@@ -430,7 +441,7 @@ def stop(wipe=False):
     osEnv['TMPDIR'] = MalcolmTmpPath
 
     if wipe:
-        # attempt to DELETE _template/malcolm_template in OpenSearch
+        # attempt to DELETE _index_template/malcolm_template in OpenSearch
         err, out = run_process(
             [
                 dockerComposeBin,
@@ -440,7 +451,7 @@ def stop(wipe=False):
                 'arkime',
                 'bash',
                 '-c',
-                'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_template/malcolm_template"',
+                'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_index_template/malcolm_template"',
             ],
             env=osEnv,
             debug=args.debug,

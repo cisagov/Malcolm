@@ -40,7 +40,7 @@ RUN set -x && \
     cd $GOPATH/src/github.com/magefile/mage && \
     go run bootstrap.go
 
-ENV BEATS=metricbeat
+ENV BEATS=filebeat
 ENV BEATS_VERSION=7.10.2
 
 ADD ./build.sh /build.sh

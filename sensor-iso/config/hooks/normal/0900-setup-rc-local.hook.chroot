@@ -32,10 +32,12 @@ if [ -f /opt/sensor/sensor_ctl/supervisor.sh ]; then
   ( getent passwd 1000 >/dev/null 2>&1 ) && ulimit -l unlimited && sudo -H -u '#1000' /opt/sensor/sensor_ctl/supervisor.sh
 fi
 
-# hddtemp daemon for querying HDD temperatures
-/usr/sbin/hddtemp --daemon --numeric --quiet --unit=C -4 --listen=127.0.0.1 --port=7634 /dev/sd?
-
 systemctl mask ctrl-alt-del.target
+
+if [ ! -s /var/lib/aide/aide.db ]; then
+    > /var/lib/aide/aide.db
+    /usr/sbin/aideinit --yes --force
+fi
 
 exit 0
 EOF

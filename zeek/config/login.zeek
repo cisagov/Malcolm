@@ -49,11 +49,11 @@ redef record connection += {
 # see https://github.com/zeek/zeek/blob/release/1.5/policy/login.bro#L178
 #     https://github.com/reservoirlabs/brorefguide/blob/master/analysis.texi#L3850
 
-redef skip_authentication = { "WELCOME TO THE BERKELEY PUBLIC LIBRARY", };
+const skip_authentication: set[string] = { "WELCOME TO THE BERKELEY PUBLIC LIBRARY", } &redef;
 
-redef direct_login_prompts = { "TERMINAL?", };
+const direct_login_prompts: set[string] = { "TERMINAL?", } &redef;
 
-redef login_prompts = {
+const login_prompts: set[string] = {
   "Login:",
   "login:",
   "Name:",
@@ -62,24 +62,16 @@ redef login_prompts = {
   "Member Name",
   "User Access Verification",
   "Cisco Systems Console",
-  direct_login_prompts
-};
+} &redef;
 
-redef login_non_failure_msgs = {
-  "Failures",
-  "failures", # probably is "<n> failures since last login"
-  "failure since last successful login",
-  "failures since last successful login",
-};
-
-redef login_non_failure_msgs = {
+const login_non_failure_msgs: set[string] = {
   "Failures",
   "failures", # probably is "<n> failures since last login"
   "failure since last successful login",
   "failures since last successful login",
 } &redef;
 
-redef login_failure_msgs = {
+const login_failure_msgs: set[string] = {
   "invalid",
   "Invalid",
   "incorrect",
@@ -93,11 +85,11 @@ redef login_failure_msgs = {
   "INVALID",
   "Sorry.",
   "Sorry,",
-};
+} &redef;
 
-const router_prompts: set[string] &redef;
+const router_prompts: set[string] = {} &redef;
 
-redef login_success_msgs = {
+const login_success_msgs: set[string] = {
   "Last login",
   "Last successful login",
   "Last   successful login",
@@ -105,16 +97,15 @@ redef login_success_msgs = {
   "unsuccessful login attempts",
   "failure since last successful login",
   "failures since last successful login",
-  router_prompts,
-};
+} &redef;
 
-redef login_timeouts = {
+const login_timeouts: set[string] = {
   "timeout",
   "timed out",
   "Timeout",
   "Timed out",
   "Error reading command input",  # VMS
-};
+} &redef;
 # end borrowed constants from Bro 1.5 login.bro
 ###############################################
 

@@ -43,27 +43,22 @@ ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
 ENV DASHBOARDS_URL $DASHBOARDS_URL
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION "0.1.12"
+ENV SUPERCRONIC_VERSION "0.2.1"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "048b95b48b708983effb2e5c935a1ef8483d9e3e"
+ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
+
 ADD dashboards/dashboards /opt/dashboards
-# At the moment Beats won't import dashboards into OpenSearch dashboards
-# (see opensearch-project/OpenSearch-Dashboards#656 and
-# opensearch-project/OpenSearch-Dashboards#831), although the templates/index
-# patterns work ok. As such, we're going to manually add the dashboards we care about to
-# /opt/dashboards/beats and load them when the container starts up.
-ADD sensor-iso/config/includes.chroot/usr/share/filebeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
-ADD sensor-iso/config/includes.chroot/usr/share/auditbeat/kibana/7/dashboard-custom/*.json /opt/dashboards/beats
-ADD sensor-iso/config/includes.chroot/usr/share/protologbeat/kibana/7/dashboard/*.json /opt/dashboards/beats
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
 ADD dashboards/alerting /opt/alerting
+ADD dashboards/notifications /opt/notifications
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
-ADD dashboards/malcolm_template.json /data/malcolm_template.json
+ADD dashboards/templates /opt/templates
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /data/
 ADD shared/bin/opensearch_index_size_prune.py /data/
@@ -83,11 +78,19 @@ RUN apk update --no-cache && \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty ; \
       addgroup ${PUSER} shadow ; \
-    mkdir -p /data/init && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/maps /data/init /opt/anomaly_detectors && \
+    mkdir -p /data/init /opt/ecs && \
+      cd /opt && \
+      curl -sSL "$(curl -sSL "$ECS_RELEASES_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./ecs --strip-components 1 && \
+      mv /opt/ecs/generated/elasticsearch /opt/ecs-templates && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"constant_keyword"/\1"keyword"/' "{}" \; && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"wildcard"/\1"keyword"/' "{}" \; && \
+      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
+      rm -rf /opt/ecs && \
+    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */6 * * * /data/refresh-auxiliary-index-patterns.sh\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index 'malcolm_beats_*' --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 

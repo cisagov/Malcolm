@@ -20,6 +20,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # set up some sensor-specific stuff
   if [[ -d /opt/sensor ]]; then
 
+    [[ -d /opt/sensor/sensor_ctl/ ]] && mkdir -p /opt/sensor/sensor_ctl/logstash-client-certificates
+
     # set ownership for /opt/sensor files for sensor UID:GID
     chown -R 1000:1000 /opt/sensor
     find /opt/sensor/ -type d -exec chmod 750 "{}" \;
@@ -42,6 +44,10 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     [[ -d /opt/sensor/sensor_ctl/arkime/config.ini ]] && chmod 600 /opt/sensor/sensor_ctl/arkime/config.ini
 
   fi
+
+  dpkg -s fluent-bit >/dev/null 2>&1 && \
+    [[ -d /opt/sensor/sensor_ctl/ ]] && \
+    mkdir -p /opt/sensor/sensor_ctl/fluentbit
 
   # zeekctl won't like being run by a non-root user unless the whole stupid thing is owned by the non-root user
   if [[ -d /opt/zeek.orig ]]; then

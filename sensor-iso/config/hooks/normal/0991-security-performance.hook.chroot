@@ -93,6 +93,7 @@ sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
 echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
 echo "umask 077" >> /etc/profile
 echo "export UMASK=077" >> /etc/profile
+echo "export PYTHONDONTWRITEBYTECODE=1" >> /etc/profile
 
 # enable cron logging
 sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
@@ -120,6 +121,7 @@ EOF
 
 # tweak some auditd settings
 sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/audit/auditd.conf
+sed -r -i "s/(log_group\s*=\s*).*/\1 sensor/" /etc/audit/auditd.conf
 sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
 
 # tweak some apparmor settings (allow clamd to scan)
@@ -137,6 +139,17 @@ usermod -d /var/lib/ntp ntp
 systemctl disable htpdate || true
 sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
 sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
+
+# disable default fluentbit configuration
+systemctl disable fluent-bit || true
+
+# add fluentbit logfmt parser
+cat << 'EOF' >> /etc/fluent-bit/parsers.conf
+
+[PARSER]
+    Name logfmt
+    Format logfmt
+EOF
 
 # remove identifying operating system information
 truncate -s 0 /etc/motd

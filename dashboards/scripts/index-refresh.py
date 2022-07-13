@@ -12,7 +12,8 @@ GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
 GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
 PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
-OS_GET_TEMPLATE_URI = '_template'
+OS_GET_INDEX_TEMPLATE_URI = '_index_template'
+OS_GET_COMPONENT_TEMPLATE_URI = '_component_template'
 GET_SHARDS_URL = '_cat/shards?h=index,state'
 SHARD_UNASSIGNED_STATUS = 'UNASSIGNED'
 
@@ -154,47 +155,70 @@ def main():
 
                 # request template from OpenSearch and pull the mappings/properties (field list) out
                 getTemplateResponse = requests.get(
-                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_TEMPLATE_URI, args.template)
+                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template)
                 )
                 getTemplateResponse.raise_for_status()
-                getTemplateInfo = getTemplateResponse.json()[args.template]['mappings']['properties']
+                getTemplateResponseJson = getTemplateResponse.json()
+                if 'index_templates' in getTemplateResponseJson:
+                    for template in getTemplateResponseJson['index_templates']:
 
-                # a field should be merged if it's not already in the list we have from Dashboards, and it's
-                # in the list of types we're merging (leave more complex types like nested and geolocation
-                # to be handled naturally as the data shows up)
-                for field in getTemplateInfo:
-                    mergeFieldTypes = ("date", "float", "integer", "ip", "keyword", "long", "short", "text")
-                    if (
-                        (field not in fieldsNames)
-                        and ('type' in getTemplateInfo[field])
-                        and (getTemplateInfo[field]['type'] in mergeFieldTypes)
-                    ):
+                        templateFields = template['index_template']['template']['mappings']['properties']
 
-                        # create field dict in same format as those returned by GET_FIELDS_URI above
-                        mergedFieldInfo = {}
-                        mergedFieldInfo['name'] = field
-                        mergedFieldInfo['esTypes'] = [getTemplateInfo[field]['type']]
-                        if (
-                            (getTemplateInfo[field]['type'] == 'float')
-                            or (getTemplateInfo[field]['type'] == 'integer')
-                            or (getTemplateInfo[field]['type'] == 'long')
-                            or (getTemplateInfo[field]['type'] == 'short')
-                        ):
-                            mergedFieldInfo['type'] = 'number'
-                        elif (getTemplateInfo[field]['type'] == 'keyword') or (
-                            getTemplateInfo[field]['type'] == 'text'
-                        ):
-                            mergedFieldInfo['type'] = 'string'
-                        else:
-                            mergedFieldInfo['type'] = getTemplateInfo[field]['type']
-                        mergedFieldInfo['searchable'] = True
-                        mergedFieldInfo['aggregatable'] = "text" not in mergedFieldInfo['esTypes']
-                        mergedFieldInfo['readFromDocValues'] = mergedFieldInfo['aggregatable']
-                        fieldsNames.append(field)
-                        getFieldsList.append(mergedFieldInfo)
+                        # also include fields from component templates into templateFields before processing
+                        # https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates
+                        composedOfList = (
+                            template['index_template']['composed_of']
+                            if 'composed_of' in template['index_template']
+                            else []
+                        )
+                        for componentName in composedOfList:
+                            getComponentResponse = requests.get(
+                                '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName)
+                            )
+                            getComponentResponse.raise_for_status()
+                            getComponentResponseJson = getComponentResponse.json()
+                            if 'component_templates' in getComponentResponseJson:
+                                for component in getComponentResponseJson['component_templates']:
+                                    templateFields.update(
+                                        component['component_template']['template']['mappings']['properties']
+                                    )
 
-                    # elif debug:
-                    #   eprint('Not merging {}: {}'.format(field, json.dumps(getTemplateInfo[field])))
+                        # a field should be merged if it's not already in the list we have from Dashboards, and it's
+                        # in the list of types we're merging (leave more complex types like nested and geolocation
+                        # to be handled naturally as the data shows up)
+                        for field in templateFields:
+                            mergeFieldTypes = ("date", "float", "integer", "ip", "keyword", "long", "short", "text")
+                            if (
+                                (field not in fieldsNames)
+                                and ('type' in templateFields[field])
+                                and (templateFields[field]['type'] in mergeFieldTypes)
+                            ):
+
+                                # create field dict in same format as those returned by GET_FIELDS_URI above
+                                mergedFieldInfo = {}
+                                mergedFieldInfo['name'] = field
+                                mergedFieldInfo['esTypes'] = [templateFields[field]['type']]
+                                if (
+                                    (templateFields[field]['type'] == 'float')
+                                    or (templateFields[field]['type'] == 'integer')
+                                    or (templateFields[field]['type'] == 'long')
+                                    or (templateFields[field]['type'] == 'short')
+                                ):
+                                    mergedFieldInfo['type'] = 'number'
+                                elif (templateFields[field]['type'] == 'keyword') or (
+                                    templateFields[field]['type'] == 'text'
+                                ):
+                                    mergedFieldInfo['type'] = 'string'
+                                else:
+                                    mergedFieldInfo['type'] = templateFields[field]['type']
+                                mergedFieldInfo['searchable'] = True
+                                mergedFieldInfo['aggregatable'] = "text" not in mergedFieldInfo['esTypes']
+                                mergedFieldInfo['readFromDocValues'] = mergedFieldInfo['aggregatable']
+                                fieldsNames.append(field)
+                                getFieldsList.append(mergedFieldInfo)
+
+                            # elif debug:
+                            #   eprint('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
 
             except Exception as e:
                 eprint('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))

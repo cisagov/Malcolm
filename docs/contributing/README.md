@@ -42,7 +42,6 @@ opensearch:
     - ./opensearch:/usr/share/opensearch/data:delegated
     - ./opensearch-backup:/opt/opensearch/backup:delegated
 dashboards-helper:
-    - ./index-management-policy.json:/data/index-management-policy.json:ro
 dashboards:
 logstash:
     - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
@@ -142,7 +141,7 @@ Although OpenSearch is a NoSQL database and as-such is "unstructured" and "schem
 
 * [`arkime/etc/config.ini`](../../arkime/etc/config.ini) - follow existing examples in the `[custom-fields]` and `[custom-views]` sections in order for [Arkime](https://arkime.com) to be aware of your new fields
 * [`arkime/wise/source.zeeklogs.js`](../../arkime/wise/source.zeeklogs.js) - add new fields to the `allFields` array for Malcolm to create Arkime [value actions](https://arkime.com/settings#right-click) for your fields
-* [`dashboards/malcolm_template.json`](../../arkime/wise/source.zeeklogs.js) - add new fields to the giant list of fields in this document in order for them to be defined as part of the `arkime_sessions3-*` [index template](https://opensearch.org/docs/latest/opensearch/index-templates/) used by Arkime and OpenSearch Dashboards in Malcolm
+* [`dashboards/templates/composable/component/__(name)__.json`](../../dashboards/templates/composable/component/) - add new fields to a new [composable index template](https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates) file in this directory and add its name (prefixed with `custom_`) to the `composed_of` section of [`dashboards/templates/malcolm_template.json`](../../dashboards/templates/malcolm_template.json) in order for it to be included as part of the `arkime_sessions3-*` [index template](https://opensearch.org/docs/latest/opensearch/index-templates/) used by Arkime and OpenSearch Dashboards in Malcolm
 
 When possible, I recommend you to use (or at least take inspiration from) the [Elastic Common Schema (ECS) Reference](https://www.elastic.co/guide/en/ecs/current/index.html) when deciding how to define new field names.
 
@@ -205,7 +204,7 @@ Logstash can then be easily extended to add more [`logstash/pipelines`](../../lo
 
 So, in order to add a new **parse pipeline** for `cooltool` after tweaking [`filebeat.yml`](../../filebeat/filebeat.yml) as described above, create a `cooltool` directory under [`logstash/pipelines`](../../logstash/pipelines) which follows the same pattern as the `zeek` parse pipeline. This directory will have an input file (tiny), a filter file (possibly large), and an output file (tiny). In your filter file, be sure to set the field [`event.hash`](https://www.elastic.co/guide/en/ecs/master/ecs-event.html#field-event-hash) to a unique value to identify indexed documents in OpenSearch; the [fingerprint filter](https://www.elastic.co/guide/en/logstash/current/plugins-filters-fingerprint.html) may be useful for this.
 
-Finally, in your `docker-compose` files, set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable under `logstash-variables` to `cooltool-parse,zeek-parse,suricata-parse` (assuming you named the pipeline address from the previous step `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to all parse pipelines.
+Finally, in your `docker-compose` files, set a new `LOGSTASH_PARSE_PIPELINE_ADDRESSES` environment variable under `logstash-variables` to `cooltool-parse,zeek-parse,suricata-parse,beats-parse` (assuming you named the pipeline address from the previous step `cooltool-parse`) so that logs sent from `filebeat` to `logstash` are forwarded to all parse pipelines.
 
 ### <a name="LogstashZeek"></a>Parsing new Zeek logs
 

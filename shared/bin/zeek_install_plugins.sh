@@ -7,7 +7,6 @@ if [ -z "$BASH_VERSION" ]; then
   exit 1
 fi
 
-SPICY_DIR=${SPICY_DIR:-/opt/spicy}
 ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
 
 # going to clone under /usr/local/src
@@ -107,10 +106,10 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zeek-xor-exe-plugin"
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
-  "https://github.com/mitre-attack/bzar"
+  "https://github.com/mmguero-dev/bzar"
   "https://github.com/mmguero-dev/zeek-af_packet-plugin|master"
   "https://github.com/precurse/zeek-httpattacks"
-  "https://github.com/salesforce/GQUIC_Protocol_Analyzer"
+  "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer"
   "https://github.com/salesforce/hassh"
   "https://github.com/salesforce/ja3"
   "https://github.com/zeek/spicy-dhcp"

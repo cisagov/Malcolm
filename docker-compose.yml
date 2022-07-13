@@ -99,11 +99,6 @@ x-suricata-variables: &suricata-variables
 x-dashboards-helper-variables: &dashboards-helper-variables
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
-  ISM_CLOSE_AGE : '60d'
-  ISM_COLD_AGE : '30d'
-  ISM_DELETE_AGE : '365d'
-  ISM_POLICY_NAME : 'session_index_policy'
-  ISM_SNAPSHOT_AGE : '1d'
   ISM_SNAPSHOT_COMPRESSED : 'false'
   ISM_SNAPSHOT_REPO : 'logs'
 
@@ -131,6 +126,12 @@ x-filebeat-variables: &filebeat-variables
   FILEBEAT_CLOSE_REMOVED : 'true'
   FILEBEAT_CLOSE_EOF : 'true'
   FILEBEAT_CLEAN_REMOVED : 'true'
+  FILEBEAT_TCP_LISTEN : 'false'
+  FILEBEAT_TCP_LOG_FORMAT : 'raw'
+  FILEBEAT_TCP_PARSE_SOURCE_FIELD : 'message'
+  FILEBEAT_TCP_PARSE_TARGET_FIELD : ''
+  FILEBEAT_TCP_PARSE_DROP_FIELD : ''
+  FILEBEAT_TCP_TAG : ''
 
 x-common-upload-variables: &common-upload-variables
   AUTO_TAG : 'true'
@@ -166,7 +167,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.0.1
+    image: malcolmnetsec/opensearch:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -181,10 +182,9 @@ services:
       OPENSEARCH_JAVA_OPTS : '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
       discovery.type : 'single-node'
-      discovery.zen.minimum_master_nodes : 1
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
-      indices.query.bool.max_clause_count : 2048
+      indices.query.bool.max_clause_count : 4096
       path.repo : '/opt/opensearch/backup'
     expose:
       - 9200
@@ -209,7 +209,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.0.1
+    image: malcolmnetsec/dashboards-helper:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -230,8 +230,6 @@ services:
       - opensearch
     expose:
       - 28991
-    volumes:
-      - ./index-management-policy.json:/data/index-management-policy.json:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
@@ -242,7 +240,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.0.1
+    image: malcolmnetsec/dashboards:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -268,7 +266,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.0.1
+    image: malcolmnetsec/logstash-oss:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -299,6 +297,7 @@ services:
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.orig.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
+      - ./logstash/patterns:/usr/share/logstash/malcolm-patterns:ro
       - ./logstash/ruby:/usr/share/logstash/malcolm-ruby:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
@@ -319,7 +318,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.0.1
+    image: malcolmnetsec/filebeat-oss:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -337,6 +336,10 @@ services:
       FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
     depends_on:
       - logstash
+    expose:
+      - 5045
+    ports:
+      - "127.0.0.1:5045:5045"
     volumes:
       - nginx-log-path:/data/nginx:ro
       - ./zeek-logs:/data/zeek
@@ -354,7 +357,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.0.1
+    image: malcolmnetsec/arkime:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -400,7 +403,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.0.1
+    image: malcolmnetsec/zeek:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -435,7 +438,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.0.1
+    image: malcolmnetsec/suricata:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -463,7 +466,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.0.1
+    image: malcolmnetsec/file-monitor:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -491,7 +494,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.0.1
+    image: malcolmnetsec/pcap-capture:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -514,7 +517,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.0.1
+    image: malcolmnetsec/pcap-monitor:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -542,7 +545,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.0.1
+    image: malcolmnetsec/file-upload:6.1.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -570,7 +573,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.0.1
+    image: malcolmnetsec/htadmin:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -597,7 +600,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.0.1
+    image: malcolmnetsec/freq:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -620,7 +623,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.0.1
+    image: malcolmnetsec/name-map-ui:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -646,7 +649,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:6.0.1
+    image: malcolmnetsec/api:6.1.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -672,7 +675,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.0.1
+    image: malcolmnetsec/nginx-proxy:6.1.0
     restart: "no"
     stdin_open: false
     tty: true

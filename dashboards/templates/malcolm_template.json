@@ -1,0 +1,61 @@
+{
+  "index_patterns" : ["arkime_sessions3-*"],
+  "composed_of": [
+    "ecs_base",
+    "ecs_ecs",
+    "ecs_event",
+    "ecs_agent",
+    "ecs_client",
+    "ecs_destination",
+    "ecs_error",
+    "ecs_file",
+    "ecs_host",
+    "ecs_http",
+    "ecs_log",
+    "ecs_network",
+    "ecs_process",
+    "ecs_related",
+    "ecs_rule",
+    "ecs_server",
+    "ecs_source",
+    "ecs_threat",
+    "ecs_url",
+    "ecs_vulnerability",
+    "ecs_user_agent",
+    "custom_arkime",
+    "custom_suricata",
+    "custom_zeek",
+    "custom_zeek_ot"
+  ],
+  "template" :{
+    "settings" : {
+      "index" : {
+        "mapping.total_fields.limit" : "5000"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "destination.hostname": { "type": "keyword" },
+        "destination.ip_reverse_dns": { "type": "keyword" },
+        "destination.oui": { "type": "keyword" },
+        "destination.segment": { "type": "keyword" },
+        "event.freq_score_v1": { "type": "float" },
+        "event.freq_score_v2": { "type": "float" },
+        "event.hits": { "type": "long" },
+        "event.result": { "type": "keyword" },
+        "event.severity_tags": { "type": "keyword" },
+        "file.source": { "type": "keyword" },
+        "network.protocol_version": { "type": "keyword" },
+        "related.mac": { "type": "keyword" },
+        "related.oui": { "type": "keyword" },
+        "related.password": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
+        "source.hostname": { "type": "keyword" },
+        "source.ip_reverse_dns": { "type": "keyword" },
+        "source.oui": { "type": "keyword" },
+        "source.segment": { "type": "keyword" },
+        "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "tls.server.ja3s_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
+      }
+    }
+  }
+}

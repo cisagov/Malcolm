@@ -78,10 +78,14 @@ libgtk2.0-bin
 libjson-perl
 libkrb5-3
 liblsan0
+libmhash2
 libnl-3-200
 libnl-genl-3-200
 libnl-route-3-200
 libpam-pwquality
+libpcre2-16-0
+libpcre2-32-0
+libpcre2-8-0
 libtool
 libtsan0
 libubsan1

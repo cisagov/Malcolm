@@ -21,7 +21,8 @@ UFW_ALLOW_RULES=(
   https
   ntp
   ssh
-  5044
+  5044/tcp
+  5045/tcp
   5601/tcp
   9200/tcp
 )
@@ -116,6 +117,7 @@ sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
 echo -e "\n\n# new directories default to 700, new files to 600" >> /etc/profile
 echo "umask 077" >> /etc/profile
 echo "export UMASK=077" >> /etc/profile
+echo "export PYTHONDONTWRITEBYTECODE=1" >> /etc/profile
 
 # enable cron logging
 sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
@@ -152,6 +154,17 @@ sed -i "s/^\(restrict -6\)/# \1/" /etc/ntp.conf
 sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
 sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
 usermod -d /var/lib/ntp ntp
+
+# disable default fluentbit configuration
+systemctl disable fluent-bit || true
+
+# add fluentbit logfmt parser
+cat << 'EOF' >> /etc/fluent-bit/parsers.conf
+
+[PARSER]
+    Name logfmt
+    Format logfmt
+EOF
 
 # disable htpdate service, we're going to use cron instead
 systemctl disable htpdate || true

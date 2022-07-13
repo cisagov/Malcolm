@@ -1,0 +1,40 @@
+{
+  "index_patterns" : ["malcolm_beats_*"],
+  "composed_of": [
+    "ecs_base",
+    "ecs_ecs",
+    "ecs_event",
+    "ecs_agent",
+    "ecs_client",
+    "ecs_destination",
+    "ecs_error",
+    "ecs_file",
+    "ecs_host",
+    "ecs_http",
+    "ecs_log",
+    "ecs_network",
+    "ecs_process",
+    "ecs_related",
+    "ecs_server",
+    "ecs_source",
+    "ecs_threat",
+    "ecs_url",
+    "ecs_user",
+    "ecs_user_agent",
+    "custom_miscbeat"
+  ],
+  "template" :{
+    "settings" : {
+      "index" : {
+        "mapping.total_fields.limit" : "5000"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "timestamp": { "type": "date" },
+        "node": { "type": "keyword" },
+        "event.result": { "type": "keyword" }
+      }
+    }
+  }
+}

@@ -28,20 +28,18 @@ Hedgehog Linux is a Debian-based operating system built to
         + [Capture](#ConfigCapture)
             * [Automatic file extraction and scanning](#ZeekFileExtraction)
         + [Forwarding](#ConfigForwarding)
-            * [filebeat](#filebeat): Zeek and Suricata log forwarding
             * [arkime-capture](#arkime-capture): Arkime session forwarding
-            * [metricbeat](#metricbeat): resource statistics forwarding
-            * [auditbeat](#auditbeat): audit log forwarding
-            * [filebeat-syslog](#syslogbeat): syslog forwarding
-            * [heatbeat](#heatbeat): temperature forwarding
+            * [filebeat](#filebeat): Zeek and Suricata log forwarding
+            * [miscbeat](#miscbeat): System metrics forwarding        
         + [Autostart services](#ConfigAutostart)
-        + [Zeek Intelligence Framework](#ZeekIntel)
++ [Zeek Intelligence Framework](#ZeekIntel)
 * [Appendix A - Generating the ISO](#ISOBuild)
 * [Appendix B - Configuring SSH access](#ConfigSSH)
 * [Appendix C - Troubleshooting](#Troubleshooting)
 * [Appendix D - Hardening](#Hardening)
     - [STIG compliance exceptions](#STIGExceptions)
     - [CIS benchmark compliance exceptions](#CISExceptions)
+    - [Hardening compliance issues - work in progress](#ComplianceWIP)
 * [Appendix E - Upgrades](#UpgradePlan)
 * [Copyright](#Footer)
 
@@ -126,7 +124,7 @@ Several icons are available in the top menu bar:
 
 ### <a name="ConfigHostname"></a>Hostname
 
-The first step of sensor configuration is to configure the network interfaces and sensor hostname. Double-clicking the **Configure Interfaces and Hostname** desktop icon (or, if you are at a command line prompt, running `configure-interfaces`) will prompt you for the root password you created during installation, after which the configuration welcome screen is shown. Select **Continue** to proceed.
+The first step of sensor configuration is to configure the network interfaces and sensor hostname. Clicking the **Configure Interfaces and Hostname** toolbar icon (or, if you are at a command line prompt, running `configure-interfaces`) will prompt you for the root password you created during installation, after which the configuration welcome screen is shown. Select **Continue** to proceed.
 
 You may next select whether to configure the network interfaces, hostname, or time synchronization.
 
@@ -172,7 +170,7 @@ Upon configuring time synchronization, a "Time synchronization configured succes
 
 ## <a name="ConfigUser"></a>Capture, forwarding, and autostart services
 
-Double-clicking the **Configure Capture and Forwarding** icon (or, if you are at a command prompt, running `configure-capture`) will launch the configuration tool for capture and forwarding. The root password is not required as it was for the interface and hostname configuration, as sensor services are run under the non-privileged sensor account. Select **Continue** to proceed. You may select from a list of configuration options.
+Clicking the **Configure Capture and Forwarding** toolbar icon (or, if you are at a command prompt, running `configure-capture`) will launch the configuration tool for capture and forwarding. The root password is not required as it was for the interface and hostname configuration, as sensor services are run under the non-privileged sensor account. Select **Continue** to proceed. You may select from a list of configuration options.
 
 ![Select configuration mode](./docs/images/capture_config_main.png)
 
@@ -217,9 +215,7 @@ Files which are flagged as potentially malicious will be logged as Zeek `signatu
 
 ![File quarantine](./docs/images/file_quarantine.png)
 
-Finally, you will then be presented with the list of configuration variables that will be used for capture, including the values which you have configured up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. It is not recommended that you edit this file manually. After confirming these values, you will be presented with a confirmation that these settings have been written to the configuration file, and you will be returned to the welcome screen.
-
-![Capture parameters summary](./docs/images/capture_confirm.png)
+Finally, you will be presented with the list of configuration variables that will be used for capture, including the values which you have configured up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. It is not recommended that you edit this file manually. After confirming these values, you will be presented with a confirmation that these settings have been written to the configuration file, and you will be returned to the welcome screen.
 
 ### <a name="ConfigForwarding"></a>Forwarding
 
@@ -229,13 +225,41 @@ Select **Configure Forwarding** to set up forwarding logs and statistics from th
 
 There are five forwarder services used on the sensor, each for forwarding a different type of log or sensor metric.
 
+### <a name="arkime-capture"></a>capture: Arkime session forwarding
+
+[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [OpenSearch](https://opensearch.org/) database so that it can be viewed in [Arkime viewer](https://arkime.com/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/cisagov/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+
+First, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication)), choose **None**.
+
+![OpenSearch connection protocol](./docs/images/opensearch_connection_protocol.png) ![OpenSearch SSL verification](./docs/images/opensearch_ssl_verification.png)
+
+Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an OpenSearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+
+![OpenSearch host and port](./docs/images/arkime-capture-ip-port.png)
+
+You will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch API. After you've entered the username and the password, the sensor will attempt a test connection to OpenSearch using the connection information provided.
+
+![OpenSearch username](./docs/images/opensearch_username.png) ![OpenSearch password](./docs/images/opensearch_password.png) ![Successful OpenSearch connection](./docs/images/opensearch_connection_success.png)
+
+Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
+
+![PCAP retrieval ACL](./docs/images/malcolm_arkime_reachback_acl.png)
+
+Finally, you'll be given the opportunity to review the all of the Arkime `capture` options you've specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool's welcome screen.
+
+![capture settings confirmation](./docs/images/arkime_confirm.png)
+
 ### <a name="filebeat"></a>filebeat: Zeek and Suricata log forwarding
 
 [Filebeat](https://www.elastic.co/products/beats/filebeat) is used to forward [Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/) logs to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database.
 
-To configure filebeat, first provide the log path (the same path previously configured for log file generation). You must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+To configure filebeat, first provide the log path (the same path previously configured for log file generation).
 
-![Configure filebeat for log forwrding](./docs/images/filebeat_dest.png)
+![Configure filebeat for log forwarding](./docs/images/filebeat_log_path.png)
+
+You must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
+
+![Configure filebeat for log forwrading](./docs/images/filebeat_ip_port.png)
 
 Next you are asked whether the connection used for log forwarding should be done **unencrypted** or over **SSL**. Unencrypted communication requires less processing overhead and is simpler to configure, but the contents of the logs may be visible to anyone who is able to intercept that traffic.
 
@@ -245,87 +269,21 @@ If **SSL** is chosen, you must choose whether to enable [SSL certificate verific
 
 ![Unencrypted vs. SSL encryption for log forwarding](./docs/images/filebeat_ssl_verify.png)
 
-The last step for SSL-encrypted log forwarding is to specify the SSL certificate authority, certificate, and key files. These files must match those used by the Logstash instance receiving the logs on the aggregator. If Malcolm's `auth_setup` script was used to generate these files they would be found in the `filebeat/certs/` subdirectory of the Malcolm installation and must be manually copied to the sensor (stored under `/opt/sensor/sensor_ctl/filebeat/` or in any other path accessible to the sensor account). Specify the location of the certificate authorities file (eg., `ca.crt`), the certificate file (eg., `client.crt`), and the key file (eg., `client.key`).
+The last step for SSL-encrypted log forwarding is to specify the SSL certificate authority, certificate, and key files. These files must match those used by the Logstash instance receiving the logs on the aggregator. If Malcolm's `auth_setup` script was used to generate these files they would be found in the `filebeat/certs/` subdirectory of the Malcolm installation and must be manually copied to the sensor (stored under `/opt/sensor/sensor_ctl/logstash-client-certificates` or in any other path accessible to the sensor account). Specify the location of the certificate authorities file (eg., `ca.crt`), the certificate file (eg., `client.crt`), and the key file (eg., `client.key`).
 
 ![SSL certificate files](./docs/images/filebeat_certs.png)
 
 The Logstash instance receiving the events must be similarly configured with matching SSL certificate and key files. Under Malcolm, the `BEATS_SSL` variable must be set to true in Malcolm's `docker-compose.yml` file and the SSL files must exist in the `logstash/certs/` subdirectory of the Malcolm installation.
 
-Once you have specified all of the filebeat parameters, you will be presented with a summary of the settings related to the forwarding of these logs. Selecting **OK** will cause the parameters to be written to filebeat's configuration keystore under `/opt/sensor/sensor_ctl/filebeat` and you will be returned to the configuration tool's welcome screen.
+Once you have specified all of the filebeat parameters, you will be presented with a summary of the settings related to the forwarding of these logs. Selecting **OK** will cause the parameters to be written to filebeat's configuration keystore under `/opt/sensor/sensor_ctl/logstash-client-certificates` and you will be returned to the configuration tool's welcome screen.
 
 ![Confirm filebeat settings](./docs/images/filebeat_confirm.png)
 
-### <a name="arkime-capture"></a>capture: Arkime session forwarding
+### <a name="miscbeat"></a>miscbeat: System metrics forwarding
 
-[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [OpenSearch](https://opensearch.org/) database so that it can be viewed in [Arkime viewer](https://arkime.com/), whether standalone or as part of a [Malcolm](https://github.com/cisagov/Malcolm) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions](https://github.com/cisagov/Malcolm#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+The sensor uses [Fluent Bit](https://fluentbit.io/) to gather miscellaneous system resource metrics (CPU, network I/O, disk I/O, memory utilization, temperature, etc.) and the [Beats](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) protocol to forward these metrics to a remote [Logstash](https://www.elastic.co/products/logstash) instance for further enrichment prior to insertion into an [OpenSearch](https://opensearch.org/) database. Metrics categories can be enabled/disabled as described in the [autostart services](#ConfigAutostart) section of this document.
 
-First, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication)), choose **None**.
-
-![OpenSearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![OpenSearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
-
-Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an OpenSearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
-
-![OpenSearch host and port](./docs/images/arkime-capture-ip-port.png)
-
-You will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch API. After you've entered the username and the password, the sensor will attempt a test connection to OpenSearch using the connection information provided.
-
-![OpenSearch username](./docs/images/elasticsearch-username.png) ![OpenSearch password](./docs/images/elasticsearch_password.png) ![Successful OpenSearch connection](./docs/images/metricbeat_elasticsearch_success.png)
-
-Finally, you will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
-
-![PCAP retrieval ACL](./docs/images/malcolm_arkime_reachback_acl.png)
-
-Finally, you'll be given the opportunity to review the all of the Arkime `capture` options you've specified. Selecting **OK** will cause the parameters to be saved and you will be returned to the configuration tool's welcome screen.
-
-![capture settings confirmation](./docs/images/arkime_confirm.png) ![capture settings applied successfully](./docs/images/arkime_success.png)
-
-### <a name="metricbeat"></a>metricbeat: resource statistics forwarding
-
-The sensor uses [metricbeat](https://www.elastic.co/products/beats/metricbeat) to forward system resource metrics (CPU, network I/O, disk I/O, memory utilization, etc.) to an OpenSearch database using a RESTful API using HTTP/HTTPS as the transport protocol. Select **metricbeat** from the forwarding configuration mode options.
-
-Metricbeat gathers system resource metrics at an interval you specify. The default interval is 30 seconds, but it can be set to any value between 1 and 60 seconds.
-
-![Metricbeat interval](./docs/images/metricbeat_interval.png)
-
-Next, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration](https://github.com/cisagov/Malcolm#configure-authentication), choose **None**.
-
-![OpenSearch connection protocol](./docs/images/metricbeat_elastic_protocol.png) ![OpenSearch SSL verification](./docs/images/metricbeat_elastic_ssl.png)
-
-Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggregator) and port. These metrics are written to an OpenSearch database using a RESTful API, usually using port 9200. Depending on your network configuration, you may need to open this port in your firewall to allow this connection from the sensor to the aggregator.
-
-![OpenSearch host and port](./docs/images/metricbeat_elastic_host.png)
-
-Next, you will be asked if you wish to configure **OpenSearch Dashboards** connectivity. [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) is an open source general-purpose data visualization tool for OpenSearch. If you choose **Yes** and proceed to configure Dashboards connectivity, metricbeat will create custom search indexes, visualizations, and dashboards for Dashboards to display the sensor's resource metrics.
-
-You will be prompted to specify the **connection protocol** and (for HTTPS) **SSL verification** for Dashboards. These values should probably be the same ones you chose for OpenSearch. You will also be prompted for the **Dashboards host** IP address and **port**. The IP address will probably be the same one you specified for OpenSearch. The default Dashboards port is 5601.
-
-The final settings required to configure Dashboards are whether or not to configure **OpenSearch Dashboards** and the local directory on the sensor containing the dashboards to be imported. The default values are probably what you want.
-
-Finally, you will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch and Dashboards APIs.
-
-After you've entered the username and the password, the sensor will attempt test connections to the OpenSearch and Dashboards APIs using the connection information provided.
-
-![OpenSearch/Dashboards username](./docs/images/metricbeat_elastic_username.png) ![OpenSearch/Dashboards password](./docs/images/metricbeat_elastic_password.png) ![Successful OpenSearch connection](./docs/images/metricbeat_elasticsearch_success.png) ![Successful Dashboards connection](./docs/images/metricbeat_kibana_success.png)
-
-Finally, you'll be given the opportunity to review the all of the metricbeat options you've specified. Selecting **OK** will cause the parameters to be written to metricbeat's configuration keystore under `/opt/sensor/sensor_ctl/metricbeat` and you will be returned to the configuration tool's welcome screen.
-
-![Metricbeat settings confirmation](./docs/images/metricbeat_confirm.png) ![Metricbeat settings applied successfully](./docs/images/metricbeat_success.png)
-
-### <a name="auditbeat"></a>auditbeat: audit log forwarding
-
-The sensor uses [auditbeat](https://www.elastic.co/products/beats/auditbeat) to forward auditd logs, process and socket statistics, and sensor system file integrity information to an OpenSearch database. Its configuration is almost identical to that of metricbeat in the previous section. Select **auditbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
-
-The sensor implements STIG (Security Technical Implementation Guidelines) rules according to DISA RHEL 7 STIG V1 R1, ported to a Debian 9 base platform. Enabling audit log forwarding via auditbeat is required to satisfy the requirements regarding forwarding audit logs to a remote log server as defined in that specification.
-
-### <a name="syslogbeat"></a>filebeat-syslog: syslog forwarding
-
-The sensor uses [filebeat's syslog input](https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-input-syslog.html) to forward the sensor's system logs to an OpenSearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **filebeat-syslog** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
-
-Enabling syslog forwarding via filebeat is required to satisfy the STIG requirements regarding sending system logs to a remote log server as defined in that specification.
-
-### <a name="heatbeat"></a>heatbeat: temperature forwarding
-
-The sensor employs a custom agent using the beats protocol to forward hardware metrics such as CPU and storage device temperatures, system voltages, and fan speeds (when applicable) to an OpenSearch database. Its configuration is almost identical to that of metricbeat in a previous section. Select **heatbeat** from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
+This forwarder's configuration is almost identical to that of [filebeat](#filebeat) in the previous section. Select `miscbeat` from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
 ### <a name="ConfigAutostart"></a>Autostart services
 
@@ -333,21 +291,23 @@ Once the forwarders have been configured, the final step is to **Configure Autos
 
 Despite configuring capture and/or forwarder services as described in previous sections, only services enabled in the autostart configuration will run when the sensor starts up. The available autostart processes are as follows (recommended services are in **bold text**):
 
-* **AUTOSTART_AUDITBEAT** – [auditbeat](#auditbeat) audit log forwarder
-* **AUTOSTART_CLAMAV_UPDATES** – Virus database update service for ClamAV (requires sensor to be connected to the internet)
-* **AUTOSTART_FILEBEAT** – [filebeat](#filebeat) Zeek log forwarder 
-* **AUTOSTART_HEATBEAT** – [sensor hardware](#heatbeat) (eg., CPU and storage device temperature) metrics forwarder
-* **AUTOSTART_HEATBEAT_SENSORS** – the background process monitoring [hardware sensors](#heatbeat) for temperatures, voltages, fan speeds, etc. (this is required in addition to **AUTOSTART_HEATBEAT** metrics forwarding)
-* **AUTOSTART_METRICBEAT** – system resource utilization [metrics forwarder](#metricbeat)
-* **AUTOSTART_ARKIME** – [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
-* *AUTOSTART_NETSNIFF* – [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
-* **AUTOSTART_PRUNE_ZEEK** – storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
-* **AUTOSTART_PRUNE_PCAP** – storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
+* **AUTOSTART_ARKIME** - [capture](#arkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If you are using Hedgehog Linux along with [Malcolm](https://github.com/cisagov/Malcolm) or another Arkime installation, this is probably the packet capture engine you want to use.
+* **AUTOSTART_CLAMAV_UPDATES** - Virus database update service for ClamAV (requires sensor to be connected to the internet)
+* **AUTOSTART_FILEBEAT** - [filebeat](#filebeat) Zeek and Suricata log forwarder 
+* **AUTOSTART_FLUENTBIT_AIDE** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/exec) [AIDE](https://aide.github.io/) file system integrity checks
+* **AUTOSTART_FLUENTBIT_AUDITLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/tail) [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs
+* *AUTOSTART_FLUENTBIT_KMSG* - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/kernel-logs) the Linux kernel log buffer (these are generally reflected in syslog as well, which may make this agent redundant)
+* **AUTOSTART_FLUENTBIT_METRICS** - [Fluent Bit](https://fluentbit.io/) agent for collecting [various](https://docs.fluentbit.io/manual/pipeline/inputs) system resource and performance metrics
+* **AUTOSTART_FLUENTBIT_SYSLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/syslog) Linux syslog messages
+* **AUTOSTART_FLUENTBIT_THERMAL** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/thermal) system temperatures
+* **AUTOSTART_MISCBEAT** - [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) forwarder which sends system metrics collected by [Fluent Bit](https://fluentbit.io/) to a remote Logstash instance (e.g., [Malcolm](https://github.com/cisagov/Malcolm)'s)
+* *AUTOSTART_NETSNIFF* - [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
+* **AUTOSTART_PRUNE_PCAP** - storage space monitor to ensure that PCAP files do not consume more than 90% of the total size of the storage volume to which PCAP files are written
+* **AUTOSTART_PRUNE_ZEEK** - storage space monitor to ensure that Zeek logs do not consume more than 90% of the total size of the storage volume to which Zeek logs are written
 * **AUTOSTART_SURICATA** - [Suricata](https://suricata.io/) traffic analysis engine
 * **AUTOSTART_SURICATA_UPDATES** - Rule update service for Suricata (requires sensor to be connected to the internet)
-* **AUTOSTART_SYSLOGBEAT** – filebeat [system log forwarder](#syslogbeat)
-* *AUTOSTART_TCPDUMP* – [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
-* **AUTOSTART_ZEEK** – [Zeek](https://www.zeek.org/) traffic analysis engine
+* *AUTOSTART_TCPDUMP* - [tcpdump](https://www.tcpdump.org/) PCAP engine for saving packet capture (PCAP) files
+* **AUTOSTART_ZEEK** - [Zeek](https://www.zeek.org/) traffic analysis engine
 
 Note that only one packet capture engine ([capture](https://arkime.com/), [netsniff-ng](http://netsniff-ng.org/), or [tcpdump](https://www.tcpdump.org/)) can be used.
 
@@ -363,31 +323,39 @@ After you have completed configuring the sensor it is recommended that you reboo
 /opt/sensor/sensor_ctl/shutdown && sleep 10 && /opt/sensor/sensor_ctl/supervisor.sh
 ```
 
-This will cause the sensor services controller to stop, wait a few seconds, and restart. You can check the status of the sensor's processes by choosing **Sensor Status** from the sensor's kiosk mode, double-clicking the **Sensor Service Status** desktop icon, or running `/opt/sensor/sensor_ctl/status` from the command line:
+This will cause the sensor services controller to stop, wait a few seconds, and restart. You can check the status of the sensor's processes by choosing **Sensor Status** from the sensor's kiosk mode, clicking the **Sensor Service Status** toolbar icon, or running `/opt/sensor/sensor_ctl/status` from the command line:
 
 ```
 $ /opt/sensor/sensor_ctl/status 
-beats:auditbeat                  RUNNING   pid 14470, uptime 8 days, 20:22:32
-beats:filebeat                   RUNNING   pid 14460, uptime 8 days, 20:22:32
-beats:heatbeat                   RUNNING   pid 14481, uptime 8 days, 20:22:32
-beats:metricbeat                 RUNNING   pid 14476, uptime 8 days, 20:22:32
-beats:sensors                    RUNNING   pid 14484, uptime 8 days, 20:22:32
-beats:syslogbeat                 RUNNING   pid 14471, uptime 8 days, 20:22:32
-clamav:clamav-service            RUNNING   pid 14454, uptime 8 days, 20:22:32
-clamav:clamav-updates            RUNNING   pid 14450, uptime 8 days, 20:22:32
-arkime:arkime-capture            RUNNING   pid 14432, uptime 8 days, 20:22:32
-arkime:arkime-viewer             RUNNING   pid 14431, uptime 8 days, 20:22:32
-netsniff:netsniff-enp8s0         STOPPED   Not started
-prune:prune-pcap                 RUNNING   pid 14446, uptime 8 days, 20:22:32
-prune:prune-zeek                 RUNNING   pid 14442, uptime 8 days, 20:22:32
-tcpdump:tcpdump-enp8s0           STOPPED   Not started
-zeek:logger                      RUNNING   pid 14434, uptime 8 days, 20:22:32
-zeek:virustotal                  RUNNING   pid 14435, uptime 8 days, 20:22:32
-zeek:yara                        RUNNING   pid 14435, uptime 8 days, 20:22:32
-zeek:capa                        RUNNING   pid 14435, uptime 8 days, 20:22:32
-zeek:clamav                      RUNNING   pid 14435, uptime 8 days, 20:22:32
-zeek:watcher                     RUNNING   pid 14441, uptime 8 days, 20:22:32
-zeek:zeekctl                     RUNNING   pid 14433, uptime 8 days, 20:22:32
+arkime:arkime-capture            RUNNING   pid 6455, uptime 0:03:17
+arkime:arkime-viewer             RUNNING   pid 6456, uptime 0:03:17
+beats:filebeat                   RUNNING   pid 6457, uptime 0:03:17
+beats:miscbeat                   RUNNING   pid 6458, uptime 0:03:17
+clamav:clamav-service            RUNNING   pid 6459, uptime 0:03:17
+clamav:clamav-updates            RUNNING   pid 6461, uptime 0:03:17
+fluentbit-auditlog               RUNNING   pid 6463, uptime 0:03:17
+fluentbit-kmsg                   STOPPED   Not started
+fluentbit-metrics:cpu            RUNNING   pid 6466, uptime 0:03:17
+fluentbit-metrics:df             RUNNING   pid 6471, uptime 0:03:17
+fluentbit-metrics:disk           RUNNING   pid 6468, uptime 0:03:17
+fluentbit-metrics:mem            RUNNING   pid 6472, uptime 0:03:17
+fluentbit-metrics:mem_p          RUNNING   pid 6473, uptime 0:03:17
+fluentbit-metrics:netif          RUNNING   pid 6474, uptime 0:03:17
+fluentbit-syslog                 RUNNING   pid 6478, uptime 0:03:17
+fluentbit-thermal                RUNNING   pid 6480, uptime 0:03:17
+netsniff:netsniff-enp1s0         STOPPED   Not started
+prune:prune-pcap                 RUNNING   pid 6484, uptime 0:03:17
+prune:prune-zeek                 RUNNING   pid 6486, uptime 0:03:17
+supercronic                      RUNNING   pid 6490, uptime 0:03:17
+suricata                         RUNNING   pid 6501, uptime 0:03:17
+tcpdump:tcpdump-enp1s0           STOPPED   Not started
+zeek:capa                        RUNNING   pid 6553, uptime 0:03:17
+zeek:clamav                      RUNNING   pid 6512, uptime 0:03:17
+zeek:logger                      RUNNING   pid 6554, uptime 0:03:17
+zeek:virustotal                  STOPPED   Not started
+zeek:watcher                     RUNNING   pid 6510, uptime 0:03:17
+zeek:yara                        RUNNING   pid 6548, uptime 0:03:17
+zeek:zeekctl                     RUNNING   pid 6502, uptime 0:03:17
 ```
 
 ### <a name="ZeekIntel"></a>Zeek Intelligence Framework
@@ -429,7 +397,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-6.0.1.iso"
+Finished, created "/sensor-build/hedgehog-6.1.0.iso"
 …
 ```
 
@@ -478,61 +446,57 @@ Hedgehog Linux targets the following guidelines for establishing a secure config
 
 Hedgehog Linux claims the following exceptions to STIG compliance:
 
-| # | ID  | Title | Justification |
-| --- | --- | --- | --- |
-| 1 | [SV-86535r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71911) | When passwords are changed a minimum of eight of the total number of characters must be changed. | Account/password policy exception: As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general user-facing software platform, some exceptions to password enforcement policies are claimed. |
-| 2 | [SV-86537r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71913) | When passwords are changed a minimum of four character classes must be changed. | Account/password policy exception |
-| 3 | [SV-86549r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71925) | Passwords for new users must be restricted to a 24 hours/1 day minimum lifetime. | Account/password policy exception |
-| 4 | [SV-86551r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71927) | Passwords must be restricted to a 24 hours/1 day minimum lifetime. | Account/password policy exception |
-| 5 | [SV-86553r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71929) | Passwords for new users must be restricted to a 60-day maximum lifetime. | Account/password policy exception |
-| 6 | [SV-86555r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71931) | Existing passwords must be restricted to a 60-day maximum lifetime. | Account/password policy exception |
-| 7 | [SV-86557r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71933) | Passwords must be prohibited from reuse for a minimum of five generations. | Account/password policy exception |
-| 8 | [SV-86565r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71941) | The operating system must disable account identifiers (individuals, groups, roles, and devices) if the password expires. | Account/password policy exception |
-| 9 | [SV-86567r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71943) | Accounts subject to three unsuccessful logon attempts within 15 minutes must be locked for the maximum configurable period. | Account/password policy exception |
-| 10 | [SV-86569r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71945) | If three unsuccessful root logon attempts within 15 minutes occur the associated account must be locked. | Account/password policy exception |
-| 11 | [SV-86603r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2018-11-28/finding/V-71979) | The … operating system must prevent the installation of software, patches, service packs, device drivers, or operating system components of local packages without verification they have been digitally signed using a certificate that is issued by a Certificate Authority (CA) that is recognized and approved by the organization. | As the base distribution is not using embedded signatures, `debsig-verify` would reject all packages (see comment in `/etc/dpkg/dpkg.cfg`). Enabling it after installation would disallow any future updates. |
-| 12 | [SV-86607r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71983) | USB mass storage must be disabled. | The ability to copy data captured by the sensor to a mounted USB mass storage device is a requirement of the system. |
-| 13 | [SV-86609r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71985) | File system automounter must be disabled unless required. | The ability to copy data captured by the sensor to a mounted USB mass storage device is a requirement of the system. |
-| 14 | [SV-86705r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72081) | The operating system must shut down upon audit processing failure, unless availability is an overriding concern. If availability is a concern, the system must alert the designated staff (System Administrator [SA] and Information System Security Officer [ISSO] at a minimum) in the event of an audit processing failure. | As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. |
-| 15 | [SV-86713r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72089) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
-| 16 | [SV-86715r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72093) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer (ISSO) (at a minimum) when the threshold for the repository maximum audit record storage capacity is reached. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
-| 17 | [SV-86837r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/2016-12-16/finding/V-38666) | The system must use and update a DoD-approved virus scan program. | As this is a network traffic capture appliance rather than an end-user device and will not be internet-connected, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
-| 18 | [SV-86839r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72215) | The system must update the virus scan program every seven days or more frequently. | As this is a network traffic capture appliance rather than an end-user device and will not be internet-connected, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
-| 19 | [SV-86847r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72223) | All network connections associated with a communication session must be terminated at the end of the session or after 10 minutes of inactivity from the user at a command prompt, except to fulfill documented and validated mission requirements. | The sensor may be controlled from the command line in a manual capture scenario, so timing out a session based on command prompt inactivity would be inadvisable. | 
-| 20 | [SV-86893r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72269) | The operating system must, for networked systems, synchronize clocks with a server that is synchronized to one of the redundant United States Naval Observatory (USNO) time servers, a time server designated for the appropriate DoD network (NIPRNet/SIPRNet), and/or the Global Positioning System (GPS). | While [time synchronization](#ConfigTime) is supported on Hedgehog Linux, an exception is claimed for this rule as the network sensor device may be configured to sync to servers other than the ones listed in the STIG. |
-| 21 | [SV-86905r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72281) | For systems using DNS resolution, at least two name servers must be configured. | STIG recommendations for DNS servers are not enforced on Hedgehog Linux to allow for use in a variety of network scenarios. |
-| 22 | [SV-86919r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72295) | Network interfaces must not be in promiscuous mode. | The purpose of Hedgehog Linux is to sniff and capture network traffic. |
-| 23 | [SV-86931r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72307) | An X Windows display manager must not be installed unless approved. | A locked-down X Windows session is required for the sensor's kiosk display. |
-| 24 | [SV-86519r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71895) | The operating system must set the idle delay setting for all connection types. | As this is a network traffic capture appliance rather than an end-user device, timing out displays or connections would not be desireable. |
-| 25 | [SV-86523r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71899) | The operating system must initiate a session lock for the screensaver after a period of inactivity for graphical user interfaces. | This option is configurable during install time. Some installations of Hedgehog Linux may be on appliance hardware not equipped with a keyboard by default, in which case it may not be desirable to lock the session.|
-| 26 | [SV-86525r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71901) | The operating system must initiate a session lock for graphical user interfaces when the screensaver is activated. | This option is configurable during install time. Some installations of Hedgehog Linux may be on appliance hardware not equipped with a keyboard by default, in which case it may not be desirable to lock the session. |
-| 27 | [SV-86589r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71965) | The operating system must uniquely identify and must authenticate organizational users (or processes acting on behalf of organizational users) using multifactor authentication. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
-| 28 | [SV-86851r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72227) | The operating system must implement cryptography to protect the integrity of Lightweight Directory Access Protocol (LDAP) authentication communications. | Does not apply as Hedgehog Linux does not use LDAP for authentication. |
-| 29 | [SV-86921r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72297) | The system must be configured to prevent unrestricted mail relaying. | Does not apply as Hedgehog Linux does not run a mail service. |
-| 30 | [SV-86929r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72305) | If the Trivial File Transfer Protocol (TFTP) server is required, the TFTP daemon must be configured to operate in secure mode. | Does not apply as Hedgehog Linux does not run a TFTP server. |
-| 31 | [SV-86935r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72311) | The Network File System (NFS) must be configured to use RPCSEC_GSS. | Does not apply as Hedgehog Linux does not run an NFS server. |
-| 32 | [SV-87041r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72417) | The operating system must have the required packages for multifactor authentication installed. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
-| 33 | [SV-87051r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72427) | The operating system must implement multifactor authentication for access to privileged accounts via pluggable authentication modules (PAM). | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
-| 34 | [SV-87059r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72435) | The operating system must implement smart card logons for multifactor authentication for access to privileged accounts. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
-| 35 | [SV-87829r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-73177) | Wireless network adapters must be disabled. | As an appliance intended to capture network traffic in a variety of network environments, wireless adapters may be needed to capture and/or report wireless traffic. |
-| 36 | [SV-86699r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72075) | The system must not allow removable media to be used as the boot loader unless approved. | Hedgehog Linux supports a live boot mode that can be booted from removable media. |
+| ID  | Title | Justification |
+| --- | --- | --- |
+| [SV-86535r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71911) | When passwords are changed a minimum of eight of the total number of characters must be changed. | Account/password policy exception: As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general user-facing software platform, some exceptions to password enforcement policies are claimed. |
+| [SV-86537r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71913) | When passwords are changed a minimum of four character classes must be changed. | Account/password policy exception |
+| [SV-86549r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71925) | Passwords for new users must be restricted to a 24 hours/1 day minimum lifetime. | Account/password policy exception |
+| [SV-86551r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71927) | Passwords must be restricted to a 24 hours/1 day minimum lifetime. | Account/password policy exception |
+| [SV-86553r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71929) | Passwords for new users must be restricted to a 60-day maximum lifetime. | Account/password policy exception |
+| [SV-86555r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71931) | Existing passwords must be restricted to a 60-day maximum lifetime. | Account/password policy exception |
+| [SV-86557r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71933) | Passwords must be prohibited from reuse for a minimum of five generations. | Account/password policy exception |
+| [SV-86565r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71941) | The operating system must disable account identifiers (individuals, groups, roles, and devices) if the password expires. | Account/password policy exception |
+| [SV-86567r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71943) | Accounts subject to three unsuccessful logon attempts within 15 minutes must be locked for the maximum configurable period. | Account/password policy exception |
+| [SV-86569r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71945) | If three unsuccessful root logon attempts within 15 minutes occur the associated account must be locked. | Account/password policy exception |
+| [SV-86603r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2018-11-28/finding/V-71979) | The … operating system must prevent the installation of software, patches, service packs, device drivers, or operating system components of local packages without verification they have been digitally signed using a certificate that is issued by a Certificate Authority (CA) that is recognized and approved by the organization. | As the base distribution is not using embedded signatures, `debsig-verify` would reject all packages (see comment in `/etc/dpkg/dpkg.cfg`). Enabling it after installation would disallow any future updates. |
+| [SV-86607r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71983) | USB mass storage must be disabled. | The ability to copy data captured by the sensor to a mounted USB mass storage device is a requirement of the system. |
+| [SV-86609r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71985) | File system automounter must be disabled unless required. | The ability to copy data captured by the sensor to a mounted USB mass storage device is a requirement of the system. |
+| [SV-86693r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72069) | The file integrity tool must be configured to verify Access Control Lists (ACLs). | This is not a multi-user system, the ACL check would be irrelevant. |
+| [SV-86705r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72081) | The operating system must shut down upon audit processing failure, unless availability is an overriding concern. If availability is a concern, the system must alert the designated staff (System Administrator [SA] and Information System Security Officer [ISSO] at a minimum) in the event of an audit processing failure. | As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. |
+| [SV-86713r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72089) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
+| [SV-86715r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72093) | The operating system must immediately notify the System Administrator (SA) and Information System Security Officer (ISSO) (at a minimum) when the threshold for the repository maximum audit record storage capacity is reached. | As a sensor running Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications of this sort are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. |
+| [SV-86837r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_6/2016-12-16/finding/V-38666) | The system must use and update a DoD-approved virus scan program. | As this is a network traffic capture appliance rather than an end-user device and will not be internet-connected, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
+| [SV-86839r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72215) | The system must update the virus scan program every seven days or more frequently. | As this is a network traffic capture appliance rather than an end-user device and will not be internet-connected, regular user files will not be created. A virus scan program would impact device performance and would be unnecessary. |
+| [SV-86847r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72223) | All network connections associated with a communication session must be terminated at the end of the session or after 10 minutes of inactivity from the user at a command prompt, except to fulfill documented and validated mission requirements. | The sensor may be controlled from the command line in a manual capture scenario, so timing out a session based on command prompt inactivity would be inadvisable. | 
+| [SV-86893r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72269) | The operating system must, for networked systems, synchronize clocks with a server that is synchronized to one of the redundant United States Naval Observatory (USNO) time servers, a time server designated for the appropriate DoD network (NIPRNet/SIPRNet), and/or the Global Positioning System (GPS). | While [time synchronization](#ConfigTime) is supported on Hedgehog Linux, an exception is claimed for this rule as the network sensor device may be configured to sync to servers other than the ones listed in the STIG. |
+| [SV-86905r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72281) | For systems using DNS resolution, at least two name servers must be configured. | STIG recommendations for DNS servers are not enforced on Hedgehog Linux to allow for use in a variety of network scenarios. |
+| [SV-86919r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72295) | Network interfaces must not be in promiscuous mode. | The purpose of Hedgehog Linux is to sniff and capture network traffic. |
+| [SV-86931r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72307) | An X Windows display manager must not be installed unless approved. | A locked-down X Windows session is required for the sensor's kiosk display. |
+| [SV-86519r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71895) | The operating system must set the idle delay setting for all connection types. | As this is a network traffic capture appliance rather than an end-user device, timing out displays or connections would not be desireable. |
+| [SV-86523r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71899) | The operating system must initiate a session lock for the screensaver after a period of inactivity for graphical user interfaces. | This option is configurable during install time. Some installations of Hedgehog Linux may be on appliance hardware not equipped with a keyboard by default, in which case it may not be desirable to lock the session.|
+| [SV-86525r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71901) | The operating system must initiate a session lock for graphical user interfaces when the screensaver is activated. | This option is configurable during install time. Some installations of Hedgehog Linux may be on appliance hardware not equipped with a keyboard by default, in which case it may not be desirable to lock the session. |
+| [SV-86589r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71965) | The operating system must uniquely identify and must authenticate organizational users (or processes acting on behalf of organizational users) using multifactor authentication. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| [SV-86851r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72227) | The operating system must implement cryptography to protect the integrity of Lightweight Directory Access Protocol (LDAP) authentication communications. | Does not apply as Hedgehog Linux does not use LDAP for authentication. |
+| [SV-86921r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72297) | The system must be configured to prevent unrestricted mail relaying. | Does not apply as Hedgehog Linux does not run a mail service. |
+| [SV-86929r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72305) | If the Trivial File Transfer Protocol (TFTP) server is required, the TFTP daemon must be configured to operate in secure mode. | Does not apply as Hedgehog Linux does not run a TFTP server. |
+| [SV-86935r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72311) | The Network File System (NFS) must be configured to use RPCSEC_GSS. | Does not apply as Hedgehog Linux does not run an NFS server. |
+| [SV-87041r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72417) | The operating system must have the required packages for multifactor authentication installed. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| [SV-87051r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72427) | The operating system must implement multifactor authentication for access to privileged accounts via pluggable authentication modules (PAM). | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| [SV-87059r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72435) | The operating system must implement smart card logons for multifactor authentication for access to privileged accounts. | As this is a network traffic capture appliance rather than an end-user device or a multiuser network host, this requirement is not applicable. |
+| [SV-87829r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-73177) | Wireless network adapters must be disabled. | As an appliance intended to capture network traffic in a variety of network environments, wireless adapters may be needed to capture and/or report wireless traffic. |
+| [SV-86699r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72075) | The system must not allow removable media to be used as the boot loader unless approved. | Hedgehog Linux supports a live boot mode that can be booted from removable media. |
 
 Please review the notes for these additional rules. While not claiming an exception, they may be implemented or checked in a different way than outlined by the RHEL STIG as Hedgehog Linux is not built on RHEL or for other reasons.
 
-| # | ID  | Title | Note |
-| --- | --- | --- | --- |
-| 1 | [SV-86585r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71961) | Systems with a Basic Input/Output System (BIOS) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
-| 2 | [SV-86587r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71963) | Systems using Unified Extensible Firmware Interface (UEFI) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
-| 3 | [SV-86651r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72027) | All files and directories contained in local interactive user home directories must have mode 0750 or less permissive. | Depending on when the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is run, some nonessential ephemeral files may exist in the `sensor` home directory which will cause this check to fail. For practical purposes Hedgehog Linux's configuration does, however, comply. This file list can be checked manually by running `find /home/sensor -type f -perm /027 -exec ls -l '{}' ';'`.|
-| 4 | [SV-86693r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72069) | The file integrity tool must be configured to verify Access Control Lists (ACLs). | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` specified for use in the RHEL STIG. Additionally, as this is not a multi-user system, the ACL check would be irrelevant. |
-| 5 | [SV-86597r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71973) | A file integrity tool must verify the baseline operating system configuration at least weekly. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` specified for use in the RHEL STIG. |
-| 6 | [SV-86697r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72073) | The file integrity tool must use FIPS 140-2 approved cryptographic hashes for validating file contents and directories. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` specified for use in the RHEL STIG. Auditbeat uses SHA1 which is FIPS 140-2 approved. |
-| 7 | [SV-86623r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71999) | Vendor packaged system security patches and updates must be installed and up to date. | When the Hedgehog Linux sensor appliance software is built, all of the latest applicable security patches and updates are included in it. How future updates are to be handled is still in design. |
-| 8 | [SV-86707r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72083) | The operating system must off-load audit records onto a different system or media from the system being audited. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
-| 9 | [SV-86709r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72085) | The operating system must encrypt the transfer of audit records off-loaded onto a different system or media from the system being audited. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads (via an encrypted channel) audit records to an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
-| 10 | [SV-86833r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72209) | The system must send rsyslog output to a log aggregation server. | Syslogs are forwarded to an OpenSearch database running on another system via [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-syslog.html), though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
-| 11 | [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). Local logs are generated when this network connection is broken, and it resumes automatically. |
-| 12 | [SV-86691r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72067) | The operating system must implement NIST FIPS-validated cryptography for the following: to provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Hedgehog Linux does use FIPS-compatible libraries for cryptographic functions. However, the kernel parameter being checked by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is incompatible with some of the systems initialization scripts.|
+| ID  | Title | Note |
+| --- | --- | --- |
+| [SV-86585r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71961) | Systems with a Basic Input/Output System (BIOS) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
+| [SV-86587r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71963) | Systems using Unified Extensible Firmware Interface (UEFI) must require authentication upon booting into single-user and maintenance modes. | Although the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) does not detect it, booting into recovery mode *does* in fact require the root password. |
+| [SV-86651r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72027) | All files and directories contained in local interactive user home directories must have mode 0750 or less permissive. | Depending on when the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is run, some nonessential ephemeral files may exist in the `sensor` home directory which will cause this check to fail. For practical purposes Hedgehog Linux's configuration does, however, comply. This file list can be checked manually by running `find /home/sensor -type f -perm /027 -exec ls -l '{}' ';'`.|
+| [SV-86623r3](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-71999) | Vendor packaged system security patches and updates must be installed and up to date. | When the Hedgehog Linux sensor appliance software is built, all of the latest applicable security patches and updates are included in it. How future updates are to be handled is still in design. |
+| [SV-86833r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72209) | The system must send rsyslog output to a log aggregation server. | Syslogs are forwarded to an OpenSearch database running on another system via [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-syslog.html), though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). |
+| [SV-86691r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72067) | The operating system must implement NIST FIPS-validated cryptography for the following: to provision digital signatures, to generate cryptographic hashes, and to protect data requiring data-at-rest protections in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Hedgehog Linux does use FIPS-compatible libraries for cryptographic functions. However, the kernel parameter being checked by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian) is incompatible with some of the systems initialization scripts.|
+| [SV-87815r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-73163) | The audit system must take appropriate action when there is an error sending audit records to a remote system. | Hedgehog Linux uses uses [Fluent Bit](https://fluentbit.io/) to monitor audit logs and [Beats](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to securely forward them for storage in an OpenSearch database on another system, though this is not detected by the [compliance check script](https://github.com/hardenedlinux/STIG-4-Debian). Local logs are generated when this network connection is broken, and it resumes automatically. |
 
 In addition, DISA STIG rules SV-86663r1, SV-86695r2, SV-86759r3, SV-86761r3, SV-86763r3, SV-86765r3, SV-86595r1, and SV-86615r2 relate to the SELinux kernel which is not used in Hedgehog Linux, and are thus skipped.
 
@@ -578,11 +542,28 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - Hedgehog Linux **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
 
-**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. Because Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications about its status are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. [Auditbeat](https://www.elastic.co/products/beats/auditbeat) offloads audit records to an OpenSearch database on another system, though this is not detected by the [CIS benchmark compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening). Local logs are generated when the network connection is broken, and it resumes automatically. Syslog messages are also similarly forwarded.
-
-**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity** - [Auditbeat](https://www.elastic.co/products/beats/auditbeat) is managing file integrity checks instead of the `aide` utility.
+**8.1.1.2 Disable System on Audit Log Full**, **8.1.1.3 Keep All Auditing Information**, **8.1.1.5 Ensure set remote server for audit service**, **8.1.1.6 Ensure enable_krb5 set to yes for remote audit service**, **8.1.1.7 Ensure set action for audit storage volume is fulled**, **8.1.1.9 Set space left for auditd service**, a few other audit-related items under section **8.1**, **8.2.5 Configure rsyslog to Send Logs to a Remote Log Host** - As maximizing availability is a system requirement, audit processing failures will be logged on the device rather than halting the system. Because Hedgehog Linux is intended to be used as an appliance rather than a general network host, notifications about its status are sent in system logs forwarded to the OpenSearch database on the aggregator. `auditd` is set up to syslog when this storage volume is reached. [Fluent Bit](https://fluentbit.io) offloads audit records to an OpenSearch database on another system, though this is not detected by the [CIS benchmark compliance scripts](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening). Local logs are generated when the network connection is broken, and it resumes automatically. Syslog messages are also similarly forwarded.
 
 **8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of Hedgehog Linux's trimming-down process. All non-locale-related system files pass intergrity checks.
+
+## <a name="ComplianceWIP"></a>Hardening compliance issues - work in progress
+
+Hedgehog Linux has recently replaced several [Beats](https://www.elastic.co/beats/) forwarders, including [auditbeat](https://www.elastic.co/beats/auditbeat), with [Fluent Bit](https://fluentbit.io/). While [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs can be configured to be forwarded to an OpenSearch database on an external aggregator, requirements for file integrity checks are in the progress of being implemented with [AIDE](https://aide.github.io/).
+
+Until that work is complete, Hedgehog Linux is not in compliance with the following items:
+
+* **STIG**
+
+| ID  | Title | Note |
+| --- | --- | --- |
+| [SV-86597r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-71973) | A file integrity tool must verify the baseline operating system configuration at least weekly. | |
+| [SV-86697r2](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72073) | The file integrity tool must use FIPS 140-2 approved cryptographic hashes for validating file contents and directories. | |
+| [SV-86707r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-07-08/finding/V-72083) | The operating system must off-load audit records onto a different system or media from the system being audited. | |
+| [SV-86709r1](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/2017-12-14/finding/V-72085) | The operating system must encrypt the transfer of audit records off-loaded onto a different system or media from the system being audited. | |
+
+* **CIS**
+
+**8.4.1 Install aide package** and **8.4.2 Implement Periodic Execution of File Integrity**
 
 # <a name="UpgradePlan"></a>Appendix E - Upgrades
 
@@ -661,30 +642,13 @@ $ apt-get install $(cat *.list.chroot)
 ```
 root@hedgehog:/tmp# scp -r user@otherbox:/media/squash/opt/hedgehog_install_artifacts/ ./
 user@otherbox's password: 
-auditbeat-tweaked-7.6.2-amd64.deb                                               100%   13MB  49.3MB/s   00:00    
 filebeat-tweaked-7.6.2-amd64.deb                                                100%   13MB  65.9MB/s   00:00    
-metricbeat-tweaked-7.6.2-amd64.deb                                              100%   18MB  72.0MB/s   00:00    
 arkime_2.2.3-1_amd64.deb                                                        100%  113MB  32.2MB/s   00:03    
 netsniff-ng_0.6.6-1_amd64.deb                                                   100%  330KB  52.1MB/s   00:00    
-packetbeat-tweaked-7.6.2-amd64.deb                                              100%   14MB  59.2MB/s   00:00    
-protologbeat                                                                    100%   56MB  38.1MB/s   00:01    
-zeek_3.0.20-1_amd64.deb                                                          100%   26MB  63.1MB/s   00:00
+zeek_3.0.20-1_amd64.deb                                                         100%   26MB  63.1MB/s   00:00
 ```
 
-12. Replace the old `/usr/local/bin/protologbeat` with the new one:
-```
-root@hedgehog:/tmp# cp -biv hedgehog_install_artifacts/protologbeat /usr/local/bin/protologbeat 
-cp: overwrite '/usr/local/bin/protologbeat'? y
-'hedgehog_install_artifacts/protologbeat' -> '/usr/local/bin/protologbeat' (backup: '/usr/local/bin/protologbeat~')
-
-root@hedgehog:/tmp# ls -l /usr/local/bin/protologbeat
--rwxr-xr-x 1 root root 58895456 May  8 15:45 /usr/local/bin/protologbeat
-
-root@hedgehog:/tmp# /usr/local/bin/protologbeat version
-protologbeat version 7.6.0 (amd64), libbeat 7.6.0 [unknown built unknown]
-```
-
-13. Blow away the old `zeek` package, we're going to start clean with that one particularly. The others should be fine to upgrade in place.
+12. Blow away the old `zeek` package, we're going to start clean with that one particularly. The others should be fine to upgrade in place.
 ```
 root@hedgehog:/opt# apt-get --purge remove zeek
 Reading package lists... Done
@@ -704,52 +668,35 @@ dpkg: warning: while removing zeek, directory '/opt/zeek/bin' not empty so not r
 root@hedgehog:/opt# rm -rf /opt/zeek*
 ```
 
-14. Install the new .deb files. You're going to have some warnings, but that's okay.
+13. Install the new .deb files. You're going to have some warnings, but that's okay.
 ```
 root@hedgehog:/tmp# dpkg -i hedgehog_install_artifacts/*.deb
 (Reading database ... 118149 files and directories currently installed.)
-Preparing to unpack .../auditbeat-tweaked-7.6.2-amd64.deb ...
-Unpacking auditbeat (7.6.2) over (6.8.4) ...
-dpkg: warning: unable to delete old directory '/usr/share/auditbeat/kibana/6/dashboard': Directory not empty
-dpkg: warning: unable to delete old directory '/usr/share/auditbeat/kibana/6': Directory not empty
 Preparing to unpack .../filebeat-tweaked-7.6.2-amd64.deb ...
 Unpacking filebeat (7.6.2) over (6.8.4) ...
 dpkg: warning: unable to delete old directory '/usr/share/filebeat/kibana/6/dashboard': Directory not empty
 dpkg: warning: unable to delete old directory '/usr/share/filebeat/kibana/6': Directory not empty
-Preparing to unpack .../metricbeat-tweaked-7.6.2-amd64.deb ...
-Unpacking metricbeat (7.6.2) over (6.8.4) ...
 Preparing to unpack .../arkime_2.2.3-1_amd64.deb ...
 Unpacking arkime (2.2.3-1) over (2.0.1-1) ...
 Preparing to unpack .../netsniff-ng_0.6.6-1_amd64.deb ...
 Unpacking netsniff-ng (0.6.6-1) over (0.6.6-1) ...
-Preparing to unpack .../packetbeat-tweaked-7.6.2-amd64.deb ...
-Unpacking packetbeat (7.6.2) over (6.8.4) ...
 Preparing to unpack .../zeek_3.0.20-1_amd64.deb ...
 Unpacking zeek (3.0.20-1) over (3.0.0-1) ...
-Setting up auditbeat (7.6.2) ...
-Installing new version of [...]
-[...]
 Setting up filebeat (7.6.2) ...
-Installing new version of [...]
-[...]
-Setting up metricbeat (7.6.2) ...
 Installing new version of [...]
 [...]
 Setting up arkime (2.2.3-1) ...
 READ /opt/arkime/README.txt and RUN /opt/arkime/bin/Configure
 Setting up netsniff-ng (0.6.6-1) ...
-Setting up packetbeat (7.6.2) ...
-Installing new version of [...]
-[...]
 Setting up zeek (3.0.20-1) ...
 Processing triggers for systemd (232-25+deb9u12) ...
 Processing triggers for man-db (2.7.6.1-2) ...
 ```
 
-15. Fix anything that might need fixing as far as the deb package requirements go
+14. Fix anything that might need fixing as far as the deb package requirements go
     - `apt-get -f install`
 
-16. We just installed a Zeek .deb, but the third-part plugins packages and local config weren't part of that package. So we're going to `rsync` those from the other box where we have the ISO and `filesystem.squashfs` mounted as well:
+15. We just installed a Zeek .deb, but the third-part plugins packages and local config weren't part of that package. So we're going to `rsync` those from the other box where we have the ISO and `filesystem.squashfs` mounted as well:
 ```
 root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/opt/zeek/ /opt/zeek 
 user@otherbox's password: 
@@ -773,7 +720,7 @@ lrwxrwxrwx  1 root root    27 May  6 21:52 zeek-plugin-s7comm -> packages/zeek-p
 lrwxrwxrwx  1 root root    24 May  6 21:52 zeek-plugin-tds -> packages/zeek-plugin-tds
 ```
 
-17. The `zeekctl` component of zeek doesn't like being run by an unprivileged user unless the whole directory is owned by that user. As Hedgehog Linux runs everything it can as an unprivileged user, we're going to reset zeek to a "clean" state after each reboot. Zeek's config files will get regenerated when Zeek itself is started. So, now make a complete backup of `/opt/zeek` as it's going to have its ownership changed during runtime:
+16. The `zeekctl` component of zeek doesn't like being run by an unprivileged user unless the whole directory is owned by that user. As Hedgehog Linux runs everything it can as an unprivileged user, we're going to reset zeek to a "clean" state after each reboot. Zeek's config files will get regenerated when Zeek itself is started. So, now make a complete backup of `/opt/zeek` as it's going to have its ownership changed during runtime:
 ```
 root@hedgehog:/tmp# rsync -a /opt/zeek/ /opt/zeek.orig
 
@@ -786,7 +733,7 @@ drwxr-xr-x  8 root   root    4096 May  8 15:48 zeek
 drwxr-xr-x  8 root   root    4096 May  8 15:48 zeek.orig
 ```
 
-18. Grab other new scripts and stuff from our mount of the ISO using `rsync`:
+17. Grab other new scripts and stuff from our mount of the ISO using `rsync`:
 ```
 root@hedgehog:/tmp# rsync -a user@otherbox:/media/squash/usr/local/bin/ /usr/local/bin
 user@otherbox's password: 
@@ -809,10 +756,7 @@ root@hedgehog:/tmp# ls -l /opt/ | grep '\-rules'
 drwxr-xr-x  8 root   root    4096 May  8 15:48 capa-rules
 drwxr-xr-x  8 root   root  24576  May  8 15:48 yara-rules
 
-root@hedgehog:/tmp# for BEAT in auditbeat filebeat metricbeat packetbeat protologbeat; do rsync -a user@otherbox:/media/squash/usr/share/$BEAT/kibana/ /usr/share/$BEAT/kibana; done
-user@otherbox's password: 
-user@otherbox's password: 
-user@otherbox's password: 
+root@hedgehog:/tmp# for BEAT in filebeat; do rsync -a user@otherbox:/media/squash/usr/share/$BEAT/kibana/ /usr/share/$BEAT/kibana; done
 user@otherbox's password: 
 user@otherbox's password: 
 
@@ -825,7 +769,7 @@ user@otherbox's password:
 root@hedgehog:/tmp# chmod 400 /etc/sudoers.d/*
 ```
 
-19. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
+18. Set capabilities and symlinks for network capture programs to be used by the unprivileged user:
 
 commands:
 
@@ -840,10 +784,6 @@ chown root:netdev /opt/zeek/bin/capstats && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/capstats
 chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
-chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
-  setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
-chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
 chown root:netdev /opt/arkime/bin/capture && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 
@@ -869,10 +809,6 @@ root@hedgehog:/tmp# chown root:netdev /opt/zeek/bin/capstats && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/capstats
 root@hedgehog:/tmp# chown root:netdev /usr/bin/tcpdump && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
-root@hedgehog:/tmp# chown root:netdev /usr/share/auditbeat/bin/auditbeat && \
->   setcap 'CAP_AUDIT_READ+eip' /usr/share/auditbeat/bin/auditbeat
-root@hedgehog:/tmp# chown root:netdev /usr/share/packetbeat/bin/packetbeat && \
->   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/share/packetbeat/bin/packetbeat
 root@hedgehog:/tmp# chown root:netdev /opt/arkime/bin/capture && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
 root@hedgehog:/tmp# ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
@@ -884,10 +820,10 @@ root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/node /usr/local/bin
 root@hedgehog:/tmp# ln -s -f /opt/arkime/bin/npx /usr/local/bin
 ```
 
-20. Back up unprivileged user sensor-specific config and scripts:
+19. Back up unprivileged user sensor-specific config and scripts:
     - `mv /opt/sensor/ /opt/sensor_upgrade_backup_$(date +%Y-%m-%d)`
 
-21. Grab unprivileged user sensor-specific config and scripts from our mount of the ISO using `rsync` and change its ownership to the unprivileged user:
+20. Grab unprivileged user sensor-specific config and scripts from our mount of the ISO using `rsync` and change its ownership to the unprivileged user:
 ```
 root@hedgehog:/tmp# rsync -av user@otherbox:/media/squash/opt/sensor /opt/
 user@otherbox's password: 
@@ -906,7 +842,7 @@ drwxr-xr-x  4 sensor sensor  4096 May  6 22:00 sensor
 drwxr-x---  4 sensor sensor  4096 May  8 14:33 sensor_upgrade_backup_2020-05-08
 ```
 
-22. Leave the root shell and `cd` to `/opt`
+21. Leave the root shell and `cd` to `/opt`
 ```
 root@hedgehog:~# exit
 logout
@@ -917,7 +853,7 @@ sensor
 sensor@hedgehog:~$ cd /opt
 ```
 
-23. Compare the old and new `control_vars.conf` files
+22. Compare the old and new `control_vars.conf` files
 ```
 sensor@hedgehog:opt$ diff sensor_upgrade_backup_2020-05-08/sensor_ctl/control_vars.conf sensor/sensor_ctl/control_vars.conf 
 1,2c1,2
@@ -939,16 +875,16 @@ cp: overwrite 'sensor/sensor_ctl/control_vars.conf'? y
 
 If there are major differences or new variables, continue on to the next step, in a minute you'll need to run `capture-config` to configure from scratch anyway.
 
-24. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
+23. Restore certificates/keystores for forwarders from the backup `sensor_ctl` path to the new one
 ```
-sensor@hedgehog:opt$ for BEAT in auditbeat filebeat filebeat-syslog heatbeat metricbeat; do cp /opt/sensor_upgrade_backup_2020-05-08/sensor_ctl/$BEAT/data/* /opt/sensor/sensor_ctl/$BEAT/data/; done
+sensor@hedgehog:opt$ for BEAT in filebeat miscbeat; do cp /opt/sensor_upgrade_backup_2020-05-08/sensor_ctl/$BEAT/data/* /opt/sensor/sensor_ctl/$BEAT/data/; done
 
-sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/filebeat/
+sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/logstash-client-certificates/
 ```
 
-25. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
+24. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](#ConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
 
-26. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
+25. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
 
 ## Post-upgrade
 

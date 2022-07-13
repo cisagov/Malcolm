@@ -106,6 +106,8 @@ jobs:
             docker rmi "$IMAGE"
           done
           pushd ./malcolm-iso
+          mkdir -p ./shared
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
           sudo /usr/bin/env bash ./build.sh -d "$DEST_IMAGES_TGZ"
           rm -rf ./shared/
           sudo chmod 644 ./malcolm-*.*

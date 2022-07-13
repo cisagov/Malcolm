@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="1.3.2"
+ARG OPENSEARCH_VERSION="2.1.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="1.3.2"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.1.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -59,7 +59,7 @@ RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodule
 
 RUN eval "$(nodenv init -)" && \
     mkdir -p /usr/share/opensearch-dashboards/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/mmguero-dev/osd_sankey_vis.git /usr/share/opensearch-dashboards/plugins/sankey_vis && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch opensearch-v2-dashboards-compatibility https://github.com/mmguero-dev/osd_sankey_vis.git /usr/share/opensearch-dashboards/plugins/sankey_vis && \
     cd /usr/share/opensearch-dashboards/plugins/sankey_vis && \
     yarn osd bootstrap && \
     yarn install && \
@@ -68,7 +68,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:1.3.2
+FROM opensearchproject/opensearch-dashboards:2.1.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -128,6 +128,8 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
 # internal opensearch code validating them AND the web browser retrieving them. So we're going scorched earth instead.
 ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo.svg
+ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo_dark_mode.svg
+ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo_default_mode.svg
 ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_dark_mode.svg
 ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_default_mode.svg
 ADD docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico

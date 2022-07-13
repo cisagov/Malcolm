@@ -39,6 +39,7 @@ fasttrack-archive-keyring
 fatresize
 file
 findutils
+fluent-bit
 fonts-dejavu
 fuse-overlayfs
 fuse3
@@ -76,10 +77,14 @@ less
 libffi-dev
 libgtk2.0-bin
 libmagic1
+libmhash2
 libnl-3-200
 libnl-genl-3-200
 libnl-route-3-200
 libpam-pwquality
+libpcre2-16-0
+libpcre2-32-0
+libpcre2-8-0
 libssl-dev
 libssl1.1
 libykpers-1-1
