@@ -244,7 +244,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into OpenSearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
 * [OpenSearch](https://opensearch.org/) - a search and analytics engine for indexing and querying network traffic session metadata 
-* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
+* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands in the same way it natively understands PCAP data
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
 * [Suricata](https://suricata.io/) - an IDS and threat detection engine
@@ -280,7 +280,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
     * Corelight's [VMware Workspace ONE Access and Identity Manager RCE vulnerability (CVE-2022-22954)](https://github.com/corelight/cve-2022-22954) plugin
     * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
-* Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
+    * Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
