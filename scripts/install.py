@@ -754,10 +754,26 @@ class Installer(object):
                                 r'(ZEEK_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveZeek)}", line
                             )
 
+                        elif 'ZEEK_ROTATED_PCAP' in line:
+                            # rotated captured PCAP analysis with Zeek (not live capture)
+                            line = re.sub(
+                                r'(ZEEK_ROTATED_PCAP\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoZeek and (not liveZeek))}",
+                                line,
+                            )
+
                         elif 'SURICATA_LIVE_CAPTURE' in line:
                             # live traffic analysis with Suricata
                             line = re.sub(
                                 r'(SURICATA_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveSuricata)}", line
+                            )
+
+                        elif 'SURICATA_ROTATED_PCAP' in line:
+                            # rotated captured PCAP analysis with Suricata (not live capture)
+                            line = re.sub(
+                                r'(SURICATA_ROTATED_PCAP\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoSuricata and (not liveSuricata))}",
+                                line,
                             )
 
                         elif 'PCAP_IFACE' in line:

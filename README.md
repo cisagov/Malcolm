@@ -560,7 +560,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
 * `PCAP_FILTER` – specifies a tcpdump-style filter expression for local packet capture; leave blank to capture all traffic
-* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
+* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF`, `PCAP_ENABLE_TCPDUMP`, `ZEEK_LIVE_CAPTURE` or `SURICATA_LIVE_CAPTURE` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
 * `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it is closed for processing and a new PCAP file created 
 * `PCAP_ROTATE_MINUTES` – used to specify a time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
 * `pipeline.workers`, `pipeline.batch.size` and `pipeline.batch.delay` - these settings are used to tune the performance and resource utilization of the the `logstash` container; see [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html)
@@ -568,8 +568,10 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
 * `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
 * `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
-* `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`)
+* `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`).
 * `SURICATA_UPDATE_RULES` – if set to `true`, Suricata signatures will periodically be updated (default `false`)
+* `SURICATA_LIVE_CAPTURE` - if set to `true`, Suricata will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
+* `SURICATA_ROTATED_PCAP` - if set to `true`, Suricata can analyze captured PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `SURICATA_AUTO_ANALYZE_PCAP_FILES`); if `SURICATA_LIVE_CAPTURE` is `true`, this should be false, otherwise Suricata will see duplicate traffic
 * `SURICATA_…` - the [`suricata` container entrypoint script](shared/bin/suricata_config_populate.py) can use **many** more environment variables to tweak [suricata.yaml](https://github.com/OISF/suricata/blob/master/suricata.yaml.in); in that script, `DEFAULT_VARS` defines those variables (albeit without the `SURICATA_` prefix you must add to each for use)
 * `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the size threshold (in megabytes) for assigning severity to large connections or file transfers (default `1000`)
 * `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
@@ -581,6 +583,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](#ZeekIntelSTIX) or [MISP](#ZeekIntelMISP) feed, only process threat indicators that have been created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2021`) or relative interval (`30 days ago`)
 * `ZEEK_INTEL_ITEM_EXPIRATION` - specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](#ZeekIntel) (default `-1min`, which disables item expiration)
 * `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](#ZeekIntel) files (defaults to empty, which disables automatic refresh)
+* `ZEEK_LIVE_CAPTURE` - if set to `true`, Zeek will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
+* `ZEEK_ROTATED_PCAP` - if set to `true`, Zeek can analyze captured PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `ZEEK_AUTO_ANALYZE_PCAP_FILES`); if `ZEEK_LIVE_CAPTURE` is `true`, this should be false, otherwise Zeek will see duplicate traffic
 
 #### <a name="HostSystemConfigLinux"></a>Linux host system configuration
 
@@ -3780,15 +3784,19 @@ Lookup extracted file hashes with VirusTotal? (y/N): n
 
 Download updated file scanner signatures periodically? (Y/n): y
 
-Should Malcolm capture network traffic to PCAP files? (y/N): y  
+Should Malcolm capture live network traffic to PCAP files for analysis with Arkime? (y/N): y
 
-Specify capture interface(s) (comma-separated): eth0
-
-Capture packets using netsniff-ng? (Y/n): y
+Capture packets using netsniff-ng? (Y/n): y   
 
 Capture packets using tcpdump? (y/N): n
 
-PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
+Should Malcolm analyze live network traffic with Suricata? (y/N): y
+
+Should Malcolm analyze live network traffic with Zeek? (y/N): y
+
+Specify capture interface(s) (comma-separated): eth0
+
+Capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
@@ -3868,18 +3876,34 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
-…
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-…
-Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_suricata_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
+
+NAME                          COMMAND                  SERVICE             STATUS               PORTS
+malcolm-api-1                 "/usr/local/bin/dock…"   api                 running (starting)   …
+malcolm-arkime-1              "/usr/local/bin/dock…"   arkime              running (starting)   …
+malcolm-dashboards-1          "/usr/local/bin/dock…"   dashboards          running (starting)   …
+malcolm-dashboards-helper-1   "/usr/local/bin/dock…"   dashboards-helper   running (starting)   …
+malcolm-file-monitor-1        "/usr/local/bin/dock…"   file-monitor        running (starting)   …
+malcolm-filebeat-1            "/usr/local/bin/dock…"   filebeat            running (starting)   …
+malcolm-freq-1                "/usr/local/bin/dock…"   freq                running (starting)   …
+malcolm-htadmin-1             "/usr/local/bin/dock…"   htadmin             running (starting)   …
+malcolm-logstash-1            "/usr/local/bin/dock…"   logstash            running (starting)   …
+malcolm-name-map-ui-1         "/usr/local/bin/dock…"   name-map-ui         running (starting)   …
+malcolm-nginx-proxy-1         "/usr/local/bin/dock…"   nginx-proxy         running (starting)   …
+malcolm-opensearch-1          "/usr/local/bin/dock…"   opensearch          running (starting)   …
+malcolm-pcap-capture-1        "/usr/local/bin/dock…"   pcap-capture        running              …
+malcolm-pcap-monitor-1        "/usr/local/bin/dock…"   pcap-monitor        running (starting)   …
+malcolm-suricata-1            "/usr/local/bin/dock…"   suricata            running (starting)   …
+malcolm-suricata-live-1       "/usr/local/bin/dock…"   suricata-live       running              …
+malcolm-upload-1              "/usr/local/bin/dock…"   upload              running (starting)   …
+malcolm-zeek-1                "/usr/local/bin/dock…"   zeek                running (starting)   …
+malcolm-zeek-live-1           "/usr/local/bin/dock…"   zeek-live           running              …
 …
 ```
 
 It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
 ```
 …
-logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>5, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-suricata", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
-logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
+malcolm-logstash-1  | [2022-07-27T20:27:52,056][INFO ][logstash.agent           ] Pipelines running {:count=>6, :running_pipelines=>[:"malcolm-input", :"malcolm-output", :"malcolm-beats", :"malcolm-suricata", :"malcolm-enrichment", :"malcolm-zeek"], :non_running_pipelines=>[]}
 …
 ```
 
