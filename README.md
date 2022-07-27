@@ -52,8 +52,8 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     - [Tagging](#Tagging)
     - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
 * [Live analysis](#LiveAnalysis)
-    * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
+    * [Monitoring local network interfaces](#LocalPCAP)
     * [Manually forwarding logs from an external source](#ExternalForward)
 * [Arkime](#Arkime)
     * [Zeek log integration](#ArkimeZeek)
@@ -907,24 +907,28 @@ The **Analyze with Zeek** and **Analyze with Suricata** checkboxes may be used w
 
 ## <a name="LiveAnalysis"></a>Live analysis
 
-### <a name="LocalPCAP"></a>Capturing traffic on local network interfaces
-
-Malcolm's `pcap-capture` container can capture traffic on one or more local network interfaces and periodically rotate these files for processing. The `pcap-capture` Docker container is started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) in order for it to be able to open network interfaces in promiscuous mode for capture.
-
-The environment variables prefixed with `PCAP_` in the [`docker-compose.yml`](#DockerComposeYml) file determine local packet capture behavior. Local capture can also be configured by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Should Malcolm capture network traffic to PCAP files?`."
-
-Note that currently Microsoft Windows and Apple macOS platforms run Docker inside of a virtualized environment. This would require additional configuration of virtual interfaces and port forwarding in Docker, the process for which is outside of the scope of this document.
-
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/main/sensor-iso/) is a Debian-based operating system built to
+A dedicated network sensor appliance is the recommended method for capturing and analyzing live network traffic when performance and throughput is of utmost importance. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/main/sensor-iso/) is a custom Debian-based operating system built to:
 
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/Malcolm)
+* generate and forward Zeek and Suricata logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/Malcolm)
 
 Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/main/sensor-iso/README.md) for more information.
+
+### <a name="LocalPCAP"></a>Monitoring local network interfaces
+
+Malcolm's `pcap-capture`, `suricata-live` and `zeek-live` containers can monitor one or more local network interfaces, specified by the `PCAP_IFACE` environment variable in [`docker-compose.yml`](#DockerComposeYml). These containers are started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) to allow opening network interfaces in promiscuous mode for capture.
+
+The instances of Zeek and Suricata (in the `suricata-live` and `zeek-live` containers when the `SURICATA_LIVE_CAPTURE` and `ZEEK_LIVE_CAPTURE` environment variables in [`docker-compose.yml`](#DockerComposeYml) are set to `true`, respectively) analyze traffic on-the-fly and generate log files containing network session metadata. These log files are in turn scanned by Filebeat and forwarded to Logstash for enrichment and indexing into the OpenSearch document store.
+
+In contrast, the `pcap-capture` container buffers traffic to PCAP files and periodically rotates these files for processing (by Arkime's `capture` utlity in the `arkime` container) according to the thresholds defined by the `PCAP_ROTATE_MEGABYTES` and `PCAP_ROTATE_MINUTES` environment variables in [`docker-compose.yml`](#DockerComposeYml). If for some reason you also want Zeek and Suricata to process these intermediate PCAP files rather than monitoring the network interfaces directly, you can set `SURICATA_ROTATED_PCAP`/`ZEEK_ROTATED_PCAP` to `true` and `SURICATA_LIVE_CAPTURE`/`ZEEK_LIVE_CAPTURE` to false.
+
+These various options for monitoring traffic on local network interfaces can also be configured by running [`./scripts/install.py --configure`](#ConfigAndTuning).
+
+Note that currently Microsoft Windows and Apple macOS platforms run Docker inside of a virtualized environment. Live traffic capture and analysis on those platforms would require additional configuration of virtual interfaces and port forwarding in Docker which is outside of the scope of this document.
 
 ### <a name="ExternalForward"></a>Manually forwarding logs from an external source
 
