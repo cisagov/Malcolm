@@ -147,5 +147,5 @@ def tags_from_filename(filespec):
     # split tags on these characters
     tagSplitterRe = "[,-/_.]+"
     # tags to ignore explicitly
-    regex = re.compile(r'^(\d+|p?cap|dmp|log|bro|zeek|tcpdump|netsniff)$', re.IGNORECASE)
+    regex = re.compile(r'^(\d+|p?cap|dmp|log|bro|zeek|suricata|m?tcpdump|m?netsniff)$', re.IGNORECASE)
     return list(filter(lambda i: not regex.search(i), map(str.strip, filter(None, re.split(tagSplitterRe, filespec)))))

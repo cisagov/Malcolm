@@ -473,7 +473,12 @@ def stop(wipe=False):
 
     if wipe:
         # delete OpenSearch database
-        shutil.rmtree(os.path.join(MalcolmPath, 'opensearch/nodes'), ignore_errors=True)
+        shutil.rmtree(os.path.join(MalcolmPath, os.path.join('opensearch', 'nodes')), ignore_errors=True)
+
+        # delete Zeek live-related spool files
+        shutil.rmtree(
+            os.path.join(MalcolmPath, os.path.join('zeek-logs', os.path.join('live', 'spool'))), ignore_errors=True
+        )
 
         # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
         for dataDir in ['opensearch-backup', 'zeek-logs', 'suricata-logs', 'arkime-logs', 'pcap', 'arkime-raw']:
@@ -491,6 +496,8 @@ def stop(wipe=False):
             os.path.join('opensearch-backup', 'logs'),
             os.path.join('zeek-logs', 'processed'),
             os.path.join('zeek-logs', 'current'),
+            os.path.join('zeek-logs', 'live'),
+            os.path.join('suricata-logs'),
         ]:
             RemoveEmptyFolders(dataDir, removeRoot=False)
 
@@ -544,10 +551,11 @@ def start():
         os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
-        os.path.join(MalcolmPath, os.path.join('suricata-logs')),
+        os.path.join(MalcolmPath, os.path.join('suricata-logs', 'live')),
         os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'MISP'))),
         os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'STIX'))),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'current')),
+        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'live')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'extract_files')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'processed')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'upload')),

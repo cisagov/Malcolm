@@ -3,11 +3,11 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
-PROCESS_DIR=${FILEBEAT_ZEEK_DIR:-/data/zeek/}
+PROCESS_DIR=${FILEBEAT_ZEEK_DIR:-/zeek/}
 UPLOAD_DIR="${PROCESS_DIR}/upload"
 mkdir -p "$UPLOAD_DIR"
 
-# as new zeek log archives are closed for writing in /data/zeek/upload, move them to /data/zeek for processing
+# as new zeek log archives are closed for writing in /zeek/upload, move them to /zeek for processing
 inotifywait -m -e close_write --format '%w%f' "${UPLOAD_DIR}" | while read NEWFILE
 do
   FILEMIME=$(file -b --mime-type "$NEWFILE")

@@ -507,8 +507,8 @@ class Installer(object):
                 'Determine oldest indices by name (instead of creation time)?', default=True
             )
 
-        autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
-        autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
+        autoSuricata = InstallerYesOrNo('Automatically analyze all uploaded PCAP files with Suricata?', default=True)
+        autoZeek = InstallerYesOrNo('Automatically analyze all uploaded PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
         )
@@ -583,16 +583,26 @@ class Installer(object):
         # input packet capture parameters
         pcapNetSniff = False
         pcapTcpDump = False
+        liveZeek = False
+        liveSuricata = False
         pcapIface = 'lo'
         pcapFilter = ''
-        if InstallerYesOrNo('Should Malcolm capture network traffic to PCAP files?', default=False):
+
+        if InstallerYesOrNo(
+            'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
+        ):
+            pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
+            pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
+
+        liveSuricata = InstallerYesOrNo('Should Malcolm analyze live network traffic with Suricata?', default=False)
+        liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
+
+        if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
             while len(pcapIface) <= 0:
                 pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
-            pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
-            pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
             pcapFilter = InstallerAskForString(
-                'PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
+                'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
             )
 
         # modify specified values in-place in docker-compose files
@@ -725,6 +735,18 @@ class Installer(object):
                                 r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
                             )
 
+                        elif 'ZEEK_LIVE_CAPTURE' in line:
+                            # live traffic analysis with Zeek
+                            line = re.sub(
+                                r'(ZEEK_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveZeek)}", line
+                            )
+
+                        elif 'SURICATA_LIVE_CAPTURE' in line:
+                            # live traffic analysis with Suricata
+                            line = re.sub(
+                                r'(SURICATA_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveSuricata)}", line
+                            )
+
                         elif 'PCAP_IFACE' in line:
                             # capture interface(s)
                             line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
@@ -734,7 +756,7 @@ class Installer(object):
                             line = re.sub(r'(PCAP_FILTER\s*:)(.*)', fr"\g<1> '{pcapFilter}'", line)
 
                         elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
-                            # automatic pcap analysis with Zeek
+                            # automatic uploaded pcap analysis with Zeek
                             line = re.sub(
                                 r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(autoZeek)}",
@@ -742,7 +764,7 @@ class Installer(object):
                             )
 
                         elif 'SURICATA_AUTO_ANALYZE_PCAP_FILES' in line:
-                            # automatic pcap analysis with suricata
+                            # automatic uploaded pcap analysis with suricata
                             line = re.sub(
                                 r'(SURICATA_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(autoSuricata)}",

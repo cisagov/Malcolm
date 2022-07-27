@@ -101,7 +101,13 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "suricata"
 ENV PGROUP "suricata"
-ENV PUSER_PRIV_DROP true
+# not dropping privileges globally: supervisord will take care of it
+# for all processes, but first we need root to sure capabilities for
+# traffic capturing tools are in-place before they are started.
+# despite doing setcap here in the Dockerfile, the chown in
+# docker-uid-gid-setup.sh will cause them to be lost, so we need
+# a final check in docker_entrypoint.sh before startup
+ENV PUSER_PRIV_DROP false
 
 ENV SUPERCRONIC_VERSION "0.2.1"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
@@ -125,12 +131,16 @@ COPY --from=builder /suricatabld.tar.gz /suricatabld.tar.gz
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+        bc \
         curl \
+        ethtool \
         file \
         inotify-tools \
+        iproute2 \
         jq \
         less \
         libcap-ng0 \
+        libcap2-bin \
         libevent-2.1-7 \
         libevent-pthreads-2.1-7 \
         libgeoip1 \
@@ -175,6 +185,9 @@ RUN apt-get -q update && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB}) && \
     tar xf /suricatabld.tar.gz --strip-components=1 -C / && \
+    chown root:${PGROUP} /sbin/ethtool /usr/bin/suricata && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
     apt-get clean && \
@@ -193,19 +206,32 @@ ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG AUTO_TAG=true
+ARG SURICATA_PCAP_PROCESSOR=true
+ARG SURICATA_CRON=true
 ARG SURICATA_AUTO_ANALYZE_PCAP_FILES=false
 ARG SURICATA_CUSTOM_RULES_ONLY=false
 ARG SURICATA_AUTO_ANALYZE_PCAP_THREADS=1
 ARG LOG_CLEANUP_MINUTES=30
+ARG SURICATA_LIVE_CAPTURE=false
+ARG SURICATA_ROTATED_PCAP=false
+# PCAP_IFACE=comma-separated list of capture interfaces
+ARG PCAP_IFACE=lo
+ARG PCAP_FILTER=
 
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
-ENV AUTO_TAG $AUTO_TAG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
+ENV AUTO_TAG $AUTO_TAG
+ENV SURICATA_PCAP_PROCESSOR $SURICATA_PCAP_PROCESSOR
+ENV SURICATA_CRON $SURICATA_CRON
 ENV SURICATA_AUTO_ANALYZE_PCAP_FILES $SURICATA_AUTO_ANALYZE_PCAP_FILES
 ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 ENV SURICATA_CUSTOM_RULES_ONLY $SURICATA_CUSTOM_RULES_ONLY
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
+ENV SURICATA_LIVE_CAPTURE $SURICATA_LIVE_CAPTURE
+ENV SURICATA_ROTATED_PCAP $SURICATA_ROTATED_PCAP
+ENV PCAP_IFACE $PCAP_IFACE
+ENV PCAP_FILTER $PCAP_FILTER
 
 ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$SURICATA_RUN_DIR"
 

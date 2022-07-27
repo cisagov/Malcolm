@@ -107,6 +107,7 @@ if [ -d "$WORKDIR" ]; then
 
   # copy shared scripts
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
+  mv ./config/includes.chroot/usr/local/bin/zeekdeploy.sh /opt/zeek/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   # write out some version stuff specific to this installation version

@@ -356,7 +356,8 @@ DEFAULT_VARS.update(
 for varName, varVal in [
     (key.upper(), value)
     for key, value in os.environ.items()
-    if key.upper().startswith('SURICATA') or key.upper() in ('CAPTURE_INTERFACE', 'CAPTURE_FILTER', 'SUPERVISOR_PATH')
+    if key.upper().startswith('SURICATA')
+    or key.upper() in ('CAPTURE_INTERFACE', 'CAPTURE_FILTER', 'PCAP_IFACE', 'PCAP_FILTER', 'SUPERVISOR_PATH')
 ]:
     tmpYaml = YAML(typ='safe')
     newVal = tmpYaml.load(varVal)
@@ -801,11 +802,16 @@ def main():
         )
 
     # af-packet interface definitions
-    if DEFAULT_VARS['CAPTURE_INTERFACE'] is not None:
+    captureIface = (
+        DEFAULT_VARS['CAPTURE_INTERFACE']
+        if DEFAULT_VARS['CAPTURE_INTERFACE'] is not None
+        else DEFAULT_VARS['PCAP_IFACE']
+    )
+    if captureIface is not None:
         cfg.pop('af-packet', None)
         cfg['af-packet'] = [{'interface': 'default'}]
         clusterId = 99
-        for iface in DEFAULT_VARS['CAPTURE_INTERFACE'].split(','):
+        for iface in captureIface.split(','):
             cfg['af-packet'].insert(
                 0,
                 {
@@ -813,7 +819,9 @@ def main():
                     'cluster-id': clusterId,
                     'block-size': DEFAULT_VARS['AF_PACKET_BLOCK_SIZE'],
                     'block-timeout': DEFAULT_VARS['AF_PACKET_BLOCK_TIMEOUT'],
-                    'bpf-filter': DEFAULT_VARS['CAPTURE_FILTER'],
+                    'bpf-filter': DEFAULT_VARS['CAPTURE_FILTER']
+                    if DEFAULT_VARS['CAPTURE_FILTER'] is not None
+                    else DEFAULT_VARS['PCAP_FILTER'],
                     'buffer-size': DEFAULT_VARS['AF_PACKET_BUFFER_SIZE'],
                     'checksum-checks': DEFAULT_VARS['AF_PACKET_CHECKSUM_CHECKS'],
                     'cluster-type': DEFAULT_VARS['AF_PACKET_CLUSTER_TYPE'],

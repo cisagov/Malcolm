@@ -193,7 +193,7 @@ def zeekFileWorker(zeekWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, zeekBin, autoZeek, autoTag, uploadDir, defaultExtractFileMode = (
+    newFileQueue, pcapBaseDir, zeekBin, autoZeek, forceZeek, autoTag, uploadDir, defaultExtractFileMode = (
         zeekWorkerArgs[0],
         zeekWorkerArgs[1],
         zeekWorkerArgs[2],
@@ -201,6 +201,7 @@ def zeekFileWorker(zeekWorkerArgs):
         zeekWorkerArgs[4],
         zeekWorkerArgs[5],
         zeekWorkerArgs[6],
+        zeekWorkerArgs[7],
     )
 
     if debug:
@@ -220,9 +221,20 @@ def zeekFileWorker(zeekWorkerArgs):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-                    # zeek this PCAP if it's tagged "AUTOZEEK" or if the global autoZeek flag is turned on
-                    if autoZeek or (
-                        (FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                    # Zeek this PCAP if it's tagged "AUTOZEEK" or if the global autoZeek flag is turned on.
+                    # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
+                    # as Zeek now does its own network capture in Malcolm standalone mode.
+                    if (
+                        autoZeek
+                        or ((FILE_INFO_DICT_TAGS in fileInfo) and ZEEK_AUTOZEEK_TAG in fileInfo[FILE_INFO_DICT_TAGS])
+                    ) and (
+                        forceZeek
+                        or (
+                            not any(
+                                os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                                for prefix in ('mnetsniff', 'mtcpdump')
+                            )
+                        )
                     ):
 
                         extractFileMode = defaultExtractFileMode
@@ -337,7 +349,7 @@ def suricataFileWorker(suricataWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, autoSuricata, suricataBin, autoTag, uploadDir, suricataConfig = (
+    newFileQueue, pcapBaseDir, autoSuricata, forceSuricata, suricataBin, autoTag, uploadDir, suricataConfig = (
         suricataWorkerArgs[0],
         suricataWorkerArgs[1],
         suricataWorkerArgs[2],
@@ -345,6 +357,7 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[4],
         suricataWorkerArgs[5],
         suricataWorkerArgs[6],
+        suricataWorkerArgs[7],
     )
 
     if debug:
@@ -360,9 +373,22 @@ def suricataFileWorker(suricataWorkerArgs):
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
 
-                # suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on
-                if autoSuricata or (
-                    (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
+                # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
+                # as Suricata now does its own network capture in Malcolm standalone mode.
+                if (
+                    autoSuricata
+                    or (
+                        (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                    )
+                ) and (
+                    forceSuricata
+                    or (
+                        not any(
+                            os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                            for prefix in ('mnetsniff', 'mtcpdump')
+                        )
+                    )
                 ):
 
                     if pcapBaseDir and os.path.isdir(pcapBaseDir):
@@ -590,6 +616,17 @@ def main():
             required=False,
         )
         parser.add_argument(
+            '--forcezeek',
+            dest='forceZeek',
+            help="Force Zeek analysis even on rotated PCAPs",
+            metavar='true|false',
+            type=str2bool,
+            nargs='?',
+            const=True,
+            default=False,
+            required=False,
+        )
+        parser.add_argument(
             '--extract',
             dest='zeekExtractFileMode',
             help='Zeek file carving mode',
@@ -619,6 +656,17 @@ def main():
             '--autosuricata',
             dest='autoSuricata',
             help="Autoanalyze all PCAP file with Suricata",
+            metavar='true|false',
+            type=str2bool,
+            nargs='?',
+            const=True,
+            default=False,
+            required=False,
+        )
+        parser.add_argument(
+            '--forcesuricata',
+            dest='forceSuricata',
+            help="Force Suricata analysis even on rotated PCAPs",
             metavar='true|false',
             type=str2bool,
             nargs='?',
@@ -711,6 +759,7 @@ def main():
                     args.pcapBaseDir,
                     args.executable,
                     args.autoZeek,
+                    args.forceZeek,
                     args.autoTag,
                     args.zeekUploadDir,
                     args.zeekExtractFileMode,
@@ -726,6 +775,7 @@ def main():
                     newFileQueue,
                     args.pcapBaseDir,
                     args.autoSuricata,
+                    args.forceSuricata,
                     args.executable,
                     args.autoTag,
                     args.suricataUploadDir,

@@ -9,7 +9,7 @@ filebeat.inputs:
     - ${BEAT_STATIC_LOG_PATTERN:/home/sensor/bro_logs/static/*.log}
   symlinks: true
   fields_under_root: true
-  tags: ["_filebeat_zeek"]
+  tags: ["_filebeat_zeek_live"]
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
@@ -27,7 +27,7 @@ filebeat.inputs:
     - ${BEAT_SURICATA_LOG_PATTERN:/home/sensor/bro_logs/suricata/eve*.json}
   symlinks: true
   fields_under_root: true
-  tags: ["_filebeat_suricata"]
+  tags: ["_filebeat_suricata_live"]
   compression_level: 0
   scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${BEAT_CLEAN_INACTIVE:180m}

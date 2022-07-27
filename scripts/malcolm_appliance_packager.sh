@@ -74,11 +74,12 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
-  mkdir $VERBOSE -p "$DESTDIR/suricata-logs/"
+  mkdir $VERBOSE -p "$DESTDIR/suricata-logs/live"
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
   mkdir $VERBOSE -p "$DESTDIR/yara/rules/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/current/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/"
+  mkdir $VERBOSE -p "$DESTDIR/zeek-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/processed/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/upload/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP"
@@ -125,7 +126,7 @@ if mkdir "$DESTDIR"; then
   if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
     echo "This might take a few minutes..."
     DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.gz"
-    IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}') )
+    IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}' | sort -u) )
     docker save "${IMAGES[@]}" | gzip > "$DESTNAMEIMAGES"
     echo "Packaged Malcolm docker images to \"$DESTNAMEIMAGES\""
     echo ""
