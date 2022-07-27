@@ -507,8 +507,8 @@ class Installer(object):
                 'Determine oldest indices by name (instead of creation time)?', default=True
             )
 
-        autoSuricata = InstallerYesOrNo('Automatically analyze all uploaded PCAP files with Suricata?', default=True)
-        autoZeek = InstallerYesOrNo('Automatically analyze all uploaded PCAP files with Zeek?', default=True)
+        autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
+        autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
         )
@@ -741,10 +741,26 @@ class Installer(object):
                                 r'(ZEEK_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveZeek)}", line
                             )
 
+                        elif 'ZEEK_ROTATED_PCAP' in line:
+                            # rotated captured PCAP analysis with Zeek (not live capture)
+                            line = re.sub(
+                                r'(ZEEK_ROTATED_PCAP\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoZeek and (not liveZeek))}",
+                                line,
+                            )
+
                         elif 'SURICATA_LIVE_CAPTURE' in line:
                             # live traffic analysis with Suricata
                             line = re.sub(
                                 r'(SURICATA_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveSuricata)}", line
+                            )
+
+                        elif 'SURICATA_ROTATED_PCAP' in line:
+                            # rotated captured PCAP analysis with Suricata (not live capture)
+                            line = re.sub(
+                                r'(SURICATA_ROTATED_PCAP\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoSuricata and (not liveSuricata))}",
+                                line,
                             )
 
                         elif 'PCAP_IFACE' in line:
