@@ -26,14 +26,22 @@ else
   fi
 fi
 
+if [[ -z "$CAPTURE_INTERFACE" ]] && [[ -n "$PCAP_IFACE" ]]; then
+  CAPTURE_INTERFACE="$PCAP_IFACE"
+fi
+if [[ -z "$CAPTURE_FILTER" ]] && [[ -n "$PCAP_FILTER" ]]; then
+  CAPTURE_FILTER="$PCAP_FILTER"
+fi
+
 # capture interface(s) *must* be specified
 if [[ -z $CAPTURE_INTERFACE ]] ; then
   echo "Zeek capture interface(s) (via \$CAPTURE_INTERFACE) not specified"
   exit 1
 fi
 
-# do we have AF_PACKET support in the kernel? true if > 0
-AF_PACKET_SUPPORT=$(grep -c -x 'CONFIG_PACKET=[ym]' "/boot/config-$(uname -r)")
+# do we have AF_PACKET support in the kernel? if we can't determine, assume "yes"
+BOOT_CONFIG_FILE="/boot/config-$(uname -r)"
+[[ -r "$BOOT_CONFIG_FILE" ]] && AF_PACKET_SUPPORT=$(grep -c -x 'CONFIG_PACKET=[ym]' "$BOOT_CONFIG_FILE") || AF_PACKET_SUPPORT=1
 
 # determine location of zeekctl script and relative installation path
 ZEEK_CTL="$(which zeekctl)"
@@ -55,6 +63,7 @@ fi
 
 # some other defaults
 [[ -z $ZEEK_LB_PROCS ]] && ZEEK_LB_PROCS="1"
+[[ -z $WORKER_LB_PROCS ]] && WORKER_LB_PROCS="$ZEEK_LB_PROCS"
 [[ -z $ZEEK_LB_METHOD ]] && ZEEK_LB_METHOD="custom"
 [[ -z $ZEEK_AF_PACKET_BUFFER_SIZE ]] && ZEEK_AF_PACKET_BUFFER_SIZE="$(echo "64*1024*1024" | bc)"
 
@@ -64,7 +73,7 @@ ZEEK_LOG_PATH="$($REALPATH "$ZEEK_LOG_PATH")"
 ARCHIVE_PATH="$ZEEK_LOG_PATH/logs"
 WORK_PATH="$ZEEK_LOG_PATH/spool"
 TMP_PATH="$ZEEK_INSTALL_PATH/spool/tmp"
-EXTRACT_FILES_PATH="$ZEEK_LOG_PATH/extract_files"
+[[ -z $EXTRACT_FILES_PATH ]] && EXTRACT_FILES_PATH="$ZEEK_LOG_PATH/extract_files"
 mkdir -p "$ARCHIVE_PATH"/static "$WORK_PATH" "$EXTRACT_FILES_PATH" "$TMP_PATH"
 export TMP="$TMP_PATH"
 
@@ -76,7 +85,8 @@ ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRI
 ([[ ! -r "$ZEEK_EXTRACTOR_OVERRIDE_FILE" ]] || [[ -z "$ZEEK_EXTRACTOR_SCRIPT" ]] || [[ ! "$ZEEK_EXTRACTOR_MODE" = "mapped" ]]) && ZEEK_EXTRACTOR_OVERRIDE_FILE=""
 
 # make sure "intel" directory exists, even if empty
-export INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
+[[ -n "$ZEEK_INTEL_PATH" ]] && INTEL_DIR="$ZEEK_INTEL_PATH" || INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
+export INTEL_DIR
 mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP
 touch "$INTEL_DIR"/__load__.zeek
 # autoconfigure load directives for intel files

@@ -1,5 +1,5 @@
 [program:netsniff-$IFACE]
-command=/usr/sbin/netsniff-ng -i "$IFACE" -T "%(ENV_PCAP_NETSNIFF_MAGIC)s" -o "%(ENV_PCAP_PATH)s" -P "netsniff-$IFACE_" -F "%(ENV_PCAP_ROTATE_MEGABYTES)sMiB" --silent "%(ENV_PCAP_FILTER)s"
+command=/usr/sbin/netsniff-ng -i "$IFACE" -T "%(ENV_PCAP_NETSNIFF_MAGIC)s" -o "%(ENV_PCAP_PATH)s" -P "mnetsniff-$IFACE_" -F "%(ENV_PCAP_ROTATE_MEGABYTES)sMiB" --silent "%(ENV_PCAP_FILTER)s"
 user=%(ENV_PUSER)s
 startsecs=5
 startretries=3

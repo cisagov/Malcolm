@@ -3,8 +3,8 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
-# for files (sort -V (natural)) under /data/zeek that:
-#   - are not in processed/ or current/ or upload/ or extract_files/ (-prune)
+# for files (sort -V (natural)) under /zeek that:
+#   - are not in processed/ or current/ or upload/ or extract_files/ or live/ (-prune)
 #   - are archive files
 #   - are not in use (fuser -s)
 # 1. move file to processed/ (preserving original subdirectory heirarchy, if any)
@@ -22,7 +22,7 @@ export ZEEK_LOG_FIELD_BITMAP_SCRIPT="$SCRIPT_DIR/zeek-log-field-bitmap.py"
 
 export ZEEK_LOG_AUTO_TAG=${AUTO_TAG:-"true"}
 
-ZEEK_LOGS_DIR=${FILEBEAT_ZEEK_DIR:-/data/zeek/}
+ZEEK_LOGS_DIR=${FILEBEAT_ZEEK_DIR:-/zeek/}
 
 # remove the lock directory on exit
 function cleanup {
@@ -38,7 +38,7 @@ if mkdir $LOCKDIR; then
 
   # get new zeek logs ready for processing
   cd "$ZEEK_LOGS_DIR"
-  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)" | awk -F'|' '{print $1}' | sort -V | \
+  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)" | awk -F'|' '{print $1}' | sort -V | \
     xargs -n 1 -P $FILEBEAT_PREPARE_PROCESS_COUNT -I '{}' bash -c '
 
     fuser -s "{}" 2>/dev/null

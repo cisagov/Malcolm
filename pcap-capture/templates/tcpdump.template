@@ -1,5 +1,5 @@
 [program:tcpdump-$IFACE]
-command=/usr/bin/tcpdump -i "$IFACE" -s %(ENV_PCAP_SNAPLEN)s -w "tcpdump-$IFACE_%(ENV_PCAP_TCPDUMP_FILENAME_PATTERN)s" -G %(ENV_PCAP_ROTATE_SECONDS)s -C %(ENV_PCAP_ROTATE_MEGABYTES)s -K -n "%(ENV_PCAP_FILTER)s"
+command=/usr/bin/tcpdump -i "$IFACE" -s %(ENV_PCAP_SNAPLEN)s -w "mtcpdump-$IFACE_%(ENV_PCAP_TCPDUMP_FILENAME_PATTERN)s" -G %(ENV_PCAP_ROTATE_SECONDS)s -C %(ENV_PCAP_ROTATE_MEGABYTES)s -K -n "%(ENV_PCAP_FILTER)s"
 user=%(ENV_PUSER)s
 startsecs=5
 startretries=3

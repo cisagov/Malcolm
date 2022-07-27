@@ -17,14 +17,19 @@ import re
 from subprocess import Popen, PIPE
 
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
-broDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/data/zeek/"), '')
+zeekDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
 fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat/data/registry/filebeat/data.json")
-currentDir = broDir + "current/"
-processedDir = broDir + "processed/"
+currentDir = zeekDir + "current/"
+processedDir = zeekDir + "processed/"
+liveDir = zeekDir + "live/logs/"
 
-import os, errno
+nowTime = time.time()
+logMimeType = "text/plain"
+archiveMimeTypeRegex = re.compile(
+    r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)"
+)
 
 
 def silentRemove(filename):
@@ -37,22 +42,76 @@ def silentRemove(filename):
         pass
 
 
+def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
+
+    try:
+        # first check to see if it's in the filebeat registry
+        if filebeatReg is not None:
+            fileStatInfo = os.stat(filename)
+            if fileStatInfo:
+                fileFound = any(
+                    (
+                        (entry['FileStateOS'])
+                        and (entry['FileStateOS']['device'] == fileStatInfo.st_dev)
+                        and (entry['FileStateOS']['inode'] == fileStatInfo.st_ino)
+                    )
+                    for entry in filebeatReg
+                )
+                if fileFound:
+                    # found a file in the filebeat registry, so leave it alone!
+                    # we only want to delete files that filebeat has forgotten
+                    # print "{} is found in registry!".format(filename)
+                    return
+                # else:
+                # print "{} is NOT found in registry!".format(filename)
+
+        # now see if the file is in use by any other process in the system
+        fuserProcess = Popen(["fuser", "-s", filename], stdout=PIPE)
+        fuserProcess.communicate()
+        fuserExitCode = fuserProcess.wait()
+        if fuserExitCode != 0:
+
+            # the file is not in use, let's check it's mtime/ctime
+            logTime = max(os.path.getctime(filename), os.path.getmtime(filename))
+            lastUseTime = nowTime - logTime
+
+            # get the file type
+            fileType = magic.from_file(filename, mime=True)
+            if (checkLogs == True) and (cleanLogSeconds > 0) and (fileType == logMimeType):
+                cleanSeconds = cleanLogSeconds
+            elif (checkArchives == True) and (cleanZipSeconds > 0) and archiveMimeTypeRegex.match(fileType) is not None:
+                cleanSeconds = cleanZipSeconds
+            else:
+                # not a file we're going to be messing with
+                cleanSeconds = 0
+
+            if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
+                # this is a closed file that is old, so delete it
+                print('removing old file "{}" ({}, used {} seconds ago)'.format(filename, fileType, lastUseTime))
+                silentRemove(filename)
+
+    except FileNotFoundError as fnf:
+        # file's already gone, oh well
+        pass
+
+    except Exception as e:
+        print("{} for '{}': {}".format(type(e).__name__, filename, e))
+
+
 def pruneFiles():
 
     if (cleanLogSeconds <= 0) and (cleanZipSeconds <= 0):
         # disabled, don't do anything
         return
 
-    nowTime = time.time()
-
-    logMimeType = "text/plain"
-    archiveMimeTypeRegex = re.compile(
-        r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)"
-    )
-
     # look for regular files in the processed/ directory
     foundFiles = [
         (os.path.join(root, filename)) for root, dirnames, filenames in os.walk(processedDir) for filename in filenames
+    ]
+
+    # look for rotated files from live zeek instance
+    rotatedFiles = [
+        (os.path.join(root, filename)) for root, dirnames, filenames in os.walk(liveDir) for filename in filenames
     ]
 
     # look up the filebeat registry file and try to read it
@@ -63,51 +122,9 @@ def pruneFiles():
 
     # see if the files we found are in use and old enough to be pruned
     for file in foundFiles:
-
-        # first check to see if it's in the filebeat registry
-        if fbReg is not None:
-            fileStatInfo = os.stat(file)
-            if fileStatInfo:
-                fileFound = any(
-                    (
-                        (entry['FileStateOS'])
-                        and (entry['FileStateOS']['device'] == fileStatInfo.st_dev)
-                        and (entry['FileStateOS']['inode'] == fileStatInfo.st_ino)
-                    )
-                    for entry in fbReg
-                )
-                if fileFound:
-                    # found a file in the filebeat registry, so leave it alone!
-                    # we only want to delete files that filebeat has forgotten
-                    # print "{} is found in registry!".format(file)
-                    continue
-                # else:
-                # print "{} is NOT found in registry!".format(file)
-
-        # now see if the file is in use by any other process in the system
-        fuserProcess = Popen(["fuser", "-s", file], stdout=PIPE)
-        fuserProcess.communicate()
-        fuserExitCode = fuserProcess.wait()
-        if fuserExitCode != 0:
-
-            # the file is not in use, let's check it's mtime/ctime
-            logTime = max(os.path.getctime(file), os.path.getmtime(file))
-            lastUseTime = nowTime - logTime
-
-            # get the file type
-            fileType = magic.from_file(file, mime=True)
-            if (cleanLogSeconds > 0) and (fileType == logMimeType):
-                cleanSeconds = cleanLogSeconds
-            elif (cleanZipSeconds > 0) and archiveMimeTypeRegex.match(fileType) is not None:
-                cleanSeconds = cleanZipSeconds
-            else:
-                # not a file we're going to be messing with
-                cleanSeconds = 0
-
-            if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
-                # this is a closed file that is old, so delete it
-                print('removing old file "{}" ({}, used {} seconds ago)'.format(file, fileType, lastUseTime))
-                silentRemove(file)
+        checkFile(file, filebeatReg=fbReg, checkLogs=True, checkArchives=True)
+    for file in rotatedFiles:
+        checkFile(file, filebeatReg=None, checkLogs=False, checkArchives=True)
 
     # clean up any broken symlinks in the current/ directory
     for current in os.listdir(currentDir):
