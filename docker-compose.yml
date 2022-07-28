@@ -639,7 +639,6 @@ services:
       << : *suricata-variables
       << : *suricata-offline-variables
       SURICATA_PCAP_PROCESSOR : 'true'
-      SURICATA_CRON : 'true'
     depends_on:
       - logstash
     volumes:
@@ -677,7 +676,6 @@ services:
       << : *suricata-live-variables
       << : *pcap-capture-variables
       SURICATA_PCAP_PROCESSOR : 'false'
-      SURICATA_CRON : 'false'
     volumes:
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
