@@ -91,6 +91,7 @@ mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP
 touch "$INTEL_DIR"/__load__.zeek
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true
+INTEL_UPDATE_TIME_PREV=0
 
 # configure zeek cfg files
 pushd "$ZEEK_INSTALL_PATH"/etc >/dev/null 2>&1
@@ -218,6 +219,20 @@ while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" 
   for i in `seq 1 10`; do
     sleep 1
   done
+
+  # check to see if intel feeds were updated, and if so, restart
+  INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
+  if (( $INTEL_UPDATE_TIME > $INTEL_UPDATE_TIME_PREV )); then
+    if (( $INTEL_UPDATE_TIME_PREV == 0 )); then
+      # this is the first time after startup, we don't actually need to do anything
+      true
+    else
+      echo "Restarting via \"$ZEEK_CTL\" after intel update..." >&2
+      "$ZEEK_CTL" restart
+    fi
+    INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
+  fi
+
 done
 
 popd >/dev/null 2>&1
