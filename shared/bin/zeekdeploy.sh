@@ -213,12 +213,10 @@ trap finish EXIT
 # execute zeekctl
 echo "Running via \"$ZEEK_CTL\"..." >&2
 "$ZEEK_CTL" deploy
+for i in `seq 1 10`; do sleep 1; done
 
 # wait until interrupted (or somehow if zeek dies on its own)
 while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" | wc -l) -ge $ZEEK_PROCS ]; do
-  for i in `seq 1 10`; do
-    sleep 1
-  done
 
   # check to see if intel feeds were updated, and if so, restart
   INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
@@ -233,6 +231,7 @@ while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" 
     INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
   fi
 
+  for i in `seq 1 10`; do sleep 1; done
 done
 
 popd >/dev/null 2>&1
