@@ -591,6 +591,7 @@ class Installer(object):
         liveZeek = False
         liveSuricata = False
         pcapIface = 'lo'
+        tweakIface = False
         pcapFilter = ''
 
         if InstallerYesOrNo(
@@ -608,6 +609,9 @@ class Installer(object):
                 pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
             pcapFilter = InstallerAskForString(
                 'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
+            )
+            tweakIface = InstallerYesOrNo(
+                'Disable capture interface hardware offloading and adjust ring buffer sizes?', default=False
             )
 
         # modify specified values in-place in docker-compose files
@@ -779,6 +783,12 @@ class Installer(object):
                         elif 'PCAP_IFACE' in line:
                             # capture interface(s)
                             line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
+
+                        elif 'PCAP_IFACE_TWEAK' in line:
+                            # disable NIC hardware offloading features and adjust ring buffers
+                            line = re.sub(
+                                r'(PCAP_IFACE_TWEAK\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(tweakIface)}", line
+                            )
 
                         elif 'PCAP_FILTER' in line:
                             # capture filter
