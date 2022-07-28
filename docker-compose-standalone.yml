@@ -283,6 +283,10 @@ x-pcap-capture-variables: &pcap-capture-variables
   # Specifies local network interface(s) for local packet capture if PCAP_ENABLE_NETSNIFF,
   #   PCAP_ENABLE_TCPDUMP, ZEEK_LIVE_CAPTURE or SURICATA_LIVE_CAPTURE are 'true'
   PCAP_IFACE : 'lo'
+  # Whether or not ethtool will disable NIC hardware offloading features and adjust
+  #   ring buffer sizes for capture interface(s) (should be 'true' if the interface(s) are
+  #   being used for capture only, 'false' if they are being used for management/communication)
+  PCAP_IFACE_TWEAK : 'false'
   # Specifies how large a locally-captured PCAP file can become (in megabytes) before
   #   it is closed for processing and a new PCAP file created
   PCAP_ROTATE_MEGABYTES : 1024

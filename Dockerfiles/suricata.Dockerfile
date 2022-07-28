@@ -201,6 +201,7 @@ COPY --chmod=755 shared/bin/pcap_processor.py /opt/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
+COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
@@ -216,6 +217,7 @@ ARG SURICATA_LIVE_CAPTURE=false
 ARG SURICATA_ROTATED_PCAP=false
 # PCAP_IFACE=comma-separated list of capture interfaces
 ARG PCAP_IFACE=lo
+ARG PCAP_IFACE_TWEAK=false
 ARG PCAP_FILTER=
 
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
@@ -231,6 +233,7 @@ ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
 ENV SURICATA_LIVE_CAPTURE $SURICATA_LIVE_CAPTURE
 ENV SURICATA_ROTATED_PCAP $SURICATA_ROTATED_PCAP
 ENV PCAP_IFACE $PCAP_IFACE
+ENV PCAP_IFACE_TWEAK $PCAP_IFACE_TWEAK
 ENV PCAP_FILTER $PCAP_FILTER
 
 ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$SURICATA_RUN_DIR"

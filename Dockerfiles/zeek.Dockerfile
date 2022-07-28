@@ -159,6 +159,7 @@ ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 ADD zeek/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
 ADD shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
+ADD shared/bin/nic-capture-setup.sh /usr/local/bin/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
@@ -209,6 +210,7 @@ ARG ZEEK_LIVE_CAPTURE=false
 ARG ZEEK_ROTATED_PCAP=false
 # PCAP_IFACE=comma-separated list of capture interfaces
 ARG PCAP_IFACE=lo
+ARG PCAP_IFACE_TWEAK=false
 ARG PCAP_FILTER=
 
 ENV AUTO_TAG $AUTO_TAG
@@ -228,6 +230,7 @@ ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV ZEEK_LIVE_CAPTURE $ZEEK_LIVE_CAPTURE
 ENV ZEEK_ROTATED_PCAP $ZEEK_ROTATED_PCAP
 ENV PCAP_IFACE $PCAP_IFACE
+ENV PCAP_IFACE_TWEAK $PCAP_IFACE_TWEAK
 ENV PCAP_FILTER $PCAP_FILTER
 
 # environment variables for zeek runtime tweaks (used in local.zeek)
