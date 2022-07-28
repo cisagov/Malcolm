@@ -53,7 +53,7 @@ function CreateCaptureConfigs() {
           [[ "${PCAP_IFACE_TWEAK:-false}" == "true" ]] && \
             [[ "$IFACE" != "lo" ]] && \
             [[ -x /usr/local/bin/nic-capture-setup.sh ]] && \
-            /usr/local/bin/nic-capture-setup.sh "$IFACE" || true
+            /usr/local/bin/nic-capture-setup.sh "$IFACE" >/dev/null 2>&1 || true
 
         done # loop over capture interfaces
 
