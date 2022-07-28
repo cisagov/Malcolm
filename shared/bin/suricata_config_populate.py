@@ -300,6 +300,7 @@ DEFAULT_VARS.update(
         'RFB_EVE_ENABLED': False,
         'RFB_PORTS': "[5900,5901,5902,5903,5904,5905,5906,5907,5908,5909]",
         'RUNMODE': 'autofp',
+        'RUN_DIR': os.path.join(os.getenv('SUPERVISOR_PATH', '/var/run'), 'suricata'),
         'SHELLCODE_PORTS': '!80',
         'SIP_ENABLED': True,
         'SIP_EVE_ENABLED': False,
@@ -1185,13 +1186,13 @@ def main():
     cfg.pop('coredump', None)
     deep_set(cfg, ['coredump', 'max-dump'], 0)
 
-    if DEFAULT_VARS['SUPERVISOR_PATH'] is not None:
+    if DEFAULT_VARS['RUN_DIR'] is not None:
         cfg.pop('unix-command', None)
         deep_set(cfg, ['unix-command', 'enabled'], True)
         deep_set(
             cfg,
             ['unix-command', 'filename'],
-            os.path.join(os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata'), 'suricata-command.socket'),
+            os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata-command.socket'),
         )
 
     # validate suricata execution prior to calling it a day
@@ -1243,17 +1244,13 @@ def main():
     ##################################################################################################
 
     # remove the pidfile and command file for a new run (in case they weren't cleaned up before)
-    if DEFAULT_VARS['SUPERVISOR_PATH'] is not None and os.path.isdir(
-        os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata')
-    ):
+    if DEFAULT_VARS['RUN_DIR'] is not None and os.path.isdir(os.path.join(DEFAULT_VARS['RUN_DIR'])):
         try:
-            os.remove(os.path.join(os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata'), 'suricata.pid'))
+            os.remove(os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata.pid'))
         except:
             pass
         try:
-            os.remove(
-                os.path.join(os.path.join(DEFAULT_VARS['SUPERVISOR_PATH'], 'suricata'), 'suricata-command.socket')
-            )
+            os.remove(os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata-command.socket'))
         except:
             pass
 

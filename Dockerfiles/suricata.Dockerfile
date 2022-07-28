@@ -176,6 +176,8 @@ VOLUME ["$SURICATA_LOG_DIR"]
 VOLUME ["$SURICATA_MANAGED_DIR"]
 VOLUME ["$SURICATA_RUN_DIR"]
 
+WORKDIR $SURICATA_RUN_DIR
+
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
