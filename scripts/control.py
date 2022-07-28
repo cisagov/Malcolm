@@ -361,7 +361,7 @@ def logs():
                 serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
                 messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
                 outputJson = LoadStrIfJson(messageStr)
-                if outputJson is not None:
+                if isinstance(outputJson, dict):
 
                     # if there's a timestamp in the JSON, move it outside of the JSON to the beginning of the log string
                     timeKey = None
@@ -571,6 +571,9 @@ def start():
 
     # touch the zeek intel file
     open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
+
+    # clean up any leftover intel update locks
+    shutil.rmtree(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True)
 
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
     osEnv = os.environ.copy()

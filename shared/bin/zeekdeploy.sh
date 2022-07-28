@@ -215,19 +215,18 @@ echo "Running via \"$ZEEK_CTL\"..." >&2
 "$ZEEK_CTL" deploy
 for i in `seq 1 10`; do sleep 1; done
 
+# keep track of intel updates in order to reload when they occur
+INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
+INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
+
 # wait until interrupted (or somehow if zeek dies on its own)
 while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" | wc -l) -ge $ZEEK_PROCS ]; do
 
   # check to see if intel feeds were updated, and if so, restart
   INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
   if (( $INTEL_UPDATE_TIME > $INTEL_UPDATE_TIME_PREV )); then
-    if (( $INTEL_UPDATE_TIME_PREV == 0 )); then
-      # this is the first time after startup, we don't actually need to do anything
-      true
-    else
-      echo "Restarting via \"$ZEEK_CTL\" after intel update..." >&2
-      "$ZEEK_CTL" restart
-    fi
+    echo "Restarting via \"$ZEEK_CTL\" after intel update..." >&2
+    "$ZEEK_CTL" restart
     INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
   fi
 
