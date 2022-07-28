@@ -25,8 +25,8 @@ if (( $FILE_AGE_MIN > 0 )); then
                 -d "{\"limit\":1,\"filter\":{\"log.file.path\":\"$(basename $LOGFILE)\"}}" 2>/dev/null \
             | jq '.results | length' 2>/dev/null || echo '0')
 
-        if (( $DOCUMENT_FOUND > 0 )); then
-            # at least one log document exists in the database, assume it's safe to clean up now
+        if (( $DOCUMENT_FOUND > 0 )) || (( $(stat --printf='%s' "$LOGFILE" 2>/dev/null || echo -n '1') == 0 )); then
+            # at least one log document exists in the database (or the file is empty), assume it's safe to clean up now
             rm -f "$LOGFILE"
 
         else

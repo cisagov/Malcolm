@@ -570,6 +570,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
 * `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
 * `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`).
+* `SURICATA_UPDATE_RULES` – if set to `true`, Suricata signatures will periodically be updated (default `false`)
 * `SURICATA_LIVE_CAPTURE` - if set to `true`, Suricata will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
 * `SURICATA_ROTATED_PCAP` - if set to `true`, Suricata can analyze captured PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `SURICATA_AUTO_ANALYZE_PCAP_FILES`); if `SURICATA_LIVE_CAPTURE` is `true`, this should be false, otherwise Suricata will see duplicate traffic
 * `SURICATA_…` - the [`suricata` container entrypoint script](shared/bin/suricata_config_populate.py) can use **many** more environment variables to tweak [suricata.yaml](https://github.com/OISF/suricata/blob/master/suricata.yaml.in); in that script, `DEFAULT_VARS` defines those variables (albeit without the `SURICATA_` prefix you must add to each for use)
@@ -3748,6 +3749,8 @@ Delete the oldest indices when the database exceeds a certain size? (y/N): n
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
+Download updated Suricata signatures periodically? (Y/n): y
+
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
 Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
@@ -3784,7 +3787,7 @@ Scan extracted PE files with Capa? (y/N): y
 
 Lookup extracted file hashes with VirusTotal? (y/N): n
 
-Download updated scanner signatures periodically? (Y/n): y
+Download updated file scanner signatures periodically? (Y/n): y
 
 Should Malcolm capture live network traffic to PCAP files for analysis with Arkime? (y/N): y
 

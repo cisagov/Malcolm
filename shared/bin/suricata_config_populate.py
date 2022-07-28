@@ -6,7 +6,7 @@
 # modify suricata.yaml according to many environment variables
 
 #
-# suricata.yaml: https://suricata.readthedocs.io/en/suricata-6.0.0/configuration/suricata-yaml.html
+# suricata.yaml: https://suricata.readthedocs.io/en/suricata-6.0.5/configuration/suricata-yaml.html
 #                https://github.com/OISF/suricata/blob/master/suricata.yaml.in
 #
 #
