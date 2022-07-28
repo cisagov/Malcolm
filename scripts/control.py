@@ -278,6 +278,7 @@ def logs():
       | \bGET.+\b302\s+30\b
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
       | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
+      | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
       | /_ns_/nstest\.html
       | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
       | \b(d|es)?stats\.json
