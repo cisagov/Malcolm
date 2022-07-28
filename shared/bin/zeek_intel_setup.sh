@@ -21,15 +21,12 @@ THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_i
 LOCK_DIR="${INTEL_DIR}/lock"
 
 # make sure only one instance of the intel update runs at a time
-cleanup() {
-    if ! rmdir -- "$LOCK_DIR"; then
-        echo "Failed to remove lock directory '$LOCK_DIR'" >&2
-        exit 1
-    fi
+function finish {
+    rmdir -- "$LOCK_DIR" || echo "Failed to remove lock directory '$LOCK_DIR'" >&2
 }
 
 if mkdir -- "$LOCK_DIR" 2>/dev/null; then
-    trap "cleanup" EXIT
+    trap finish EXIT
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
     if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
@@ -105,6 +102,8 @@ EOF
         popd >/dev/null 2>&1
     fi
 
+    finish
+    trap - EXIT
 fi # singleton lock check
 
 # if supercronic is being used to periodically refresh the intel sources,
