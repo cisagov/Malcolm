@@ -16,6 +16,7 @@ import stat
 import sys
 
 from malcolm_common import *
+from base64 import b64encode
 from collections import defaultdict, namedtuple
 from subprocess import PIPE, STDOUT, Popen, check_call, CalledProcessError
 
@@ -649,7 +650,7 @@ def authSetup(wipe=False):
                 "# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)\n"
             )
             f.write(f'MALCOLM_USERNAME={username}\n')
-            f.write(f'MALCOLM_PASSWORD={passwordEncrypted}\n')
+            f.write(f'MALCOLM_PASSWORD={b64encode(passwordEncrypted.encode()).decode("ascii")}\n')
         os.chmod(authEnvFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
         # create or update the htpasswd file
