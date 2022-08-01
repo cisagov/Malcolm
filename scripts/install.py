@@ -308,6 +308,7 @@ class Installer(object):
         expose_opensearch_default=False,
         expose_logstash_default=False,
         expose_filebeat_default=False,
+        expose_sftp_default=False,
         restart_mode_default=False,
     ):
         global args
@@ -538,6 +539,9 @@ class Installer(object):
             externalEsSslVerify = False
         filebeatTcpOpen = InstallerYesOrNo(
             'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
+        )
+        sftpOpen = InstallerYesOrNo(
+            'Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default
         )
 
         # input file extraction parameters
@@ -926,6 +930,16 @@ class Installer(object):
                                 line = re.sub(
                                     r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
                                     fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
+                                    line,
+                                )
+
+                        elif currentService == 'upload':
+                            # stuff specifically in the upload section
+                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IP based on whether it should be externally exposed or not
+                                line = re.sub(
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if sftpOpen else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
 
@@ -1950,6 +1964,16 @@ def main():
         help="Expose Filebeat TCP port to external hosts",
     )
     parser.add_argument(
+        '-s',
+        '--sftp-expose',
+        dest='exposeSFTP',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Expose SFTP server (for PCAP upload) to external hosts",
+    )
+    parser.add_argument(
         '-r',
         '--restart-malcolm',
         dest='malcolmAutoRestart',
@@ -2057,6 +2081,7 @@ def main():
             expose_opensearch_default=args.exposeOpenSearch,
             expose_logstash_default=args.exposeLogstash,
             expose_filebeat_default=args.exposeFilebeatTcp,
+            expose_sftp_default=args.exposeSFTP,
             restart_mode_default=args.malcolmAutoRestart,
         )
         eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
