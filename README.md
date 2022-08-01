@@ -3612,7 +3612,7 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 ### PCAP file export error when Zeek logs are in Arkime search results
 
-Arkime has a nice feature that allows you to export PCAP files matching the filters currently populating the search field. However, Arkime viewer will raise an exception if records created from Zeek logs are found among the search results to be exported. For this reason, if you are using the export PCAP feature it is recommended that you apply the **PCAP Files** view to filter your search results prior to doing the export.
+Arkime has a nice feature that allows you to export PCAP files matching the filters currently populating the search field. However, Arkime viewer will raise an exception if records created from Zeek logs are found among the search results to be exported. For this reason, if you are using the export PCAP feature it is recommended that you apply the **Arkime Sessions** view to filter your search results prior to doing the export.
 
 ### Manual OpenSearch Dashboards index pattern refresh
 
