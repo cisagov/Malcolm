@@ -103,7 +103,6 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     * [Hardening](#Hardening)
         * [STIG compliance exceptions](#STIGExceptions)
         * [CIS benchmark compliance exceptions](#CISExceptions)
-* [Known issues](#Issues)
 * [Installation example using Ubuntu 22.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
 * [Modifying or Contributing to Malcolm](#Contributing)
@@ -3607,18 +3606,6 @@ Please review the notes for these additional guidelines. While not claiming an e
 **7.4.4 Create /etc/hosts.deny**, **7.7.1 Ensure Firewall is active**, **7.7.4.1 Ensure default deny firewall policy**, **7.7.4.3 Ensure default deny firewall policy**, **7.7.4.4 Ensure outbound and established connections are configured** - The Malcolm aggregator base operating system **is** configured with an appropriately locked-down software firewall (managed by "Uncomplicated Firewall" `ufw`). However, the methods outlined in the CIS benchmark recommendations do not account for this configuration. 
 
 **8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass intergrity checks.
-
-## <a name="Issues"></a>Known issues
-
-### PCAP file export error when Zeek logs are in Arkime search results
-
-Arkime has a nice feature that allows you to export PCAP files matching the filters currently populating the search field. However, Arkime viewer will raise an exception if records created from Zeek logs are found among the search results to be exported. For this reason, if you are using the export PCAP feature it is recommended that you apply the **Arkime Sessions** view to filter your search results prior to doing the export.
-
-### Manual OpenSearch Dashboards index pattern refresh
-
-Because some fields are created in OpenSearch dynamically when Zeek logs are ingested by Logstash, they may not have been present when OpenSearch Dashboards configures its index pattern field mapping during initialization. As such, those fields will not show up in OpenSearch Dashboards visualizations until its copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
-
-After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
 
 ![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
 
