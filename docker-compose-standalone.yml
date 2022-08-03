@@ -226,7 +226,7 @@ x-filebeat-variables: &filebeat-variables
   # Name of field to drop (if it exists) in events sent to the filebeat TCP input listener
   FILEBEAT_TCP_PARSE_DROP_FIELD : ''
   # Tag to append to events sent to the filebeat TCP input listener
-  FILEBEAT_TCP_TAG : ''
+  FILEBEAT_TCP_TAG : '_malcolm_beats'
 
 x-common-upload-variables: &common-upload-variables
   # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata
