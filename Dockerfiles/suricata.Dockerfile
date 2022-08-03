@@ -1,85 +1,3 @@
-FROM debian:11-slim as builder
-
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
-
-# for download, compile and install
-ENV SURICATA_VER "6.0.0"
-
-RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y --no-install-recommends \
-        autoconf \
-        automake \
-        build-essential \
-        ca-certificates \
-        cargo \
-        curl \
-        libcap-ng-dev \
-        libevent-dev \
-        libgeoip-dev \
-        libhiredis-dev \
-        libhtp-dev \
-        libhyperscan-dev \
-        libjansson-dev \
-        liblua5.1-dev \
-        libluajit-5.1-dev \
-        liblz4-dev \
-        libmagic-dev \
-        libmaxminddb-dev \
-        libnet1-dev \
-        libnetfilter-log-dev \
-        libnetfilter-queue-dev \
-        libnfnetlink-dev \
-        libnss3-dev \
-        libpcap-dev \
-        libpcre3-dev \
-        libtool \
-        libyaml-dev \
-        make \
-        python3-pip \
-        python3-yaml \
-        wget \
-        zlib1g-dev && \
-    ( curl https://sh.rustup.rs -sSf | bash -s -- -y ) && \
-        echo 'source $HOME/.cargo/env' >> $HOME/.bashrc && \
-    python3 -m pip install --no-cache-dir --upgrade pip && \
-        python3 -m pip install --no-cache-dir suricata-update && \
-    mkdir -p /src/ /suricatabld/ && \
-        wget https://www.openinfosecfoundation.org/download/suricata-$SURICATA_VER.tar.gz && \
-        tar xvfz suricata-$SURICATA_VER.tar.gz --strip-components=1 -C /src/ && \
-        rm suricata-$SURICATA_VER.tar.gz && \
-    cd /src/ && \
-    ./configure \
-        --prefix=/usr \
-        --sysconfdir=/etc \
-        --mandir=/usr/share/man \
-        --localstatedir=/var \
-        --enable-non-bundled-htp \
-        --enable-nfqueue \
-        --enable-rust \
-        --disable-gccmarch-native \
-        --enable-hiredis \
-        --enable-geoip \
-        --enable-gccprotect \
-        --enable-pie \
-        --enable-luajit && \
-    make && \
-        make check && \
-        make install DESTDIR=/suricatabld && \
-        make install-full DESTDIR=/suricatabld && \
-        ldconfig /suricatabld/usr/local/lib && \
-        make install-conf DESTDIR=/suricatabld && \
-        make install-rules DESTDIR=/suricatabld && \
-    mkdir -p /suricatabld/var/lib/suricata/ && \
-        cp -r /var/lib/suricata/rules /suricatabld/var/lib/suricata/ && \
-    ( find /suricatabld -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
-    cd / && \
-        tar czf ./suricatabld.tar.gz /suricatabld && \
-        rm -rf /src /suricatabld
-
 FROM debian:11-slim
 
 LABEL maintainer="malcolm@inl.gov"
@@ -101,7 +19,13 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "suricata"
 ENV PGROUP "suricata"
-ENV PUSER_PRIV_DROP true
+# not dropping privileges globally: supervisord will take care of it
+# for all processes, but first we need root to sure capabilities for
+# traffic capturing tools are in-place before they are started.
+# despite doing setcap here in the Dockerfile, the chown in
+# docker-uid-gid-setup.sh will cause them to be lost, so we need
+# a final check in docker_entrypoint.sh before startup
+ENV PUSER_PRIV_DROP false
 
 ENV SUPERCRONIC_VERSION "0.2.1"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
@@ -119,18 +43,30 @@ ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
 ENV SURICATA_MANAGED_RULES_DIR "$SURICATA_MANAGED_DIR/rules"
 ENV SURICATA_RUN_DIR /var/run/suricata
+ENV SURICATA_UPDATE_CONFIG_FILE "$SURICATA_CONFIG_DIR"/update.yaml
+ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
+ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
+ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
-COPY --from=builder /suricatabld.tar.gz /suricatabld.tar.gz
-
-RUN apt-get -q update && \
+RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list && \
+    apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
+    apt-get install -q -y -t bullseye-backports --no-install-recommends \
+        libhtp2 \
+        suricata \
+        suricata-update && \
     apt-get install -q -y --no-install-recommends \
+        bc \
         curl \
+        ethtool \
         file \
         inotify-tools \
+        iproute2 \
         jq \
         less \
         libcap-ng0 \
+        libcap2-bin \
         libevent-2.1-7 \
         libevent-pthreads-2.1-7 \
         libgeoip1 \
@@ -154,14 +90,11 @@ RUN apt-get -q update && \
         moreutils \
         procps \
         psmisc \
-        python3-pip \
         python3-ruamel.yaml \
         python3-zmq \
         supervisor \
         vim-tiny \
         zlib1g && \
-    python3 -m pip install --no-cache-dir --upgrade pip && \
-        python3 -m pip install --no-cache-dir suricata-update && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \
@@ -172,40 +105,68 @@ RUN apt-get -q update && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    ln -sfr /opt/pcap_processor.py /opt/pcap_suricata_processor.py && \
-        (echo "*/5 * * * * /opt/eve-clean-logs.sh" > ${SUPERCRONIC_CRONTAB}) && \
-    tar xf /suricatabld.tar.gz --strip-components=1 -C / && \
+    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
+        (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
+    cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
+        "$SURICATA_UPDATE_CONFIG_FILE" && \
+    suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
+    suricata-update update --fail --verbose --etopen --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
+    chown root:${PGROUP} /sbin/ethtool /usr/bin/suricata && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata && \
     apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /suricatabld.tar.gz
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --chmod=644 shared/bin/pcap_utils.py /opt/
-COPY --chmod=644 shared/pcaps/*.* /tmp/
+COPY --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/pcap_processor.py /opt/
+COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
-COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /opt/
+COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
+COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
 
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG AUTO_TAG=true
+ARG SURICATA_PCAP_PROCESSOR=true
+ARG SURICATA_CRON=true
 ARG SURICATA_AUTO_ANALYZE_PCAP_FILES=false
 ARG SURICATA_CUSTOM_RULES_ONLY=false
 ARG SURICATA_AUTO_ANALYZE_PCAP_THREADS=1
 ARG LOG_CLEANUP_MINUTES=30
+ARG SURICATA_UPDATE_RULES=false
+ARG SURICATA_UPDATE_DEBUG=false
+ARG SURICATA_UPDATE_ETOPEN=true
+ARG SURICATA_LIVE_CAPTURE=false
+ARG SURICATA_ROTATED_PCAP=false
+# PCAP_IFACE=comma-separated list of capture interfaces
+ARG PCAP_IFACE=lo
+ARG PCAP_IFACE_TWEAK=false
+ARG PCAP_FILTER=
 
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
-ENV AUTO_TAG $AUTO_TAG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
+ENV AUTO_TAG $AUTO_TAG
+ENV SURICATA_PCAP_PROCESSOR $SURICATA_PCAP_PROCESSOR
+ENV SURICATA_CRON $SURICATA_CRON
 ENV SURICATA_AUTO_ANALYZE_PCAP_FILES $SURICATA_AUTO_ANALYZE_PCAP_FILES
 ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 ENV SURICATA_CUSTOM_RULES_ONLY $SURICATA_CUSTOM_RULES_ONLY
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
+ENV SURICATA_UPDATE_RULES $SURICATA_UPDATE_RULES
+ENV SURICATA_UPDATE_DEBUG $SURICATA_UPDATE_DEBUG
+ENV SURICATA_UPDATE_ETOPEN $SURICATA_UPDATE_ETOPEN
+ENV SURICATA_LIVE_CAPTURE $SURICATA_LIVE_CAPTURE
+ENV SURICATA_ROTATED_PCAP $SURICATA_ROTATED_PCAP
+ENV PCAP_IFACE $PCAP_IFACE
+ENV PCAP_IFACE_TWEAK $PCAP_IFACE_TWEAK
+ENV PCAP_FILTER $PCAP_FILTER
 
 ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$SURICATA_RUN_DIR"
 
@@ -214,6 +175,8 @@ VOLUME ["$SURICATA_CUSTOM_RULES_DIR"]
 VOLUME ["$SURICATA_LOG_DIR"]
 VOLUME ["$SURICATA_MANAGED_DIR"]
 VOLUME ["$SURICATA_RUN_DIR"]
+
+WORKDIR $SURICATA_RUN_DIR
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 

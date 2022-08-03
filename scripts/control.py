@@ -16,6 +16,7 @@ import stat
 import sys
 
 from malcolm_common import *
+from base64 import b64encode
 from collections import defaultdict, namedtuple
 from subprocess import PIPE, STDOUT, Popen, check_call, CalledProcessError
 
@@ -278,6 +279,7 @@ def logs():
       | \bGET.+\b302\s+30\b
       | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
       | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
+      | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
       | /_ns_/nstest\.html
       | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
       | \b(d|es)?stats\.json
@@ -360,7 +362,7 @@ def logs():
                 serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
                 messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
                 outputJson = LoadStrIfJson(messageStr)
-                if outputJson is not None:
+                if isinstance(outputJson, dict):
 
                     # if there's a timestamp in the JSON, move it outside of the JSON to the beginning of the log string
                     timeKey = None
@@ -473,7 +475,12 @@ def stop(wipe=False):
 
     if wipe:
         # delete OpenSearch database
-        shutil.rmtree(os.path.join(MalcolmPath, 'opensearch/nodes'), ignore_errors=True)
+        shutil.rmtree(os.path.join(MalcolmPath, os.path.join('opensearch', 'nodes')), ignore_errors=True)
+
+        # delete Zeek live-related spool files
+        shutil.rmtree(
+            os.path.join(MalcolmPath, os.path.join('zeek-logs', os.path.join('live', 'spool'))), ignore_errors=True
+        )
 
         # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
         for dataDir in ['opensearch-backup', 'zeek-logs', 'suricata-logs', 'arkime-logs', 'pcap', 'arkime-raw']:
@@ -491,6 +498,8 @@ def stop(wipe=False):
             os.path.join('opensearch-backup', 'logs'),
             os.path.join('zeek-logs', 'processed'),
             os.path.join('zeek-logs', 'current'),
+            os.path.join('zeek-logs', 'live'),
+            os.path.join('suricata-logs'),
         ]:
             RemoveEmptyFolders(dataDir, removeRoot=False)
 
@@ -544,10 +553,11 @@ def start():
         os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
-        os.path.join(MalcolmPath, os.path.join('suricata-logs')),
+        os.path.join(MalcolmPath, os.path.join('suricata-logs', 'live')),
         os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'MISP'))),
         os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'STIX'))),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'current')),
+        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'live')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'extract_files')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'processed')),
         os.path.join(MalcolmPath, os.path.join('zeek-logs', 'upload')),
@@ -562,6 +572,9 @@ def start():
 
     # touch the zeek intel file
     open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
+
+    # clean up any leftover intel update locks
+    shutil.rmtree(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True)
 
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
     osEnv = os.environ.copy()
@@ -579,7 +592,7 @@ def start():
         eprint("  - OpenSearch Dashboards: https://localhost/dashboards/")
         eprint("  - PCAP upload (web): https://localhost/upload/")
         eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-        eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/\n")
+        eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
         eprint("  - Account management: https://localhost:488/\n")
     else:
         eprint("Malcolm failed to start\n")
@@ -637,7 +650,7 @@ def authSetup(wipe=False):
                 "# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)\n"
             )
             f.write(f'MALCOLM_USERNAME={username}\n')
-            f.write(f'MALCOLM_PASSWORD={passwordEncrypted}\n')
+            f.write(f'MALCOLM_PASSWORD={b64encode(passwordEncrypted.encode()).decode("ascii")}\n')
         os.chmod(authEnvFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
         # create or update the htpasswd file

@@ -33,7 +33,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
         /usr/bin/yq eval --inplace ".\"reload-command\"=\"kill -USR2 \$(pidof suricata)\"" "$SURICATA_UPDATE_CONFIG_FILE"
 
         /usr/bin/yq eval --inplace 'del(."sources")' "$SURICATA_UPDATE_CONFIG_FILE"
-        if [[ "${SURICATA_REFRESH_ETOPEN:-true}" == "true" ]]; then
+        if [[ "${SURICATA_UPDATE_ETOPEN:-true}" == "true" ]]; then
             ETOPEN_FLAG="--etopen"
             /usr/bin/yq eval --inplace ".\"sources\"=[\"https://rules.emergingthreats.net/open/suricata-%(__version__)s/emerging.rules.tar.gz\",\"https://sslbl.abuse.ch/blacklist/sslblacklist.rules\"]" "$SURICATA_UPDATE_CONFIG_FILE"
         else

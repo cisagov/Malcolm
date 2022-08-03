@@ -34,13 +34,13 @@ fi
 
 function filesize_in_image() {
   FILESPEC="$2"
-  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}' | sort -u)"
   $DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "stat --printf='%s' \"$FILESPEC\" 2>/dev/null || stat -c '%s' \"$FILESPEC\" 2>/dev/null"
 }
 
 function dirsize_in_image() {
   FILESPEC="$2"
-  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}')"
+  IMAGE="$($GREP -P "^\s+image:.*$1" docker-compose-standalone.yml | awk '{print $2}' | sort -u)"
   KBYTES="$($DOCKER_BIN run --rm --pull never --entrypoint /bin/sh "$IMAGE" -c "du -sk \"$FILESPEC\" 2>/dev/null | cut -f1")"
   echo $(($KBYTES * 1024))
 }

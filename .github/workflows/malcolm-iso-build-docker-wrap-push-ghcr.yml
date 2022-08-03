@@ -93,7 +93,7 @@ jobs:
       -
         name: Build image
         run: |
-          IMAGES=( $(grep image: docker-compose.yml | awk '{print $2}') )
+          IMAGES=( $(grep image: docker-compose.yml | awk '{print $2}' | sort -u) )
           for IMAGE in "${IMAGES[@]}"; do
             REPO_IMAGE="$(echo "$IMAGE" | sed "s@^\(malcolmnetsec\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"
             docker pull "$REPO_IMAGE" && \

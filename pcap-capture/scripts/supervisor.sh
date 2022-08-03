@@ -11,6 +11,12 @@ CAPTURE_GROUPS_FILE="capture-groups.conf"
 
 function join_by { local IFS="$1"; shift; echo "$*"; }
 
+function SetCaptureCapabilities() {
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump || true
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng || true
+}
+
 # Create config files for each capture interface for the various capture programs (tcpdump, netsniff)
 # so that supervisord can manage instances of each of these programs for each interface.
 # bro is now managed by broctl (via brodeploy.sh) rather than individually by supervisord so that
@@ -42,6 +48,13 @@ function CreateCaptureConfigs() {
             PROG_GROUP+=($INSTANCE_NAME)
 
           fi # capture program template exists
+
+          # disable NIC hardware offloading features and adjust ring buffer sizes
+          [[ "${PCAP_IFACE_TWEAK:-false}" == "true" ]] && \
+            [[ "$IFACE" != "lo" ]] && \
+            [[ -x /usr/local/bin/nic-capture-setup.sh ]] && \
+            /usr/local/bin/nic-capture-setup.sh "$IFACE" >/dev/null 2>&1 || true
+
         done # loop over capture interfaces
 
       fi # capture interface(s) defined
@@ -58,14 +71,8 @@ function CreateCaptureConfigs() {
   fi # config dir exists
 }
 
-function SetCaptureCapabilities() {
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump || true
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng || true
-}
-
-CreateCaptureConfigs
 SetCaptureCapabilities
+CreateCaptureConfigs
 
 if [[ -z $PCAP_ROTATE_SECONDS ]] && [[ -n $PCAP_ROTATE_MINUTES ]]; then
   export PCAP_ROTATE_SECONDS=$(echo "$PCAP_ROTATE_MINUTES * 60" | bc)

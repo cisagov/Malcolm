@@ -21,7 +21,13 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "zeeker"
 ENV PGROUP "zeeker"
-ENV PUSER_PRIV_DROP true
+# not dropping privileges globally: supervisord will take care of it
+# for all processes, but first we need root to sure capabilities for
+# traffic capturing tools are in-place before they are started.
+# despite doing setcap here in the Dockerfile, the chown in
+# docker-uid-gid-setup.sh will cause them to be lost, so we need
+# a final check in docker_entrypoint.sh before startup
+ENV PUSER_PRIV_DROP false
 
 # for download and install
 ARG ZEEK_LTS=
@@ -48,20 +54,24 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # build and install system packages, zeek, spicy and plugins
-RUN apt-get -q update && \
+RUN export DEBARCH=$(dpkg --print-architecture) && \
+    apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+      bc \
       bison \
       ca-certificates \
       ccache \
       cmake \
       curl \
+      ethtool \
       file \
       flex \
       g++ \
       gcc \
       git \
       gnupg2 \
+      iproute2 \
       jq \
       less \
       libatomic1 \
@@ -77,6 +87,7 @@ RUN apt-get -q update && \
       libtcmalloc-minimal4 \
       libunwind8 \
       libzmq5 \
+      linux-headers-$DEBARCH \
       locales-all \
       make \
       moreutils \
@@ -145,7 +156,10 @@ ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
-ADD shared/bin/zeek_intel_setup.sh /usr/local/bin/entrypoint.sh
+ADD zeek/scripts/docker_entrypoint.sh /usr/local/bin/
+ADD shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
+ADD shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
+ADD shared/bin/nic-capture-setup.sh /usr/local/bin/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
@@ -166,12 +180,20 @@ RUN mkdir -p /tmp/logs && \
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
+    chown root:${PGROUP} /sbin/ethtool "${ZEEK_DIR}"/bin/zeek "${ZEEK_DIR}"/bin/capstats && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/zeek && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/capstats && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
+#Whether or not to start up the pcap_processor script to monitor pcaps
+ARG ZEEK_PCAP_PROCESSOR=true
+#Whether or not to start up supercronic for updating intel definitions
+ARG ZEEK_CRON=true
 #Whether or not to run "zeek -r XXXXX.pcap local" on each pcap file
 ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
@@ -184,8 +206,16 @@ ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
 ARG PCAP_MONITOR_HOST=pcap-monitor
+ARG ZEEK_LIVE_CAPTURE=false
+ARG ZEEK_ROTATED_PCAP=false
+# PCAP_IFACE=comma-separated list of capture interfaces
+ARG PCAP_IFACE=lo
+ARG PCAP_IFACE_TWEAK=false
+ARG PCAP_FILTER=
 
 ENV AUTO_TAG $AUTO_TAG
+ENV ZEEK_PCAP_PROCESSOR $ZEEK_PCAP_PROCESSOR
+ENV ZEEK_CRON $ZEEK_CRON
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
 ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_INTEL_ITEM_EXPIRATION $ZEEK_INTEL_ITEM_EXPIRATION
@@ -197,6 +227,11 @@ ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
+ENV ZEEK_LIVE_CAPTURE $ZEEK_LIVE_CAPTURE
+ENV ZEEK_ROTATED_PCAP $ZEEK_ROTATED_PCAP
+ENV PCAP_IFACE $PCAP_IFACE
+ENV PCAP_IFACE_TWEAK $PCAP_IFACE_TWEAK
+ENV PCAP_FILTER $PCAP_FILTER
 
 # environment variables for zeek runtime tweaks (used in local.zeek)
 ARG ZEEK_DISABLE_HASH_ALL_FILES=
@@ -234,9 +269,11 @@ ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 
+ENV PUSER_CHOWN "$ZEEK_DIR"
+
 VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

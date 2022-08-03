@@ -51,6 +51,9 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/etc/systemd/system/multi-user\.target\.wants/ntp.service$
 !/home(/|$)
 !/malcolm_images\.tar\.gz$
+!/opt/debian-cis(/|$)
+!/opt/STIG-4-Debian(/|$)
+!/opt/harbianaudit(/|$)
 !/root(/|$)
 !/run(/|$)
 !/tmp(/|$)

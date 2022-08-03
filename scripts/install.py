@@ -308,6 +308,7 @@ class Installer(object):
         expose_opensearch_default=False,
         expose_logstash_default=False,
         expose_filebeat_default=False,
+        expose_sftp_default=False,
         restart_mode_default=False,
     ):
         global args
@@ -508,6 +509,9 @@ class Installer(object):
             )
 
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
+        suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
+            'Download updated Suricata signatures periodically?', default=autoSuricata
+        )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
@@ -536,6 +540,9 @@ class Installer(object):
         filebeatTcpOpen = InstallerYesOrNo(
             'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
         )
+        sftpOpen = InstallerYesOrNo(
+            'Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default
+        )
 
         # input file extraction parameters
         allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
@@ -548,7 +555,7 @@ class Installer(object):
         yaraScan = False
         capaScan = False
         clamAvScan = False
-        ruleUpdate = False
+        fileScanRuleUpdate = False
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
             while fileCarveMode not in allowedFileCarveModes:
@@ -571,7 +578,9 @@ class Installer(object):
                 if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
                     while len(vtotApiKey) <= 1:
                         vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
-                ruleUpdate = InstallerYesOrNo('Download updated scanner signatures periodically?', default=True)
+                fileScanRuleUpdate = InstallerYesOrNo(
+                    'Download updated file scanner signatures periodically?', default=True
+                )
 
         if fileCarveMode not in allowedFileCarveModes:
             fileCarveMode = allowedFileCarveModes[0]
@@ -583,16 +592,30 @@ class Installer(object):
         # input packet capture parameters
         pcapNetSniff = False
         pcapTcpDump = False
+        liveZeek = False
+        liveSuricata = False
         pcapIface = 'lo'
+        tweakIface = False
         pcapFilter = ''
-        if InstallerYesOrNo('Should Malcolm capture network traffic to PCAP files?', default=False):
+
+        if InstallerYesOrNo(
+            'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
+        ):
+            pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
+            pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
+
+        liveSuricata = InstallerYesOrNo('Should Malcolm analyze live network traffic with Suricata?', default=False)
+        liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
+
+        if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
             while len(pcapIface) <= 0:
                 pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
-            pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
-            pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
             pcapFilter = InstallerAskForString(
-                'PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
+                'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
+            )
+            tweakIface = InstallerYesOrNo(
+                'Disable capture interface hardware offloading and adjust ring buffer sizes?', default=False
             )
 
         # modify specified values in-place in docker-compose files
@@ -709,7 +732,15 @@ class Installer(object):
                             # rule updates (yara/capa via git, clamav via freshclam)
                             line = re.sub(
                                 r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(ruleUpdate)}",
+                                fr"\g<1>{TrueOrFalseQuote(fileScanRuleUpdate)}",
+                                line,
+                            )
+
+                        elif 'SURICATA_UPDATE_RULES' in line:
+                            # Suricata signature updates (via suricata-update)
+                            line = re.sub(
+                                r'(SURICATA_UPDATE_RULES\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(suricataRuleUpdate)}",
                                 line,
                             )
 
@@ -725,6 +756,40 @@ class Installer(object):
                                 r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
                             )
 
+                        elif 'ZEEK_LIVE_CAPTURE' in line:
+                            # live traffic analysis with Zeek
+                            line = re.sub(
+                                r'(ZEEK_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveZeek)}", line
+                            )
+
+                        elif 'ZEEK_ROTATED_PCAP' in line:
+                            # rotated captured PCAP analysis with Zeek (not live capture)
+                            line = re.sub(
+                                r'(ZEEK_ROTATED_PCAP\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoZeek and (not liveZeek))}",
+                                line,
+                            )
+
+                        elif 'SURICATA_LIVE_CAPTURE' in line:
+                            # live traffic analysis with Suricata
+                            line = re.sub(
+                                r'(SURICATA_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveSuricata)}", line
+                            )
+
+                        elif 'SURICATA_ROTATED_PCAP' in line:
+                            # rotated captured PCAP analysis with Suricata (not live capture)
+                            line = re.sub(
+                                r'(SURICATA_ROTATED_PCAP\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(autoSuricata and (not liveSuricata))}",
+                                line,
+                            )
+
+                        elif 'PCAP_IFACE_TWEAK' in line:
+                            # disable NIC hardware offloading features and adjust ring buffers
+                            line = re.sub(
+                                r'(PCAP_IFACE_TWEAK\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(tweakIface)}", line
+                            )
+
                         elif 'PCAP_IFACE' in line:
                             # capture interface(s)
                             line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
@@ -734,7 +799,7 @@ class Installer(object):
                             line = re.sub(r'(PCAP_FILTER\s*:)(.*)', fr"\g<1> '{pcapFilter}'", line)
 
                         elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
-                            # automatic pcap analysis with Zeek
+                            # automatic uploaded pcap analysis with Zeek
                             line = re.sub(
                                 r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(autoZeek)}",
@@ -742,7 +807,7 @@ class Installer(object):
                             )
 
                         elif 'SURICATA_AUTO_ANALYZE_PCAP_FILES' in line:
-                            # automatic pcap analysis with suricata
+                            # automatic uploaded pcap analysis with suricata
                             line = re.sub(
                                 r'(SURICATA_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(autoSuricata)}",
@@ -865,6 +930,16 @@ class Installer(object):
                                 line = re.sub(
                                     r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
                                     fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
+                                    line,
+                                )
+
+                        elif currentService == 'upload':
+                            # stuff specifically in the upload section
+                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IP based on whether it should be externally exposed or not
+                                line = re.sub(
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if sftpOpen else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
 
@@ -1889,6 +1964,16 @@ def main():
         help="Expose Filebeat TCP port to external hosts",
     )
     parser.add_argument(
+        '-s',
+        '--sftp-expose',
+        dest='exposeSFTP',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Expose SFTP server (for PCAP upload) to external hosts",
+    )
+    parser.add_argument(
         '-r',
         '--restart-malcolm',
         dest='malcolmAutoRestart',
@@ -1996,6 +2081,7 @@ def main():
             expose_opensearch_default=args.exposeOpenSearch,
             expose_logstash_default=args.exposeLogstash,
             expose_filebeat_default=args.exposeFilebeatTcp,
+            expose_sftp_default=args.exposeSFTP,
             restart_mode_default=args.malcolmAutoRestart,
         )
         eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")

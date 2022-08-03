@@ -38,7 +38,7 @@ processors:
       fields: [ "tcp_log_format", "${FILEBEAT_TCP_PARSE_DROP_FIELD:}" ]
       ignore_missing: true
   - add_tags:
-      tags: [ "_malcolm_beats", "${FILEBEAT_TCP_TAG:}" ]
+      tags: [ "${FILEBEAT_TCP_TAG:_malcolm_beats}" ]
 
 #================================ Outputs ======================================
 

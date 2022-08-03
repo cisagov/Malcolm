@@ -52,8 +52,8 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     - [Tagging](#Tagging)
     - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
 * [Live analysis](#LiveAnalysis)
-    * [Capturing traffic on local network interfaces](#LocalPCAP)
     * [Using a network sensor appliance](#Hedgehog)
+    * [Monitoring local network interfaces](#LocalPCAP)
     * [Manually forwarding logs from an external source](#ExternalForward)
 * [Arkime](#Arkime)
     * [Zeek log integration](#ArkimeZeek)
@@ -103,7 +103,6 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     * [Hardening](#Hardening)
         * [STIG compliance exceptions](#STIGExceptions)
         * [CIS benchmark compliance exceptions](#CISExceptions)
-* [Known issues](#Issues)
 * [Installation example using Ubuntu 22.04 LTS](#InstallationExample)
 * [Upgrading Malcolm](#UpgradePlan)
 * [Modifying or Contributing to Malcolm](#Contributing)
@@ -182,23 +181,23 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.1.0           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.1.0           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.1.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.1.0           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.1.0           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.1.0           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.1.0           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.1.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.1.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.1.0           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.1.0           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.2.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.2.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.2.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.2.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.2.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.2.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.2.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.2.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.2.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.2.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.2.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.2.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.2.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.2.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.2.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.2.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.2.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 #### Import from pre-packaged tarballs
@@ -243,7 +242,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into OpenSearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
 * [OpenSearch](https://opensearch.org/) - a search and analytics engine for indexing and querying network traffic session metadata 
-* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands and is able to understand in the same way it natively understands PCAP data
+* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands in the same way it natively understands PCAP data
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
 * [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
 * [Suricata](https://suricata.io/) - an IDS and threat detection engine
@@ -279,7 +278,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
     * Corelight's [VMware Workspace ONE Access and Identity Manager RCE vulnerability (CVE-2022-22954)](https://github.com/corelight/cve-2022-22954) plugin
     * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
-* Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
+    * Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
@@ -559,15 +558,19 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
 * `PCAP_FILTER` – specifies a tcpdump-style filter expression for local packet capture; leave blank to capture all traffic
-* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF` or `PCAP_ENABLE_TCPDUMP` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
-* `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it closed for processing and a new PCAP file created 
-* `PCAP_ROTATE_MINUTES` – used to specify an time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
+* `PCAP_IFACE` – used to specify the network interface(s) for local packet capture if `PCAP_ENABLE_NETSNIFF`, `PCAP_ENABLE_TCPDUMP`, `ZEEK_LIVE_CAPTURE` or `SURICATA_LIVE_CAPTURE` are enabled; for multiple interfaces, separate the interface names with a comma (e.g., `'enp0s25'` or `'enp10s0,enp11s0'`)
+* `PCAP_IFACE_TWEAK` - if set to `true`, Malcolm will [use `ethtool`](shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be `true` if the interface(s) are being used for capture only, `false` if they are being used for management/communication
+* `PCAP_ROTATE_MEGABYTES` – used to specify how large a locally-captured PCAP file can become (in megabytes) before it is closed for processing and a new PCAP file created 
+* `PCAP_ROTATE_MINUTES` – used to specify a time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
 * `pipeline.workers`, `pipeline.batch.size` and `pipeline.batch.delay` - these settings are used to tune the performance and resource utilization of the the `logstash` container; see [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html)
 * `PUID` and `PGID` - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
 * `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
 * `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
 * `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
 * `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`).
+* `SURICATA_UPDATE_RULES` – if set to `true`, Suricata signatures will periodically be updated (default `false`)
+* `SURICATA_LIVE_CAPTURE` - if set to `true`, Suricata will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
+* `SURICATA_ROTATED_PCAP` - if set to `true`, Suricata can analyze captured PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `SURICATA_AUTO_ANALYZE_PCAP_FILES`); if `SURICATA_LIVE_CAPTURE` is `true`, this should be false, otherwise Suricata will see duplicate traffic
 * `SURICATA_…` - the [`suricata` container entrypoint script](shared/bin/suricata_config_populate.py) can use **many** more environment variables to tweak [suricata.yaml](https://github.com/OISF/suricata/blob/master/suricata.yaml.in); in that script, `DEFAULT_VARS` defines those variables (albeit without the `SURICATA_` prefix you must add to each for use)
 * `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the size threshold (in megabytes) for assigning severity to large connections or file transfers (default `1000`)
 * `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
@@ -579,6 +582,8 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](#ZeekIntelSTIX) or [MISP](#ZeekIntelMISP) feed, only process threat indicators that have been created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2021`) or relative interval (`30 days ago`)
 * `ZEEK_INTEL_ITEM_EXPIRATION` - specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](#ZeekIntel) (default `-1min`, which disables item expiration)
 * `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](#ZeekIntel) files (defaults to empty, which disables automatic refresh)
+* `ZEEK_LIVE_CAPTURE` - if set to `true`, Zeek will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
+* `ZEEK_ROTATED_PCAP` - if set to `true`, Zeek can analyze captured PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `ZEEK_AUTO_ANALYZE_PCAP_FILES`); if `ZEEK_LIVE_CAPTURE` is `true`, this should be false, otherwise Zeek will see duplicate traffic
 
 #### <a name="HostSystemConfigLinux"></a>Linux host system configuration
 
@@ -901,24 +906,28 @@ The **Analyze with Zeek** and **Analyze with Suricata** checkboxes may be used w
 
 ## <a name="LiveAnalysis"></a>Live analysis
 
-### <a name="LocalPCAP"></a>Capturing traffic on local network interfaces
-
-Malcolm's `pcap-capture` container can capture traffic on one or more local network interfaces and periodically rotate these files for processing. The `pcap-capture` Docker container is started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) in order for it to be able to open network interfaces in promiscuous mode for capture.
-
-The environment variables prefixed with `PCAP_` in the [`docker-compose.yml`](#DockerComposeYml) file determine local packet capture behavior. Local capture can also be configured by running [`./scripts/install.py --configure`](#ConfigAndTuning) and answering "yes" to "`Should Malcolm capture network traffic to PCAP files?`."
-
-Note that currently Microsoft Windows and Apple macOS platforms run Docker inside of a virtualized environment. This would require additional configuration of virtual interfaces and port forwarding in Docker, the process for which is outside of the scope of this document.
-
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A remote network sensor appliance can be used to monitor network traffic, capture PCAP files, and forward Zeek logs, Arkime sessions, or other information to Malcolm. [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/main/sensor-iso/) is a Debian-based operating system built to
+A dedicated network sensor appliance is the recommended method for capturing and analyzing live network traffic when performance and throughput is of utmost importance. [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/main/sensor-iso/) is a custom Debian-based operating system built to:
 
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/Malcolm)
+* generate and forward Zeek and Suricata logs, Arkime sessions, and other information to [Malcolm](https://github.com/cisagov/Malcolm)
 
 Please see the [Hedgehog Linux README](https://github.com/cisagov/Malcolm/blob/main/sensor-iso/README.md) for more information.
+
+### <a name="LocalPCAP"></a>Monitoring local network interfaces
+
+Malcolm's `pcap-capture`, `suricata-live` and `zeek-live` containers can monitor one or more local network interfaces, specified by the `PCAP_IFACE` environment variable in [`docker-compose.yml`](#DockerComposeYml). These containers are started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) to allow opening network interfaces in promiscuous mode for capture.
+
+The instances of Zeek and Suricata (in the `suricata-live` and `zeek-live` containers when the `SURICATA_LIVE_CAPTURE` and `ZEEK_LIVE_CAPTURE` environment variables in [`docker-compose.yml`](#DockerComposeYml) are set to `true`, respectively) analyze traffic on-the-fly and generate log files containing network session metadata. These log files are in turn scanned by Filebeat and forwarded to Logstash for enrichment and indexing into the OpenSearch document store.
+
+In contrast, the `pcap-capture` container buffers traffic to PCAP files and periodically rotates these files for processing (by Arkime's `capture` utlity in the `arkime` container) according to the thresholds defined by the `PCAP_ROTATE_MEGABYTES` and `PCAP_ROTATE_MINUTES` environment variables in [`docker-compose.yml`](#DockerComposeYml). If for some reason (e.g., a low resources environment) you also want Zeek and Suricata to process these intermediate PCAP files rather than monitoring the network interfaces directly, you can set `SURICATA_ROTATED_PCAP`/`ZEEK_ROTATED_PCAP` to `true` and `SURICATA_LIVE_CAPTURE`/`ZEEK_LIVE_CAPTURE` to false.
+
+These various options for monitoring traffic on local network interfaces can also be configured by running [`./scripts/install.py --configure`](#ConfigAndTuning).
+
+Note that currently Microsoft Windows and Apple macOS platforms run Docker inside of a virtualized environment. Live traffic capture and analysis on those platforms would require additional configuration of virtual interfaces and port forwarding in Docker which is outside of the scope of this document.
 
 ### <a name="ExternalForward"></a>Manually forwarding logs from an external source
 
@@ -1419,7 +1428,7 @@ Restarting Logstash may take several minutes, after which log ingestion will be 
 
 ### <a name="IndexManagement"></a>OpenSearch index management
 
-Malcolm releases prior to v6.1.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
+Malcolm releases prior to v6.2.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
 
 Since then, OpenSearch Dashboards has developed and released plugins with UIs for [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/). Because these plugins provide a more comprehensive and user-friendly interfaces for these features, the old environment variable-based configuration code has been removed from Malcolm, with the exception of the code that uses `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` and `OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT` which deals with deleting the oldest network session metadata indices when the database exceeds a certain size.
 
@@ -3424,7 +3433,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-6.1.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-6.2.0.iso"
 …
 ```
 
@@ -3597,20 +3606,6 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass intergrity checks.
 
-## <a name="Issues"></a>Known issues
-
-### PCAP file export error when Zeek logs are in Arkime search results
-
-Arkime has a nice feature that allows you to export PCAP files matching the filters currently populating the search field. However, Arkime viewer will raise an exception if records created from Zeek logs are found among the search results to be exported. For this reason, if you are using the export PCAP feature it is recommended that you apply the **Arkime Sessions** view to filter your search results prior to doing the export.
-
-### Manual OpenSearch Dashboards index pattern refresh
-
-Because some fields are created in OpenSearch dynamically when Zeek logs are ingested by Logstash, they may not have been present when OpenSearch Dashboards configures its index pattern field mapping during initialization. As such, those fields will not show up in OpenSearch Dashboards visualizations until its copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
-
-After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the `arkime_sessions3-*` index pattern and clicking the reload **🗘** button near the upper-right of the window.
-
-![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
-
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 22.04 LTS
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/cisagov/Malcolm/tree/main), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
@@ -3738,6 +3733,8 @@ Delete the oldest indices when the database exceeds a certain size? (y/N): n
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
+Download updated Suricata signatures periodically? (Y/n): y
+
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
 Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
@@ -3753,6 +3750,8 @@ Expose Logstash port to external hosts? (y/N): n
 Forward Logstash logs to external OpenSearch instance? (y/N): n
 
 Expose Filebeat TCP port to external hosts? (y/N): n
+
+Expose SFTP server (for PCAP upload) to external hosts? (y/N): n
 
 Enable file extraction with Zeek? (y/N): y
 1: none
@@ -3774,17 +3773,23 @@ Scan extracted PE files with Capa? (y/N): y
 
 Lookup extracted file hashes with VirusTotal? (y/N): n
 
-Download updated scanner signatures periodically? (Y/n): y
+Download updated file scanner signatures periodically? (Y/n): y
 
-Should Malcolm capture network traffic to PCAP files? (y/N): y  
+Should Malcolm capture live network traffic to PCAP files for analysis with Arkime? (y/N): y
 
-Specify capture interface(s) (comma-separated): eth0
-
-Capture packets using netsniff-ng? (Y/n): y
+Capture packets using netsniff-ng? (Y/n): y   
 
 Capture packets using tcpdump? (y/N): n
 
-PCAP capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
+Should Malcolm analyze live network traffic with Suricata? (y/N): y
+
+Should Malcolm analyze live network traffic with Zeek? (y/N): y
+
+Specify capture interface(s) (comma-separated): eth0
+
+Capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
+
+Disable capture interface hardware offloading and adjust ring buffer sizes? (y/N): n
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
@@ -3834,23 +3839,23 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.1.0           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.1.0           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.1.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.1.0           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.1.0           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.1.0           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.1.0           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.1.0           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.1.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.1.0           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.1.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.1.0           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.1.0           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.1.0           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.2.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.2.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.2.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.2.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.2.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.2.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.2.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.2.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.2.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.2.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.2.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.2.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.2.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.2.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.2.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.2.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.2.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.
@@ -3864,18 +3869,34 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
-…
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-…
-Attaching to malcolm_nginx-proxy_1, malcolm_dashboards_1, malcolm_filebeat_1, malcolm_upload_1, malcolm_pcap-monitor_1, malcolm_arkime_1, malcolm_zeek_1, malcolm_dashboards-helper_1, malcolm_logstash_1, malcolm_freq_1, malcolm_opensearch_1, malcolm_htadmin_1, malcolm_pcap-capture_1, malcolm_suricata_1, malcolm_file-monitor_1, malcolm_name-map-ui_1
+
+NAME                          COMMAND                  SERVICE             STATUS               PORTS
+malcolm-api-1                 "/usr/local/bin/dock…"   api                 running (starting)   …
+malcolm-arkime-1              "/usr/local/bin/dock…"   arkime              running (starting)   …
+malcolm-dashboards-1          "/usr/local/bin/dock…"   dashboards          running (starting)   …
+malcolm-dashboards-helper-1   "/usr/local/bin/dock…"   dashboards-helper   running (starting)   …
+malcolm-file-monitor-1        "/usr/local/bin/dock…"   file-monitor        running (starting)   …
+malcolm-filebeat-1            "/usr/local/bin/dock…"   filebeat            running (starting)   …
+malcolm-freq-1                "/usr/local/bin/dock…"   freq                running (starting)   …
+malcolm-htadmin-1             "/usr/local/bin/dock…"   htadmin             running (starting)   …
+malcolm-logstash-1            "/usr/local/bin/dock…"   logstash            running (starting)   …
+malcolm-name-map-ui-1         "/usr/local/bin/dock…"   name-map-ui         running (starting)   …
+malcolm-nginx-proxy-1         "/usr/local/bin/dock…"   nginx-proxy         running (starting)   …
+malcolm-opensearch-1          "/usr/local/bin/dock…"   opensearch          running (starting)   …
+malcolm-pcap-capture-1        "/usr/local/bin/dock…"   pcap-capture        running              …
+malcolm-pcap-monitor-1        "/usr/local/bin/dock…"   pcap-monitor        running (starting)   …
+malcolm-suricata-1            "/usr/local/bin/dock…"   suricata            running (starting)   …
+malcolm-suricata-live-1       "/usr/local/bin/dock…"   suricata-live       running              …
+malcolm-upload-1              "/usr/local/bin/dock…"   upload              running (starting)   …
+malcolm-zeek-1                "/usr/local/bin/dock…"   zeek                running (starting)   …
+malcolm-zeek-live-1           "/usr/local/bin/dock…"   zeek-live           running              …
 …
 ```
 
 It will take several minutes for all of Malcolm's components to start up. Logstash will take the longest, probably 3 to 5 minutes. You'll know Logstash is fully ready when you see Logstash spit out a bunch of starting up messages, ending with this:
 ```
 …
-logstash_1  | [2019-06-11T15:45:42,009][INFO ][logstash.agent    ] Pipelines running {:count=>5, :running_pipelines=>[:"malcolm-output", :"malcolm-input", :"malcolm-suricata", :"malcolm-zeek", :"malcolm-enrichment"], :non_running_pipelines=>[]}
-logstash_1  | [2019-06-11T15:45:42,599][INFO ][logstash.agent    ] Successfully started Logstash API endpoint {:port=>9600}
+malcolm-logstash-1  | [2022-07-27T20:27:52,056][INFO ][logstash.agent           ] Pipelines running {:count=>6, :running_pipelines=>[:"malcolm-input", :"malcolm-output", :"malcolm-beats", :"malcolm-suricata", :"malcolm-enrichment", :"malcolm-zeek"], :non_running_pipelines=>[]}
 …
 ```
 

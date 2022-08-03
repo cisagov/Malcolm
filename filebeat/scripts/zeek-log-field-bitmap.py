@@ -109,17 +109,20 @@ def main():
             #   - the "path" which is the zeek log type (eg., conn, weird, etc.)
             #   - the "fields" list of field names
             headers = {}
-            with open(sys.argv[1], "r") as zeekLogFile:
-                for line in zeekLogFile:
-                    if line.startswith('#'):
-                        values = line.strip().split(ZEEK_LOG_DELIMITER)
-                        key = values.pop(0)[1:]
-                        if len(values) == 1:
-                            headers[key] = values[0]
+            try:
+                with open(sys.argv[1], "r", encoding='utf-8') as zeekLogFile:
+                    for line in zeekLogFile:
+                        if line.startswith('#'):
+                            values = line.strip().split(ZEEK_LOG_DELIMITER)
+                            key = values.pop(0)[1:]
+                            if len(values) == 1:
+                                headers[key] = values[0]
+                            else:
+                                headers[key] = values
                         else:
-                            headers[key] = values
-                    else:
-                        break
+                            break
+            except Exception as e:
+                eprint("{} for '{}': {}".format(type(e).__name__, sys.argv[1], e))
 
             if (
                 (ZEEK_LOG_HEADER_LOGTYPE in headers)

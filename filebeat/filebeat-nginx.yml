@@ -11,10 +11,10 @@ filebeat.modules:
 - module: nginx
   access:
     enabled: true
-    var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/data/nginx}/access.log*"]
+    var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/nginx}/access.log*"]
   error:
     enabled: true
-    var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/data/nginx}/error.log*"]
+    var.paths: ["${FILEBEAT_NGINX_LOG_PATH:/nginx}/error.log*"]
 
 processors:
   - add_tags:
