@@ -161,7 +161,10 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/etc/suricata/rules(/|$)
 !/etc/systemd/system/multi-user\.target\.wants/ntp.service$
 !/home(/|$)
+!/opt/debian-cis(/|$)
+!/opt/harbianaudit(/|$)
 !/opt/sensor(/|$)
+!/opt/STIG-4-Debian(/|$)
 !/opt/yara-rules(/|$)
 !/opt/zeek(/|$)
 !/root(/|$)
