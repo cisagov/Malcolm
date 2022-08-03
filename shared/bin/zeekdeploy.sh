@@ -112,6 +112,17 @@ fi
 sed -r -i "s@(LogDir)\s*=\s*.*@\1 = $ARCHIVE_PATH@" ./zeekctl.cfg
 sed -r -i "s@(SpoolDir)\s*=\s*.*@\1 = $WORK_PATH@" ./zeekctl.cfg
 
+sed -r -i "s/(MailConnectionSummary)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg
+sed -r -i "s/(MinDiskSpace)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg
+sed -r -i "s/(MailHostUpDown)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg
+if grep --quiet ^SendMail ./zeekctl.cfg; then
+  sed -r -i "s/(SendMail)\s*=\s*.*/\1 =/" ./zeekctl.cfg
+elif grep --quiet ^MailTo ./zeekctl.cfg; then
+  sed -i -r '/^MailTo\s*=\s*/i SendMail =' ./zeekctl.cfg
+else
+  echo "SendMail =" >> ./zeekctl.cfg
+fi
+
 # completely rewrite node.cfg for one worker per interface
 # see idaholab/Malcolm#36 for details on fine-tuning
 
