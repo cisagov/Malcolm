@@ -784,15 +784,15 @@ class Installer(object):
                                 line,
                             )
 
-                        elif 'PCAP_IFACE' in line:
-                            # capture interface(s)
-                            line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
-
                         elif 'PCAP_IFACE_TWEAK' in line:
                             # disable NIC hardware offloading features and adjust ring buffers
                             line = re.sub(
                                 r'(PCAP_IFACE_TWEAK\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(tweakIface)}", line
                             )
+
+                        elif 'PCAP_IFACE' in line:
+                            # capture interface(s)
+                            line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
 
                         elif 'PCAP_FILTER' in line:
                             # capture filter
