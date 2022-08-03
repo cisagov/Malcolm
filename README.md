@@ -3607,8 +3607,6 @@ Please review the notes for these additional guidelines. While not claiming an e
 
 **8.7 Verifies integrity all packages** - The [script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/8.7_verify_integrity_packages.sh) which verifies package integrity only "fails" because of missing (status `??5??????` displayed by the utility) language ("locale") files, which are removed as part of the Malcolm aggregator base operating system's trimming-down process. All non-locale-related system files pass intergrity checks.
 
-![Refreshing the OpenSearch Dashboards cached index pattern](./docs/images/screenshots/dashboards_refresh_index.png)
-
 ## <a name="InstallationExample"></a>Installation example using Ubuntu 22.04 LTS
 
 Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/main), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
