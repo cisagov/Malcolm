@@ -37,39 +37,83 @@ x-nginx-variables: &nginx-variables
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
 x-arkime-variables: &arkime-variables
+  # Whether or not Arkime is allowed to delete uploaded/captured PCAP (see
+  #   https://arkime.com/faq#pcap-deletion)
   MANAGE_PCAP_FILES : 'false'
+  # The number of Arkime capture processes allowed to run concurrently
   ARKIME_ANALYZE_PCAP_THREADS : 1
+  # MaxMind GeoIP database update API key (see
+  #   https://support.maxmind.com/hc/en-us/articles/4407116112539-Using-License-Keys)
   MAXMIND_GEOIP_DB_LICENSE_KEY : '0'
 
-x-zeek-variables: &zeek-variables
+x-zeek-live-variables: &zeek-live-variables
+  # Whether or not Zeek should monitor live traffic on a local
+  #   interface (PCAP_IFACE variable below specifies capture interfaces)
+  ZEEK_LIVE_CAPTURE : 'false'
+
+x-zeek-offline-variables: &zeek-offline-variables
+  # Whether or not Zeek should analyze uploaded PCAP files
   ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
+  # The number of Zeek processes for analyzing uploaded PCAP files allowed
+  #   to run concurrently
   ZEEK_AUTO_ANALYZE_PCAP_THREADS : 1
+  # Whether or not Zeek should analyze captured PCAP files captured
+  #   by netsniff-ng/tcpdump (see PCAP_ENABLE_NETSNIFF and PCAP_ENABLE_TCPDUMP
+  #   below). If ZEEK_LIVE_CAPTURE is true, this should be false: otherwise
+  #   Zeek will see duplicate traffic.
+  ZEEK_ROTATED_PCAP : 'true'
+
+x-zeek-variables: &zeek-variables
+  # Specifies the value for Zeek's Intel::item_expiration timeout (-1min to disable)
   ZEEK_INTEL_ITEM_EXPIRATION : '-1min'
+  # When querying a TAXII or MISP feed, only process threat indicators that have
+  #   been created or modified since the time represented by this value;
+  #   it may be either a fixed date/time (01/01/2021) or relative interval (30 days ago)
   ZEEK_INTEL_FEED_SINCE : ''
+  # Specifies a cron expression indicating the refresh interval for generating the
+  #   Zeek Intelligence Framework files ('' disables automatic refresh)
   ZEEK_INTEL_REFRESH_CRON_EXPRESSION : ''
+  # Determines the file extraction behavior for file transfers detected by Zeek
   ZEEK_EXTRACTOR_MODE : 'none'
+  # Whether or not files extant in ./zeek-logs/extract_files/ will be ignored on startup
   EXTRACTED_FILE_IGNORE_EXISTING : 'false'
+  # Determines the behavior for preservation of Zeek-extracted files
   EXTRACTED_FILE_PRESERVATION : 'quarantined'
+  # The minimum size (in bytes) for files to be extracted by Zeek
   EXTRACTED_FILE_MIN_BYTES : 64
+  # The maximum size (in bytes) for files to be extracted by Zeek
   EXTRACTED_FILE_MAX_BYTES : 134217728
+  # A VirusTotal Public API v.20 used to submit hashes of Zeek-extracted files
   VTOT_API2_KEY : '0'
+  # Rate limiting for VirusTotal, ClamAV, YARA and capa with Zeek-extracted files
   VTOT_REQUESTS_PER_MINUTE : 4
   CLAMD_MAX_REQUESTS : 8
   YARA_MAX_REQUESTS : 8
   CAPA_MAX_REQUESTS : 4
+  # Whether or not YARA will scan Zeek-extracted files
   EXTRACTED_FILE_ENABLE_YARA : 'false'
+  # Whether or not the default YARA ruleset will be ignored and only custom rules used
   EXTRACTED_FILE_YARA_CUSTOM_ONLY : 'false'
+  # Whether or not capa will scan Zeek-extracted executables
   EXTRACTED_FILE_ENABLE_CAPA : 'false'
+  # Whether or not capa will be extra verbose
   EXTRACTED_FILE_CAPA_VERBOSE : 'false'
+  # Whether or not ClamAV will scan Zeek-extracted executables
   EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
+  # Whether or not to regularly update rule definitions for file scanning engines
   EXTRACTED_FILE_UPDATE_RULES : 'false'
+  # Whether or not to enable debug output for Zeek-extracted file scanning
   EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
+  # Whether or not to enable very verbose debug output for Zeek-extracted file scanning
   EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
+  # Whether or not to serve the directory containing Zeek-extracted over HTTP at ./extracted-files/
   EXTRACTED_FILE_HTTP_SERVER_ENABLE : 'false'
+  # Whether or not Zeek-extracted files served over HTTP will be AES-256-CBC-encrypted
   EXTRACTED_FILE_HTTP_SERVER_ENCRYPT : 'true'
+  # Specifies the AES-256-CBC decryption password for encrypted Zeek-extracted files served over HTTP
   EXTRACTED_FILE_HTTP_SERVER_KEY : 'quarantined'
-  # environment variables for tweaking Zeek at runtime (see local.zeek)
-  # set to a non-blank value to disable the corresponding feature
+  # Environment variables for tweaking Zeek at runtime (see local.zeek)
+  #   Set to any non-blank value to disable the corresponding feature
   ZEEK_DISABLE_HASH_ALL_FILES : ''
   ZEEK_DISABLE_LOG_PASSWORDS : ''
   ZEEK_DISABLE_SSL_VALIDATE_CERTS : ''
@@ -86,79 +130,173 @@ x-zeek-variables: &zeek-variables
   ZEEK_DISABLE_SPICY_TFTP : ''
   ZEEK_DISABLE_SPICY_WIREGUARD : ''
 
-x-suricata-variables: &suricata-variables
+x-suricata-live-variables: &suricata-live-variables
+  # Whether or not Suricata should monitor live traffic on a local
+  #   interface (PCAP_IFACE variable below specifies capture interfaces)
+  SURICATA_LIVE_CAPTURE : 'false'
+  # Specifies the Suricata runmode for live capture (see
+  #   https://suricata.readthedocs.io/en/latest/performance/runmodes.html)
+  SURICATA_RUNMODE : 'workers'
+
+x-suricata-offline-variables: &suricata-offline-variables
+  # Whether or not Suricata should analyze uploaded PCAP files
   SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
-  SURICATA_AUTO_ANALYZE_PCAP_THREADS: 1
-  SURICATA_CUSTOM_RULES_ONLY: 'false'
+  # The number of Suricata processes for analyzing uploaded PCAP files allowed
+  #   to run concurrently
+  SURICATA_AUTO_ANALYZE_PCAP_THREADS : 1
+  # Whether or not Suricata should analyze captured PCAP files captured
+  #   by netsniff-ng/tcpdump (see PCAP_ENABLE_NETSNIFF and PCAP_ENABLE_TCPDUMP
+  #   below). If SURICATA_LIVE_CAPTURE is true, this should be false: otherwise
+  #   Suricata will see duplicate traffic.
+  SURICATA_ROTATED_PCAP : 'true'
+
+x-suricata-variables: &suricata-variables
+  # Whether or not the default Suricata ruleset will be ignored and only custom rules used
+  SURICATA_CUSTOM_RULES_ONLY : 'false'
+  SURICATA_UPDATE_RULES: 'false'
+  SURICATA_UPDATE_DEBUG: 'false'
+  SURICATA_UPDATE_ETOPEN: 'true'
   # suricata_config_populate.py can use MANY more environment variables to tweak
-  # suricata.yaml (see https://github.com/OISF/suricata/blob/master/suricata.yaml.in and
-  # https://suricata.readthedocs.io/en/suricata-6.0.0/configuration/suricata-yaml.html).
-  # DEFAULT_VARS in that script defines those variables (albeit without the
-  # required `SURICATA_` prefixing each)
+  #   suricata.yaml (see https://github.com/OISF/suricata/blob/master/suricata.yaml.in and
+  #   https://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html).
+  #   DEFAULT_VARS in that script defines those variables (albeit without the
+  #   required `SURICATA_` prefixing each)
 
 x-dashboards-helper-variables: &dashboards-helper-variables
+  # The maximum cumulative size of OpenSearch indices containing network traffic metadata
+  #   (arkime_sessions3-*) before which the oldest indices will be deleted ('' to disable
+  #   storage-based index pruning).
   OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
+  # Whether to determine the "oldest" indices for storage-based index pruning by creation
+  #   date/time ('true') or index name ('false')
   OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
+  # Parameters for the OpenSearch repository used for index snapshots
   ISM_SNAPSHOT_COMPRESSED : 'false'
   ISM_SNAPSHOT_REPO : 'logs'
 
 x-logstash-variables: &logstash-variables
+  # Parameters for tuning Logstash pipelines (see
+  #   https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html)
   pipeline.workers : 3
   pipeline.batch.size : 75
   pipeline.batch.delay : 50
+  # Whether or not Logstash will map MAC addresses to vendors for MAC addresses
   LOGSTASH_OUI_LOOKUP       : 'true'
+  # Whether or not Logstash will perform severity scoring on network traffic metadata
   LOGSTASH_SEVERITY_SCORING : 'true'
+  # Whether or not Logstash will perform a reverse DNS lookup for external IP addresses
   LOGSTASH_REVERSE_DNS      : 'false'
-  # OS_EXTERNAL_HOSTS : ''
-  # OS_EXTERNAL_SSL : 'true'
-  # OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
+  # If specified (in the format '10.0.0.123:9200'), logs received by Logstash will be
+  #   forwarded on to another external OpenSearch instance in addition to the one
+  #   maintained locally by Malcolm
+  OS_EXTERNAL_HOSTS : ''
+  # Whether or not Logstash will use HTTPS for the connection to OS_EXTERNAL_HOSTS
+  OS_EXTERNAL_SSL : 'true'
+  # Whether or not Logstash will require full TLS certificate validation for the connection
+  #   to OS_EXTERNAL_HOSTS (this may fail if using self-signed certificates)
+  OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
   # For security, OS_EXTERNAL_USER and OS_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
   #   See also volume mount for logstash.keystore below.
   # OS_EXTERNAL_USER : 'janedoe'
   # OS_EXTERNAL_PASSWORD : 'secret'
 
 x-filebeat-variables: &filebeat-variables
+  # filebeat parameters used for monitoring log files containing network traffic metadata
+  #   (see https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html)
   FILEBEAT_SCAN_FREQUENCY : '10s'
   FILEBEAT_CLEAN_INACTIVE : '180m'
   FILEBEAT_IGNORE_OLDER : '120m'
   FILEBEAT_CLOSE_INACTIVE : '120s'
+  FILEBEAT_CLOSE_INACTIVE_LIVE : '90m'
   FILEBEAT_CLOSE_RENAMED : 'true'
   FILEBEAT_CLOSE_REMOVED : 'true'
   FILEBEAT_CLOSE_EOF : 'true'
   FILEBEAT_CLEAN_REMOVED : 'true'
+  # Whether or not to expose a filebeat TCP input listener (see
+  #    https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html)
   FILEBEAT_TCP_LISTEN : 'false'
+  # Log format expected for events sent to the filebeat TCP input listener ('json' or 'raw')
   FILEBEAT_TCP_LOG_FORMAT : 'raw'
+  # Source field name to parse (when FILEBEAT_TCP_LOG_FORMAT is 'json') for events sent to the
+  #    filebeat TCP input listener
   FILEBEAT_TCP_PARSE_SOURCE_FIELD : 'message'
+  # Target field name to store decoded JSON fields (when FILEBEAT_TCP_LOG_FORMAT is 'json') for
+  #    events sent to the filebeat TCP input listener
   FILEBEAT_TCP_PARSE_TARGET_FIELD : ''
+  # Name of field to drop (if it exists) in events sent to the filebeat TCP input listener
   FILEBEAT_TCP_PARSE_DROP_FIELD : ''
-  FILEBEAT_TCP_TAG : ''
+  # Tag to append to events sent to the filebeat TCP input listener
+  FILEBEAT_TCP_TAG : '_malcolm_beats'
 
 x-common-upload-variables: &common-upload-variables
+  # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata
+  #   parsed from uploaded PCAP files
   AUTO_TAG : 'true'
+  # The node name (e.g., the hostname of this machine running Malcolm) to associate with
+  #   network traffic metadata
   PCAP_NODE_NAME : 'malcolm'
+  # Whether or not to enable debug output for processing uploaded/captured PCAP files
   PCAP_PIPELINE_DEBUG : 'false'
+  # Whether or not to enable very verbose debug output for processing uploaded/captured PCAP files
   PCAP_PIPELINE_DEBUG_EXTRA : 'false'
+  # Whether or not PCAP files extant in ./pcap/ will be ignored on startup
   PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
+  # 'pcap-monitor' to match the name of the container providing the uploaded/captured PCAP file
+  #   monitoring service
   PCAP_MONITOR_HOST : 'pcap-monitor'
+  # The age (in minutes) at which already-processed log files containing network traffic metadata should
+  #   be pruned from the filesystem
   LOG_CLEANUP_MINUTES : 360
+  # The age (in minutes) at which the compressed archives containing already-processed log files should
+  #   be pruned from the filesystem
   ZIP_CLEANUP_MINUTES : 720
 
 x-common-lookup-variables: &common-lookup-variables
+  # Whether or not domain names (from DNS queries and SSL server names) will be assigned entropy scores
+  #   as calculated by freq
   FREQ_LOOKUP : 'true'
+  # When severity scoring is enabled, this variable indicates the entropy threshold for
+  #   assigning severity to events with entropy scores calculated by freq;
+  #   a lower value will only assign severity scores to fewer domain names with higher entropy
   FREQ_SEVERITY_THRESHOLD : '2.0'
+  # When severity scoring is enabled, this variable indicates the size threshold (in megabytes)
+  #   for assigning severity to large connections or file transfers
   TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
+  # When severity scoring is enabled, this variable indicates the duration threshold (in seconds)
+  #   for assigning severity to long connections
   CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
+  # When severity scoring is enabled, this variable defines a comma-separated list of
+  #   countries of concern (using ISO 3166-1 alpha-2 codes)
   QUESTIONABLE_COUNTRY_CODES : 'CN,IR,KP,RU,UA'
 
 x-common-beats-variables: &common-beats-variables
+  # Whether or not Logstash will use require encrypted communications for any external
+  #   Beats-based forwarders from which it will accept logs
   BEATS_SSL : 'false'
 
 x-pcap-capture-variables: &pcap-capture-variables
+  # Whether or not netsniff-ng should create PCAP files from live traffic on a local
+  #   interface for analysis by Arkime capture (should be 'false' if PCAP_ENABLE_TCPDUMP
+  #   is 'true')
   PCAP_ENABLE_NETSNIFF : 'false'
+  # Whether or not tcpdump should create PCAP files from live traffic on a local
+  #   interface for analysis by Arkime capture (should be 'false' if PCAP_ENABLE_NETSNIFF
+  #   is 'true')
   PCAP_ENABLE_TCPDUMP : 'false'
+  # Specifies local network interface(s) for local packet capture if PCAP_ENABLE_NETSNIFF,
+  #   PCAP_ENABLE_TCPDUMP, ZEEK_LIVE_CAPTURE or SURICATA_LIVE_CAPTURE are 'true'
   PCAP_IFACE : 'lo'
+  # Whether or not ethtool will disable NIC hardware offloading features and adjust
+  #   ring buffer sizes for capture interface(s) (should be 'true' if the interface(s) are
+  #   being used for capture only, 'false' if they are being used for management/communication)
+  PCAP_IFACE_TWEAK : 'false'
+  # Specifies how large a locally-captured PCAP file can become (in megabytes) before
+  #   it is closed for processing and a new PCAP file created
   PCAP_ROTATE_MEGABYTES : 1024
+  # Specifies a time interval (in minutes) after which a locally-captured PCAP file
+  #   will be closed for processing and a new PCAP file created
   PCAP_ROTATE_MINUTES : 10
+  # Specifies a tcpdump-style filter expression for local packet capture ('' to capture all traffic)
   PCAP_FILTER : ''
 ################################################################################
 
@@ -167,7 +305,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.1.0
+    image: malcolmnetsec/opensearch:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -209,7 +347,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.1.0
+    image: malcolmnetsec/dashboards-helper:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -240,7 +378,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.1.0
+    image: malcolmnetsec/dashboards:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -266,7 +404,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.1.0
+    image: malcolmnetsec/logstash-oss:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -318,7 +456,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.1.0
+    image: malcolmnetsec/filebeat-oss:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -331,9 +469,10 @@ services:
       << : *filebeat-variables
       << : *common-upload-variables
       << : *common-beats-variables
-      FILEBEAT_ZEEK_LOG_PATH : '/data/zeek/current'
-      FILEBEAT_SURICATA_LOG_PATH : '/data/suricata'
-      FILEBEAT_NGINX_LOG_PATH : '/data/nginx'
+      FILEBEAT_ZEEK_LOG_PATH : '/zeek/current'
+      FILEBEAT_ZEEK_LOG_LIVE_PATH : '/zeek/live'
+      FILEBEAT_SURICATA_LOG_PATH : '/suricata'
+      FILEBEAT_NGINX_LOG_PATH : '/nginx'
     depends_on:
       - logstash
     expose:
@@ -341,9 +480,9 @@ services:
     ports:
       - "127.0.0.1:5045:5045"
     volumes:
-      - nginx-log-path:/data/nginx:ro
-      - ./zeek-logs:/data/zeek
-      - ./suricata-logs:/data/suricata
+      - nginx-log-path:/nginx:ro
+      - ./zeek-logs:/zeek
+      - ./suricata-logs:/suricata
       - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
       - ./filebeat/certs/client.crt:/certs/client.crt:ro
       - ./filebeat/certs/client.key:/certs/client.key:ro
@@ -357,7 +496,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.1.0
+    image: malcolmnetsec/arkime:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -403,23 +542,29 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.1.0
+    image: malcolmnetsec/zeek:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: zeek
     networks:
       - default
-    environment:
-      << : *process-variables
-      << : *common-upload-variables
-      << : *zeek-variables
     ulimits:
       memlock:
         soft: -1
         hard: -1
     cap_add:
       - IPC_LOCK
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+    environment:
+      << : *process-variables
+      << : *common-upload-variables
+      << : *zeek-variables
+      << : *zeek-offline-variables
+      ZEEK_PCAP_PROCESSOR : 'true'
+      ZEEK_CRON : 'false'
     depends_on:
       - opensearch
     volumes:
@@ -434,39 +579,111 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  zeek-live:
+    build:
+      context: .
+      dockerfile: Dockerfiles/zeek.Dockerfile
+    image: malcolmnetsec/zeek:6.2.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    network_mode: host
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+    environment:
+      << : *process-variables
+      << : *common-upload-variables
+      << : *zeek-variables
+      << : *zeek-live-variables
+      << : *pcap-capture-variables
+      ZEEK_PCAP_PROCESSOR : 'false'
+      ZEEK_CRON : 'true'
+      ZEEK_LOG_PATH : '/zeek/live'
+      ZEEK_INTEL_PATH : '/opt/zeek/share/zeek/site/intel'
+      EXTRACT_FILES_PATH : '/zeek/extract_files'
+    volumes:
+      - ./zeek-logs/live:/zeek/live
+      - ./zeek-logs/extract_files:/zeek/extract_files
+      - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
+      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
   suricata:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.1.0
+    image: malcolmnetsec/suricata:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: suricata
+    networks:
+      - default
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
     environment:
       << : *process-variables
-      << : *logstash-variables
       << : *common-upload-variables
       << : *suricata-variables
+      << : *suricata-offline-variables
+      SURICATA_PCAP_PROCESSOR : 'true'
     depends_on:
       - logstash
     volumes:
       - ./suricata-logs:/var/log/suricata
       - ./pcap:/data/pcap
       - ./suricata/rules:/opt/suricata/rules:ro
-    expose:
-      - 8711
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 120s
+  suricata-live:
+    build:
+      context: .
+      dockerfile: Dockerfiles/suricata.Dockerfile
+    image: malcolmnetsec/suricata:6.2.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    network_mode: host
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - IPC_LOCK
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+    environment:
+      << : *process-variables
+      << : *common-upload-variables
+      << : *suricata-variables
+      << : *suricata-live-variables
+      << : *pcap-capture-variables
+      SURICATA_PCAP_PROCESSOR : 'false'
+    volumes:
+      - ./suricata-logs:/var/log/suricata
+      - ./suricata/rules:/opt/suricata/rules:ro
   file-monitor:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.1.0
+    image: malcolmnetsec/file-monitor:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -481,8 +698,8 @@ services:
       - 3310
       - 8440
     volumes:
-      - ./zeek-logs/extract_files:/data/zeek/extract_files
-      - ./zeek-logs/current:/data/zeek/logs
+      - ./zeek-logs/extract_files:/zeek/extract_files
+      - ./zeek-logs/current:/zeek/logs
       - ./yara/rules:/yara-rules/custom:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "watcher", "logger"]
@@ -494,7 +711,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.1.0
+    image: malcolmnetsec/pcap-capture:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -517,7 +734,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.1.0
+    image: malcolmnetsec/pcap-monitor:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -545,7 +762,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.1.0
+    image: malcolmnetsec/file-upload:6.2.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -573,7 +790,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.1.0
+    image: malcolmnetsec/htadmin:6.2.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -600,7 +817,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.1.0
+    image: malcolmnetsec/freq:6.2.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -623,7 +840,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.1.0
+    image: malcolmnetsec/name-map-ui:6.2.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -649,7 +866,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:6.1.0
+    image: malcolmnetsec/api:6.2.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -675,7 +892,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.1.0
+    image: malcolmnetsec/nginx-proxy:6.2.0
     restart: "no"
     stdin_open: false
     tty: true

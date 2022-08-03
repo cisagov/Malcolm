@@ -80,6 +80,7 @@ CreateCaptureConfigs
 mkdir -p "$SUPERVISOR_PATH/"{log,run}
 rm -f "$SUPERVISOR_PATH/"/log/*
 
+rm -rf /opt/sensor/sensor_ctl/zeek/intel/lock || true
 mkdir -p "$SUPERVISOR_PATH"/suricata/rules "$ZEEK_LOG_PATH"/suricata 2>/dev/null || true
 mkdir -p "$PCAP_PATH"/ 2>/dev/null || true
 mkdir -p "$SUPERVISOR_PATH"/supercronic 2>/dev/null && touch "$SUPERVISOR_PATH"/supercronic/crontab || true

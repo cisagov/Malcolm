@@ -5,10 +5,10 @@
 # clone STIG-4-Debian, harbian-audit and debian-cis and clean up some stuff we don't need
 mkdir -p /opt
 git clone --depth 1 --recursive --single-branch https://github.com/hardenedlinux/STIG-4-Debian /opt/STIG-4-Debian
-git clone --depth 1 --recursive --single-branch https://github.com/hardenedlinux/harbian-audit /opt/harbian-audit
+git clone --depth 1 --recursive --single-branch https://github.com/hardenedlinux/harbian-audit /opt/harbianaudit
 git clone --depth 1 --recursive --single-branch https://github.com/ovh/debian-cis /opt/debian-cis
-sed -i "s#CIS_ROOT_DIR=.*#CIS_ROOT_DIR='/opt/harbian-audit'#" /opt/harbian-audit/etc/default.cfg
+sed -i "s#CIS_ROOT_DIR=.*#CIS_ROOT_DIR='/opt/harbianaudit'#" /opt/harbianaudit/etc/default.cfg
 sed -i "s#CIS_ROOT_DIR=.*#CIS_ROOT_DIR='/opt/debian-cis'#" /opt/debian-cis/debian/default
-# cp /opt/harbian-audit/debian/default.cfg /etc/default/cis-hardening
+# cp /opt/harbianaudit/debian/default.cfg /etc/default/cis-hardening
 # cp /opt/debian-cis/debian/default /etc/default/cis-hardening
-rm -rf /opt/STIG-4-Debian/.git /opt/harbian-audit/.git /opt/debian-cis/.git
+rm -rf /opt/STIG-4-Debian/.git /opt/harbianaudit/.git /opt/debian-cis/.git

@@ -1,0 +1,15 @@
+diff --git a/viewer/apiSessions.js b/viewer/apiSessions.js
+index 367ef7d9..4ec216b7 100644
+--- a/viewer/apiSessions.js
++++ b/viewer/apiSessions.js
+@@ -1124,6 +1124,10 @@ module.exports = (Config, Db, internals, ViewerUtils) => {
+ 
+       const fields = session.fields;
+ 
++      if (!fields.packetPos) {
++        return endCb(null);
++      }
++
+       if (maxPackets && fields.packetPos.length > maxPackets) {
+         fields.packetPos.length = maxPackets;
+       }

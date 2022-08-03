@@ -107,7 +107,9 @@ if [ -d "$WORKDIR" ]; then
 
   # copy shared scripts
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
-  chown -R root:root ./config/includes.chroot/usr/local/bin/
+  mkdir -p ./config/includes.chroot/opt/zeek/bin/
+  mv ./config/includes.chroot/usr/local/bin/zeekdeploy.sh ./config/includes.chroot/opt/zeek/bin/
+  chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/zeek/bin/
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info

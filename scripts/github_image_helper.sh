@@ -80,7 +80,7 @@ function PullAndTagGithubWorkflowImages() {
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
   echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
-  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1); do
+  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u); do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
   echo "done"

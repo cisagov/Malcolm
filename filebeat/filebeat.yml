@@ -6,11 +6,11 @@ logging.metrics.enabled: false
 
 #================================ Inputs =======================================
 
-#-------------------------- Current "real" Zeek logs ---------------------------
+#-------------------------- "Real" Zeek logs -----------------------------------
 filebeat.inputs:
 - type: log
   paths:
-    - ${FILEBEAT_ZEEK_LOG_PATH:/data/zeek/current}/*.log
+    - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/*.log
   # see comment below for signatures(_carved).log
   exclude_files: ['signatures\(_carved.*\)\.log$']
   symlinks: true
@@ -19,12 +19,29 @@ filebeat.inputs:
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
-  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:45m}
-  ignore_older: ${FILEBEAT_IGNORE_OLDER:30m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:30s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
   close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
   close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
   close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
+- type: log
+  paths:
+    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/logs/current/*.log
+  symlinks: true
+  fields_under_root: true
+  tags: ["_filebeat_zeek_live"]
+  compression_level: 0
+  exclude_lines: ['^\s*#']
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #-------------------------- Carved file signature hit log ----------------------
@@ -37,7 +54,7 @@ filebeat.inputs:
 # custom settings here.
 - type: log
   paths:
-    - ${FILEBEAT_ZEEK_LOG_PATH:/data/zeek/current}/signatures(_carved*).log
+    - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/signatures(_carved*).log
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek"]
@@ -55,18 +72,34 @@ filebeat.inputs:
 #-------------------------- Suricata EVE JSON logs -----------------------------
 - type: log
   paths:
-    - ${FILEBEAT_SURICATA_LOG_PATH:/data/suricata}/eve-*.json
+    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/eve-*.json
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata"]
   compression_level: 0
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
-  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:45m}
-  ignore_older: ${FILEBEAT_IGNORE_OLDER:30m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:30s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
   close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
   close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
   close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
+- type: log
+  paths:
+    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/live/eve.json
+  symlinks: true
+  fields_under_root: true
+  tags: ["_filebeat_suricata_live"]
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 #================================ Outputs ======================================

@@ -21,8 +21,8 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG ZEEK_EXTRACTOR_PATH=/data/zeek/extract_files
-ARG ZEEK_LOG_DIRECTORY=/data/zeek/logs
+ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
+ARG ZEEK_LOG_DIRECTORY=/zeek/logs
 ARG EXTRACTED_FILE_IGNORE_EXISTING=false
 ARG EXTRACTED_FILE_PRESERVATION=quarantined
 ARG EXTRACTED_FILE_WATCHER_START_SLEEP=30
@@ -212,7 +212,7 @@ RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
 
 USER root
 
-WORKDIR /data/zeek/extract_files
+WORKDIR /zeek/extract_files
 
 ENV PATH "${CAPA_DIR}:${PATH}"
 

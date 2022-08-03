@@ -32,9 +32,10 @@ ARG FILEBEAT_CLOSE_RENAMED=true
 ARG FILEBEAT_CLOSE_REMOVED=true
 ARG FILEBEAT_CLOSE_EOF=true
 ARG FILEBEAT_CLEAN_REMOVED=true
-ARG FILEBEAT_ZEEK_LOG_PATH="/data/zeek/current"
-ARG FILEBEAT_SURICATA_LOG_PATH="/data/suricata"
-ARG FILEBEAT_NGINX_LOG_PATH="/data/nginx"
+ARG FILEBEAT_ZEEK_LOG_PATH="/zeek/current"
+ARG FILEBEAT_ZEEK_LOG_LIVE_PATH="/zeek/live"
+ARG FILEBEAT_SURICATA_LOG_PATH="/suricata"
+ARG FILEBEAT_NGINX_LOG_PATH="/nginx"
 ARG LOG_CLEANUP_MINUTES=0
 ARG ZIP_CLEANUP_MINUTES=0
 ARG NGINX_LOG_ACCESS_AND_ERRORS=false
@@ -51,7 +52,7 @@ ARG FILEBEAT_TCP_PARSE_PROCESS_ARRAY=false
 ARG FILEBEAT_TCP_PARSE_SOURCE_FIELD="message"
 ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
-ARG FILEBEAT_TCP_TAG=""
+ARG FILEBEAT_TCP_TAG="_malcolm_beats"
 
 ENV SUPERCRONIC_VERSION "0.2.1"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
@@ -77,8 +78,8 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
-ADD filebeat/scripts /data/
-ADD shared/bin/opensearch_status.sh /data/
+ADD filebeat/scripts /usr/local/bin/
+ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN for INPUT in nginx tcp; do \
       mkdir -p /usr/share/filebeat-$INPUT/data; \
@@ -87,8 +88,8 @@ RUN for INPUT in nginx tcp; do \
       chmod 750 /usr/share/filebeat-$INPUT; \
       chmod 770 /usr/share/filebeat-$INPUT/data; \
     done; \
-    chmod 755 /data/*.sh /data/*.py && \
-    (echo -e "* * * * * /data/filebeat-process-zeek-folder.sh\n*/5 * * * * /data/filebeat-clean-zeeklogs-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
+    chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py && \
+    (echo -e "* * * * * /usr/local/bin/filebeat-process-zeek-folder.sh\n*/5 * * * * /usr/local/bin/filebeat-clean-zeeklogs-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
 
 ENV AUTO_TAG $AUTO_TAG
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
@@ -102,6 +103,7 @@ ENV FILEBEAT_CLOSE_REMOVED $FILEBEAT_CLOSE_REMOVED
 ENV FILEBEAT_CLOSE_EOF $FILEBEAT_CLOSE_EOF
 ENV FILEBEAT_CLEAN_REMOVED $FILEBEAT_CLEAN_REMOVED
 ENV FILEBEAT_ZEEK_LOG_PATH $FILEBEAT_ZEEK_LOG_PATH
+ENV FILEBEAT_ZEEK_LOG_LIVE_PATH $FILEBEAT_ZEEK_LOG_LIVE_PATH
 ENV FILEBEAT_SURICATA_LOG_PATH $FILEBEAT_SURICATA_LOG_PATH
 ENV FILEBEAT_NGINX_LOG_PATH $FILEBEAT_NGINX_LOG_PATH
 ENV NGINX_LOG_ACCESS_AND_ERRORS $NGINX_LOG_ACCESS_AND_ERRORS
@@ -120,8 +122,7 @@ ENV FILEBEAT_TCP_PARSE_TARGET_FIELD $FILEBEAT_TCP_PARSE_TARGET_FIELD
 ENV FILEBEAT_TCP_PARSE_DROP_FIELD $FILEBEAT_TCP_PARSE_DROP_FIELD
 ENV FILEBEAT_TCP_TAG $FILEBEAT_TCP_TAG
 ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat/data/registry/filebeat/data.json"
-ENV FILEBEAT_ZEEK_DIR "/data/zeek/"
-ENV PATH="/data:${PATH}"
+ENV FILEBEAT_ZEEK_DIR "/zeek/"
 
 VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
 

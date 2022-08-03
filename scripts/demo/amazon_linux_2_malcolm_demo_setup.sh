@@ -576,7 +576,7 @@ function InstallMalcolm {
         done
       done
       touch auth.env
-      grep image: docker-compose-standalone.yml | awk '{print $2}' | xargs -l -r $SUDO_CMD docker pull
+      grep image: docker-compose-standalone.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1
     fi
