@@ -948,3 +948,4 @@ volumes:
 
 networks:
   default:
+    external: false

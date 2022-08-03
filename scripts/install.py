@@ -1032,9 +1032,11 @@ class Installer(object):
                         if not sectionStartLine:
                             if not networkWritten:
                                 print(f"{sectionIndents[currentSection]}default:")
+                                print(
+                                    f"{sectionIndents[currentSection] * 2}external: {'true' if (len(dockerNetworkExternalName) > 0) else 'false'}"
+                                )
                                 if len(dockerNetworkExternalName) > 0:
-                                    print(f"{sectionIndents[currentSection] * 2}external:")
-                                    print(f"{sectionIndents[currentSection] * 3}name: {dockerNetworkExternalName}")
+                                    print(f"{sectionIndents[currentSection] * 2}name: {dockerNetworkExternalName}")
                                 networkWritten = True
                             # we already re-wrote the network stuff, anything else is superfluous
                             skipLine = True
