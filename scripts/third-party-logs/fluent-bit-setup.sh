@@ -126,7 +126,7 @@ function _fluentbit_bin {
   else
     FLUENTBIT_BIN='fluent-bit'
   fi
-  "$FLUENTBIT_BIN" "$@"
+  echo "$FLUENTBIT_BIN"
 }
 
 function _fluentbit_parser_cfg {
@@ -141,10 +141,14 @@ function _fluentbit_parser_cfg {
   fi
 }
 
+function _fluentbit_run {
+  "$(_fluentbit_bin)" "$@"
+}
+
 ###############################################################################
 # install fluent-bit if it's not already installed
 function InstallFluentBit() {
-  _fluentbit_bin --version >/dev/null 2>&1
+  _fluentbit_run --version >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
 
     if [[ -n "$LINUX" ]]; then
@@ -176,7 +180,7 @@ function InstallFluentBit() {
     echo "fluent-bit is already installed" 2>&1
   fi
 
-  _fluentbit_bin --version >/dev/null 2>&1
+  _fluentbit_run --version >/dev/null 2>&1
 }
 
 ###############################################################################
@@ -282,7 +286,7 @@ function GetMalcolmConnInfo() {
     FLUENTBIT_ARGS+=( "'*'" )
   fi
   FLUENTBIT_ARGS+=( -f )
-  FLUENTBIT_ARGS+=( -1 )
+  FLUENTBIT_ARGS+=( 1 )
 
   ( IFS=$'\n'; echo "${FLUENTBIT_ARGS[*]}" )
 }
@@ -292,12 +296,20 @@ function GetMalcolmConnInfo() {
 function GetFluentBitFormatInfo() {
   INPUT_NAME=
   declare -A PARAMS
-  readarray -t PLUGINS < <(_fluentbit_bin --help 2>&1 | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' | sed -n '/^Inputs$/, /^Filters$/{ /^Inputs$/! { /^Filters$/! p } }' | grep . | awk '{print $1}' | sort)
 
-  echo "Enter input plugin and parameters. Leave parameters blank for defaults." >&2
+  echo "Choose input plugin and enter parameters. Leave parameters blank for defaults." >&2
   echo "  see https://docs.fluentbit.io/manual/pipeline/inputs" >&2
+  readarray -t PLUGINS < <(_fluentbit_run --help 2>&1 | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' | sed -n '/^Inputs$/, /^Filters$/{ /^Inputs$/! { /^Filters$/! p } }' | grep . | awk '{print $1}' | sort)
+  for i in "${!PLUGINS[@]}"; do
+    ((IPLUS=i+1))
+    printf "%s\t%s\n" "$IPLUS" "${PLUGINS[$i]}" >&2
+  done
   while [[ -z "$INPUT_NAME" ]] || ! _in_array PLUGINS "$INPUT_NAME"; do
-    INPUT_NAME="$(_GetString "Enter input plugin name:" "" | tr '[:upper:]' '[:lower:]')"
+    echo -n "Input plugin: " >&2
+    read PLUGIN_IDX
+    if (( $PLUGIN_IDX > 0 )) && (( $PLUGIN_IDX <= "${#PLUGINS[@]}" )); then
+      INPUT_NAME="${PLUGINS[((PLUGIN_IDX-1))]}"
+    fi
   done
 
   case $INPUT_NAME in
@@ -528,7 +540,7 @@ function GetFluentBitFormatInfo() {
   esac
 
   for KEY in ${PARAM_NAMES[@]}; do
-    VALUE="$(_GetString "$KEY: ")"
+    VALUE="$(_GetString "$INPUT_NAME $KEY: ")"
     [[ -n "$VALUE" ]] && PARAMS+=(["$KEY"]="$VALUE")
   done
 
@@ -558,10 +570,10 @@ trap _clean_up EXIT
 FUNCTIONS=($(declare -F | awk '{print $NF}' | tac | egrep -v "^_"))
 
 # present the menu to our customer and get their selection
-printf "%s\t%s\n" "0" "ALL"
+printf "%s\t%s\n" "0" "ALL" >&2
 for i in "${!FUNCTIONS[@]}"; do
   ((IPLUS=i+1))
-  printf "%s\t%s\n" "$IPLUS" "${FUNCTIONS[$i]}"
+  printf "%s\t%s\n" "$IPLUS" "${FUNCTIONS[$i]}" >&2
 done
 
 echo -n "Operation: " >&2
@@ -574,8 +586,8 @@ if (( $USER_FUNCTION_IDX == 0 )); then
     if [[ "${#FLUENTBIT_INPUT_INFO[@]}" -ge 2 ]]; then
       readarray -t MALCOLM_CONN_INFO < <(GetMalcolmConnInfo)
       if [[ "${#MALCOLM_CONN_INFO[@]}" -ge 4 ]]; then
-        ( IFS=$' '; echo "${FLUENTBIT_INPUT_INFO[*]}" )
-        ( IFS=$' '; echo "${MALCOLM_CONN_INFO[*]}" )
+        FLUENTBIT_COMMAND=("$(_fluentbit_bin)" "${FLUENTBIT_INPUT_INFO[@]}" "${MALCOLM_CONN_INFO[@]}")
+        ( IFS=$' '; echo "${FLUENTBIT_COMMAND[*]}" )
       else
         echo "Failed to get fluent-bit output parameters" >&2
         exit 1;
