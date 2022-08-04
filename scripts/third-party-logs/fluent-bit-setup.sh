@@ -156,7 +156,7 @@ function InstallFluentBit() {
       if [[ $INSTALL_CONFIRM =~ ^[Yy] ]]; then
         source <(curl -fsSL https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh)
       else
-        echo "Visit https://docs.fluentbit.io/manual/installation/linux" 2>&1
+        echo "Visit https://docs.fluentbit.io/manual/installation/linux" >&2
       fi
 
     elif [[ -n "$MACOS" ]]; then
@@ -170,14 +170,14 @@ function InstallFluentBit() {
       if [[ $INSTALL_CONFIRM =~ ^[Yy] ]]; then
         brew install fluent-bit
       else
-        echo "Visit https://docs.fluentbit.io/manual/installation/macos" 2>&1
+        echo "Visit https://docs.fluentbit.io/manual/installation/macos" >&2
       fi
 
     else
-      echo "Visit https://docs.fluentbit.io/manual/installation/getting-started-with-fluent-bit" 2>&1
+      echo "Visit https://docs.fluentbit.io/manual/installation/getting-started-with-fluent-bit" >&2
     fi
   else
-    echo "fluent-bit is already installed" 2>&1
+    echo "fluent-bit is already installed" >&2
   fi
 
   _fluentbit_run --version >/dev/null 2>&1
@@ -560,6 +560,92 @@ function GetFluentBitFormatInfo() {
   ( IFS=$'\n'; echo "${FLUENTBIT_ARGS[*]}" )
 }
 
+###############################################################################
+# setup systemd (linux) service to run fluentbit as configured
+function CreateFluentbitService() {
+  COMMAND=("$@")
+
+  SERVICE_CONFIRM="$(_GetConfirmation "Configure service to run fluent-bit [y/N]?" "n")"
+  if [[ $SERVICE_CONFIRM =~ ^[Yy] ]]; then
+
+    # linux services via systemd
+    if [[ -n "$LINUX" ]]; then
+      if systemctl --version >/dev/null 2>&1; then
+
+        # prompt for a valid service name
+        SERVICE_NAME=
+        while [[ -z "$SERVICE_NAME" ]] || \
+              [[ ! "$SERVICE_NAME" =~ ^[A-Za-z0-9_-]*$ ]] || \
+              [[ -e "$HOME"/.config/systemd/user/"$SERVICE_NAME".service ]]; do
+          SERVICE_NAME="$(_GetString "Enter .service file prefix:")"
+        done
+
+        # run as root or a regular user?
+        if [[ "$SCRIPT_USER" != "root" ]]; then
+          SYSCTL_USER_CONFIRM="$(_GetConfirmation "Configure systemd service as user \"$SCRIPT_USER\" [Y/n]?" "y")"
+        else
+          SYSCTL_USER_CONFIRM=n
+        fi
+
+        if [[ $SYSCTL_USER_CONFIRM =~ ^[Yy] ]]; then
+          # running as a regular user, need to enable-linger for service to be able to run
+          "$SUDO_CMD" loginctl enable-linger "$SCRIPT_USER" || echo "loginctl enable-linger $SCRIPT_USER failed" >&2
+
+          # create service directory and write .service file
+          mkdir -p "$HOME"/.config/systemd/user/ || echo "creating "$HOME"/.config/systemd/user/ failed" >&2
+          cat <<EOF > "$HOME"/.config/systemd/user/"$SERVICE_NAME".service
+[Unit]
+AssertPathExists=$(_fluentbit_bin)
+After=network.target
+
+[Service]
+ExecStart=$( ( IFS=$' '; echo "${FLUENTBIT_COMMAND[*]}" ) )
+Restart=on-failure
+PrivateTmp=false
+NoNewPrivileges=false
+
+[Install]
+WantedBy=default.target
+EOF
+          systemctl --user daemon-reload
+          systemctl --user enable "$SERVICE_NAME".service >&2
+          systemctl --user start "$SERVICE_NAME".service >&2
+          sleep 5
+          systemctl --user status --no-pager "$SERVICE_NAME".service >&2
+
+        else
+          # running as root, ensure service directory exists and write .service file
+          mkdir -p /etc/systemd/system/ || echo "creating /etc/systemd/system/ failed" >&2
+          cat << EOF | "$SUDO_CMD" tee /etc/systemd/system/"$SERVICE_NAME".service >/dev/null 2>&1
+[Unit]
+AssertPathExists=$(_fluentbit_bin)
+After=network.target
+
+[Service]
+ExecStart=$( ( IFS=$' '; echo "${FLUENTBIT_COMMAND[*]}" ) )
+Restart=on-failure
+PrivateTmp=false
+NoNewPrivileges=false
+
+[Install]
+WantedBy=multi-user.target
+EOF
+          "$SUDO_CMD" systemctl daemon-reload
+          "$SUDO_CMD" systemctl enable "$SERVICE_NAME".service >&2
+          "$SUDO_CMD" systemctl start "$SERVICE_NAME".service >&2
+          "$SUDO_CMD" sleep 5
+          "$SUDO_CMD" systemctl status --no-pager "$SERVICE_NAME".service >&2
+        fi # unprivileged vs. root
+      else
+        echo "systemctl not detected" >&2 && false
+      fi # systemctl check
+
+    elif [[ -n "$MACOS" ]]; then
+      echo "macOS services unsupported" >&2 && false
+    fi # os determination
+  fi # user prompt
+}
+
 ################################################################################
 # "main" - ask the user what they want to do, and do it (or do it without interaction)
 [[ -n $VERBOSE_FLAG ]] && echo "script in \"${SCRIPT_PATH}\" called from \"${FULL_PWD}\"" >&2 && set -x
@@ -588,6 +674,7 @@ if (( $USER_FUNCTION_IDX == 0 )); then
       if [[ "${#MALCOLM_CONN_INFO[@]}" -ge 4 ]]; then
         FLUENTBIT_COMMAND=("$(_fluentbit_bin)" "${FLUENTBIT_INPUT_INFO[@]}" "${MALCOLM_CONN_INFO[@]}")
         ( IFS=$' '; echo "${FLUENTBIT_COMMAND[*]}" )
+        CreateFluentbitService "${FLUENTBIT_COMMAND[@]}"
       else
         echo "Failed to get fluent-bit output parameters" >&2
         exit 1;
