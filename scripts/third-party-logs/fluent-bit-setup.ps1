@@ -91,14 +91,28 @@ if (-Not $fluentbit_installed) {
     }
 
     if (($fluentbit_sha_good -eq 1) -or ($ignore_sha_sum -eq 1)) {
-        Write-Host 'fluent-bit zip is okay'
+        Expand-Archive "$fluent_bit_zip" -DestinationPath (Get-Location)
+        if (Test-Path -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform" -PathType Container) {
+            Get-ChildItem -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform" |
+                Move-Item -Destination (Get-Location)
+            Remove-Item -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform"
+            $fluentbit_installed = (Test-Path -Path './bin/fluent-bit.exe' -PathType Leaf)
+            if ($fluentbit_installed) {
+                $fluentbit_bin = (Resolve-Path -Path './bin/fluent-bit.exe')
+                $fluentbit_path = Split-Path -Path "$fluentbit_bin"
+            }
+        } else {
+            Write-Host "Failed to expand $fluent_bit_zip" -ForegroundColor Red
+        }
     } else {
         Write-Host "Could not download or verify SHA256 sum of $fluent_bit_zip" -ForegroundColor Red
     }
 }
 
-if ($fluentbit_installed) {
-
+if (-Not $fluentbit_installed) {
+    Write-Host "Visit https://docs.fluentbit.io/manual/installation/windows to download and install fluent-bit" -ForegroundColor Red
 }
+
+
 
 Pop-Location
