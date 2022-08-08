@@ -184,13 +184,6 @@ function InstallFluentBit() {
 }
 
 ###############################################################################
-# identify location of client certificates for SSL
-function GetBeatsCerts() {
-
-  ( IFS=$'\n'; echo "${FLUENTBIT_ARGS[*]}" )
-}
-
-###############################################################################
 # identify malcolm connection information
 function GetMalcolmConnInfo() {
   IP=
