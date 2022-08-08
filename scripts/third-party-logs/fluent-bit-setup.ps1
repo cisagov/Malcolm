@@ -63,7 +63,8 @@ function Menu {
 ###############################################################################
 
 # navigate to script directory
-Push-Location (split-path $MyInvocation.MyCommand.Path)
+$workdir = Split-Path $MyInvocation.MyCommand.Path
+Push-Location $workdir
 
 ###############################################################################
 # determine if fluent-bit is already installed (via package, in local ./bin directory or in current PATH)
@@ -113,7 +114,7 @@ if (-Not $fluentbit_installed) {
     # see if the .zip file already exists, and whether or not we should use it
     if (Test-Path -Path $fluent_bit_zip -PathType Leaf) {
         $title    = "$fluent_bit_zip found"
-        $question = "Would you like to use existing $fluent_bit_zip at "+(Get-Location)+'?'
+        $question = "Would you like to use existing $fluent_bit_zip at "+$workdir+'?'
         $choices  = '&Yes', '&No'
         $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
         if ($decision -ne 0) {
@@ -124,7 +125,7 @@ if (-Not $fluentbit_installed) {
     # download the zip file if requested
     if (-Not (Test-Path -Path $fluent_bit_zip -PathType Leaf)) {
         $title    = 'Download fluent-bit'
-        $question = 'Would you like to download fluent-bit (zip) to '+(Get-Location)+'?'
+        $question = 'Would you like to download fluent-bit (zip) to '+$workdir+'?'
         $choices  = '&Yes', '&No'
         $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
         if ($decision -eq 0) {
@@ -159,10 +160,10 @@ if (-Not $fluentbit_installed) {
 
     # download integrity is good, extract the .zip file into the current directory
     if (($fluentbit_sha_good -eq 1) -or ($ignore_sha_sum -eq 1)) {
-        Expand-Archive "$fluent_bit_zip" -DestinationPath (Get-Location)
+        Expand-Archive "$fluent_bit_zip" -DestinationPath "$workdir"
         if (Test-Path -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform" -PathType Container) {
             Get-ChildItem -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform" |
-                Move-Item -Destination (Get-Location)
+                Move-Item -Destination "$workdir"
             Remove-Item -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform"
             $fluentbit_installed = (Test-Path -Path './bin/fluent-bit.exe' -PathType Leaf)
             if ($fluentbit_installed) {
@@ -278,9 +279,21 @@ $key = (Resolve-Path -Path "$key")
 
 ###############################################################################
 # build fluent-bit.exe command
+# building both a string version and a configuration file version in an array,
+# the former for display and the latter so that we can output it for use
+# with a windows service so we don't have to escape all of the quotes
+
+Write-Host ""
+
 $fluentbit_command = @()
 $fluentbit_command += "$fluentbit_bin"
 
+$fluentbit_config = @()
+$fluentbit_config += "[SERVICE]"
+$fluentbit_config += "    Flush    1"
+$fluentbit_config += "    Daemon    off"
+
+# parser config file
 $fluentbit_parsers_conf = ''
 if (Test-Path -Path "$fluentbit_path/../conf/parsers.conf" -PathType Leaf) {
     $fluentbit_parsers_conf = (Resolve-Path -Path "$fluentbit_path/../conf/parsers.conf")
@@ -290,18 +303,27 @@ if (Test-Path -Path "$fluentbit_path/../conf/parsers.conf" -PathType Leaf) {
 if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
     $fluentbit_command += "-R"
     $fluentbit_command += '"' + $fluentbit_parsers_conf + '"'
+    $fluentbit_config += "    Parsers_File    ${fluentbit_parsers_conf}"
 }
 
+# input
 $fluentbit_command += "-i"
 $fluentbit_command += "$input_chosen"
 
+$fluentbit_config += ""
+$fluentbit_config += "[INPUT]"
+$fluentbit_config += "    Name    ${input_chosen}"
+
+# input parameters
 foreach ($element in $param_map.GetEnumerator()) {
     if (-Not ([string]::IsNullOrWhiteSpace($($element.Value)))) {
         $fluentbit_command += "-p"
         $fluentbit_command += $($element.Name)+'="'+$($element.Value)+'"'
+        $fluentbit_config += "    $($element.Name)    $($element.Value)"
     }
 }
 
+# output and output parameters
 $fluentbit_command += "-o"
 $fluentbit_command += "tcp://${malcolm_ip}:${malcolm_port}"
 $fluentbit_command += "-p"
@@ -317,6 +339,18 @@ $fluentbit_command += 'tls.key_file='+'"'+$key+'"'
 $fluentbit_command += "-p"
 $fluentbit_command += 'format='+'"'+$message_format+'"'
 
+$fluentbit_config += ""
+$fluentbit_config += "[OUTPUT]"
+$fluentbit_config += "    Name    tcp://${malcolm_ip}:${malcolm_port}"
+$fluentbit_config += "    Match    *"
+$fluentbit_config += "    tls    on"
+$fluentbit_config += "    tls.verify    off"
+$fluentbit_config += "    tls.ca_file    ${ca}"
+$fluentbit_config += "    tls.crt_file    ${cert}"
+$fluentbit_config += "    tls.key_file    ${key}"
+$fluentbit_config += "    format    ${message_format}"
+
+# filters
 if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
     $fluentbit_command += "-F"
     $fluentbit_command += "nest"
@@ -328,6 +362,15 @@ if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
     $fluentbit_command += "WildCard='*'"
     $fluentbit_command += "-m"
     $fluentbit_command += "'*'"
+
+    $fluentbit_config += ""
+    $fluentbit_config += "[FILTER]"
+    $fluentbit_config += "    Name    nest"
+    $fluentbit_config += "    Operation    nest"
+    $fluentbit_config += "    Nested_under    ${message_nest}"
+    $fluentbit_config += "    WildCard    *"
+    $fluentbit_config += "    Match    *"
+
 }
 if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
     $fluentbit_command += "-F"
@@ -336,13 +379,48 @@ if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
     $fluentbit_command += '"Record=module '+$message_module+'"'
     $fluentbit_command += "-m"
     $fluentbit_command += "'*'"
+
+    $fluentbit_config += ""
+    $fluentbit_config += "[FILTER]"
+    $fluentbit_config += "    Name    record_modifier"
+    $fluentbit_config += "    Record    module ${message_module}"
+    $fluentbit_config += "    Match    *"
 }
+
+# finish up
 $fluentbit_command += "-f"
 $fluentbit_command += "1"
+$fluentbit_config += ""
 
-$fluentbit_command -join ' '
+# compose and display the command line
+$fluentbit_command_str = $fluentbit_command -join ' '
+$fluentbit_command_str
 
-# TODO: create service?
+# prompt the user if they want to create a service
+$title    = "fluent-bit ${input_chosen} Service"
+$question = "Install and start Windows service for ${input_chosen}?"
+$choices  = '&Yes', '&No'
+$decision = $Host.UI.PromptForChoice($title, $question, $choices, 1)
+if ($decision -eq 0) {
+    # prompt for service name and account to run under
+    do { $service_name = Read-Host -Prompt 'Enter name for service' } until (-Not [string]::IsNullOrWhiteSpace($service_name))
+    $service_account_default=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $service_account = Read-Host -Prompt "Enter account name to run service ($service_account_default)"
+    if ([string]::IsNullOrWhiteSpace($service_account)) {
+        $service_account = $service_account_default
+    }
+    # write configuration out to file for fluent-bit.exe to read upon execution
+    ($fluentbit_config -join "`n") + "`n" | Out-File -FilePath "${service_name}.cfg" -Encoding ascii -NoNewLine
+    # create the service and start it
+    $service_cmd = "${fluentbit_bin} -c ${workdir}\${service_name}.cfg"
+    New-Service -name $service_name `
+      -displayName $service_name `
+      -StartupType Automatic `
+      -Credential "$service_account" `
+      -binaryPathName "$service_cmd"
+    Restart-Service -DisplayName $service_name
+    Get-Service $service_name
+}
 
 ###############################################################################
 # return to original directory
