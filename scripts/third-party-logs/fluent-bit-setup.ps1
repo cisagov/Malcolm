@@ -9,7 +9,7 @@
 ###############################################################################
 
 ###############################################################################
-# DrawMenu and Menu credit "JBs Powershell"
+# credit for this PowerShell interactive menu implementation to "JBs Powershell"
 # http://mspowershell.blogspot.com/2009/02/cli-menu-in-powershell.html?m=1
 
 function DrawMenu {
@@ -138,7 +138,7 @@ if (-Not $fluentbit_installed) {
     # check whether or not we can do the sha sum, and if not, confirm if that's okay
     $fluentbit_sha_good = 0
     $ignore_sha_sum = 0
-    if (-Not (Test-Path -Path $fluent_bit_shafile -PathType Leaf)) {
+    if ((Test-Path -Path $fluent_bit_zip -PathType Leaf) -And (-Not (Test-Path -Path $fluent_bit_shafile -PathType Leaf))) {
         $title    = "$fluent_bit_shafile not found"
         $question = "Cannot verify SHA256 of $fluent_bit_zip (missing $fluent_bit_shafile), abort?"
         $choices  = '&Yes', '&No'
@@ -148,6 +148,7 @@ if (-Not $fluentbit_installed) {
         }
     }
 
+    # calculate the SHA256 sum of the ZIP file an compare it to the downloaded SHA256 value
     if ((Test-Path -Path $fluent_bit_shafile -PathType Leaf) -and (Test-Path -Path $fluent_bit_zip -PathType Leaf)) {
         $fluentbit_expected_hash = ((Get-Content "$fluent_bit_shafile" -First 1).ToLower() -split '\s+')[0]
         $fluentbit_zip_hash = (Get-FileHash "$fluent_bit_zip").Hash.ToLower()
@@ -156,6 +157,7 @@ if (-Not $fluentbit_installed) {
         }
     }
 
+    # download integrity is good, extract the .zip file into the current directory
     if (($fluentbit_sha_good -eq 1) -or ($ignore_sha_sum -eq 1)) {
         Expand-Archive "$fluent_bit_zip" -DestinationPath (Get-Location)
         if (Test-Path -Path "fluent-bit-$fluent_bit_full_version-$fluent_bit_platform" -PathType Container) {
@@ -339,6 +341,8 @@ $fluentbit_command += "-f"
 $fluentbit_command += "1"
 
 $fluentbit_command -join ' '
+
+# TODO: create service?
 
 ###############################################################################
 # return to original directory
