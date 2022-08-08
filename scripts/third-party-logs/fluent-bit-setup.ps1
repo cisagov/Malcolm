@@ -279,7 +279,16 @@ $key = (Resolve-Path -Path "$key")
 $fluentbit_command = @()
 $fluentbit_command += "$fluentbit_bin"
 
-# todo: get parser file
+$fluentbit_parsers_conf = ''
+if (Test-Path -Path "$fluentbit_path/../conf/parsers.conf" -PathType Leaf) {
+    $fluentbit_parsers_conf = (Resolve-Path -Path "$fluentbit_path/../conf/parsers.conf")
+} elseif (Test-Path -Path "$fluentbit_path/parsers.conf" -PathType Leaf) {
+    $fluentbit_parsers_conf = (Resolve-Path -Path "$fluentbit_path/parsers.conf")
+}
+if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
+    $fluentbit_command += "-R"
+    $fluentbit_command += '"' + $fluentbit_parsers_conf + '"'
+}
 
 $fluentbit_command += "-i"
 $fluentbit_command += "$input_chosen"
