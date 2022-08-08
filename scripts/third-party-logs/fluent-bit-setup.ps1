@@ -1,5 +1,11 @@
 ###############################################################################
+# fluent-bit-setup.ps1
 #
+# Interactive PowerShell script to aid in the installation and
+# configuration of fluent-bit (https://fluentbit.io/) for forwarding logs to
+# an instance of Malcolm (https://github.com/idaholab/malcolm).
+#
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 ###############################################################################
 
 ###############################################################################
@@ -53,7 +59,7 @@ function Menu {
 }
 
 ###############################################################################
-#
+# "main"
 ###############################################################################
 
 # navigate to script directory
@@ -206,7 +212,7 @@ $param_names = switch ( $input_chosen )
     'tail' { @('Buffer_Chunk_Size', 'Buffer_Max_Size', 'Path', 'Path_Key', 'Exclude_Path', 'Offset_Key', 'Read_from_Head', 'Refresh_Interval', 'Rotate_Wait', 'Ignore_Older', 'Skip_Long_Lines', 'Skip_Empty_Lines', 'DB', 'DB.sync', 'DB.locking', 'DB.journal_mode', 'Mem_Buf_Limit', 'Exit_On_Eof', 'Parser', 'Key', 'Inotify_Watcher', 'Tag', 'Tag_Regex', 'Static_Batch_Size') }
     'tcp' { @('Listen', 'Port', 'Buffer_Size', 'Chunk_Size', 'Format', 'Separator') }
     'windows_exporter_metrics' { @('scrape_interval') }
-    'winevtlog' { @('Channels', 'Interval_Sec', 'DB') }
+    'winevtlog' { @('Channels', 'Interval_Sec', 'Interval_NSec', 'Read_Existing_Events', 'DB', 'String_Inserts', 'Render_Event_As_XML', 'Use_ANSI') }
     'winlog' { @('Channels', 'Interval_Sec', 'DB') }
     'winstat' { @('Interval_Sec', 'Interval_NSec') }
     default { @() }
@@ -326,5 +332,5 @@ $fluentbit_command += "1"
 $fluentbit_command -join ' '
 
 ###############################################################################
-# done
+# return to original directory
 Pop-Location

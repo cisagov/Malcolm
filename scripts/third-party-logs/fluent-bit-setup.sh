@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 ###############################################################################
+# fluent-bit-setup.sh
+#
+# Interactive bash script for Linux and macOS to aid in the installation and
+# configuration of fluent-bit (https://fluentbit.io/) for forwarding logs to
+# an instance of Malcolm (https://github.com/idaholab/malcolm).
+#
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
+###############################################################################
 # force bash
 if [[ -z "$BASH_VERSION" ]]; then
   echo "Wrong interpreter, please run \"$0\" with bash" >&2
