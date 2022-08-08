@@ -419,7 +419,7 @@ if ($decision -eq 0) {
       -Credential "$service_account" `
       -binaryPathName "$service_cmd"
     Restart-Service -DisplayName $service_name
-    Get-Service $service_name
+    Get-Service -DisplayName $service_name
 }
 
 ###############################################################################
