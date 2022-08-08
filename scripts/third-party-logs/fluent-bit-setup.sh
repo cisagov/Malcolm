@@ -667,7 +667,9 @@ done
 echo -n "Operation: " >&2
 read USER_FUNCTION_IDX
 
-if (( $USER_FUNCTION_IDX == 0 )); then
+echo $USER_FUNCTION_IDX
+
+if [[ -z "$USER_FUNCTION_IDX" ]] || (( $USER_FUNCTION_IDX == 0 )); then
   # do everything, in order
   if InstallFluentBit; then
     readarray -t FLUENTBIT_INPUT_INFO < <(GetFluentBitFormatInfo)
