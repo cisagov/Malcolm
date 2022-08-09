@@ -14,7 +14,7 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 
 ## Configuring Malcolm
 
-The environment variables in [`docker-compose.yml`](../../#DockerComposeYml) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/install.py --configure`](../../#ConfigAndTuning)), as can be seen from the following excerpt from the [Installation example](../../#InstallationExample):
+The environment variables in [`docker-compose.yml`](../../README.md#DockerComposeYml) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/install.py --configure`](../../README.md#ConfigAndTuning)), as can be seen from the following excerpt from the [Installation example](../../README.md#InstallationExample):
 
 ```
 …
@@ -42,9 +42,9 @@ The variables corresponding to these questions can be found in the `filebeat-var
 * `FILEBEAT_TCP_PARSE_DROP_FIELD` - name of field to drop (if it exists) in logs sent to the filebeat TCP input listener
 * `FILEBEAT_TCP_TAG` - tag to append to events sent to the filebeat TCP input listener
 
-These variables' values will depend on your forwarder and the format of the data it sends. Note that unless you are creating your own [Logstash pipeline](../../docs/contributing/#LogstashNewSource), you probably want to choose the default `_malcolm_beats` for `FILEBEAT_TCP_TAG` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline.
+These variables' values will depend on your forwarder and the format of the data it sends. Note that unless you are creating your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource), you probably want to choose the default `_malcolm_beats` for `FILEBEAT_TCP_TAG` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline.
 
-In order to maintain the integrity and confidentiality of your data, Malcolm's default is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](../../#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
+In order to maintain the integrity and confidentiality of your data, Malcolm's default is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](../../README.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
 
 ## Fluent Bit
 
