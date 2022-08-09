@@ -18,6 +18,8 @@ The environment variables in [`docker-compose.yml`](../../README.md#DockerCompos
 
 ```
 …
+Expose Logstash port to external hosts? (y/N): y
+…
 Expose Filebeat TCP port to external hosts? (y/N): y
 1: json
 2: raw
@@ -35,12 +37,12 @@ Tag to apply to messages sent to Filebeat TCP listener (_malcolm_beats): _malcol
 
 The variables corresponding to these questions can be found in the `filebeat-variables` section of`docker-compose.yml`:
 
-* `FILEBEAT_TCP_LISTEN` - whether or not to expose a [filebeat TCP input listener](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to which logs may be sent (the default TCP port is `5045`: you may need to adjust your firewall accordingly)
-* `FILEBEAT_TCP_LOG_FORMAT` - log format expected for logs sent to the filebeat TCP input listener (`json` or `raw`)
-* `FILEBEAT_TCP_PARSE_SOURCE_FIELD` - source field name to parse (when `FILEBEAT_TCP_LOG_FORMAT` is `json`) for logs sent to the filebeat TCP input listener
-* `FILEBEAT_TCP_PARSE_TARGET_FIELD` - target field name to store decoded JSON fields (when `FILEBEAT_TCP_LOG_FORMAT` is `json`) for logs sent to the filebeat TCP input listener
-* `FILEBEAT_TCP_PARSE_DROP_FIELD` - name of field to drop (if it exists) in logs sent to the filebeat TCP input listener
-* `FILEBEAT_TCP_TAG` - tag to append to events sent to the filebeat TCP input listener
+* `FILEBEAT_TCP_LISTEN` - whether or not to expose a [Filebeat TCP input listener](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to which logs may be sent (the default TCP port is `5045`: you may need to adjust your firewall accordingly)
+* `FILEBEAT_TCP_LOG_FORMAT` - log format expected for logs sent to the Filebeat TCP input listener (`json` or `raw`)
+* `FILEBEAT_TCP_PARSE_SOURCE_FIELD` - source field name to parse (when `FILEBEAT_TCP_LOG_FORMAT` is `json`) for logs sent to the Filebeat TCP input listener
+* `FILEBEAT_TCP_PARSE_TARGET_FIELD` - target field name to store decoded JSON fields (when `FILEBEAT_TCP_LOG_FORMAT` is `json`) for logs sent to the Filebeat TCP input listener
+* `FILEBEAT_TCP_PARSE_DROP_FIELD` - name of field to drop (if it exists) in logs sent to the Filebeat TCP input listener
+* `FILEBEAT_TCP_TAG` - tag to append to events sent to the Filebeat TCP input listener
 
 These variables' values will depend on your forwarder and the format of the data it sends. Note that unless you are creating your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource), you probably want to choose the default `_malcolm_beats` for `FILEBEAT_TCP_TAG` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline.
 
@@ -115,7 +117,9 @@ Enter Malcolm Filebeat TCP port (5045): 5045
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field: cpu
 Add "module" value: cpu
+
 /usr/local/bin/fluent-bit -R /etc/fluent-bit/parsers.conf -i cpu -p Interval_Sec=10 -o tcp://172.16.0.20:5045 -p tls=on -p tls.verify=off -p tls.ca_file=/home/user/Malcolm/filebeat/certs/ca.crt -p tls.crt_file=/home/user/Malcolm/filebeat/certs/client.crt -p tls.key_file=/home/user/Malcolm/filebeat/certs/client.key -p format=json_lines -F nest -p Operation=nest -p Nested_under=cpu -p WildCard='*' -m '*' -F record_modifier -p 'Record=module cpu' -m '*' -f 1
+
 Configure service to run fluent-bit [y/N]? y
 Enter .service file prefix: fluentbit_cpu
 Configure systemd service as user "user" [Y/n]? y
@@ -131,16 +135,10 @@ Created symlink /home/user/.config/systemd/user/default.target.wants/fluentbit_c
      CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/fluentbit_cpu.service
              └─105521 /usr/local/bin/fluent-bit -R /etc/fluent-bit/parsers.conf -i cpu -p Interval_Sec=10 -o tcp://172.16.0.20:5045 -p tls=on -p tls.verify=off -p tls.ca_fil…
 
-Aug 09 09:19:43 seven fluent-bit[105521]: Fluent Bit v1.9.6
-Aug 09 09:19:43 seven fluent-bit[105521]: * Copyright (C) 2015-2022 The Fluent Bit Authors
-Aug 09 09:19:43 seven fluent-bit[105521]: * Fluent Bit is a CNCF sub-project under the umbrella of Fluentd
-Aug 09 09:19:43 seven fluent-bit[105521]: * https://fluentbit.io
-Aug 09 09:19:43 seven fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [fluent bit] version=1.9.6, commit=, pid=105521
-Aug 09 09:19:43 seven fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [storage] version=1.2.0, type=memory-only, sync=normal, checksum=disabled, max_chunks_up=128
-Aug 09 09:19:43 seven fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [cmetrics] version=0.3.5
-Aug 09 09:19:43 seven fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [sp] stream processor started
-Aug 09 09:19:43 seven fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [output:tcp:tcp.0] worker #0 started
-Aug 09 09:19:43 seven fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [output:tcp:tcp.0] worker #1 started
+Aug 09 09:19:43 localhost fluent-bit[105521]: Fluent Bit v1.9.6
+…
+Aug 09 09:19:43 localhost fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [output:tcp:tcp.0] worker #0 started
+Aug 09 09:19:43 localhost fluent-bit[105521]: [2022/08/09 09:19:43] [ info] [output:tcp:tcp.0] worker #1 started
 ```
 
 macOS example:
@@ -187,7 +185,9 @@ Enter Malcolm Filebeat TCP port (5045): 5045
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field: random
 Add "module" value: random
+
 /usr/local/bin/fluent-bit -R /usr/local/etc/fluent-bit/parsers.conf -i random -p Samples=10 -p Interval_Sec=30 -o tcp://172.16.0.20:5045 -p tls=on -p tls.verify=off -p tls.ca_file=/Users/user/forwarder/ca.crt -p tls.crt_file=/Users/user/forwarder/client.crt -p tls.key_file=/Users/user/forwarder/client.key -p format=json_lines -F nest -p Operation=nest -p Nested_under=random -p WildCard='*' -m '*' -F record_modifier -p 'Record=module random' -m '*' -f 1
+
 Configure service to run fluent-bit [y/N]? n
 ```
 
@@ -262,6 +262,31 @@ Running  fluentbit_winev... fluentbit_winevtlog
 
 ## Beats
 
+Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data to Malcolm's Filebeat TCP listener. Follow the [Get started with Beats](https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html) documentation for configuring Beats on your system.
 
-## Visualization
+In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/install.py --configure`](../../README.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
+
+Your Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [filebeat.yml](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) file:
+
+
+```yml
+filebeat.inputs:
+- type: log
+  paths:
+    - /home/user/logs/*.log
+  tags: ["_malcolm_beats"]
+
+output.logstash:
+  hosts: ["172.16.0.20:5044"]
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/home/user/Malcolm/filebeat/certs/ca.crt"]
+  ssl.certificate: "/home/user/Malcolm/filebeat/certs/client.crt"
+  ssl.key: "/home/user/Malcolm/filebeat/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"
+```
+
+The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-general-options.html#_tags_21): unless you are creating your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource), you probably want to use `_malcolm_beats` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline. This parts should apply regardless of the specific Beats forwarder you're using (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
+
+## Data Format and Visualization
 

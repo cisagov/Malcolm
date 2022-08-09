@@ -681,7 +681,9 @@ if [[ -z "$USER_FUNCTION_IDX" ]] || (( $USER_FUNCTION_IDX == 0 )); then
       readarray -t MALCOLM_CONN_INFO < <(GetMalcolmConnInfo)
       if [[ "${#MALCOLM_CONN_INFO[@]}" -ge 4 ]]; then
         FLUENTBIT_COMMAND=("$(_fluentbit_bin)" "${FLUENTBIT_INPUT_INFO[@]}" "${MALCOLM_CONN_INFO[@]}")
+        echo
         ( IFS=$' '; echo "${FLUENTBIT_COMMAND[*]}" )
+        echo
         CreateFluentbitService "${FLUENTBIT_COMMAND[@]}"
       else
         echo "Failed to get fluent-bit output parameters" >&2
