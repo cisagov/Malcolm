@@ -166,7 +166,6 @@
         "zeek.irc.dcc_mime_type": { "type": "keyword" },
         "zeek.irc.nick": { "type": "keyword" },
         "zeek.irc.value": { "type": "keyword" },
-        "zeek.iso_cotp.pdu_type": { "type": "keyword" },
         "zeek.kerberos.cipher": { "type": "keyword" },
         "zeek.kerberos.client_cert_fuid": { "type": "keyword" },
         "zeek.kerberos.client_cert_subject": { "type": "keyword" },

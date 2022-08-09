@@ -93,7 +93,7 @@ fields_to_urls.append([r'^zeek\.rdp\.', ['DASH:7f41913f-cba8-43f5-82a8-241b7ead0
 fields_to_urls.append([r'^zeek\.rfb\.', ['DASH:f77bf097-18a8-465c-b634-eb2acc7a4f26']])
 fields_to_urls.append(
     [
-        r'^zeek\.(s7comm|iso_cotp)\.',
+        r'^zeek\.(s7comm.*|(iso_)?cotp)\.',
         ['DASH:e76d05c0-eb9f-11e9-a384-0fcf32210194', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf'],
     ]
 )
@@ -491,7 +491,7 @@ def document(index):
     Returns
     -------
     filter
-        dict containing the filters, e.g., {"_id":"210301-Cgnjsc2Tkdl38g25D6-iso_cotp-5485"}
+        dict containing the filters, e.g., {"_id":"210301-Cgnjsc2Tkdl38g25D6-cotp-5485"}
     results
         array of the documents retrieved (up to 'limit')
     """

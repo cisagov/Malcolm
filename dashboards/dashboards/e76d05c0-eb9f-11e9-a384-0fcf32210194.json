@@ -115,7 +115,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"type\":\"phrases\",\"key\":\"event.dataset\",\"value\":\"s7comm, iso_cotp\",\"params\":[\"s7comm\",\"iso_cotp\"],\"negate\":false,\"disabled\":false,\"alias\":\"Zeek Log Type\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"event.dataset\":\"s7comm\"}},{\"match_phrase\":{\"event.dataset\":\"iso_cotp\"}}],\"minimum_should_match\":1}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"type\":\"phrases\",\"key\":\"event.dataset\",\"value\":\"s7comm, cotp\",\"params\":[\"s7comm\",\"cotp\"],\"negate\":false,\"disabled\":false,\"alias\":\"Zeek Log Type\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"event.dataset\":\"s7comm\"}},{\"match_phrase\":{\"event.dataset\":\"cotp\"}}],\"minimum_should_match\":1}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -149,7 +149,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"type\":\"phrases\",\"key\":\"event.dataset\",\"value\":\"s7comm, iso_cotp\",\"params\":[\"s7comm\",\"iso_cotp\"],\"negate\":false,\"disabled\":false,\"alias\":\"Zeek Log Type\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"event.dataset\":\"s7comm\"}},{\"match_phrase\":{\"event.dataset\":\"iso_cotp\"}}],\"minimum_should_match\":1}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"type\":\"phrases\",\"key\":\"event.dataset\",\"value\":\"s7comm, cotp\",\"params\":[\"s7comm\",\"cotp\"],\"negate\":false,\"disabled\":false,\"alias\":\"Zeek Log Type\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"bool\":{\"should\":[{\"match_phrase\":{\"event.dataset\":\"s7comm\"}},{\"match_phrase\":{\"event.dataset\":\"cotp\"}}],\"minimum_should_match\":1}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -208,7 +208,7 @@
       "version": "WzgyNSwxXQ==",
       "attributes": {
         "title": "COTP - PDU Type",
-        "visState": "{\"title\":\"COTP - PDU Type\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.iso_cotp.pdu_type\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"PDU Type\"}}]}",
+        "visState": "{\"title\":\"COTP - PDU Type\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.cotp.pdu_name\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"PDU Type\"}}]}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -406,7 +406,7 @@
           "source.port",
           "destination.ip",
           "destination.port",
-          "zeek.iso_cotp.pdu_type",
+          "zeek.cotp.pdu_name",
           "event.id"
         ],
         "sort": [
@@ -417,7 +417,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:iso_cotp\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:cotp\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -446,7 +446,7 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "zeek.iso_cotp.pdu_type",
+          "zeek.cotp.pdu_name",
           "zeek.s7comm.parameter",
           "zeek.s7comm.data_info",
           "zeek.s7comm.rosctr",
@@ -460,7 +460,7 @@
         ],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:(iso_cotp OR s7comm)\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query\":\"event.dataset:(cotp OR s7comm)\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
