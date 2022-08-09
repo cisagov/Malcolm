@@ -8,8 +8,11 @@
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 ###############################################################################
 
+$fluent_bit_version = '1.9'
+$fluent_bit_full_version = '1.9.6'
+
 ###############################################################################
-# credit for this PowerShell interactive menu implementation to "JBs Powershell"
+# credit for this PowerShell interactive Menu implementation to "JBs Powershell"
 # http://mspowershell.blogspot.com/2009/02/cli-menu-in-powershell.html?m=1
 
 function DrawMenu {
@@ -61,6 +64,7 @@ function Menu {
 ###############################################################################
 # "main"
 ###############################################################################
+$now_unix_secs = [int](Get-Date -UFormat %s -Millisecond 0)
 
 # navigate to script directory
 $workdir = Split-Path $MyInvocation.MyCommand.Path
@@ -71,8 +75,6 @@ Push-Location $workdir
 $fluentbit_installed = 0
 $fluentbit_path = ''
 $fluentbit_bin = ''
-$fluent_bit_version = '1.9'
-$fluent_bit_full_version = '1.9.6'
 if ([Environment]::Is64BitOperatingSystem) {
     $fluent_bit_platform = 'win64'
 } else {
@@ -238,8 +240,19 @@ $message_format = Read-Host -Prompt 'Enter fluent-bit output format (json_lines)
 if ([string]::IsNullOrWhiteSpace($message_format)) {
     $message_format = 'json_lines'
 }
-$message_nest = Read-Host -Prompt 'Nest values under field'
-$message_module = Read-Host -Prompt 'Add "module" value'
+if ($message_format -eq 'json_lines') {
+    $message_nest = Read-Host -Prompt "Nest values under field ($input_chosen)"
+    $message_module = Read-Host -Prompt "Add `"module`" value ($input_chosen)"
+    if ([string]::IsNullOrWhiteSpace($message_nest)) {
+        $message_nest = $input_chosen
+    }
+    if ([string]::IsNullOrWhiteSpace($message_module)) {
+        $message_module = $input_chosen
+    }
+} else {
+    $message_nest = Read-Host -Prompt 'Nest values under field'
+    $message_module = Read-Host -Prompt 'Add "module" value'
+}
 
 ###############################################################################
 # prompt for TLS client ca/certificate/key files
@@ -307,7 +320,11 @@ $fluentbit_config += "    Name    ${input_chosen}"
 
 # input parameters
 foreach ($element in $param_map.GetEnumerator()) {
-    if (-Not ([string]::IsNullOrWhiteSpace($($element.Value)))) {
+    if (($($element.Name) -eq 'DB') -and ([string]::IsNullOrWhiteSpace($($element.Value)))) {
+        # if the monitor file/offset DB is an unspecified parameter, choose it for them
+        $fluentbit_config += "    $($element.Name)    $workdir\${input_chosen}_${malcolm_ip}_${now_unix_secs}.db"
+    } elseif (-Not ([string]::IsNullOrWhiteSpace($($element.Value)))) {
+        # otherwise output specified values as-is
         $fluentbit_config += "    $($element.Name)    $($element.Value)"
     }
 }
@@ -323,30 +340,28 @@ $fluentbit_config += "    tls.ca_file    ${ca}"
 $fluentbit_config += "    tls.crt_file    ${cert}"
 $fluentbit_config += "    tls.key_file    ${key}"
 $fluentbit_config += "    format    ${message_format}"
+$fluentbit_config += ""
 
 # filters
 if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
-    $fluentbit_config += ""
     $fluentbit_config += "[FILTER]"
     $fluentbit_config += "    Name    nest"
     $fluentbit_config += "    Operation    nest"
     $fluentbit_config += "    Nested_under    ${message_nest}"
     $fluentbit_config += "    WildCard    *"
     $fluentbit_config += "    Match    *"
+    $fluentbit_config += ""
 }
 
 if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
-    $fluentbit_config += ""
     $fluentbit_config += "[FILTER]"
     $fluentbit_config += "    Name    record_modifier"
     $fluentbit_config += "    Record    module ${message_module}"
     $fluentbit_config += "    Match    *"
+    $fluentbit_config += ""
 }
 
-$fluentbit_config += ""
-
 # write configuration out to file for fluent-bit.exe to read upon execution
-$now_unix_secs = [int](Get-Date -UFormat %s -Millisecond 0)
 $fluentbit_config_path = "${input_chosen}_${malcolm_ip}_${now_unix_secs}.cfg"
 ($fluentbit_config -join "`n") + "`n" | Out-File -FilePath "${fluentbit_config_path}" -Encoding ascii -NoNewLine
 $fluentbit_config_path = (Resolve-Path -Path "$fluentbit_config_path")
@@ -354,27 +369,37 @@ $fluentbit_config_path = (Resolve-Path -Path "$fluentbit_config_path")
 Write-Host "$fluentbit_bin -c `"${fluentbit_config_path}`""
 
 # prompt the user if they want to create a service
-$title    = "fluent-bit ${input_chosen} Service"
-$question = "Install and start Windows service for ${input_chosen} to ${malcolm_ip}?"
+$title    = "Install fluent-bit Service"
+$question = "Install Windows service for ${input_chosen} to ${malcolm_ip}:${malcolm_port}?"
 $choices  = '&Yes', '&No'
 $decision = $Host.UI.PromptForChoice($title, $question, $choices, 1)
 if ($decision -eq 0) {
-    # prompt for service name and account to run under
+    # prompt for service name and account to run under (default to current user)
     do { $service_name = Read-Host -Prompt 'Enter name for service' } until (-Not [string]::IsNullOrWhiteSpace($service_name))
     $service_account_default=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name
     $service_account = Read-Host -Prompt "Enter account name to run service ($service_account_default)"
     if ([string]::IsNullOrWhiteSpace($service_account)) {
         $service_account = $service_account_default
     }
-    # create the service and start it
+
+    # create the service
     $service_cmd = "${fluentbit_bin} -c ${fluentbit_config_path}"
     New-Service -name $service_name `
       -displayName $service_name `
+      -description "fluent-bit ${input_chosen} to ${malcolm_ip}:${malcolm_port}" `
       -StartupType Automatic `
       -Credential "$service_account" `
       -binaryPathName "$service_cmd"
-    Restart-Service -DisplayName $service_name
-    Get-Service -DisplayName $service_name
+
+    # prompt to start it
+    $title    = "Start fluent-bit Service"
+    $question = "Start Windows service for ${input_chosen} to ${malcolm_ip}:${malcolm_port}?"
+    $choices  = '&Yes', '&No'
+    $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
+    if ($decision -eq 0) {
+        Restart-Service -DisplayName $service_name
+        Get-Service -DisplayName $service_name
+    }
 }
 
 ###############################################################################
