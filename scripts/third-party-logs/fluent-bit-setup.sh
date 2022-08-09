@@ -41,8 +41,9 @@ fi
 # get directory script is executing from
 [[ -n $MACOS ]] && REALPATH=grealpath || REALPATH=realpath
 [[ -n $MACOS ]] && DIRNAME=gdirname || DIRNAME=dirname
-if ! (type "$REALPATH" && type "$DIRNAME") > /dev/null; then
-  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME" >&2
+[[ -n $MACOS ]] && SED=gsed || SED=sed
+if ! (type "$REALPATH" && type "$DIRNAME" && type "$SED") > /dev/null; then
+  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH, $DIRNAME and $SED" >&2
   exit 1
 fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}") | head -n 1)"
@@ -204,7 +205,7 @@ function GetMalcolmConnInfo() {
   CERT=
   KEY=
 
-  command -v ip >/dev/null 2>&1 && SUGGESTED_IP=$(ip route get 255.255.255.255 2>/dev/null | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g") || SUGGESTED_IP='127.0.0.1'
+  command -v ip >/dev/null 2>&1 && SUGGESTED_IP=$(ip route get 255.255.255.255 2>/dev/null | grep -Po '(?<=src )(\d{1,3}.){4}' | $SED "s/ //g") || SUGGESTED_IP='127.0.0.1'
   SUGGESTED_PORT=5045
   SUGGESTED_FORMAT=json_lines
 
@@ -301,7 +302,13 @@ function GetFluentBitFormatInfo() {
 
   echo "Choose input plugin and enter parameters. Leave parameters blank for defaults." >&2
   echo "  see https://docs.fluentbit.io/manual/pipeline/inputs" >&2
-  readarray -t PLUGINS < <(_fluentbit_run --help 2>&1 | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' | sed -n '/^Inputs$/, /^Filters$/{ /^Inputs$/! { /^Filters$/! p } }' | grep . | awk '{print $1}' | sort)
+  readarray -t PLUGINS < <(_fluentbit_run --help 2>&1 | $SED 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' | $SED -n '/^Inputs$/, /^Filters$/{ /^Inputs$/! { /^Filters$/! p } }' | grep . | awk '{print $1}' | sort)
+  if [[ ${#PLUGINS[@]} -eq 0 ]]; then
+    # this shouldn't have happened, but we need to have at least one plugin here
+    PLUGINS=(
+      dummy
+    )
+  fi
   for i in "${!PLUGINS[@]}"; do
     ((IPLUS=i+1))
     printf "%s\t%s\n" "$IPLUS" "${PLUGINS[$i]}" >&2
@@ -643,7 +650,7 @@ EOF
       fi # systemctl check
 
     elif [[ -n "$MACOS" ]]; then
-      echo "macOS services unsupported" >&2 && false
+      echo "macOS services not yet implemented" >&2 && false
     fi # os determination
   fi # user prompt
 }
@@ -666,9 +673,6 @@ done
 
 echo -n "Operation: " >&2
 read USER_FUNCTION_IDX
-
-echo $USER_FUNCTION_IDX
-
 if [[ -z "$USER_FUNCTION_IDX" ]] || (( $USER_FUNCTION_IDX == 0 )); then
   # do everything, in order
   if InstallFluentBit; then
