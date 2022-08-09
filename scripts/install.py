@@ -522,10 +522,6 @@ class Installer(object):
             'Expose OpenSearch port to external hosts?', default=expose_opensearch_default
         )
         logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
-        logstashSsl = logstashOpen and InstallerYesOrNo(
-            'Should Logstash require SSL for forwarded logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)',
-            default=True,
-        )
         externalEsForward = InstallerYesOrNo('Forward Logstash logs to external OpenSearch instance?', default=False)
         if externalEsForward:
             externalEsHost = InstallerAskForString('Enter external OpenSearch host:port (e.g., 10.0.0.123:9200)')
@@ -537,9 +533,42 @@ class Installer(object):
             externalEsHost = ""
             externalEsSsl = False
             externalEsSslVerify = False
+
         filebeatTcpOpen = InstallerYesOrNo(
             'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
         )
+        filebeatTcpSourceField = ''
+        filebeatTcpTargetField = ''
+        filebeatTcpDropField = ''
+        filebeatTcpTag = '_malcolm_beats'
+        if filebeatTcpOpen:
+            allowedFilebeatTcpFormats = ('json', 'raw')
+            filebeatTcpFormat = 'unset'
+            while filebeatTcpFormat not in allowedFilebeatTcpFormats:
+                filebeatTcpFormat = InstallerChooseOne(
+                    'Select log format for messages sent to Filebeat TCP listener',
+                    choices=[(x, '', x == allowedFilebeatTcpFormats[0]) for x in allowedFilebeatTcpFormats],
+                )
+            if filebeatTcpFormat == 'json':
+                filebeatTcpSourceField = InstallerAskForString(
+                    'Source field to parse for messages sent to Filebeat TCP listener',
+                    default="message",
+                )
+                filebeatTcpTargetField = InstallerAskForString(
+                    'Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener',
+                    default="miscbeat",
+                )
+                filebeatTcpDropField = InstallerAskForString(
+                    f'Field to drop from events sent to Filebeat TCP listener',
+                    default=filebeatTcpSourceField,
+                )
+            filebeatTcpTag = InstallerAskForString(
+                f'Tag to apply to messages sent to Filebeat TCP listener',
+                default=filebeatTcpTag,
+            )
+        else:
+            filebeatTcpFormat = 'raw'
+
         sftpOpen = InstallerYesOrNo(
             'Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default
         )
@@ -834,13 +863,45 @@ class Installer(object):
                             # freq.py string randomness calculations
                             line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
 
-                        elif 'BEATS_SSL' in line:
-                            # enable/disable beats SSL
+                        elif 'FILEBEAT_TCP_LISTEN' in line:
+                            # expose a filebeat TCP input listener
                             line = re.sub(
-                                r'(BEATS_SSL\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}",
+                                r'(FILEBEAT_TCP_LISTEN\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(filebeatTcpOpen)}",
                                 line,
                             )
+
+                        elif 'FILEBEAT_TCP_LOG_FORMAT' in line:
+                            # log format expected for events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_LOG_FORMAT\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpFormat}'", line
+                            )
+
+                        elif 'FILEBEAT_TCP_PARSE_SOURCE_FIELD' in line:
+                            # source field name to parse for events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_PARSE_SOURCE_FIELD\s*:\s*)(\S+)',
+                                fr"\g<1>'{filebeatTcpSourceField}'",
+                                line,
+                            )
+
+                        elif 'FILEBEAT_TCP_PARSE_TARGET_FIELD' in line:
+                            # target field name to store decoded JSON fields for events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_PARSE_TARGET_FIELD\s*:\s*)(\S+)',
+                                fr"\g<1>'{filebeatTcpTargetField}'",
+                                line,
+                            )
+
+                        elif 'FILEBEAT_TCP_PARSE_DROP_FIELD' in line:
+                            # field to drop in events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_PARSE_DROP_FIELD\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpDropField}'", line
+                            )
+
+                        elif 'FILEBEAT_TCP_TAG' in line:
+                            # tag to append to events sent to the filebeat TCP input listener
+                            line = re.sub(r'(FILEBEAT_TCP_TAG\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpTag}'", line)
 
                         elif 'ISM_SNAPSHOT_COMPRESSED' in line:
                             # OpenSearch index state management snapshot compression

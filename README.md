@@ -530,7 +530,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 
 * `ARKIME_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](#Tagging) (default `true`)
-* `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external [Beats](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html)-based forwarders from which it will accept logs; if Malcolm is being used as a standalone tool then this can safely be set to `false`, but if external log feeds are to be accepted then setting it to true is recommended (default `false`)
+* `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external [Beats](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html)-based forwarders from which it will accept logs (default `true`)
 * `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
 * `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
 * `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
@@ -3750,7 +3750,18 @@ Expose Logstash port to external hosts? (y/N): n
 
 Forward Logstash logs to external OpenSearch instance? (y/N): n
 
-Expose Filebeat TCP port to external hosts? (y/N): n
+Expose Filebeat TCP port to external hosts? (y/N): y
+1: json
+2: raw
+Select log format for messages sent to Filebeat TCP listener (json): 1
+
+Source field to parse for messages sent to Filebeat TCP listener (message): message
+
+Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener (miscbeat): miscbeat
+
+Field to drop from events sent to Filebeat TCP listener (message): message
+
+Tag to apply to messages sent to Filebeat TCP listener (_malcolm_beats): _malcolm_beats
 
 Expose SFTP server (for PCAP upload) to external hosts? (y/N): n
 

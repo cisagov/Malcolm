@@ -198,7 +198,7 @@ Next, tweak [`filebeat.yml`](../../filebeat/filebeat.yml) by adding a new log in
 
 Logstash can then be easily extended to add more [`logstash/pipelines`](../../logstash/pipelines). At the time of this writing (as of the [v5.0.0 release](https://github.com/idaholab/Malcolm/releases/tag/v5.0.0)), the Logstash pipelines basically look like this:
 
-* input (from `filebeat`) sends logs to 1..*n* **parse pipelines** (today it's just `zeek`)
+* input (from `filebeat`) sends logs to 1..*n* **parse pipelines**
 * each **parse pipeline** does what it needs to do to parse its logs then sends them to the [**enrichment pipeline**](#LogstashEnrichments)
 * the [**enrichment pipeline**](../../logstash/pipelines/enrichment) performs common lookups to the fields that have been normalized and indexes the logs into the OpenSearch data store
 

@@ -272,7 +272,7 @@ x-common-lookup-variables: &common-lookup-variables
 x-common-beats-variables: &common-beats-variables
   # Whether or not Logstash will use require encrypted communications for any external
   #   Beats-based forwarders from which it will accept logs
-  BEATS_SSL : 'false'
+  BEATS_SSL : 'true'
 
 x-pcap-capture-variables: &pcap-capture-variables
   # Whether or not netsniff-ng should create PCAP files from live traffic on a local
