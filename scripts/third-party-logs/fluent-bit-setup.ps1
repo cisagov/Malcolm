@@ -278,15 +278,11 @@ $cert = (Resolve-Path -Path "$cert")
 $key = (Resolve-Path -Path "$key")
 
 ###############################################################################
-# build fluent-bit.exe command
-# building both a string version and a configuration file version in an array,
-# the former for display and the latter so that we can output it for use
-# with a windows service so we don't have to escape all of the quotes
+# build fluent-bit.exe configuration. saving it into a file rather than building
+# the command line as the escaping of quotes/spaces becomes tricky when building
+# a service
 
 Write-Host ""
-
-$fluentbit_command = @()
-$fluentbit_command += "$fluentbit_bin"
 
 $fluentbit_config = @()
 $fluentbit_config += "[SERVICE]"
@@ -301,15 +297,10 @@ if (Test-Path -Path "$fluentbit_path/../conf/parsers.conf" -PathType Leaf) {
     $fluentbit_parsers_conf = (Resolve-Path -Path "$fluentbit_path/parsers.conf")
 }
 if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
-    $fluentbit_command += "-R"
-    $fluentbit_command += '"' + $fluentbit_parsers_conf + '"'
     $fluentbit_config += "    Parsers_File    ${fluentbit_parsers_conf}"
 }
 
 # input
-$fluentbit_command += "-i"
-$fluentbit_command += "$input_chosen"
-
 $fluentbit_config += ""
 $fluentbit_config += "[INPUT]"
 $fluentbit_config += "    Name    ${input_chosen}"
@@ -317,28 +308,11 @@ $fluentbit_config += "    Name    ${input_chosen}"
 # input parameters
 foreach ($element in $param_map.GetEnumerator()) {
     if (-Not ([string]::IsNullOrWhiteSpace($($element.Value)))) {
-        $fluentbit_command += "-p"
-        $fluentbit_command += $($element.Name)+'="'+$($element.Value)+'"'
         $fluentbit_config += "    $($element.Name)    $($element.Value)"
     }
 }
 
-# output and output parameters
-$fluentbit_command += "-o"
-$fluentbit_command += "tcp://${malcolm_ip}:${malcolm_port}"
-$fluentbit_command += "-p"
-$fluentbit_command += "tls=on"
-$fluentbit_command += "-p"
-$fluentbit_command += "tls.verify=off"
-$fluentbit_command += "-p"
-$fluentbit_command += 'tls.ca_file='+'"'+$ca+'"'
-$fluentbit_command += "-p"
-$fluentbit_command += 'tls.crt_file='+'"'+$cert+'"'
-$fluentbit_command += "-p"
-$fluentbit_command += 'tls.key_file='+'"'+$key+'"'
-$fluentbit_command += "-p"
-$fluentbit_command += 'format='+'"'+$message_format+'"'
-
+# output parameters
 $fluentbit_config += ""
 $fluentbit_config += "[OUTPUT]"
 $fluentbit_config += "    Name    tcp://${malcolm_ip}:${malcolm_port}"
@@ -352,17 +326,6 @@ $fluentbit_config += "    format    ${message_format}"
 
 # filters
 if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
-    $fluentbit_command += "-F"
-    $fluentbit_command += "nest"
-    $fluentbit_command += "-p"
-    $fluentbit_command += "Operation=nest"
-    $fluentbit_command += "-p"
-    $fluentbit_command += "Nested_under=$message_nest"
-    $fluentbit_command += "-p"
-    $fluentbit_command += "WildCard='*'"
-    $fluentbit_command += "-m"
-    $fluentbit_command += "'*'"
-
     $fluentbit_config += ""
     $fluentbit_config += "[FILTER]"
     $fluentbit_config += "    Name    nest"
@@ -370,16 +333,9 @@ if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
     $fluentbit_config += "    Nested_under    ${message_nest}"
     $fluentbit_config += "    WildCard    *"
     $fluentbit_config += "    Match    *"
-
 }
-if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
-    $fluentbit_command += "-F"
-    $fluentbit_command += "record_modifier"
-    $fluentbit_command += "-p"
-    $fluentbit_command += '"Record=module '+$message_module+'"'
-    $fluentbit_command += "-m"
-    $fluentbit_command += "'*'"
 
+if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
     $fluentbit_config += ""
     $fluentbit_config += "[FILTER]"
     $fluentbit_config += "    Name    record_modifier"
@@ -387,18 +343,19 @@ if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
     $fluentbit_config += "    Match    *"
 }
 
-# finish up
-$fluentbit_command += "-f"
-$fluentbit_command += "1"
 $fluentbit_config += ""
 
-# compose and display the command line
-$fluentbit_command_str = $fluentbit_command -join ' '
-$fluentbit_command_str
+# write configuration out to file for fluent-bit.exe to read upon execution
+$now_unix_secs = [int](Get-Date -UFormat %s -Millisecond 0)
+$fluentbit_config_path = "${input_chosen}_${malcolm_ip}_${now_unix_secs}.cfg"
+($fluentbit_config -join "`n") + "`n" | Out-File -FilePath "${fluentbit_config_path}" -Encoding ascii -NoNewLine
+$fluentbit_config_path = (Resolve-Path -Path "$fluentbit_config_path")
+
+Write-Host "$fluentbit_bin -c `"${fluentbit_config_path}`""
 
 # prompt the user if they want to create a service
 $title    = "fluent-bit ${input_chosen} Service"
-$question = "Install and start Windows service for ${input_chosen}?"
+$question = "Install and start Windows service for ${input_chosen} to ${malcolm_ip}?"
 $choices  = '&Yes', '&No'
 $decision = $Host.UI.PromptForChoice($title, $question, $choices, 1)
 if ($decision -eq 0) {
@@ -409,10 +366,8 @@ if ($decision -eq 0) {
     if ([string]::IsNullOrWhiteSpace($service_account)) {
         $service_account = $service_account_default
     }
-    # write configuration out to file for fluent-bit.exe to read upon execution
-    ($fluentbit_config -join "`n") + "`n" | Out-File -FilePath "${service_name}.cfg" -Encoding ascii -NoNewLine
     # create the service and start it
-    $service_cmd = "${fluentbit_bin} -c ${workdir}\${service_name}.cfg"
+    $service_cmd = "${fluentbit_bin} -c ${fluentbit_config_path}"
     New-Service -name $service_name `
       -displayName $service_name `
       -StartupType Automatic `
