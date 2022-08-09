@@ -12,6 +12,8 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 * Messages in the form of MQTT control packets
 * many more...
 
+The types of third-party logs and metrics discussed in this document are *not* the same as the network session metadata provided by Arkime, Zeek and Suricata. Please refer to the [Malcolm Contributor Guide](../../docs/contributing/README.md) for information on integrating a new network traffic analysis provider.
+
 ## <a name="TableOfContents"></a>Table of Contents
 
 * [Configuring Malcolm](#Malcolm)

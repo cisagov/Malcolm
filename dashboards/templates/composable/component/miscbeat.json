@@ -184,7 +184,6 @@
             "winlog": {
               "properties": {
                 "ActivityID" : { "type": "keyword" },
-                "Channel" : { "type": "keyword" },
                 "Computer" : { "type": "keyword" },
                 "Data" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "EventRecordID" : { "type": "integer" },
