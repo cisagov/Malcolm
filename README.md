@@ -95,6 +95,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [API](#API)
         + [Examples](#APIExamples)
+* [Ingesting Third-party Logs](#ThirdPartyLogs)
 * [Malcolm installer ISO](#ISO)
     * [Installation](#ISOInstallation)
     * [Generating the ISO](#ISOBuild)
@@ -3396,6 +3397,22 @@ A webhook that accepts alert data to be reindexed into OpenSearch as session rec
 }
 ```
 </details>
+
+## <a name="ThirdPartyLogs"></a>Ingesting Third-Party Logs
+
+Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) for data storage, search and visualization, and [Logstash](https://www.elastic.co/logstash/) for log processing. Because these tools are data agnostic, Malcolm can be configured to accept various host logs and other third-party logs sent from log forwaders such as [Fluent Bit](https://fluentbit.io/) and [Beats](https://www.elastic.co/beats/). Some examples of the types of logs these forwarders might send include:
+
+* System resource utilization metrics (CPU, memory, disk, network, etc.)
+* System temperatures
+* Linux system logs
+* Windows event logs
+* Process or service health status
+* Logs appended to textual log files (e.g., `tail`-ing a log file)
+* The output of an external script or program
+* Messages in the form of MQTT control packets
+* many more...
+
+Refer to [**Forwarding Third-Party Logs to Malcolm**](./scripts/third-party-logs/README.md) for more information.
 
 ## <a name="ISO"></a>Malcolm installer ISO
 

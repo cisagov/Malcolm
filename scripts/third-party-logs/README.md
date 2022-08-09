@@ -12,7 +12,18 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 * Messages in the form of MQTT control packets
 * many more...
 
-## Configuring Malcolm
+## <a name="TableOfContents"></a>Table of Contents
+
+* [Configuring Malcolm](#Malcolm)
+    - [Secure communication](#MalcolmTLS)
+* [Fluent Bit](#FluentBit)
+    - [Convenience Script for Linux/macOS](#FluentBitBash)
+    - [Convenience Script for Windows](#FluentBitPowerShell)
+* [Beats](#Beats)
+* [Data Format and Visualization](#Data)
+* [Document Indices](#Indices)
+
+## <a name="Malcolm"></a>Configuring Malcolm
 
 The environment variables in [`docker-compose.yml`](../../README.md#DockerComposeYml) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/install.py --configure`](../../README.md#ConfigAndTuning)), as can be seen from the following excerpt from the [Installation example](../../README.md#InstallationExample):
 
@@ -46,13 +57,15 @@ The variables corresponding to these questions can be found in the `filebeat-var
 
 These variables' values will depend on your forwarder and the format of the data it sends. Note that unless you are creating your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource), you probably want to choose the default `_malcolm_beats` for `FILEBEAT_TCP_TAG` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline.
 
-In order to maintain the integrity and confidentiality of your data, Malcolm's default is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](../../README.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
+### <a name="MalcolmTLS"></a>Secure communication
 
-## Fluent Bit
+In order to maintain the integrity and confidentiality of your data, Malcolm's default (set via the `BEATS_SSL` environment variable in `docker-compose.yml`) is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](../../README.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
+
+## <a name="FluentBit"></a>Fluent Bit
 
 [Fluent Bit](https://fluentbit.io/) is a fast and lightweight logging and metrics processor and forwarder that works well with Malcolm. It is [well-documented](https://docs.fluentbit.io/manual), supports a number of [platforms](https://docs.fluentbit.io/manual/installation/getting-started-with-fluent-bit) including [Linux](https://docs.fluentbit.io/manual/installation/linux), [Microsoft Windows](https://docs.fluentbit.io/manual/installation/windows), macOS (either built [via source](https://docs.fluentbit.io/manual/installation/macos) or installed with [Homebrew](https://formulae.brew.sh/formula/fluent-bit#default)) and more. It provides many [data sources](https://docs.fluentbit.io/manual/pipeline/inputs) (inputs).
 
-### Convenience Script for Linux/macOS
+### <a name="FluentBitBash"></a>Convenience Script for Linux/macOS
 
 [`fluent-bit-setup.sh`](./fluent-bit-setup.sh) is a Bash script to help install and configure Fluent Bit on Linux and macOS systems. After configuring Malcolm to accept and parse forwarded logs as described above, run `fluent-bit-setup.sh` as illustrated in the examples below:
 
@@ -191,7 +204,7 @@ Add "module" value: random
 Configure service to run fluent-bit [y/N]? n
 ```
 
-### Convenience Script for Windows
+### <a name="FluentBitPowerShell"></a>Convenience Script for Windows
 
 [fluent-bit-setup.ps1](./fluent-bit-setup.ps1) is a PowerShell script to help install and configure Fluent Bit on Microsoft Windows systems.
 
@@ -260,7 +273,7 @@ Status   Name               DisplayName
 Running  fluentbit_winev... fluentbit_winevtlog
 ```
 
-## Beats
+## <a name="Beats"></a>Beats
 
 Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data to Malcolm's Filebeat TCP listener. Follow the [Get started with Beats](https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html) documentation for configuring Beats on your system.
 
@@ -274,7 +287,10 @@ filebeat.inputs:
 - type: log
   paths:
     - /home/user/logs/*.log
-  tags: ["_malcolm_beats"]
+
+processors:
+  - add_tags:
+      tags: [_malcolm_beats]
 
 output.logstash:
   hosts: ["172.16.0.20:5044"]
@@ -286,7 +302,27 @@ output.logstash:
   ssl.verification_mode: "none"
 ```
 
-The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-general-options.html#_tags_21): unless you are creating your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource), you probably want to use `_malcolm_beats` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline. This parts should apply regardless of the specific Beats forwarder you're using (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
+The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/add-tags.html): unless you are creating your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource), you probably want to use `_malcolm_beats` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline. This parts should apply regardless of the specific Beats forwarder you're using (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
 
-## Data Format and Visualization
+Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats/filebeat/current/defining-processors.html) to filter, transform and enhance data prior to sending it to Malcolm. Consult each forwarder's [documentation](https://www.elastic.co/beats/) to learn more about what processors are available and how to configure them. Use the [Console output](https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html) for debugging and experimenting with how Beats forwarders format the logs they generate.
 
+## <a name="Data"></a>Data Format and Visualization
+
+Because Malcolm could receive logs or metrics from virtually any provider, Malcolm most likely does not have prebuilt dashboards and visualizations for your third-party logs. Luckily, [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) provides visualization tools that can be used with whatever data is stored in Malcolm's OpenSearch document store. Here are some resources to help you get started understanding OpenSearch Dashboards and building custom visualizations for your data:
+
+* [OpenSearch Dashboards](../../README.md#Dashboards) in the Malcolm documentation
+* [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) documentation
+* [Kibana User Guide](https://www.elastic.co/guide/en/kibana/7.10/index.html) (OpenSearch Dashboards is an open-source fork of Kibana, so much of its documentation also applies to OpenSearch Dashboards)
+    - [Discover](https://www.elastic.co/guide/en/kibana/7.10/discover.html)
+    - [Searching Your Data](https://www.elastic.co/guide/en/kibana/7.10/search.html)
+    - [Kibana Dashboards](https://www.elastic.co/guide/en/kibana/7.10/dashboard.html)
+    - [TimeLine](https://www.elastic.co/guide/en/kibana/7.12/timelion.html)
+* [Search Queries in Arkime and OpenSearch](../../README.md#SearchCheatSheet)
+
+## <a name="Indices"></a>Document Indices
+
+Third-party logs ingested into Malcolm as outlined in this document will be indexed into the `malcolm_beats_*` index pattern (unless you've created your own [Logstash pipeline](../../docs/contributing/README.md#LogstashNewSource)), which can be selected in the OpenSearch Dashboards' Discover view or when specifying the log source for a new visualization. 
+
+Because these documents are indexed by OpenSearch dynamically as they are ingested by Logstash, their component fields will not show up as searchable in OpenSearch Dashboards visualizations until its copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
+
+After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the index pattern (`malcolm_beats_*`) and clicking the reload **🗘** button near the upper-right of the window.
