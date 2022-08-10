@@ -1,8 +1,8 @@
 diff --git a/capture/db.c b/capture/db.c
-index 5bfe0f48..5ea65753 100644
+index c1350507..1ae57143 100644
 --- a/capture/db.c
 +++ b/capture/db.c
-@@ -2309,7 +2309,7 @@ LOCAL void moloch_db_load_fields()
+@@ -2325,7 +2325,7 @@ LOCAL void moloch_db_load_fields()
      char                   key[100];
      int                    key_len;
  
@@ -12,15 +12,15 @@ index 5bfe0f48..5ea65753 100644
  
      if (!data) {
 diff --git a/capture/moloch.h b/capture/moloch.h
-index f3419c15..0005d58a 100644
+index 2a63d913..4b7dc4f0 100644
 --- a/capture/moloch.h
 +++ b/capture/moloch.h
-@@ -352,7 +352,7 @@ enum MolochRotate {
+@@ -357,7 +357,7 @@ enum MolochRotate {
   */
  
  #define MOLOCH_FIELD_NOT_FOUND  -1
 -#define MOLOCH_FIELDS_DB_MAX 512
-+#define MOLOCH_FIELDS_DB_MAX 3000
++#define MOLOCH_FIELDS_DB_MAX 5000
  #define MOLOCH_FIELDS_CNT_MIN MOLOCH_FIELDS_DB_MAX
  #define MOLOCH_FIELDS_CNT_MAX (MOLOCH_FIELDS_DB_MAX*2)
  #define MOLOCH_FIELD_EXSPECIAL_START            (MOLOCH_FIELDS_CNT_MAX)
@@ -37,3 +37,16 @@ index 2f98ebe1..0e7b4002 100644
  typedef struct wiserequest {
      BSB          bsb;
      WiseItem_t  *items[WISE_MAX_REQUEST_ITEMS];
+diff --git a/viewer/db.js b/viewer/db.js
+index 1eebc559..2046f17b 100644
+--- a/viewer/db.js
++++ b/viewer/db.js
+@@ -1835,7 +1835,7 @@ exports.sid2Index = function (id, options) {
+ };
+ 
+ exports.loadFields = async () => {
+-  return exports.search('fields', 'field', { size: 3000 });
++  return exports.search('fields', 'field', { size: 5000 });
+ };
+ 
+ exports.getIndices = async (startTime, stopTime, bounding, rotateIndex) => {

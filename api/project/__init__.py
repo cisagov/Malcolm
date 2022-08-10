@@ -553,7 +553,7 @@ def fields():
             # get fields from Arkime's field's table
             s = opensearch_dsl.Search(
                 using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
-            ).extra(size=3000)
+            ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
                 if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
                     if debugApi:
