@@ -358,7 +358,6 @@
         "zeek.s7comm_plus.opcode_name": { "type": "keyword" },
         "zeek.s7comm_plus.function_code": { "type": "keyword" },
         "zeek.s7comm_plus.function_name": { "type": "keyword" },
-        "zeek.s7comm_read_szl.pdu_reference": { "type": "integer"},
         "zeek.s7comm_read_szl.method": { "type": "keyword"},
         "zeek.s7comm_read_szl.szl_id": { "type": "keyword"},
         "zeek.s7comm_read_szl.szl_id_name": { "type": "keyword"},

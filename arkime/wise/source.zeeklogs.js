@@ -1391,7 +1391,6 @@ class MalcolmSource extends WISESource {
       "zeek.s7comm_plus.opcode_name",
       "zeek.s7comm_plus.function_code",
       "zeek.s7comm_plus.function_name",
-      "zeek.s7comm_read_szl.pdu_reference",
       "zeek.s7comm_read_szl.method",
       "zeek.s7comm_read_szl.szl_id",
       "zeek.s7comm_read_szl.szl_id_name",

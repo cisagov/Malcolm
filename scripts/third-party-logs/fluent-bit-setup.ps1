@@ -9,7 +9,7 @@
 ###############################################################################
 
 $fluent_bit_version = '1.9'
-$fluent_bit_full_version = '1.9.6'
+$fluent_bit_full_version = '1.9.7'
 
 ###############################################################################
 # credit for this PowerShell interactive Menu implementation to "JBs Powershell"
