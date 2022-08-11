@@ -105,6 +105,7 @@ if (Test-Path -Path './bin/fluent-bit.exe' -PathType Leaf) {
     }
 }
 if ($fluentbit_bin) {
+    $fluentbit_path = (Resolve-Path -Path "$fluentbit_path")
     $fluentbit_bin = (Resolve-Path -Path "$fluentbit_bin")
     $fluentbit_installed = (Test-Path -Path "$fluentbit_bin" -PathType Leaf)
 }
@@ -295,8 +296,6 @@ $key = (Resolve-Path -Path "$key")
 # the command line as the escaping of quotes/spaces becomes tricky when building
 # a service
 
-Write-Host ""
-
 $fluentbit_config = @()
 $fluentbit_config += "[SERVICE]"
 $fluentbit_config += "    Flush    1"
@@ -309,7 +308,10 @@ if (Test-Path -Path "$fluentbit_path/../conf/parsers.conf" -PathType Leaf) {
 } elseif (Test-Path -Path "$fluentbit_path/parsers.conf" -PathType Leaf) {
     $fluentbit_parsers_conf = (Resolve-Path -Path "$fluentbit_path/parsers.conf")
 }
-if (-Not ([string]::IsNullOrWhiteSpace($message_nest))) {
+if ([string]::IsNullOrWhiteSpace($fluentbit_parsers_conf)) {
+    $fluentbit_parsers_conf = Read-Host -Prompt 'Enter location of fluent-bit parsers.conf'
+}
+if ((-Not ([string]::IsNullOrWhiteSpace($fluentbit_parsers_conf))) -and (Test-Path -Path "$fluentbit_parsers_conf" -PathType Leaf)) {
     $fluentbit_config += "    Parsers_File    ${fluentbit_parsers_conf}"
 }
 
@@ -366,6 +368,7 @@ $fluentbit_config_path = "${input_chosen}_${malcolm_ip}_${now_unix_secs}.cfg"
 ($fluentbit_config -join "`n") + "`n" | Out-File -FilePath "${fluentbit_config_path}" -Encoding ascii -NoNewLine
 $fluentbit_config_path = (Resolve-Path -Path "$fluentbit_config_path")
 
+Write-Host ""
 Write-Host "$fluentbit_bin -c `"${fluentbit_config_path}`""
 
 # prompt the user if they want to create a service
