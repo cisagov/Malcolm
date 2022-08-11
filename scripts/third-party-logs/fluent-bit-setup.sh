@@ -422,6 +422,14 @@ function GetFluentBitFormatInfo() {
       )
       ;;
 
+    mem)
+      PARAM_NAMES=(
+        Interval_Sec
+        Interval_NSec
+        PID
+      )
+      ;;
+
     mqtt)
       PARAM_NAMES=(
         Listen
