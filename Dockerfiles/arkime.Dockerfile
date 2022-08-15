@@ -66,7 +66,7 @@ RUN apt-get -q update && \
     sed -i 's/\!\[.*\](.*\/badge.svg)//g' README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIMEDIR/doc/doc.css -o $ARKIMEDIR/doc/README.html $ARKIMEDIR/doc/README.md && \
   cd /opt && \
-    git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
+    git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     find $ARKIMEDIR/doc/images/screenshots -name "*.png" -delete && \
