@@ -4,7 +4,7 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "3.4.2"
+ENV ARKIME_VERSION "main"
 ENV ARKIMEDIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -66,7 +66,7 @@ RUN apt-get -q update && \
     sed -i 's/\!\[.*\](.*\/badge.svg)//g' README.md && \
     pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIMEDIR/doc/doc.css -o $ARKIMEDIR/doc/README.html $ARKIMEDIR/doc/README.md && \
   cd /opt && \
-    git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
+    git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     find $ARKIMEDIR/doc/images/screenshots -name "*.png" -delete && \
@@ -80,10 +80,15 @@ RUN apt-get -q update && \
     rm -rf ./viewer/vueapp/src/components/upload ./capture/plugins/suricata* && \
     sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
+    echo '>>>> easybutton-build.sh' && \
     ./easybutton-build.sh && \
+    echo '>>>> npm -g config set user root' && \
     npm -g config set user root && \
+    echo '>>>> make install' && \
     make install && \
+    echo '>>>> npm cache clean --force' && \
     npm cache clean --force && \
+    echo '>>>> cleanup' && \
     rm -f ${ARKIMEDIR}/wiseService/source.* && \
     bash -c "file ${ARKIMEDIR}/bin/* ${ARKIMEDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 

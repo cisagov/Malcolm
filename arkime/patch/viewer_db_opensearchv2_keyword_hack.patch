@@ -1,8 +1,8 @@
 diff --git a/viewer/db.js b/viewer/db.js
-index 1eebc559..45645fd3 100644
+index afd0ef70..ca707dee 100644
 --- a/viewer/db.js
 +++ b/viewer/db.js
-@@ -382,7 +382,13 @@ function fixSessionFields (fields, unflatten) {
+@@ -386,7 +386,13 @@ function fixSessionFields (fields, unflatten) {
      delete fields[f];
      for (let i = 0; i < path.length; i++) {
        if (i === path.length - 1) {
