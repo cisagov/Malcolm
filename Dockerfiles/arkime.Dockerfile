@@ -80,15 +80,10 @@ RUN apt-get -q update && \
     rm -rf ./viewer/vueapp/src/components/upload ./capture/plugins/suricata* && \
     sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
-    echo '>>>> easybutton-build.sh' && \
     ./easybutton-build.sh && \
-    echo '>>>> npm -g config set user root' && \
     npm -g config set user root && \
-    echo '>>>> make install' && \
     make install && \
-    echo '>>>> npm cache clean --force' && \
     npm cache clean --force && \
-    echo '>>>> cleanup' && \
     rm -f ${ARKIMEDIR}/wiseService/source.* && \
     bash -c "file ${ARKIMEDIR}/bin/* ${ARKIMEDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
