@@ -8,7 +8,7 @@ echo "Checking OpenSearch..."
 /opt/opensearch_status.sh 2>&1 && echo "OpenSearch is running!"
 
 #Wipe is the same initalize except it keeps users intact
-echo WIPE | /opt/arkime/db/db.pl "${OPENSEARCH_URL}" wipe
+echo WIPE | /opt/arkime/db/db.pl --insecure  "${OPENSEARCH_URL}" wipe
 
 #this is a hacky way to get all of the parseable field definitions put into O.S.
 touch /tmp/not_a_packet.pcap

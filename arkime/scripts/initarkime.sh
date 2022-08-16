@@ -31,7 +31,7 @@ if [[ $(curl -fsk -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_c
 
   echo "Initializing OpenSearch database..."
 
-	$ARKIME_DIR/db/db.pl "${OPENSEARCH_URL}" initnoprompt
+	$ARKIME_DIR/db/db.pl --insecure "${OPENSEARCH_URL}" initnoprompt
 
   echo "Creating default user..."
 
@@ -57,7 +57,7 @@ else
 
   if /opt/arkime-needs-upgrade.sh 2>&1; then
     echo "OpenSearch database needs to be upgraded for $ARKIME_VERSION!"
-    $ARKIME_DIR/db/db.pl "${OPENSEARCH_URL}" upgradenoprompt
+    $ARKIME_DIR/db/db.pl --insecure "${OPENSEARCH_URL}" upgradenoprompt
     echo "OpenSearch database upgrade complete!"
     echo
 
