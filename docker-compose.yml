@@ -37,17 +37,7 @@ x-nginx-variables: &nginx-variables
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
 x-opensearch-variables: &opensearch-variables
-  # Variables used in various services to define the connection to the OpenSearch
-  #   document store. The reason there is some redundancy among these values
-  #   is due to limitations in how docker-compose does variable expansion;
-  #   they should be consistent (e.g., don't put one hosts' value in OPENSEARCH_HOST
-  #   and a different one in OPENSEARCH_URL). In most use cases these
-  #   variables do not need to be changed, as they refer to Malcolm's internal
-  #   opensearch searvice.
-  OPENSEARCH_HOST : 'opensearch'
-  OPENSEARCH_PORT : '9200'
-  OPENSEARCH_PROTOCOL : 'http'
-  OPENSEARCH_HOST_AND_PORT : 'opensearch:9200'
+  # Used in various services to define the connection to the OpenSearch document store.
   OPENSEARCH_URL : 'http://opensearch:9200'
 
 x-arkime-variables: &arkime-variables

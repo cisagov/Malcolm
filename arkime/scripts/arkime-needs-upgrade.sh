@@ -2,10 +2,7 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
-OPENSEARCH_HOST=${OPENSEARCH_HOST:-"opensearch"}
-OPENSEARCH_PORT=${OPENSEARCH_PORT:-"9200"}
-OPENSEARCH_PROTOCOL=${OPENSEARCH_PROTOCOL:-"http"}
-OPENSEARCH_URL=${OPENSEARCH_URL:-"${OPENSEARCH_PROTOCOL}://${OPENSEARCH_HOST}:${OPENSEARCH_PORT}"}
+OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 
 # this script returns:
 #   0 - an UPGRADE IS NEEDED for Arkime indices
