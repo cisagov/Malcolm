@@ -36,13 +36,13 @@ if [[ $(curl -fsk -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_c
   echo "Creating default user..."
 
 	# this password isn't going to be used by Arkime, nginx will do the auth instead
-	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
+	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth --insecure
 
   echo "Initializing fields..."
 
   # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
-  $ARKIME_DIR/bin/capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+  $ARKIME_DIR/bin/capture --insecure --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
 
   echo "Setting defaults..."

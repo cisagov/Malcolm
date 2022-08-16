@@ -12,5 +12,5 @@ echo WIPE | /opt/arkime/db/db.pl "${OPENSEARCH_URL}" wipe
 
 #this is a hacky way to get all of the parseable field definitions put into O.S.
 touch /tmp/not_a_packet.pcap
-$ARKIME_DIR/bin/capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+$ARKIME_DIR/bin/capture --insecure --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
 rm -f /tmp/not_a_packet.pcap

@@ -7,6 +7,7 @@ server.basePath: "/dashboards"
 server.rewriteBasePath: true
 server.maxPayloadBytes: 8388608
 opensearch.hosts: ["${OPENSEARCH_URL}"]
+opensearch.ssl.verificationMode: "none"
 opensearch.requestTimeout: 180000
 
 opensearchDashboards.branding:

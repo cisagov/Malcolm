@@ -75,7 +75,12 @@ class EventWatcher(pyinotify.ProcessEvent):
                 try:
                     if debug:
                         eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchHost}...")
-                    opensearch_dsl.connections.create_connection(hosts=[args.opensearchHost])
+                    opensearch_dsl.connections.create_connection(
+                        hosts=[args.opensearchHost],
+                        verify_certs=False,
+                        ssl_assert_hostname=False,
+                        ssl_show_warn=False,
+                    )
                     if verboseDebug:
                         eprint(f"{scriptName}:\t{opensearch_dsl.connections.get_connection().cluster.health()}")
                     connected = opensearch_dsl.connections.get_connection() is not None

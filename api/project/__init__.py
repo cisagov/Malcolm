@@ -150,7 +150,12 @@ warnings.filterwarnings(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object("project.config.Config")
-opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]])
+opensearch_dsl.connections.create_connection(
+    hosts=[app.config["OPENSEARCH_URL"]],
+    verify_certs=False,
+    ssl_assert_hostname=False,
+    ssl_show_warn=False,
+)
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 
