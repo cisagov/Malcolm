@@ -480,6 +480,7 @@ services:
     environment:
       << : *process-variables
       << : *nginx-variables
+      << : *opensearch-variables
       << : *filebeat-variables
       << : *common-upload-variables
       << : *common-beats-variables
