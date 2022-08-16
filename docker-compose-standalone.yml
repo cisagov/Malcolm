@@ -36,6 +36,20 @@ x-nginx-variables: &nginx-variables
   # Whether or not to write nginx's access.log and error.log to OpenSearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
 
+x-opensearch-variables: &opensearch-variables
+  # Variables used in various services to define the connection to the OpenSearch
+  #   document store. The reason there is some redundancy among these values
+  #   is due to limitations in how docker-compose does variable expansion;
+  #   they should be consistent (e.g., don't put one hosts' value in OPENSEARCH_HOST
+  #   and a different one in OPENSEARCH_URL). In most use cases these
+  #   variables do not need to be changed, as they refer to Malcolm's internal
+  #   opensearch searvice.
+  OPENSEARCH_HOST : 'opensearch'
+  OPENSEARCH_PORT : '9200'
+  OPENSEARCH_PROTOCOL : 'http'
+  OPENSEARCH_HOST_AND_PORT : 'opensearch:9200'
+  OPENSEARCH_URL : 'http://opensearch:9200'
+
 x-arkime-variables: &arkime-variables
   # Whether or not Arkime is allowed to delete uploaded/captured PCAP (see
   #   https://arkime.com/faq#pcap-deletion)
@@ -350,8 +364,8 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *opensearch-variables
       << : *dashboards-helper-variables
-      OPENSEARCH_URL : 'http://opensearch:9200'
       DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
@@ -378,7 +392,7 @@ services:
       - default
     environment:
       << : *process-variables
-      OPENSEARCH_URL : 'http://opensearch:9200'
+      << : *opensearch-variables
       VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
       - opensearch
@@ -407,10 +421,10 @@ services:
       - IPC_LOCK
     environment:
       << : *process-variables
+      << : *opensearch-variables
       << : *logstash-variables
       << : *common-beats-variables
       << : *common-lookup-variables
-      OS_HOSTS : 'opensearch:9200'
       LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
@@ -485,12 +499,11 @@ services:
       - ./auth.env
     environment:
       << : *process-variables
+      << : *opensearch-variables
       << : *common-upload-variables
       << : *arkime-variables
       VIRTUAL_HOST : 'arkime.malcolm.local'
-      OS_HOST : 'opensearch'
-      OS_PORT : 9200
-      OS_MAX_SHARDS_PER_NODE : 2500
+      OPENSEARCH_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
       WISE : 'on'
     ulimits:
@@ -695,8 +708,8 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *opensearch-variables
       << : *common-upload-variables
-      OPENSEARCH_URL : 'http://opensearch:9200'
     depends_on:
       - opensearch
     expose:
@@ -816,6 +829,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *opensearch-variables
       VIRTUAL_HOST : 'api.malcolm.local'
     expose:
       - 5000

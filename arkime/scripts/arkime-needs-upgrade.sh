@@ -2,6 +2,11 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+OPENSEARCH_HOST=${OPENSEARCH_HOST:-"opensearch"}
+OPENSEARCH_PORT=${OPENSEARCH_PORT:-"9200"}
+OPENSEARCH_PROTOCOL=${OPENSEARCH_PROTOCOL:-"http"}
+OPENSEARCH_URL=${OPENSEARCH_URL:-"${OPENSEARCH_PROTOCOL}://${OPENSEARCH_HOST}:${OPENSEARCH_PORT}"}
+
 # this script returns:
 #   0 - an UPGRADE IS NEEDED for Arkime indices
 #   1 - an UPGRADE IS NOT NEEDED for Arkime indices
@@ -39,6 +44,6 @@ while read INDEX_NAME; do
     fi # compare INDEX_NAME vs. INDEX_PREFIX
   done # loop over ARKIME_INDEX_CURRENT_VERSIONS
 
-done <<<$(curl -fsS -H"Content-Type: application/json" -XGET "http://$OS_HOST:$OS_PORT/_cat/indices?v" | tail -n +2 | awk '{print $3}')
+done <<<$(curl -fsSk -H"Content-Type: application/json" -XGET "${OPENSEARCH_URL}/_cat/indices?v" | tail -n +2 | awk '{print $3}')
 
 exit $RETURN_CODE
