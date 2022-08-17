@@ -8,11 +8,13 @@ import json
 import requests
 import os
 import sys
+import urllib3
 
 ###################################################################################################
 debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
+urllib3.disable_warnings()
 
 ###################################################################################################
 # print to stderr

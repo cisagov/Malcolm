@@ -7,6 +7,7 @@ import re
 import requests
 import os
 import sys
+import urllib3
 
 GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
@@ -22,6 +23,7 @@ debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
+urllib3.disable_warnings()
 
 ###################################################################################################
 # print to stderr
