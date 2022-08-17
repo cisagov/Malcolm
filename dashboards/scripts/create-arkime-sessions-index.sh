@@ -42,12 +42,13 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
       echo "OpenSearch is running!"
 
-      # register the repo name/path for opensearch snapshots
+      # register the repo name/path for opensearch snapshots (but don't count this an unrecoverable failure)
       echo "Registering index snapshot repository..."
       curl -w "\n" -H "Accept: application/json" \
         -H "Content-type: application/json" \
         -XPUT -fsSLk "$OPENSEARCH_URL/_snapshot/$ISM_SNAPSHOT_REPO" \
-        -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }"
+        -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }" \
+        || true
 
       if [[ -d /opt/ecs-templates/composable/component ]]; then
         echo "Importing ECS composable templates..."
