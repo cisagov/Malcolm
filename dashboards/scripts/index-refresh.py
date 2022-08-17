@@ -114,14 +114,20 @@ def main():
         sys.tracebacklimit = 0
 
     # get version number so Dashboards doesn't think we're doing a XSRF when we do the PUT
-    statusInfoResponse = requests.get('{}/{}'.format(args.dashboardsUrl, GET_STATUS_API))
+    statusInfoResponse = requests.get(
+        '{}/{}'.format(args.dashboardsUrl, GET_STATUS_API),
+        verify=False,
+    )
     statusInfoResponse.raise_for_status()
     statusInfo = statusInfoResponse.json()
     dashboardsVersion = statusInfo['version']['number']
     if debug:
         eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
 
-    opensearchInfoResponse = requests.get(args.opensearchUrl)
+    opensearchInfoResponse = requests.get(
+        args.opensearchUrl,
+        verify=False,
+    )
     opensearchInfo = opensearchInfoResponse.json()
     opensearchVersion = opensearchInfo['version']['number']
     if debug:
@@ -131,6 +137,7 @@ def main():
     getIndexInfoResponse = requests.get(
         '{}/{}'.format(args.dashboardsUrl, GET_INDEX_PATTERN_INFO_URI),
         params={'type': 'index-pattern', 'fields': 'id', 'search': '"{}"'.format(args.index)},
+        verify=False,
     )
     getIndexInfoResponse.raise_for_status()
     getIndexInfo = getIndexInfoResponse.json()
@@ -144,6 +151,7 @@ def main():
         getFieldsResponse = requests.get(
             '{}/{}'.format(args.dashboardsUrl, GET_FIELDS_URI),
             params={'pattern': args.index, 'meta_fields': ["_source", "_id", "_type", "_index", "_score"]},
+            verify=False,
         )
         getFieldsResponse.raise_for_status()
         getFieldsList = getFieldsResponse.json()['fields']
@@ -155,7 +163,8 @@ def main():
 
                 # request template from OpenSearch and pull the mappings/properties (field list) out
                 getTemplateResponse = requests.get(
-                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template)
+                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template),
+                    verify=False,
                 )
                 getTemplateResponse.raise_for_status()
                 getTemplateResponseJson = getTemplateResponse.json()
@@ -173,7 +182,8 @@ def main():
                         )
                         for componentName in composedOfList:
                             getComponentResponse = requests.get(
-                                '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName)
+                                '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName),
+                                verify=False,
                             )
                             getComponentResponse.raise_for_status()
                             getComponentResponseJson = getComponentResponse.json()
@@ -378,6 +388,7 @@ def main():
                     'osd-version': dashboardsVersion,
                 },
                 data=json.dumps(putIndexInfo),
+                verify=False,
             )
             putResponse.raise_for_status()
 
@@ -393,7 +404,10 @@ def main():
     if args.fixUnassigned and not args.dryrun:
         # set some configuration-related indexes (opensearch/opendistro) replica count to 0
         # so we don't have yellow index state on those
-        shardsResponse = requests.get('{}/{}'.format(args.opensearchUrl, GET_SHARDS_URL))
+        shardsResponse = requests.get(
+            '{}/{}'.format(args.opensearchUrl, GET_SHARDS_URL),
+            verify=False,
+        )
         for shardLine in shardsResponse.iter_lines():
             shardInfo = shardLine.decode('utf-8').split()
             if (shardInfo is not None) and (len(shardInfo) == 2) and (shardInfo[1] == SHARD_UNASSIGNED_STATUS):
@@ -404,6 +418,7 @@ def main():
                         'osd-xsrf': 'true',
                     },
                     data=json.dumps({'index': {'number_of_replicas': 0}}),
+                    verify=False,
                 )
                 putResponse.raise_for_status()
 

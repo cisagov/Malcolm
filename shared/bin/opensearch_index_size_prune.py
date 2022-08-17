@@ -130,7 +130,10 @@ def main():
     if args.limit == '0':
         return
 
-    osInfoResponse = requests.get(args.opensearchUrl)
+    osInfoResponse = requests.get(
+        args.opensearchUrl,
+        verify=False,
+    )
     osInfo = osInfoResponse.json()
     opensearchVersion = osInfo['version']['number']
     if debug:
@@ -159,7 +162,8 @@ def main():
         # get allocation statistics for node(s) to do percentage calculation
         esDiskUsageStats = []
         osInfoResponse = requests.get(
-            f'{args.opensearchUrl}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json'
+            f'{args.opensearchUrl}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json',
+            verify=False,
         )
         osInfo = osInfoResponse.json()
 
@@ -213,7 +217,10 @@ def main():
         )
 
     # now determine the total size of the indices from the index pattern
-    osInfoResponse = requests.get(f'{args.opensearchUrl}/{args.index}/_stats/store')
+    osInfoResponse = requests.get(
+        f'{args.opensearchUrl}/{args.index}/_stats/store',
+        verify=False,
+    )
     osInfo = osInfoResponse.json()
     try:
         totalSizeInMegabytes = (
@@ -239,6 +246,7 @@ def main():
         osInfoResponse = requests.get(
             f'{args.opensearchUrl}/_cat/indices/{args.index}',
             params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
+            verify=False,
         )
         osInfo = sorted(osInfoResponse.json(), key=lambda k: k['i' if args.nameSorted else 'creation.date'])
 
@@ -263,7 +271,10 @@ def main():
             if not args.dryrun:
                 # delete the indices to free up the space indicated
                 for index in indicesToDelete:
-                    esDeleteResponse = requests.delete(f'{args.opensearchUrl}/{index["i"]}')
+                    esDeleteResponse = requests.delete(
+                        f'{args.opensearchUrl}/{index["i"]}',
+                        verify=False,
+                    )
                     print(
                         f'DELETE {index["i"]} ({humanfriendly.format_size(humanfriendly.parse_size(index[sizeKey]))}): {requests.status_codes._codes[esDeleteResponse.status_code][0]}'
                     )

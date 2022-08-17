@@ -110,7 +110,10 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    osInfoResponse = requests.get(args.opensearchUrl)
+    osInfoResponse = requests.get(
+        args.opensearchUrl,
+        verify=False,
+    )
     osInfo = osInfoResponse.json()
     opensearchVersion = osInfo['version']['number']
     if debug:
@@ -152,6 +155,7 @@ def main():
             settingsUrl,
             headers={'Content-Type': 'application/json'},
             data=json.dumps(settingsInfo),
+            verify=False,
         )
         putResponse.raise_for_status()
         if debug:
@@ -159,7 +163,10 @@ def main():
 
     if debug:
         # request settings to verify change(s)
-        checkResponse = requests.get(settingsUrl)
+        checkResponse = requests.get(
+            settingsUrl,
+            verify=False,
+        )
         if args.index == '_cluster':
             eprint(json.dumps(checkResponse.json()))
         else:
