@@ -111,7 +111,7 @@ USER root
 COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux zip unzip && \
+    yum install -y curl psmisc util-linux openssl zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \

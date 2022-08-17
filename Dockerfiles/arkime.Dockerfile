@@ -218,6 +218,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     chmod 755 /opt/*.sh && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_arkime_processor.py && \
     cp -f /opt/arkime_update_geo.sh $ARKIME_DIR/bin/arkime_update_geo.sh && \
+    mv $ARKIME_DIR/etc/config.ini $ARKIME_DIR/etc/config.orig.ini && \
     chmod u+s $ARKIME_DIR/bin/capture && \
     mkdir -p /var/run/arkime && \
     chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/logs /var/run/arkime

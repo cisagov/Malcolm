@@ -40,8 +40,8 @@ RUN yum install -y openssl util-linux procps && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
-  mkdir -p /usr/share/opensearch/ca-trust && \
-  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /usr/share/opensearch/ca-trust && \
+  mkdir -p /var/local/ca-trust && \
+  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /var/local/ca-trust && \
   sed -i "s/^\([[:space:]]*\)\([^#].*performance-analyzer-agent-cli\)/\1# \2/" /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*[^#].*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
@@ -50,7 +50,7 @@ RUN yum install -y openssl util-linux procps && \
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 
-VOLUME ["/usr/share/opensearch/ca-trust"]
+VOLUME ["/var/local/ca-trust"]
 
 ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
 

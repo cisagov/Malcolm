@@ -66,7 +66,7 @@ ADD shared/bin/opensearch_read_only.py /data/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && \
+    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm shadow jq && \
     npm install -g http-server && \
     pip3 install supervisor humanfriendly requests && \
     curl -fsSLO "$SUPERCRONIC_URL" && \

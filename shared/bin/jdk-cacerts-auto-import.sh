@@ -18,6 +18,7 @@ CA_DIR_PARENTS=(
   "$JDK_DIR"/../"$TRUSTED_CA_DIRNAME"
   /etc/"$TRUSTED_CA_DIRNAME"
   /opt/"$TRUSTED_CA_DIRNAME"
+  /var/local/"$TRUSTED_CA_DIRNAME"
   /"$TRUSTED_CA_DIRNAME"
 )
 for i in ${CA_DIR_PARENTS[@]}; do

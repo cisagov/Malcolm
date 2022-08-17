@@ -65,6 +65,7 @@ RUN apt-get -q update && \
       ethtool \
       libcap2-bin \
       netsniff-ng \
+      openssl \
       procps \
       psmisc \
       supervisor \

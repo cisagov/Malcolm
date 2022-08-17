@@ -65,7 +65,7 @@ USER root
 
 RUN yum install -y epel-release && \
         yum upgrade -y && \
-        yum install -y curl inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz p7zip p7zip-plugins unar python3-setuptools python3-pip && \
+        yum install -y curl inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz openssl p7zip p7zip-plugins unar python3-setuptools python3-pip && \
         yum clean all && \
     ln -sr /usr/sbin/fuser /bin/fuser && \
     python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor && \

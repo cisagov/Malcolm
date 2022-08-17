@@ -18,23 +18,28 @@ x-auth-variables: &auth-variables
   #   and use stunnel to tunnel the connection.
   NGINX_LDAP_TLS_STUNNEL : 'false'
   # stunnel will require and verify certificates for StartTLS when one or more
-  # trusted CA certificate files are placed in the ./nginx/ca-trust directory.
-  # For additional security, hostname or IP address checking of the associated
-  # CA certificate(s) can be enabled by providing these values.
+  #   trusted CA certificate files are placed in the ./nginx/ca-trust directory.
+  #   For additional security, hostname or IP address checking of the associated
+  #   CA certificate(s) can be enabled by providing these values.
   NGINX_LDAP_TLS_STUNNEL_CHECK_HOST : ''
   NGINX_LDAP_TLS_STUNNEL_CHECK_IP : ''
   NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL : 2
 
 x-nginx-variables: &nginx-variables
   # Whether or not nginx should use HTTPS. This is almost CERTAINLY what you want.
-  # The only case you may want to set this to false is if you're using another
-  # reverse proxy in front of Malcolm. Even if set to 'false', NGINX will still
-  # listen on port 443 (it just won't be encrypted). If you change this, you'll
-  # probably want to change "0.0.0.0:443:443" to something like
-  # "127.0.0.1:80:443" in the ports section for the nginx-proxy service.
+  #   The only case you may want to set this to false is if you're using another
+  #   reverse proxy in front of Malcolm. Even if set to 'false', NGINX will still
+  #   listen on port 443 (it just won't be encrypted). If you change this, you'll
+  #   probably want to change "0.0.0.0:443:443" to something like
+  #   "127.0.0.1:80:443" in the ports section for the nginx-proxy service.
   NGINX_SSL : 'true'
   # Whether or not to write nginx's access.log and error.log to OpenSearch
   NGINX_LOG_ACCESS_AND_ERRORS : 'false'
+
+x-ssl-variables: &ssl-variables
+  # When possible, docker containers will automatically add trusted CA certificate files
+  #   found in the ./nginx/ca-trust directory (which is bind mounted to /ca-trust).
+  PUSER_CA_TRUST : '/var/local/ca-trust'
 
 x-opensearch-variables: &opensearch-variables
   # Used in various services to define the connection to the OpenSearch document store.
@@ -315,6 +320,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       logger.level : 'WARN'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
@@ -334,8 +340,8 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
-      - ./nginx/ca-trust:/usr/share/opensearch/ca-trust:ro
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
     healthcheck:
@@ -354,6 +360,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *opensearch-variables
       << : *dashboards-helper-variables
       DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
@@ -366,6 +373,8 @@ services:
       - opensearch
     expose:
       - 28991
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
@@ -382,6 +391,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *opensearch-variables
       VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
@@ -389,6 +399,8 @@ services:
       - dashboards-helper
     expose:
       - 5601
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
@@ -411,6 +423,7 @@ services:
       - IPC_LOCK
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *opensearch-variables
       << : *logstash-variables
       << : *common-beats-variables
@@ -425,9 +438,9 @@ services:
     ports:
       - "127.0.0.1:5044:5044"
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
-      - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
@@ -450,6 +463,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *nginx-variables
       << : *opensearch-variables
       << : *filebeat-variables
@@ -466,6 +480,7 @@ services:
     ports:
       - "127.0.0.1:5045:5045"
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - nginx-log-path:/nginx:ro
       - ./zeek-logs:/zeek
       - ./suricata-logs:/suricata
@@ -490,6 +505,7 @@ services:
       - ./auth.env
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *opensearch-variables
       << : *common-upload-variables
       << : *arkime-variables
@@ -508,6 +524,7 @@ services:
       - 8005
       - 8081
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap:/data/pcap
       - ./arkime-logs:/opt/arkime/logs
       - ./arkime-raw:/opt/arkime/raw
@@ -536,6 +553,7 @@ services:
       - SYS_ADMIN
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *common-upload-variables
       << : *zeek-variables
       << : *zeek-offline-variables
@@ -544,6 +562,7 @@ services:
     depends_on:
       - opensearch
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap:/pcap
       - ./zeek-logs/upload:/zeek/upload
       - ./zeek-logs/extract_files:/zeek/extract_files
@@ -571,6 +590,7 @@ services:
       - SYS_ADMIN
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *common-upload-variables
       << : *zeek-variables
       << : *zeek-live-variables
@@ -581,6 +601,7 @@ services:
       ZEEK_INTEL_PATH : '/opt/zeek/share/zeek/site/intel'
       EXTRACT_FILES_PATH : '/zeek/extract_files'
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./zeek-logs/live:/zeek/live
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
@@ -603,6 +624,7 @@ services:
       - SYS_ADMIN
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *common-upload-variables
       << : *suricata-variables
       << : *suricata-offline-variables
@@ -610,6 +632,7 @@ services:
     depends_on:
       - logstash
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./suricata-logs:/var/log/suricata
       - ./pcap:/data/pcap
       - ./suricata/rules:/opt/suricata/rules:ro
@@ -636,12 +659,14 @@ services:
       - SYS_ADMIN
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *common-upload-variables
       << : *suricata-variables
       << : *suricata-live-variables
       << : *pcap-capture-variables
       SURICATA_PCAP_PROCESSOR : 'false'
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
   file-monitor:
@@ -654,12 +679,14 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *zeek-variables
       VIRTUAL_HOST : 'file-monitor.malcolm.local'
     expose:
       - 3310
       - 8440
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek-logs/current:/zeek/logs
       - ./yara/rules:/yara-rules/custom:ro
@@ -686,8 +713,10 @@ services:
       - SYS_ADMIN
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *pcap-capture-variables
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
     image: malcolmnetsec/pcap-monitor:6.2.1
@@ -699,6 +728,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *opensearch-variables
       << : *common-upload-variables
     depends_on:
@@ -706,6 +736,7 @@ services:
     expose:
       - 30441
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./zeek-logs:/zeek
       - ./pcap:/pcap
     healthcheck:
@@ -726,6 +757,7 @@ services:
       - ./auth.env
     environment:
       << : *process-variables
+      << : *ssl-variables
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
@@ -735,6 +767,7 @@ services:
     ports:
       - "127.0.0.1:8022:22"
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost"]
@@ -752,11 +785,13 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *auth-variables
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     expose:
       - 80
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
@@ -776,10 +811,13 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *common-lookup-variables
       VIRTUAL_HOST : 'freq.malcolm.local'
     expose:
       - 10004
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:10004"]
       interval: 30s
@@ -796,10 +834,12 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     expose:
       - 8080
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
       - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
       - ./net-map.json:/var/www/html/maps/net-map.json:rw
@@ -820,10 +860,13 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *opensearch-variables
       VIRTUAL_HOST : 'api.malcolm.local'
     expose:
       - 5000
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/ping"]
       interval: 30s
@@ -840,6 +883,7 @@ services:
       - default
     environment:
       << : *process-variables
+      << : *ssl-variables
       << : *auth-variables
       << : *nginx-variables
     depends_on:
@@ -856,10 +900,10 @@ services:
       - "127.0.0.1:5601:5601"
       - "127.0.0.1:9200:9200"
     volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
       - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
-      - ./nginx/ca-trust:/etc/nginx/ca-trust:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
     healthcheck:
