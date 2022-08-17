@@ -270,6 +270,8 @@ def logs():
     global dockerBin
     global dockerComposeBin
 
+    urlUserPassRegEx = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
+
     # noisy logs (a lot of it is NGINX logs from health checks)
     ignoreRegEx = re.compile(
         r"""
@@ -352,7 +354,7 @@ def logs():
         if (len(output) == 0) and (process.poll() is not None):
             break
         if output:
-            outputStr = output.decode().strip()
+            outputStr = urlUserPassRegEx.sub(r"\1xxxxxxxx\2", output.decode().strip())
             outputStrEscaped = EscapeAnsi(outputStr)
             if ignoreRegEx.match(outputStrEscaped):
                 pass  ### print(f'!!!!!!!: {outputStr}')
