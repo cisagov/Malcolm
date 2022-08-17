@@ -37,23 +37,24 @@ if [[ -n ${PUSER_CA_TRUST} ]] && command -v openssl >/dev/null 2>&1; then
     CA_FILES+=("${PUSER_CA_TRUST}")
   fi
   for CA_FILE in "${CA_FILES[@]}"; do
-    BASE_CA_NAME="$(basename "$CA_FILE")"
+    CA_NAME_ORIG="$(basename "$CA_FILE")"
+    CA_NAME_CRT="${CA_NAME_ORIG%.*}.crt"
     DEST_FILE=
     CONCAT_FILE=
     HASH_FILE="$(openssl x509 -hash -noout -in "$CA_FILE")".0
     if command -v update-ca-certificates >/dev/null 2>&1; then
       if [[ -d /usr/local/share/ca-certificates ]]; then
-        DEST_FILE=/usr/local/share/ca-certificates/"$BASE_CA_NAME"
+        DEST_FILE=/usr/local/share/ca-certificates/"$CA_NAME_CRT"
       elif [[ -d /usr/share/ca-certificates ]]; then
-        DEST_FILE=/usr/share/ca-certificates/"$BASE_CA_NAME"
+        DEST_FILE=/usr/share/ca-certificates/"$CA_NAME_CRT"
       elif [[ -d /etc/ssl/certs ]]; then
         DEST_FILE==/etc/ssl/certs/"$HASH_FILE"
       fi
     elif command -v update-ca-trust >/dev/null 2>&1; then
       if [[ -d /usr/share/pki/ca-trust-source/anchors ]]; then
-        DEST_FILE=/usr/share/pki/ca-trust-source/anchors/"$BASE_CA_NAME"
+        DEST_FILE=/usr/share/pki/ca-trust-source/anchors/"$CA_NAME_CRT"
       elif [[ -d /etc/pki/ca-trust/source/anchors ]]; then
-        DEST_FILE=/etc/pki/ca-trust/source/anchors/"$BASE_CA_NAME"
+        DEST_FILE=/etc/pki/ca-trust/source/anchors/"$CA_NAME_CRT"
       fi
     else
       if [[ -d /etc/ssl/certs ]]; then
@@ -73,7 +74,7 @@ if [[ -n ${PUSER_CA_TRUST} ]] && command -v openssl >/dev/null 2>&1; then
     [[ -n "$DEST_FILE" ]] && ( cp "$CA_FILE" "$DEST_FILE" && chmod 644 "$DEST_FILE" ) || true
     [[ -n "$CONCAT_FILE" ]] && \
       ( echo "" >> "$CONCAT_FILE" && \
-        echo "# $BASE_CA_NAME" >> "$CONCAT_FILE" \
+        echo "# $CA_NAME_ORIG" >> "$CONCAT_FILE" \
         && cat "$CA_FILE" >> "$CONCAT_FILE" ) || true
   done
   command -v update-ca-certificates >/dev/null 2>&1 && update-ca-certificates >/dev/null 2>&1 || true
