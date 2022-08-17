@@ -1243,11 +1243,11 @@ OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://w
 | Field does not exist |`event.dataset != EXISTS!`|`NOT _exists_:event.dataset`|`NOT event.dataset:*`|
 | Field matches a value |`port.dst == 22`|`destination.port:22`|`destination.port:22`|
 | Field does not match a value |`port.dst != 22`|`NOT destination.port:22`|`NOT destination.port:22`|
-| Field matches at least one of a list of values |`tags == [external_source, external_destination]`|`tags:(external_source OR external_destination)`|`tags:(external_source or external_destination)`|
+| Field matches at least one of a list of values |`tags == [foo, bar]`|`tags:(foo OR bar)`|`tags:(foo or bar)`|
 | Field range (inclusive) |`http.statuscode >= 200 && http.statuscode <= 300`|`http.statuscode:[200 TO 300]`|`http.statuscode >= 200 and http.statuscode <= 300`|
 | Field range (exclusive) |`http.statuscode > 200 && http.statuscode < 300`|`http.statuscode:{200 TO 300}`|`http.statuscode > 200 and http.statuscode < 300`|
 | Field range (mixed exclusivity) |`http.statuscode >= 200 && http.statuscode < 300`|`http.statuscode:[200 TO 300}`|`http.statuscode >= 200 and http.statuscode < 300`|
-| Match all search terms (AND) |`(tags == [external_source, external_destination]) && (http.statuscode == 401)`|`tags:(external_source OR external_destination) AND http.statuscode:401`|`tags:(external_source or external_destination) and http.statuscode:401`|
+| Match all search terms (AND) |`(tags == [foo, bar]) && (http.statuscode == 401)`|`tags:(foo OR bar) AND http.statuscode:401`|`tags:(foo or bar) and http.statuscode:401`|
 | Match any search terms (OR) |`(zeek.ftp.password == EXISTS!) || (zeek.http.password == EXISTS!) || (related.user == "anonymous")`|`_exists_:zeek.ftp.password OR _exists_:zeek.http.password OR related.user:"anonymous"`|`zeek.ftp.password:* or zeek.http.password:* or related.user:"anonymous"`|
 | Global string search (anywhere in the document) |all Arkime search expressions are field-based|`microsoft`|`microsoft`|
 | Wildcards|`host.dns == "*micro?oft*"` (`?` for single character, `*` for any characters)|`dns.host:*micro?oft*` (`?` for single character, `*` for any characters)|`dns.host:*micro*ft*` (`*` for any characters)|

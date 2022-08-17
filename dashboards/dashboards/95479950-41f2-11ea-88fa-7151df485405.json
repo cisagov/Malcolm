@@ -277,7 +277,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"network.protocol:(ssh OR rdp OR rfb OR telnet OR rlogin OR rsh OR openvpn OR ipsec OR wireguard) AND tags:(external_source OR external_destination)\",\"language\":\"kuery\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"network.protocol:(ssh OR rdp OR rfb OR telnet OR rlogin OR rsh OR openvpn OR ipsec OR wireguard) AND network.direction:(inbound OR outbound)\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
@@ -307,7 +307,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"tags:internal_source AND tags:external_destination\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"network.direction:outbound\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -336,7 +336,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"tags:external_source AND tags:internal_destination\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"network.direction:inbound\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

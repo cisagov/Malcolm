@@ -1798,6 +1798,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.vulnerability, 'category', 'Vulnerability Category', 'vulnerability.category')\n" +
       "    +arrayList(session.vulnerability, 'enumeration', 'Vulnerability Enumeration', 'vulnerability.enumeration')\n" +
       "    +arrayList(session.vulnerability, 'id', 'Vulnerability ID', 'vulnerability.id')\n" +
+      "    +arrayList(session.network, 'direction', 'Direction', 'network.direction')\n" +
       "    +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
       "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
