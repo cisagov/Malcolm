@@ -781,7 +781,7 @@ You must run auth_setup after install.py to store OpenSearch connection credenti
 …
 ```
 
-### <a name="OpenSearchAuth"></a>Authentication and authorization for remote OpenSearch clusters
+#### <a name="OpenSearchAuth"></a>Authentication and authorization for remote OpenSearch clusters
 
 In addition to setting the environment variables in [`docker-compose.yml`](#DockerComposeYml) as described above, you must provide Malcolm with credentials for it to be able to communicate with remote OpenSearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary OpenSearch connections, respectively, and are bind mounted into the Docker containers which need to communicate with OpenSearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](#AuthSetup) script as illustrated:
 
