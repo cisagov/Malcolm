@@ -12,10 +12,11 @@ RUN    apt-get update -q \
     && python3 -m pip install flake8
 
 COPY ./api /usr/src/app/
+COPY scripts/malcolm_common.py /usr/src/app/
 WORKDIR /usr/src/app
 
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
-    && flake8 --ignore=E501,F401
+    && flake8 --ignore=E501,F401,W503
 
 FROM python:3-slim
 
@@ -48,6 +49,7 @@ ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG DASHBOARDS_URL="http://dashboards:5601/dashboards"
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL=true
 ARG RESULT_SET_LIMIT="500"
 
 ENV HOME=/malcolm
@@ -60,6 +62,7 @@ ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
 ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
 ENV DASHBOARDS_URL $DASHBOARDS_URL
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV RESULT_SET_LIMIT $RESULT_SET_LIMIT
 
 WORKDIR "${APP_HOME}"
@@ -67,6 +70,7 @@ WORKDIR "${APP_HOME}"
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 COPY ./api "${APP_HOME}"
+COPY scripts/malcolm_common.py "${APP_HOME}"/
 COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

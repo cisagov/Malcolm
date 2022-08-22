@@ -110,6 +110,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL=true
 ARG MALCOLM_USERNAME=admin
 ARG ARKIME_ECS_PROVIDER=arkime
 ARG ARKIME_ECS_DATASET=session
@@ -128,6 +129,7 @@ ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
@@ -191,6 +193,7 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
+ADD scripts/malcolm_common.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
 ADD arkime/etc $ARKIME_DIR/etc/
 ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/

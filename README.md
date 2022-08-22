@@ -39,6 +39,8 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
         * [macOS host system configuration](#HostSystemConfigMac)
         * [Windows host system configuration](#HostSystemConfigWindows)
 * [Running Malcolm](#Running)
+    * [OpenSearch instances](#OpenSearchInstance)
+        * [Authentication and authorization for remote OpenSearch clusters](#OpenSearchAuth)
     * [Configure authentication](#AuthSetup)
         * [Local account management](#AuthBasicAccountManagement)
         * [Lightweight Directory Access Protocol (LDAP) authentication](#AuthLDAP)
@@ -183,23 +185,23 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.2.1           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.2.1           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.2.1           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.2.1           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.2.1           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.2.1           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.2.1           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.2.1           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.2.1           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.2.1           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.2.1           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.2.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.2.1           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.2.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.2.1           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.2.1           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.2.1           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.3.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.3.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.3.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.3.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.3.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.3.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.3.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.3.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.3.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.3.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.3.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.3.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.3.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.3.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.3.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.3.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.3.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 #### Import from pre-packaged tarballs
@@ -438,19 +440,21 @@ Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/wo
 $ ./scripts/malcolm_appliance_packager.sh 
 You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
 
-Store administrator username/password for local Malcolm access? (Y/n): 
+Store administrator username/password for local Malcolm access? (Y/n): y
 
 Administrator username: analyst
-analyst password: 
-analyst password (again): 
+analyst password: : 
+analyst password (again): : 
 
-(Re)generate self-signed certificates for HTTPS access (Y/n): 
+(Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
-(Re)generate self-signed certificates for a remote log forwarder (Y/n): 
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): y
 
-Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): 
+Store username/password for primary remote OpenSearch instance? (y/N): n
 
-Store username/password for email alert sender account (y/N): 
+Store username/password for secondary remote OpenSearch instance? (y/N): n
+
+Store username/password for email alert sender account? (y/N): n
 
 Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
 
@@ -551,12 +555,15 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `LOGSTASH_SEVERITY_SCORING` - if set to `true`, Logstash will perform [severity scoring](#Severity) when analyzing Zeek logs (default `true`)
 * `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
 * `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
+* `OPENSEARCH_LOCAL` - if set to `true`, Malcolm will use its own internal [OpenSearch instance](#OpenSearchInstance) (default `true`)
+* `OPENSEARCH_URL` - when using Malcolm's internal OpenSearch instance (i.e., `OPENSEARCH_LOCAL` is `true`) this should be `http://opensearch:9200`, otherwise this value specifies the primary remote instance URL in the format `protocol://host:port` (default `http://opensearch:9200`)
+* `OPENSEARCH_SSL_CERTIFICATE_VERIFICATION` - if set to `true`, connections to the primary remote OpenSearch instance will require full TLS certificate validation (this may fail if using self-signed certificates) (default `false`)
+* `OPENSEARCH_SECONDARY` - if set to `true`, Malcolm will forward logs to a secondary remote OpenSearch instance in addition to the primary (local or remote) OpenSearch instance (default `false`)
+* `OPENSEARCH_SECONDARY_URL` - when forwarding to a secondary remote OpenSearch instance (i.e., `OPENSEARCH_SECONDARY` is `true`) this value specifies the secondary remote instance URL in the format `protocol://host:port`
+* `OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION` - if set to `true`, connections to the secondary remote OpenSearch instance will require full TLS certificate validation (this may fail if using self-signed certificates) (default `false`)
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 * `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
 * `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy like Traefik, Caddy, etc.)
-* `OS_EXTERNAL_HOSTS` – if specified (in the format `'10.0.0.123:9200'`), logs received by Logstash will be forwarded on to another external OpenSearch instance in addition to the one maintained locally by Malcolm
-* `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` – if set to `true`, Logstash will require full TLS certificate validation; this may fail if using self-signed certificates (default `false`)
-* `OS_EXTERNAL_SSL` –  if set to `true`, Logstash will use HTTPS for the connection to external OpenSearch instances specified in `OS_EXTERNAL_HOSTS`
 * `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
 * `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
 * `PCAP_FILTER` – specifies a tcpdump-style filter expression for local packet capture; leave blank to capture all traffic
@@ -578,7 +585,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](#ZeekFileExtraction) to VirusTotal
 * `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
 * `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
-* `ZEEK_DISABLE_...` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
+* `ZEEK_DISABLE_…` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
 * `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
 * `ZEEK_EXTRACTOR_MODE` – determines the file extraction behavior for file transfers detected by Zeek; see [Automatic file extraction and scanning](#ZeekFileExtraction) for more details
 * `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](#ZeekIntelSTIX) or [MISP](#ZeekIntelMISP) feed, only process threat indicators that have been created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2021`) or relative interval (`30 days ago`)
@@ -675,7 +682,7 @@ blockdev --setra 512 /dev/sda
 
 * Change the I/O scheduler to `deadline` or `noop`. Again, this can be done in a variety of ways. The simplest is to add `elevator=deadline` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub2`
 
-* If you are planning on using very large data sets, consider formatting the drive containing `opensearch` volume as XFS.
+* If you are planning on using very large data sets, consider formatting the drive containing the `opensearch` volume as XFS.
 
 After making all of these changes, do a reboot for good measure!
 
@@ -735,6 +742,85 @@ Once Docker is installed, configured and running as described in the previous se
 
 ## <a name="Running"></a>Running Malcolm
 
+### <a name="OpenSearchInstance"></a>OpenSearch instances
+
+Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. OpenSearch can also run as a [cluster](https://opensearch.org/docs/latest/opensearch/cluster/) with instances distributed across multiple nodes with dedicated [roles](https://opensearch.org/docs/latest/opensearch/cluster/#nodes) like cluster manager, data node, ingest node, etc.
+
+As the permutations of OpenSearch cluster configurations are numerous, it is beyond Malcolm's scope to set up multi-node clusters. However, Malcolm can be configured to use a remote OpenSearch cluster rather than its own internal instance.
+
+The `OPENSEARCH_…` [environment variables in `docker-compose.yml`](#DockerComposeYml) control whether Malcolm uses its own local OpenSearch instance or a remote OpenSearch instance as its primary data store. The configuration portion of Malcolm install script ([`./scripts/install.py --configure`](#ConfigAndTuning)) can help you configure these options.
+
+For example, to use the default standalone configuration, answer `Y` when prompted `Should Malcolm use and maintain its own OpenSearch instance?`.
+
+Or, to use a remote OpenSearch cluster:
+
+```
+…
+Should Malcolm use and maintain its own OpenSearch instance? (Y/n): n
+
+Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://192.168.1.123:9200
+
+Require SSL certificate validation for communication with primary OpenSearch instance? (y/N): n
+
+You must run auth_setup after install.py to store OpenSearch connection credentials.
+…
+```
+
+Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can be configured additionally forward logs to a secondary remote OpenSearch instance. The `OPENSEARCH_SECONDARY_…` [environment variables in `docker-compose.yml`](#DockerComposeYml) control this behavior. Configuration of a remote secondary OpenSearch instance is similar to that of a remote primary OpenSearch instance:
+
+
+```
+…
+Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): y
+
+Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://192.168.1.124:9200
+
+Require SSL certificate validation for communication with secondary OpenSearch instance? (y/N): n
+
+You must run auth_setup after install.py to store OpenSearch connection credentials.
+…
+```
+
+### <a name="OpenSearchAuth"></a>Authentication and authorization for remote OpenSearch clusters
+
+In addition to setting the environment variables in [`docker-compose.yml`](#DockerComposeYml) as described above, you must provide Malcolm with credentials for it to be able to communicate with remote OpenSearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary OpenSearch connections, respectively, and are bind mounted into the Docker containers which need to communicate with OpenSearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](#AuthSetup) script as illustrated:
+
+```
+$ ./scripts/auth_setup 
+
+…
+
+Store username/password for primary remote OpenSearch instance? (y/N): y
+
+OpenSearch username: servicedb 
+servicedb password: : 
+servicedb password (again): : 
+
+Require SSL certificate validation for OpenSearch communication? (Y/n): n
+
+Store username/password for secondary remote OpenSearch instance? (y/N): y
+
+OpenSearch username: remotedb
+remotedb password: : 
+remotedb password (again): : 
+
+Require SSL certificate validation for OpenSearch communication? (Y/n): n
+
+…
+```
+
+These files are created with permissions such that only the user account running Malcolm can access them:
+
+```
+$ ls -la .opensearch.*.curlrc
+-rw------- 1 tlacuache tlacuache 36 Aug 22 14:17 .opensearch.primary.curlrc
+-rw------- 1 tlacuache tlacuache 35 Aug 22 14:18 .opensearch.secondary.curlrc
+```
+
+One caveat with Malcolm using a remote OpenSearch cluster as its primary document store is that the accounts used to access Malcolm's [web interfaces](#UserInterfaceURLs), particularly [OpenSearch Dashboards](#Dashboards), are in some instance passed directly through to OpenSearch itself. For this reason, both Malcolm and the remote primary OpenSearch instance must have the same account information. The easiest way to accomplish this is to use an Active Directory/LDAP server that both [Malcolm](#AuthLDAP) and [OpenSearch](https://opensearch.org/docs/latest/security-plugin/configuration/ldap/) use as a common authentication backend.
+
+See the OpenSearch documentation on [access control](https://opensearch.org/docs/latest/security-plugin/access-control/index/) for more information.
+
 ### <a name="AuthSetup"></a>Configure authentication
 
 Malcolm requires authentication to access the [user interface](#UserInterfaceURLs). [Nginx](https://nginx.org/) can authenticate users with either local TLS-encrypted HTTP basic authentication or using a remote Lightweight Directory Access Protocol (LDAP) authentication server.
@@ -753,8 +839,6 @@ In either case, you **must** run `./scripts/auth_setup` before starting Malcolm 
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
     * certificate authority, certificate, and key files for Malcolm's Logstash instance are located in the `logstash/certs/` directory
     * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory; if using [Hedgehog Linux](#Hedgehog), these certificates should be copied to the `/opt/sensor/sensor_ctl/logstash-client-certificates` directory on the sensor
-* specify whether or not to store the username/password for forwarding Logstash events to a secondary, external OpenSearch instance (see the `OS_EXTERNAL_HOSTS`, `OS_EXTERNAL_SSL`, and `OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION` environment variables above)
-    * these parameters are stored securely in the Logstash keystore file `logstash/certs/logstash.keystore`
 * specify whether or not to [store the username/password](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) for [email alert senders](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#create-destinations)
     * these parameters are stored securely in the OpenSearch keystore file `opensearch/opensearch.keystore`
 
@@ -1337,7 +1421,7 @@ The `EXTRACTED_FILE_PRESERVATION` [environment variable in `docker-compose.yml`]
 * `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
 * `none`: preserve no extracted files
 
-The `EXTRACTED_FILE_HTTP_SERVER_...` [environment variables in `docker-compose.yml`](#DockerComposeYml) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server. Beware that Zeek-extracted files may contain malware. As such, the files may be optionally encrypted upon download. 
+The `EXTRACTED_FILE_HTTP_SERVER_…` [environment variables in `docker-compose.yml`](#DockerComposeYml) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server. Beware that Zeek-extracted files may contain malware. As such, the files may be optionally encrypted upon download. 
 
 ### <a name="HostAndSubnetNaming"></a>Automatic host and subnet name assignment
 
@@ -1572,11 +1656,11 @@ Store administrator username/password for local Malcolm access? (Y/n): n
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): n
 
-Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): n
+Store username/password for primary remote OpenSearch instance? (y/N): n
 
-Store username/password for email alert sender account (y/N): y
+Store username/password for secondary remote OpenSearch instance? (y/N): n
 
-OpenSearch alerting destination name: destination_alpha
+Store username/password for email alert sender account? (y/N): y
 
 Email account username: analyst@example.org
 analyst@example.org password: 
@@ -3410,7 +3494,7 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 * Logs appended to textual log files (e.g., `tail`-ing a log file)
 * The output of an external script or program
 * Messages in the form of MQTT control packets
-* many more...
+* many more…
 
 Refer to [**Forwarding Third-Party Logs to Malcolm**](./scripts/third-party-logs/README.md) for more information.
 
@@ -3451,7 +3535,7 @@ Building the ISO may take 30 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-6.2.1.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-6.3.0.iso"
 …
 ```
 
@@ -3724,6 +3808,10 @@ Now that any necessary system configuration changes have been made, the local Ma
 ```
 Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
 
+Should Malcolm use and maintain its own OpenSearch instance? (Y/n): y
+
+Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): n
+
 Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
 
 Setting 3 workers for Logstash pipelines. Is this OK? (Y/n): y
@@ -3764,8 +3852,6 @@ Perform string randomness scoring on some fields? (Y/n): y
 Expose OpenSearch port to external hosts? (y/N): n
 
 Expose Logstash port to external hosts? (y/N): n
-
-Forward Logstash logs to external OpenSearch instance? (y/N): n
 
 Expose Filebeat TCP port to external hosts? (y/N): y
 1: json
@@ -3833,16 +3919,18 @@ user@host:~/Malcolm$ ./scripts/auth_setup
 Store administrator username/password for local Malcolm access? (Y/n): y
 
 Administrator username: analyst
-analyst password:
-analyst password (again):
+analyst password: : 
+analyst password (again): : 
 
-(Re)generate self-signed certificates for HTTPS access (Y/n): y
+(Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): y
 
-Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance (y/N): n
+Store username/password for primary remote OpenSearch instance? (y/N): n
 
-Store username/password for email alert sender account (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) (y/N): n
+Store username/password for secondary remote OpenSearch instance? (y/N): n
+
+Store username/password for email alert sender account? (y/N): n
 ```
 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
@@ -3868,23 +3956,23 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              6.2.1           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           6.2.1           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       6.2.1           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                6.2.1           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.2.1           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/file-monitor                                     6.2.1           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      6.2.1           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/freq                                             6.2.1           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          6.2.1           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     6.2.1           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      6.2.1           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/nginx-proxy                                      6.2.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       6.2.1           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     6.2.1           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     6.2.1           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/suricata                                         6.2.1           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             6.2.1           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              6.3.0           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           6.3.0           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       6.3.0           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                6.3.0           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/filebeat-oss                                     6.3.0           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/file-monitor                                     6.3.0           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      6.3.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/freq                                             6.3.0           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          6.3.0           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     6.3.0           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      6.3.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/nginx-proxy                                      6.3.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       6.3.0           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     6.3.0           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     6.3.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/suricata                                         6.3.0           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             6.3.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, we can start Malcolm. When Malcolm starts it will stream informational and debug messages to the console. If you wish, you can safely close the console or use `Ctrl+C` to stop these messages; Malcolm will continue running in the background.

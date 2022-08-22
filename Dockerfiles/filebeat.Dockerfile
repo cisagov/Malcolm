@@ -40,6 +40,7 @@ ARG LOG_CLEANUP_MINUTES=0
 ARG ZIP_CLEANUP_MINUTES=0
 ARG NGINX_LOG_ACCESS_AND_ERRORS=false
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL=true
 ARG FILEBEAT_TCP_LISTEN=false
 ARG FILEBEAT_TCP_PORT=5045
 ARG FILEBEAT_TCP_LOG_FORMAT="raw"
@@ -80,6 +81,7 @@ ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
+ADD scripts/malcolm_common.py /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN for INPUT in nginx tcp; do \
@@ -109,6 +111,7 @@ ENV FILEBEAT_SURICATA_LOG_PATH $FILEBEAT_SURICATA_LOG_PATH
 ENV FILEBEAT_NGINX_LOG_PATH $FILEBEAT_NGINX_LOG_PATH
 ENV NGINX_LOG_ACCESS_AND_ERRORS $NGINX_LOG_ACCESS_AND_ERRORS
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV FILEBEAT_TCP_LISTEN $FILEBEAT_TCP_LISTEN
 ENV FILEBEAT_TCP_PORT $FILEBEAT_TCP_PORT
 ENV FILEBEAT_TCP_LOG_FORMAT $FILEBEAT_TCP_LOG_FORMAT

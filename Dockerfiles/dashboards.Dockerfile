@@ -90,6 +90,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL="true"
 ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
 ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
 ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
@@ -104,6 +105,7 @@ ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
 ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
 ENV PATH="/data:${PATH}"
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV NODE_OPTIONS $NODE_OPTIONS
 
 USER root
@@ -111,7 +113,7 @@ USER root
 COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl zip unzip && \
+    yum install -y curl psmisc util-linux openssl python3 zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
@@ -121,8 +123,10 @@ RUN yum upgrade -y && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-ADD dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+ADD dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
+ADD scripts/malcolm_common.py /usr/local/bin/
 
 # Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
@@ -138,7 +142,7 @@ ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/
 ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
 
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/share/opensearch-dashboards/opensearch-dashboards-docker-entrypoint.sh"]
 

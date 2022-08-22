@@ -6,9 +6,13 @@
 import argparse
 import json
 import requests
+import malcolm_common
 import os
 import sys
 import urllib3
+
+from collections import defaultdict
+from requests.auth import HTTPBasicAuth
 
 ###################################################################################################
 debug = False
@@ -64,8 +68,37 @@ def main():
         dest='opensearchUrl',
         metavar='<protocol://host:port>',
         type=str,
-        default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'),
+        default=os.getenv('OPENSEARCH_URL', None),
         help='OpenSearch URL',
+    )
+    parser.add_argument(
+        '-c',
+        '--opensearch-curlrc',
+        dest='opensearchCurlRcFile',
+        metavar='<filename>',
+        type=str,
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        help='cURL.rc formatted file containing OpenSearch connection parameters',
+    )
+    parser.add_argument(
+        '-s',
+        '--opensearch-ssl-verify',
+        dest='opensearchSslVerify',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
+        help="Verify SSL certificates for OpenSearch",
+    )
+    parser.add_argument(
+        '-l',
+        '--opensearch-local',
+        dest='opensearchIsLocal',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_LOCAL', default='True')),
+        help="Malcolm is using its local OpenSearch instance",
     )
     parser.add_argument(
         '-r',
@@ -112,9 +145,27 @@ def main():
     else:
         sys.tracebacklimit = 0
 
+    args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
+    opensearchCreds = (
+        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
+        if (not args.opensearchIsLocal)
+        else defaultdict(lambda: None)
+    )
+    if not args.opensearchUrl:
+        if args.opensearchIsLocal:
+            args.opensearchUrl = 'http://opensearch:9200'
+        elif 'url' in opensearchCreds:
+            args.opensearchUrl = opensearchCreds['url']
+    opensearchReqHttpAuth = (
+        HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
+        if opensearchCreds['user'] is not None
+        else None
+    )
+
     osInfoResponse = requests.get(
         args.opensearchUrl,
-        verify=False,
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
     )
     osInfo = osInfoResponse.json()
     opensearchVersion = osInfo['version']['number']
@@ -155,9 +206,10 @@ def main():
         # make the PUT request to change the index/cluster setting and raise an exception if it fails
         putResponse = requests.put(
             settingsUrl,
+            auth=opensearchReqHttpAuth,
             headers={'Content-Type': 'application/json'},
             data=json.dumps(settingsInfo),
-            verify=False,
+            verify=args.opensearchSslVerify,
         )
         putResponse.raise_for_status()
         if debug:
@@ -167,7 +219,8 @@ def main():
         # request settings to verify change(s)
         checkResponse = requests.get(
             settingsUrl,
-            verify=False,
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
         )
         if args.index == '_cluster':
             eprint(json.dumps(checkResponse.json()))

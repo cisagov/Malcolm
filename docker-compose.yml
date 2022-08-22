@@ -43,7 +43,43 @@ x-ssl-variables: &ssl-variables
 
 x-opensearch-variables: &opensearch-variables
   # Used in various services to define the connection to the OpenSearch document store.
+  # Whether or not Malcolm will start and use its own local OpenSearch instance as its
+  #   primary data store. Set to 'false' if you're connecting to another OpenSearch
+  #   cluster, in which case the other environment variables in this section must also
+  #   be set with the connection parameters.
+  OPENSEARCH_LOCAL : 'true'
+  # URL for connecting to OpenSearch instance. When using Malcolm's internal instance
+  #   of OpenSearch (i.e., OPENSEARCH_LOCAL is 'true') this should be
+  #   'http://opensearch:9200', otherwise specify the primary remote instance URL
+  #   in the format 'protocol://host:port'.
   OPENSEARCH_URL : 'http://opensearch:9200'
+  # Used when OPENSEARCH_LOCAL is 'false', the cURL-formatted config file contains login
+  #   credentials for the primary OpenSearch instance. It can be generated for you by the
+  #   ./scripts/auth_setup script. The notable parameters expected from this file would be
+  #   user (with a "user:password" value) and "insecure" (if the certificate verification
+  #   setting below is 'false'). See cURL config file format at
+  #   https://everything.curl.dev/cmdline/configfile. This file is bind mounted locally
+  #   from .opensearch.primary.curlrc as /var/local/opensearch.primary.curlrc
+  OPENSEARCH_CREDS_CONFIG_FILE : '/var/local/opensearch.primary.curlrc'
+  # Whether or not connections to the primary remote OpenSearch instance require full
+  #  TLS certificate validation for the connection (this may fail if using self-signed
+  #  certificates).
+  OPENSEARCH_SSL_CERTIFICATE_VERIFICATION : 'false'
+  # Whether or not Malcolm's Logstash instance will forward logs to a secondary remote
+  #   OpenSearch instance in addition to the (local or remote) primary instance.
+  OPENSEARCH_SECONDARY : 'false'
+  # URL for connecting to the secondary remote OpenSearch instance, specified
+  #   in the format 'protocol://host:port'.
+  OPENSEARCH_SECONDARY_URL : ''
+  # Used when OPENSEARCH_SECONDARY is 'true', the cURL-formatted config file contains login
+  #   credentials for the secondary OpenSearch instance. The comments describing
+  #   OPENSEARCH_CREDS_CONFIG_FILE above also apply here. This file is bind mounted locally
+  #   from .opensearch.secondary.curlrc as /var/local/opensearch.secondary.curlrc
+  OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE : '/var/local/opensearch.secondary.curlrc'
+  # Whether or not connections to the secondary remote OpenSearch instance require full
+  #  TLS certificate validation for the connection (this may fail if using self-signed
+  #  certificates).
+  OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION : 'false'
 
 x-arkime-variables: &arkime-variables
   # Whether or not Arkime is allowed to delete uploaded/captured PCAP (see
@@ -195,19 +231,6 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_SEVERITY_SCORING : 'true'
   # Whether or not Logstash will perform a reverse DNS lookup for external IP addresses
   LOGSTASH_REVERSE_DNS      : 'false'
-  # If specified (in the format '10.0.0.123:9200'), logs received by Logstash will be
-  #   forwarded on to another external OpenSearch instance in addition to the one
-  #   maintained locally by Malcolm
-  OS_EXTERNAL_HOSTS : ''
-  # Whether or not Logstash will use HTTPS for the connection to OS_EXTERNAL_HOSTS
-  OS_EXTERNAL_SSL : 'true'
-  # Whether or not Logstash will require full TLS certificate validation for the connection
-  #   to OS_EXTERNAL_HOSTS (this may fail if using self-signed certificates)
-  OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION : 'false'
-  # For security, OS_EXTERNAL_USER and OS_EXTERNAL_PASSWORD should be stored in Logstash keystore using ./scripts/auth_setup
-  #   See also volume mount for logstash.keystore below.
-  # OS_EXTERNAL_USER : 'janedoe'
-  # OS_EXTERNAL_PASSWORD : 'secret'
 
 x-filebeat-variables: &filebeat-variables
   # filebeat parameters used for monitoring log files containing network traffic metadata
@@ -314,7 +337,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.2.1
+    image: malcolmnetsec/opensearch:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -324,6 +347,7 @@ services:
     environment:
       << : *process-variables
       << : *ssl-variables
+      << : *opensearch-variables
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
@@ -344,6 +368,8 @@ services:
       - IPC_LOCK
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
       - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
@@ -357,7 +383,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.2.1
+    image: malcolmnetsec/dashboards-helper:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -381,6 +407,7 @@ services:
       - 28991
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
@@ -391,7 +418,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.2.1
+    image: malcolmnetsec/dashboards:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -410,6 +437,7 @@ services:
       - 5601
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
@@ -420,7 +448,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.2.1
+    image: malcolmnetsec/logstash-oss:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -451,12 +479,13 @@ services:
       - "127.0.0.1:5044:5044"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.orig.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       - ./logstash/patterns:/usr/share/logstash/malcolm-patterns:ro
       - ./logstash/ruby:/usr/share/logstash/malcolm-ruby:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
-      - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
@@ -473,7 +502,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.2.1
+    image: malcolmnetsec/filebeat-oss:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -500,6 +529,7 @@ services:
       - "127.0.0.1:5045:5045"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
       - nginx-log-path:/nginx:ro
       - ./zeek-logs:/zeek
       - ./suricata-logs:/suricata
@@ -516,7 +546,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.2.1
+    image: malcolmnetsec/arkime:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -547,6 +577,7 @@ services:
       - 8081
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
       - ./arkime-logs:/opt/arkime/logs
       - ./arkime-raw:/opt/arkime/raw
@@ -563,7 +594,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.2.1
+    image: malcolmnetsec/zeek:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -606,7 +637,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.2.1
+    image: malcolmnetsec/zeek:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -642,7 +673,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.2.1
+    image: malcolmnetsec/suricata:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -682,7 +713,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.2.1
+    image: malcolmnetsec/suricata:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -712,7 +743,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.2.1
+    image: malcolmnetsec/file-monitor:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -742,7 +773,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.2.1
+    image: malcolmnetsec/pcap-capture:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -767,7 +798,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.2.1
+    image: malcolmnetsec/pcap-monitor:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -785,6 +816,7 @@ services:
       - 30441
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
       - ./zeek-logs:/zeek
       - ./pcap:/pcap
     healthcheck:
@@ -797,7 +829,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.2.1
+    image: malcolmnetsec/file-upload:6.3.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -827,7 +859,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.2.1
+    image: malcolmnetsec/htadmin:6.3.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -856,7 +888,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.2.1
+    image: malcolmnetsec/freq:6.3.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -882,7 +914,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.2.1
+    image: malcolmnetsec/name-map-ui:6.3.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -910,7 +942,7 @@ services:
       retries: 3
       start_period: 60s
   api:
-    image: malcolmnetsec/api:6.2.1
+    image: malcolmnetsec/api:6.3.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -930,6 +962,7 @@ services:
       - 5000
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/ping"]
       interval: 30s
@@ -940,7 +973,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.2.1
+    image: malcolmnetsec/nginx-proxy:6.3.0
     restart: "no"
     stdin_open: false
     tty: true

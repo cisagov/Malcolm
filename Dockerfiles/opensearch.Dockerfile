@@ -21,6 +21,9 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
+ARG OPENSEARCH_LOCAL=true
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
+
 ARG MALCOLM_API_URL="http://api:5000/event"
 ENV MALCOLM_API_URL $MALCOLM_API_URL
 
@@ -46,13 +49,13 @@ RUN yum install -y openssl util-linux procps && \
   sed -i '/^[[:space:]]*[^#].*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
 
-# just used for initial keystore creation
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+ADD shared/bin/service_check_passthrough.sh /usr/local/bin/docker-entrypoint.sh
 
 VOLUME ["/var/local/ca-trust"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
 
