@@ -813,8 +813,8 @@ These files are created with permissions such that only the user account running
 
 ```
 $ ls -la .opensearch.*.curlrc
--rw------- 1 tlacuache tlacuache 36 Aug 22 14:17 .opensearch.primary.curlrc
--rw------- 1 tlacuache tlacuache 35 Aug 22 14:18 .opensearch.secondary.curlrc
+-rw------- 1 user user 36 Aug 22 14:17 .opensearch.primary.curlrc
+-rw------- 1 user user 35 Aug 22 14:18 .opensearch.secondary.curlrc
 ```
 
 One caveat with Malcolm using a remote OpenSearch cluster as its primary document store is that the accounts used to access Malcolm's [web interfaces](#UserInterfaceURLs), particularly [OpenSearch Dashboards](#Dashboards), are in some instance passed directly through to OpenSearch itself. For this reason, both Malcolm and the remote primary OpenSearch instance must have the same account information. The easiest way to accomplish this is to use an Active Directory/LDAP server that both [Malcolm](#AuthLDAP) and [OpenSearch](https://opensearch.org/docs/latest/security-plugin/configuration/ldap/) use as a common authentication backend.
