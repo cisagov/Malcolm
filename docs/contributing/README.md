@@ -35,65 +35,104 @@ There are several ways to customize Malcolm's runtime behavior via local changes
 Some configuration changes can be put in place by modifying local copies of configuration files and then use a [Docker bind mount](https://docs.docker.com/storage/bind-mounts/) to overlay the modified file onto the running Malcolm container. This is already done for many files and directories used to persist Malcolm configuration and data. For example, the default list of bind mounted files and directories for each Malcolm service is as follows:
 
 ```
-$ grep -P "^(      - ./|  \w+:)" docker-compose-standalone.yml
-opensearch:
-    - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
-    - ./nginx/ca-trust:/usr/share/opensearch/ca-trust:ro
-    - ./opensearch:/usr/share/opensearch/data:delegated
-    - ./opensearch-backup:/opt/opensearch/backup:delegated
-dashboards-helper:
-dashboards:
-logstash:
-    - ./logstash/certs/logstash.keystore:/usr/share/logstash/config/logstash.keystore:rw
-    - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
-    - ./nginx/ca-trust:/usr/share/logstash/ca-trust:ro
-    - ./logstash/certs/ca.crt:/certs/ca.crt:ro
-    - ./logstash/certs/server.crt:/certs/server.crt:ro
-    - ./logstash/certs/server.key:/certs/server.key:ro
-    - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
-    - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
-    - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
-filebeat:
-    - ./zeek-logs:/data/zeek
-    - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
-    - ./filebeat/certs/client.crt:/certs/client.crt:ro
-    - ./filebeat/certs/client.key:/certs/client.key:ro
-arkime:
-    - ./auth.env
-    - ./pcap:/data/pcap
-    - ./arkime-logs:/opt/arkime/logs
-    - ./arkime-raw:/opt/arkime/raw
-zeek:
-    - ./pcap:/pcap
-    - ./zeek-logs/upload:/zeek/upload
-    - ./zeek-logs/extract_files:/zeek/extract_files
-file-monitor:
-    - ./zeek-logs/extract_files:/data/zeek/extract_files
-    - ./zeek-logs/current:/data/zeek/logs
-    - ./yara/rules:/yara-rules/custom:ro
-pcap-capture:
-    - ./pcap/upload:/pcap
-pcap-monitor:
-    - ./zeek-logs:/zeek
-    - ./pcap:/pcap
-upload:
-    - ./auth.env
-    - ./pcap/upload:/var/www/upload/server/php/chroot/files
-htadmin:
-    - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
-    - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-    - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
-freq:
-name-map-ui:
-    - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
-    - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
-    - ./net-map.json:/var/www/html/maps/net-map.json:rw
-nginx-proxy:
-    - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
-    - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
-    - ./nginx/ca-trust:/etc/nginx/ca-trust:ro
-    - ./nginx/certs:/etc/nginx/certs:ro
-    - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
+$ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
+  opensearch:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
+      - ./opensearch:/usr/share/opensearch/data:delegated
+      - ./opensearch-backup:/opt/opensearch/backup:delegated
+  dashboards-helper:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+  dashboards:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+  logstash:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
+      - ./logstash/certs/ca.crt:/certs/ca.crt:ro
+      - ./logstash/certs/server.crt:/certs/server.crt:ro
+      - ./logstash/certs/server.key:/certs/server.key:ro
+      - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
+      - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
+      - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
+  filebeat:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./zeek-logs:/zeek
+      - ./suricata-logs:/suricata
+      - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
+      - ./filebeat/certs/client.crt:/certs/client.crt:ro
+      - ./filebeat/certs/client.key:/certs/client.key:ro
+  arkime:
+      - ./auth.env
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./pcap:/data/pcap
+      - ./arkime-logs:/opt/arkime/logs
+      - ./arkime-raw:/opt/arkime/raw
+  zeek:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./pcap:/pcap
+      - ./zeek-logs/upload:/zeek/upload
+      - ./zeek-logs/extract_files:/zeek/extract_files
+      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+  zeek-live:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./zeek-logs/live:/zeek/live
+      - ./zeek-logs/extract_files:/zeek/extract_files
+      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+  suricata:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./suricata-logs:/var/log/suricata
+      - ./pcap:/data/pcap
+      - ./suricata/rules:/opt/suricata/rules:ro
+  suricata-live:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./suricata-logs:/var/log/suricata
+      - ./suricata/rules:/opt/suricata/rules:ro
+  file-monitor:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./zeek-logs/extract_files:/zeek/extract_files
+      - ./zeek-logs/current:/zeek/logs
+      - ./yara/rules:/yara-rules/custom:ro
+  pcap-capture:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./pcap/upload:/pcap
+  pcap-monitor:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./zeek-logs:/zeek
+      - ./pcap:/pcap
+  upload:
+      - ./auth.env
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./pcap/upload:/var/www/upload/server/php/chroot/files
+  htadmin:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
+      - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
+      - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
+  freq:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+  name-map-ui:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
+      - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
+      - ./net-map.json:/var/www/html/maps/net-map.json:rw
+  api:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+  nginx-proxy:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
+      - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
 ```
 
 So, for example, if you wanted to make a change to the `nginx-proxy` container's `nginx.conf` file, you could add the following line to the `volumes:` section of the `nginx-proxy` service in your `docker-compose.yml` file:
