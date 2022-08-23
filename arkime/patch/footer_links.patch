@@ -1,13 +1,18 @@
 diff --git a/viewer/vueapp/src/components/utils/Footer.vue b/viewer/vueapp/src/components/utils/Footer.vue
-index 50e30c99..d54542dc 100644
+index 50e30c99..d67dfb36 100644
 --- a/viewer/vueapp/src/components/utils/Footer.vue
 +++ b/viewer/vueapp/src/components/utils/Footer.vue
-@@ -5,6 +5,8 @@
+@@ -4,9 +4,11 @@
+     <p>
        <small>
          Arkime v{{molochVersion}} |
-         <a href="https://arkime.com">arkime.com</a>
-+        | <a href="/readme">Malcolm</a>
-+        | <a href="/dashboards">Dashboards</a>
+-        <a href="https://arkime.com">arkime.com</a>
++        <a href="https://arkime.com">arkime.com 🦉</a>
++        | <a href="/readme">Malc⦿lm 📄</a>
++        | <a href="/dashboards">Dashboards 📊</a>
          <span v-if="responseTime && !loadingData">
-           | {{ responseTime | commaString }}ms
+-          | {{ responseTime | commaString }}ms
++          | {{ responseTime | commaString }}ms ⏱️
          </span>
+         <span v-if="loadingData">
+           |
