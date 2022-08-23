@@ -368,6 +368,7 @@
           "destination.ip",
           "event.action",
           "event.result",
+          "network.is_orig",
           "zeek.cip.direction",
           "zeek.cip.cip_sequence_count",
           "zeek.cip.class_id",
@@ -456,6 +457,7 @@
           "destination.ip",
           "event.action",
           "event.result",
+          "network.is_orig",
           "zeek.enip.options",
           "zeek.enip.sender_context",
           "zeek.enip.session_handle",
@@ -498,6 +500,7 @@
         "columns": [
           "source.ip",
           "destination.ip",
+          "network.is_orig",
           "zeek.cip_io.connection_id",
           "zeek.cip_io.sequence_number",
           "zeek.cip_io.data_length",
