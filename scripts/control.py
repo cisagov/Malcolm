@@ -445,8 +445,6 @@ def stop(wipe=False):
     osEnv = os.environ.copy()
     osEnv['TMPDIR'] = MalcolmTmpPath
 
-    # TODO: handle OPENSEARCH_URL, OPENSEARCH_LOCAL, OPENSEARCH_SSL_CERTIFICATE_VERIFICATION, OPENSEARCH_CREDS_CONFIG_FILE
-
     if wipe:
         # attempt to DELETE _index_template/malcolm_template in OpenSearch
         err, out = run_process(
@@ -458,7 +456,7 @@ def stop(wipe=False):
                 'arkime',
                 'bash',
                 '-c',
-                'curl -fsk --output /dev/null -H"Content-Type: application/json" -XDELETE "$OPENSEARCH_URL/_index_template/malcolm_template"',
+                'curl -fs --config /var/local/opensearch.primary.curlrc --output /dev/null -H"Content-Type: application/json" -XDELETE "$OPENSEARCH_URL/_index_template/malcolm_template"',
             ],
             env=osEnv,
             debug=args.debug,
