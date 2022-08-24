@@ -445,23 +445,6 @@ def stop(wipe=False):
     osEnv = os.environ.copy()
     osEnv['TMPDIR'] = MalcolmTmpPath
 
-    if wipe:
-        # attempt to DELETE _index_template/malcolm_template in OpenSearch
-        err, out = run_process(
-            [
-                dockerComposeBin,
-                '-f',
-                args.composeFile,
-                'exec',
-                'arkime',
-                'bash',
-                '-c',
-                'curl -fs --config /var/local/opensearch.primary.curlrc --output /dev/null -H"Content-Type: application/json" -XDELETE "$OPENSEARCH_URL/_index_template/malcolm_template"',
-            ],
-            env=osEnv,
-            debug=args.debug,
-        )
-
     # if stop.sh is being called with wipe.sh (after the docker-compose file)
     # then also remove named and anonymous volumes (not external volumes, of course)
     err, out = run_process(
