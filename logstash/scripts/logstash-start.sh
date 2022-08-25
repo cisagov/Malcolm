@@ -107,8 +107,8 @@ OPENSSL_SECONDARY_PASSWORD=
 if [[ "$OPENSEARCH_SECONDARY" == "true" ]] && [[ -r "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
     NEW_SECONDARY_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
-    OPENSSL_SECONDARY_USER="$(echo "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" | cut -d'|' -f1)"
-    OPENSSL_SECONDARY_PASSWORD="$(echo "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" | cut -d'|' -f2-)"
+    OPENSSL_SECONDARY_USER="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f1)"
+    OPENSSL_SECONDARY_PASSWORD="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f2-)"
     popd >/dev/null 2>&1
 fi
 

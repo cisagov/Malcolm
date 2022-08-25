@@ -402,6 +402,7 @@ services:
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
