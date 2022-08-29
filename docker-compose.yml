@@ -298,8 +298,8 @@ x-common-lookup-variables: &common-lookup-variables
   #   for assigning severity to long connections
   CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
   # When severity scoring is enabled, this variable defines a comma-separated list of
-  #   countries of concern (using ISO 3166-1 alpha-2 codes)
-  QUESTIONABLE_COUNTRY_CODES : 'CN,IR,KP,RU,UA'
+  #   sensitive countries (using ISO 3166-1 alpha-2 codes)
+  SENSITIVE_COUNTRY_CODES : 'AM,AZ,BY,CN,CU,DZ,GE,HK,IL,IN,IQ,IR,KG,KP,KZ,LY,MD,MO,PK,RU,SD,SS,SY,TJ,TM,TW,UA,UZ'
 
 x-common-beats-variables: &common-beats-variables
   # Whether or not Logstash will use require encrypted communications for any external

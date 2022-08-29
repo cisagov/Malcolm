@@ -573,7 +573,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `PCAP_ROTATE_MINUTES` – used to specify a time interval (in minutes) after which a locally-captured PCAP file will be closed for processing and a new PCAP file created
 * `pipeline.workers`, `pipeline.batch.size` and `pipeline.batch.delay` - these settings are used to tune the performance and resource utilization of the the `logstash` container; see [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html)
 * `PUID` and `PGID` - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
-* `QUESTIONABLE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of countries of concern (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'CN,IR,KP,RU,UA'`)
+* `SENSITIVE_COUNTRY_CODES` - when [severity scoring](#Severity) is enabled, this variable defines a comma-separated list of sensitive countries (using [ISO 3166-1 alpha-2 codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) (default `'AM,AZ,BY,CN,CU,DZ,GE,HK,IL,IN,IQ,IR,KG,KP,KZ,LY,MD,MO,PK,RU,SD,SS,SY,TJ,TM,TW,UA,UZ'`, taken from the U.S. Department of Energy Sensitive Country List)
 * `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
 * `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
 * `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`).
@@ -1526,8 +1526,8 @@ As Zeek logs are parsed and enriched prior to indexing, a severity score up to `
 
 * cross-segment network traffic (if [network subnets were defined](#HostAndSubnetNaming))
 * connection origination and destination (e.g., inbound, outbound, external, internal)
-* traffic to or from countries of concern
-    - The comma-separated list of countries (by [ISO 3166-1 alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) can be customized by setting the `QUESTIONABLE_COUNTRY_CODES` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+* traffic to or from sensitive countries
+    - The comma-separated list of countries (by [ISO 3166-1 alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) can be customized by setting the `SENSITIVE_COUNTRY_CODES` environment variable in [`docker-compose.yml`](#DockerComposeYml).
 * domain names (from DNS queries and SSL server names) with high entropy as calculated by [freq](https://github.com/MarkBaggett/freq)
     - The entropy threshold for this condition to trigger can be adjusted by setting the `FREQ_SEVERITY_THRESHOLD` environment variable in [`docker-compose.yml`](#DockerComposeYml). A lower value will only assign severity scores to fewer domain names with higher entropy (e.g., `2.0` for `NQZHTFHRMYMTVBQJE.COM`), while a higher value will assign severity scores to more domain names with lower entropy (e.g., `7.5` for `naturallanguagedomain.example.org`).
 * file transfers (categorized by mime type)
@@ -3338,7 +3338,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             },
             {
                 "doc_count": 1985,
-                "key": "Country of concern"
+                "key": "Sensitive country"
             },
             {
                 "doc_count": 760,
