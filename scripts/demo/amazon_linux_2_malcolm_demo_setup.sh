@@ -316,7 +316,7 @@ function InstallCommonPackages {
       fi
 
       # wireshark
-      WIRESHARK_VERSION=3.6.2
+      WIRESHARK_VERSION=3.6.7
       curl -sSL -O -J "https://2.na.dl.wireshark.org/src/wireshark-${WIRESHARK_VERSION}.tar.xz"
       tar xvf wireshark-"${WIRESHARK_VERSION}".tar.xz
       pushd wireshark-"${WIRESHARK_VERSION}" >/dev/null 2>&1
