@@ -47,7 +47,7 @@ ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
 # put Zeek and Spicy in PATH
-ENV ZEEK_DIR "/opt/zeek"
+ENV ZEEK_DIR "/opt/zeek-rc"
 ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 
 # add script for building 3rd-party plugins
@@ -112,16 +112,16 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
       curl -sSL --remote-name-all \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VERSION}_all.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_all.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_all.deb" \
-        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_all.deb" && \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker-rc${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek-rc${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek-rc${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek-rc${ZEEK_LTS}-spicy-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek-rc${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl-rc${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek-rc${ZEEK_LTS}-client_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek-rc${ZEEK_LTS}-zkg_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek-rc${ZEEK_LTS}-btest_${ZEEK_VERSION}_all.deb" \
+        "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek-rc${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_all.deb" && \
       dpkg -i ./*.deb && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
