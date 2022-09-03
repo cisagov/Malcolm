@@ -285,14 +285,14 @@ class Installer(object):
                     if self.debug:
                         eprint(f"{installPath} only contains {childDir[0]}")
                     for f in os.listdir(childDir[0]):
-                        shutil.move(os.path.join(childDir[0], f), installPath)
+                        shutil.move(os.path.join(childDir[0], f), secure_installPath(installPath))
                     shutil.rmtree(childDir[0], ignore_errors=True)
 
                 # verify the installation worked
                 if os.path.isfile(os.path.join(installPath, "docker-compose.yml")):
                     eprint(f"Malcolm runtime files extracted to {installPath}")
                     result = True
-                    with open(os.path.join(installPath, "install_source.txt"), 'w') as f:
+                    with open(os.path.join(secure_installPath(installPath), "install_source.txt"), 'w') as f:
                         f.write(
                             f'{os.path.basename(malcolm_install_file)} (installed {str(datetime.datetime.now())})\n'
                         )

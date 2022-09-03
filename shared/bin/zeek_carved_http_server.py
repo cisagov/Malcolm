@@ -116,7 +116,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 encrypted += OPENSSL_ENC_MAGIC
                 encrypted += salt
                 self.wfile.write(encrypted)
-                with open(fullpath, 'rb') as f:
+                with open(secure_fullpath(fullpath), 'rb') as f:
                     padding = b''
                     while True:
                         chunk = f.read(cipher.block_size)
