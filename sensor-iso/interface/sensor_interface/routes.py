@@ -52,7 +52,6 @@ def buttons():
 @app.route('/script_call/<string:script>', methods=['POST'])
 def activate_service(script):
     print(script)
-    reason = sys_s.service(script)
     return sys_s.service(script)
 
 
