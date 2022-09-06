@@ -443,8 +443,8 @@ You must set a username and password for Malcolm, and self-signed X.509 certific
 Store administrator username/password for local Malcolm access? (Y/n): y
 
 Administrator username: analyst
-analyst password: : 
-analyst password (again): : 
+analyst password:
+analyst password (again):
 
 (Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
@@ -793,16 +793,16 @@ $ ./scripts/auth_setup
 Store username/password for primary remote OpenSearch instance? (y/N): y
 
 OpenSearch username: servicedb 
-servicedb password: : 
-servicedb password (again): : 
+servicedb password:
+servicedb password (again):
 
 Require SSL certificate validation for OpenSearch communication? (Y/n): n
 
 Store username/password for secondary remote OpenSearch instance? (y/N): y
 
 OpenSearch username: remotedb
-remotedb password: : 
-remotedb password (again): : 
+remotedb password:
+remotedb password (again):
 
 Require SSL certificate validation for OpenSearch communication? (Y/n): n
 
@@ -3919,8 +3919,8 @@ user@host:~/Malcolm$ ./scripts/auth_setup
 Store administrator username/password for local Malcolm access? (Y/n): y
 
 Administrator username: analyst
-analyst password: : 
-analyst password (again): : 
+analyst password:
+analyst password (again):
 
 (Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
