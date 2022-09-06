@@ -502,7 +502,7 @@
           "url.original",
           "zeek.opcua_binary.seq_number",
           "zeek.opcua_binary.request_id",
-          "zeek.opcua_binary.opcua_id",
+          "zeek.opcua_binary.opcua_link_id",
           "zeek.uid"
         ],
         "sort": [],
