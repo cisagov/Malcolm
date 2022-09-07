@@ -32,43 +32,43 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
   # give OpenSearch time to start before configuring dashboards
   /data/opensearch_status.sh >/dev/null 2>&1
 
-  # is the Dashboards process server up and responding to requests?
-  if curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
+  for LOOP in primary secondary; do
 
-    # have we not not already created the index pattern?
-    if ! curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
+    if [[ "$LOOP" == "primary" ]]; then
+      OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"http://opensearch:9200"}
+      OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+      OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+      if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
+        CURL_CONFIG_PARAMS=(
+          --config
+          "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE"
+          )
+      else
+        CURL_CONFIG_PARAMS=()
+      fi
 
-      for LOOP in primary secondary; do
+    elif [[ "$LOOP" == "secondary" ]] && [[ "${OPENSEARCH_SECONDARY:-"false"}" == "true" ]] && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then
+      OPENSEARCH_URL_TO_USE=$OPENSEARCH_SECONDARY_URL
+      OPENSEARCH_LOCAL=false
+      OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/opensearch.secondary.curlrc"}
+      if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
+        CURL_CONFIG_PARAMS=(
+          --config
+          "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE"
+          )
+      else
+        CURL_CONFIG_PARAMS=()
+      fi
 
-        if [[ "$LOOP" == "primary" ]]; then
-          OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"http://opensearch:9200"}
-          OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-          OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
-          if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
-            CURL_CONFIG_PARAMS=(
-              --config
-              "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE"
-              )
-          else
-            CURL_CONFIG_PARAMS=()
-          fi
+    else
+      continue
+    fi
 
-        elif [[ "$LOOP" == "secondary" ]] && [[ "${OPENSEARCH_SECONDARY:-"false"}" == "true" ]] && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then
-          OPENSEARCH_URL_TO_USE=$OPENSEARCH_SECONDARY_URL
-          OPENSEARCH_LOCAL=false
-          OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/opensearch.secondary.curlrc"}
-          if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
-            CURL_CONFIG_PARAMS=(
-              --config
-              "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE"
-              )
-          else
-            CURL_CONFIG_PARAMS=()
-          fi
+    # is the Dashboards process server up and responding to requests?
+    if [[ "$LOOP" != "primary" ]] || curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
 
-        else
-          continue
-        fi
+      # have we not not already created the index pattern?
+      if [[ "$LOOP" != "primary" ]] || ! curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
 
         echo "OpenSearch ($LOOP) is running at \"${OPENSEARCH_URL_TO_USE}\"!"
 
@@ -237,7 +237,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           echo "OpenSearch alerting objects creation complete!"
 
         fi # stuff to only do for primary
-      done # primary vs. secondary
-    fi # index pattern not already created check
-  fi # dashboards is running
+      fi # index pattern not already created check
+    fi # dashboards is running
+  done # primary vs. secondary
 fi # CREATE_OS_ARKIME_SESSION_INDEX is true
