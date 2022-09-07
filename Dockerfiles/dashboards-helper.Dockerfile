@@ -25,6 +25,7 @@ ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL=true
 ARG ISM_SNAPSHOT_COMPRESSED=false
 ARG ISM_SNAPSHOT_REPO=logs
 ARG OFFLINE_REGION_MAPS_PORT="28991"
@@ -36,6 +37,7 @@ ENV ARKIME_INDEX_PATTERN_ID $ARKIME_INDEX_PATTERN_ID
 ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
 ENV CREATE_OS_ARKIME_SESSION_INDEX $CREATE_OS_ARKIME_SESSION_INDEX
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV ISM_SNAPSHOT_COMPRESSED $ISM_SNAPSHOT_COMPRESSED
 ENV ISM_SNAPSHOT_REPO $ISM_SNAPSHOT_REPO
 ENV OFFLINE_REGION_MAPS_PORT $OFFLINE_REGION_MAPS_PORT
@@ -63,10 +65,11 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /data/
 ADD shared/bin/opensearch_index_size_prune.py /data/
 ADD shared/bin/opensearch_read_only.py /data/
+ADD scripts/malcolm_common.py /data/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash python3 py3-pip curl procps psmisc npm shadow jq && \
+    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm shadow jq && \
     npm install -g http-server && \
     pip3 install supervisor humanfriendly requests && \
     curl -fsSLO "$SUPERCRONIC_URL" && \

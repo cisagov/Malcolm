@@ -1,0 +1,13 @@
+diff --git a/capture/db.c b/capture/db.c
+index c1350507..b29a41ac 100644
+--- a/capture/db.c
++++ b/capture/db.c
+@@ -2411,7 +2411,7 @@ void moloch_db_add_field(char *group, char *kind, char *expression, char *friend
+     }
+ 
+     BSB_EXPORT_u08(bsb, '}');
+-    moloch_http_schedule(esServer, "POST", key, key_len, json, BSB_LENGTH(bsb), NULL, MOLOCH_HTTP_PRIORITY_NORMAL, NULL, NULL);
++    moloch_http_schedule(esServer, "POST", key, key_len, json, BSB_LENGTH(bsb), NULL, MOLOCH_HTTP_PRIORITY_BEST, NULL, NULL);
+ }
+ /******************************************************************************/
+ void moloch_db_update_field(char *expression, char *name, char *value)

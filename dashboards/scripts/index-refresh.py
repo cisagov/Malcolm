@@ -3,10 +3,15 @@
 
 import argparse
 import json
+import malcolm_common
 import re
 import requests
 import os
 import sys
+import urllib3
+
+from collections import defaultdict
+from requests.auth import HTTPBasicAuth
 
 GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
@@ -22,6 +27,7 @@ debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
+urllib3.disable_warnings()
 
 ###################################################################################################
 # print to stderr
@@ -73,8 +79,35 @@ def main():
         dest='opensearchUrl',
         metavar='<protocol://host:port>',
         type=str,
-        default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'),
+        default=os.getenv('OPENSEARCH_URL', None),
         help='OpenSearch URL',
+    )
+    parser.add_argument(
+        '-c',
+        '--opensearch-curlrc',
+        dest='opensearchCurlRcFile',
+        metavar='<filename>',
+        type=str,
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        help='cURL.rc formatted file containing OpenSearch connection parameters',
+    )
+    parser.add_argument(
+        '--opensearch-ssl-verify',
+        dest='opensearchSslVerify',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
+        help="Verify SSL certificates for OpenSearch",
+    )
+    parser.add_argument(
+        '--opensearch-local',
+        dest='opensearchIsLocal',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_LOCAL', default='True')),
+        help="Malcolm is using its local OpenSearch instance",
     )
     parser.add_argument(
         '-t',
@@ -113,15 +146,40 @@ def main():
     else:
         sys.tracebacklimit = 0
 
+    args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
+    opensearchCreds = (
+        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
+        if (not args.opensearchIsLocal)
+        else defaultdict(lambda: None)
+    )
+    if not args.opensearchUrl:
+        if args.opensearchIsLocal:
+            args.opensearchUrl = 'http://opensearch:9200'
+        elif 'url' in opensearchCreds:
+            args.opensearchUrl = opensearchCreds['url']
+    opensearchReqHttpAuth = (
+        HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
+        if opensearchCreds['user'] is not None
+        else None
+    )
+
     # get version number so Dashboards doesn't think we're doing a XSRF when we do the PUT
-    statusInfoResponse = requests.get('{}/{}'.format(args.dashboardsUrl, GET_STATUS_API))
+    statusInfoResponse = requests.get(
+        '{}/{}'.format(args.dashboardsUrl, GET_STATUS_API),
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
+    )
     statusInfoResponse.raise_for_status()
     statusInfo = statusInfoResponse.json()
     dashboardsVersion = statusInfo['version']['number']
     if debug:
         eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
 
-    opensearchInfoResponse = requests.get(args.opensearchUrl)
+    opensearchInfoResponse = requests.get(
+        args.opensearchUrl,
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
+    )
     opensearchInfo = opensearchInfoResponse.json()
     opensearchVersion = opensearchInfo['version']['number']
     if debug:
@@ -131,6 +189,8 @@ def main():
     getIndexInfoResponse = requests.get(
         '{}/{}'.format(args.dashboardsUrl, GET_INDEX_PATTERN_INFO_URI),
         params={'type': 'index-pattern', 'fields': 'id', 'search': '"{}"'.format(args.index)},
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
     )
     getIndexInfoResponse.raise_for_status()
     getIndexInfo = getIndexInfoResponse.json()
@@ -144,6 +204,8 @@ def main():
         getFieldsResponse = requests.get(
             '{}/{}'.format(args.dashboardsUrl, GET_FIELDS_URI),
             params={'pattern': args.index, 'meta_fields': ["_source", "_id", "_type", "_index", "_score"]},
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
         )
         getFieldsResponse.raise_for_status()
         getFieldsList = getFieldsResponse.json()['fields']
@@ -155,7 +217,9 @@ def main():
 
                 # request template from OpenSearch and pull the mappings/properties (field list) out
                 getTemplateResponse = requests.get(
-                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template)
+                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template),
+                    auth=opensearchReqHttpAuth,
+                    verify=args.opensearchSslVerify,
                 )
                 getTemplateResponse.raise_for_status()
                 getTemplateResponseJson = getTemplateResponse.json()
@@ -173,7 +237,9 @@ def main():
                         )
                         for componentName in composedOfList:
                             getComponentResponse = requests.get(
-                                '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName)
+                                '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName),
+                                auth=opensearchReqHttpAuth,
+                                verify=args.opensearchSslVerify,
                             )
                             getComponentResponse.raise_for_status()
                             getComponentResponseJson = getComponentResponse.json()
@@ -378,6 +444,8 @@ def main():
                     'osd-version': dashboardsVersion,
                 },
                 data=json.dumps(putIndexInfo),
+                auth=opensearchReqHttpAuth,
+                verify=args.opensearchSslVerify,
             )
             putResponse.raise_for_status()
 
@@ -390,10 +458,14 @@ def main():
     else:
         print("failure (could not find Index ID for {})".format(args.index))
 
-    if args.fixUnassigned and not args.dryrun:
+    if args.opensearchIsLocal and args.fixUnassigned and not args.dryrun:
         # set some configuration-related indexes (opensearch/opendistro) replica count to 0
         # so we don't have yellow index state on those
-        shardsResponse = requests.get('{}/{}'.format(args.opensearchUrl, GET_SHARDS_URL))
+        shardsResponse = requests.get(
+            '{}/{}'.format(args.opensearchUrl, GET_SHARDS_URL),
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
+        )
         for shardLine in shardsResponse.iter_lines():
             shardInfo = shardLine.decode('utf-8').split()
             if (shardInfo is not None) and (len(shardInfo) == 2) and (shardInfo[1] == SHARD_UNASSIGNED_STATUS):
@@ -404,6 +476,8 @@ def main():
                         'osd-xsrf': 'true',
                     },
                     data=json.dumps({'index': {'number_of_replicas': 0}}),
+                    auth=opensearchReqHttpAuth,
+                    verify=args.opensearchSslVerify,
                 )
                 putResponse.raise_for_status()
 

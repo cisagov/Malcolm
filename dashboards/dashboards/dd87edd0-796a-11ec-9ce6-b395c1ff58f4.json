@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "2.2.0",
   "objects": [
     {
       "id": "dd87edd0-796a-11ec-9ce6-b395c1ff58f4",
@@ -7,18 +7,18 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:53:31.158Z",
-      "version": "WzE1MzksMV0=",
+      "updated_at": "2022-08-25T15:00:12.257Z",
+      "version": "Wzg4OSwxXQ==",
       "attributes": {
         "title": "OPCUA Binary",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"886cdf48-973d-47e6-9838-02080dbe6c02\",\"w\":10,\"x\":8,\"y\":0},\"panelIndex\":\"886cdf48-973d-47e6-9838-02080dbe6c02\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"28e2dbd3-5a7d-4a76-bc34-6b6de8254690\",\"w\":30,\"x\":18,\"y\":0},\"panelIndex\":\"28e2dbd3-5a7d-4a76-bc34-6b6de8254690\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"a2d62e63-70cd-4835-8cb1-68c84a273f99\",\"w\":9,\"x\":18,\"y\":11},\"panelIndex\":\"a2d62e63-70cd-4835-8cb1-68c84a273f99\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"5cecf8c4-270e-4376-839e-ffc43feee2a8\",\"w\":8,\"x\":27,\"y\":11},\"panelIndex\":\"5cecf8c4-270e-4376-839e-ffc43feee2a8\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":36,\"i\":\"e9ef651a-fafc-46d8-a020-e1159a91e9a3\",\"w\":13,\"x\":35,\"y\":11},\"panelIndex\":\"e9ef651a-fafc-46d8-a020-e1159a91e9a3\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"844fa8b7-fc4b-4f2f-9ad7-390f0ea501df\",\"w\":9,\"x\":0,\"y\":29},\"panelIndex\":\"844fa8b7-fc4b-4f2f-9ad7-390f0ea501df\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"3776f460-c4a9-4dca-82b7-8f7fdff39d4e\",\"w\":9,\"x\":9,\"y\":29},\"panelIndex\":\"3776f460-c4a9-4dca-82b7-8f7fdff39d4e\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"b5c46334-c593-4b2e-8382-80cdd2774540\",\"w\":17,\"x\":18,\"y\":29},\"panelIndex\":\"b5c46334-c593-4b2e-8382-80cdd2774540\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"af0495c3-f385-47ea-901b-b43bbf9694e4\",\"w\":48,\"x\":0,\"y\":47},\"panelIndex\":\"af0495c3-f385-47ea-901b-b43bbf9694e4\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"353dcc1d-a7f4-4f08-baae-4f4f1429106e\",\"w\":48,\"x\":0,\"y\":69},\"panelIndex\":\"353dcc1d-a7f4-4f08-baae-4f4f1429106e\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"7e187ed0-e7a2-40fc-8119-f2b8bea0eab2\",\"w\":48,\"x\":0,\"y\":92},\"panelIndex\":\"7e187ed0-e7a2-40fc-8119-f2b8bea0eab2\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"ab328ba8-00f2-493d-8f77-2f37061cd349\",\"w\":48,\"x\":0,\"y\":114},\"panelIndex\":\"ab328ba8-00f2-493d-8f77-2f37061cd349\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"df0f20ac-a10d-494e-b1f0-e2559af5c73e\",\"w\":48,\"x\":0,\"y\":137},\"panelIndex\":\"df0f20ac-a10d-494e-b1f0-e2559af5c73e\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"6b1b98b1-fd9e-41f3-942f-5b41d52c96e3\",\"w\":48,\"x\":0,\"y\":159},\"panelIndex\":\"6b1b98b1-fd9e-41f3-942f-5b41d52c96e3\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":23,\"i\":\"bb6fde48-b1a9-462e-bf7a-ce8c5f5ba128\",\"w\":48,\"x\":0,\"y\":182},\"panelIndex\":\"bb6fde48-b1a9-462e-bf7a-ce8c5f5ba128\",\"version\":\"1.2.0\",\"panelRefName\":\"panel_15\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":28,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":28,\"i\":\"fc818c59-8306-4f6c-87c6-2386910c5f65\",\"w\":10,\"x\":8,\"y\":0},\"panelIndex\":\"fc818c59-8306-4f6c-87c6-2386910c5f65\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"28e2dbd3-5a7d-4a76-bc34-6b6de8254690\",\"w\":30,\"x\":18,\"y\":0},\"panelIndex\":\"28e2dbd3-5a7d-4a76-bc34-6b6de8254690\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"a2d62e63-70cd-4835-8cb1-68c84a273f99\",\"w\":9,\"x\":18,\"y\":11},\"panelIndex\":\"a2d62e63-70cd-4835-8cb1-68c84a273f99\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"5cecf8c4-270e-4376-839e-ffc43feee2a8\",\"w\":9,\"x\":27,\"y\":11},\"panelIndex\":\"5cecf8c4-270e-4376-839e-ffc43feee2a8\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"e9ef651a-fafc-46d8-a020-e1159a91e9a3\",\"w\":12,\"x\":36,\"y\":11},\"panelIndex\":\"e9ef651a-fafc-46d8-a020-e1159a91e9a3\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"844fa8b7-fc4b-4f2f-9ad7-390f0ea501df\",\"w\":8,\"x\":0,\"y\":28},\"panelIndex\":\"844fa8b7-fc4b-4f2f-9ad7-390f0ea501df\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"3776f460-c4a9-4dca-82b7-8f7fdff39d4e\",\"w\":10,\"x\":8,\"y\":28},\"panelIndex\":\"3776f460-c4a9-4dca-82b7-8f7fdff39d4e\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":37,\"i\":\"76010cc4-9cfe-4fc7-95d2-2c68b26c377f\",\"w\":18,\"x\":18,\"y\":29},\"panelIndex\":\"76010cc4-9cfe-4fc7-95d2-2c68b26c377f\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"d6e83d77-8304-443a-8abf-d70a812d8192\",\"w\":12,\"x\":36,\"y\":40},\"panelIndex\":\"d6e83d77-8304-443a-8abf-d70a812d8192\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":20,\"i\":\"77667538-5271-4f14-90ee-c18fd47014a3\",\"w\":18,\"x\":0,\"y\":46},\"panelIndex\":\"77667538-5271-4f14-90ee-c18fd47014a3\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"b525948d-4ea2-4e09-b86a-4cfbed09ea95\",\"w\":12,\"x\":36,\"y\":48},\"panelIndex\":\"b525948d-4ea2-4e09-b86a-4cfbed09ea95\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":35,\"i\":\"929431a5-fa23-4b30-9ea8-b2ee9517fb76\",\"w\":48,\"x\":0,\"y\":66},\"panelIndex\":\"929431a5-fa23-4b30-9ea8-b2ee9517fb76\",\"version\":\"2.2.0\",\"panelRefName\":\"panel_12\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         }
       },
       "references": [
@@ -30,7 +30,7 @@
         {
           "name": "panel_1",
           "type": "visualization",
-          "id": "fce8f5b0-796b-11ec-9ce6-b395c1ff58f4"
+          "id": "92c65a40-2480-11ed-90af-d572007a83ed"
         },
         {
           "name": "panel_2",
@@ -65,42 +65,27 @@
         {
           "name": "panel_8",
           "type": "visualization",
-          "id": "5e25be80-7971-11ec-9ce6-b395c1ff58f4"
+          "id": "78512b80-2481-11ed-90af-d572007a83ed"
         },
         {
           "name": "panel_9",
-          "type": "search",
-          "id": "015ef1a0-7965-11ec-9ce6-b395c1ff58f4"
+          "type": "visualization",
+          "id": "2b4fa8f0-2483-11ed-90af-d572007a83ed"
         },
         {
           "name": "panel_10",
-          "type": "search",
-          "id": "78f74cd0-796a-11ec-9ce6-b395c1ff58f4"
+          "type": "visualization",
+          "id": "5cb9eaf0-2482-11ed-90af-d572007a83ed"
         },
         {
           "name": "panel_11",
-          "type": "search",
-          "id": "8cdde460-7966-11ec-9ce6-b395c1ff58f4"
+          "type": "visualization",
+          "id": "c5848c20-2482-11ed-90af-d572007a83ed"
         },
         {
           "name": "panel_12",
           "type": "search",
-          "id": "64309d30-7968-11ec-9ce6-b395c1ff58f4"
-        },
-        {
-          "name": "panel_13",
-          "type": "search",
-          "id": "b8ca0610-7968-11ec-9ce6-b395c1ff58f4"
-        },
-        {
-          "name": "panel_14",
-          "type": "search",
-          "id": "f2ecb990-7969-11ec-9ce6-b395c1ff58f4"
-        },
-        {
-          "name": "panel_15",
-          "type": "search",
-          "id": "e229f0e0-7965-11ec-9ce6-b395c1ff58f4"
+          "id": "2e1ab730-2480-11ed-90af-d572007a83ed"
         }
       ],
       "migrationVersion": {
@@ -113,8 +98,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T19:53:14.682Z",
-      "version": "Wzc2OSwxXQ==",
+      "updated_at": "2022-08-25T14:45:15.248Z",
+      "version": "WzgwMSwxXQ==",
       "attributes": {
         "title": "Network Logs",
         "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -131,21 +116,51 @@
       }
     },
     {
-      "id": "fce8f5b0-796b-11ec-9ce6-b395c1ff58f4",
+      "id": "92c65a40-2480-11ed-90af-d572007a83ed",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:09:35.927Z",
-      "version": "WzExOTYsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyMSwxXQ==",
       "attributes": {
-        "title": "OPCUA - Log Count",
-        "visState": "{\"title\":\"OPCUA - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"group\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":32}}}}",
-        "uiStateJSON": "{}",
+        "title": "OPCUA Binary - Log Count",
+        "visState": "{\"title\":\"OPCUA Binary - Log Count\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:opcua*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "2e1ab730-2480-11ed-90af-d572007a83ed"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "d3963c30-796c-11ec-9ce6-b395c1ff58f4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyMiwxXQ==",
+      "attributes": {
+        "title": "OPCUA Binary - Traffic Over Time",
+        "visState": "{\"title\":\"OPCUA Binary - Traffic Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-15y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -160,43 +175,13 @@
       }
     },
     {
-      "id": "d3963c30-796c-11ec-9ce6-b395c1ff58f4",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T21:14:45.491Z",
-      "version": "WzEyMTMsMV0=",
-      "attributes": {
-        "title": "OPCUA Binary - Traffic Over Time",
-        "visState": "{\"title\":\"OPCUA Binary - Traffic Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-26y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "015ef1a0-7965-11ec-9ce6-b395c1ff58f4"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
       "id": "8e858040-796e-11ec-9ce6-b395c1ff58f4",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:27:08.612Z",
-      "version": "WzEzMDgsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyMywxXQ==",
       "attributes": {
         "title": "OPCUA Binary - Actions",
         "visState": "{\"title\":\"OPCUA Binary - Actions\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Action\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
@@ -224,8 +209,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:33:28.203Z",
-      "version": "WzEzNTgsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyNCwxXQ==",
       "attributes": {
         "title": "OPCUA Binary - Results",
         "visState": "{\"title\":\"OPCUA Binary - Results\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Result\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
@@ -253,11 +238,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:52:05.199Z",
-      "version": "WzE1MjAsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyNSwxXQ==",
       "attributes": {
         "title": "OPCUA Binary - URLs and URIs",
-        "visState": "{\"title\":\"OPCUA Binary - URLs and URIs\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"url.original\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"URL or URI\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":25,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "visState": "{\"title\":\"OPCUA Binary - URLs and URIs\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"url.original\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"URL or URI\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
@@ -282,11 +267,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:18:25.631Z",
-      "version": "WzEyMzQsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyNiwxXQ==",
       "attributes": {
         "title": "OPCUA Binary - Source",
-        "visState": "{\"title\":\"OPCUA Binary - Source\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source Port\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "visState": "{\"title\":\"OPCUA Binary - Source\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
@@ -312,8 +297,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:21:10.851Z",
-      "version": "WzEyNjYsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyNywxXQ==",
       "attributes": {
         "title": "OPCUA Binary - Destination",
         "visState": "{\"title\":\"OPCUA Binary - Destination\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
@@ -337,17 +322,17 @@
       }
     },
     {
-      "id": "5e25be80-7971-11ec-9ce6-b395c1ff58f4",
+      "id": "78512b80-2481-11ed-90af-d572007a83ed",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T21:48:43.146Z",
-      "version": "WzE0NzEsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyOCwxXQ==",
       "attributes": {
-        "title": "OPCUA Binary - Get Endpoints Text",
-        "visState": "{\"title\":\"OPCUA Binary - Get Endpoints Text\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.opcua_binary_get_endpoints.text\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Get Endpoints Text\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
+        "title": "OPCUA Binary - User",
+        "visState": "{\"title\":\"OPCUA Binary - User\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.user\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"User\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
@@ -359,11 +344,140 @@
         {
           "name": "search_0",
           "type": "search",
-          "id": "64309d30-7968-11ec-9ce6-b395c1ff58f4"
+          "id": "2e1ab730-2480-11ed-90af-d572007a83ed"
         }
       ],
       "migrationVersion": {
         "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "2b4fa8f0-2483-11ed-90af-d572007a83ed",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzcyOSwxXQ==",
+      "attributes": {
+        "title": "OPCUA Binary - Password Count",
+        "visState": "{\"title\":\"OPCUA Binary - Password Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"related.password\",\"customLabel\":\"Unique Passwords\"},\"schema\":\"metric\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":60}}}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "2e1ab730-2480-11ed-90af-d572007a83ed"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "5cb9eaf0-2482-11ed-90af-d572007a83ed",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzczMCwxXQ==",
+      "attributes": {
+        "title": "OPCUA Binary - Software",
+        "visState": "{\"title\":\"OPCUA Binary - Software\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.software.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Software Name\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "2e1ab730-2480-11ed-90af-d572007a83ed"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "c5848c20-2482-11ed-90af-d572007a83ed",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzczMSwxXQ==",
+      "attributes": {
+        "title": "OPCUA Binary - Protocol Version",
+        "visState": "{\"title\":\"OPCUA Binary - Protocol Version\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Protocol Version\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "2e1ab730-2480-11ed-90af-d572007a83ed"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "2e1ab730-2480-11ed-90af-d572007a83ed",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzczMiwxXQ==",
+      "attributes": {
+        "title": "OPCUA Binary and Related - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "event.dataset",
+          "source.ip",
+          "destination.ip",
+          "destination.port",
+          "event.action",
+          "event.result",
+          "url.original",
+          "event.id"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"event.provider:zeek AND event.dataset:opcua*\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
       }
     },
     {
@@ -372,8 +486,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-01-19T20:59:37.718Z",
-      "version": "WzExNDQsMV0=",
+      "updated_at": "2022-08-25T14:45:07.172Z",
+      "version": "WzczMywxXQ==",
       "attributes": {
         "title": "OPCUA Binary - Logs",
         "description": "",
@@ -388,256 +502,13 @@
           "url.original",
           "zeek.opcua_binary.seq_number",
           "zeek.opcua_binary.request_id",
-          "zeek.opcua_binary.opcua_id",
+          "zeek.opcua_binary.opcua_link_id",
           "zeek.uid"
         ],
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "78f74cd0-796a-11ec-9ce6-b395c1ff58f4",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T20:57:54.461Z",
-      "version": "WzExMzksMV0=",
-      "attributes": {
-        "title": "OPCUA Binary Status Code Details - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "source.ip",
-          "source.port",
-          "destination.ip",
-          "destination.port",
-          "zeek.opcua_binary_status_code_detail.source_str",
-          "zeek.opcua_binary_status_code_detail.status_code",
-          "zeek.opcua_binary_status_code_detail.sub_code_str",
-          "zeek.opcua_binary_status_code_detail.severity_str",
-          "zeek.opcua_binary.opcua_id",
-          "zeek.uid"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary_status_code_detail\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "8cdde460-7966-11ec-9ce6-b395c1ff58f4",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T20:29:49.862Z",
-      "version": "WzEwNTksMV0=",
-      "attributes": {
-        "title": "OPCUA Binary Get Endpoints Discovery - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "source.ip",
-          "source.port",
-          "destination.ip",
-          "destination.port",
-          "zeek.opcua_binary_get_endpoints_discovery.discovery_profile_uri",
-          "zeek.opcua_binary_get_endpoints_discovery.discovery_profile_url",
-          "zeek.opcua_binary_get_endpoints_discovery.discovery_profile_id",
-          "zeek.uid"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary_get_endpoints_discovery\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "64309d30-7968-11ec-9ce6-b395c1ff58f4",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T20:43:00.610Z",
-      "version": "WzEwOTIsMV0=",
-      "attributes": {
-        "title": "OPCUA Binary Get Endpoints - Log",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "source.ip",
-          "source.port",
-          "destination.ip",
-          "destination.port",
-          "url.original",
-          "zeek.opcua_binary_get_endpoints.text",
-          "zeek.opcua_binary.opcua_id",
-          "zeek.uid"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary_get_endpoints\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "b8ca0610-7968-11ec-9ce6-b395c1ff58f4",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T20:45:22.545Z",
-      "version": "WzExMDcsMV0=",
-      "attributes": {
-        "title": "OPCUA Binary Get Endpoints User Token - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "source.ip",
-          "source.port",
-          "destination.ip",
-          "destination.port",
-          "zeek.opcua_binary_get_endpoints_user_token.user_token_policy_id",
-          "zeek.opcua_binary_get_endpoints_user_token.user_token_type",
-          "url.original",
-          "zeek.opcua_binary_get_endpoints_user_token.user_token_id",
-          "zeek.uid"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary_get_endpoints_user_token\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "f2ecb990-7969-11ec-9ce6-b395c1ff58f4",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T20:54:09.577Z",
-      "version": "WzExMzQsMV0=",
-      "attributes": {
-        "title": "OPCUA Binary OpenSecureChannel - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "source.ip",
-          "source.port",
-          "destination.ip",
-          "destination.port",
-          "network.protocol_version",
-          "zeek.opcua_binary_opensecure_channel.sec_token_request_type",
-          "zeek.opcua_binary_opensecure_channel.message_security_mode",
-          "zeek.opcua_binary_opensecure_channel.sec_token_sec_channel_id",
-          "zeek.opcua_binary_opensecure_channel.sec_token_id",
-          "zeek.opcua_binary.opcua_id",
-          "zeek.uid"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary_opensecure_channel\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        }
-      },
-      "references": [
-        {
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern",
-          "id": "arkime_sessions3-*"
-        }
-      ],
-      "migrationVersion": {
-        "search": "7.9.3"
-      }
-    },
-    {
-      "id": "e229f0e0-7965-11ec-9ce6-b395c1ff58f4",
-      "type": "search",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-01-19T20:37:22.800Z",
-      "version": "WzEwNzEsMV0=",
-      "attributes": {
-        "title": "OPCUA Binary Diagnostic Info Detail - Logs",
-        "description": "",
-        "hits": 0,
-        "columns": [
-          "source.ip",
-          "source.port",
-          "destination.ip",
-          "destination.port",
-          "zeek.opcua_binary_diag_info_detail.symbolic_id",
-          "zeek.opcua_binary_diag_info_detail.symbolic_id_str",
-          "zeek.opcua_binary_diag_info_detail.addl_info",
-          "zeek.opcua_binary_diag_info_detail.inner_diag_level",
-          "zeek.opcua_binary_diag_info_detail.inner_stat_code",
-          "zeek.opcua_binary.opcua_id",
-          "zeek.uid"
-        ],
-        "sort": [],
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"event.provider:zeek AND event.dataset:opcua_binary_diag_info_detail\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:opcua_binary\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

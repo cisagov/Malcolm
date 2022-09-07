@@ -10,8 +10,9 @@
 **/.ldap_config_defaults
 **/htpasswd
 **/malcolm_*images.tar.gz
-.envrc
-.direnv
+**/.envrc
+**/.direnv
+**/.opensearch*.curlrc
 .trigger_workflow_build
 .tmp
 docker-compose*yml
@@ -23,5 +24,6 @@ arkime-raw
 nginx/nginx_ldap.conf
 pcap
 scripts
+!scripts/malcolm_common.py
 zeek-logs
 suricata-logs

@@ -180,6 +180,52 @@
                 "type": { "type": "keyword"},
                 "uid": { "type": "keyword"}
               }
+            },
+            "winlog": {
+              "properties": {
+                "ActivityID" : { "type": "keyword" },
+                "Computer" : { "type": "keyword" },
+                "Data" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+                "EventRecordID" : { "type": "integer" },
+                "Keywords" : { "type": "keyword" },
+                "Level" : { "type": "integer" },
+                "Message" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+                "Opcode" : { "type": "integer" },
+                "ProcessID" : { "type": "integer" },
+                "ProviderGuid" : { "type": "keyword" },
+                "ProviderName" : { "type": "keyword" },
+                "Qualifiers" : { "type": "integer" },
+                "RelatedActivityID" : { "type": "keyword" },
+                "Sid" : { "type": "keyword" },
+                "StringInserts" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+                "Task" : { "type": "integer" },
+                "ThreadID" : { "type": "integer" },
+                "TimeGenerated" : { "type": "date" },
+                "TimeWritten" : { "type": "date" },
+                "UserID" : { "type": "keyword" },
+                "Version" : { "type": "integer" }
+              }
+            },
+            "winstat": {
+              "properties": {
+                "commit_limit" : { "type": "long" },
+                "commit_total" : { "type": "long" },
+                "cpu_idle" : { "type": "long" },
+                "cpu_kernel" : { "type": "long" },
+                "cpu_user" : { "type": "long" },
+                "cpu_utilization" : { "type": "float" },
+                "handles" : { "type": "integer" },
+                "kernel_nonpaged" : { "type": "long" },
+                "kernel_paged" : { "type": "long" },
+                "kernel_total" : { "type": "long" },
+                "physical_available" : { "type": "long" },
+                "physical_total" : { "type": "long" },
+                "physical_used" : { "type": "long" },
+                "processes" : { "type": "integer" },
+                "threads" : { "type": "integer" },
+                "uptime_human" : { "type": "keyword" },
+                "uptime_msec" : { "type": "integer" }
+              }
             }
           }
         }

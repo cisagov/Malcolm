@@ -25,6 +25,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL=true
 ARG PCAP_PATH=/pcap
 ARG PCAP_PIPELINE_DEBUG=false
 ARG PCAP_PIPELINE_DEBUG_EXTRA=false
@@ -33,6 +34,7 @@ ARG PCAP_NODE_NAME=malcolm
 ARG ZEEK_PATH=/zeek
 
 ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
@@ -65,6 +67,7 @@ ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD pcap-monitor/scripts/ /usr/local/bin/
 ADD shared/bin/pcap_watcher.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
+ADD scripts/malcolm_common.py /usr/local/bin/
 
 EXPOSE 30441
 

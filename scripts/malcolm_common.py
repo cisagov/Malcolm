@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import re
+import string
 import sys
 import time
 
@@ -73,6 +74,7 @@ DOCKER_INSTALL_URLS[PLATFORM_MAC] = [
 DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compose/install/')
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
 
+
 ###################################################################################################
 # chdir to directory as context manager, returning automatically
 @contextlib.contextmanager
@@ -98,11 +100,92 @@ def EscapeAnsi(line):
 
 
 ###################################################################################################
+def EscapeForCurl(s):
+    return s.translate(
+        str.maketrans(
+            {
+                '"': r'\"',
+                "\\": r"\\",
+                "\t": r"\t",
+                "\n": r"\n",
+                "\r": r"\r",
+                "\v": r"\v",
+            }
+        )
+    )
+
+
+###################################################################################################
+def custom_make_translation(text, translation):
+    regex = re.compile('|'.join(map(re.escape, translation)))
+    return regex.sub(lambda match: translation[match.group(0)], text)
+
+
+##################################################################################################
+def UnescapeForCurl(s):
+    return custom_make_translation(
+        s,
+        {
+            r'\"': '"',
+            r"\t": "\t",
+            r"\n": "\n",
+            r"\r": "\r",
+            r"\v": "\v",
+            r"\\": "\\",
+        },
+    )
+
+
+###################################################################################################
+# parse a curl-formatted config file, with special handling for user:password and URL
+# see https://everything.curl.dev/cmdline/configfile
+# e.g.:
+#
+# given .opensearch.primary.curlrc containing:
+# -
+# user: "sikari:changethis"
+# insecure
+# -
+#
+# ParseCurlFile('.opensearch.primary.curlrc') returns:
+#   {
+#    'user': 'sikari',
+#    'password': 'changethis',
+#    'insecure': ''
+#   }
+def ParseCurlFile(curlCfgFileName):
+    result = defaultdict(lambda: None)
+    if os.path.isfile(curlCfgFileName):
+        itemRegEx = re.compile(r'^([^\s:=]+)((\s*[:=]?\s*)(.*))?$')
+        with open(curlCfgFileName, 'r') as f:
+            allLines = [x.strip().lstrip('-') for x in f.readlines() if not x.startswith('#')]
+        for line in allLines:
+            found = itemRegEx.match(line)
+            if found is not None:
+                key = found.group(1)
+                value = UnescapeForCurl(found.group(4).lstrip('"').rstrip('"'))
+                if (key == 'user') and (':' in value):
+                    splitVal = value.split(':', 1)
+                    result[key] = splitVal[0]
+                    if len(splitVal) > 1:
+                        result['password'] = splitVal[1]
+                else:
+                    result[key] = value
+
+    return result
+
+
+###################################################################################################
+def contains_whitespace(s):
+    return True in [c in s for c in string.whitespace]
+
+
+###################################################################################################
 # attempt to clear the screen
 def ClearScreen():
     try:
         os.system("clear" if platform.system() != PLATFORM_WINDOWS else "cls")
-    except Exception as e:
+    except Exception:
         pass
 
 
@@ -148,7 +231,7 @@ def YesOrNo(
                 try:
                     str2bool(reply)
                     break
-                except ValueError as e:
+                except ValueError:
                     pass
             elif (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (default is not None):
                 break
@@ -159,12 +242,12 @@ def YesOrNo(
     if (len(reply) == 0) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
         reply = "y" if (default is not None) and str2bool(default) else "n"
 
-    if clearScreen == True:
+    if clearScreen is True:
         ClearScreen()
 
     try:
         return str2bool(reply)
-    except ValueError as e:
+    except ValueError:
         return YesOrNo(
             question,
             default=default,
@@ -214,7 +297,7 @@ def AskForString(
     else:
         raise RuntimeError("No user interfaces available")
 
-    if clearScreen == True:
+    if clearScreen is True:
         ClearScreen()
 
     return reply
@@ -239,7 +322,7 @@ def AskForPassword(
     else:
         raise RuntimeError("No user interfaces available")
 
-    if clearScreen == True:
+    if clearScreen is True:
         ClearScreen()
 
     return reply
@@ -260,7 +343,7 @@ def ChooseOne(
 ):
 
     validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
-    defaulted = next(iter([x for x in validChoices if x[2] == True]), None)
+    defaulted = next(iter([x for x in validChoices if x[2] is True]), None)
 
     if (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (
         defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -302,7 +385,7 @@ def ChooseOne(
     else:
         raise RuntimeError("No user interfaces available")
 
-    if clearScreen == True:
+    if clearScreen is True:
         ClearScreen()
 
     return reply
@@ -322,7 +405,7 @@ def ChooseMultiple(
 ):
 
     validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
-    defaulted = [x[0] for x in validChoices if x[2] == True]
+    defaulted = [x[0] for x in validChoices if x[2] is True]
 
     if (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (
         defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -340,7 +423,7 @@ def ChooseMultiple(
     elif uiMode & UserInterfaceMode.InteractionInput:
         allowedChars = set(string.digits + ',' + ' ')
         defaultValListStr = ",".join(defaulted)
-        print(f"0: NONE")
+        print("0: NONE")
         index = 0
         for choice in validChoices:
             index = index + 1
@@ -373,7 +456,41 @@ def ChooseMultiple(
     else:
         raise RuntimeError("No user interfaces available")
 
-    if clearScreen == True:
+    if clearScreen is True:
+        ClearScreen()
+
+    return reply
+
+
+###################################################################################################
+# display a message to the user without feedback
+def DisplayMessage(
+    message,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+):
+    reply = False
+
+    if (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (
+        defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive
+    ):
+        reply = True
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        code = MainDialog.msgbox(
+            message,
+        )
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise RuntimeError("Operation cancelled")
+        else:
+            reply = True
+
+    else:
+        print(f"\n{message}")
+        reply = True
+
+    if clearScreen is True:
         ClearScreen()
 
     return reply
@@ -419,7 +536,7 @@ def SizeHumanFormat(num, suffix='B'):
 def LoadStrIfJson(jsonStr):
     try:
         return json.loads(jsonStr)
-    except ValueError as e:
+    except ValueError:
         return None
 
 
@@ -445,7 +562,7 @@ def check_output_input(*popenargs, **kwargs):
     process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
     try:
         output, errput = process.communicate(inputdata)
-    except:
+    except Exception:
         process.kill()
         process.wait()
         raise
@@ -476,7 +593,7 @@ def run_process(
         if stdout and (len(cmdout) > 0):
             output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
 
-    except (FileNotFoundError, OSError, IOError) as e:
+    except (FileNotFoundError, OSError, IOError):
         if stderr:
             output.append(f"Command {command} not found or unable to execute")
 
@@ -508,7 +625,7 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
             if tmpImport:
                 DynImports[importName] = tmpImport
                 return DynImports[importName]
-        except ImportError as e:
+        except ImportError:
             pass
 
         # see if we can help out by installing the module
@@ -571,6 +688,7 @@ def MalcolmAuthFilesExist():
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
         and os.path.isfile(os.path.join(MalcolmPath, 'auth.env'))
+        and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 
 
@@ -608,5 +726,5 @@ def RemoveEmptyFolders(path, removeRoot=True):
     if len(files) == 0 and removeRoot:
         try:
             os.rmdir(path)
-        except:
+        except Exception:
             pass

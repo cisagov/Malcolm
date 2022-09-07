@@ -14,6 +14,7 @@ import glob
 import json
 import logging
 import magic
+import malcolm_common
 import os
 import pathlib
 import pyinotify
@@ -23,6 +24,7 @@ import time
 import zmq
 
 from pcap_utils import *
+from collections import defaultdict
 
 import opensearchpy
 import opensearch_dsl
@@ -42,6 +44,7 @@ debug = False
 verboseDebug = False
 pdbFlagged = False
 args = None
+opensearchDslHttpAuth = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
@@ -57,6 +60,7 @@ class EventWatcher(pyinotify.ProcessEvent):
 
     def __init__(self):
         global args
+        global opensearchDslHttpAuth
         global debug
         global verboseDebug
 
@@ -65,7 +69,7 @@ class EventWatcher(pyinotify.ProcessEvent):
         self.useOpenSearch = False
 
         # if we're going to be querying OpenSearch for past PCAP file status, connect now
-        if args.opensearchHost is not None:
+        if args.opensearchUrl is not None:
 
             connected = False
             healthy = False
@@ -74,8 +78,14 @@ class EventWatcher(pyinotify.ProcessEvent):
             while (not connected) and (not shuttingDown):
                 try:
                     if debug:
-                        eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchHost}...")
-                    opensearch_dsl.connections.create_connection(hosts=[args.opensearchHost])
+                        eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
+                    opensearch_dsl.connections.create_connection(
+                        hosts=[args.opensearchUrl],
+                        http_auth=opensearchDslHttpAuth,
+                        verify_certs=args.opensearchSslVerify,
+                        ssl_assert_hostname=False,
+                        ssl_show_warn=False,
+                    )
                     if verboseDebug:
                         eprint(f"{scriptName}:\t{opensearch_dsl.connections.get_connection().cluster.health()}")
                     connected = opensearch_dsl.connections.get_connection() is not None
@@ -233,6 +243,7 @@ def debug_toggle_handler(signum, frame):
 # main
 def main():
     global args
+    global opensearchDslHttpAuth
     global debug
     global verboseDebug
     global debugToggled
@@ -285,11 +296,37 @@ def main():
     parser.add_argument(
         '--opensearch',
         required=False,
-        dest='opensearchHost',
+        dest='opensearchUrl',
         metavar='<STR>',
         type=str,
-        default=None,
+        default=os.getenv('OPENSEARCH_URL', None),
         help='OpenSearch connection string for querying Arkime files index to ignore duplicates',
+    )
+    parser.add_argument(
+        '--opensearch-curlrc',
+        dest='opensearchCurlRcFile',
+        metavar='<filename>',
+        type=str,
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        help='cURL.rc formatted file containing OpenSearch connection parameters',
+    )
+    parser.add_argument(
+        '--opensearch-ssl-verify',
+        dest='opensearchSslVerify',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
+        help="Verify SSL certificates for OpenSearch",
+    )
+    parser.add_argument(
+        '--opensearch-local',
+        dest='opensearchIsLocal',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_LOCAL', default='True')),
+        help="Malcolm is using its local OpenSearch instance",
     )
     parser.add_argument(
         '--opensearch-wait',
@@ -374,6 +411,21 @@ def main():
         sys.tracebacklimit = 0
 
     logging.basicConfig(level=logging.ERROR)
+
+    args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
+    opensearchCreds = (
+        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
+        if (not args.opensearchIsLocal)
+        else defaultdict(lambda: None)
+    )
+    if not args.opensearchUrl:
+        if args.opensearchIsLocal:
+            args.opensearchUrl = 'http://opensearch:9200'
+        elif 'url' in opensearchCreds:
+            args.opensearchUrl = opensearchCreds['url']
+    opensearchDslHttpAuth = (
+        f"{opensearchCreds['user']}:{opensearchCreds['password']}" if opensearchCreds['user'] is not None else None
+    )
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)

@@ -5,16 +5,16 @@ FROM debian:11-slim AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 ENV ARKIME_VERSION "3.4.2"
-ENV ARKIMEDIR "/opt/arkime"
+ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes
 
 ADD arkime/scripts/bs4_remove_div.py /opt/
 ADD arkime/patch/* /opt/patches/
-ADD README.md $ARKIMEDIR/doc/
-ADD docs/doc.css $ARKIMEDIR/doc/
-ADD docs/images $ARKIMEDIR/doc/images/
+ADD README.md $ARKIME_DIR/doc/
+ADD docs/doc.css $ARKIME_DIR/doc/
+ADD docs/images $ARKIME_DIR/doc/images/
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -56,24 +56,24 @@ RUN apt-get -q update && \
         wget \
         zlib1g-dev && \
   pip3 install --no-cache-dir beautifulsoup4 && \
-  cd $ARKIMEDIR/doc/images && \
+  cd $ARKIME_DIR/doc/images && \
     find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
-    cd $ARKIMEDIR/doc && \
+    cd $ARKIME_DIR/doc && \
     sed -i "s/^# Malcolm$//" README.md && \
     sed -i '/./,$!d' README.md && \
     sed -i "s/.png/.jpg/g" README.md && \
     sed -i "s@docs/images@images@g" README.md && \
     sed -i 's/\!\[.*\](.*\/badge.svg)//g' README.md && \
-    pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIMEDIR/doc/doc.css -o $ARKIMEDIR/doc/README.html $ARKIMEDIR/doc/README.md && \
+    pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIME_DIR/doc/doc.css -o $ARKIME_DIR/doc/README.html $ARKIME_DIR/doc/README.md && \
   cd /opt && \
     git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    find $ARKIMEDIR/doc/images/screenshots -name "*.png" -delete && \
-    export PATH="$ARKIMEDIR/bin:${PATH}" && \
-    ln -sfr $ARKIMEDIR/bin/npm /usr/local/bin/npm && \
-    ln -sfr $ARKIMEDIR/bin/node /usr/local/bin/node && \
-    ln -sfr $ARKIMEDIR/bin/npx /usr/local/bin/npx && \
+    find $ARKIME_DIR/doc/images/screenshots -name "*.png" -delete && \
+    export PATH="$ARKIME_DIR/bin:${PATH}" && \
+    ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
+    ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
+    ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
     python3 /opt/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
     mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
     sed -i 's/v-if.*password.*"/v-if="false"/g' ./viewer/vueapp/src/components/settings/Settings.vue && \
@@ -84,8 +84,8 @@ RUN apt-get -q update && \
     npm -g config set user root && \
     make install && \
     npm cache clean --force && \
-    rm -f ${ARKIMEDIR}/wiseService/source.* && \
-    bash -c "file ${ARKIMEDIR}/bin/* ${ARKIMEDIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
+    rm -f ${ARKIME_DIR}/wiseService/source.* && \
+    bash -c "file ${ARKIME_DIR}/bin/* ${ARKIME_DIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 FROM debian:11-slim
 
@@ -109,8 +109,8 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG OS_HOST=opensearch
-ARG OS_PORT=9200
+ARG OPENSEARCH_URL="http://opensearch:9200"
+ARG OPENSEARCH_LOCAL=true
 ARG MALCOLM_USERNAME=admin
 ARG ARKIME_ECS_PROVIDER=arkime
 ARG ARKIME_ECS_DATASET=session
@@ -128,16 +128,15 @@ ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
-ENV OS_HOST $OS_HOST
-ENV OS_PORT $OS_PORT
-ENV ARKIME_ELASTICSEARCH "http://"$OS_HOST":"$OS_PORT
+ENV OPENSEARCH_URL $OPENSEARCH_URL
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
 ENV ARKIME_PASSWORD "ignored"
 ENV ARKIME_ECS_PROVIDER $ARKIME_ECS_PROVIDER
 ENV ARKIME_ECS_DATASET $ARKIME_ECS_DATASET
-ENV ARKIMEDIR "/opt/arkime"
+ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_ANALYZE_PCAP_THREADS $ARKIME_ANALYZE_PCAP_THREADS
 ENV WISE $WISE
 ENV VIEWER $VIEWER
@@ -147,7 +146,7 @@ ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
 ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
-COPY --from=build $ARKIMEDIR $ARKIMEDIR
+COPY --from=build $ARKIME_DIR $ARKIME_DIR
 
 RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -181,9 +180,9 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       wget \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
     pip3 install --no-cache-dir beautifulsoup4 pyzmq && \
-    ln -sfr $ARKIMEDIR/bin/npm /usr/local/bin/npm && \
-      ln -sfr $ARKIMEDIR/bin/node /usr/local/bin/node && \
-      ln -sfr $ARKIMEDIR/bin/npx /usr/local/bin/npx && \
+    ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
+      ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
+      ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
     apt-get -q -y --purge remove gcc gcc-10 cpp cpp-10 libssl-dev && \
       apt-get -q -y autoremove && \
       apt-get clean && \
@@ -194,9 +193,10 @@ ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
+ADD scripts/malcolm_common.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
-ADD arkime/etc $ARKIMEDIR/etc/
-ADD arkime/wise/source.*.js $ARKIMEDIR/wiseService/
+ADD arkime/etc $ARKIME_DIR/etc/
+ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 ADD arkime/supervisord.conf /etc/supervisord.conf
 
 # MaxMind now requires a (free) license key to download the free versions of
@@ -208,29 +208,30 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
       cd /tmp && \
       curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
       tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mkdir -p $ARKIMEDIR/etc/ $ARKIMEDIR/logs/ && \
-      mv -v "GeoLite2-$DB.mmdb" $ARKIMEDIR/etc/; \
+      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/logs/ && \
+      mv -v "GeoLite2-$DB.mmdb" $ARKIME_DIR/etc/; \
       rm -f "GeoLite2-$DB*"; \
     done; \
-  curl -s -S -L -o $ARKIMEDIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
-  curl -s -S -L -o $ARKIMEDIR/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
+  curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
+  curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
 
 RUN groupadd --gid $DEFAULT_GID $PGROUP && \
-    useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIMEDIR $PUSER && \
+    useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIME_DIR $PUSER && \
       usermod -a -G tty $PUSER && \
     chmod 755 /opt/*.sh && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_arkime_processor.py && \
-    cp -f /opt/arkime_update_geo.sh $ARKIMEDIR/bin/arkime_update_geo.sh && \
-    chmod u+s $ARKIMEDIR/bin/capture && \
+    cp -f /opt/arkime_update_geo.sh $ARKIME_DIR/bin/arkime_update_geo.sh && \
+    mv $ARKIME_DIR/etc/config.ini $ARKIME_DIR/etc/config.orig.ini && \
+    chmod u+s $ARKIME_DIR/bin/capture && \
     mkdir -p /var/run/arkime && \
-    chown -R $PUSER:$PGROUP $ARKIMEDIR/etc $ARKIMEDIR/logs /var/run/arkime
+    chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/logs /var/run/arkime
 #Update Path
-ENV PATH="/opt:$ARKIMEDIR/bin:${PATH}"
+ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"
 
 EXPOSE 8000 8005 8081
-WORKDIR $ARKIMEDIR
+WORKDIR $ARKIME_DIR
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/opt/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

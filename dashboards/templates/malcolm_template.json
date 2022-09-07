@@ -45,6 +45,7 @@
         "event.result": { "type": "keyword" },
         "event.severity_tags": { "type": "keyword" },
         "file.source": { "type": "keyword" },
+        "network.is_orig": { "type": "keyword" },
         "network.protocol_version": { "type": "keyword" },
         "related.mac": { "type": "keyword" },
         "related.oui": { "type": "keyword" },

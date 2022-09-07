@@ -7,6 +7,9 @@ server.basePath: "/dashboards"
 server.rewriteBasePath: true
 server.maxPayloadBytes: 8388608
 opensearch.hosts: ["${OPENSEARCH_URL}"]
+opensearch.username: "_MALCOLM_DASHBOARDS_OPENSEARCH_USER_"
+opensearch.password: "_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_"
+opensearch.ssl.verificationMode: "_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_"
 opensearch.requestTimeout: 180000
 
 opensearchDashboards.branding:

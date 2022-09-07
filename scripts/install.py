@@ -135,6 +135,26 @@ def InstallerChooseMultiple(
     )
 
 
+###################################################################################################
+# display a message to the user without feedback
+def InstallerDisplayMessage(
+    message,
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+):
+    global args
+    defBehavior = defaultBehavior
+    if args.acceptDefaultsNonInteractive and not forceInteraction:
+        defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
+
+    return DisplayMessage(
+        message,
+        defaultBehavior=defBehavior,
+        uiMode=uiMode,
+    )
+
+
 def TrueOrFalseQuote(expression):
     return "'{}'".format('true' if expression else 'false')
 
@@ -389,6 +409,48 @@ class Installer(object):
         else:
             lsWorkers = 3
 
+        opensearchPrimaryRemote = False
+        opensearchPrimaryUrl = 'http://opensearch:9200'
+        opensearchPrimarySslVerify = False
+        opensearchSecondaryRemote = False
+        opensearchSecondaryUrl = ''
+        opensearchSecondarySslVerify = False
+
+        opensearchPrimaryRemote = not InstallerYesOrNo(
+            'Should Malcolm use and maintain its own OpenSearch instance?',
+            default=True,
+        )
+        if opensearchPrimaryRemote:
+            opensearchPrimaryUrl = ''
+            while len(opensearchPrimaryUrl) <= 1:
+                opensearchPrimaryUrl = InstallerAskForString(
+                    'Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                )
+            opensearchPrimarySslVerify = opensearchPrimaryUrl.lower().startswith('https') and InstallerYesOrNo(
+                'Require SSL certificate validation for communication with primary OpenSearch instance?',
+                default=False,
+            )
+
+        opensearchSecondaryRemote = InstallerYesOrNo(
+            'Forward Logstash logs to a secondary remote OpenSearch instance?',
+            default=False,
+        )
+        if opensearchSecondaryRemote:
+            opensearchSecondaryUrl = ''
+            while len(opensearchSecondaryUrl) <= 1:
+                opensearchSecondaryUrl = InstallerAskForString(
+                    'Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                )
+            opensearchSecondarySslVerify = opensearchSecondaryUrl.lower().startswith('https') and InstallerYesOrNo(
+                'Require SSL certificate validation for communication with secondary OpenSearch instance?',
+                default=False,
+            )
+
+        if opensearchPrimaryRemote or opensearchSecondaryRemote:
+            InstallerDisplayMessage(
+                f'You must run auth_setup after {ScriptName} to store OpenSearch connection credentials.',
+            )
+
         while not InstallerYesOrNo(
             f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
         ):
@@ -482,31 +544,34 @@ class Installer(object):
 
         # snapshot repository directory and compression
         indexSnapshotDir = './opensearch-backup'
-        if not InstallerYesOrNo(
-            'Store OpenSearch index snapshots locally in {}?'.format(
-                os.path.join(malcolm_install_path, 'opensearch-backup')
-            ),
-            default=True,
-        ):
-            while True:
-                indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
-                if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
-                    indexSnapshotDir = os.path.realpath(indexSnapshotDir)
-                    break
-        indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
+        indexSnapshotCompressed = False
+        if not opensearchPrimaryRemote:
+            if not InstallerYesOrNo(
+                'Store OpenSearch index snapshots locally in {}?'.format(
+                    os.path.join(malcolm_install_path, 'opensearch-backup')
+                ),
+                default=True,
+            ):
+                while True:
+                    indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
+                    if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
+                        indexSnapshotDir = os.path.realpath(indexSnapshotDir)
+                        break
+            indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
 
         # delete oldest indexes based on index pattern size
         indexPruneSizeLimit = '0'
         indexPruneNameSort = False
-        if InstallerYesOrNo('Delete the oldest indices when the database exceeds a certain size?', default=False):
-            indexPruneSizeLimit = ''
-            while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
-                indexPruneSizeLimit != '0'
-            ):
-                indexPruneSizeLimit = InstallerAskForString('Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)')
-            indexPruneNameSort = InstallerYesOrNo(
-                'Determine oldest indices by name (instead of creation time)?', default=True
-            )
+        if not opensearchPrimaryRemote:
+            if InstallerYesOrNo('Delete the oldest indices when the database exceeds a certain size?', default=False):
+                indexPruneSizeLimit = ''
+                while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
+                    indexPruneSizeLimit != '0'
+                ):
+                    indexPruneSizeLimit = InstallerAskForString('Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)')
+                indexPruneNameSort = InstallerYesOrNo(
+                    'Determine oldest indices by name (instead of creation time)?', default=True
+                )
 
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
         suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
@@ -518,28 +583,45 @@ class Installer(object):
         )
         autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
         autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
-        opensearchOpen = InstallerYesOrNo(
+        opensearchOpen = (not opensearchPrimaryRemote) and InstallerYesOrNo(
             'Expose OpenSearch port to external hosts?', default=expose_opensearch_default
         )
         logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
-        logstashSsl = logstashOpen and InstallerYesOrNo(
-            'Should Logstash require SSL for forwarded logs? (Note: This requires the forwarder to be similarly configured and a corresponding copy of the client SSL files.)',
-            default=True,
-        )
-        externalEsForward = InstallerYesOrNo('Forward Logstash logs to external OpenSearch instance?', default=False)
-        if externalEsForward:
-            externalEsHost = InstallerAskForString('Enter external OpenSearch host:port (e.g., 10.0.0.123:9200)')
-            externalEsSsl = InstallerYesOrNo(f'Connect to "{externalEsHost}" using SSL?', default=True)
-            externalEsSslVerify = externalEsSsl and InstallerYesOrNo(
-                f'Require SSL certificate validation for communication with "{externalEsHost}"?', default=False
-            )
-        else:
-            externalEsHost = ""
-            externalEsSsl = False
-            externalEsSslVerify = False
         filebeatTcpOpen = InstallerYesOrNo(
             'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
         )
+        filebeatTcpSourceField = ''
+        filebeatTcpTargetField = ''
+        filebeatTcpDropField = ''
+        filebeatTcpTag = '_malcolm_beats'
+        if filebeatTcpOpen:
+            allowedFilebeatTcpFormats = ('json', 'raw')
+            filebeatTcpFormat = 'unset'
+            while filebeatTcpFormat not in allowedFilebeatTcpFormats:
+                filebeatTcpFormat = InstallerChooseOne(
+                    'Select log format for messages sent to Filebeat TCP listener',
+                    choices=[(x, '', x == allowedFilebeatTcpFormats[0]) for x in allowedFilebeatTcpFormats],
+                )
+            if filebeatTcpFormat == 'json':
+                filebeatTcpSourceField = InstallerAskForString(
+                    'Source field to parse for messages sent to Filebeat TCP listener',
+                    default="message",
+                )
+                filebeatTcpTargetField = InstallerAskForString(
+                    'Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener',
+                    default="miscbeat",
+                )
+                filebeatTcpDropField = InstallerAskForString(
+                    f'Field to drop from events sent to Filebeat TCP listener',
+                    default=filebeatTcpSourceField,
+                )
+            filebeatTcpTag = InstallerAskForString(
+                f'Tag to apply to messages sent to Filebeat TCP listener',
+                default=filebeatTcpTag,
+            )
+        else:
+            filebeatTcpFormat = 'raw'
+
         sftpOpen = InstallerYesOrNo(
             'Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default
         )
@@ -834,11 +916,85 @@ class Installer(object):
                             # freq.py string randomness calculations
                             line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
 
-                        elif 'BEATS_SSL' in line:
-                            # enable/disable beats SSL
+                        elif 'FILEBEAT_TCP_LISTEN' in line:
+                            # expose a filebeat TCP input listener
                             line = re.sub(
-                                r'(BEATS_SSL\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(logstashOpen and logstashSsl)}",
+                                r'(FILEBEAT_TCP_LISTEN\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(filebeatTcpOpen)}",
+                                line,
+                            )
+
+                        elif 'FILEBEAT_TCP_LOG_FORMAT' in line:
+                            # log format expected for events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_LOG_FORMAT\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpFormat}'", line
+                            )
+
+                        elif 'FILEBEAT_TCP_PARSE_SOURCE_FIELD' in line:
+                            # source field name to parse for events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_PARSE_SOURCE_FIELD\s*:\s*)(\S+)',
+                                fr"\g<1>'{filebeatTcpSourceField}'",
+                                line,
+                            )
+
+                        elif 'FILEBEAT_TCP_PARSE_TARGET_FIELD' in line:
+                            # target field name to store decoded JSON fields for events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_PARSE_TARGET_FIELD\s*:\s*)(\S+)',
+                                fr"\g<1>'{filebeatTcpTargetField}'",
+                                line,
+                            )
+
+                        elif 'FILEBEAT_TCP_PARSE_DROP_FIELD' in line:
+                            # field to drop in events sent to the filebeat TCP input listener
+                            line = re.sub(
+                                r'(FILEBEAT_TCP_PARSE_DROP_FIELD\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpDropField}'", line
+                            )
+
+                        elif 'FILEBEAT_TCP_TAG' in line:
+                            # tag to append to events sent to the filebeat TCP input listener
+                            line = re.sub(r'(FILEBEAT_TCP_TAG\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpTag}'", line)
+
+                        elif 'OPENSEARCH_LOCAL' in line:
+                            # OpenSearch primary instance is local vs. remote
+                            line = re.sub(
+                                r'(OPENSEARCH_LOCAL\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(not opensearchPrimaryRemote)}",
+                                line,
+                            )
+
+                        elif 'OPENSEARCH_URL' in line:
+                            # OpenSearch primary instance URL
+                            line = re.sub(r'(OPENSEARCH_URL\s*:\s*)(\S+)', fr"\g<1>'{opensearchPrimaryUrl}'", line)
+
+                        elif 'OPENSEARCH_SSL_CERTIFICATE_VERIFICATION' in line:
+                            # OpenSearch primary instance needs SSL verification
+                            line = re.sub(
+                                r'(OPENSEARCH_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(opensearchPrimarySslVerify)}",
+                                line,
+                            )
+
+                        elif 'OPENSEARCH_SECONDARY_URL' in line:
+                            # OpenSearch secondary instance URL
+                            line = re.sub(
+                                r'(OPENSEARCH_SECONDARY_URL\s*:\s*)(\S+)', fr"\g<1>'{opensearchSecondaryUrl}'", line
+                            )
+
+                        elif 'OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION' in line:
+                            # OpenSearch secondary instance needs SSL verification
+                            line = re.sub(
+                                r'(OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(opensearchSecondarySslVerify)}",
+                                line,
+                            )
+
+                        elif 'OPENSEARCH_SECONDARY' in line:
+                            # OpenSearch secondary remote instance is enabled
+                            line = re.sub(
+                                r'(OPENSEARCH_SECONDARY\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(opensearchSecondaryRemote)}",
                                 line,
                             )
 
@@ -863,26 +1019,6 @@ class Installer(object):
                             line = re.sub(
                                 r'(OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}",
-                                line,
-                            )
-
-                        elif 'OS_EXTERNAL_HOSTS' in line:
-                            # enable/disable forwarding Logstash to external OpenSearch instance
-                            line = re.sub(r'(#\s*)?(OS_EXTERNAL_HOSTS\s*:\s*)(\S+)', fr"\g<2>'{externalEsHost}'", line)
-
-                        elif 'OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION' in line:
-                            # enable/disable SSL certificate verification for external OpenSearch instance
-                            line = re.sub(
-                                r'(#\s*)?(OS_EXTERNAL_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
-                                fr"\g<2>{TrueOrFalseQuote(externalEsSsl and externalEsSslVerify)}",
-                                line,
-                            )
-
-                        elif 'OS_EXTERNAL_SSL' in line:
-                            # enable/disable SSL certificate verification for external OpenSearch instance
-                            line = re.sub(
-                                r'(#\s*)?(OS_EXTERNAL_SSL\s*:\s*)(\S+)',
-                                fr"\g<2>{TrueOrFalseQuote(externalEsSsl)}",
                                 line,
                             )
 
@@ -1032,9 +1168,11 @@ class Installer(object):
                         if not sectionStartLine:
                             if not networkWritten:
                                 print(f"{sectionIndents[currentSection]}default:")
+                                print(
+                                    f"{sectionIndents[currentSection] * 2}external: {'true' if (len(dockerNetworkExternalName) > 0) else 'false'}"
+                                )
                                 if len(dockerNetworkExternalName) > 0:
-                                    print(f"{sectionIndents[currentSection] * 2}external:")
-                                    print(f"{sectionIndents[currentSection] * 3}name: {dockerNetworkExternalName}")
+                                    print(f"{sectionIndents[currentSection] * 2}name: {dockerNetworkExternalName}")
                                 networkWritten = True
                             # we already re-wrote the network stuff, anything else is superfluous
                             skipLine = True

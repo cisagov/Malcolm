@@ -59,7 +59,7 @@ NGINX_RUNTIME_LDAP_CONF=/etc/nginx/nginx_ldap_rt.conf
 # config file for stunnel if using stunnel to issue LDAP StartTLS function
 STUNNEL_CONF=/etc/stunnel/stunnel.conf
 
-CA_TRUST_HOST_DIR=/etc/nginx/ca-trust
+CA_TRUST_HOST_DIR=/var/local/ca-trust
 CA_TRUST_RUN_DIR=/var/run/ca-trust
 
 # copy trusted CA certs to runtime directory and c_rehash them to create symlinks
