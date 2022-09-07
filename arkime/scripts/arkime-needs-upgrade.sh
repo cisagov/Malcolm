@@ -2,6 +2,18 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
+OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+  CURL_CONFIG_PARAMS=(
+    --config
+    "$OPENSEARCH_CREDS_CONFIG_FILE"
+    )
+else
+  CURL_CONFIG_PARAMS=()
+fi
+
 # this script returns:
 #   0 - an UPGRADE IS NEEDED for Arkime indices
 #   1 - an UPGRADE IS NOT NEEDED for Arkime indices
@@ -39,6 +51,6 @@ while read INDEX_NAME; do
     fi # compare INDEX_NAME vs. INDEX_PREFIX
   done # loop over ARKIME_INDEX_CURRENT_VERSIONS
 
-done <<<$(curl -fsS -H"Content-Type: application/json" -XGET "http://$OS_HOST:$OS_PORT/_cat/indices?v" | tail -n +2 | awk '{print $3}')
+done <<<$(curl "${CURL_CONFIG_PARAMS[@]}" -fsS -H"Content-Type: application/json" -XGET "${OPENSEARCH_URL}/_cat/indices?v" | tail -n +2 | awk '{print $3}')
 
 exit $RETURN_CODE

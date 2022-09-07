@@ -96,6 +96,8 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   pushd "$DESTDIR" >/dev/null 2>&1
+  touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
+  chmod 600 ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
   pushd "./scripts" >/dev/null 2>&1
   ln -s ./control.py auth_setup
   ln -s ./control.py logs

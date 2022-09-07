@@ -36,6 +36,19 @@ OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRE
 # ip-to-segment-logstash.py translate $INPUT_CIDR_MAP, $INPUT_HOST_MAP, $INPUT_MIXED_MAP into this logstash filter file
 NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segment_filters.conf
 
+# output plugin configuration for primary and secondary opensearch destinations
+OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-"false"}
+
+OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
+OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION:-"false"}
+
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/opensearch.secondary.curlrc"}
+
+[[ "$OPENSEARCH_SECONDARY" != "true" ]] && OPENSEARCH_SECONDARY_URL=
+export OPENSEARCH_SECONDARY_URL
+
 ####################################################################################################################
 
 # copy over pipeline filters from host-mapped volumes (if any) into their final resting places
@@ -53,7 +66,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
   xargs -0 -n 1 -I '{}' bash -c '
   PIPELINE_NAME="$(basename "{}")"
   PIPELINE_ADDRESS_NAME="$(cat "{}"/*.conf | sed -e "s/:[\}]*.*\(}\)/\1/" | envsubst | grep -P "\baddress\s*=>" | awk "{print \$3}" | sed "s/[\"'']//g" | head -n 1)"
-  if [[ -n "$OS_EXTERNAL_HOSTS" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
+  if [[ -n "$OPENSEARCH_SECONDARY_URL" ]] || [[ "$PIPELINE_ADDRESS_NAME" != "$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL" ]]; then
     echo "- pipeline.id: malcolm-$PIPELINE_NAME"       >> "$PIPELINES_CFG"
     echo "  path.config: "{}""                         >> "$PIPELINES_CFG"
     echo "  pipeline.ecs_compatibility: disabled"      >> "$PIPELINES_CFG"
@@ -68,7 +81,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
 rm -f "$NETWORK_MAP_OUTPUT_FILTER"
 /usr/local/bin/ip-to-segment-logstash.py --mixed "$INPUT_MIXED_MAP" --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
-if [[ -z "$OS_EXTERNAL_HOSTS" ]]; then
+if [[ -z "$OPENSEARCH_SECONDARY_URL" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output
   OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES="$(echo "$OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES" | sed "s/,[[:blank:]]*$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL//")"
 fi
@@ -77,9 +90,44 @@ fi
 MALCOLM_PARSE_PIPELINE_ADDRESSES=$(printf '"%s"\n' "${PARSE_PIPELINE_ADDRESSES//,/\",\"}")
 MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES//,/\",\"}")
 
+# get the username/password for opensearch from the curlrf file(s) for both primary and secondary outputs
+# (I already wrote python code to do this, so sue me)
+OPENSSL_USER=
+OPENSSL_PASSWORD=
+if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+    pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
+    NEW_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+    OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
+    OPENSSL_PASSWORD="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)"
+    popd >/dev/null 2>&1
+fi
+
+OPENSSL_SECONDARY_USER=
+OPENSSL_SECONDARY_PASSWORD=
+if [[ "$OPENSEARCH_SECONDARY" == "true" ]] && [[ -r "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" ]]; then
+    pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
+    NEW_SECONDARY_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+    OPENSSL_SECONDARY_USER="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f1)"
+    OPENSSL_SECONDARY_PASSWORD="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f2-)"
+    popd >/dev/null 2>&1
+fi
+
+# set some permissions restrictions for conf files we're going to put passwords into
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec grep -H -P "_MALCOLM_LOGSTASH_OPENSEARCH\w*_PASSWORD_" "{}" \; | \
+  cut -d: -f1 | \
+  xargs -r -l chmod 600
+
 # do a manual global replace on these particular values in the config files, as Logstash doesn't like the environment variables with quotes in them
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_OPENSEARCH_OUTPUT_PIPELINES_/${MALCOLM_OPENSEARCH_OUTPUT_PIPELINES}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
+
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SSL_VERIFICATION_/${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_USER_/${OPENSSL_USER}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_PASSWORD_/${OPENSSL_PASSWORD}/g" "{}" \; 2>/dev/null
+
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_SSL_VERIFICATION_/${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_USER_/${OPENSSL_SECONDARY_USER}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_PASSWORD_/${OPENSSL_SECONDARY_PASSWORD}/g" "{}" \; 2>/dev/null
 
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true

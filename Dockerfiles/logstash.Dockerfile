@@ -105,6 +105,7 @@ ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/patterns/ /usr/share/logstash/malcolm-patterns/
 ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
+ADD scripts/malcolm_common.py /usr/local/bin/
 ADD logstash/supervisord.conf /etc/supervisord.conf
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \

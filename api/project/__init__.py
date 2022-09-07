@@ -1,5 +1,6 @@
 import dateparser
 import json
+import malcolm_common
 import opensearch_dsl
 import opensearchpy
 import os
@@ -9,12 +10,15 @@ import re
 import requests
 import string
 import traceback
+import urllib3
 import warnings
 
 from collections import defaultdict
 from collections.abc import Iterable
 from datetime import datetime
 from flask import Flask, jsonify, request
+from requests.auth import HTTPBasicAuth
+from urllib.parse import urlparse
 
 
 # map categories of field names to OpenSearch dashboards
@@ -93,7 +97,7 @@ fields_to_urls.append([r'^zeek\.rdp\.', ['DASH:7f41913f-cba8-43f5-82a8-241b7ead0
 fields_to_urls.append([r'^zeek\.rfb\.', ['DASH:f77bf097-18a8-465c-b634-eb2acc7a4f26']])
 fields_to_urls.append(
     [
-        r'^zeek\.(s7comm|iso_cotp)\.',
+        r'^zeek\.(s7comm.*|(iso_)?cotp)\.',
         ['DASH:e76d05c0-eb9f-11e9-a384-0fcf32210194', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf'],
     ]
 )
@@ -141,7 +145,7 @@ field_type_map['long'] = 'integer'
 field_type_map['time'] = 'date'
 field_type_map['timestamp'] = 'date'
 
-
+urllib3.disable_warnings()
 warnings.filterwarnings(
     "ignore",
     message="The localize method is no longer necessary, as this time zone supports the fold attribute",
@@ -150,8 +154,32 @@ warnings.filterwarnings(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config.from_object("project.config.Config")
-opensearch_dsl.connections.create_connection(hosts=[app.config["OPENSEARCH_URL"]])
+
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
+
+opensearchUrl = app.config["OPENSEARCH_URL"]
+dashboardsUrl = app.config["DASHBOARDS_URL"]
+opensearchLocal = (app.config["OPENSEARCH_LOCAL"] == "true") or (opensearchUrl == 'http://opensearch:9200')
+opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
+opensearchCreds = (
+    malcolm_common.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
+    if (not opensearchLocal)
+    else defaultdict(lambda: None)
+)
+if opensearchCreds['user'] is not None:
+    opensearchDslHttpAuth = f"{opensearchCreds['user']}:{opensearchCreds['password']}"
+    opensearchReqHttpAuth = HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
+else:
+    opensearchDslHttpAuth = None
+    opensearchReqHttpAuth = None
+
+opensearch_dsl.connections.create_connection(
+    hosts=[opensearchUrl],
+    http_auth=opensearchDslHttpAuth,
+    verify_certs=opensearchSslVerify,
+    ssl_assert_hostname=False,
+    ssl_show_warn=False,
+)
 
 
 def deep_get(d, keys, default=None):
@@ -491,7 +519,7 @@ def document(index):
     Returns
     -------
     filter
-        dict containing the filters, e.g., {"_id":"210301-Cgnjsc2Tkdl38g25D6-iso_cotp-5485"}
+        dict containing the filters, e.g., {"_id":"210301-Cgnjsc2Tkdl38g25D6-cotp-5485"}
     results
         array of the documents retrieved (up to 'limit')
     """
@@ -522,7 +550,13 @@ def indices():
     indices
         The output of _cat/indices?format=json from the OpenSearch API
     """
-    return jsonify(indices=requests.get(f'{app.config["OPENSEARCH_URL"]}/_cat/indices?format=json').json())
+    return jsonify(
+        indices=requests.get(
+            f'{opensearchUrl}/_cat/indices?format=json',
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
+        ).json()
+    )
 
 
 @app.route("/fields", methods=['GET'])
@@ -553,7 +587,7 @@ def fields():
             # get fields from Arkime's field's table
             s = opensearch_dsl.Search(
                 using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
-            ).extra(size=3000)
+            ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
                 if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
                     if debugApi:
@@ -570,7 +604,11 @@ def fields():
 
     # get fields from OpenSearch template (and descendant components)
     try:
-        getTemplateResponseJson = requests.get(f'{app.config["OPENSEARCH_URL"]}/_index_template/{templateName}').json()
+        getTemplateResponseJson = requests.get(
+            f'{opensearchUrl}/_index_template/{templateName}',
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
+        ).json()
 
         for template in deep_get(getTemplateResponseJson, ["index_templates"]):
             # top-level fields
@@ -588,7 +626,9 @@ def fields():
             # descendant component fields
             for componentName in get_iterable(deep_get(template, ["index_template", "composed_of"])):
                 getComponentResponseJson = requests.get(
-                    f'{app.config["OPENSEARCH_URL"]}/_component_template/{componentName}'
+                    f'{opensearchUrl}/_component_template/{componentName}',
+                    auth=opensearchReqHttpAuth,
+                    verify=opensearchSslVerify,
                 ).json()
                 for component in get_iterable(deep_get(getComponentResponseJson, ["component_templates"])):
                     for fieldname, fieldinfo in deep_get(
@@ -609,11 +649,13 @@ def fields():
     # get fields from OpenSearch dashboards
     try:
         for field in requests.get(
-            f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
+            f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
             params={
                 'pattern': pattern,
                 'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
             },
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
         ).json()['fields']:
             if fieldname := deep_get(field, ['name']):
                 if debugApi:
@@ -659,7 +701,11 @@ def version():
         version=app.config["MALCOLM_VERSION"],
         built=app.config["BUILD_DATE"],
         sha=app.config["VCS_REVISION"],
-        opensearch=requests.get(app.config["OPENSEARCH_URL"]).json(),
+        opensearch=requests.get(
+            opensearchUrl,
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
+        ).json(),
         opensearch_health=opensearch_dsl.connections.get_connection().cluster.health(),
     )
 

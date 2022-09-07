@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:2.1.0
+FROM opensearchproject/opensearch:2.2.1
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -21,6 +21,9 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
+ARG OPENSEARCH_LOCAL=true
+ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
+
 ARG MALCOLM_API_URL="http://api:5000/event"
 ENV MALCOLM_API_URL $MALCOLM_API_URL
 
@@ -40,19 +43,19 @@ RUN yum install -y openssl util-linux procps && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
-  mkdir -p /usr/share/opensearch/ca-trust && \
-  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /usr/share/opensearch/ca-trust && \
+  mkdir -p /var/local/ca-trust && \
+  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /var/local/ca-trust && \
   sed -i "s/^\([[:space:]]*\)\([^#].*performance-analyzer-agent-cli\)/\1# \2/" /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*[^#].*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
 
-# just used for initial keystore creation
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+ADD shared/bin/service_check_passthrough.sh /usr/local/bin/docker-entrypoint.sh
 
-VOLUME ["/usr/share/opensearch/ca-trust"]
+VOLUME ["/var/local/ca-trust"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
 

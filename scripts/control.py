@@ -19,6 +19,7 @@ from malcolm_common import *
 from base64 import b64encode
 from collections import defaultdict, namedtuple
 from subprocess import PIPE, STDOUT, Popen, check_call, CalledProcessError
+from urllib.parse import urlparse
 
 try:
     from contextlib import nullcontext
@@ -140,7 +141,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     '-T' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
                     # execute as UID:GID in docker-compose.yml file
                     '-u',
-                    f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}'
+                    f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
                     # the work directory in the container is the directory to contain the keystore file
                     '-w',
                     volumeKeystoreDir,
@@ -270,6 +271,8 @@ def logs():
     global dockerBin
     global dockerComposeBin
 
+    urlUserPassRegEx = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
+
     # noisy logs (a lot of it is NGINX logs from health checks)
     ignoreRegEx = re.compile(
         r"""
@@ -352,7 +355,7 @@ def logs():
         if (len(output) == 0) and (process.poll() is not None):
             break
         if output:
-            outputStr = output.decode().strip()
+            outputStr = urlUserPassRegEx.sub(r"\1xxxxxxxx\2", output.decode().strip())
             outputStrEscaped = EscapeAnsi(outputStr)
             if ignoreRegEx.match(outputStrEscaped):
                 pass  ### print(f'!!!!!!!: {outputStr}')
@@ -442,23 +445,6 @@ def stop(wipe=False):
     osEnv = os.environ.copy()
     osEnv['TMPDIR'] = MalcolmTmpPath
 
-    if wipe:
-        # attempt to DELETE _index_template/malcolm_template in OpenSearch
-        err, out = run_process(
-            [
-                dockerComposeBin,
-                '-f',
-                args.composeFile,
-                'exec',
-                'arkime',
-                'bash',
-                '-c',
-                'curl -fs --output /dev/null -H"Content-Type: application/json" -XDELETE "http://$OS_HOST:$OS_PORT/_index_template/malcolm_template"',
-            ],
-            env=osEnv,
-            debug=args.debug,
-        )
-
     # if stop.sh is being called with wipe.sh (after the docker-compose file)
     # then also remove named and anonymous volumes (not external volumes, of course)
     err, out = run_process(
@@ -523,18 +509,16 @@ def start():
             'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
         )
 
-    # touch the metadata file
+    # touch the htadmin metadata file and .opensearch.*.curlrc files
     open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
+    open(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'), 'a').close()
+    open(os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'), 'a').close()
 
-    # if the OpenSearch and Logstash keystore don't exist exist, create empty ones
+    # if the OpenSearch keystore doesn't exist exist, create empty ones
     if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore'))):
         keystore_op('opensearch', True, 'create')
-    if not os.path.isfile(
-        os.path.join(MalcolmPath, os.path.join('logstash', os.path.join('certs', 'logstash.keystore')))
-    ):
-        keystore_op('logstash', True, 'create')
 
-    # make sure permissions are set correctly for the nginx worker processes
+    # make sure permissions are set correctly for the worker processes
     for authFile in [
         os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
         os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
@@ -542,7 +526,11 @@ def start():
     ]:
         # chmod 644 authFile
         os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-    for authFile in [os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))]:
+    for authFile in [
+        os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
+        os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
+        os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+    ]:
         # chmod 600 authFile
         os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
 
@@ -614,7 +602,11 @@ def authSetup(wipe=False):
         password = None
         passwordConfirm = None
         passwordEncrypted = ''
-        username = AskForString("Administrator username")
+
+        while True:
+            username = AskForString("Administrator username")
+            if len(username) > 0:
+                break
 
         while True:
             password = AskForPassword(f"{username} password: ")
@@ -960,49 +952,66 @@ def authSetup(wipe=False):
                 for oldfile in glob.glob(pat):
                     os.remove(oldfile)
 
-    # create and populate keystore for remote
-    if YesOrNo(
-        'Store username/password for forwarding Logstash events to a secondary, external OpenSearch instance',
-        default=False,
-    ):
+    # create and populate connection parameters file for remote OpenSearch instance(s)
+    for instance in ['primary', 'secondary']:
+        openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
+        if YesOrNo(
+            f'Store username/password for {instance} remote OpenSearch instance?',
+            default=False,
+        ):
+            prevCurlContents = ParseCurlFile(openSearchCredFileName)
 
-        # prompt username and password
-        esPassword = None
-        esPasswordConfirm = None
-        esUsername = AskForString("External OpenSearch username")
+            # prompt host, username and password
+            esUsername = None
+            esPassword = None
+            esPasswordConfirm = None
 
-        while True:
-            esPassword = AskForPassword(f"{esUsername} password: ")
-            esPasswordConfirm = AskForPassword(f"{esUsername} password (again): ")
-            if esPassword == esPasswordConfirm:
-                break
-            eprint("Passwords do not match")
+            while True:
+                esUsername = AskForString(
+                    "OpenSearch username",
+                    default=prevCurlContents['user'],
+                )
+                if (len(esUsername) > 0) and (':' not in esUsername):
+                    break
+                eprint("Username is blank (or contains a colon, which is not allowed)")
 
-        # create logstash keystore file, don't complain if it already exists, and set the keystore items
-        keystore_op('logstash', False, 'create', stdin='N')
-        keystore_op('logstash', False, 'remove', 'OS_EXTERNAL_USER', '--force')
-        keystore_op('logstash', False, 'add', 'OS_EXTERNAL_USER', '--stdin', '--force', stdin=esUsername)
-        keystore_op('logstash', False, 'remove', 'OS_EXTERNAL_PASSWORD', '--force')
-        keystore_op('logstash', False, 'add', 'OS_EXTERNAL_PASSWORD', '--stdin', '--force', stdin=esPassword)
-        success, results = keystore_op('logstash', False, 'list')
-        results = [
-            x.upper()
-            for x in results
-            if x
-            and (not x.upper().startswith('WARNING'))
-            and (not x.upper().startswith('KEYSTORE'))
-            and (not x.upper().startswith('USING BUNDLED JDK'))
-        ]
-        if success and ('OS_EXTERNAL_USER' in results) and ('OS_EXTERNAL_PASSWORD' in results):
-            eprint(f"External OpenSearch instance variables stored: {', '.join(results)}")
+            while True:
+                esPassword = AskForPassword(f"{esUsername} password: ")
+                if (
+                    (len(esPassword) == 0)
+                    and (prevCurlContents['password'] is not None)
+                    and YesOrNo(f'Use previously entered password for "{esUsername}"?', default=True)
+                ):
+                    esPassword = prevCurlContents['password']
+                    esPasswordConfirm = esPassword
+                else:
+                    esPasswordConfirm = AskForPassword(f"{esUsername} password (again): ")
+                if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
+                    break
+                eprint("Passwords do not match")
+
+            esSslVerify = YesOrNo(
+                f'Require SSL certificate validation for OpenSearch communication?',
+                default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
+            )
+
+            with open(openSearchCredFileName, 'w') as f:
+                f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')
+                if not esSslVerify:
+                    f.write('insecure\n')
+
         else:
-            eprint("Failed to store external OpenSearch instance variables:\n")
-            eprint("\n".join(results))
+            try:
+                os.remove(openSearchCredFileName)
+            except:
+                pass
+        open(openSearchCredFileName, 'a').close()
+        os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
 
     # OpenSearch authenticate sender account credentials
     # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account
     if YesOrNo(
-        'Store username/password for email alert sender account (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account)',
+        'Store username/password for email alert sender account? (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account)',
         default=False,
     ):
 
@@ -1010,7 +1019,10 @@ def authSetup(wipe=False):
         emailPassword = None
         emailPasswordConfirm = None
         emailSender = AskForString("OpenSearch alerting email sender name")
-        emailUsername = AskForString("Email account username")
+        while True:
+            emailUsername = AskForString("Email account username")
+            if len(emailUsername) > 0:
+                break
 
         while True:
             emailPassword = AskForPassword(f"{emailUsername} password: ")

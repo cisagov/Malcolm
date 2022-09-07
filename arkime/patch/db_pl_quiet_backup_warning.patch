@@ -1,0 +1,13 @@
+diff --git a/db/db.pl b/db/db.pl
+index 1b24b6a1..c8034ec4 100755
+--- a/db/db.pl
++++ b/db/db.pl
+@@ -7111,7 +7111,7 @@ my $health = dbCheckHealth();
+ 
+ my $nodes = esGet("/_nodes");
+ $main::numberOfNodes = dataNodes($nodes->{nodes});
+-logmsg "It is STRONGLY recommended that you stop ALL Arkime captures and viewers before proceeding.  Use 'db.pl ${main::elasticsearch} backup' to backup db first.\n\n";
++# logmsg "It is STRONGLY recommended that you stop ALL Arkime captures and viewers before proceeding.  Use 'db.pl ${main::elasticsearch} backup' to backup db first.\n\n";
+ if ($main::numberOfNodes == 1) {
+     logmsg "There is $main::numberOfNodes elastic search data node, if you expect more please fix first before proceeding.\n\n";
+ } else {

@@ -28,7 +28,7 @@ RUN apk update --no-cache && \
     apk upgrade --no-cache && \
     apk --no-cache add bash php8 php8-fpm php8-mysqli php8-json php8-openssl php8-curl php8-fileinfo \
     php8-zlib php8-xml php8-phar php8-intl php8-dom php8-xmlreader php8-ctype php8-session \
-    php8-mbstring php8-gd nginx supervisor curl inotify-tools file psmisc shadow
+    php8-mbstring php8-gd nginx supervisor curl inotify-tools file psmisc shadow openssl
 
 COPY name-map-ui/config/nginx.conf /etc/nginx/nginx.conf
 COPY name-map-ui/config/fpm-pool.conf /etc/php8/php-fpm.d/www.conf

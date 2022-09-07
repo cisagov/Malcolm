@@ -4,15 +4,21 @@
 import argparse
 import humanfriendly
 import json
+import malcolm_common
 import re
 import requests
 import os
 import sys
+import urllib3
+
+from collections import defaultdict
+from requests.auth import HTTPBasicAuth
 
 ###################################################################################################
 debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
+urllib3.disable_warnings()
 
 ###################################################################################################
 # print to stderr
@@ -62,8 +68,35 @@ def main():
         dest='opensearchUrl',
         metavar='<protocol://host:port>',
         type=str,
-        default=os.getenv('OPENSEARCH_URL', 'http://opensearch:9200'),
+        default=os.getenv('OPENSEARCH_URL', None),
         help='OpenSearch URL',
+    )
+    parser.add_argument(
+        '-c',
+        '--opensearch-curlrc',
+        dest='opensearchCurlRcFile',
+        metavar='<filename>',
+        type=str,
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        help='cURL.rc formatted file containing OpenSearch connection parameters',
+    )
+    parser.add_argument(
+        '--opensearch-ssl-verify',
+        dest='opensearchSslVerify',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
+        help="Verify SSL certificates for OpenSearch",
+    )
+    parser.add_argument(
+        '--opensearch-local',
+        dest='opensearchIsLocal',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('OPENSEARCH_LOCAL', default='True')),
+        help="Malcolm is using its local OpenSearch instance",
     )
     parser.add_argument(
         '--node',
@@ -130,7 +163,28 @@ def main():
     if args.limit == '0':
         return
 
-    osInfoResponse = requests.get(args.opensearchUrl)
+    args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
+    opensearchCreds = (
+        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
+        if (not args.opensearchIsLocal)
+        else defaultdict(lambda: None)
+    )
+    if not args.opensearchUrl:
+        if args.opensearchIsLocal:
+            args.opensearchUrl = 'http://opensearch:9200'
+        elif 'url' in opensearchCreds:
+            args.opensearchUrl = opensearchCreds['url']
+    opensearchReqHttpAuth = (
+        HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
+        if opensearchCreds['user'] is not None
+        else None
+    )
+
+    osInfoResponse = requests.get(
+        args.opensearchUrl,
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
+    )
     osInfo = osInfoResponse.json()
     opensearchVersion = osInfo['version']['number']
     if debug:
@@ -159,7 +213,9 @@ def main():
         # get allocation statistics for node(s) to do percentage calculation
         esDiskUsageStats = []
         osInfoResponse = requests.get(
-            f'{args.opensearchUrl}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json'
+            f'{args.opensearchUrl}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json',
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
         )
         osInfo = osInfoResponse.json()
 
@@ -213,7 +269,11 @@ def main():
         )
 
     # now determine the total size of the indices from the index pattern
-    osInfoResponse = requests.get(f'{args.opensearchUrl}/{args.index}/_stats/store')
+    osInfoResponse = requests.get(
+        f'{args.opensearchUrl}/{args.index}/_stats/store',
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
+    )
     osInfo = osInfoResponse.json()
     try:
         totalSizeInMegabytes = (
@@ -239,6 +299,8 @@ def main():
         osInfoResponse = requests.get(
             f'{args.opensearchUrl}/_cat/indices/{args.index}',
             params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
         )
         osInfo = sorted(osInfoResponse.json(), key=lambda k: k['i' if args.nameSorted else 'creation.date'])
 
@@ -263,7 +325,11 @@ def main():
             if not args.dryrun:
                 # delete the indices to free up the space indicated
                 for index in indicesToDelete:
-                    esDeleteResponse = requests.delete(f'{args.opensearchUrl}/{index["i"]}')
+                    esDeleteResponse = requests.delete(
+                        f'{args.opensearchUrl}/{index["i"]}',
+                        auth=opensearchReqHttpAuth,
+                        verify=args.opensearchSslVerify,
+                    )
                     print(
                         f'DELETE {index["i"]} ({humanfriendly.format_size(humanfriendly.parse_size(index[sizeKey]))}): {requests.status_codes._codes[esDeleteResponse.status_code][0]}'
                     )

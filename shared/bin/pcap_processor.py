@@ -154,6 +154,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                     cmd = [
                         arkimeBin,
                         '--quiet',
+                        '--insecure',
                         '-n',
                         fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
                         '-o',

@@ -2,20 +2,35 @@
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 
+OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
+OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+  CURL_CONFIG_PARAMS=(
+    --config
+    "$OPENSEARCH_CREDS_CONFIG_FILE"
+    )
+else
+  CURL_CONFIG_PARAMS=()
+fi
+[[ "$OPENSEARCH_SSL_CERTIFICATE_VERIFICATION" != "true" ]] && DB_SSL_FLAG="--insecure" || DB_SSL_FLAG=""
+OPENSEARCH_URL_FULL="$(grep -Pi '^elasticsearch\s*=' $ARKIME_DIR/etc/config.ini | cut -d'=' -f2-)"
+
 rm -f /var/run/arkime/initialized /var/run/arkime/runwise
 
 echo "Giving OpenSearch time to start..."
 /opt/opensearch_status.sh 2>&1 && echo "OpenSearch is running!"
 
 # download and/or update geo updates
-$ARKIMEDIR/bin/arkime_update_geo.sh
+$ARKIME_DIR/bin/arkime_update_geo.sh
 
 # start and wait patiently for WISE
 if [[ "$WISE" = "on" ]] ; then
   touch /var/run/arkime/runwise
   echo "Giving WISE time to start..."
   sleep 5
-  until curl -sSf --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
+  until curl -fsS --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
   do
       echo "Waiting for WISE to start"
       sleep 1
@@ -25,27 +40,27 @@ if [[ "$WISE" = "on" ]] ; then
 fi
 
 # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
-if [[ $(curl -fs -XGET -H'Content-Type: application/json' "http://$OS_HOST:$OS_PORT/_cat/indices/arkime_users_v*" | wc -l) < 1 ]]; then
+if [[ $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 ]]; then
 
   echo "Initializing OpenSearch database..."
 
-	$ARKIMEDIR/db/db.pl http://$OS_HOST:$OS_PORT initnoprompt
+	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt
 
   echo "Creating default user..."
 
 	# this password isn't going to be used by Arkime, nginx will do the auth instead
-	$ARKIMEDIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth
+	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth $DB_SSL_FLAG
 
   echo "Initializing fields..."
 
   # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
   touch /tmp/not_a_packet.pcap
-  $ARKIMEDIR/bin/capture --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+  $ARKIME_DIR/bin/capture $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
 
   echo "Setting defaults..."
 
-  curl -sS -H'Content-Type: application/json' -XPOST http://$OS_HOST:$OS_PORT/arkime_users/_update/$MALCOLM_USERNAME -d "@$ARKIMEDIR/etc/user_settings.json"
+  curl "${CURL_CONFIG_PARAMS[@]}" -sS -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
 
   echo -e "\nOpenSearch database initialized!\n"
 
@@ -55,7 +70,7 @@ else
 
   if /opt/arkime-needs-upgrade.sh 2>&1; then
     echo "OpenSearch database needs to be upgraded for $ARKIME_VERSION!"
-    $ARKIMEDIR/db/db.pl http://$OS_HOST:$OS_PORT upgradenoprompt
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt
     echo "OpenSearch database upgrade complete!"
     echo
 
@@ -67,13 +82,13 @@ else
 fi # if/else OpenSearch database initialized
 
 # increase OpenSearch max shards per node from default if desired
-if [[ -n $OS_MAX_SHARDS_PER_NODE ]]; then
+if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
   # see https://github.com/elastic/elasticsearch/issues/40803
-  curl -sS -H'Content-Type: application/json' -XPUT http://$OS_HOST:$OS_PORT/_cluster/settings -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OS_MAX_SHARDS_PER_NODE\" } }"
+  curl "${CURL_CONFIG_PARAMS[@]}" -sS -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OPENSEARCH_MAX_SHARDS_PER_NODE\" } }"
 fi
 
 # before running viewer, call _refresh to make sure everything is available for search first
-curl -sS -XPOST http://$OS_HOST:$OS_PORT/_refresh
+curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
 
 touch /var/run/arkime/initialized
 

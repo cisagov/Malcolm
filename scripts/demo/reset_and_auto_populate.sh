@@ -218,7 +218,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
 
   # wipe and/or restart the database as requested
   if [[ "$WIPE" == "true" ]]; then
-    ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE"
+    ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE" || true
     ./scripts/start $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
     START_PID=$!
   elif [[ "$RESTART" == "true" ]]; then

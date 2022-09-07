@@ -4,10 +4,10 @@
 
 
 while true; do
-  if [[ ("$WISE" == "on") && (-f /var/run/arkime/runwise) && (-f $ARKIMEDIR/etc/wise.ini) ]]; then
+  if [[ ("$WISE" == "on") && (-f /var/run/arkime/runwise) && (-f $ARKIME_DIR/etc/wise.ini) ]]; then
     echo "Launch wise..."
-    pushd $ARKIMEDIR/wiseService >/dev/null 2>&1
-    $ARKIMEDIR/bin/node wiseService.js -c $ARKIMEDIR/etc/wise.ini
+    pushd $ARKIME_DIR/wiseService >/dev/null 2>&1
+    $ARKIME_DIR/bin/node wiseService.js --insecure -c $ARKIME_DIR/etc/wise.ini
     popd >/dev/null 2>&1
   fi
   sleep 5
