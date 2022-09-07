@@ -217,25 +217,23 @@ Download fluent-bit
 Would you like to download fluent-bit (zip) to C:\work?
 [Y] Yes  [N] No  [?] Help (default is "Y"): y
 
-        **************************************************************************
-        * Select input plugin (https://docs.fluentbit.io/manual/pipeline/inputs) *
-        **************************************************************************
-
-        dummy
-        dummy_thread
-        fluentbit_metrics
-        forward
-        nginx_metrics
-        opentelemetry
-        prometheus_scrape
-        random
-        statsd
-        tail
-        tcp
-        windows_exporter_metrics
-        > winevtlog <
-        winlog
-        winstat
+Select input plugin (https://docs.fluentbit.io/manual/pipeline/inputs):
+1. dummy
+2. dummy_thread
+3. fluentbit_metrics
+4. forward
+5. nginx_metrics
+6. opentelemetry
+7. prometheus_scrape
+8. random
+9. statsd
+10. tail
+11. tcp
+12. windows_exporter_metrics
+13. winevtlog
+14. winlog
+15. winstat
+Make a selection: 13
 
 Enter parameters for winevtlog. Leave parameters blank for defaults.
   see https://docs.fluentbit.io/manual/pipeline/inputs
