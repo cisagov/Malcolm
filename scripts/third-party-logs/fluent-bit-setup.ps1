@@ -12,53 +12,28 @@ $fluent_bit_version = '1.9'
 $fluent_bit_full_version = '1.9.8'
 
 ###############################################################################
-# credit for this PowerShell interactive Menu implementation to "JBs Powershell"
-# http://mspowershell.blogspot.com/2009/02/cli-menu-in-powershell.html?m=1
+# select an item from a menu provided in an array
+###############################################################################
+Function DynamicMenu {
+    Param ([array] $Items, [string] $Title = "Menu")
 
-function DrawMenu {
-    ## supportfunction to the Menu function below
-    param ($menuItems, $menuPosition, $menuTitel)
-    $fcolor = $host.UI.RawUI.ForegroundColor
-    $bcolor = $host.UI.RawUI.BackgroundColor
-    $l = $menuItems.length + 1
-    cls
-    $menuwidth = $menuTitel.length + 4
-    Write-Host "`t" -NoNewLine
-    Write-Host ("*" * $menuwidth) -fore $fcolor -back $bcolor
-    Write-Host "`t" -NoNewLine
-    Write-Host "* $menuTitel *" -fore $fcolor -back $bcolor
-    Write-Host "`t" -NoNewLine
-    Write-Host ("*" * $menuwidth) -fore $fcolor -back $bcolor
-    Write-Host ""
-    Write-debug "L: $l MenuItems: $menuItems MenuPosition: $menuposition"
-    for ($i = 0; $i -le $l;$i++) {
-        Write-Host "`t" -NoNewLine
-        if ($i -eq $menuPosition) {
-            Write-Host "$($menuItems[$i])" -fore $bcolor -back $fcolor
-        } else {
-            Write-Host "$($menuItems[$i])" -fore $fcolor -back $bcolor
-        }
-    }
-}
+    $num = 0
 
-function Menu {
-    ## Generate a small "DOS-like" menu.
-    ## Choose a menuitem using up and down arrows, select by pressing ENTER
-    param ([array]$menuItems, $menuTitel = "MENU")
-    $vkeycode = 0
-    $pos = 0
-    DrawMenu $menuItems $pos $menuTitel
-    While ($vkeycode -ne 13) {
-        $press = $host.ui.rawui.readkey("NoEcho,IncludeKeyDown")
-        $vkeycode = $press.virtualkeycode
-        Write-host "$($press.character)" -NoNewLine
-        If ($vkeycode -eq 38) {$pos--}
-        If ($vkeycode -eq 40) {$pos++}
-        if ($pos -lt 0) {$pos = $menuItems.length -1}
-        if ($pos -ge $menuItems.length) {$pos = 0}
-        DrawMenu $menuItems $pos $menuTitel
+    if($Title -ne "") {
+        Write-Host $Title
     }
-    Write-Output $($menuItems[$pos])
+
+    foreach($item in $Items) {
+        $num++
+        $Separator = ":" + " " + " " *(($Items.Count).tostring().length - ($Num).tostring().length)
+        Write-Host "$num$Separator$item"
+    }
+    $Separator = ":" + " " *($Items.Count).tostring().length
+    $selection = (Read-Host "Make a selection") -as [int]
+    if (($selection -ne 0) -and ($selection -gt 0) -and ($selection -lt $Items.Count + 1)) {
+        return $Items[$selection - 1];
+    }
+    return $null;
 }
 
 ###############################################################################
@@ -202,7 +177,9 @@ foreach ($i in $fluentbit_help) {
     $fluentbit_inputs = $fluentbit_inputs + $input_name
 }
 $fluentbit_inputs = $fluentbit_inputs | Sort-Object
-$input_chosen = Menu $fluentbit_inputs "Select input plugin (https://docs.fluentbit.io/manual/pipeline/inputs)"
+do {
+    $input_chosen = DynamicMenu $fluentbit_inputs "Select input plugin (https://docs.fluentbit.io/manual/pipeline/inputs):"
+} until (![string]::IsNullOrWhiteSpace($input_chosen))
 
 ###############################################################################
 # prompt the user for values to the parameters for the chosen input plugin
@@ -210,8 +187,7 @@ $input_chosen = Menu $fluentbit_inputs "Select input plugin (https://docs.fluent
 Write-Host "Enter parameters for $input_chosen. Leave parameters blank for defaults."
 Write-Host "  see https://docs.fluentbit.io/manual/pipeline/inputs"
 Write-Host ""
-$param_names = switch ( $input_chosen )
-{
+$param_names = switch ( $input_chosen ) {
     'dummy' { @('Dummy', 'Start_time_sec', 'Start_time_nsec', 'Rate', 'Samples') }
     'random' { @('Samples', 'Interval_Sec', 'Interval_NSec') }
     'statsd' { @('Listen', 'Port') }
