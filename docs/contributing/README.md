@@ -28,7 +28,7 @@ The purpose of this document is to provide some direction for those willing to m
 
 ## <a name="LocalMods"></a>Local modifications
 
-There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](../../README.md) (see [`docker-compose.yml` parameters](../../README.md#docker-composeyml-parameters) and [Customizing event severity scoring](../../README.md#customizing-event-severity-scoring) for some examples).
+There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](../../README.md) (see [`docker-compose.yml` parameters](../../README.md#DockerComposeYml) and [Customizing event severity scoring](../../README.md#SeverityConfig) for some examples).
 
 ### <a name="Bind"></a>Docker bind mounts
 
@@ -188,7 +188,7 @@ When possible, I recommend you to use (or at least take inspiration from) the [E
 
 ### <a name="LocalZeek"></a>`local.zeek`
 
-Some Zeek behavior can be tweaked without having to manually edit configuration files through the use of environment variables: search for `ZEEK` in the [`docker-compose.yml` parameters](../../README.md#docker-composeyml-parameters) section of the documentation.
+Some Zeek behavior can be tweaked without having to manually edit configuration files through the use of environment variables: search for `ZEEK` in the [`docker-compose.yml` parameters](../../README.md#DockerComposeYml) section of the documentation.
 
 Other changes to Zeek's behavior could be made by modifying [local.zeek](../../zeek/config/local.zeek) and either using a [bind mount](#Bind) or [rebuilding](#Build) the `zeek` Docker image with the modification. See the [Zeek documentation](https://docs.zeek.org/en/master/quickstart.html#local-site-customization) for more information on customizing a Zeek instance. Note that changing Zeek's behavior could result in changes to the format of the logs Zeek generates, which could break Malcolm's parsing of those logs, so exercise caution.
 

@@ -994,14 +994,14 @@ The **Analyze with Zeek** and **Analyze with Suricata** checkboxes may be used w
 
 ### <a name="Hedgehog"></a>Using a network sensor appliance
 
-A dedicated network sensor appliance is the recommended method for capturing and analyzing live network traffic when performance and throughput is of utmost importance. [Hedgehog Linux](https://github.com/idaholab/Malcolm/tree/main/sensor-iso/) is a custom Debian-based operating system built to:
+A dedicated network sensor appliance is the recommended method for capturing and analyzing live network traffic when performance and throughput is of utmost importance. [Hedgehog Linux](./sensor-iso/README.md) is a custom Debian-based operating system built to:
 
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
 * generate and forward Zeek and Suricata logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/Malcolm)
 
-Please see the [Hedgehog Linux README](https://github.com/idaholab/Malcolm/blob/main/sensor-iso/README.md) for more information.
+Please see the [Hedgehog Linux README](./sensor-iso/README.md) for more information.
 
 ### <a name="LocalPCAP"></a>Monitoring local network interfaces
 

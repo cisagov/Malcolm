@@ -48,6 +48,21 @@ GenerateMarkdownHeader "Documentation" "documentation" >> $OUTPUT_FILE
 curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/README.md \
   | sed '0,/name="TableOfContents"/d' \
   | sed '/## Other Software/,$d' \
+  | sed "s@./docs/contributing/README.md@/contributions/@g" \
+  | sed "s@./sensor-iso/README.md@/hedgehog/@g" \
+  | sed "s@./scripts/third-party-logs/README.md@/thirdpartylogs/@g" \
+  | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
+  | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
+  | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/@g" \
+  >> $OUTPUT_FILE
+
+# third-party logs ingestion page
+OUTPUT_FILE="$OUTPUT_DIR"/thirdpartylogs.md
+> $OUTPUT_FILE
+GenerateMarkdownHeader "Forwarding Third-Party Logs to Malcolm" "thirdpartylogs" >> $OUTPUT_FILE
+curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/scripts/third-party-logs/README.md \
+  | sed "s@../../README.md@/documentation/@g" \
+  | sed "s@../../docs/contributing/README.md@/contributions/@g" \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
   | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/@g" \
@@ -58,6 +73,7 @@ OUTPUT_FILE="$OUTPUT_DIR"/hedgehog.md
 > $OUTPUT_FILE
 GenerateMarkdownHeader " " "hedgehog" >> $OUTPUT_FILE
 curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/README.md \
+  | sed "s@../README.md@/documentation/@g" \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
   | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/sensor-iso/@g" \
@@ -68,6 +84,7 @@ OUTPUT_FILE="$OUTPUT_DIR"/contributions.md
 > $OUTPUT_FILE
 GenerateMarkdownHeader "Contributions" "contributions" >> $OUTPUT_FILE
 curl -sSL --silent https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/docs/contributing/README.md \
+  | sed "s@../../README.md@/documentation/@g" \
   | sed "s@\](https://github.com/idaholab/[Mm]alcolm/*)@\](https://malcolm.fyi/)@g" \
   | sed "s@/[Mm]alcolm/blob/main/@/Malcolm/blob/$BRANCH/@g" \
   | sed "s@\](\./@\](https://raw.githubusercontent.com/idaholab/Malcolm/$BRANCH/docs/contributing/@g" \
