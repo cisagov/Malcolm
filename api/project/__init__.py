@@ -158,6 +158,7 @@ app.config.from_object("project.config.Config")
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 opensearchUrl = app.config["OPENSEARCH_URL"]
+dashboardsUrl = app.config["DASHBOARDS_URL"]
 opensearchLocal = (app.config["OPENSEARCH_LOCAL"] == "true") or (opensearchUrl == 'http://opensearch:9200')
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = (
@@ -648,11 +649,13 @@ def fields():
     # get fields from OpenSearch dashboards
     try:
         for field in requests.get(
-            f"{app.config['DASHBOARDS_URL']}/api/index_patterns/_fields_for_wildcard",
+            f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
             params={
                 'pattern': pattern,
                 'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
             },
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
         ).json()['fields']:
             if fieldname := deep_get(field, ['name']):
                 if debugApi:
