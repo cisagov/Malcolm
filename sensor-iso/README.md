@@ -38,7 +38,6 @@ Hedgehog Linux is a Debian-based operating system built to
 * [Appendix C - Troubleshooting](#Troubleshooting)
 * [Appendix D - Hardening](#Hardening)
     - [Compliance exceptions](#ComplianceExceptions)
-    - [Hardening compliance issues - work in progress](#ComplianceWIP)
 * [Appendix E - Upgrades](#UpgradePlan)
 * [Copyright](#Footer)
 
