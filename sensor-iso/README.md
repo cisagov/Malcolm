@@ -433,15 +433,15 @@ Should the sensor not function as expected, first try rebooting the device. If t
 
 # <a name="Hardening"></a>Appendix D - Hardening
 
-Hedgehog Linux uses the [harbian-audit Hardening](https://github.com/hardenedlinux/harbian-audit) benchmarks which target the following guidelines for establishing a secure configuration posture:
+Hedgehog Linux uses the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks which target the following guidelines for establishing a secure configuration posture:
 
 * [CIS Debian Linux 9/10 Benchmark](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/)
-* [DISA STIG (Security Technical Implementation Guides for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
+* [DISA STIG (Security Technical Implementation Guides) for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
 * Additional recommendations from [cisecurity.org](https://www.cisecurity.org/)
 
 ## <a name="ComplianceExceptions"></a>Compliance Exceptions
 
-[Currently](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening) there are 274 checks to determine compliance with the CIS Debian Linux Benchmark.
+[Currently](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening) there are 274 checks to determine compliance the with the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmark.
 
 Hedgehog Linux claims exceptions from the recommendations in this benchmark in the following categories:
 
