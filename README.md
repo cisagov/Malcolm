@@ -3591,7 +3591,7 @@ Upon configuring time synchronization, a "Time synchronization configured succes
 
 ### <a name="Hardening"></a>Hardening
 
-The Malcolm aggregator base operating system uses the [harbian-audit Hardening](https://github.com/hardenedlinux/harbian-audit) benchmarks which target the following guidelines for establishing a secure configuration posture:
+The Malcolm aggregator base operating system uses the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks which target the following guidelines for establishing a secure configuration posture:
 
 * [CIS Debian Linux 9/10 Benchmark](https://www.cisecurity.org/cis-benchmarks/cis-benchmarks-faq/)
 * [DISA STIG (Security Technical Implementation Guides) for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
