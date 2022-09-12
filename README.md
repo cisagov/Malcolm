@@ -3599,7 +3599,7 @@ The Malcolm aggregator base operating system uses the [harbian-audit](https://gi
 
 #### <a name="ComplianceExceptions"></a>Compliance Exceptions
 
-[Currently](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening) there are 274 checks to determine compliance the with the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmark.
+[Currently](https://github.com/hardenedlinux/harbian-audit/tree/master/bin/hardening) there are 274 checks to determine compliance with the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmark.
 
 The Malcolm aggregator base operating system claims exceptions from the recommendations in this benchmark in the following categories:
 
