@@ -30,11 +30,13 @@
 -a always,exit -F path=/etc/audit/audisp-remote.conf -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/audit/auditd.conf -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/default/grub -F perm=wa -k config_file_change
+-a always,exit -F path=/etc/default/ufw -F perm=wa -k ufw_config_file_chg
 -a always,exit -F path=/etc/fstab -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/hosts.deny -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/login.defs -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/profile -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/sysctl.conf -F perm=wa -k config_file_change
+-a always,exit -F dir=/etc/ufw/ -F perm=wa -k ufw_config_file_chg
 -a always,exit -F path=/sbin/apparmor_parser -F perm=x -F auid>=1000 -F auid!=4294967295 -k MAC-policy
 -a always,exit -F path=/sbin/pam_tally -F perm=wxa -F auid>=1000 -F auid!=4294967295 -k privileged-pam
 -a always,exit -F path=/sbin/pam_tally2 -F perm=wxa -F auid>=1000 -F auid!=4294967295 -k privileged-pam
@@ -95,6 +97,7 @@
 -a always,exit -F path=/usr/sbin/pppd -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/semanage -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/setsebool -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/usr/sbin/ufw -F perm=wax -k ufw_command_wax
 -a always,exit -F path=/usr/sbin/unix_chkpwd -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/useradd -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/userhelper -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
@@ -106,7 +109,6 @@
 -w /bin/kmod -p x -k modules
 -w /etc/apparmor.d/ -p wa -k MAC-policy
 -w /etc/apparmor/ -p wa -k MAC-policy
--w /etc/default/ufw -p wa -k UFW_config
 -w /etc/group -p wa -k identity
 -w /etc/gshadow -p wa -k identity
 -w /etc/hosts -p wa -k system-locale
@@ -121,11 +123,9 @@
 -w /etc/shadow -p wa -k identity
 -w /etc/sudoers -p wa -k sudoers
 -w /etc/sudoers.d/ -p wa -k sudoers
--w /etc/ufw -p wa -k UFW_rules
 -w /sbin/insmod -p x -k modules
 -w /sbin/modprobe -p x -k modules
 -w /sbin/rmmod -p x -k modules
--w /usr/sbin/ufw -p wa -k UFW_ufw
 -w /var/log/btmp -p wa -k session
 -w /var/log/faillog -p wa -k logins
 -w /var/log/lastlog -p wa -k logins
