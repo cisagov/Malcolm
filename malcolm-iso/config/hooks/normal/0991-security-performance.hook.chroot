@@ -110,7 +110,6 @@ sed -i "s/#user_allow_other.*/user_allow_other/" /etc/fuse.conf
 find /etc/audit -type d -exec chmod 750 "{}" \;
 find /etc/audit -type f -exec chmod 640 "{}" \;
 chmod 600 /etc/ssh/sshd_config
-chmod 400 /boot/grub/grub.cfg
 
 # set DIR_MODE to 750 for new users
 sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
