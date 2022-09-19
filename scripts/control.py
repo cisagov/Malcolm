@@ -5,14 +5,17 @@
 
 import argparse
 import errno
+import fileinput
 import getpass
 import glob
 import json
 import os
 import platform
 import re
+import secrets
 import shutil
 import stat
+import string
 import sys
 
 from malcolm_common import *
@@ -530,6 +533,10 @@ def start():
         os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
         os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
         os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env'))),
+        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'postgres.env'))),
+        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'redis-cache.env'))),
+        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'redis.env'))),
     ]:
         # chmod 600 authFile
         os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
@@ -539,6 +546,9 @@ def start():
         os.path.join(MalcolmPath, 'opensearch'),
         os.path.join(MalcolmPath, 'opensearch-backup'),
         os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
+        os.path.join(MalcolmPath, os.path.join('netbox', 'media')),
+        os.path.join(MalcolmPath, os.path.join('netbox', 'postgres')),
+        os.path.join(MalcolmPath, os.path.join('netbox', 'redis')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
         os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
         os.path.join(MalcolmPath, os.path.join('suricata-logs', 'live')),
@@ -1049,6 +1059,79 @@ def authSetup(wipe=False):
         else:
             eprint("Failed to store email alert sender account variables:\n")
             eprint("\n".join(results))
+
+    if YesOrNo('(Re)generate internal passwords for NetBox', default=True):
+        with pushd(os.path.join(MalcolmPath, os.path.join('netbox', 'env'))):
+            netboxPwAlphabet = string.ascii_letters + string.digits + '_'
+            netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
+            netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+            netboxRedisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+            netboxRedisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+            netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+            netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
+            netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
+
+            with open('postgres.env', 'w') as f:
+                f.write('POSTGRES_DB=netbox\n')
+                f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
+                f.write('POSTGRES_USER=netbox\n')
+            os.chmod('postgres.env', stat.S_IRUSR | stat.S_IWUSR)
+
+            with open('redis-cache.env', 'w') as f:
+                f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
+            os.chmod('redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
+
+            with open('redis.env', 'w') as f:
+                f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
+            os.chmod('redis.env', stat.S_IRUSR | stat.S_IWUSR)
+
+            if (not os.path.isfile('netbox.env')) and (os.path.isfile('netbox.env.example')):
+                shutil.copy2('netbox.env.example', 'netbox.env')
+
+            with fileinput.FileInput('netbox.env', inplace=True, backup=None) as envFile:
+                for line in envFile:
+                    line = line.rstrip("\n")
+
+                    if line.startswith('DB_PASSWORD'):
+                        line = re.sub(
+                            r'(DB_PASSWORD\s*=\s*)(\S+)',
+                            fr"\g<1>{netboxPostGresPassword}",
+                            line,
+                        )
+                    elif line.startswith('REDIS_CACHE_PASSWORD'):
+                        line = re.sub(
+                            r'(REDIS_CACHE_PASSWORD\s*=\s*)(\S+)',
+                            fr"\g<1>{netboxRedisCachePassword}",
+                            line,
+                        )
+                    elif line.startswith('REDIS_PASSWORD'):
+                        line = re.sub(
+                            r'(REDIS_PASSWORD\s*=\s*)(\S+)',
+                            fr"\g<1>{netboxRedisPassword}",
+                            line,
+                        )
+                    elif line.startswith('SECRET_KEY'):
+                        line = re.sub(
+                            r'(SECRET_KEY\s*=\s*)(\S+)',
+                            fr"\g<1>{netboxSecretKey}",
+                            line,
+                        )
+                    elif line.startswith('SUPERUSER_PASSWORD'):
+                        line = re.sub(
+                            r'(SUPERUSER_PASSWORD\s*=\s*)(\S+)',
+                            fr"\g<1>{netboxSuPassword}",
+                            line,
+                        )
+                    elif line.startswith('SUPERUSER_API_TOKEN'):
+                        line = re.sub(
+                            r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
+                            fr"\g<1>{netboxSuToken}",
+                            line,
+                        )
+
+                    print(line)
+
+            os.chmod('netbox.env', stat.S_IRUSR | stat.S_IWUSR)
 
 
 ###################################################################################################

@@ -1,0 +1,2 @@
+pynetbox
+python-slugify

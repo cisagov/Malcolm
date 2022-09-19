@@ -942,6 +942,100 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  netbox:
+    image: ghcr.io/mmguero/netbox:latest
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox
+    networks:
+      - default
+    environment:
+      << : *process-variables
+      VIRTUAL_HOST : 'netbox.malcolm.local'
+    env_file: ./netbox/env/netbox.env
+    depends_on:
+    - netbox-postgres
+    - netbox-redis
+    - netbox-redis-cache
+    volumes:
+    - ./netbox/config/configuration:/etc/netbox/config:ro
+    - ./netbox/config/reports:/etc/netbox/reports:ro
+    - ./netbox/config/scripts:/etc/netbox/scripts:ro
+    - ./netbox/config/unit:/etc/unit:ro
+    - ./netbox/media:/opt/netbox/netbox/media:rw
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "http://localhost:8080/assets/api/" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+  netbox-postgres:
+    image: ghcr.io/mmguero/postgres:14-alpine
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-postgres
+    networks:
+      - default
+    environment:
+      << : *process-variables
+      VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
+    env_file: ./netbox/env/postgres.env
+    volumes:
+    - ./netbox/postgres:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  netbox-redis:
+    image: ghcr.io/mmguero/redis:7-alpine
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-redis
+    networks:
+      - default
+    environment:
+      << : *process-variables
+      VIRTUAL_HOST : 'netbox-redis.malcolm.local'
+    env_file: ./netbox/env/redis.env
+    command:
+    - sh
+    - -c
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD
+    volumes:
+    - ./netbox/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "pidof redis-server || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  netbox-redis-cache:
+    image: ghcr.io/mmguero/redis:7-alpine
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-redis-cache
+    networks:
+      - default
+    environment:
+      << : *process-variables
+      VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
+      env_file: ./netbox/env/redis-cache.env
+    command:
+    - sh
+    - -c
+    - redis-server --requirepass $$REDIS_PASSWORD
+    healthcheck:
+      test: ["CMD-SHELL", "pidof redis-server || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
   api:
     image: malcolmnetsec/api:6.4.0
     build:
