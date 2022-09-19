@@ -890,10 +890,10 @@ services:
     hostname: netbox
     networks:
       - default
+    env_file: ./netbox/env/netbox.env
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'netbox.malcolm.local'
-    env_file: ./netbox/env/netbox.env
     depends_on:
     - netbox-postgres
     - netbox-redis
@@ -918,10 +918,10 @@ services:
     hostname: netbox-postgres
     networks:
       - default
+    env_file: ./netbox/env/postgres.env
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
-    env_file: ./netbox/env/postgres.env
     volumes:
     - ./netbox/postgres:/var/lib/postgresql/data:rw
     healthcheck:
@@ -938,10 +938,10 @@ services:
     hostname: netbox-redis
     networks:
       - default
+    env_file: ./netbox/env/redis.env
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'netbox-redis.malcolm.local'
-    env_file: ./netbox/env/redis.env
     command:
     - sh
     - -c
@@ -962,10 +962,10 @@ services:
     hostname: netbox-redis-cache
     networks:
       - default
+    env_file: ./netbox/env/redis-cache.env
     environment:
       << : *process-variables
       VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
-      env_file: ./netbox/env/redis-cache.env
     command:
     - sh
     - -c

@@ -472,7 +472,17 @@ def stop(wipe=False):
         )
 
         # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
-        for dataDir in ['opensearch-backup', 'zeek-logs', 'suricata-logs', 'arkime-logs', 'pcap', 'arkime-raw']:
+        for dataDir in [
+            'opensearch-backup',
+            'zeek-logs',
+            'suricata-logs',
+            'arkime-logs',
+            'pcap',
+            'arkime-raw',
+            os.path.join('netbox', 'media'),
+            os.path.join('netbox', 'postgres'),
+            os.path.join('netbox', 'redis'),
+        ]:
             for root, dirnames, filenames in os.walk(os.path.join(MalcolmPath, dataDir), topdown=True, onerror=None):
                 for file in filenames:
                     fileSpec = os.path.join(root, file)
@@ -489,6 +499,9 @@ def stop(wipe=False):
             os.path.join('zeek-logs', 'current'),
             os.path.join('zeek-logs', 'live'),
             os.path.join('suricata-logs'),
+            os.path.join('netbox', 'media'),
+            os.path.join('netbox', 'postgres'),
+            os.path.join('netbox', 'redis'),
         ]:
             RemoveEmptyFolders(dataDir, removeRoot=False)
 

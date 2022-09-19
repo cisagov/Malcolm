@@ -256,6 +256,9 @@ Malcolm leverages the following excellent open source tools, among others.
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
 * [List.js](https://github.com/javve/list.js) - for the [host and subnet name mapping](#HostAndSubnetNaming) interface
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
+* [NetBox](https://netbox.dev/) - a suite for modeling and documenting modern networks
+* [PostgreSQL](https://www.postgresql.org/) - a relational database for persisting NetBox's data
+* [Redis](https://redis.io/) - an in-memory data store for caching NetBox session information
 * [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [Fluent Bit](https://fluentbit.io/) - for forwarding metrics to Malcolm from [network sensors](#Hedgehog) (packet capture appliances)
@@ -378,6 +381,7 @@ Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `opensearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](#ISO) for a minimal Debian-based Linux installation for running Malcolm
 * `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](#HostAndSubnetNaming) interface
+* `netbox` - code and configuration for the `netbox`, `netbox-postgres`, `netbox-redis` and `netbox-redis-cache` containers which provide asset management capabilities
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
