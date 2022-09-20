@@ -883,7 +883,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/mmguero/netbox:latest
+    image: malcolmnetsec/netbox:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -911,7 +911,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/mmguero/postgres:14-alpine
+    image: malcolmnetsec/postgresql:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -931,7 +931,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/mmguero/redis:7-alpine
+    image: malcolmnetsec/redis:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -955,7 +955,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/mmguero/redis:7-alpine
+    image: malcolmnetsec/redis:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
