@@ -21,6 +21,8 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
+ENV TINI_VERSION v0.19.0
+
 ARG OPENSEARCH_LOCAL=true
 ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 
@@ -32,6 +34,8 @@ ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
 ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
+
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
@@ -45,6 +49,7 @@ RUN yum install -y openssl util-linux procps && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
   mkdir -p /var/local/ca-trust && \
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /var/local/ca-trust && \
+  chmod +x /usr/bin/tini && \
   sed -i "s/^\([[:space:]]*\)\([^#].*performance-analyzer-agent-cli\)/\1# \2/" /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*[^#].*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
@@ -55,7 +60,7 @@ ADD shared/bin/service_check_passthrough.sh /usr/local/bin/docker-entrypoint.sh
 
 VOLUME ["/var/local/ca-trust"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
 

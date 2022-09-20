@@ -64,6 +64,8 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
+ENV TINI_VERSION v0.19.0
+
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
 ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse,beats-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
@@ -80,6 +82,7 @@ ENV LS_JAVA_HOME=/usr/share/logstash/jdk
 USER root
 
 COPY --from=build /opt/logstash-filter-fingerprint /opt/logstash-filter-fingerprint
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 RUN yum install -y epel-release && \
     yum upgrade -y && \
@@ -93,6 +96,7 @@ RUN yum install -y epel-release && \
                                        logstash-filter-useragent \
                                        logstash-input-beats logstash-output-elasticsearch && \
     logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-*.gem && \
+    chmod +x /usr/bin/tini && \
     rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -137,7 +141,7 @@ EXPOSE 5044
 EXPOSE 9001
 EXPOSE 9600
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

@@ -105,6 +105,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       python3-zmq \
       supervisor \
       swig \
+      tini \
       vim-tiny \
       zlib1g-dev && \
     pip3 install --no-cache-dir pymisp stix2 taxii2-client dateparser && \
@@ -273,7 +274,7 @@ ENV PUSER_CHOWN "$ZEEK_DIR"
 
 VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

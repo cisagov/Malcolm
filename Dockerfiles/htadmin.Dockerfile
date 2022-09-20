@@ -51,7 +51,8 @@ RUN apt-get -q update && \
       php$PHP_VERSION-fpm \
       php$PHP_VERSION-gd \
       procps \
-      supervisor && \
+      supervisor \
+      tini && \
     ( yes '' | pecl channel-update pecl.php.net ) && \
     ( yes '' | pecl install mcrypt-$MCRYPT_VERSION ) && \
     ln -s -r /usr/lib/php/20??????/*.so /usr/lib/php/$PHP_VERSION/ && \
@@ -84,7 +85,7 @@ ADD htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

@@ -76,7 +76,7 @@ COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \
-    && apt-get -y -q --no-install-recommends install curl netcat \
+    && apt-get -y -q --no-install-recommends install curl netcat tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
     && chmod 755 /usr/local/bin/docker-uid-gid-setup.sh \
@@ -89,7 +89,7 @@ RUN    apt-get -q update \
 
 EXPOSE 5000
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "${APP_HOME}/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "${APP_HOME}/entrypoint.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

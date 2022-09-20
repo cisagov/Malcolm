@@ -24,7 +24,7 @@ ENV TERM xterm
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 
 RUN set -x && \
-   apk --no-cache add bash procps psmisc rsync shadow && \
+   apk --no-cache add bash procps psmisc rsync shadow tini && \
    rsync -a /usr/local/bin/ /usr/bin/ && \
    rsync -a /usr/local/share/ /usr/share/ && \
    rsync -a /usr/local/lib/ /usr/lib/ && \
@@ -35,7 +35,7 @@ RUN set -x && \
 
 USER root
 
-ENTRYPOINT ["/usr/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/docker-entrypoint.sh", "postgres"]
 

@@ -29,7 +29,7 @@ RUN apk update --no-cache && \
 
 WORKDIR /home/${PUSER}
 
-ENTRYPOINT [ "/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh" ]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

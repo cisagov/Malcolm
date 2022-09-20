@@ -73,7 +73,7 @@ if [[ -z "$SERVICE" ]]; then
 fi
 SERVICE_UCASE="$(echo ${SERVICE^^})"
 
-# if disabled wasn't specified on command line, but service was, check environment variables
+# if disabled wasn't specified, but service was, check environment variables
 if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
     DISABLED_VARNAME="${SERVICE_UCASE}_DISABLED"
     if [[ -n "${!DISABLED_VARNAME}" ]] && \
@@ -114,6 +114,8 @@ if [[ -n "$SERVICE" ]]; then
             PORT=9600
         elif [[ "$SERVICE" == "name-map-ui" ]]; then
             PORT=8080
+        elif [[ "$SERVICE" == "netbox" ]]; then
+            PORT=8080
         elif [[ "$SERVICE" == "opensearch" ]]; then
             PORT=9200
         fi
@@ -122,6 +124,8 @@ if [[ -n "$SERVICE" ]]; then
         if [[ "$SERVICE" == "api" ]]; then
             FORMAT=json
         elif [[ "$SERVICE" == "logstash" ]]; then
+            FORMAT=json
+        elif [[ "$SERVICE" == "netbox" ]]; then
             FORMAT=json
         elif [[ "$SERVICE" == "opensearch" ]]; then
             FORMAT=json

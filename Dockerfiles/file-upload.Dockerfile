@@ -66,7 +66,8 @@ RUN apt-get -q update && \
       php$PHP_VERSION \
       php$PHP_VERSION-fpm \
       php$PHP_VERSION-apcu \
-      nginx-light && \
+      nginx-light \
+      tini && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
 
@@ -99,7 +100,7 @@ RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]
 EXPOSE 22 80
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

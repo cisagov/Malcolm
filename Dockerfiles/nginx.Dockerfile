@@ -185,7 +185,7 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap stunnel supervisor tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap stunnel supervisor tini tzdata; \
   update-ca-certificates; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
@@ -206,7 +206,7 @@ ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

@@ -37,7 +37,8 @@ RUN apt-get -q update && \
       psmisc \
       python3 \
       python3-dev \
-      python3-pip && \
+      python3-pip \
+      tini && \
     pip3 install supervisor six && \
     cd /opt && \
     mkdir -p ./freq_server && \
@@ -60,7 +61,7 @@ WORKDIR /opt/freq_server
 
 EXPOSE $FREQ_PORT
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
