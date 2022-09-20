@@ -22,20 +22,25 @@ ENV PUSER_CHOWN "/run/postgresql;/var/lib/postgresql"
 ENV TERM xterm
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
-RUN set -x && \
-   apk --no-cache add bash procps psmisc rsync shadow tini && \
-   rsync -a /usr/local/bin/ /usr/bin/ && \
-   rsync -a /usr/local/share/ /usr/share/ && \
-   rsync -a /usr/local/lib/ /usr/lib/ && \
-   rm -rf /usr/local/bin /usr/local/share /usr/local/lib && \
-   ln -s /usr/bin /usr/local/bin && \
-   ln -s /usr/share /usr/local/share && \
-   ln -s /usr/lib /usr/local/lib
+RUN apk update --no-cache && \
+    apk upgrade --no-cache && \
+    apk add --no-cache bash procps psmisc shadow tini && \
+    apk add --no-cache --virtual .build-deps rsync && \
+    rsync -a /usr/local/bin/ /usr/bin/ && \
+    rsync -a /usr/local/share/ /usr/share/ && \
+    rsync -a /usr/local/lib/ /usr/lib/ && \
+    rm -rf /usr/local/bin /usr/local/share /usr/local/lib && \
+    ln -s /usr/bin /usr/local/bin && \
+    ln -s /usr/share /usr/local/share && \
+    ln -s /usr/lib /usr/local/lib && \
+    apk del .build-deps
 
 USER root
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/bin/docker-entrypoint.sh", "postgres"]
 

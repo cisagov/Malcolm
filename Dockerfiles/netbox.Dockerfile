@@ -25,9 +25,6 @@ ENV PUSER_PRIV_DROP true
 ARG BASE_PATH=assets
 ENV BASE_PATH $BASE_PATH
 
-ARG NETBOX_DISABLED=false
-ENV NETBOX_DISABLED $NETBOX_DISABLED
-
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
@@ -55,6 +52,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
+COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh"]
 

@@ -265,7 +265,10 @@ x-filebeat-variables: &filebeat-variables
 x-netbox-variables: &netbox-variables
   # Parameters related to NetBox (and supporting tools). Note that other more specific parameters
   #   can also be configured in the env_file files for netbox* services
-  NETBOX_DISABLED : 'true'
+  NETBOX_DISABLED : &netboxdisabled 'true'
+  NETBOX_POSTGRES_DISABLED : *netboxdisabled
+  NETBOX_REDIS_DISABLED : *netboxdisabled
+  NETBOX_REDIS_CACHE_DISABLED : *netboxdisabled
 
 x-common-upload-variables: &common-upload-variables
   # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata

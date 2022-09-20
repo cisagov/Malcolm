@@ -21,6 +21,8 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
@@ -29,7 +31,7 @@ RUN apk update --no-cache && \
 
 WORKDIR /home/${PUSER}
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

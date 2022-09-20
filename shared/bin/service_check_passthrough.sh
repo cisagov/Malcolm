@@ -31,6 +31,7 @@ while getopts 'vds:p:f:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
+      set -x
       ;;
 
     d)
@@ -71,7 +72,7 @@ if [[ -z "$SERVICE" ]]; then
         SERVICE="$(uname -a | awk '{print $2}')"
     fi
 fi
-SERVICE_UCASE="$(echo ${SERVICE^^})"
+SERVICE_UCASE="$(echo ${SERVICE^^} | tr '-' '_')"
 
 # if disabled wasn't specified, but service was, check environment variables
 if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
@@ -154,7 +155,9 @@ EOF
 EOF
     fi # json vs http
 
-    if command -v python3 >/dev/null 2>&1; then
+    if command -v goStatic >/dev/null 2>&1; then
+        goStatic -path "$(pwd)" -fallback "index.html" -port $PORT
+    elif command -v python3 >/dev/null 2>&1; then
         python3 -m http.server --bind 0.0.0.0 $PORT
     elif command -v python >/dev/null 2>&1; then
         python -m SimpleHTTPServer $PORT

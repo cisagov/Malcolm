@@ -56,7 +56,8 @@ RUN yum install -y openssl util-linux procps && \
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
-ADD shared/bin/service_check_passthrough.sh /usr/local/bin/docker-entrypoint.sh
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/docker-entrypoint.sh
+COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 VOLUME ["/var/local/ca-trust"]
 
