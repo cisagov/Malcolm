@@ -604,6 +604,7 @@ def start():
         eprint("  - PCAP upload (web): https://localhost/upload/")
         eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
         eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
+        eprint("  - NetBox: https://localhost/assets/\n")
         eprint("  - Account management: https://localhost:488/\n")
     else:
         eprint("Malcolm failed to start\n")

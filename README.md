@@ -95,6 +95,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
     - [Alerting](#Alerting)
         + [Email Sender Accounts](#AlertingEmail)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
+    - [Asset Management with NetBox](#NetBox)
     - [API](#API)
         + [Examples](#APIExamples)
 * [Ingesting Third-party Logs](#ThirdPartyLogs)
@@ -222,12 +223,13 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 
 A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to be completely up, depending on the system), the following services will be accessible:
 
-* Arkime: [https://localhost:443](https://localhost:443)
-* OpenSearch Dashboards: [https://localhost/dashboards/](https://localhost/dashboards/) or [https://localhost:5601](https://localhost:5601)
-* Capture File and Log Archive Upload (Web): [https://localhost/upload/](https://localhost/upload/)
-* Capture File and Log Archive Upload (SFTP): `sftp://<username>@127.0.0.1:8022/files`
+* [Arkime](https://arkime.com/): [https://localhost:443](https://localhost:443)
+* [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/): [https://localhost/dashboards/](https://localhost/dashboards/) or [https://localhost:5601](https://localhost:5601)
+* [Capture File and Log Archive Upload (Web)](#Upload): [https://localhost/upload/](https://localhost/upload/)
+* [Capture File and Log Archive Upload (SFTP)](#Upload): `sftp://<username>@127.0.0.1:8022/files`
 * [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
-* Account Management: [https://localhost:488](https://localhost:488)
+* [NetBox](#NetBox): [https://localhost/assets/](https://localhost/assets/)
+* [Account Management](#AuthBasicAccountManagement): [https://localhost:488](https://localhost:488)
 
 ## <a name="Overview"></a>Overview
 
@@ -497,6 +499,7 @@ A minute or so after starting Malcolm, the following services will be accessible
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
+  - NetBox: https://localhost/assets/
   - Account management: https://localhost:488/
 ```
 
@@ -575,6 +578,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `OPENSEARCH_SECONDARY` - if set to `true`, Malcolm will forward logs to a secondary remote OpenSearch instance in addition to the primary (local or remote) OpenSearch instance (default `false`)
 * `OPENSEARCH_SECONDARY_URL` - when forwarding to a secondary remote OpenSearch instance (i.e., `OPENSEARCH_SECONDARY` is `true`) this value specifies the secondary remote instance URL in the format `protocol://host:port`
 * `OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION` - if set to `true`, connections to the secondary remote OpenSearch instance will require full TLS certificate validation (this may fail if using self-signed certificates) (default `false`)
+* `NETBOX_DISABLED` - if set to `true`, Malcolm will **not** start [NetBox](#NetBox) and manage a [NetBox](#NetBox) instance (default `true`)
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 * `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
 * `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy like Traefik, Caddy, etc.)
@@ -1697,6 +1701,15 @@ Naturally, these lookups could produce false positives, so these connections are
 ![](./docs/images/screenshots/dashboards_bestguess.png)
 
 This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](#DockerComposeYml).
+
+### <a name="NetBox"></a>Asset Management with NetBox
+
+Malcolm provides an instance NetBox, an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/assets/](https://localhost/assets/) if you are connecting locally.
+
+Deeper integration between Malcolm and Netbox is a work in progress, with the eventual goal being for Malcolm to automatically create objects in NetBox based on traffic observed and/or enrich its own network traffic metadata based on NetBox inventory.
+
+Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbox), its [documentation](https://docs.netbox.dev/en/stable/) and its [public demo](https://demo.netbox.dev/) for more information.
+
 
 ### <a name="API"></a>API
 
@@ -3951,6 +3964,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
+  - NetBox: https://localhost/assets/  
   - Account management: https://localhost:488/
 
 NAME                           COMMAND                  SERVICE              STATUS               PORTS
