@@ -18,49 +18,6 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 
 ###################################################################################################
-DEFAULT_GROUP_NAMES = (
-    'administrator',
-    'standard',
-)
-
-DEFAULT_PERMISSIONS = {
-    'administrator_permission': {
-        'name': 'administrator_permission',
-        'enabled': True,
-        'groups': ['administrator'],
-        'actions': [
-            'view',
-            'add',
-            'change',
-            'delete',
-        ],
-        'exclude_objects': [],
-    },
-    'standard_permission': {
-        'name': 'standard_permission',
-        'enabled': True,
-        'groups': ['standard'],
-        'actions': [
-            'view',
-            'add',
-            'change',
-            'delete',
-        ],
-        'exclude_objects': [
-            'admin.logentry',
-            'auth.group',
-            'auth.permission',
-            'auth.user',
-            'users.admingroup',
-            'users.adminuser',
-            'users.objectpermission',
-            'users.token',
-            'users.userconfig',
-        ],
-    },
-}
-
-###################################################################################################
 # main
 def main():
     global args
@@ -96,9 +53,9 @@ def main():
         '--url',
         dest='netboxUrl',
         type=str,
-        default=None,
+        default='http://localhost:8080/assets',
         required=True,
-        help="Netbox Base URL",
+        help="NetBox Base URL",
     )
     parser.add_argument(
         '-t',
@@ -107,7 +64,7 @@ def main():
         type=str,
         default=None,
         required=True,
-        help="Netbox API Token",
+        help="NetBox API Token",
     )
     parser.add_argument(
         '-s',
@@ -118,6 +75,22 @@ def main():
         default=[os.getenv('NETBOX_DEFAULT_SITE', 'default')],
         required=False,
         help="Site(s) to create",
+    )
+    parser.add_argument(
+        '--default-group',
+        dest='defaultGroupName',
+        type=str,
+        default=os.getenv('REMOTE_AUTH_DEFAULT_GROUPS', 'standard'),
+        required=False,
+        help="Name of default group for automatic NetBox user creation",
+    )
+    parser.add_argument(
+        '--staff-group',
+        dest='staffGroupName',
+        type=str,
+        default=os.getenv('REMOTE_AUTH_STAFF_GROUPS', 'administrator'),
+        required=False,
+        help="Name of staff group for automatic NetBox user creation",
     )
     try:
         parser.error = parser.exit
@@ -153,6 +126,11 @@ def main():
             time.sleep(5)
 
     ###### GROUPS ################################################################################################
+    DEFAULT_GROUP_NAMES = (
+        args.staffGroupName,
+        args.defaultGroupName,
+    )
+
     # list existing groups
     groupsPreExisting = [x.name for x in nb.users.groups.all()]
     logging.debug(groupsPreExisting)
@@ -166,7 +144,44 @@ def main():
     groupNameIdDict = {x.name: x.id for x in nb.users.groups.all()}
     logging.debug(groupNameIdDict)
 
-    # ###### PERMISSIONS ###########################################################################################
+    ####### PERMISSIONS ###########################################################################################
+    DEFAULT_PERMISSIONS = {
+        f'{args.staffGroupName}_permission': {
+            'name': f'{args.staffGroupName}_permission',
+            'enabled': True,
+            'groups': [args.staffGroupName],
+            'actions': [
+                'view',
+                'add',
+                'change',
+                'delete',
+            ],
+            'exclude_objects': [],
+        },
+        f'{args.defaultGroupName}_permission': {
+            'name': f'{args.defaultGroupName}_permission',
+            'enabled': True,
+            'groups': [args.defaultGroupName],
+            'actions': [
+                'view',
+                'add',
+                'change',
+                'delete',
+            ],
+            'exclude_objects': [
+                'admin.logentry',
+                'auth.group',
+                'auth.permission',
+                'auth.user',
+                'users.admingroup',
+                'users.adminuser',
+                'users.objectpermission',
+                'users.token',
+                'users.userconfig',
+            ],
+        },
+    }
+
     # get all content types (for creating new permissions)
     allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
 
