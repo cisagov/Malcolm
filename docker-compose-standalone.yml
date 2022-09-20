@@ -9,6 +9,8 @@ x-process-variables: &process-variables
   # docker containers will run processes as unprivileged user with UID:GID
   PUID : 1000
   PGID : 1000
+  # for debugging container init via tini (https://github.com/krallin/tini)
+  TINI_VERBOSITY : 1
 
 x-auth-variables: &auth-variables
   # authentication method: encrypted HTTP basic authentication ('true') vs LDAP ('false')
@@ -260,6 +262,22 @@ x-filebeat-variables: &filebeat-variables
   # Tag to append to events sent to the filebeat TCP input listener
   FILEBEAT_TCP_TAG : '_malcolm_beats'
 
+x-netbox-variables: &netbox-variables
+  # Parameters related to NetBox (and supporting tools). Note that other more specific parameters
+  #   can also be configured in the env_file files for netbox* services
+  # The name of the default "site" to be created upon NetBox initialization
+  NETBOX_DEFAULT_SITE : 'Malcolm'
+  # Whether to disable Malcolm's NetBox instance ('true') or not ('false')
+  NETBOX_DISABLED : &netboxdisabled 'true'
+  NETBOX_POSTGRES_DISABLED : *netboxdisabled
+  NETBOX_REDIS_DISABLED : *netboxdisabled
+  NETBOX_REDIS_CACHE_DISABLED : *netboxdisabled
+  # Whether or not to periodically query network traffic metadata and use it to populate NetBox
+  NETBOX_CRON : 'false'
+  # If using the NetBox interface to create API tokens, set this
+  #   (see https://docs.djangoproject.com/en/4.1/ref/settings/#csrf-trusted-origins)
+  # CSRF_TRUSTED_ORIGINS : 'https://malcolm.example.org'
+
 x-common-upload-variables: &common-upload-variables
   # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata
   #   parsed from uploaded PCAP files
@@ -334,7 +352,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   opensearch:
-    image: malcolmnetsec/opensearch:6.3.1
+    image: malcolmnetsec/opensearch:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -377,7 +395,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: malcolmnetsec/dashboards-helper:6.3.1
+    image: malcolmnetsec/dashboards-helper:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -410,7 +428,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: malcolmnetsec/dashboards:6.3.1
+    image: malcolmnetsec/dashboards:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -437,7 +455,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:6.3.1
+    image: malcolmnetsec/logstash-oss:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -484,7 +502,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:6.3.1
+    image: malcolmnetsec/filebeat-oss:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -525,7 +543,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:6.3.1
+    image: malcolmnetsec/arkime:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -567,7 +585,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:6.3.1
+    image: malcolmnetsec/zeek:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -606,7 +624,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: malcolmnetsec/zeek:6.3.1
+    image: malcolmnetsec/zeek:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -638,7 +656,7 @@ services:
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
   suricata:
-    image: malcolmnetsec/suricata:6.3.1
+    image: malcolmnetsec/suricata:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -675,7 +693,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: malcolmnetsec/suricata:6.3.1
+    image: malcolmnetsec/suricata:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -702,7 +720,7 @@ services:
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
   file-monitor:
-    image: malcolmnetsec/file-monitor:6.3.1
+    image: malcolmnetsec/file-monitor:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -729,7 +747,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:6.3.1
+    image: malcolmnetsec/pcap-capture:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -751,7 +769,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:6.3.1
+    image: malcolmnetsec/pcap-monitor:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -779,7 +797,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:6.3.1
+    image: malcolmnetsec/file-upload:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -809,7 +827,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.3.1
+    image: malcolmnetsec/htadmin:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -835,7 +853,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.3.1
+    image: malcolmnetsec/freq:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -858,7 +876,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.3.1
+    image: malcolmnetsec/name-map-ui:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -882,8 +900,115 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  netbox:
+    image: malcolmnetsec/netbox:6.4.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox
+    networks:
+      - default
+    env_file: ./netbox/env/netbox.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox.malcolm.local'
+    depends_on:
+      - netbox-postgres
+      - netbox-redis
+      - netbox-redis-cache
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./netbox/config/configuration:/etc/netbox/config:ro
+      - ./netbox/config/reports:/etc/netbox/reports:ro
+      - ./netbox/config/scripts:/etc/netbox/scripts:ro
+      - ./netbox/config/unit:/etc/unit:ro
+      - ./netbox/media:/opt/netbox/netbox/media:rw
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "http://localhost:8080/assets/api/" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+  netbox-postgres:
+    image: malcolmnetsec/postgresql:6.4.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-postgres
+    networks:
+      - default
+    env_file: ./netbox/env/postgres.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./netbox/postgres:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  netbox-redis:
+    image: malcolmnetsec/redis:6.4.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-redis
+    networks:
+      - default
+    env_file: ./netbox/env/redis.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox-redis.malcolm.local'
+    command:
+      - sh
+      - -c
+      - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./netbox/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "pidof redis-server || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  netbox-redis-cache:
+    image: malcolmnetsec/redis:6.4.0
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-redis-cache
+    networks:
+      - default
+    env_file: ./netbox/env/redis-cache.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
+    command:
+      - sh
+      - -c
+      - redis-server --requirepass $$REDIS_PASSWORD
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pidof redis-server || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
   api:
-    image: malcolmnetsec/api:6.3.1
+    image: malcolmnetsec/api:6.4.0
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -908,7 +1033,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:6.3.1
+    image: malcolmnetsec/nginx-proxy:6.4.0
     restart: "no"
     stdin_open: false
     tty: true

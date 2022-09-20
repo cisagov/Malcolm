@@ -9,6 +9,8 @@ x-process-variables: &process-variables
   # docker containers will run processes as unprivileged user with UID:GID
   PUID : 1000
   PGID : 1000
+  # for debugging container init via tini (https://github.com/krallin/tini)
+  TINI_VERBOSITY : 1
 
 x-auth-variables: &auth-variables
   # authentication method: encrypted HTTP basic authentication ('true') vs LDAP ('false')
@@ -260,6 +262,22 @@ x-filebeat-variables: &filebeat-variables
   # Tag to append to events sent to the filebeat TCP input listener
   FILEBEAT_TCP_TAG : '_malcolm_beats'
 
+x-netbox-variables: &netbox-variables
+  # Parameters related to NetBox (and supporting tools). Note that other more specific parameters
+  #   can also be configured in the env_file files for netbox* services
+  # The name of the default "site" to be created upon NetBox initialization
+  NETBOX_DEFAULT_SITE : 'Malcolm'
+  # Whether to disable Malcolm's NetBox instance ('true') or not ('false')
+  NETBOX_DISABLED : &netboxdisabled 'true'
+  NETBOX_POSTGRES_DISABLED : *netboxdisabled
+  NETBOX_REDIS_DISABLED : *netboxdisabled
+  NETBOX_REDIS_CACHE_DISABLED : *netboxdisabled
+  # Whether or not to periodically query network traffic metadata and use it to populate NetBox
+  NETBOX_CRON : 'false'
+  # If using the NetBox interface to create API tokens, set this
+  #   (see https://docs.djangoproject.com/en/4.1/ref/settings/#csrf-trusted-origins)
+  # CSRF_TRUSTED_ORIGINS : 'https://malcolm.example.org'
+
 x-common-upload-variables: &common-upload-variables
   # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata
   #   parsed from uploaded PCAP files
@@ -337,7 +355,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.3.1
+    image: malcolmnetsec/opensearch:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -383,7 +401,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.3.1
+    image: malcolmnetsec/dashboards-helper:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -419,7 +437,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.3.1
+    image: malcolmnetsec/dashboards:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -449,7 +467,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.3.1
+    image: malcolmnetsec/logstash-oss:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -503,7 +521,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.3.1
+    image: malcolmnetsec/filebeat-oss:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -547,7 +565,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.3.1
+    image: malcolmnetsec/arkime:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -595,7 +613,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.3.1
+    image: malcolmnetsec/zeek:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -638,7 +656,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.3.1
+    image: malcolmnetsec/zeek:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -674,7 +692,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.3.1
+    image: malcolmnetsec/suricata:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -714,7 +732,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.3.1
+    image: malcolmnetsec/suricata:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -744,7 +762,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.3.1
+    image: malcolmnetsec/file-monitor:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -774,7 +792,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.3.1
+    image: malcolmnetsec/pcap-capture:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -799,7 +817,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.3.1
+    image: malcolmnetsec/pcap-monitor:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -830,7 +848,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.3.1
+    image: malcolmnetsec/file-upload:6.4.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -860,7 +878,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.3.1
+    image: malcolmnetsec/htadmin:6.4.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -889,7 +907,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.3.1
+    image: malcolmnetsec/freq:6.4.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -915,7 +933,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.3.1
+    image: malcolmnetsec/name-map-ui:6.4.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -942,8 +960,127 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  netbox:
+    image: malcolmnetsec/netbox:6.4.0
+    build:
+      context: .
+      dockerfile: Dockerfiles/netbox.Dockerfile
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox
+    networks:
+      - default
+    env_file: ./netbox/env/netbox.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox.malcolm.local'
+    depends_on:
+      - netbox-postgres
+      - netbox-redis
+      - netbox-redis-cache
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./netbox/config/configuration:/etc/netbox/config:ro
+      - ./netbox/config/reports:/etc/netbox/reports:ro
+      - ./netbox/config/scripts:/etc/netbox/scripts:ro
+      - ./netbox/config/unit:/etc/unit:ro
+      - ./netbox/media:/opt/netbox/netbox/media:rw
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "http://localhost:8080/assets/api/" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
+  netbox-postgres:
+    image: malcolmnetsec/postgresql:6.4.0
+    build:
+      context: .
+      dockerfile: Dockerfiles/postgresql.Dockerfile
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-postgres
+    networks:
+      - default
+    env_file: ./netbox/env/postgres.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./netbox/postgres:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  netbox-redis:
+    image: malcolmnetsec/redis:6.4.0
+    build:
+      context: .
+      dockerfile: Dockerfiles/redis.Dockerfile
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-redis
+    networks:
+      - default
+    env_file: ./netbox/env/redis.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox-redis.malcolm.local'
+    command:
+      - sh
+      - -c
+      - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./netbox/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "pidof redis-server || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  netbox-redis-cache:
+    image: malcolmnetsec/redis:6.4.0
+    build:
+      context: .
+      dockerfile: Dockerfiles/redis.Dockerfile
+    restart: "no"
+    stdin_open: false
+    tty: true
+    hostname: netbox-redis-cache
+    networks:
+      - default
+    env_file: ./netbox/env/redis-cache.env
+    environment:
+      << : *process-variables
+      << : *ssl-variables
+      << : *netbox-variables
+      VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
+    command:
+      - sh
+      - -c
+      - redis-server --requirepass $$REDIS_PASSWORD
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pidof redis-server || exit 1" ]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
   api:
-    image: malcolmnetsec/api:6.3.1
+    image: malcolmnetsec/api:6.4.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -974,7 +1111,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.3.1
+    image: malcolmnetsec/nginx-proxy:6.4.0
     restart: "no"
     stdin_open: false
     tty: true

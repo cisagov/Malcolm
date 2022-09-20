@@ -62,7 +62,11 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV TINI_VERSION v0.19.0
+
 USER root
+
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 RUN yum install -y epel-release && \
         yum upgrade -y && \
@@ -74,7 +78,8 @@ RUN yum install -y epel-release && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
       mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    chmod +x /usr/bin/tini
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
@@ -131,7 +136,7 @@ ENV FILEBEAT_ZEEK_DIR "/zeek/"
 
 VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

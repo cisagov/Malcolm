@@ -89,6 +89,8 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
+ENV TINI_VERSION v0.19.0
+
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL="true"
 ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
@@ -96,7 +98,6 @@ ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
 ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG NODE_OPTIONS="--max_old_space_size=4096"
-
 
 ENV CREATE_OS_ARKIME_SESSION_INDEX $CREATE_OS_ARKIME_SESSION_INDEX
 ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
@@ -111,6 +112,7 @@ ENV NODE_OPTIONS $NODE_OPTIONS
 USER root
 
 COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 RUN yum upgrade -y && \
     yum install -y curl psmisc util-linux openssl python3 zip unzip && \
@@ -120,6 +122,7 @@ RUN yum upgrade -y && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards/plugins/* && \
+    chmod +x /usr/bin/tini && \
     yum clean all && \
     rm -rf /var/cache/yum
 
@@ -142,7 +145,7 @@ ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/
 ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
 
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/share/opensearch-dashboards/opensearch-dashboards-docker-entrypoint.sh"]
 

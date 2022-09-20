@@ -27,3 +27,6 @@ scripts
 !scripts/malcolm_common.py
 zeek-logs
 suricata-logs
+netbox/netbox/media
+netbox/netbox/postgres
+netbox/netbox/redis

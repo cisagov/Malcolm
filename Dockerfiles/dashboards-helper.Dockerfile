@@ -69,7 +69,7 @@ ADD scripts/malcolm_common.py /data/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm shadow jq && \
+    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm shadow jq tini && \
     npm install -g http-server && \
     pip3 install supervisor humanfriendly requests && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
@@ -97,7 +97,7 @@ RUN apk update --no-cache && \
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

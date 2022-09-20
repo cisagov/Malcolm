@@ -178,6 +178,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       supervisor \
       vim-tiny \
       wget \
+      tini \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
     pip3 install --no-cache-dir beautifulsoup4 pyzmq && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
@@ -231,7 +232,7 @@ ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"
 EXPOSE 8000 8005 8081
 WORKDIR $ARKIME_DIR
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/opt/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/opt/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

@@ -69,7 +69,8 @@ RUN apt-get -q update && \
       procps \
       psmisc \
       supervisor \
-      tcpdump && \
+      tcpdump \
+      tini && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
@@ -87,7 +88,7 @@ RUN apt-get -q update && \
 
 WORKDIR "$PCAP_PATH"
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/local/bin/supervisor.sh"]
 

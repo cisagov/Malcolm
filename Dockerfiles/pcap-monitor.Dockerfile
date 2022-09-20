@@ -55,6 +55,7 @@ RUN apt-get -q update && \
       python3-setuptools \
       python3-wheel \
       supervisor \
+      tini \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -71,7 +72,7 @@ ADD scripts/malcolm_common.py /usr/local/bin/
 
 EXPOSE 30441
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

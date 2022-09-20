@@ -119,6 +119,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       libtool \
       make \
       pkg-config \
+      tini \
       unzip && \
     apt-get  -y -q install \
       inotify-tools \
@@ -224,7 +225,7 @@ VOLUME ["$YARA_RULES_SRC_DIR"]
 EXPOSE 3310
 EXPOSE $EXTRACTED_FILE_HTTP_SERVER_PORT
 
-ENTRYPOINT ["/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
