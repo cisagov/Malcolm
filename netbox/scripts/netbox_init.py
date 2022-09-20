@@ -7,6 +7,7 @@ import logging
 import os
 import pynetbox
 import sys
+import time
 
 from slugify import slugify
 
@@ -70,7 +71,26 @@ def main():
         add_help=False,
         usage='{} <arguments>'.format(script_name),
     )
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=1,
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
+    )
+    parser.add_argument(
+        '--wait',
+        dest='wait',
+        action='store_true',
+        help='Wait for connection first',
+    )
+    parser.add_argument(
+        '--no-wait',
+        dest='wait',
+        action='store_false',
+        help='Do not wait for connection (error if connection fails)',
+    )
+    parser.set_defaults(wait=True)
     parser.add_argument(
         '-u',
         '--url',
@@ -95,7 +115,7 @@ def main():
         dest='netboxSites',
         nargs='*',
         type=str,
-        default=[],
+        default=[os.getenv('NETBOX_DEFAULT_SITE', 'default')],
         required=False,
         help="Site(s) to create",
     )
@@ -121,6 +141,16 @@ def main():
         args.netboxUrl,
         token=args.netboxToken,
     )
+
+    # wait for a good connection
+    while args.wait:
+        try:
+            sitesConnTest = [x.name for x in nb.dcim.sites.all()]
+            break
+        except Exception as e:
+            logging.info(f"{type(e).__name__}: {e}")
+            logging.debug("retrying in a few seconds...")
+            time.sleep(5)
 
     ###### GROUPS ################################################################################################
     # list existing groups

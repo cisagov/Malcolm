@@ -23,7 +23,10 @@ ENV PGROUP "boxer"
 ENV PUSER_PRIV_DROP true
 
 ARG BASE_PATH=assets
+ARG NETBOX_DEFAULT_SITE=Malcolm
+
 ENV BASE_PATH $BASE_PATH
+ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -41,7 +44,7 @@ RUN apt-get -q update && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
-    mkdir -p /opt/unit /etc/supervisor.d && \
+    mkdir -p /opt/unit && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
     if [ -n "${BASE_PATH}" ] && [ "${BASE_PATH}" != "netbox" ]; then \
         mkdir /opt/netbox/netbox/$BASE_PATH && \
