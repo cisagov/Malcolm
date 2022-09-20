@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - CyberChef
-Exec=/opt/firefox/firefox https://localhost/cyberchef/
+Exec=/opt/firefox/firefox https://localhost/cyberchef.html
 Terminal=false
 X-MultipleArgs=false
 Type=Application

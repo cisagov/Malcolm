@@ -56,6 +56,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfiles/api.Dockerfile
+          file: ./Dockerfiles/postgresql.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/api:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/postgresql:${{ steps.extract_branch.outputs.branch }}

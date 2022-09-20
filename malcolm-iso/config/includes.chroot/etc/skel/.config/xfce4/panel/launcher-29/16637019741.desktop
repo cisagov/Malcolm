@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Malcolm - NetBox
+Exec=/opt/firefox/firefox https://localhost/assets/
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=network-workgroup
+Categories=Network;
+StartupWMClass=Firefox
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-netbox.desktop
