@@ -96,6 +96,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
         + [Email Sender Accounts](#AlertingEmail)
     - ["Best Guess" Fingerprinting for ICS Protocols](#ICSBestGuess)
     - [Asset Management with NetBox](#NetBox)
+    - [CyberChef](#CyberChef)
     - [API](#API)
         + [Examples](#APIExamples)
 * [Ingesting Third-party Logs](#ThirdPartyLogs)
@@ -1704,12 +1705,17 @@ This feature is disabled by default, but it can be enabled by clearing (setting 
 
 ### <a name="NetBox"></a>Asset Management with NetBox
 
-Malcolm provides an instance NetBox, an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/assets/](https://localhost/assets/) if you are connecting locally.
+Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/assets/](https://localhost/assets/) if you are connecting locally.
 
 Deeper integration between Malcolm and Netbox is a work in progress, with the eventual goal being for Malcolm to automatically create objects in NetBox based on traffic observed and/or enrich its own network traffic metadata based on NetBox inventory.
 
 Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbox), its [documentation](https://docs.netbox.dev/en/stable/) and its [public demo](https://demo.netbox.dev/) for more information.
 
+### <a name="CyberChef"></a>CyberChef
+
+Malcolm provides an instance of [CyberChef](https://github.com/gchq/CyberChef), the "Cyber Swiss Army Knife - a web app for encryption, encoding, compression and data analysis." CyberChef is available at at [https://localhost/cyberchef.html](https://localhost/cyberchef.html) if you are connecting locally.
+
+Arkime's [Sessions](#ArkimeSessions) view has built-in CyberChef integration for Arkime sessions with full PCAP payloads available: expanding a session and opening the **Packet Options** drop-down menu in its payload section will provide options for **Open src packets with CyberChef** and **Open dst packets with CyberChef**.
 
 ### <a name="API"></a>API
 
