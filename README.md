@@ -304,6 +304,8 @@ Malcolm leverages the following excellent open source tools, among others.
     * Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
+![Malcolm Components](./docs/images/malcolm_components.png)
+
 ## <a name="Protocols"></a>Supported Protocols
 
 Malcolm uses [Zeek](https://docs.zeek.org/en/stable/script-reference/proto-analyzers.html) and [Arkime](https://github.com/arkime/arkime/tree/master/capture/parsers) to analyze network traffic. These tools provide varying degrees of visibility into traffic transmitted over the following network protocols:
