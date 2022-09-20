@@ -265,11 +265,16 @@ x-filebeat-variables: &filebeat-variables
 x-netbox-variables: &netbox-variables
   # Parameters related to NetBox (and supporting tools). Note that other more specific parameters
   #   can also be configured in the env_file files for netbox* services
+  # The name of the default "site" to be created upon NetBox initialization
   NETBOX_DEFAULT_SITE : 'Malcolm'
+  # Whether to disable Malcolm's NetBox instance ('true') or not ('false')
   NETBOX_DISABLED : &netboxdisabled 'true'
   NETBOX_POSTGRES_DISABLED : *netboxdisabled
   NETBOX_REDIS_DISABLED : *netboxdisabled
   NETBOX_REDIS_CACHE_DISABLED : *netboxdisabled
+  # If using the NetBox interface to create API tokens, set this
+  #   (see https://docs.djangoproject.com/en/4.1/ref/settings/#csrf-trusted-origins)
+  # CSRF_TRUSTED_ORIGINS : 'https://malcolm.example.org'
 
 x-common-upload-variables: &common-upload-variables
   # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata

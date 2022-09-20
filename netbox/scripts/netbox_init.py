@@ -131,18 +131,21 @@ def main():
         args.defaultGroupName,
     )
 
-    # list existing groups
-    groupsPreExisting = [x.name for x in nb.users.groups.all()]
-    logging.debug(groupsPreExisting)
+    try:
+        # list existing groups
+        groupsPreExisting = [x.name for x in nb.users.groups.all()]
+        logging.debug(groupsPreExisting)
 
-    # create groups that don't already exist
-    for groupName in DEFAULT_GROUP_NAMES:
-        if groupName not in groupsPreExisting:
-            nb.users.groups.create({'name': groupName})
+        # create groups that don't already exist
+        for groupName in DEFAULT_GROUP_NAMES:
+            if groupName not in groupsPreExisting:
+                nb.users.groups.create({'name': groupName})
 
-    # get existing groups into name->id dictionary
-    groupNameIdDict = {x.name: x.id for x in nb.users.groups.all()}
-    logging.debug(groupNameIdDict)
+        # get existing groups into name->id dictionary
+        groupNameIdDict = {x.name: x.id for x in nb.users.groups.all()}
+        logging.debug(groupNameIdDict)
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing groups: {e}")
 
     ####### PERMISSIONS ###########################################################################################
     DEFAULT_PERMISSIONS = {
@@ -182,39 +185,47 @@ def main():
         },
     }
 
-    # get all content types (for creating new permissions)
-    allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
+    try:
+        # get all content types (for creating new permissions)
+        allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
 
-    # get existing permissions
-    permsPreExisting = [x.name for x in nb.users.permissions.all()]
-    logging.debug(permsPreExisting)
+        # get existing permissions
+        permsPreExisting = [x.name for x in nb.users.permissions.all()]
+        logging.debug(permsPreExisting)
 
-    # create permissions that don't already exist
-    for permName, permConfig in DEFAULT_PERMISSIONS.items():
-        if 'name' in permConfig and permConfig['name'] not in permsPreExisting:
-            permConfig['groups'] = [groupNameIdDict[x] for x in permConfig['groups']]
-            permConfig['object_types'] = [ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']]
-            permConfig.pop('exclude_objects', None)
-            nb.users.permissions.create(permConfig)
+        # create permissions that don't already exist
+        for permName, permConfig in DEFAULT_PERMISSIONS.items():
+            if 'name' in permConfig and permConfig['name'] not in permsPreExisting:
+                permConfig['groups'] = [groupNameIdDict[x] for x in permConfig['groups']]
+                permConfig['object_types'] = [
+                    ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']
+                ]
+                permConfig.pop('exclude_objects', None)
+                nb.users.permissions.create(permConfig)
 
-    logging.debug([x.name for x in nb.users.permissions.all()])
+        logging.debug([x.name for x in nb.users.permissions.all()])
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing permissions: {e}")
 
     # ###### PERMISSIONS ###########################################################################################
     # get existing sites
-    sitesPreExisting = [x.name for x in nb.dcim.sites.all()]
-    logging.debug(sitesPreExisting)
+    try:
+        sitesPreExisting = [x.name for x in nb.dcim.sites.all()]
+        logging.debug(sitesPreExisting)
 
-    # create sites that don't already exist
-    for siteName in args.netboxSites:
-        if siteName not in sitesPreExisting:
-            nb.dcim.sites.create(
-                {
-                    "name": siteName,
-                    "slug": slugify(siteName),
-                },
-            )
+        # create sites that don't already exist
+        for siteName in args.netboxSites:
+            if siteName not in sitesPreExisting:
+                nb.dcim.sites.create(
+                    {
+                        "name": siteName,
+                        "slug": slugify(siteName),
+                    },
+                )
 
-    logging.debug([f'{x.name} ({x.slug})' for x in nb.dcim.sites.all()])
+        logging.debug([f'{x.name} ({x.slug})' for x in nb.dcim.sites.all()])
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing sites: {e}")
 
 
 ###################################################################################################
