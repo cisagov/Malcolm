@@ -299,7 +299,7 @@ def logs():
       | eshealth
       | esindices/list
       | executing\s+attempt_(transition|set_replica_count)\s+for
-      | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+      | GET\s+/(assets/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
       | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
