@@ -67,6 +67,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
+  mkdir $VERBOSE -p "$DESTDIR/netbox/env/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/media/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/postgres/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/redis/"
@@ -98,6 +99,8 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
+  cp $VERBOSE -r ./netbox/config/ "$DESTDIR/netbox/"
+  cp $VERBOSE ./netbox/env/netbox.env.example "$DESTDIR/netbox/env/"
   pushd "$DESTDIR" >/dev/null 2>&1
   touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
   chmod 600 ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc

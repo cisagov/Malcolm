@@ -96,6 +96,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/htadmin/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/maps/"
+  mkdir -p "$MALCOLM_DEST_DIR/netbox/env/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/media/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/postgres/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/redis/"
@@ -135,6 +136,9 @@ if [ -d "$WORKDIR" ]; then
   cp ./README.md "$MALCOLM_DEST_DIR/"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
+  cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
+  cp ./netbox/env/netbox.env.example "$MALCOLM_DEST_DIR/netbox/env/"
+
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
 
