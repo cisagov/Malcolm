@@ -580,6 +580,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `OPENSEARCH_SECONDARY_URL` - when forwarding to a secondary remote OpenSearch instance (i.e., `OPENSEARCH_SECONDARY` is `true`) this value specifies the secondary remote instance URL in the format `protocol://host:port`
 * `OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION` - if set to `true`, connections to the secondary remote OpenSearch instance will require full TLS certificate validation (this may fail if using self-signed certificates) (default `false`)
 * `NETBOX_DISABLED` - if set to `true`, Malcolm will **not** start [NetBox](#NetBox) and manage a [NetBox](#NetBox) instance (default `true`)
+* `NETBOX_CRON` - if set to `true`, network traffic metadata will periodically be queried and used to populate Malcolm's [NetBox](#NetBox) instance
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication
 * `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
 * `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy like Traefik, Caddy, etc.)
@@ -1707,7 +1708,7 @@ This feature is disabled by default, but it can be enabled by clearing (setting 
 
 Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/assets/](https://localhost/assets/) if you are connecting locally.
 
-Deeper integration between Malcolm and Netbox is a work in progress, with the eventual goal being for Malcolm to automatically create objects in NetBox based on traffic observed and/or enrich its own network traffic metadata based on NetBox inventory.
+The design of a potentially deeper integration between Malcolm and Netbox is a work in progress. The purpose of an asset management system is to document the intended state of a network: were Malcolm to actively and agressively populate NetBox with the live network state, a network configuration fault could result in an incorrect documented configuration. The Malcolm development team is investigating what data, if any, should automatically flow to NetBox based on traffic observed (enabled via the `NETBOX_CRON` [environment variable in `docker-compose.yml`](#DockerComposeYml)), and what NetBox inventory data could be used, if any, to enrich Malcolm's network traffic metadata.
 
 Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbox), its [documentation](https://docs.netbox.dev/en/stable/) and its [public demo](https://demo.netbox.dev/) for more information.
 

@@ -272,6 +272,8 @@ x-netbox-variables: &netbox-variables
   NETBOX_POSTGRES_DISABLED : *netboxdisabled
   NETBOX_REDIS_DISABLED : *netboxdisabled
   NETBOX_REDIS_CACHE_DISABLED : *netboxdisabled
+  # Whether or not to periodically query network traffic metadata and use it to populate NetBox
+  NETBOX_CRON : 'false'
   # If using the NetBox interface to create API tokens, set this
   #   (see https://docs.djangoproject.com/en/4.1/ref/settings/#csrf-trusted-origins)
   # CSRF_TRUSTED_ORIGINS : 'https://malcolm.example.org'

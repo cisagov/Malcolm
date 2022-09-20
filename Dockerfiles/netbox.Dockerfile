@@ -22,11 +22,19 @@ ENV PUSER "boxer"
 ENV PGROUP "boxer"
 ENV PUSER_PRIV_DROP true
 
+ENV SUPERCRONIC_VERSION "0.2.1"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
+ENV SUPERCRONIC "supercronic-linux-amd64"
+ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
+ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
 ARG BASE_PATH=assets
 ARG NETBOX_DEFAULT_SITE=Malcolm
+ARG NETBOX_CRON=false
 
 ENV BASE_PATH $BASE_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
+ENV NETBOX_CRON $NETBOX_CRON
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -38,6 +46,12 @@ RUN apt-get -q update && \
       python3-slugify \
       supervisor \
       tini && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+      chmod +x "$SUPERCRONIC" && \
+      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+      touch "${SUPERCRONIC_CRONTAB}" && \
     apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
