@@ -171,6 +171,9 @@ Pulling freq              ... done
 Pulling htadmin           ... done
 Pulling logstash          ... done
 Pulling name-map-ui       ... done
+Pulling netbox            ... done
+Pulling netbox-postgresql ... done
+Pulling netbox-redis      ... done
 Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
@@ -188,17 +191,20 @@ malcolmnetsec/api                                              6.4.0           x
 malcolmnetsec/arkime                                           6.4.0           xxxxxxxxxxxx   3 days ago   816MB
 malcolmnetsec/dashboards                                       6.4.0           xxxxxxxxxxxx   3 days ago   1.02GB
 malcolmnetsec/dashboards-helper                                6.4.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.4.0           xxxxxxxxxxxx   3 days ago   624MB
 malcolmnetsec/file-monitor                                     6.4.0           xxxxxxxxxxxx   3 days ago   588MB
 malcolmnetsec/file-upload                                      6.4.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/filebeat-oss                                     6.4.0           xxxxxxxxxxxx   3 days ago   624MB
 malcolmnetsec/freq                                             6.4.0           xxxxxxxxxxxx   3 days ago   132MB
 malcolmnetsec/htadmin                                          6.4.0           xxxxxxxxxxxx   3 days ago   242MB
 malcolmnetsec/logstash-oss                                     6.4.0           xxxxxxxxxxxx   3 days ago   1.35GB
 malcolmnetsec/name-map-ui                                      6.4.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/netbox                                           6.4.0           xxxxxxxxxxxx   3 days ago   1.01GB
 malcolmnetsec/nginx-proxy                                      6.4.0           xxxxxxxxxxxx   3 days ago   121MB
 malcolmnetsec/opensearch                                       6.4.0           xxxxxxxxxxxx   3 days ago   1.17GB
 malcolmnetsec/pcap-capture                                     6.4.0           xxxxxxxxxxxx   3 days ago   121MB
 malcolmnetsec/pcap-monitor                                     6.4.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/postgresql                                       6.4.0           xxxxxxxxxxxx   3 days ago   268MB
+malcolmnetsec/redis                                            6.4.0           xxxxxxxxxxxx   3 days ago   34.2MB
 malcolmnetsec/suricata                                         6.4.0           xxxxxxxxxxxx   3 days ago   278MB
 malcolmnetsec/zeek                                             6.4.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
@@ -424,10 +430,13 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/htadmin` (based on `debian:11-slim`)
 * `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
 * `malcolmnetsec/name-map-ui` (based on `alpine:3.16`)
+* `malcolmnetsec/netbox` (based on `netboxcommunity/netbox:latest`)
 * `malcolmnetsec/nginx-proxy` (based on `alpine:3.16`)
 * `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
 * `malcolmnetsec/pcap-capture` (based on `debian:11-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:11-slim`)
+* `malcolmnetsec/postgresql` (based on `postgres:14-alpine`)
+* `malcolmnetsec/redis` (based on `redis:7-alpine`)
 * `malcolmnetsec/suricata` (based on `debian:11-slim`)
 * `malcolmnetsec/zeek` (based on `debian:11-slim`)
 
@@ -458,6 +467,8 @@ Store username/password for primary remote OpenSearch instance? (y/N): n
 Store username/password for secondary remote OpenSearch instance? (y/N): n
 
 Store username/password for email alert sender account? (y/N): n
+
+(Re)generate internal passwords for NetBox (Y/n): y
 
 Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
 
@@ -1669,6 +1680,8 @@ Email account username: analyst@example.org
 analyst@example.org password: 
 analyst@example.org password (again): 
 Email alert sender account variables stored: opensearch.alerting.destination.email.destination_alpha.password, opensearch.alerting.destination.email.destination_alpha.username
+
+(Re)generate internal passwords for NetBox (Y/n): n
 ```
 
 This action should only be performed while Malcolm is [stopped](#StopAndRestart): otherwise the credentials will not be stored correctly.
@@ -3876,6 +3889,8 @@ Store username/password for primary remote OpenSearch instance? (y/N): n
 Store username/password for secondary remote OpenSearch instance? (y/N): n
 
 Store username/password for email alert sender account? (y/N): n
+
+(Re)generate internal passwords for NetBox (Y/n): y
 ```
 
 For now, rather than [build Malcolm from scratch](#Build), we'll pull images from [Docker Hub](https://hub.docker.com/u/malcolmnetsec):
@@ -3891,6 +3906,9 @@ Pulling freq              ... done
 Pulling htadmin           ... done
 Pulling logstash          ... done
 Pulling name-map-ui       ... done
+Pulling netbox            ... done
+Pulling netbox-postgresql ... done
+Pulling netbox-redis      ... done
 Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
@@ -3905,17 +3923,20 @@ malcolmnetsec/api                                              6.4.0           x
 malcolmnetsec/arkime                                           6.4.0           xxxxxxxxxxxx   3 days ago   816MB
 malcolmnetsec/dashboards                                       6.4.0           xxxxxxxxxxxx   3 days ago   1.02GB
 malcolmnetsec/dashboards-helper                                6.4.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/filebeat-oss                                     6.4.0           xxxxxxxxxxxx   3 days ago   624MB
 malcolmnetsec/file-monitor                                     6.4.0           xxxxxxxxxxxx   3 days ago   588MB
 malcolmnetsec/file-upload                                      6.4.0           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/filebeat-oss                                     6.4.0           xxxxxxxxxxxx   3 days ago   624MB
 malcolmnetsec/freq                                             6.4.0           xxxxxxxxxxxx   3 days ago   132MB
 malcolmnetsec/htadmin                                          6.4.0           xxxxxxxxxxxx   3 days ago   242MB
 malcolmnetsec/logstash-oss                                     6.4.0           xxxxxxxxxxxx   3 days ago   1.35GB
 malcolmnetsec/name-map-ui                                      6.4.0           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/netbox                                           6.4.0           xxxxxxxxxxxx   3 days ago   1.01GB
 malcolmnetsec/nginx-proxy                                      6.4.0           xxxxxxxxxxxx   3 days ago   121MB
 malcolmnetsec/opensearch                                       6.4.0           xxxxxxxxxxxx   3 days ago   1.17GB
 malcolmnetsec/pcap-capture                                     6.4.0           xxxxxxxxxxxx   3 days ago   121MB
 malcolmnetsec/pcap-monitor                                     6.4.0           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/postgresql                                       6.4.0           xxxxxxxxxxxx   3 days ago   268MB
+malcolmnetsec/redis                                            6.4.0           xxxxxxxxxxxx   3 days ago   34.2MB
 malcolmnetsec/suricata                                         6.4.0           xxxxxxxxxxxx   3 days ago   278MB
 malcolmnetsec/zeek                                             6.4.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
@@ -3932,26 +3953,30 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - Account management: https://localhost:488/
 
-NAME                          COMMAND                  SERVICE             STATUS               PORTS
-malcolm-api-1                 "/usr/local/bin/dock…"   api                 running (starting)   …
-malcolm-arkime-1              "/usr/local/bin/dock…"   arkime              running (starting)   …
-malcolm-dashboards-1          "/usr/local/bin/dock…"   dashboards          running (starting)   …
-malcolm-dashboards-helper-1   "/usr/local/bin/dock…"   dashboards-helper   running (starting)   …
-malcolm-file-monitor-1        "/usr/local/bin/dock…"   file-monitor        running (starting)   …
-malcolm-filebeat-1            "/usr/local/bin/dock…"   filebeat            running (starting)   …
-malcolm-freq-1                "/usr/local/bin/dock…"   freq                running (starting)   …
-malcolm-htadmin-1             "/usr/local/bin/dock…"   htadmin             running (starting)   …
-malcolm-logstash-1            "/usr/local/bin/dock…"   logstash            running (starting)   …
-malcolm-name-map-ui-1         "/usr/local/bin/dock…"   name-map-ui         running (starting)   …
-malcolm-nginx-proxy-1         "/usr/local/bin/dock…"   nginx-proxy         running (starting)   …
-malcolm-opensearch-1          "/usr/local/bin/dock…"   opensearch          running (starting)   …
-malcolm-pcap-capture-1        "/usr/local/bin/dock…"   pcap-capture        running              …
-malcolm-pcap-monitor-1        "/usr/local/bin/dock…"   pcap-monitor        running (starting)   …
-malcolm-suricata-1            "/usr/local/bin/dock…"   suricata            running (starting)   …
-malcolm-suricata-live-1       "/usr/local/bin/dock…"   suricata-live       running              …
-malcolm-upload-1              "/usr/local/bin/dock…"   upload              running (starting)   …
-malcolm-zeek-1                "/usr/local/bin/dock…"   zeek                running (starting)   …
-malcolm-zeek-live-1           "/usr/local/bin/dock…"   zeek-live           running              …
+NAME                           COMMAND                  SERVICE              STATUS               PORTS
+malcolm-api-1                  "/usr/local/bin/dock…"   api                  running (starting)   …
+malcolm-arkime-1               "/usr/local/bin/dock…"   arkime               running (starting)   …
+malcolm-dashboards-1           "/usr/local/bin/dock…"   dashboards           running (starting)   …
+malcolm-dashboards-helper-1    "/usr/local/bin/dock…"   dashboards-helper    running (starting)   …
+malcolm-file-monitor-1         "/usr/local/bin/dock…"   file-monitor         running (starting)   …
+malcolm-filebeat-1             "/usr/local/bin/dock…"   filebeat             running (starting)   …
+malcolm-freq-1                 "/usr/local/bin/dock…"   freq                 running (starting)   …
+malcolm-htadmin-1              "/usr/local/bin/dock…"   htadmin              running (starting)   …
+malcolm-logstash-1             "/usr/local/bin/dock…"   logstash             running (starting)   …
+malcolm-name-map-ui-1          "/usr/local/bin/dock…"   name-map-ui          running (starting)   …
+malcolm-netbox-1               "/usr/bin/tini -- /u…"   netbox               running (starting)   …
+malcolm-netbox-postgres-1      "/usr/bin/docker-uid…"   netbox-postgres      running (starting)   …
+malcolm-netbox-redis-1         "/sbin/tini -- /usr/…"   netbox-redis         running (starting)   …
+malcolm-netbox-redis-cache-1   "/sbin/tini -- /usr/…"   netbox-redis-cache   running (starting)   …
+malcolm-nginx-proxy-1          "/usr/local/bin/dock…"   nginx-proxy          running (starting)   …
+malcolm-opensearch-1           "/usr/local/bin/dock…"   opensearch           running (starting)   …
+malcolm-pcap-capture-1         "/usr/local/bin/dock…"   pcap-capture         running              …
+malcolm-pcap-monitor-1         "/usr/local/bin/dock…"   pcap-monitor         running (starting)   …
+malcolm-suricata-1             "/usr/local/bin/dock…"   suricata             running (starting)   …
+malcolm-suricata-live-1        "/usr/local/bin/dock…"   suricata-live        running              …
+malcolm-upload-1               "/usr/local/bin/dock…"   upload               running (starting)   …
+malcolm-zeek-1                 "/usr/local/bin/dock…"   zeek                 running (starting)   …
+malcolm-zeek-live-1            "/usr/local/bin/dock…"   zeek-live            running              …
 …
 ```
 

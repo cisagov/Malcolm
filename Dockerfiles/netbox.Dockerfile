@@ -25,33 +25,31 @@ ENV PUSER_PRIV_DROP true
 ARG BASE_PATH=assets
 ENV BASE_PATH $BASE_PATH
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=644 ./netbox/supervisord.conf /etc/supervisord.conf
-
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
-      iproute2 \
-      iputils-ping \
       procps \
       psmisc \
       python3-psycopg2 \
+      python3-pynetbox \
+      python3-slugify \
       supervisor \
-      tini \
-      vim-tiny && \
+      tini && \
     apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    chmod 755 /usr/local/bin/docker-uid-gid-setup.sh && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
-    mkdir -p /opt/unit && \
+    mkdir -p /opt/unit /etc/supervisor.d && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
     if [ -n "${BASE_PATH}" ] && [ "${BASE_PATH}" != "netbox" ]; then \
         mkdir /opt/netbox/netbox/$BASE_PATH && \
         mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static; \
     fi
+
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=644 ./netbox/supervisord.conf /etc/supervisord.conf
 
 ENTRYPOINT [ "/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh" ]
 
