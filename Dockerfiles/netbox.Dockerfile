@@ -49,7 +49,8 @@ RUN apt-get -q update && \
     fi
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=644 ./netbox/supervisord.conf /etc/supervisord.conf
+COPY --chmod=755 netbox/scripts/* /usr/local/bin/
+COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 
 ENTRYPOINT [ "/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh" ]
 
