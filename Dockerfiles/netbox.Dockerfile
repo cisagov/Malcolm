@@ -28,11 +28,10 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ARG BASE_PATH=assets
 ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=false
 
-ENV BASE_PATH $BASE_PATH
+ENV BASE_PATH netbox
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
 
@@ -60,15 +59,14 @@ RUN apt-get -q update && \
     usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
-    if [ -n "${BASE_PATH}" ] && [ "${BASE_PATH}" != "netbox" ]; then \
-        mkdir /opt/netbox/netbox/$BASE_PATH && \
-        mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static; \
-    fi
+    mkdir -p /opt/netbox/netbox/$BASE_PATH && \
+    mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
+COPY --chmod=644 netbox/config/unit/nginx-unit.json /etc/unit/nginx-unit.json
 COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh"]

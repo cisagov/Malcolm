@@ -53,7 +53,7 @@ def main():
         '--url',
         dest='netboxUrl',
         type=str,
-        default='http://localhost:8080/assets',
+        default='http://localhost:8080/netbox',
         required=True,
         help="NetBox Base URL",
     )

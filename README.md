@@ -229,7 +229,7 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * [Capture File and Log Archive Upload (Web)](#Upload): [https://localhost/upload/](https://localhost/upload/)
 * [Capture File and Log Archive Upload (SFTP)](#Upload): `sftp://<username>@127.0.0.1:8022/files`
 * [Host and Subnet Name Mapping](#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
-* [NetBox](#NetBox): [https://localhost/assets/](https://localhost/assets/)
+* [NetBox](#NetBox): [https://localhost/netbox/](https://localhost/netbox/)
 * [Account Management](#AuthBasicAccountManagement): [https://localhost:488](https://localhost:488)
 
 ## <a name="Overview"></a>Overview
@@ -502,7 +502,7 @@ A minute or so after starting Malcolm, the following services will be accessible
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
-  - NetBox: https://localhost/assets/
+  - NetBox: https://localhost/netbox/
   - Account management: https://localhost:488/
 ```
 
@@ -1708,7 +1708,7 @@ This feature is disabled by default, but it can be enabled by clearing (setting 
 
 ### <a name="NetBox"></a>Asset Management with NetBox
 
-Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/assets/](https://localhost/assets/) if you are connecting locally.
+Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/netbox/](https://localhost/netbox/) if you are connecting locally.
 
 The design of a potentially deeper integration between Malcolm and Netbox is a work in progress. The purpose of an asset management system is to document the intended state of a network: were Malcolm to actively and agressively populate NetBox with the live network state, a network configuration fault could result in an incorrect documented configuration. The Malcolm development team is investigating what data, if any, should automatically flow to NetBox based on traffic observed (enabled via the `NETBOX_CRON` [environment variable in `docker-compose.yml`](#DockerComposeYml)), and what NetBox inventory data could be used, if any, to enrich Malcolm's network traffic metadata. Well-considered suggestions in this area [are welcome](mailto:malcolm@inl.gov?subject=NetBox).
 
@@ -3973,7 +3973,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
-  - NetBox: https://localhost/assets/  
+  - NetBox: https://localhost/netbox/  
   - Account management: https://localhost:488/
 
 NAME                           COMMAND                  SERVICE              STATUS               PORTS

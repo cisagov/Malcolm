@@ -15,7 +15,7 @@
   "routes": [
     {
       "match": {
-        "uri": "/assets/static/*"
+        "uri": "/netbox/static/*"
       },
       "action": {
         "share": "/opt/netbox/netbox${uri}"

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - NetBox
-Exec=/opt/firefox/firefox https://localhost/assets/
+Exec=/opt/firefox/firefox https://localhost/netbox/
 Terminal=false
 X-MultipleArgs=false
 Type=Application

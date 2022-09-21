@@ -159,7 +159,7 @@ if mkdir "$DESTDIR"; then
   echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
   echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
   echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"
-  echo "  - NetBox: https://localhost/assets/" | tee -a "$README"
+  echo "  - NetBox: https://localhost/netbox/" | tee -a "$README"
   echo "  - Account management: https://localhost:488/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1

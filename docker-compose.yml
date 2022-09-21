@@ -986,7 +986,6 @@ services:
       - ./netbox/config/configuration:/etc/netbox/config:ro
       - ./netbox/config/reports:/etc/netbox/reports:ro
       - ./netbox/config/scripts:/etc/netbox/scripts:ro
-      - ./netbox/config/unit:/etc/unit:ro
       - ./netbox/media:/opt/netbox/netbox/media:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "http://localhost:8080/assets/api/" ]
