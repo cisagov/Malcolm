@@ -1049,10 +1049,11 @@ services:
       - api
       - arkime
       - dashboards
-      - upload
+      - file-monitor
       - htadmin
       - name-map-ui
-      - file-monitor
+      - netbox
+      - upload
     ports:
       - "0.0.0.0:443:443"
       - "0.0.0.0:488:488"
