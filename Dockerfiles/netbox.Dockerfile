@@ -38,6 +38,7 @@ ENV NETBOX_CRON $NETBOX_CRON
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+      jq \
       procps \
       psmisc \
       python3-psycopg2 \
@@ -60,13 +61,15 @@ RUN apt-get -q update && \
     mkdir -p /opt/unit && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \
-    mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static
+      mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static && \
+      jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq ".routes[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
+      mv /etc/unit/nginx-unit-new.json /etc/unit/nginx-unit.json && \
+      chmod 644 /etc/unit/nginx-unit.json
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 netbox/config/unit/nginx-unit.json /etc/unit/nginx-unit.json
 COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/service_check_passthrough.sh"]
