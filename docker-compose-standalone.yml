@@ -925,7 +925,7 @@ services:
       - ./netbox/config/scripts:/etc/netbox/scripts:ro
       - ./netbox/media:/opt/netbox/netbox/media:rw
     healthcheck:
-      test: ["CMD", "curl", "--silent", "http://localhost:8080/assets/api/" ]
+      test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/" ]
       interval: 60s
       timeout: 15s
       retries: 3
