@@ -1,3 +1,4 @@
+repository: mmguero-dev/Malcolm
 title: Malcolm
 description: A powerful, easily deployable network traffic analysis tool suite
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
@@ -31,3 +32,52 @@ show_downloads: true
 relative_links:
   enabled: true
   collections: true
+exclude:
+  - api
+  - arkime
+  - arkime-logs
+  - arkime-raw
+  - auth.env
+  - cidr-map.txt
+  - dashboards
+  - docker-compose-standalone.yml
+  - docker-compose.yml
+  - Dockerfiles
+  - .dockerignore
+  - .envrc
+  - filebeat
+  - file-monitor
+  - file-upload
+  - freq-server
+  - .git
+  - .github
+  - .gitignore
+  - Gemfile
+  - Gemfile.lock
+  - host-map.txt
+  - htadmin
+  - .ldap_config_defaults
+  - logstash
+  - malcolm-iso
+  - name-map-ui
+  - netbox
+  - net-map.json
+  - nginx
+  - opensearch
+  - opensearch-backup
+  - .opensearch.primary.curlrc
+  - .opensearch.secondary.curlrc
+  - pcap
+  - pcap-capture
+  - pcap-monitor
+  - scripts
+  - sensor-iso
+  - shared
+  - suricata
+  - suricata-logs
+  - .tmp
+  - .travis.yml
+  - .trigger_workflow_build
+  - yara
+  - zeek
+  - zeek-logs

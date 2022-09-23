@@ -24,6 +24,8 @@
 malcolm_*images.tar.gz
 *.iso
 *-build.log
+Gemfile.lock
+_site
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
