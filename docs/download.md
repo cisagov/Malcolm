@@ -22,7 +22,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 ### Installer ISO
 
-[Instructions are provided](/hedgehog/#ISOBuild) to generate the Hedgehog Linux ISO from source. While official downloads of the Hedgehog Linux ISO are not provided, an **unofficial build** of the ISO installer for the latest stable release is available for download here.
+[Instructions are provided](/hedgehog/#SensorISOBuild) to generate the Hedgehog Linux ISO from source. While official downloads of the Hedgehog Linux ISO are not provided, an **unofficial build** of the ISO installer for the latest stable release is available for download here.
 
 | ISO | SHA256 |
 |---|---|

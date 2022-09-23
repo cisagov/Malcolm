@@ -1,0 +1,7 @@
+# <a name="SystemRequirements"></a>Recommended system requirements
+
+Malcolm runs on top of [Docker](https://www.docker.com/) which runs on recent releases of Linux, Apple macOS and Microsoft Windows 10.
+
+To quote the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/guide/current/hardware.html), "If there is one resource that you will run out of first, it will likely be memory." The same is true for Malcolm: you will want at least 16 gigabytes of RAM to run Malcolm comfortably. For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm can run on less, but more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
+
+Arkime's wiki has a couple of documents ([here](https://github.com/arkime/arkime#hardware-requirements) and [here](https://github.com/arkime/arkime/wiki/FAQ#what-kind-of-capture-machines-should-we-buy) and [here](https://github.com/arkime/arkime/wiki/FAQ#how-many-elasticsearch-nodes-or-machines-do-i-need) and a [calculator here](https://molo.ch/#estimators)) which may be helpful, although not everything in those documents will apply to a Docker-based setup like Malcolm.

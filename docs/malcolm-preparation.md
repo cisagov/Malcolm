@@ -1,0 +1,15 @@
+# <a name="Configuration"></a>Configuration
+
+* [Configuration](#Configuration)
+    - [Recommended system requirements](system-requirements.md#SystemRequirements)
+    - [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
+        + [`docker-compose.yml` parameters](malcolm-config.md#DockerComposeYml)
+    - [Configure authentication](authsetup.md#AuthSetup)
+        + [Local account management](authsetup.md#AuthBasicAccountManagement)
+        + [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP)
+            * [LDAP connection security](authsetup.md#AuthLDAPSecurity)
+        + [TLS certificates](authsetup.md#TLSCerts)
+    - [Platform-specific Configuration](host-config.md#HostSystemConfig)
+        + [Linux host system configuration](host-config-linux.md#HostSystemConfigLinux)
+        + [macOS host system configuration](host-config-macos.md#HostSystemConfigMac)
+        + [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows)

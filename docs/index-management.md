@@ -1,0 +1,7 @@
+# <a name="IndexManagement"></a>OpenSearch index management
+
+Malcolm releases prior to v6.2.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
+
+Since then, OpenSearch Dashboards has developed and released plugins with UIs for [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/). Because these plugins provide a more comprehensive and user-friendly interfaces for these features, the old environment variable-based configuration code has been removed from Malcolm, with the exception of the code that uses `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` and `OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT` which deals with deleting the oldest network session metadata indices when the database exceeds a certain size.
+
+Note that OpenSearch index state management and snapshot management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) file can be used to allow Arkime to prune old PCAP files based on available disk space.

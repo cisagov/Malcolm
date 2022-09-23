@@ -1,0 +1,161 @@
+# <a name="Development"></a>Development
+
+* [Development](#Development)
+    - [Building from source](#Build)
+    - [Pre-Packaged installation files](#Packager)
+
+Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
+
+* `api` - code and configuration for the `api` container which provides a REST API to query Malcolm
+* `arkime` - code and configuration for the `arkime` container which processes PCAP files using `capture` and which serves the Viewer application
+* `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
+* `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
+* `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
+* `docs` - a directory containing instructions and documentation
+* `opensearch` - an initially empty directory where the OpenSearch database instance will reside
+* `opensearch-backup` - an initially empty directory for storing OpenSearch [index snapshots](index-management.md#IndexManagement) 
+* `filebeat` - code and configuration for the `filebeat` container which ingests Zeek logs and forwards them to the `logstash` container
+* `file-monitor` - code and configuration for the `file-monitor` container which can scan files extracted by Zeek
+* `file-upload` - code and configuration for the `upload` container which serves a web browser-based upload form for uploading PCAP files and Zeek logs, and which serves an SFTP share as an alternate method for upload
+* `freq-server` - code and configuration for the `freq` container used for calculating entropy of strings
+* `htadmin` - configuration for the `htadmin` user account management container
+* `dashboards` - code and configuration for the `dashboards` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
+* `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `opensearch` container
+* `malcolm-iso` - code and configuration for building an [installer ISO](malcolm-iso.md#ISO) for a minimal Debian-based Linux installation for running Malcolm
+* `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](host-and-subnet-mapping.md#HostAndSubnetNaming) interface
+* `netbox` - code and configuration for the `netbox`, `netbox-postgres`, `netbox-redis` and `netbox-redis-cache` containers which provide asset management capabilities
+* `nginx` - configuration for the `nginx` reverse proxy container
+* `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
+* `pcap-capture` - code and configuration for the `pcap-capture` container which can capture network traffic
+* `pcap-monitor` - code and configuration for the `pcap-monitor` container which watches for new or uploaded PCAP files notifies the other services to process them
+* `scripts` - control scripts for starting, stopping, restarting, etc. Malcolm
+* `sensor-iso` - code and configuration for building a [Hedgehog Linux](live-analysis.md#Hedgehog) ISO
+* `shared` - miscellaneous code used by various Malcolm components 
+* `suricata` - code and configuration for the `suricata` container which handles PCAP processing using Suricata
+* `suricata-logs` - an initially empty directory for Suricata logs to be uploaded, processed, and stored
+* `zeek` - code and configuration for the `zeek` container which handles PCAP processing using Zeek
+* `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
+* `_includes` and `_layouts` - templates for the HTML version of the documentation
+
+and the following files of special note:
+
+* `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
+* `cidr-map.txt` - specify custom IP address to network segment mapping
+* `host-map.txt` - specify custom IP and/or MAC address to host mapping
+* `net-map.json` - an alternative to `cidr-map.txt` and `host-map.txt`, mapping hosts and network segments to their names in a JSON-formatted file
+* `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
+* `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
+
+## <a name="Build"></a>Building from source
+
+Building the Malcolm docker images from scratch requires internet access to pull source files for its components. Once internet access is available, execute the following command to build all of the Docker images used by the Malcolm appliance:
+
+```
+$ ./scripts/build.sh
+```
+
+Then, go take a walk or something since it will be a while. When you're done, you can run `docker images` and see you have fresh images for:
+
+* `malcolmnetsec/api` (based on `python:3-slim`)
+* `malcolmnetsec/arkime` (based on `debian:11-slim`)
+* `malcolmnetsec/dashboards-helper` (based on `alpine:3.16`)
+* `malcolmnetsec/dashboards` (based on `opensearchproject/opensearch-dashboards`)
+* `malcolmnetsec/file-monitor` (based on `debian:11-slim`)
+* `malcolmnetsec/file-upload` (based on `debian:11-slim`)
+* `malcolmnetsec/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
+* `malcolmnetsec/freq` (based on `debian:11-slim`)
+* `malcolmnetsec/htadmin` (based on `debian:11-slim`)
+* `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
+* `malcolmnetsec/name-map-ui` (based on `alpine:3.16`)
+* `malcolmnetsec/netbox` (based on `netboxcommunity/netbox:latest`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.16`)
+* `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
+* `malcolmnetsec/pcap-capture` (based on `debian:11-slim`)
+* `malcolmnetsec/pcap-monitor` (based on `debian:11-slim`)
+* `malcolmnetsec/postgresql` (based on `postgres:14-alpine`)
+* `malcolmnetsec/redis` (based on `redis:7-alpine`)
+* `malcolmnetsec/suricata` (based on `debian:11-slim`)
+* `malcolmnetsec/zeek` (based on `debian:11-slim`)
+
+Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolmnetsec/image:branch` (e.g., if you've forked Malcolm with the github user `romeogdetlevjr`, the `arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolmnetsec/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you'll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
+
+# <a name="Packager"></a>Pre-Packaged installation files
+
+## Creating pre-packaged installation files
+
+`scripts/malcolm_appliance_packager.sh` can be run to package up the configuration files (and, if necessary, the Docker images) which can be copied to a network share or USB drive for distribution to non-networked machines. For example:
+
+```
+$ ./scripts/malcolm_appliance_packager.sh 
+You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
+
+Store administrator username/password for local Malcolm access? (Y/n): y
+
+Administrator username: analyst
+analyst password:
+analyst password (again):
+
+(Re)generate self-signed certificates for HTTPS access (Y/n): y 
+
+(Re)generate self-signed certificates for a remote log forwarder (Y/n): y
+
+Store username/password for primary remote OpenSearch instance? (y/N): n
+
+Store username/password for secondary remote OpenSearch instance? (y/N): n
+
+Store username/password for email alert sender account? (y/N): n
+
+(Re)generate internal passwords for NetBox (Y/n): y
+
+Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
+
+Do you need to package docker images also [y/N]? y
+This might take a few minutes...
+
+Packaged Malcolm docker images to "/home/user/tmp/malcolm_20190513_101117_f0d052c_images.tar.gz"
+
+
+To install Malcolm:
+  1. Run install.py
+  2. Follow the prompts
+
+To start, stop, restart, etc. Malcolm:
+  Use the control scripts in the "scripts/" directory:
+   - start         (start Malcolm)
+   - stop          (stop Malcolm)
+   - restart       (restart Malcolm)
+   - logs          (monitor Malcolm logs)
+   - wipe          (stop Malcolm and clear its database)
+   - auth_setup    (change authentication-related settings)
+
+A minute or so after starting Malcolm, the following services will be accessible:
+  - Arkime: https://localhost/
+  - OpenSearch Dashboards: https://localhost/dashboards/
+  - PCAP upload (web): https://localhost/upload/
+  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
+  - Host and subnet name mapping editor: https://localhost/name-map-ui/
+  - NetBox: https://localhost/netbox/
+  - Account management: https://localhost:488/
+```
+
+The above example will result in the following artifacts for distribution as explained in the script's output:
+
+```
+$ ls -lh
+total 2.0G
+-rwxr-xr-x 1 user user  61k May 13 11:32 install.py
+-rw-r--r-- 1 user user 2.0G May 13 11:37 malcolm_20190513_101117_f0d052c_images.tar.gz
+-rw-r--r-- 1 user user  683 May 13 11:37 malcolm_20190513_101117_f0d052c.README.txt
+-rw-r--r-- 1 user user 183k May 13 11:32 malcolm_20190513_101117_f0d052c.tar.gz
+```
+
+## Installing from pre-packaged installation files
+
+If you have obtained pre-packaged installation files to install Malcolm on a non-networked machine via an internal network share or on a USB key, you likely have the following files:
+
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains a minimal set up instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternatively, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` - This tarball contains the Docker images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz`
+* `install.py` - This install script can load the Docker images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
+
+Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. If you do not already have Docker and Docker Compose installed, the `install.py` script will help you install them.

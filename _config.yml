@@ -1,0 +1,33 @@
+title: Malcolm
+description: A powerful, easily deployable network traffic analysis tool suite
+logo: docs/images/logo/Malcolm_outline_banner_dark.png
+remote_theme: pages-themes/minimal@v0.2.0
+external_download_url: https://malcolm.fyi/download/
+youtube_url: https://www.youtube.com/c/MalcolmNetworkTrafficAnalysisToolSuite
+docs_uri: docs/
+alerting_docs_uri: docs/alerting.html
+anomaly_detection_docs_uri: docs/anomaly-detection.html
+api_docs_uri: docs/api.html
+arkime_docs_uri: docs/arkime.html
+components_docs_uri: docs/components.html
+configuring_docs_uri: docs/malcolm-preparation.html
+contributing_docs_uri: docs/contributing-guide.html
+dashboards_docs_uri: docs/dashboards.html
+hardening_docs_uri: docs/hardening.html
+hedgehog_docs_uri: docs/hedgehog.html
+live_analysis_docs_uri: docs/live-analysis.html
+protocols_docs_uri: docs/protocols.html
+queries_docs_uri: docs/queries-cheat-sheet.html
+quickstart_docs_uri: docs/quickstart.html
+severity_docs_uri: docs/severity.html
+thirdparty_logs_docs_uri: docs/third-party-logs.html
+upload_docs_uri: docs/upload.html
+github:
+  owner_name: Seth Grover
+plugins:
+  - jekyll-remote-theme
+  - jekyll-relative-links
+show_downloads: true
+relative_links:
+  enabled: true
+  collections: true
