@@ -25,7 +25,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
 
 ## <a name="BuildBadges"></a>Automated Builds Status
 
-See [**Building from source**](docs/development.md#Build) to read how you can use GitHub [workflow files](./.github/workflows/) to build Malcolm.
+See [**Building from source**](docs/development.md#Build) to read how you can use GitHub [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) to build Malcolm.
 
 ![api-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/api-build-and-push-ghcr/badge.svg)
 ![arkime-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/arkime-build-and-push-ghcr/badge.svg)

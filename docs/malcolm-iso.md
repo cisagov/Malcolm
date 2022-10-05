@@ -54,7 +54,7 @@ $ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_image
 
 A system installed from the resulting ISO will load the Malcolm Docker images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
 
-Alternately, if you have forked Malcolm on GitHub, [workflow files](./.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs, specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`](./.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. You'll need to run the workflows to build and push your fork's Malcolm docker images before building the ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
+Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided which contain instructions for GitHub to build the docker images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs, specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. You'll need to run the workflows to build and push your fork's Malcolm docker images before building the ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
 
 ## <a name="ISOInstallation"></a>Installation
 

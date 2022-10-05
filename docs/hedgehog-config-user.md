@@ -28,7 +28,7 @@ To specify which files should be extracted, specify the Zeek file carving mode:
 
 ![Zeek file carving mode](./images/hedgehog/images/zeek_file_carve_mode.png)
 
-If you're not sure what to choose, either of **mapped (except common plain text files)** (if you want to carve and scan almost all files) or **interesting** (if you only want to carve and scan files with [mime types of common attack vectors](./interface/sensor_ctl/zeek/extractor_override.interesting.zeek)) is probably a good choice.
+If you're not sure what to choose, either of **mapped (except common plain text files)** (if you want to carve and scan almost all files) or **interesting** (if you only want to carve and scan files with [mime types of common attack vectors]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/sensor-iso/interface/sensor_ctl/zeek/extractor_override.interesting.zeek)) is probably a good choice.
 
 Next, specify which carved files to preserve (saved on the sensor under `/capture/bro/capture/extract_files/quarantine` by default). In order to not consume all of the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#HedgehogConfigAutostart) section.
 

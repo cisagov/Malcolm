@@ -68,7 +68,7 @@ In order to maintain the integrity and confidentiality of your data, Malcolm's d
 
 ### <a name="FluentBitBash"></a>Convenience Script for Linux/macOS
 
-[`fluent-bit-setup.sh`](./fluent-bit-setup.sh) is a Bash script to help install and configure Fluent Bit on Linux and macOS systems. After configuring Malcolm to accept and parse forwarded logs as described above, run `fluent-bit-setup.sh` as illustrated in the examples below:
+[`fluent-bit-setup.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/third-party-logs/fluent-bit-setup.sh) is a Bash script to help install and configure Fluent Bit on Linux and macOS systems. After configuring Malcolm to accept and parse forwarded logs as described above, run `fluent-bit-setup.sh` as illustrated in the examples below:
 
 Linux example:
 
@@ -207,7 +207,7 @@ Configure service to run fluent-bit [y/N]? n
 
 ### <a name="FluentBitPowerShell"></a>Convenience Script for Windows
 
-[fluent-bit-setup.ps1](./fluent-bit-setup.ps1) is a PowerShell script to help install and configure Fluent Bit on Microsoft Windows systems.
+[fluent-bit-setup.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/third-party-logs/fluent-bit-setup.ps1) is a PowerShell script to help install and configure Fluent Bit on Microsoft Windows systems.
 
 ```
 PS C:\work> .\fluent-bit-setup.ps1
