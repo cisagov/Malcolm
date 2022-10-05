@@ -27,7 +27,6 @@ pcap
 scripts
 !scripts/malcolm_common.py
 zeek-logs
-_site
 suricata-logs
 netbox/netbox/media
 netbox/netbox/postgres

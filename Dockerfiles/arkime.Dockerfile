@@ -12,9 +12,6 @@ ENV ARKIME_INET yes
 
 ADD arkime/scripts/bs4_remove_div.py /opt/
 ADD arkime/patch/* /opt/patches/
-ADD README.md $ARKIME_DIR/doc/
-ADD docs/doc.css $ARKIME_DIR/doc/
-ADD docs/images $ARKIME_DIR/doc/images/
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -31,7 +28,6 @@ RUN apt-get -q update && \
         git-core \
         groff \
         groff-base \
-        imagemagick \
         libcap-dev \
         libjson-perl \
         libkrb5-dev \
@@ -44,32 +40,20 @@ RUN apt-get -q update && \
         make \
         meson \
         ninja-build \
-        pandoc \
         patch \
         python3-dev \
         python3-pip \
         python3-setuptools \
         python3-wheel \
-        rename \
         sudo \
         swig \
         wget \
         zlib1g-dev && \
   pip3 install --no-cache-dir beautifulsoup4 && \
-  cd $ARKIME_DIR/doc/images && \
-    find . -name "*.png" -exec bash -c 'convert "{}" -fuzz 2% -transparent white -background white -alpha remove -strip -interlace Plane -quality 85% "{}.jpg" && rename "s/\.png//" "{}.jpg"' \; && \
-    cd $ARKIME_DIR/doc && \
-    sed -i "s/^# Malcolm$//" README.md && \
-    sed -i '/./,$!d' README.md && \
-    sed -i "s/.png/.jpg/g" README.md && \
-    sed -i "s@docs/images@images@g" README.md && \
-    sed -i 's/\!\[.*\](.*\/badge.svg)//g' README.md && \
-    pandoc -s --self-contained --metadata title="Malcolm README" --css $ARKIME_DIR/doc/doc.css -o $ARKIME_DIR/doc/README.html $ARKIME_DIR/doc/README.md && \
   cd /opt && \
     git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    find $ARKIME_DIR/doc/images/screenshots -name "*.png" -delete && \
     export PATH="$ARKIME_DIR/bin:${PATH}" && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
     ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \

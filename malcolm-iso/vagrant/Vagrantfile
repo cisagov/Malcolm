@@ -60,7 +60,6 @@ Vagrant.configure("2") do |config|
       jq \
       linux-headers-amd64 \
       live-build \
-      pandoc \
       rsync \
       software-properties-common \
       squashfs-tools \

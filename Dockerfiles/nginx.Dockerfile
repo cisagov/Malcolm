@@ -7,6 +7,18 @@
 #             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
 
 ####################################################################################
+
+# first build documentation with jekyll
+FROM ghcr.io/mmguero-dev/jekyll:latest as docbuild
+
+ADD . /site
+
+WORKDIR /site
+
+RUN docker-entrypoint.sh bundle exec jekyll build && \
+    find /site/_site -type f -name "*.md" -delete
+
+# build NGINX image
 FROM alpine:3.16
 
 LABEL maintainer="malcolm@inl.gov"
@@ -196,6 +208,7 @@ RUN set -x ; \
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
+COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/

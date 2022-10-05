@@ -82,6 +82,7 @@ else
   MAXMIND_API_KEY="$($GREP -P "^\s*MAXMIND_GEOIP_DB_LICENSE_KEY\s*:\s" "$CONFIG_FILE" | cut -d: -f2 | tr -d '[:space:]'\'\" | head -n 1)"
 fi
 
+# build the image(s)
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
   $DOCKER_COMPOSE_COMMAND build --progress=plain --force-rm --no-cache --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
@@ -106,6 +107,7 @@ FILES_IN_IMAGES=(
   "/var/www/html/jquery.min.js;name-map-ui"
   "/opt/zeek/bin/zeek;zeek"
   "/opt/zeek/bin/spicyz;zeek"
+  "/usr/share/nginx/html/index.html;nginx-proxy"
 )
 for i in ${FILES_IN_IMAGES[@]}; do
   FILE="$(echo "$i" | cut -d';' -f1)"
