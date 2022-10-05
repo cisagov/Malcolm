@@ -31,7 +31,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 
 ## Scenario 2: Malcolm was installed from a packaged tarball
 
-If you installed Malcolm from [pre-packaged installation files](https://github.com/idaholab/Malcolm#Packager), here are the basic steps to perform an upgrade:
+If you installed Malcolm from [pre-packaged installation files]({{ site.github.repository_url }}#Packager), here are the basic steps to perform an upgrade:
 
 1. stop Malcolm
     * `./scripts/stop`

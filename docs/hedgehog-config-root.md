@@ -32,7 +32,7 @@ In either case, upon selecting **OK** the network interface will be brought down
 
 ## <a name="HedgehogConfigTime"></a>Time synchronization
 
-Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm](https://github.com/idaholab/Malcolm) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
+Returning to the configuration mode selection, choose **Time Sync**. Here you can configure the sensor to keep its time synchronized with either an NTP server (using the NTP protocol) or a local [Malcolm]({{ site.github.repository_url }}) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
 
 ![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
 

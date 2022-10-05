@@ -15,7 +15,7 @@ The build should work with either the [VirtualBox](https://www.virtualbox.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
     - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box to `libvirt` format
 
-To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm](https://github.com/idaholab/Malcolm/) working copy and run:
+To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm]({{ site.github.repository_url }}/) working copy and run:
 
 ```
 $ ./sensor-iso/build_via_vagrant.sh -f
@@ -33,4 +33,4 @@ Finished, created "/sensor-build/hedgehog-6.4.0.iso"
 …
 ```
 
-Alternately, if you have forked Malcolm on GitHub, [workflow files](../.github/workflows/) are provided which contain instructions for GitHub to build the docker images and Hedgehog and [Malcolm](https://github.com/idaholab/Malcolm) installer ISOs, specifically [`sensor-iso-build-docker-wrap-push-ghcr.yml`](../.github/workflows/sensor-iso-build-docker-wrap-push-ghcr.yml) for the Hedgehog ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
+Alternately, if you have forked Malcolm on GitHub, [workflow files](../.github/workflows/) are provided which contain instructions for GitHub to build the docker images and Hedgehog and [Malcolm]({{ site.github.repository_url }}) installer ISOs, specifically [`sensor-iso-build-docker-wrap-push-ghcr.yml`](../.github/workflows/sensor-iso-build-docker-wrap-push-ghcr.yml) for the Hedgehog ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.

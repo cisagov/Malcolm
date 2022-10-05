@@ -2,7 +2,7 @@
 
 ![](./docs/images/logo/Malcolm_outline_banner_dark.png)
 
-[Malcolm](https://github.com/idaholab/Malcolm) is a powerful network traffic analysis tool suite designed with the following goals in mind:
+[Malcolm]({{ site.github.repository_url }}) is a powerful network traffic analysis tool suite designed with the following goals in mind:
 
 * **Easy to use** – Malcolm accepts network traffic data in the form of full packet capture (PCAP) files and Zeek (formerly Bro) logs. These artifacts can be uploaded via a simple browser-based interface or captured live and forwarded to Malcolm using lightweight forwarders. In either case, the data is automatically normalized, enriched, and correlated for analysis.
 * **Powerful traffic analysis** – Visibility into network communications is provided through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime (formerly Moloch), a powerful tool for finding and identifying the network sessions comprising suspected security incidents.
@@ -27,25 +27,25 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
 
 See [**Building from source**](docs/development.md#Build) to read how you can use GitHub [workflow files](./.github/workflows/) to build Malcolm.
 
-![api-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/api-build-and-push-ghcr/badge.svg)
-![arkime-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/arkime-build-and-push-ghcr/badge.svg)
-![dashboards-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-build-and-push-ghcr/badge.svg)
-![dashboards-helper-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/dashboards-helper-build-and-push-ghcr/badge.svg)
-![file-monitor-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/file-monitor-build-and-push-ghcr/badge.svg)
-![file-upload-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/file-upload-build-and-push-ghcr/badge.svg)
-![filebeat-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/filebeat-build-and-push-ghcr/badge.svg)
-![freq-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/freq-build-and-push-ghcr/badge.svg)
-![htadmin-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/htadmin-build-and-push-ghcr/badge.svg)
-![logstash-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/logstash-build-and-push-ghcr/badge.svg)
-![name-map-ui-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/name-map-ui-build-and-push-ghcr/badge.svg)
-![nginx-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/nginx-build-and-push-ghcr/badge.svg)
-![opensearch-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/opensearch-build-and-push-ghcr/badge.svg)
-![pcap-capture-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-capture-build-and-push-ghcr/badge.svg)
-![pcap-monitor-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
-![suricata-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/suricata-build-and-push-ghcr/badge.svg)
-![zeek-build-and-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/zeek-build-and-push-ghcr/badge.svg)
-![malcolm-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
-![sensor-iso-build-docker-wrap-push-ghcr](https://github.com/mmguero-dev/Malcolm/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
+![api-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/api-build-and-push-ghcr/badge.svg)
+![arkime-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/arkime-build-and-push-ghcr/badge.svg)
+![dashboards-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/dashboards-build-and-push-ghcr/badge.svg)
+![dashboards-helper-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/dashboards-helper-build-and-push-ghcr/badge.svg)
+![file-monitor-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/file-monitor-build-and-push-ghcr/badge.svg)
+![file-upload-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/file-upload-build-and-push-ghcr/badge.svg)
+![filebeat-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/filebeat-build-and-push-ghcr/badge.svg)
+![freq-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/freq-build-and-push-ghcr/badge.svg)
+![htadmin-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/htadmin-build-and-push-ghcr/badge.svg)
+![logstash-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/logstash-build-and-push-ghcr/badge.svg)
+![name-map-ui-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/name-map-ui-build-and-push-ghcr/badge.svg)
+![nginx-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/nginx-build-and-push-ghcr/badge.svg)
+![opensearch-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/opensearch-build-and-push-ghcr/badge.svg)
+![pcap-capture-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/pcap-capture-build-and-push-ghcr/badge.svg)
+![pcap-monitor-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/pcap-monitor-build-and-push-ghcr/badge.svg)
+![suricata-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/suricata-build-and-push-ghcr/badge.svg)
+![zeek-build-and-push-ghcr]({{ site.github.repository_url }}/workflows/zeek-build-and-push-ghcr/badge.svg)
+![malcolm-iso-build-docker-wrap-push-ghcr]({{ site.github.repository_url }}/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
+![sensor-iso-build-docker-wrap-push-ghcr]({{ site.github.repository_url }}/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
 
 ## <a name="Forks"></a>Forks
 
@@ -53,7 +53,7 @@ See [**Building from source**](docs/development.md#Build) to read how you can us
 
 ## <a name="Footer"></a>Copyright
 
-[Malcolm](https://github.com/idaholab/Malcolm) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
+[Malcolm]({{ site.github.repository_url }}) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See [`License.txt`](./License.txt) for the terms of its release.
 

@@ -1,12 +1,12 @@
 # <a name="InstallationExample"></a>Installation example using Ubuntu 22.04 LTS
 
-Here's a step-by-step example of getting [Malcolm from GitHub](https://github.com/idaholab/Malcolm/tree/main), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
+Here's a step-by-step example of getting [Malcolm from GitHub]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}), configuring your system and your Malcolm instance, and running it on a system running Ubuntu Linux. Your mileage may vary depending on your individual system configuration, but this should be a good starting point.
 
 The commands in this example should be executed as a non-root user.
 
-You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release](https://github.com/idaholab/Malcolm/releases).
+You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release]({{ site.github.repository_url }}/releases).
 
-To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub](https://github.com/idaholab/Malcolm/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
+To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
@@ -15,7 +15,7 @@ malcolm_common.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
 
 If you are obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:
 ```
-user@host:~$ git clone https://github.com/idaholab/Malcolm
+user@host:~$ git clone {{ site.github.repository_url }}
 Cloning into 'Malcolm'...
 remote: Enumerating objects: 443, done.
 remote: Counting objects: 100% (443/443), done.

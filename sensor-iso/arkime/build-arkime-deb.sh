@@ -46,7 +46,7 @@ if (( ${#ETC_FILES} )) ; then
   cp -r /arkime-etc/* $ARKIME_DIR/etc/
 fi
 
-fpm -s dir -t deb -n arkime -x opt/arkime/logs -x opt/arkime/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "http://molo.ch" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIME_DIR"
+fpm -s dir -t deb -n arkime -x opt/arkime/logs -x opt/arkime/raw -v $ARKIME_VERSION --iteration 1 --template-scripts --after-install "release/afterinstall.sh" --url "https://arkime.com" --description "Arkime Full Packet System" -d libwww-perl -d libjson-perl -d ethtool -d libyaml-dev "$ARKIME_DIR"
 
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 

@@ -20,7 +20,7 @@ You'll need to provide access to your `cooltool` logs in a similar fashion.
 
 Next, tweak [`filebeat.yml`](../filebeat/filebeat.yml) by adding a new log input path pointing to the `cooltool` logs to send them along to the `logstash` container. This modified `filebeat.yml` will need to be reflected in the `filebeat` container via [bind mount](contributing-local-modifications.md#Bind) or by [rebuilding](development.md#Build) it.
 
-Logstash can then be easily extended to add more [`logstash/pipelines`](../logstash/pipelines). At the time of this writing (as of the [v5.0.0 release](https://github.com/idaholab/Malcolm/releases/tag/v5.0.0)), the Logstash pipelines basically look like this:
+Logstash can then be easily extended to add more [`logstash/pipelines`](../logstash/pipelines). At the time of this writing (as of the [v5.0.0 release]({{ site.github.repository_url }}/releases/tag/v5.0.0)), the Logstash pipelines basically look like this:
 
 * input (from `filebeat`) sends logs to 1..*n* **parse pipelines**
 * each **parse pipeline** does what it needs to do to parse its logs then sends them to the [**enrichment pipeline**](#LogstashEnrichments)

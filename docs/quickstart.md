@@ -12,7 +12,7 @@ The scripts to control Malcolm require Python 3. The [`install.py`](malcolm-conf
 
 ### Source code
 
-The files required to build and run Malcolm are available on its [GitHub page](https://github.com/idaholab/Malcolm/tree/main). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
+The files required to build and run Malcolm are available on its [GitHub page]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}). Malcolm's source code is released under the terms of a permissive open source software license (see see `License.txt` for the terms of its release).
 
 ### Building Malcolm from scratch
 

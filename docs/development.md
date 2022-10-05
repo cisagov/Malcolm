@@ -4,7 +4,7 @@
     - [Building from source](#Build)
     - [Pre-Packaged installation files](#Packager)
 
-Checking out the [Malcolm source code](https://github.com/idaholab/Malcolm/tree/main) results in the following subdirectories in your `malcolm/` working copy:
+Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}) results in the following subdirectories in your `malcolm/` working copy:
 
 * `api` - code and configuration for the `api` container which provides a REST API to query Malcolm
 * `arkime` - code and configuration for the `arkime` container which processes PCAP files using `capture` and which serves the Viewer application

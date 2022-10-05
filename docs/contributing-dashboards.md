@@ -1,6 +1,6 @@
 # <a name="dashboards"></a>OpenSearch Dashboards
 
-[OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) is an open-source fork of [Kibana](https://www.elastic.co/kibana/), which is [no longer open-source software](https://github.com/idaholab/Malcolm/releases/tag/v5.0.0).
+[OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) is an open-source fork of [Kibana](https://www.elastic.co/kibana/), which is [no longer open-source software]({{ site.github.repository_url }}/releases/tag/v5.0.0).
 
 ## <a name="DashboardsNewViz"></a>Adding new visualizations and dashboards
 

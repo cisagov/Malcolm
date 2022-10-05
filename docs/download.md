@@ -12,7 +12,7 @@ Malcolm's Docker-based deployment model makes Malcolm able to run on a variety o
 
 Malcolm can be [packaged](/documentation/#ISOBuild) into an [installer ISO](/documentation/#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
 
-While official downloads of the Malcolm installer ISO are not provided, an **unofficial build** of the ISO installer for the [latest stable release](https://github.com/idaholab/Malcolm/releases/latest) is available for download here.
+While official downloads of the Malcolm installer ISO are not provided, an **unofficial build** of the ISO installer for the [latest stable release]({{ site.github.repository_url }}/releases/latest) is available for download here.
 
 | ISO | SHA256 |
 |---|---|
@@ -36,4 +36,4 @@ Read carefully the installation documentation for [Malcolm](/documentation/#ISOI
 
 ## Disclaimer
 
-The terms of [Malcolm's license](https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt) also apply to these unofficial builds of the Malcolm and Hedgehog Linux installer ISOs: neither the organizations funding Malcolm's development, its developers nor the maintainer of this site makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness or usefulness of any data, apparatus or process disclosed therein.
+The terms of [Malcolm's license]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/License.txt) also apply to these unofficial builds of the Malcolm and Hedgehog Linux installer ISOs: neither the organizations funding Malcolm's development, its developers nor the maintainer of this site makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness or usefulness of any data, apparatus or process disclosed therein.

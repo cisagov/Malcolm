@@ -12,7 +12,7 @@ A dedicated network sensor appliance is the recommended method for capturing and
 * monitor network interfaces
 * capture packets to PCAP files
 * detect file transfers in network traffic and extract and scan those files for threats
-* generate and forward Zeek and Suricata logs, Arkime sessions, and other information to [Malcolm](https://github.com/idaholab/Malcolm)
+* generate and forward Zeek and Suricata logs, Arkime sessions, and other information to [Malcolm]({{ site.github.repository_url }})
 
 Please see the [Hedgehog Linux README](hedgehog.md) for more information.
 
