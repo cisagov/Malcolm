@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - README
-Exec=/opt/firefox/firefox https://localhost/readme
+Exec=/opt/firefox/firefox https://localhost/readme/
 Terminal=false
 X-MultipleArgs=false
 Type=Application

@@ -133,7 +133,6 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py wipe
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
-  cp ./README.md "$MALCOLM_DEST_DIR/"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
   cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"

@@ -19,7 +19,7 @@ WORKDIR /site
 RUN docker-entrypoint.sh bundle exec jekyll build && \
     find /site/_site -type f -name "*.md" -delete && \
     find /site/_site -type f -name "*.html" -exec sed -i "s@/\(docs\|assets\)@/readme/\1@g" "{}" \; && \
-    find /site/_site -type f -name "*.html" -exec sed -i 's@\(href=\)"/"@\1"/readme"@g' "{}" \;
+    find /site/_site -type f -name "*.html" -exec sed -i 's@\(href=\)"/"@\1"/readme/"@g' "{}" \;
 
 # build NGINX image
 FROM alpine:3.16
