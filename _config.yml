@@ -42,6 +42,10 @@ exclude:
   - dashboards
   - docker-compose-standalone.yml
   - docker-compose.yml
+  - docs/quick-start
+  - docs/slides
+  - docs/stix
+  - docs/web
   - Dockerfiles
   - .dockerignore
   - .envrc
