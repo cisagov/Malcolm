@@ -10,6 +10,12 @@ on:
       - 'Dockerfiles/nginx.Dockerfile'
       - 'shared/bin/*'
       - '.trigger_workflow_build'
+      - '_config.yml'
+      - '_includes/**'
+      - '_layouts/**'
+      - 'docs/**'
+      - 'Gemfile'
+      - 'README.md'
   workflow_dispatch:
   repository_dispatch:
 
