@@ -15,7 +15,9 @@ ARG GITHUB_TOKEN
 ARG VCS_REVISION
 ENV VCS_REVISION $VCS_REVISION
 
-ADD README.md _includes _layouts _config.yml Gemfile /site/
+ADD README.md _config.yml Gemfile /site/
+ADD _includes/ /site/_includes/
+ADD _layouts/ /site/_includes/
 ADD docs/ /site/docs/
 
 WORKDIR /site
