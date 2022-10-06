@@ -22,6 +22,8 @@ opensearch
 opensearch-backup
 arkime-logs
 arkime-raw
+malcolm-iso
+sensor-iso
 nginx/nginx_ldap.conf
 pcap
 _site

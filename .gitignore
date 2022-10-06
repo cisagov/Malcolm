@@ -26,6 +26,13 @@ malcolm_*images.tar.gz
 *-build.log
 Gemfile.lock
 _site
+sensor-iso/_config.yml
+sensor-iso/_includes
+sensor-iso/_layouts
+sensor-iso/_site
+sensor-iso/docs
+sensor-iso/Gemfile
+sensor-iso/README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
