@@ -71,7 +71,7 @@
         {% if site.show_downloads %}
         <ul class="downloads">
           <li><a href="{{ site.github.repository_url }}/releases">GitHub <strong>Releases</strong></a></li>
-          <li><a href="{{ site.github.tar_url }}">Source <strong>.tgz</strong></a></li>
+          <li><a href="{{ site.github.repository_url }}/tarball/{{ site.github.default_branch }}">Source <strong>.tgz</strong></a></li>
           <li><a href="{{ site.external_download_url | default: site.github.repository_url }}">Download <strong>ISOs</strong></a></li>
         </ul>
         {% endif %}

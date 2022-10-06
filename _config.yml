@@ -25,6 +25,7 @@ thirdparty_logs_docs_uri: docs/third-party-logs.html
 upload_docs_uri: docs/upload.html
 github:
   owner_name: Seth Grover
+  default_branch: development
 plugins:
   - jekyll-relative-links
   - jekyll-remote-theme
