@@ -14,7 +14,7 @@ FROM ghcr.io/mmguero-dev/jekyll:latest as docbuild
 ARG VCS_REVISION
 ENV VCS_REVISION $VCS_REVISION
 
-ADD README.md _includes _layouts _site _config.yml Gemfile docs /site/
+ADD README.md _includes _layouts _config.yml Gemfile docs /site/
 
 WORKDIR /site
 

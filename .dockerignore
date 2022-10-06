@@ -24,6 +24,7 @@ arkime-logs
 arkime-raw
 nginx/nginx_ldap.conf
 pcap
+_site
 scripts
 !scripts/malcolm_common.py
 zeek-logs

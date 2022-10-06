@@ -22,6 +22,7 @@ LOG_BASE_DIR=$(pwd)
 while getopts 'v' OPTION; do
   case "$OPTION" in
     v)
+      set -x
       VERBOSE_FLAG="-v"
       ;;
 
@@ -59,6 +60,18 @@ else
   exit 1
 fi
 
+################################################################################
+# cleanup temporary directory, if any
+WORKDIR="$(mktemp -d -t malcolm-docs-XXXXXX)"
+
+function _cleanup {
+  if [[ -d "$WORKDIR" ]] && ! rm -rf "$WORKDIR"; then
+   echo "Failed to remove temporary directory '$WORKDIR'" >&2
+  fi
+}
+
+trap "_cleanup" EXIT
+
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
 RUN_PATH="$(pwd)"
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
@@ -67,9 +80,22 @@ pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 # clean up old documentation builds
 [[ -d ./_site/ ]] && rm -rf ./_site/
 
+# copy just what's needed for documentation into temporary working directory and build there
+cp $VERBOSE_FLAG -r README.md _includes _layouts _config.yml Gemfile docs "$WORKDIR"
+pushd "$WORKDIR" >/dev/null 2>&1
+
 # run jekyll docker container to generate HTML version of the documentation
-$DOCKER_BIN run --rm -v "$(pwd)":/site --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll bundle exec jekyll build
+$DOCKER_BIN run --rm -v "$(pwd)":/site --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll:latest bundle exec jekyll build
+
+# clean up some files no longer needed
+find ./_site/ -type f -name "*.md" -delete
+
 # TODO: can we get this to run mapping UID so it doesn't have to be sudo'd?
 $SUDO_CMD chown -R $(id -u):$(id -g) ./_site/
+
+popd >/dev/null 2>&1
+
+# copy built documentation from work directory
+cp $VERBOSE_FLAG -r "$WORKDIR"/_site/ ./
 
 popd >/dev/null 2>&1
