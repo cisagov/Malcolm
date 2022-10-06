@@ -17,7 +17,7 @@ ENV VCS_REVISION $VCS_REVISION
 
 ADD README.md _config.yml Gemfile /site/
 ADD _includes/ /site/_includes/
-ADD _layouts/ /site/_includes/
+ADD _layouts/ /site/_layouts/
 ADD docs/ /site/docs/
 
 WORKDIR /site
