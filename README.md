@@ -55,7 +55,7 @@ See [**Building from source**](docs/development.md#Build) to read how you can us
 
 [Malcolm]({{ site.github.repository_url }}) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
-See [`License.txt`](./License.txt) for the terms of its release.
+See [`License.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/License.txt) for the terms of its release.
 
 ## Other Software
 
