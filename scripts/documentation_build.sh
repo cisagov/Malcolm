@@ -18,12 +18,22 @@ ENCODING="utf-8"
 
 # parse command-line options
 VERBOSE_FLAG=""
+REVISION="${VCS_REVSION:-$( git rev-parse --short HEAD 2>/dev/null || true )}"
+TOKEN="${GITHUB_TOKEN:-}"
 LOG_BASE_DIR=$(pwd)
-while getopts 'v' OPTION; do
+while getopts 'vr:t:' OPTION; do
   case "$OPTION" in
     v)
       set -x
       VERBOSE_FLAG="-v"
+      ;;
+
+    r)
+      REVISION="$OPTARG"
+      ;;
+
+    t)
+      TOKEN="$OPTARG"
       ;;
 
     ?)
@@ -84,8 +94,17 @@ pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
 cp $VERBOSE_FLAG -r README.md _includes _layouts _config.yml Gemfile docs "$WORKDIR"
 pushd "$WORKDIR" >/dev/null 2>&1
 
+# if the revision commit has been specified, replace references to site.github.build_revision with it
+[[ -n "$REVISION" ]] && find . -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$REVISION/g" "{}" \;
+
+# pass GitHub API token through to Jekyll if it's available
+if [[ -n "${TOKEN:-}" ]]; then
+  TOKEN_ARGS=(-e JEKYLL_GITHUB_TOKEN="$TOKEN")
+else
+  TOKEN_ARGS=()
+fi
 # run jekyll docker container to generate HTML version of the documentation
-$DOCKER_BIN run --rm -v "$(pwd)":/site --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll:latest bundle exec jekyll build
+$DOCKER_BIN run --rm -v "$(pwd)":/site "${TOKEN_ARGS[@]}" --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll:latest bundle exec jekyll build
 
 # clean up some files no longer needed
 find ./_site/ -type f -name "*.md" -delete

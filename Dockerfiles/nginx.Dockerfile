@@ -11,6 +11,7 @@
 # first build documentation with jekyll
 FROM ghcr.io/mmguero-dev/jekyll:latest as docbuild
 
+ARG GITHUB_TOKEN
 ARG VCS_REVISION
 ENV VCS_REVISION $VCS_REVISION
 
@@ -20,6 +21,9 @@ WORKDIR /site
 
 # build documentation, remove unnecessary files, then massage a bit to work nicely with NGINX (which will be serving it)
 RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$VCS_REVISION/g" "{}" \; && \
+    if [ -n "${GITHUB_TOKEN}" ]; then \
+      export JEKYLL_GITHUB_TOKEN="${GITHUB_TOKEN}"; \
+    fi && \
     docker-entrypoint.sh bundle exec jekyll build && \
     find /site/_site -type f -name "*.md" -delete && \
     find /site/_site -type f -name "*.html" -exec sed -i "s@/\(docs\|assets\)@/readme/\1@g" "{}" \; && \

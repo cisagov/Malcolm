@@ -126,6 +126,17 @@ if [ -d "$WORKDIR" ]; then
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
   echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
 
+  # format and copy documentation
+  [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
+    . "$SCRIPT_PATH/shared/environment.chroot"
+  bash "$SCRIPT_PATH/docs/documentation_build.sh" -v -r "${VCS_REVSION:-main}" -t "${GITHUB_TOKEN:-}"
+  mkdir -p ./config/includes.chroot/usr/share/doc
+  cp -r "$SCRIPT_PATH/_site" ./config/includes.chroot/usr/share/doc/hedgehog
+  mkdir -p ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ ./config/includes.chroot/usr/share/images/hedgehog/ ./config/includes.chroot/usr/share/images/desktop-base/
+  cp "$SCRIPT_PATH/docs/images/hedgehog/logo/"*.png ./config/includes.chroot/usr/share/images/hedgehog/
+  ln -r -s ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
+  find "$SCRIPT_PATH/docs/images/hedgehog/logo/font/" -type f -name "*.ttf" -exec cp "{}" ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ \;
+
   # clone and build aide .deb package in its own clean environment (rather than in hooks/)
   bash "$SCRIPT_PATH/shared/aide/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/shared/aide:/build aide-build:latest -o /build
@@ -156,14 +167,6 @@ if [ -d "$WORKDIR" ]; then
   docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
   cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
-
-  # format and copy documentation
-  # TODO
-  pushd "$SCRIPT_PATH/"
-  mkdir -p ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ ./config/includes.chroot/usr/share/images/hedgehog/ ./config/includes.chroot/usr/share/images/desktop-base/
-  cp "$SCRIPT_PATH/docs/logo/"*.png ./config/includes.chroot/usr/share/images/hedgehog/
-  ln -r -s ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
-  find "$SCRIPT_PATH/docs/logo/font" -type f -name "*.ttf" -exec cp "{}" ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ \;
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/

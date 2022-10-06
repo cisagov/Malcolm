@@ -69,6 +69,8 @@ echo "SSH available." >&2
 cleanup_shared
 mkdir -p "$SCRIPT_PATH"/shared
 [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
+echo "VCS_REVSION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
+
 trap cleanup_shared EXIT
 
 if [[ -r "$DOCKER_IMAGES_TGZ" ]]; then
