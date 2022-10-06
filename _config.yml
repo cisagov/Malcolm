@@ -26,8 +26,9 @@ upload_docs_uri: docs/upload.html
 github:
   owner_name: Seth Grover
 plugins:
-  - jekyll-remote-theme
   - jekyll-relative-links
+  - jekyll-remote-theme
+  - jekyll-seo-tag
 show_downloads: true
 relative_links:
   enabled: true
