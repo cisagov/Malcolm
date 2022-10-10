@@ -89,7 +89,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
-  cp $VERBOSE ./auth.env "$DESTDIR/"
+  touch "$DESTDIR/"auth.env
   cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
   cp $VERBOSE ./host-map.txt "$DESTDIR/"
   cp $VERBOSE ./net-map.json "$DESTDIR/"
@@ -113,9 +113,6 @@ if mkdir "$DESTDIR"; then
   ln -s ./control.py stop
   ln -s ./control.py wipe
   popd  >/dev/null 2>&1
-  echo "You must set an administrator username and password for Malcolm, and self-signed X.509 certificates will be generated"
-  ./scripts/auth_setup
-  rm -rf logstash/certs/ca.key
   pushd .. >/dev/null 2>&1
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
@@ -123,7 +120,6 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
-  echo ""
 
   unset CONFIRMATION
   echo ""
