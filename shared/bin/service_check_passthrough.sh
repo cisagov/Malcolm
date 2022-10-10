@@ -149,7 +149,7 @@ EOF
 <header><title>$SERVICE Disabled</title></header>
 <body>
 <h1>The local service $SERVICE has been disabled.</h1>
-<p>Refer to the <a href="/readme" onclick="javascript:event.target.port=443">Malcolm documentation</a>.</p>
+<p>Refer to the <a href="/readme/" onclick="javascript:event.target.port=443">Malcolm documentation</a>.</p>
 </body>
 </html>
 EOF

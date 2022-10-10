@@ -135,7 +135,8 @@ A minute or so after starting Malcolm, the following services will be accessible
   - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - NetBox: https://localhost/netbox/
-  - Account management: https://localhost:488/
+  - Account management: https://localhost:488/  
+  - Documentation: https://localhost/readme/
 ```
 
 The above example will result in the following artifacts for distribution as explained in the script's output:

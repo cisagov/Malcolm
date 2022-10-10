@@ -285,6 +285,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - NetBox: https://localhost/netbox/  
   - Account management: https://localhost:488/
+  - Documentation: https://localhost/readme/
 
 NAME                           COMMAND                  SERVICE              STATUS               PORTS
 malcolm-api-1                  "/usr/local/bin/dock…"   api                  running (starting)   …

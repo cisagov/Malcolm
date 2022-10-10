@@ -119,8 +119,6 @@ if mkdir "$DESTDIR"; then
   pushd .. >/dev/null 2>&1
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
-  README_HTML="$RUN_PATH/$(basename $DESTDIR).README.html"
-  docker run --rm --entrypoint /bin/bash "$(grep -E 'image: *malcolmnetsec/arkime' "$DESTDIR/docker-compose.yml" | awk '{print $2}')" -c "cat /opt/arkime/doc/README.html" > "$README_HTML" || true
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
@@ -161,6 +159,7 @@ if mkdir "$DESTDIR"; then
   echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"
   echo "  - NetBox: https://localhost/netbox/" | tee -a "$README"
   echo "  - Account management: https://localhost:488/" | tee -a "$README"
+  echo "  - Documentation: https://localhost/readme/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1

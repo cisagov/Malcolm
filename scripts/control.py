@@ -606,6 +606,7 @@ def start():
         eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
         eprint("  - NetBox: https://localhost/netbox/\n")
         eprint("  - Account management: https://localhost:488/\n")
+        eprint("  - Documentation: https://localhost/readme/\n")
     else:
         eprint("Malcolm failed to start\n")
         eprint("\n".join(out))

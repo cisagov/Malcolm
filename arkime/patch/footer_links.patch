@@ -8,7 +8,7 @@ index 50e30c99..d67dfb36 100644
          Arkime v{{molochVersion}} |
 -        <a href="https://arkime.com">arkime.com</a>
 +        <a href="https://arkime.com">arkime.com 🦉</a>
-+        | <a href="/readme">Malc⦿lm 📄</a>
++        | <a href="/readme/">Malc⦿lm 📄</a>
 +        | <a href="/dashboards">Dashboards 📊</a>
          <span v-if="responseTime && !loadingData">
 -          | {{ responseTime | commaString }}ms
