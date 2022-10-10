@@ -35,6 +35,17 @@ relative_links:
   enabled: true
   collections: true
 exclude:
+  - .dockerignore
+  - .envrc
+  - .git
+  - .github
+  - .gitignore
+  - .ldap_config_defaults
+  - .opensearch.primary.curlrc
+  - .opensearch.secondary.curlrc
+  - .tmp
+  - .travis.yml
+  - .trigger_workflow_build
   - api
   - arkime
   - arkime-logs
@@ -44,37 +55,29 @@ exclude:
   - dashboards
   - docker-compose-standalone.yml
   - docker-compose.yml
-  - docs/images/hedgehog/logo/font
+  - Dockerfiles
   - docs/images/font
+  - docs/images/hedgehog/logo/font
   - docs/quick-start
   - docs/slides
   - docs/stix
   - docs/web
-  - Dockerfiles
-  - .dockerignore
-  - .envrc
-  - filebeat
   - file-monitor
   - file-upload
+  - filebeat
   - freq-server
-  - .git
-  - .github
-  - .gitignore
   - Gemfile
   - Gemfile.lock
   - host-map.txt
   - htadmin
-  - .ldap_config_defaults
   - logstash
   - malcolm-iso
   - name-map-ui
-  - netbox
   - net-map.json
+  - netbox
   - nginx
   - opensearch
   - opensearch-backup
-  - .opensearch.primary.curlrc
-  - .opensearch.secondary.curlrc
   - pcap
   - pcap-capture
   - pcap-monitor
@@ -83,9 +86,13 @@ exclude:
   - shared
   - suricata
   - suricata-logs
-  - .tmp
-  - .travis.yml
-  - .trigger_workflow_build
   - yara
   - zeek
   - zeek-logs
+  - "**/*.ai"
+  - "**/*.eps"
+  - "**/*.odg"
+  - "**/*.ppt*"
+  - "**/*.pdf"
+  - "**/*.svg"
+  - "**/*.xcf"

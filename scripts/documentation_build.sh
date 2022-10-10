@@ -95,7 +95,7 @@ cp $VERBOSE_FLAG -r README.md _includes _layouts _config.yml Gemfile docs "$WORK
 pushd "$WORKDIR" >/dev/null 2>&1
 
 # if the revision commit has been specified, replace references to site.github.build_revision with it
-[[ -n "$REVISION" ]] && find . -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$REVISION/g" "{}" \;
+[[ -n "$REVISION" ]] && $FIND . -type f -name "*.md" -exec $SED -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$REVISION/g" "{}" \;
 
 # pass GitHub API token through to Jekyll if it's available
 if [[ -n "${TOKEN:-}" ]]; then
@@ -107,7 +107,7 @@ fi
 $DOCKER_BIN run --rm -v "$(pwd)":/site "${TOKEN_ARGS[@]}" --entrypoint="docker-entrypoint.sh" ghcr.io/mmguero-dev/jekyll:latest bundle exec jekyll build
 
 # clean up some files no longer needed
-find ./_site/ -type f -name "*.md" -delete
+$FIND ./_site/ -type f -name "*.md" -delete
 
 # TODO: can we get this to run mapping UID so it doesn't have to be sudo'd?
 $SUDO_CMD chown -R $(id -u):$(id -g) ./_site/
