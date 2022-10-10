@@ -66,6 +66,7 @@
 "s7comm": ["ot", "network"]
 "s7comm_plus": ["ot", "network"]
 "s7comm_read_szl": ["ot", "network"]
+"s7comm_upload_download": ["ot", "network"]
 "signatures": ["malware", "intrusion_detection", "network"]
 "sip": ["network"]
 "smb_cmd": ["network"]
