@@ -108,7 +108,7 @@ CAPA_MIMES_TO_SCAN = (
 )
 CAPA_VIV_SUFFIX = '.viv'
 CAPA_VIV_MIME = 'data'
-CAPA_ATTACK_KEY = 'att&ck'
+CAPA_ATTACK_KEY = 'attack'
 CAPA_RUN_TIMEOUT_SEC = 300
 
 ###################################################################################################
