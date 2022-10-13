@@ -21,7 +21,7 @@ fi
 apt-get -q update
 
 cd /tmp
-git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION
+git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION
 cd "./arkime-"$ARKIME_VERSION
 for i in /opt/patches/*; do
   patch -p 1 -r - --no-backup-if-mismatch < $i || true

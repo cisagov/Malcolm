@@ -4,7 +4,7 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "3.4.2"
+ENV ARKIME_VERSION "v4.0.0"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -51,7 +51,7 @@ RUN apt-get -q update && \
         zlib1g-dev && \
   pip3 install --no-cache-dir beautifulsoup4 && \
   cd /opt && \
-    git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --no-tags --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
+    git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
     bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     export PATH="$ARKIME_DIR/bin:${PATH}" && \

@@ -28,9 +28,12 @@ set -e
   [arkime_files_v]=arkime_files_v30
   [arkime_hunts_v]=arkime_hunts_v30
   [arkime_lookups_v]=arkime_lookups_v30
+  [arkime_notifiers_v]=arkime_notifiers_v40
   [arkime_queries_v]=arkime_queries_v30
+  [arkime_sequence_v]=arkime_sequence_v30
   [arkime_stats_v]=arkime_stats_v30
   [arkime_users_v]=arkime_users_v30
+  [arkime_views_v]=arkime_views_v40
 )
 
 # get a list of all current indices and loop over them

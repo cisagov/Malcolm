@@ -342,7 +342,7 @@ x-pcap-capture-variables: &pcap-capture-variables
   PCAP_IFACE_TWEAK : 'false'
   # Specifies how large a locally-captured PCAP file can become (in megabytes) before
   #   it is closed for processing and a new PCAP file created
-  PCAP_ROTATE_MEGABYTES : 1024
+  PCAP_ROTATE_MEGABYTES : 4096
   # Specifies a time interval (in minutes) after which a locally-captured PCAP file
   #   will be closed for processing and a new PCAP file created
   PCAP_ROTATE_MINUTES : 10
