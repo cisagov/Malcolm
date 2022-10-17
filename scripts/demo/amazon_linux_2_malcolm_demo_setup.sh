@@ -544,7 +544,7 @@ function InstallMalcolm {
 
   CONFIRMATION=$(_GetConfirmation "Clone and setup Malcolm [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-    if _GitClone https://github.com/idaholab/Malcolm "$MALCOLM_PATH"; then
+    if _GitClone https://github.com/cisagov/Malcolm "$MALCOLM_PATH"; then
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
       python3 ./scripts/install.py -c -d
       CONFIG_PAIRS=(
@@ -582,7 +582,7 @@ function InstallMalcolm {
     fi
 
     pushd "$LOCAL_BIN_PATH" >/dev/null 2>&1
-    curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/demo/reset_and_auto_populate.sh
+    curl -sSL -J -O https://raw.githubusercontent.com/cisagov/Malcolm/main/scripts/demo/reset_and_auto_populate.sh
     curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm-PCAP/main/tools/pcap_time_shift.py
     chmod 755 reset_and_auto_populate.sh pcap_time_shift.py
     popd >/dev/null 2>&1

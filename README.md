@@ -47,24 +47,11 @@ See [**Building from source**](docs/development.md#Build) to read how you can us
 ![malcolm-iso-build-docker-wrap-push-ghcr]({{ site.github.repository_url }}/workflows/malcolm-iso-build-docker-wrap-push-ghcr/badge.svg)
 ![sensor-iso-build-docker-wrap-push-ghcr]({{ site.github.repository_url }}/workflows/sensor-iso-build-docker-wrap-push-ghcr/badge.svg)
 
-## <a name="Forks"></a>Forks
-
-[CISA](https://www.cisa.gov/) maintains the upstream source code repository for Malcolm at [https://github.com/cisagov/Malcolm](https://github.com/cisagov/Malcolm). The [Idaho National Lab](https://inl.gov/)'s fork of Malcolm, which is currently kept up-to-date with CISA's upstream development, can be found at [https://github.com/idaholab/Malcolm](https://github.com/idaholab/Malcolm).
-
 ## <a name="Footer"></a>Copyright
 
 [Malcolm]({{ site.github.repository_url }}) is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See [`License.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/License.txt) for the terms of its release.
-
-## Other Software
-
-Idaho National Laboratory is a cutting edge research facility which is constantly producing high quality research and software. Feel free to take a look at our other software and scientific offerings at:
-
-* [Primary Technology Offerings Page](https://www.inl.gov/inl-initiatives/technology-deployment)
-* [Supported Open Source Software](https://github.com/idaholab)
-* [Raw Experiment Open Source Software](https://github.com/IdahoLabResearch)
-* [Unsupported Open Source Software](https://github.com/IdahoLabCuttingBoard)
 
 ## <a name="Contact"></a>Contact information of author(s):
 
