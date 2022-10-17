@@ -1,0 +1,6 @@
+{
+  "name": "Suricata Logs",
+  "expression": "event.provider == suricata",
+  "roles": ["arkimeUser"],
+  "users" : [ ]
+}

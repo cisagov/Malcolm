@@ -1,0 +1,6 @@
+{
+  "name": "Arkime Sessions",
+  "expression": "event.provider == arkime",
+  "roles": ["arkimeUser"],
+  "users" : [ ]
+}

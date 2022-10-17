@@ -58,9 +58,20 @@ if [[ $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/j
   $ARKIME_DIR/bin/capture $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
   rm -f /tmp/not_a_packet.pcap
 
+  echo "Initializing views..."
+
+  for VIEW_FILE in "$ARKIME_DIR"/etc/views/*.json; do
+    TEMP_JSON=$(mktemp --suffix=.json)
+    RANDOM_ID="$(openssl rand -base64 14 | sed -E 's/[^[:alnum:][:space:]]+/_/g')"
+    echo "Creating view $(jq '.name' < "${VIEW_FILE}")"
+    jq ". += {\"user\": \"${MALCOLM_USERNAME}\"}" < "${VIEW_FILE}" >"${TEMP_JSON}"
+    curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_views/_doc/${RANDOM_ID}" -d "@${TEMP_JSON}"
+    rm -f "${TEMP_JSON}"
+  done
+
   echo "Setting defaults..."
 
-  curl "${CURL_CONFIG_PARAMS[@]}" -sS -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
+  curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
 
   echo -e "\nOpenSearch database initialized!\n"
 
@@ -84,7 +95,7 @@ fi # if/else OpenSearch database initialized
 # increase OpenSearch max shards per node from default if desired
 if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
   # see https://github.com/elastic/elasticsearch/issues/40803
-  curl "${CURL_CONFIG_PARAMS[@]}" -sS -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OPENSEARCH_MAX_SHARDS_PER_NODE\" } }"
+  curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OPENSEARCH_MAX_SHARDS_PER_NODE\" } }"
 fi
 
 # before running viewer, call _refresh to make sure everything is available for search first
@@ -93,3 +104,4 @@ curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
 touch /var/run/arkime/initialized
 
 # the (viewer|wise)_service.sh scripts will start/restart those processes
+

@@ -1,0 +1,6 @@
+{
+  "name": "Suricata Alerts",
+  "expression": "event.provider == suricata && event.dataset == alert",
+  "roles": ["arkimeUser"],
+  "users" : [ ]
+}
