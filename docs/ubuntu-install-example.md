@@ -129,7 +129,7 @@ Delete the oldest indices when the database exceeds a certain size? (y/N): n
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
-Download updated Suricata signatures periodically? (Y/n): y
+Download updated Suricata signatures periodically? (y/N): y
 
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
@@ -170,6 +170,10 @@ Select file extraction behavior (none): 5
 3: none
 Select file preservation behavior (quarantined): 1
 
+Expose web interface for downloading preserved files? (y/N): y
+
+Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted): decryptme
+
 Scan extracted files with ClamAV? (y/N): y
 
 Scan extracted files with Yara? (y/N): y
@@ -178,7 +182,9 @@ Scan extracted PE files with Capa? (y/N): y
 
 Lookup extracted file hashes with VirusTotal? (y/N): n
 
-Download updated file scanner signatures periodically? (Y/n): y
+Download updated file scanner signatures periodically? (n/Y): y
+
+Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y/N): n
 
 Should Malcolm capture live network traffic to PCAP files for analysis with Arkime? (y/N): y
 
