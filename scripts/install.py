@@ -575,7 +575,7 @@ class Installer(object):
 
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
         suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
-            'Download updated Suricata signatures periodically?', default=autoSuricata
+            'Download updated Suricata signatures periodically?', default=False
         )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
         reverseDns = InstallerYesOrNo(
@@ -638,6 +638,8 @@ class Installer(object):
         capaScan = False
         clamAvScan = False
         fileScanRuleUpdate = False
+        fileCarveHttpServer = False
+        fileCarveHttpServeEncryptKey = ''
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
             while fileCarveMode not in allowedFileCarveModes:
@@ -650,6 +652,13 @@ class Installer(object):
                     'Select file preservation behavior',
                     choices=[(x, '', x == allowedFilePreserveModes[0]) for x in allowedFilePreserveModes],
                 )
+            fileCarveHttpServer = InstallerYesOrNo(
+                'Expose web interface for downloading preserved files?', default=False
+            )
+            if fileCarveHttpServer:
+                fileCarveHttpServeEncryptKey = InstallerAskForString(
+                    'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
+                )
             if fileCarveMode is not None:
                 if InstallerYesOrNo('Scan extracted files with ClamAV?', default=False):
                     clamAvScan = True
@@ -661,7 +670,7 @@ class Installer(object):
                     while len(vtotApiKey) <= 1:
                         vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
                 fileScanRuleUpdate = InstallerYesOrNo(
-                    'Download updated file scanner signatures periodically?', default=True
+                    'Download updated file scanner signatures periodically?', default=False
                 )
 
         if fileCarveMode not in allowedFileCarveModes:
@@ -670,6 +679,12 @@ class Installer(object):
             filePreserveMode = allowedFilePreserveModes[0]
         if (vtotApiKey is None) or (len(vtotApiKey) <= 1):
             vtotApiKey = '0'
+
+        # NetBox
+        netboxEnabled = InstallerYesOrNo(
+            'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
+            default=False,
+        )
 
         # input packet capture parameters
         pcapNetSniff = False
@@ -784,6 +799,31 @@ class Installer(object):
                             # zeek file preservation mode
                             line = re.sub(
                                 r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', fr"\g<1>'{filePreserveMode}'", line
+                            )
+
+                        elif 'EXTRACTED_FILE_HTTP_SERVER_ENABLE' in line:
+                            # HTTP server for extracted files
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_HTTP_SERVER_ENABLE\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(fileCarveHttpServer)}",
+                                line,
+                            )
+
+                        elif 'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT' in line:
+                            # encrypt HTTP server for extracted files
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_HTTP_SERVER_ENCRYPT\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0))}",
+                                line,
+                            )
+
+                        elif 'EXTRACTED_FILE_HTTP_SERVER_KEY' in line:
+                            # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
+                            fileCarveHttpServeEncryptKeyEscaped = fileCarveHttpServeEncryptKey.replace("'", "''")
+                            line = re.sub(
+                                r'(EXTRACTED_FILE_HTTP_SERVER_KEY\s*:\s*)(\S+)',
+                                fr"\g<1>'{fileCarveHttpServeEncryptKeyEscaped}'",
+                                line,
                             )
 
                         elif 'VTOT_API2_KEY' in line:
@@ -906,6 +946,14 @@ class Installer(object):
                             # automatic MAC OUI lookup
                             line = re.sub(
                                 r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line
+                            )
+
+                        elif 'NETBOX_DISABLED' in line:
+                            # enable/disable netbox
+                            line = re.sub(
+                                r'(NETBOX_DISABLED\s*:(\s*&\S+)?\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(not netboxEnabled)}",
+                                line,
                             )
 
                         elif 'pipeline.workers' in line:
