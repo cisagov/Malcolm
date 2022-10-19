@@ -55,6 +55,16 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(maxFileTimeM)\s*=\s*.*/\1=$PCAP_ROTATE_MINUTES/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # pcap compression
+  COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
+  COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"
+  sed -r -i "s/(simpleCompression)\s*=\s*.*/\1=$COMPRESSION_TYPE/" "$ARKIME_CONFIG_FILE"
+  if [[ "$COMPRESSION_TYPE" == "zstd" ]]; then
+    sed -r -i "s/(simpleZstdLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
+  elif [[ "$COMPRESSION_TYPE" == "gzip" ]]; then
+    sed -r -i "s/(simpleGzipLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
+  fi
+
   # identify node in session metadata for PCAP reachback
   PRIMARY_IP=$(ip route get 255.255.255.255 | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
   export ARKIME_NODE_NAME="$(hostname --long)"

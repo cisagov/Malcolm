@@ -99,6 +99,17 @@ class Constants:
 
     # specific to arkime
     ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
+    ARKIME_COMPRESSION_TYPE = "ARKIME_COMPRESSION_TYPE"
+    ARKIME_COMPRESSION_LEVEL = "ARKIME_COMPRESSION_LEVEL"
+    ARKIME_COMPRESSION_TYPES = (
+        # 'gzip', - gzip has got issues on Hedgehog for some reason
+        'none',
+        'zstd',
+    )
+    ARKIME_COMPRESSION_LEVELS = {
+        'gzip': (1, 9, 3),
+        'zstd': (-5, 19, 3),
+    }
 
     MSG_CONFIG_MODE = 'Configuration Mode'
     MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
@@ -106,6 +117,8 @@ class Constants:
     MSG_CONFIG_MODE_AUTOSTART = 'Configure Autostart Services'
     MSG_CONFIG_GENERIC = 'Configure {}'
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
+    MSG_CONFIG_ARKIME_COMPRESSION = 'Specify Arkime PCAP compression mode'
+    MSG_CONFIG_ARKIME_COMPRESSION_LEVEL = 'Specify Arkime PCAP {} compression level'
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
@@ -832,6 +845,49 @@ def main():
                             if isipaddress(ip)
                         ]
                     )
+
+                    # arkime PCAP compression settings
+                    code, compression_type = d.radiolist(
+                        Constants.MSG_CONFIG_ARKIME_COMPRESSION,
+                        choices=[
+                            (x, x, x == capture_config_dict[Constants.ARKIME_COMPRESSION_TYPE])
+                            for x in Constants.ARKIME_COMPRESSION_TYPES
+                        ],
+                    )
+                    if code == Dialog.CANCEL or code == Dialog.ESC:
+                        raise CancelledError
+                    arkime_opensearch_config_dict[Constants.ARKIME_COMPRESSION_TYPE] = compression_type
+
+                    compression_level = 0
+                    if compression_type in Constants.ARKIME_COMPRESSION_LEVELS:
+                        prev_compression_level = capture_config_dict.get(
+                            Constants.ARKIME_COMPRESSION_LEVEL,
+                            Constants.ARKIME_COMPRESSION_LEVELS[compression_type][2],
+                        )
+                        prev_compression_level = (
+                            int(prev_compression_level)
+                            if prev_compression_level.isdigit()
+                            else int(Constants.ARKIME_COMPRESSION_LEVELS[compression_type][2])
+                        )
+                        code, compression_level = d.rangebox(
+                            f"{Constants.MSG_CONFIG_ARKIME_COMPRESSION_LEVEL.format(compression_type)}",
+                            width=(
+                                len(
+                                    range(
+                                        Constants.ARKIME_COMPRESSION_LEVELS[compression_type][0],
+                                        Constants.ARKIME_COMPRESSION_LEVELS[compression_type][1],
+                                    )
+                                )
+                                + 1
+                            )
+                            * 3,
+                            min=Constants.ARKIME_COMPRESSION_LEVELS[compression_type][0],
+                            max=Constants.ARKIME_COMPRESSION_LEVELS[compression_type][1],
+                            init=prev_compression_level,
+                        )
+                    if code == Dialog.CANCEL or code == Dialog.ESC:
+                        raise CancelledError
+                    arkime_opensearch_config_dict[Constants.ARKIME_COMPRESSION_LEVEL] = str(compression_level)
 
                     list_results = sorted(
                         [
