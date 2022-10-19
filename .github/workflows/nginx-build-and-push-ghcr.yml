@@ -43,6 +43,11 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
       -
+        name: Extract commit SHA
+        shell: bash
+        run: echo "##[set-output name=sha;]$(git rev-parse --short HEAD)"
+        id: extract_commit_sha
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       -
@@ -65,7 +70,7 @@ jobs:
           context: .
           file: ./Dockerfiles/nginx.Dockerfile
           build-args: |
-            VCS_REVISION=${{ secrets.sha }}
+            VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/nginx-proxy:${{ steps.extract_branch.outputs.branch }}

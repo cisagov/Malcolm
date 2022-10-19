@@ -8,7 +8,7 @@ on:
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
-      - '.trigger_workflow_build'
+      - '.trigger_iso_workflow_build'
       - '.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
@@ -80,10 +80,10 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
       -
-        name: Extract short hash
+        name: Extract commit SHA
         shell: bash
-        run: echo "##[set-output name=hash;]$(git rev-parse --short $GITHUB_SHA)"
-        id: extract_short_hash
+        run: echo "##[set-output name=sha;]$(git rev-parse --short HEAD)"
+        id: extract_commit_sha
       -
         name: Extract Malcolm version
         shell: bash
@@ -99,7 +99,7 @@ jobs:
               docker tag "$REPO_IMAGE" "$IMAGE" && \
               docker rmi "$REPO_IMAGE"
           done
-          DEST_IMAGES_TGZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_short_hash.outputs.hash }}_images.tar.gz
+          DEST_IMAGES_TGZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.gz
           docker save "${IMAGES[@]}" | gzip --best > "$DEST_IMAGES_TGZ"
           for IMAGE in "${IMAGES[@]}"; do
             docker rmi "$IMAGE"
