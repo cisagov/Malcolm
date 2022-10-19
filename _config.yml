@@ -3,7 +3,7 @@ title: Malcolm
 description: A powerful, easily deployable network traffic analysis tool suite
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0
-external_download_url: https://malcolm.fyi/download/
+external_download_url: https://malcolm.fyi/docs/download.html
 youtube_url: https://www.youtube.com/c/MalcolmNetworkTrafficAnalysisToolSuite
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
