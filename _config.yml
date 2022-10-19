@@ -87,6 +87,7 @@ exclude:
   - suricata
   - suricata-logs
   - yara
+  - yq
   - zeek
   - zeek-logs
   - "**/*.ai"
