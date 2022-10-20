@@ -74,6 +74,21 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   rsync -a --update /opt/arkime/etc/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb} /opt/sensor/sensor_ctl/arkime/
   chmod 600 /opt/sensor/sensor_ctl/arkime/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb}
 
+  # generate self-signed TLS keys for arkime viewer if they don't already exist
+  if ( [[ -n "$ARKIME_VIEWER_CERT" ]] && [[ -n "$ARKIME_VIEWER_KEY" ]] ); then
+    CRT_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_CERT"
+    KEY_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_KEY"
+    if ( [[ ! -f "$CRT_FILESPEC" ]] || [[ ! -f "$KEY_FILESPEC" ]] ) && [[ -x /usr/local/bin/self_signed_key_gen.sh ]]; then
+      CERT_WORK_DIR="$(mktemp -d -t arkime-viewer-tls-XXXXXX)"
+      pushd "$CERT_WORK_DIR" >/dev/null 2>&1
+      /usr/local/bin/self_signed_key_gen.sh >/dev/null 2>&1
+      mv ./certs_2*/server.crt "$CRT_FILESPEC"
+      mv ./certs_2*/server.key "$KEY_FILESPEC"
+      popd >/dev/null 2>&1
+      rm -rf "$CERT_WORK_DIR"
+    fi
+  fi
+
   # update the firewall ACL (via ufw) to allow retrieval of packets
   sudo --non-interactive /usr/local/bin/ufw_allow_viewer.sh
 
