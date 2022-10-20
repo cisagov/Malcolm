@@ -604,7 +604,7 @@ services:
       - ./arkime/etc/user_settings.json:/opt/arkime/etc/user_settings.json:ro
       - ./arkime/wise/source.zeeklogs.js:/opt/arkime/wiseService/source.zeeklogs.js:ro
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8005/_ns_/nstest.html"]
+      test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
       interval: 90s
       timeout: 30s
       retries: 3
