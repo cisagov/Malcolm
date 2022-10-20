@@ -181,6 +181,7 @@ ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
 ADD scripts/malcolm_common.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
+ADD shared/bin/self_signed_key_gen.sh /usr/local/bin/
 ADD arkime/etc $ARKIME_DIR/etc/
 ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 ADD arkime/supervisord.conf /etc/supervisord.conf
