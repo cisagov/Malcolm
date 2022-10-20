@@ -79,13 +79,12 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     CRT_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_CERT"
     KEY_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_KEY"
     if ( [[ ! -f "$CRT_FILESPEC" ]] || [[ ! -f "$KEY_FILESPEC" ]] ) && [[ -x /usr/local/bin/self_signed_key_gen.sh ]]; then
-      CERT_WORK_DIR="$(mktemp -d -t arkime-viewer-tls-XXXXXX)"
-      pushd "$CERT_WORK_DIR" >/dev/null 2>&1
-      /usr/local/bin/self_signed_key_gen.sh >/dev/null 2>&1
-      mv ./certs_2*/server.crt "$CRT_FILESPEC"
-      mv ./certs_2*/server.key "$KEY_FILESPEC"
-      popd >/dev/null 2>&1
-      rm -rf "$CERT_WORK_DIR"
+      pushd "$SUPERVISOR_PATH"/arkime >/dev/null 2>&1
+      /usr/local/bin/self_signed_key_gen.sh -n -o ./newcerts >/dev/null 2>&1
+      mv ./newcerts/server.crt "$CRT_FILESPEC"
+      mv ./newcerts/server.key "$KEY_FILESPEC"
+      rm -rf ./newcerts
+      popd >/dev/null 2>&1      
     fi
   fi
 

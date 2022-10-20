@@ -6,6 +6,10 @@
 #   openssl s_server -Verify 999 -CAfile ca.crt -key server.key -cert server.crt -accept 44330 -www
 #   openssl s_client -CAfile ca.crt -key client.key -cert client.crt -showcerts -connect localhost:44330
 
+set -e
+set -u
+set -o pipefail
+
 ENCODING="utf-8"
 
 if [ -t 0 ] ; then
@@ -14,19 +18,48 @@ else
   INTERACTIVE_SHELL=no
 fi
 
-set -e
-set -u
-set -o pipefail
+OUTPUT_PATH=
+while getopts 'vno:' OPTION; do
+  case "$OPTION" in
+    v)
+      VERBOSE_FLAG="-v"
+      set -x
+      ;;
+
+    n)
+      INTERACTIVE_SHELL=no
+      ;;
+
+    o)
+      OUTPUT_PATH="$OPTARG"
+      ;;
+
+    ?)
+      echo "script usage: $(basename $0) [-v (verbose)] [-n (non-interactive)]" >&2
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
 
 RUN_PATH="$(pwd)"
-OUTPUT_PATH="${1:-"$(pwd)"/certs_$(date "+%Y-%m-%d_%H:%M:%S")}"
+[[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
+if ! command -v "$REALPATH" >/dev/null 2>&1; then
+  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH" >&2
+  exit 1
+fi
+
+if [[ -z "$OUTPUT_PATH" ]]; then
+  OUTPUT_PATH="$(pwd)"/certs_$(date "+%Y-%m-%d_%H:%M:%S")
+fi
+OUTPUT_PATH=$($REALPATH "${OUTPUT_PATH}")
 
 # create a temporary directory to store our results in
 WORKDIR="$(mktemp -d -t keygen-XXXXXX)"
 
 # cleanup - on exit ensure the leftover files are shredded and the temporary directory is removed
 function cleanup {
-  popd >/dev/null 2>&1
+  popd >/dev/null 2>&1 || true
   shred -u "$WORKDIR"/* >/dev/null 2>&1 || true
   if ! rm -rf "$WORKDIR"; then
     echo "Failed to remove temporary directory '$WORKDIR'" >&2
@@ -218,8 +251,10 @@ EOF
   openssl dhparam -out dhparam.pem 2048
   # -----------------------------------------------
 
-  mkdir -p "$OUTPUT_PATH"
-  chmod 700 "$OUTPUT_PATH"
+  if [[ ! -d "$OUTPUT_PATH" ]] && [[ ! -e "$OUTPUT_PATH" ]]; then
+    mkdir -p "$OUTPUT_PATH"
+    chmod 700 "$OUTPUT_PATH"
+  fi
   rm -f *.conf *.csr *.srl
   cp ./* "$OUTPUT_PATH"/
 fi
