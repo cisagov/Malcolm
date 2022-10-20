@@ -579,7 +579,7 @@ services:
       - ./arkime-logs:/opt/arkime/logs
       - ./arkime-raw:/opt/arkime/raw
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8005/_ns_/nstest.html"]
+      test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
       interval: 90s
       timeout: 30s
       retries: 3
