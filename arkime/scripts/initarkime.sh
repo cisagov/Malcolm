@@ -19,6 +19,19 @@ OPENSEARCH_URL_FULL="$(grep -Pi '^elasticsearch\s*=' $ARKIME_DIR/etc/config.ini 
 
 rm -f /var/run/arkime/initialized /var/run/arkime/runwise
 
+# make sure TLS certificates exist prior to starting up
+CERT_FILE=$ARKIME_DIR/etc/viewer.crt
+KEY_FILE=$ARKIME_DIR/etc/viewer.key
+if ( [[ ! -f "$CERT_FILE" ]] || [[ ! -f "$KEY_FILE" ]] ) && [[ -x /usr/local/bin/self_signed_key_gen.sh ]]; then
+  rm -f "$CERT_FILE" "$KEY_FILE" ./newcerts
+  pushd $ARKIME_DIR/etc/ >/dev/null 2>&1
+  /usr/local/bin/self_signed_key_gen.sh -n -o ./newcerts >/dev/null 2>&1
+  mv ./newcerts/server.crt "$CERT_FILE"
+  mv ./newcerts/server.key "$KEY_FILE"
+  rm -rf ./newcerts
+  popd >/dev/null 2>&1
+fi
+
 echo "Giving OpenSearch time to start..."
 /opt/opensearch_status.sh 2>&1 && echo "OpenSearch is running!"
 
