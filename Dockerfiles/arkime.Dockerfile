@@ -68,7 +68,7 @@ RUN apt-get -q update && \
     npm -g config set user root && \
     make install && \
     npm cache clean --force && \
-    rm -f ${ARKIME_DIR}/wiseService/source.* && \
+    rm -f ${ARKIME_DIR}/wiseService/source.* ${ARKIME_DIR}/etc/*.systemd.service && \
     bash -c "file ${ARKIME_DIR}/bin/* ${ARKIME_DIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
 
 FROM debian:11-slim
