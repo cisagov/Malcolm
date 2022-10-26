@@ -41,11 +41,9 @@ RUN apt-get -q update && \
       jq \
       procps \
       psmisc \
-      python3-psycopg2 \
-      python3-pynetbox \
-      python3-slugify \
       supervisor \
       tini && \
+    /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
