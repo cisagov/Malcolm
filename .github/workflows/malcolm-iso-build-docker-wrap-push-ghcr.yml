@@ -77,17 +77,17 @@ jobs:
       -
         name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: extract_branch
       -
         name: Extract commit SHA
         shell: bash
-        run: echo "##[set-output name=sha;]$(git rev-parse --short HEAD)"
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         id: extract_commit_sha
       -
         name: Extract Malcolm version
         shell: bash
-        run: echo "##[set-output name=mversion;]$(grep -P "^\s+image:\s*malcolm" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+        run: echo "mversion=$(grep -P "^\s+image:\s*malcolm" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
         id: extract_malcolm_version
       -
         name: Build image
