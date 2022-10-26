@@ -6,8 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN    apt-get update -q \
-    && apt-get -y -q --no-install-recommends upgrade \
-    && apt-get install -y --no-install-recommends gcc \
+    && apt-get -y -q upgrade \
+    && apt-get install -y gcc \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install flake8
 
