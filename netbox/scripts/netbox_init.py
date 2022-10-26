@@ -9,6 +9,7 @@ import pynetbox
 import sys
 import time
 
+from collections.abc import Iterable
 from slugify import slugify
 
 ###################################################################################################
@@ -16,6 +17,14 @@ args = None
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
+
+###################################################################################################
+def get_iterable(x):
+    if isinstance(x, Iterable) and not isinstance(x, str):
+        return x
+    else:
+        return (x,)
+
 
 ###################################################################################################
 # main
@@ -77,6 +86,15 @@ def main():
         help="Site(s) to create",
     )
     parser.add_argument(
+        '-n',
+        '--net-map',
+        dest='netMapFileName',
+        type=str,
+        default=None,
+        required=False,
+        help="Filename of JSON file containing network subnet/host name mapping",
+    )
+    parser.add_argument(
         '--default-group',
         dest='defaultGroupName',
         type=str,
@@ -114,6 +132,11 @@ def main():
         args.netboxUrl,
         token=args.netboxToken,
     )
+    sites = {}
+    groups = {}
+    permissions = {}
+    vrfs = {}
+    prefixes = {}
 
     # wait for a good connection
     while args.wait:
@@ -133,17 +156,19 @@ def main():
 
     try:
         # list existing groups
-        groupsPreExisting = [x.name for x in nb.users.groups.all()]
-        logging.debug(groupsPreExisting)
+        groupsPreExisting = {x.name: x.id for x in nb.users.groups.all()}
+        logging.debug(f"groups (before): {groupsPreExisting}")
 
         # create groups that don't already exist
-        for groupName in DEFAULT_GROUP_NAMES:
-            if groupName not in groupsPreExisting:
+        for groupName in [x for x in DEFAULT_GROUP_NAMES if x not in groupsPreExisting]:
+            try:
                 nb.users.groups.create({'name': groupName})
+            except pynetbox.RequestError as re:
+                logging.warning(f"{type(re).__name__} processing group \"{groupName}\": {re}")
 
         # get existing groups into name->id dictionary
-        groupNameIdDict = {x.name: x.id for x in nb.users.groups.all()}
-        logging.debug(groupNameIdDict)
+        groups = {x.name: x.id for x in nb.users.groups.all()}
+        logging.debug(f"groups (after): {groups}")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing groups: {e}")
 
@@ -190,42 +215,119 @@ def main():
         allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
 
         # get existing permissions
-        permsPreExisting = [x.name for x in nb.users.permissions.all()]
-        logging.debug(permsPreExisting)
+        permsPreExisting = {x.name: x.id for x in nb.users.permissions.all()}
+        logging.debug(f"permissions (before): {permsPreExisting}")
 
         # create permissions that don't already exist
-        for permName, permConfig in DEFAULT_PERMISSIONS.items():
-            if 'name' in permConfig and permConfig['name'] not in permsPreExisting:
-                permConfig['groups'] = [groupNameIdDict[x] for x in permConfig['groups']]
-                permConfig['object_types'] = [
-                    ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']
-                ]
-                permConfig.pop('exclude_objects', None)
+        for permName, permConfig in {
+            k: v for (k, v) in DEFAULT_PERMISSIONS.items() if v.get('name', None) and v['name'] not in permsPreExisting
+        }.items():
+            permConfig['groups'] = [groups[x] for x in permConfig['groups']]
+            permConfig['object_types'] = [ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']]
+            permConfig.pop('exclude_objects', None)
+            try:
                 nb.users.permissions.create(permConfig)
+            except pynetbox.RequestError as re:
+                logging.warning(f"{type(re).__name__} processing permission \"{permConfig['name']}\": {re}")
 
-        logging.debug([x.name for x in nb.users.permissions.all()])
+        permissions = {x.name: x.id for x in nb.users.permissions.all()}
+        logging.debug(f"permissions (after): {permissions}")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing permissions: {e}")
 
-    # ###### PERMISSIONS ###########################################################################################
+    # ###### SITES #################################################################################################
     # get existing sites
     try:
-        sitesPreExisting = [x.name for x in nb.dcim.sites.all()]
-        logging.debug(sitesPreExisting)
+        sitesPreExisting = {x.name: x.id for x in nb.dcim.sites.all()}
+        logging.debug(f"sites (before): {sitesPreExisting}")
 
         # create sites that don't already exist
-        for siteName in args.netboxSites:
-            if siteName not in sitesPreExisting:
+        for siteName in [x for x in args.netboxSites if x not in sitesPreExisting]:
+            try:
                 nb.dcim.sites.create(
                     {
                         "name": siteName,
                         "slug": slugify(siteName),
                     },
                 )
+            except pynetbox.RequestError as re:
+                logging.warning(f"{type(re).__name__} processing site \"{siteName}\": {re}")
 
-        logging.debug([f'{x.name} ({x.slug})' for x in nb.dcim.sites.all()])
+        sites = {x.name: x.id for x in nb.dcim.sites.all()}
+        logging.debug(f"sites (after): {sites}")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
+
+    # ###### Net Map ###############################################################################################
+    try:
+        # load net-map.json from file
+        netMapJson = None
+        if args.netMapFileName is not None and os.path.isfile(args.netMapFileName):
+            with open(args.netMapFileName) as f:
+                netMapJson = json.load(f)
+        if netMapJson is not None:
+
+            # create new VRFs
+            vrfPreExisting = {x.name: x.id for x in nb.ipam.vrfs.all()}
+            logging.debug(f"VRFs (before): {vrfPreExisting}")
+
+            for segment in [
+                x
+                for x in get_iterable(netMapJson)
+                if isinstance(x, dict)
+                and (x.get('type', '') == "segment")
+                and x.get('name', None)
+                and x.get('address', None)
+                and x['name'] not in vrfPreExisting
+            ]:
+                try:
+                    nb.ipam.vrfs.create(
+                        {
+                            "name": segment['name'],
+                            "enforce_unique": True,
+                        },
+                    )
+                except pynetbox.RequestError as re:
+                    logging.warning(f"{type(re).__name__} processing VRF \"{segment['name']}\": {re}")
+
+            vrfs = {x.name: x.id for x in nb.ipam.vrfs.all()}
+            logging.debug(f"VRFs (after): {vrfs}")
+
+            # create prefixes in VRFs
+
+            prefixesPreExisting = {x.prefix: x.id for x in nb.ipam.prefixes.all()}
+            logging.debug(f"prefixes (before): {prefixesPreExisting}")
+
+            for segment in [
+                x
+                for x in get_iterable(netMapJson)
+                if isinstance(x, dict)
+                and (x.get('type', '') == "segment")
+                and x.get('name', None)
+                and x.get('address', None)
+                and x['name'] in vrfs
+            ]:
+                try:
+                    nb.ipam.prefixes.create(
+                        {
+                            "prefix": segment['address'],
+                            "site": next(
+                                iter(list({k: v for k, v in sorted(sites.items(), key=lambda item: item[1])}.values())),
+                                None,
+                            ),
+                            "vrf": vrfs[segment['name']],
+                        },
+                    )
+                except pynetbox.RequestError as re:
+                    logging.warning(
+                        f"{type(re).__name__} processing prefix \"{segment['address']}\" (\"{segment['name']}\"): {re}"
+                    )
+
+            prefixes = {x.prefix: x.id for x in nb.ipam.prefixes.all()}
+            logging.debug(f"prefixes (after): {prefixes}")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing net map JSON \"{args.netMapFileName}\": {e}")
 
 
 ###################################################################################################
