@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import ipaddress
 import json
 import logging
 import os
 import pynetbox
+import re
 import sys
 import time
 
@@ -24,6 +26,68 @@ def get_iterable(x):
         return x
     else:
         return (x,)
+
+
+def is_ip_address(x):
+    try:
+        ip = ipaddress.ip_address(x)
+        return True
+    except Exception:
+        return False
+
+
+def is_ip_v4_address(x):
+    try:
+        ip = ipaddress.IPv4Address(x)
+        return True
+    except Exception:
+        return False
+
+
+def is_ip_v6_address(x):
+    try:
+        ip = ipaddress.IPv6Address(x)
+        return True
+    except Exception:
+        return False
+
+
+def is_ip_network(x):
+    try:
+        ip = ipaddress.ip_network(x)
+        return True
+    except Exception:
+        return False
+
+
+def min_hash_value_by_value(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values())),
+        None,
+    )
+
+
+def min_hash_value_by_key(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values())),
+        None,
+    )
+
+
+def max_hash_value_by_value(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values()))
+    except Exception:
+        last = None
+    return last
+
+
+def max_hash_value_by_key(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values()))
+    except Exception:
+        last = None
+    return last
 
 
 ###################################################################################################
@@ -161,12 +225,16 @@ def main():
     nb = pynetbox.api(
         args.netboxUrl,
         token=args.netboxToken,
+        threading=True,
     )
     sites = {}
     groups = {}
     permissions = {}
     vrfs = {}
     prefixes = {}
+    devices = {}
+    interfaces = {}
+    ipAddresses = {}
     deviceTypes = {}
     deviceRoles = {}
     manufacturers = {}
@@ -188,8 +256,8 @@ def main():
     )
 
     try:
-        groupsPreExisting = {x.name: x.id for x in nb.users.groups.all()}
-        logging.debug(f"groups (before): {groupsPreExisting}")
+        groupsPreExisting = {x.name: x for x in nb.users.groups.all()}
+        logging.debug(f"groups (before): { {k:v.id for k, v in groupsPreExisting.items()} }")
 
         # create groups that don't already exist
         for groupName in [x for x in DEFAULT_GROUP_NAMES if x not in groupsPreExisting]:
@@ -198,8 +266,8 @@ def main():
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__name__} processing group \"{groupName}\": {re}")
 
-        groups = {x.name: x.id for x in nb.users.groups.all()}
-        logging.debug(f"groups (after): {groups}")
+        groups = {x.name: x for x in nb.users.groups.all()}
+        logging.debug(f"groups (after): { {k:v.id for k, v in groups.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing groups: {e}")
 
@@ -245,14 +313,14 @@ def main():
         # get all content types (for creating new permissions)
         allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
 
-        permsPreExisting = {x.name: x.id for x in nb.users.permissions.all()}
-        logging.debug(f"permissions (before): {permsPreExisting}")
+        permsPreExisting = {x.name: x for x in nb.users.permissions.all()}
+        logging.debug(f"permissions (before): { {k:v.id for k, v in permsPreExisting.items()} }")
 
         # create permissions that don't already exist
         for permName, permConfig in {
             k: v for (k, v) in DEFAULT_PERMISSIONS.items() if v.get('name', None) and v['name'] not in permsPreExisting
         }.items():
-            permConfig['groups'] = [groups[x] for x in permConfig['groups']]
+            permConfig['groups'] = [groups[x].id for x in permConfig['groups']]
             permConfig['object_types'] = [ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']]
             permConfig.pop('exclude_objects', None)
             try:
@@ -260,15 +328,15 @@ def main():
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__name__} processing permission \"{permConfig['name']}\": {re}")
 
-        permissions = {x.name: x.id for x in nb.users.permissions.all()}
-        logging.debug(f"permissions (after): {permissions}")
+        permissions = {x.name: x for x in nb.users.permissions.all()}
+        logging.debug(f"permissions (after): { {k:v.id for k, v in permissions.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing permissions: {e}")
 
     # ###### MANUFACTURERS #########################################################################################
     try:
-        manufacturersPreExisting = {x.name: x.id for x in nb.dcim.manufacturers.all()}
-        logging.debug(f"Manufacturers (before): {manufacturersPreExisting}")
+        manufacturersPreExisting = {x.name: x for x in nb.dcim.manufacturers.all()}
+        logging.debug(f"Manufacturers (before): { {k:v.id for k, v in manufacturersPreExisting.items()} }")
 
         # create manufacturers that don't already exist
         for manufacturerName in [x for x in args.manufacturers if x not in manufacturersPreExisting]:
@@ -282,15 +350,15 @@ def main():
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__name__} processing manufacturer \"{manufacturerName}\": {re}")
 
-        manufacturers = {x.name: x.id for x in nb.dcim.manufacturers.all()}
-        logging.debug(f"Manufacturers (after): {manufacturers}")
+        manufacturers = {x.name: x for x in nb.dcim.manufacturers.all()}
+        logging.debug(f"Manufacturers (after): { {k:v.id for k, v in manufacturers.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing manufacturers: {e}")
 
     # ###### DEVICE ROLES ##########################################################################################
     try:
-        deviceRolesPreExisting = {x.name: x.id for x in nb.dcim.device_roles.all()}
-        logging.debug(f"Device roles (before): {deviceRolesPreExisting}")
+        deviceRolesPreExisting = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (before): { {k:v.id for k, v in deviceRolesPreExisting.items()} }")
 
         # create device roles that don't already exist
         for deviceRoleName in [x for x in args.deviceRoles if x not in deviceRolesPreExisting]:
@@ -305,45 +373,39 @@ def main():
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__name__} processing device role \"{deviceRoleName}\": {re}")
 
-        deviceRoles = {x.name: x.id for x in nb.dcim.device_roles.all()}
-        logging.debug(f"Device roles (after): {deviceRoles}")
+        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing device roles: {e}")
 
     # ###### DEVICE TYPES ##########################################################################################
     try:
-        deviceTypesPreExisting = {x.model: x.id for x in nb.dcim.device_types.all()}
-        logging.debug(f"Device types (before): {deviceTypesPreExisting}")
+        deviceTypesPreExisting = {x.model: x for x in nb.dcim.device_types.all()}
+        logging.debug(f"Device types (before): { {k:v.id for k, v in deviceTypesPreExisting.items()} }")
 
         # create device types that don't already exist
         for deviceTypeModel in [x for x in args.deviceTypes if x not in deviceTypesPreExisting]:
             try:
+                manuf = min_hash_value_by_value(manufacturers)
                 nb.dcim.device_types.create(
                     {
                         "model": deviceTypeModel,
                         "slug": slugify(deviceTypeModel),
-                        "manufacturer": next(
-                            iter(
-                                list(
-                                    {k: v for k, v in sorted(manufacturers.items(), key=lambda item: item[1])}.values()
-                                )
-                            ),
-                            None,
-                        ),
+                        "manufacturer": manuf.id if manuf else None,
                     },
                 )
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__model__} processing device type \"{deviceTypeModel}\": {re}")
 
-        deviceTypes = {x.model: x.id for x in nb.dcim.device_types.all()}
-        logging.debug(f"Device types (after): {deviceTypes}")
+        deviceTypes = {x.model: x for x in nb.dcim.device_types.all()}
+        logging.debug(f"Device types (after): { {k:v.id for k, v in deviceTypes.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing device types: {e}")
 
     # ###### SITES #################################################################################################
     try:
-        sitesPreExisting = {x.name: x.id for x in nb.dcim.sites.all()}
-        logging.debug(f"sites (before): {sitesPreExisting}")
+        sitesPreExisting = {x.name: x for x in nb.dcim.sites.all()}
+        logging.debug(f"sites (before): { {k:v.id for k, v in sitesPreExisting.items()} }")
 
         # create sites that don't already exist
         for siteName in [x for x in args.netboxSites if x not in sitesPreExisting]:
@@ -357,8 +419,8 @@ def main():
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__name__} processing site \"{siteName}\": {re}")
 
-        sites = {x.name: x.id for x in nb.dcim.sites.all()}
-        logging.debug(f"sites (after): {sites}")
+        sites = {x.name: x for x in nb.dcim.sites.all()}
+        logging.debug(f"sites (after): { {k:v.id for k, v in sites.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
 
@@ -372,8 +434,8 @@ def main():
         if netMapJson is not None:
 
             # create new VRFs
-            vrfPreExisting = {x.name: x.id for x in nb.ipam.vrfs.all()}
-            logging.debug(f"VRFs (before): {vrfPreExisting}")
+            vrfPreExisting = {x.name: x for x in nb.ipam.vrfs.all()}
+            logging.debug(f"VRFs (before): { {k:v.id for k, v in vrfPreExisting.items()} }")
 
             for segment in [
                 x
@@ -381,7 +443,7 @@ def main():
                 if isinstance(x, dict)
                 and (x.get('type', '') == "segment")
                 and x.get('name', None)
-                and x.get('address', None)
+                and is_ip_network(x.get('address', None))
                 and x['name'] not in vrfPreExisting
             ]:
                 try:
@@ -394,13 +456,13 @@ def main():
                 except pynetbox.RequestError as re:
                     logging.warning(f"{type(re).__name__} processing VRF \"{segment['name']}\": {re}")
 
-            vrfs = {x.name: x.id for x in nb.ipam.vrfs.all()}
-            logging.debug(f"VRFs (after): {vrfs}")
+            vrfs = {x.name: x for x in nb.ipam.vrfs.all()}
+            logging.debug(f"VRFs (after): { {k:v.id for k, v in vrfs.items()} }")
 
             # create prefixes in VRFs
 
-            prefixesPreExisting = {x.prefix: x.id for x in nb.ipam.prefixes.all()}
-            logging.debug(f"prefixes (before): {prefixesPreExisting}")
+            prefixesPreExisting = {x.prefix: x for x in nb.ipam.prefixes.all()}
+            logging.debug(f"prefixes (before): { {k:v.id for k, v in prefixesPreExisting.items()} }")
 
             for segment in [
                 x
@@ -408,18 +470,16 @@ def main():
                 if isinstance(x, dict)
                 and (x.get('type', '') == "segment")
                 and x.get('name', None)
-                and x.get('address', None)
+                and is_ip_network(x.get('address', None))
                 and x['name'] in vrfs
             ]:
                 try:
+                    site = min_hash_value_by_value(sites)
                     nb.ipam.prefixes.create(
                         {
                             "prefix": segment['address'],
-                            "site": next(
-                                iter(list({k: v for k, v in sorted(sites.items(), key=lambda item: item[1])}.values())),
-                                None,
-                            ),
-                            "vrf": vrfs[segment['name']],
+                            "site": site.id if site else None,
+                            "vrf": vrfs[segment['name']].id,
                         },
                     )
                 except pynetbox.RequestError as re:
@@ -427,8 +487,116 @@ def main():
                         f"{type(re).__name__} processing prefix \"{segment['address']}\" (\"{segment['name']}\"): {re}"
                     )
 
-            prefixes = {x.prefix: x.id for x in nb.ipam.prefixes.all()}
-            logging.debug(f"prefixes (after): {prefixes}")
+            prefixes = {x.prefix: x for x in nb.ipam.prefixes.all()}
+            logging.debug(f"prefixes (after): { {k:v.id for k, v in prefixes.items()} }")
+
+            # create hosts as devices
+            devicesPreExisting = {x.name: x for x in nb.dcim.devices.all()}
+            logging.debug(f"devices (before): { {k:v.id for k, v in devicesPreExisting.items()} }")
+
+            for host in [
+                x
+                for x in get_iterable(netMapJson)
+                if isinstance(x, dict)
+                and (x.get('type', '') == "host")
+                and x.get('name', None)
+                and x.get('address', None)
+                and x['name'] not in devicesPreExisting
+            ]:
+                try:
+                    site = min_hash_value_by_value(sites)
+                    dType = min_hash_value_by_value(deviceTypes)
+                    dRole = min_hash_value_by_value(deviceRoles)
+                    deviceCreated = nb.dcim.devices.create(
+                        {
+                            "name": host['name'],
+                            "site": site.id if site else None,
+                            "device_type": dType.id if dType else None,
+                            "device_role": dRole.id if dRole else None,
+                        },
+                    )
+                    if deviceCreated is not None:
+                        # create interface for the device
+                        if is_ip_address(host['address']):
+                            hostVrf = max_hash_value_by_key(
+                                {
+                                    ipaddress.ip_network(k): v
+                                    for k, v in prefixes.items()
+                                    if ipaddress.ip_address(host['address']) in ipaddress.ip_network(k)
+                                }
+                            )
+                            nb.dcim.interfaces.create(
+                                {
+                                    "device": deviceCreated.id,
+                                    "name": "default",
+                                    "type": "other",
+                                    "vrf": hostVrf.id if hostVrf else None,
+                                },
+                            )
+                        elif re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", x.lower()):
+                            nb.dcim.interfaces.create(
+                                {
+                                    "device": deviceCreated.id,
+                                    "name": "default",
+                                    "type": "other",
+                                    "mac_address": host['address'],
+                                },
+                            )
+
+                except pynetbox.RequestError as re:
+                    logging.warning(f"{type(re).__name__} processing device \"{host['name']}\": {re}")
+
+            devices = {x.name: x for x in nb.dcim.devices.all()}
+            logging.debug(f"devices (after): { {k:v.id for k, v in devices.items()} }")
+            interfaces = {x.device.id: x for x in nb.dcim.interfaces.all()}
+            logging.debug(f"interfaces (after): { {k:v.id for k, v in interfaces.items()} }")
+
+            # and associate IP addresses with them
+            ipAddressesPreExisting = {f"{x.address}:{x.vrf.id}": x for x in nb.ipam.ip_addresses.all()}
+            logging.debug(f"IP addresses (before): { {k:v.id for k, v in ipAddressesPreExisting.items()} }")
+
+            for host in [
+                x
+                for x in get_iterable(netMapJson)
+                if isinstance(x, dict)
+                and (x.get('type', '') == "host")
+                and x.get('name', None)
+                and is_ip_address(x.get('address', None))
+                and x['name'] in devices
+            ]:
+                try:
+                    hostVrf = max_hash_value_by_key(
+                        {
+                            ipaddress.ip_network(k): v
+                            for k, v in prefixes.items()
+                            if ipaddress.ip_address(host['address']) in ipaddress.ip_network(k)
+                        }
+                    )
+                    hostKey = f"{host['address']}/{'32' if is_ip_v4_address(host['address']) else '128'}:{hostVrf.id if hostVrf else ''}"
+                    if hostKey not in ipAddressesPreExisting:
+                        ipCreated = nb.ipam.ip_addresses.create(
+                            {
+                                "address": host['address'],
+                                "vrf": hostVrf.id if hostVrf else None,
+                                "assigned_object_type": "dcim.interface",
+                                "assigned_object_id": interfaces[devices[host['name']].id].id,
+                            },
+                        )
+                        if ipCreated is not None:
+                            # update device to set this as its primary IPv4 address
+                            deviceForIp = nb.dcim.devices.get(id=devices[host['name']].id)
+                            if deviceForIp is not None:
+                                if is_ip_v4_address(host['address']):
+                                    deviceForIp.primary_ip4 = ipCreated
+                                elif is_ip_v6_address(host['address']):
+                                    deviceForIp.primary_ip = ipCreated
+                                deviceForIp.save()
+
+                except pynetbox.RequestError as re:
+                    logging.warning(f"{type(re).__name__} processing address \"{host['address']}\": {re}")
+
+            ipAddresses = {f"{x.address}:{x.vrf}": x for x in nb.ipam.ip_addresses.all()}
+            logging.debug(f"IP addresses (after): { {k:v.id for k, v in ipAddresses.items()} }")
 
     except Exception as e:
         logging.error(f"{type(e).__name__} processing net map JSON \"{args.netMapFileName}\": {e}")
