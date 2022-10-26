@@ -376,8 +376,6 @@ services:
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
       indices.query.bool.max_clause_count : 4096
       path.repo : '/opt/opensearch/backup'
-    expose:
-      - 9200
     ulimits:
       memlock:
         soft: -1
@@ -421,8 +419,6 @@ services:
       CREATE_OS_ARKIME_SESSION_INDEX : 'true'
     depends_on:
       - opensearch
-    expose:
-      - 28991
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
@@ -452,8 +448,6 @@ services:
     depends_on:
       - opensearch
       - dashboards-helper
-    expose:
-      - 5601
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
@@ -490,10 +484,6 @@ services:
       LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
-    expose:
-      - 5044
-      - 9001
-      - 9600
     ports:
       - "127.0.0.1:5044:5044"
     volumes:
@@ -542,8 +532,6 @@ services:
       FILEBEAT_NGINX_LOG_PATH : '/nginx'
     depends_on:
       - logstash
-    expose:
-      - 5045
     ports:
       - "127.0.0.1:5045:5045"
     volumes:
@@ -590,10 +578,6 @@ services:
         hard: -1
     depends_on:
       - opensearch
-    expose:
-      - 8000
-      - 8005
-      - 8081
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
@@ -774,9 +758,6 @@ services:
       << : *ssl-variables
       << : *zeek-variables
       VIRTUAL_HOST : 'file-monitor.malcolm.local'
-    expose:
-      - 3310
-      - 8440
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./zeek-logs/extract_files:/zeek/extract_files
@@ -831,8 +812,6 @@ services:
       << : *common-upload-variables
     depends_on:
       - opensearch
-    expose:
-      - 30441
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
@@ -864,8 +843,6 @@ services:
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
       - arkime
-    expose:
-      - 80
     ports:
       - "127.0.0.1:8022:22"
     volumes:
@@ -893,8 +870,6 @@ services:
       << : *ssl-variables
       << : *auth-variables
       VIRTUAL_HOST : 'htadmin.malcolm.local'
-    expose:
-      - 80
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
@@ -922,8 +897,6 @@ services:
       << : *ssl-variables
       << : *common-lookup-variables
       VIRTUAL_HOST : 'freq.malcolm.local'
-    expose:
-      - 10004
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
     healthcheck:
@@ -947,8 +920,6 @@ services:
       << : *process-variables
       << : *ssl-variables
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
-    expose:
-      - 8080
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
@@ -987,6 +958,7 @@ services:
       - ./netbox/config/reports:/etc/netbox/reports:ro
       - ./netbox/config/scripts:/etc/netbox/scripts:ro
       - ./netbox/media:/opt/netbox/netbox/media:rw
+      - ./net-map.json:/usr/local/share/net-map.json:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/" ]
       interval: 60s
@@ -1095,8 +1067,6 @@ services:
       << : *ssl-variables
       << : *opensearch-variables
       VIRTUAL_HOST : 'api.malcolm.local'
-    expose:
-      - 5000
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
