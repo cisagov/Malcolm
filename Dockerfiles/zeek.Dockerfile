@@ -87,7 +87,6 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       libtcmalloc-minimal4 \
       libunwind8 \
       libzmq5 \
-      linux-headers-$DEBARCH \
       locales-all \
       make \
       moreutils \

@@ -107,7 +107,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mmguero-dev/bzar"
-  "https://github.com/mmguero-dev/zeek-af_packet-plugin|master"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/GQUIC_Protocol_Analyzer"
   "https://github.com/salesforce/hassh"
@@ -119,6 +118,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/zeek/spicy-pe"
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
+  "https://github.com/zeek/zeek-af_packet-plugin|master"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
