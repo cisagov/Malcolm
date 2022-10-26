@@ -63,7 +63,7 @@ def main():
         dest='netboxUrl',
         type=str,
         default='http://localhost:8080/netbox',
-        required=True,
+        required=False,
         help="NetBox Base URL",
     )
     parser.add_argument(
@@ -110,6 +110,36 @@ def main():
         required=False,
         help="Name of staff group for automatic NetBox user creation",
     )
+    parser.add_argument(
+        '-m',
+        '--manufacturer',
+        dest='manufacturers',
+        nargs='*',
+        type=str,
+        default=[os.getenv('NETBOX_DEFAULT_MANUFACTURER', 'Unspecified')],
+        required=False,
+        help="Manufacturers to create",
+    )
+    parser.add_argument(
+        '-r',
+        '--device-role',
+        dest='deviceRoles',
+        nargs='*',
+        type=str,
+        default=[os.getenv('NETBOX_DEFAULT_DEVICE_ROLE', 'Unspecified')],
+        required=False,
+        help="Device role(s) to create",
+    )
+    parser.add_argument(
+        '-y',
+        '--device-type',
+        dest='deviceTypes',
+        nargs='*',
+        type=str,
+        default=[os.getenv('NETBOX_DEFAULT_DEVICE_TYPE', 'Unspecified')],
+        required=False,
+        help="Device types(s) to create",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -137,6 +167,9 @@ def main():
     permissions = {}
     vrfs = {}
     prefixes = {}
+    deviceTypes = {}
+    deviceRoles = {}
+    manufacturers = {}
 
     # wait for a good connection
     while args.wait:
@@ -155,7 +188,6 @@ def main():
     )
 
     try:
-        # list existing groups
         groupsPreExisting = {x.name: x.id for x in nb.users.groups.all()}
         logging.debug(f"groups (before): {groupsPreExisting}")
 
@@ -166,7 +198,6 @@ def main():
             except pynetbox.RequestError as re:
                 logging.warning(f"{type(re).__name__} processing group \"{groupName}\": {re}")
 
-        # get existing groups into name->id dictionary
         groups = {x.name: x.id for x in nb.users.groups.all()}
         logging.debug(f"groups (after): {groups}")
     except Exception as e:
@@ -214,7 +245,6 @@ def main():
         # get all content types (for creating new permissions)
         allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
 
-        # get existing permissions
         permsPreExisting = {x.name: x.id for x in nb.users.permissions.all()}
         logging.debug(f"permissions (before): {permsPreExisting}")
 
@@ -235,8 +265,82 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing permissions: {e}")
 
+    # ###### MANUFACTURERS #########################################################################################
+    try:
+        manufacturersPreExisting = {x.name: x.id for x in nb.dcim.manufacturers.all()}
+        logging.debug(f"Manufacturers (before): {manufacturersPreExisting}")
+
+        # create manufacturers that don't already exist
+        for manufacturerName in [x for x in args.manufacturers if x not in manufacturersPreExisting]:
+            try:
+                nb.dcim.manufacturers.create(
+                    {
+                        "name": manufacturerName,
+                        "slug": slugify(manufacturerName),
+                    },
+                )
+            except pynetbox.RequestError as re:
+                logging.warning(f"{type(re).__name__} processing manufacturer \"{manufacturerName}\": {re}")
+
+        manufacturers = {x.name: x.id for x in nb.dcim.manufacturers.all()}
+        logging.debug(f"Manufacturers (after): {manufacturers}")
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing manufacturers: {e}")
+
+    # ###### DEVICE ROLES ##########################################################################################
+    try:
+        deviceRolesPreExisting = {x.name: x.id for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (before): {deviceRolesPreExisting}")
+
+        # create device roles that don't already exist
+        for deviceRoleName in [x for x in args.deviceRoles if x not in deviceRolesPreExisting]:
+            try:
+                nb.dcim.device_roles.create(
+                    {
+                        "name": deviceRoleName,
+                        "slug": slugify(deviceRoleName),
+                        "vm_role": True,
+                    },
+                )
+            except pynetbox.RequestError as re:
+                logging.warning(f"{type(re).__name__} processing device role \"{deviceRoleName}\": {re}")
+
+        deviceRoles = {x.name: x.id for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (after): {deviceRoles}")
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing device roles: {e}")
+
+    # ###### DEVICE TYPES ##########################################################################################
+    try:
+        deviceTypesPreExisting = {x.model: x.id for x in nb.dcim.device_types.all()}
+        logging.debug(f"Device types (before): {deviceTypesPreExisting}")
+
+        # create device types that don't already exist
+        for deviceTypeModel in [x for x in args.deviceTypes if x not in deviceTypesPreExisting]:
+            try:
+                nb.dcim.device_types.create(
+                    {
+                        "model": deviceTypeModel,
+                        "slug": slugify(deviceTypeModel),
+                        "manufacturer": next(
+                            iter(
+                                list(
+                                    {k: v for k, v in sorted(manufacturers.items(), key=lambda item: item[1])}.values()
+                                )
+                            ),
+                            None,
+                        ),
+                    },
+                )
+            except pynetbox.RequestError as re:
+                logging.warning(f"{type(re).__model__} processing device type \"{deviceTypeModel}\": {re}")
+
+        deviceTypes = {x.model: x.id for x in nb.dcim.device_types.all()}
+        logging.debug(f"Device types (after): {deviceTypes}")
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing device types: {e}")
+
     # ###### SITES #################################################################################################
-    # get existing sites
     try:
         sitesPreExisting = {x.name: x.id for x in nb.dcim.sites.all()}
         logging.debug(f"sites (before): {sitesPreExisting}")
