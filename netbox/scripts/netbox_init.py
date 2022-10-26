@@ -263,8 +263,8 @@ def main():
         for groupName in [x for x in DEFAULT_GROUP_NAMES if x not in groupsPreExisting]:
             try:
                 nb.users.groups.create({'name': groupName})
-            except pynetbox.RequestError as re:
-                logging.warning(f"{type(re).__name__} processing group \"{groupName}\": {re}")
+            except pynetbox.RequestError as nbe:
+                logging.warning(f"{type(nbe).__name__} processing group \"{groupName}\": {nbe}")
 
         groups = {x.name: x for x in nb.users.groups.all()}
         logging.debug(f"groups (after): { {k:v.id for k, v in groups.items()} }")
@@ -325,8 +325,8 @@ def main():
             permConfig.pop('exclude_objects', None)
             try:
                 nb.users.permissions.create(permConfig)
-            except pynetbox.RequestError as re:
-                logging.warning(f"{type(re).__name__} processing permission \"{permConfig['name']}\": {re}")
+            except pynetbox.RequestError as nbe:
+                logging.warning(f"{type(nbe).__name__} processing permission \"{permConfig['name']}\": {nbe}")
 
         permissions = {x.name: x for x in nb.users.permissions.all()}
         logging.debug(f"permissions (after): { {k:v.id for k, v in permissions.items()} }")
@@ -347,8 +347,8 @@ def main():
                         "slug": slugify(manufacturerName),
                     },
                 )
-            except pynetbox.RequestError as re:
-                logging.warning(f"{type(re).__name__} processing manufacturer \"{manufacturerName}\": {re}")
+            except pynetbox.RequestError as nbe:
+                logging.warning(f"{type(nbe).__name__} processing manufacturer \"{manufacturerName}\": {nbe}")
 
         manufacturers = {x.name: x for x in nb.dcim.manufacturers.all()}
         logging.debug(f"Manufacturers (after): { {k:v.id for k, v in manufacturers.items()} }")
@@ -370,8 +370,8 @@ def main():
                         "vm_role": True,
                     },
                 )
-            except pynetbox.RequestError as re:
-                logging.warning(f"{type(re).__name__} processing device role \"{deviceRoleName}\": {re}")
+            except pynetbox.RequestError as nbe:
+                logging.warning(f"{type(nbe).__name__} processing device role \"{deviceRoleName}\": {nbe}")
 
         deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
         logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
@@ -394,8 +394,8 @@ def main():
                         "manufacturer": manuf.id if manuf else None,
                     },
                 )
-            except pynetbox.RequestError as re:
-                logging.warning(f"{type(re).__model__} processing device type \"{deviceTypeModel}\": {re}")
+            except pynetbox.RequestError as nbe:
+                logging.warning(f"{type(nbe).__model__} processing device type \"{deviceTypeModel}\": {nbe}")
 
         deviceTypes = {x.model: x for x in nb.dcim.device_types.all()}
         logging.debug(f"Device types (after): { {k:v.id for k, v in deviceTypes.items()} }")
@@ -416,8 +416,8 @@ def main():
                         "slug": slugify(siteName),
                     },
                 )
-            except pynetbox.RequestError as re:
-                logging.warning(f"{type(re).__name__} processing site \"{siteName}\": {re}")
+            except pynetbox.RequestError as nbe:
+                logging.warning(f"{type(nbe).__name__} processing site \"{siteName}\": {nbe}")
 
         sites = {x.name: x for x in nb.dcim.sites.all()}
         logging.debug(f"sites (after): { {k:v.id for k, v in sites.items()} }")
@@ -453,8 +453,8 @@ def main():
                             "enforce_unique": True,
                         },
                     )
-                except pynetbox.RequestError as re:
-                    logging.warning(f"{type(re).__name__} processing VRF \"{segment['name']}\": {re}")
+                except pynetbox.RequestError as nbe:
+                    logging.warning(f"{type(nbe).__name__} processing VRF \"{segment['name']}\": {nbe}")
 
             vrfs = {x.name: x for x in nb.ipam.vrfs.all()}
             logging.debug(f"VRFs (after): { {k:v.id for k, v in vrfs.items()} }")
@@ -482,9 +482,9 @@ def main():
                             "vrf": vrfs[segment['name']].id,
                         },
                     )
-                except pynetbox.RequestError as re:
+                except pynetbox.RequestError as nbe:
                     logging.warning(
-                        f"{type(re).__name__} processing prefix \"{segment['address']}\" (\"{segment['name']}\"): {re}"
+                        f"{type(nbe).__name__} processing prefix \"{segment['address']}\" (\"{segment['name']}\"): {nbe}"
                     )
 
             prefixes = {x.prefix: x for x in nb.ipam.prefixes.all()}
@@ -533,18 +533,18 @@ def main():
                                     "vrf": hostVrf.id if hostVrf else None,
                                 },
                             )
-                        elif re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", x.lower()):
+                        elif re.match(r'^([0-9a-f]{2}[:-]){5}([0-9a-f]{2})$', host['address'].lower()):
                             nb.dcim.interfaces.create(
                                 {
                                     "device": deviceCreated.id,
                                     "name": "default",
                                     "type": "other",
-                                    "mac_address": host['address'],
+                                    "mac_address": host['address'].lower(),
                                 },
                             )
 
-                except pynetbox.RequestError as re:
-                    logging.warning(f"{type(re).__name__} processing device \"{host['name']}\": {re}")
+                except pynetbox.RequestError as nbe:
+                    logging.warning(f"{type(nbe).__name__} processing device \"{host['name']}\": {nbe}")
 
             devices = {x.name: x for x in nb.dcim.devices.all()}
             logging.debug(f"devices (after): { {k:v.id for k, v in devices.items()} }")
@@ -592,8 +592,8 @@ def main():
                                     deviceForIp.primary_ip = ipCreated
                                 deviceForIp.save()
 
-                except pynetbox.RequestError as re:
-                    logging.warning(f"{type(re).__name__} processing address \"{host['address']}\": {re}")
+                except pynetbox.RequestError as nbe:
+                    logging.warning(f"{type(nbe).__name__} processing address \"{host['address']}\": {nbe}")
 
             ipAddresses = {f"{x.address}:{x.vrf}": x for x in nb.ipam.ip_addresses.all()}
             logging.debug(f"IP addresses (after): { {k:v.id for k, v in ipAddresses.items()} }")
