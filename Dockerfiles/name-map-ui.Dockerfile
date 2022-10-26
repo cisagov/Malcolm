@@ -35,6 +35,7 @@ COPY name-map-ui/config/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
 COPY name-map-ui/config/php.ini /etc/php8/conf.d/custom.ini
 COPY name-map-ui/config/supervisord.conf /etc/supervisord.conf
 COPY name-map-ui/config/supervisor_logstash_ctl.conf /etc/supervisor/logstash/supervisord.conf
+COPY name-map-ui/config/supervisor_netbox_ctl.conf /etc/supervisor/netbox/supervisord.conf
 COPY name-map-ui/scripts/*.sh /usr/local/bin/
 
 RUN curl -sSL -o /tmp/jquery.min.js "https://code.jquery.com/jquery-${JQUERY_VERSION}.min.js" && \
