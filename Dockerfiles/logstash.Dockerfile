@@ -90,6 +90,7 @@ RUN yum install -y epel-release && \
     yum install -y curl gettext patch python3-setuptools python3-pip python3-requests openssl && \
     yum clean all && \
     pip3 install ipaddress supervisor manuf pyyaml && \
+    /usr/share/logstash/bin/ruby -S gem install lru_redux && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
