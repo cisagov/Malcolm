@@ -4,7 +4,7 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "v4.0.1"
+ENV ARKIME_VERSION "v4.0.2"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
