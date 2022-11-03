@@ -21,7 +21,7 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: write
       packages: write
