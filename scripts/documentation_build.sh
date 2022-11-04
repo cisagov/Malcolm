@@ -21,10 +21,11 @@ VERBOSE_FLAG=""
 REVISION="${VCS_REVSION:-$( git rev-parse --short HEAD 2>/dev/null || true )}"
 REPOSITORY_NAME=""
 OWNER_NAME=""
+SITEMAP_URL=""
 DEFAULT_BRANCH=""
 TOKEN="${GITHUB_TOKEN:-}"
 LOG_BASE_DIR=$(pwd)
-while getopts 'vr:t:n:o:b:' OPTION; do
+while getopts 'vr:t:n:o:b:s:' OPTION; do
   case "$OPTION" in
     v)
       set -x
@@ -47,12 +48,16 @@ while getopts 'vr:t:n:o:b:' OPTION; do
       DEFAULT_BRANCH="$OPTARG"
       ;;
 
+    s)
+      SITEMAP_URL="$OPTARG"
+      ;;
+
     t)
       TOKEN="$OPTARG"
       ;;
 
     ?)
-      echo "script usage: $(basename $0) [-v (verbose)] [-r revision] [-n repository-name] [-o owner-name] [-b default-branch] [-t github-token]" >&2
+      echo "script usage: $(basename $0) [-v (verbose)] [-r revision] [-n repository-name] [-o owner-name] [-b default-branch] [-t github-token] [-s sitemap-url]" >&2
       exit 1
       ;;
   esac
@@ -124,6 +129,7 @@ fi
 [[ -n "$REPOSITORY_NAME" ]] && "$YQ" eval --inplace ".\"repository\"=\"$REPOSITORY_NAME\""               ./_config.yml
 [[ -n "$OWNER_NAME" ]] &&      "$YQ" eval --inplace ".\"github\".\"owner_name\"=\"$OWNER_NAME\""         ./_config.yml
 [[ -n "$DEFAULT_BRANCH" ]] &&  "$YQ" eval --inplace ".\"github\".\"default_branch\"=\"$DEFAULT_BRANCH\"" ./_config.yml
+[[ -n "$SITEMAP_URL" ]] &&     "$YQ" eval --inplace ".\"url\"=\"$SITEMAP_URL\""                          ./_config.yml
 
 # pass GitHub API token through to Jekyll if it's available
 if [[ -n "${TOKEN:-}" ]]; then
