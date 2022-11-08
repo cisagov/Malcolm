@@ -5,6 +5,9 @@ logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0
 external_download_url: https://malcolm.fyi/docs/download.html
 youtube_url: https://www.youtube.com/c/MalcolmNetworkTrafficAnalysisToolSuite
+mastodon:
+  id: mmguero@infosec.exchange
+  url: https://infosec.exchange/@mmguero
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
 anomaly_detection_docs_uri: docs/anomaly-detection.html
