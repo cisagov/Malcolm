@@ -91,6 +91,7 @@ RUN yum install -y epel-release && \
     yum clean all && \
     pip3 install ipaddress supervisor manuf pyyaml && \
     /usr/share/logstash/bin/ruby -S gem install lru_redux && \
+    /usr/share/logstash/bin/ruby -S gem install netbox-client-ruby && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
