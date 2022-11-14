@@ -95,9 +95,9 @@ RUN apt-get -q update && \
         python3-pip \
         python3-requests && \
     pip3 install ipaddress supervisor manuf pyyaml && \
-    /usr/share/logstash/bin/ruby -S gem install specific_install && \
-    /usr/share/logstash/bin/ruby -S gem specific_install -l "https://github.com/SamSaffron/lru_redux" -b v1.1.0 && \
-    /usr/share/logstash/bin/ruby -S gem specific_install -l "https://github.com/rest-client/rest-client" -b v2.1.0 && \
+    echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'rest-client'" >> /usr/share/logstash/Gemfile && \
+    /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
