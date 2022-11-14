@@ -461,7 +461,7 @@ def logs():
                             and ('finished' in outputJson)
                         ):
                             print(
-                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}. {os.path.basename(outputJson['source_file'])}, {'not ' if outputJson['finished'] is False else ''}finished"
+                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
                             )
 
                         elif len(outputJson.keys()) == 1:
