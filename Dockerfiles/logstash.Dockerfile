@@ -44,7 +44,7 @@ RUN cd /opt && \
     sed -i "s/\('logstash-mixin-ecs_compatibility_support'\),.*/\1/" ./logstash-filter-fingerprint/logstash-filter-fingerprint.gemspec && \
     /bin/bash -lc "export LS_JAVA_HOME=$(realpath $(dirname $(find /usr/lib/jvm -name javac -type f))/../) && cd /opt/logstash-filter-fingerprint && ( bundle install || bundle install ) && gem build logstash-filter-fingerprint.gemspec && bundle info logstash-filter-fingerprint"
 
-FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:7.16.3
+FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:8.4.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -63,6 +63,7 @@ ENV PUSER "logstash"
 ENV PGROUP "logstash"
 ENV PUSER_PRIV_DROP true
 
+ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
@@ -78,17 +79,20 @@ ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES
-ENV LS_JAVA_HOME=/usr/share/logstash/jdk
 
 USER root
 
 COPY --from=build /opt/logstash-filter-fingerprint /opt/logstash-filter-fingerprint
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
-RUN yum install -y epel-release && \
-    yum upgrade -y && \
-    yum install -y curl gettext patch python3-setuptools python3-pip python3-requests openssl && \
-    yum clean all && \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
+    apt-get -y --no-install-recommends install \
+        gettext \
+        patch \
+        python3-setuptools \
+        python3-pip \
+        python3-requests && \
     pip3 install ipaddress supervisor manuf pyyaml && \
     /usr/share/logstash/bin/ruby -S gem install lru_redux && \
     /usr/share/logstash/bin/ruby -S gem install netbox-client-ruby && \
@@ -100,7 +104,10 @@ RUN yum install -y epel-release && \
                                        logstash-input-beats logstash-output-elasticsearch && \
     logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-*.gem && \
     chmod +x /usr/bin/tini && \
-    rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle
+    rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/manuf-oui-parse.py /usr/local/bin/

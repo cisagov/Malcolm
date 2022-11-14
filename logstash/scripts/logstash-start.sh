@@ -140,4 +140,8 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_O
 # start logstash (adapted from docker-entrypoint)
 env2yaml /usr/share/logstash/config/logstash.yml
 export LS_JAVA_OPTS="-Dls.cgroup.cpuacct.path.override=/ -Dls.cgroup.cpu.path.override=/ $LS_JAVA_OPTS"
-exec logstash
+if [[ -z $1 ]] || [[ ${1:0:1} == '-' ]] ; then
+  exec logstash "$@"
+else
+  exec "$@"
+fi

@@ -293,6 +293,7 @@ def logs():
       | _cat/indices
       | branding.*config\s+is\s+not\s+found\s+or\s+invalid
       | but\s+there\s+are\s+no\s+living\s+connections
+      | Connecting\s+to\s+backoff
       | curl.+localhost.+GET\s+/api/status\s+200
       | DEPRECATION
       | descheduling\s+job\s*id
@@ -310,6 +311,7 @@ def logs():
       | running\s+full\s+sweep
       | saved_objects
       | scheduling\s+job\s*id.+opendistro-ism
+      | SSL/TLS\s+verifications\s+disabled
       | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
       | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
       | throttling\s+index
@@ -334,6 +336,9 @@ def logs():
     )
 
     serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
+    iso8601TimeRegEx = re.compile(
+        r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
+    )
 
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
     osEnv = os.environ.copy()
@@ -366,11 +371,19 @@ def logs():
                 serviceMatch = serviceRegEx.search(outputStrEscaped)
                 serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
                 serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
+
                 messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
-                outputJson = LoadStrIfJson(messageStr)
+                messageStrSplit = messageStr.split(' ')
+                messageTimeMatch = iso8601TimeRegEx.match(messageStrSplit[0])
+                if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
+                    messageStrToTestJson = messageStr
+                else:
+                    messageStrToTestJson = messageStrSplit[1:].join(' ')
+
+                outputJson = LoadStrIfJson(messageStrToTestJson)
                 if isinstance(outputJson, dict):
 
-                    # if there's a timestamp in the JSON, move it outside of the JSON to the beginning of the log string
+                    # if there's a timestamp, move it outside of the JSON to the beginning of the log string
                     timeKey = None
                     if 'time' in outputJson:
                         timeKey = 'time'
@@ -382,6 +395,8 @@ def logs():
                     if timeKey is not None:
                         timeStr = f"{outputJson[timeKey]} "
                         outputJson.pop(timeKey, None)
+                    elif messageTimeMatch is not None:
+                        timeStr = f"{messageTimeMatch[0]} "
 
                     if (
                         ('job.schedule' in outputJson)
@@ -422,6 +437,43 @@ def logs():
                         print(
                             f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
                         )
+
+                    elif 'filebeat' in serviceStr:
+                        # this is an output line from filebeat, let's clean it up a bit: remove some clutter for the display
+                        for noisyKey in [
+                            'ecs.version',
+                            'harvester_id',
+                            'input_id',
+                            'log.level',
+                            'log.logger',
+                            'log.origin',
+                            'os_id',
+                            'service.name',
+                            'state_id',
+                        ]:
+                            outputJson.pop(noisyKey, None)
+
+                        # we'll fancify a couple of common things from filebeat
+                        if (
+                            (len(outputJson.keys()) == 3)
+                            and ('message' in outputJson)
+                            and ('source_file' in outputJson)
+                            and ('finished' in outputJson)
+                        ):
+                            print(
+                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
+                            )
+
+                        elif len(outputJson.keys()) == 1:
+                            outputKey = next(iter(outputJson))
+                            print(
+                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
+                            )
+                        else:
+                            # standardize and print the JSON output
+                            print(
+                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                            )
 
                     else:
                         # standardize and print the JSON output
