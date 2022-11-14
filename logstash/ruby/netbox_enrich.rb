@@ -5,6 +5,7 @@ end
 def register(params)
   require 'lru_redux'
   require 'rest-client'
+  require 'date'
 
   # source field containing lookup value
   @source = params["source"]
@@ -15,6 +16,11 @@ def register(params)
   if @source_cache.nil? and !@source.nil?
     @source_cache = @source
   end
+
+  # caching parameters
+  @cache_size = params.fetch("cache_size", 500)
+  @cache_ttl = params.fetch("cache_ttl", 300)
+  @fields_cache_size = params.fetch("fields_cache_size", 4096)
 
   # target field to store looked-up value
   @target = params["target"]
@@ -30,7 +36,7 @@ def register(params)
   end
 
   # hash of field names (from source_cache), each of which contains the respective looked-up values
-  @CacheHash = Hash.new{ LruRedux::TTL::ThreadSafeCache.new(params.fetch("cache_size", 500), params.fetch("cache_ttl", 300)) }
+  @cache_hash = LruRedux::ThreadSafeCache.new(@fields_cache_size)
 end
 
 def filter(event)
@@ -39,13 +45,28 @@ def filter(event)
     return [event]
   end
 
+  _result = @cache_hash.fetch(@source_cache){
+              LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
+            }.fetch(_key){
+              DateTime.now.strftime('%Q')
+            }
+
             #          v get appropriate cache by field name
             #                         v if the key exists, return it
             #                                      v if it doesn't, call NetBox for the value and, if found, store it
-  _result = @CacheHash[@source_cache].fetch(_key){ RestClient.get(@netbox_url, { :Authorization => "Token " + @netbox_token }) }
+  # _result = @cache_hash[@source_cache].fetch(_key){RestClient.get(@netbox_url,
+  #                                                                  {
+  #                                                                    "Authorization" => "Token " + @netbox_token,
+  #                                                                    "X-logstash-cache-field" => @source_cache,
+  #                                                                    "X-logstash-cache-key" => _key
+  #                                                                  })}
   # TODO: what if RestClient returns nil (which it will often)... is there a way to *not* store it if it contains nil?
 
   event.set("#{@target}", _result) unless _result.nil?
+  event.set("event.enriched_key", @source_cache) unless _result.nil?
+  event.set("event.enriched_field", _key) unless _result.nil?
+  event.set("event.cache_hash_count", @cache_hash.count) unless _result.nil?
+  event.set("event.cache_lru_count", (@cache_hash[@source_cache]&.count).to_i) unless _result.nil?
 
   [event]
 end
