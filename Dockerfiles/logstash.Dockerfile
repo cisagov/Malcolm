@@ -89,13 +89,15 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
         gettext \
+        git \
         patch \
         python3-setuptools \
         python3-pip \
         python3-requests && \
     pip3 install ipaddress supervisor manuf pyyaml && \
-    /usr/share/logstash/bin/ruby -S gem install lru_redux && \
-    /usr/share/logstash/bin/ruby -S gem install netbox-client-ruby && \
+    /usr/share/logstash/bin/ruby -S gem install specific_install && \
+    /usr/share/logstash/bin/ruby -S gem specific_install -l "https://github.com/SamSaffron/lru_redux" -b v1.1.0 && \
+    /usr/share/logstash/bin/ruby -S gem specific_install -l "https://github.com/rest-client/rest-client" -b v2.1.0 && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
