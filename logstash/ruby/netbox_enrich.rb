@@ -45,22 +45,14 @@ def filter(event)
     return [event]
   end
 
-  _result = @cache_hash.fetch(@source_cache){
-              LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
-            }.fetch(_key){
-              DateTime.now.strftime('%Q')
-            }
-
-            #          v get appropriate cache by field name
-            #                         v if the key exists, return it
-            #                                      v if it doesn't, call NetBox for the value and, if found, store it
-  # _result = @cache_hash[@source_cache].fetch(_key){RestClient.get(@netbox_url,
-  #                                                                  {
-  #                                                                    "Authorization" => "Token " + @netbox_token,
-  #                                                                    "X-logstash-cache-field" => @source_cache,
-  #                                                                    "X-logstash-cache-key" => _key
-  #                                                                  })}
   # TODO: what if RestClient returns nil (which it will often)... is there a way to *not* store it if it contains nil?
+  _result = @cache_hash.getset(@source_cache){
+              LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
+            }.getset(_key){
+              RestClient.get(@netbox_url,
+                             { "Authorization" => "Token " + @netbox_token,
+                               "X-logstash-cache-field" => @source_cache,
+                               "X-logstash-cache-key" => _key })}
 
   event.set("#{@target}", _result) unless _result.nil?
   event.set("event.enriched_key", @source_cache) unless _result.nil?
