@@ -20,7 +20,6 @@ def register(params)
   # caching parameters
   @cache_size = params.fetch("cache_size", 500)
   @cache_ttl = params.fetch("cache_ttl", 300)
-  @fields_cache_size = params.fetch("fields_cache_size", 4096)
 
   # target field to store looked-up value
   @target = params["target"]
@@ -36,7 +35,7 @@ def register(params)
   end
 
   # hash of field names (from source_cache), each of which contains the respective looked-up values
-  @cache_hash = LruRedux::ThreadSafeCache.new(@fields_cache_size)
+  @cache_hash = LruRedux::ThreadSafeCache.new(params.fetch("fields_cache_size", 4096))
 end
 
 def filter(event)
