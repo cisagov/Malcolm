@@ -461,7 +461,7 @@ def bucketfield(fieldname, current_request, urls=None):
     response = s.execute()
     if (urls is not None) and (len(urls) > 0):
         return jsonify(
-            values=response.aggregations.to_dict()["values"],
+            values=response.aggregations.to_dict().get("values", {}),
             range=(start_time_ms // 1000, end_time_ms // 1000),
             filter=filters,
             fields=get_iterable(fieldname),
@@ -469,7 +469,7 @@ def bucketfield(fieldname, current_request, urls=None):
         )
     else:
         return jsonify(
-            values=response.aggregations.to_dict()["values"],
+            values=response.aggregations.to_dict().get("values", {}),
             range=(start_time_ms // 1000, end_time_ms // 1000),
             filter=filters,
             fields=get_iterable(fieldname),
@@ -530,7 +530,7 @@ def document(index):
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
     filters, s = filtervalues(s, args)
     return jsonify(
-        results=s.execute().to_dict()['hits']['hits'],
+        results=s.execute().to_dict().get('hits', {}).get('hits', []),
         range=(start_time_ms // 1000, end_time_ms // 1000),
         filter=filters,
     )
@@ -588,7 +588,7 @@ def fields():
             s = opensearch_dsl.Search(
                 using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
             ).extra(size=5000)
-            for hit in [x['_source'] for x in s.execute().to_dict()['hits']['hits']]:
+            for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
                 if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
                     if debugApi:
                         hit['source'] = 'arkime'
