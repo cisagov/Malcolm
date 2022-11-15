@@ -50,15 +50,9 @@ def filter(event)
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
             }.getset(_key){
               RestClient.get(@netbox_url,
-                             { "Authorization" => "Token " + @netbox_token,
-                               "X-logstash-cache-field" => @source_cache,
-                               "X-logstash-cache-key" => _key })}
+                             { "Authorization" => "Token " + @netbox_token })}
 
   event.set("#{@target}", _result) unless _result.nil?
-  event.set("event.enriched_key", @source_cache) unless _result.nil?
-  event.set("event.enriched_field", _key) unless _result.nil?
-  event.set("event.cache_hash_count", @cache_hash.count) unless _result.nil?
-  event.set("event.cache_lru_count", (@cache_hash[@source_cache]&.count).to_i) unless _result.nil?
 
   [event]
 end
