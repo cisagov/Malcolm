@@ -68,6 +68,12 @@ if [ -d "$WORKDIR" ]; then
 
   chown -R root:root *
 
+  # if fasttrack.debian.net is down, use mirror.linux.pizza instead
+  FASTTRACK_MIRROR=$(( curl -fsSL -o /dev/null "https://fasttrack.debian.net/debian-fasttrack/" 2>/dev/null && echo "fasttrack.debian.net" ) || ( curl -fsSL -o /dev/null "https://mirror.linux.pizza/debian-fasttrack/" 2>/dev/null && echo "mirror.linux.pizza" ))
+  if [[ -n "$FASTTRACK_MIRROR" ]] && [[ "$FASTTRACK_MIRROR" != "fasttrack.debian.net" ]]; then
+    sed "s/fasttrack.debian.net/$FASTTRACK_MIRROR/g" ./config/archives/fasttrack.list.*
+  fi
+
   # configure installation options
   YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
