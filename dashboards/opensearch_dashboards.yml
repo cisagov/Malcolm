@@ -11,6 +11,7 @@ opensearch.username: "_MALCOLM_DASHBOARDS_OPENSEARCH_USER_"
 opensearch.password: "_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_"
 opensearch.ssl.verificationMode: "_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_"
 opensearch.requestTimeout: 180000
+data_source.enabled: false
 
 opensearchDashboards.branding:
   applicationTitle: "Malcolm Dashboards"
