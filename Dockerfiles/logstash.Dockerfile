@@ -89,7 +89,6 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
         gettext \
-        git \
         patch \
         python3-setuptools \
         python3-pip \
