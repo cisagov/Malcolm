@@ -13,7 +13,7 @@ RUN amazon-linux-extras install -y epel && \
       glibc-devel \
       glibc-headers \
       java-1.8.0-openjdk \
-      java-latest-openjdk-devel \
+      java-1.8.0-openjdk-devel \
       libffi-devel \
       libtool \
       libyaml-devel \
