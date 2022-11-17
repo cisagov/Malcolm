@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:7.10.2
+FROM docker.elastic.co/beats/filebeat-oss:8.5.1
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -21,6 +21,7 @@ ENV PGROUP "filebeat"
 # can chown uploaded files
 ENV PUSER_PRIV_DROP false
 
+ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
 ARG AUTO_TAG=true
@@ -68,18 +69,37 @@ USER root
 
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
-RUN yum install -y epel-release && \
-        yum upgrade -y && \
-        yum install -y curl inotify-tools file psmisc tar gzip unzip cpio bzip2 lzma xz openssl p7zip p7zip-plugins unar python3-setuptools python3-pip && \
-        yum clean all && \
-    ln -sr /usr/sbin/fuser /bin/fuser && \
+RUN apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
+    apt-get -y --no-install-recommends install \
+        bzip2 \
+        cpio \
+        curl \
+        file \
+        gzip \
+        inotify-tools \
+        lzma \
+        openssl \
+        p7zip \
+        p7zip-full \
+        p7zip-rar \
+        psmisc \
+        python3-pip \
+        python3-setuptools \
+        tar \
+        unar \
+        unzip \
+        xz-utils && \
     python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
       mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
       ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
-    chmod +x /usr/bin/tini
+    chmod +x /usr/bin/tini && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
@@ -97,7 +117,7 @@ RUN for INPUT in nginx tcp; do \
       chmod 770 /usr/share/filebeat-$INPUT/data; \
     done; \
     chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py && \
-    (echo -e "* * * * * /usr/local/bin/filebeat-process-zeek-folder.sh\n*/5 * * * * /usr/local/bin/filebeat-clean-zeeklogs-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
+    (echo "* * * * * /usr/local/bin/filebeat-process-zeek-folder.sh\n*/5 * * * * /usr/local/bin/filebeat-clean-zeeklogs-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
 
 ENV AUTO_TAG $AUTO_TAG
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES

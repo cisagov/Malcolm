@@ -528,7 +528,9 @@ class Installer(object):
                     f'Select LDAP server compatibility type',
                     choices=[(x, '', x == 'winldap') for x in allowedLdapModes],
                 )
-            ldapStartTLS = InstallerYesOrNo('Use StartTLS for LDAP connection security?', default=True)
+            ldapStartTLS = InstallerYesOrNo(
+                'Use StartTLS (rather than LDAPS) for LDAP connection security?', default=False
+            )
             try:
                 with open(
                     os.path.join(os.path.realpath(os.path.join(ScriptPath, "..")), ".ldap_config_defaults"), "w"

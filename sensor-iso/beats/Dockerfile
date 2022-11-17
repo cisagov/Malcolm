@@ -41,7 +41,7 @@ RUN set -x && \
     go run bootstrap.go
 
 ENV BEATS=filebeat
-ENV BEATS_VERSION=7.10.2
+ENV BEATS_VERSION=8.5.1
 
 ADD ./build.sh /build.sh
 RUN [ "chmod", "+x", "/build.sh" ]
