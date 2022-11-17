@@ -1,4 +1,4 @@
-repository: cisagov/Malcolm
+repository: idaholab/Malcolm
 title: Malcolm
 description: A powerful, easily deployable network traffic analysis tool suite
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
@@ -28,7 +28,7 @@ thirdparty_logs_docs_uri: docs/third-party-logs.html
 upload_docs_uri: docs/upload.html
 url:
 github:
-  owner_name: Cybersecurity and Infrastructure Security Agency
+  owner_name: Idaho National Laboratory
   default_branch: main
 plugins:
   - jekyll-relative-links

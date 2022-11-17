@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME=malcolm
-IMAGE_PUBLISHER=cisagov
+IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bullseye
 

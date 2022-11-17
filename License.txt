@@ -19,7 +19,7 @@ publicly and display publicly MALCOLM, in any manner, including by electronic
 means, and for any purpose whatsoever.
 
 
-https://github.com/cisagov/Malcolm
+https://github.com/idaholab/Malcolm
 
 
 Copyright 2022 Battelle Energy Alliance, LLC
