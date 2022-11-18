@@ -121,7 +121,7 @@ Specify external Docker network name (or leave blank for default networking) ():
 
 Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
 
-Store OpenSearch index snapshots locally in /home/user/Malcolm/opensearch-backup? (Y/n): y
+Store PCAP, log and index files locally under /home/user/Malcolm? (Y/n): y
 
 Compress OpenSearch index snapshots? (y/N): n
 
