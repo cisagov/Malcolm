@@ -136,6 +136,24 @@ def UnescapeForCurl(s):
     )
 
 
+##################################################################################################
+def ReplaceBindMountLocation(line, location, linePrefix):
+    if os.path.isdir(location):
+        volumeParts = line.strip().lstrip('-').lstrip().split(':')
+        volumeParts[0] = location
+        return "{}- {}".format(linePrefix, ':'.join(volumeParts))
+    else:
+        return line
+
+
+###################################################################################################
+def same_file_or_dir(path1, path2):
+    try:
+        return os.path.samefile(path1, path2)
+    except:
+        return False
+
+
 ###################################################################################################
 # parse a curl-formatted config file, with special handling for user:password and URL
 # see https://everything.curl.dev/cmdline/configfile

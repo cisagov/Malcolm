@@ -10,6 +10,7 @@ import getpass
 import glob
 import json
 import os
+import pathlib
 import platform
 import pprint
 import math
@@ -544,22 +545,129 @@ class Installer(object):
             except:
                 pass
 
-        # snapshot repository directory and compression
-        indexSnapshotDir = './opensearch-backup'
+        # directories for data volume mounts (PCAP storage, Zeek log storage, OpenSearch indexes, etc.)
+        indexDir = './opensearch'
+        indexDirDefault = os.path.join(malcolm_install_path, indexDir)
+        indexDirFull = os.path.realpath(indexDirDefault)
+
         indexSnapshotCompressed = False
-        if not opensearchPrimaryRemote:
+        indexSnapshotDir = './opensearch-backup'
+        indexSnapshotDirDefault = os.path.join(malcolm_install_path, indexSnapshotDir)
+        indexSnapshotDirFull = os.path.realpath(indexSnapshotDirDefault)
+
+        pcapDir = './pcap'
+        pcapDirDefault = os.path.join(malcolm_install_path, pcapDir)
+        pcapDirFull = os.path.realpath(pcapDirDefault)
+
+        suricataLogDir = './suricata-logs'
+        suricataLogDirDefault = os.path.join(malcolm_install_path, suricataLogDir)
+        suricataLogDirFull = os.path.realpath(suricataLogDirDefault)
+
+        zeekLogDir = './zeek-logs'
+        zeekLogDirDefault = os.path.join(malcolm_install_path, zeekLogDir)
+        zeekLogDirFull = os.path.realpath(zeekLogDirDefault)
+
+        if not InstallerYesOrNo(
+            'Store PCAP, log and index files locally under {}?'.format(malcolm_install_path),
+            default=True,
+        ):
+            # PCAP directory
             if not InstallerYesOrNo(
-                'Store OpenSearch index snapshots locally in {}?'.format(
-                    os.path.join(malcolm_install_path, 'opensearch-backup')
-                ),
+                'Store PCAP files locally in {}?'.format(pcapDirDefault),
                 default=True,
             ):
                 while True:
-                    indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
-                    if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
-                        indexSnapshotDir = os.path.realpath(indexSnapshotDir)
+                    pcapDir = InstallerAskForString('Enter PCAP directory')
+                    if (len(pcapDir) > 1) and os.path.isdir(pcapDir):
+                        pcapDirFull = os.path.realpath(pcapDir)
+                        pcapDir = (
+                            f"./{os.path.relpath(pcapDirDefault, malcolm_install_path)}"
+                            if same_file_or_dir(pcapDirDefault, pcapDirFull)
+                            else pcapDirFull
+                        )
                         break
-            indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
+
+            # Zeek log directory
+            if not InstallerYesOrNo(
+                'Store Zeek logs locally in {}?'.format(zeekLogDirDefault),
+                default=True,
+            ):
+                while True:
+                    zeekLogDir = InstallerAskForString('Enter Zeek log directory')
+                    if (len(zeekLogDir) > 1) and os.path.isdir(zeekLogDir):
+                        zeekLogDirFull = os.path.realpath(zeekLogDir)
+                        zeekLogDir = (
+                            f"./{os.path.relpath(zeekLogDirDefault, malcolm_install_path)}"
+                            if same_file_or_dir(zeekLogDirDefault, zeekLogDirFull)
+                            else zeekLogDirFull
+                        )
+                        break
+
+            # Suricata log directory
+            if not InstallerYesOrNo(
+                'Store Suricata logs locally in {}?'.format(suricataLogDirDefault),
+                default=True,
+            ):
+                while True:
+                    suricataLogDir = InstallerAskForString('Enter Suricata log directory')
+                    if (len(suricataLogDir) > 1) and os.path.isdir(suricataLogDir):
+                        suricataLogDirFull = os.path.realpath(suricataLogDir)
+                        suricataLogDir = (
+                            f"./{os.path.relpath(suricataLogDirDefault, malcolm_install_path)}"
+                            if same_file_or_dir(suricataLogDirDefault, suricataLogDirFull)
+                            else suricataLogDirFull
+                        )
+                        break
+
+            if not opensearchPrimaryRemote:
+                # opensearch index directory
+                if not InstallerYesOrNo(
+                    'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
+                    default=True,
+                ):
+                    while True:
+                        indexDir = InstallerAskForString('Enter OpenSearch index directory')
+                        if (len(indexDir) > 1) and os.path.isdir(indexDir):
+                            indexDirFull = os.path.realpath(indexDir)
+                            indexDir = (
+                                f"./{os.path.relpath(indexDirDefault, malcolm_install_path)}"
+                                if same_file_or_dir(indexDirDefault, indexDirFull)
+                                else indexDirFull
+                            )
+                            break
+
+                # opensearch snapshot repository directory and compression
+                if not InstallerYesOrNo(
+                    'Store OpenSearch index snapshots locally in {}?'.format(indexSnapshotDirDefault),
+                    default=True,
+                ):
+                    while True:
+                        indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
+                        if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
+                            indexSnapshotDirFull = os.path.realpath(indexSnapshotDir)
+                            indexSnapshotDir = (
+                                f"./{os.path.relpath(indexSnapshotDirDefault, malcolm_install_path)}"
+                                if same_file_or_dir(indexSnapshotDirDefault, indexSnapshotDirFull)
+                                else indexSnapshotDirFull
+                            )
+                            break
+
+        # make sure paths specified (and their necessary children) exist
+        for pathToCreate in (
+            indexDirFull,
+            indexSnapshotDirFull,
+            os.path.join(pcapDirFull, 'processed'),
+            os.path.join(pcapDirFull, 'upload'),
+            os.path.join(suricataLogDirFull, 'live'),
+            os.path.join(zeekLogDirFull, 'current'),
+            os.path.join(zeekLogDirFull, 'live'),
+            os.path.join(zeekLogDirFull, 'upload'),
+            os.path.join(zeekLogDirFull, os.path.join('extract_files', 'preserved')),
+            os.path.join(zeekLogDirFull, os.path.join('extract_files', 'quarantine')),
+        ):
+            pathlib.Path(pathToCreate).mkdir(parents=True, exist_ok=True)
+
+        indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
 
         # delete oldest indexes based on index pattern size
         indexPruneSizeLimit = '0'
@@ -1090,21 +1198,41 @@ class Installer(object):
                             # whether or not to restart services automatically (on boot, etc.)
                             line = f"{sectionIndents[currentSection] * 2}restart: {restartMode}"
 
-                        elif currentService == 'opensearch':
-                            # stuff specifically in the opensearch section
-                            if 'OPENSEARCH_JAVA_OPTS' in line:
-                                # OpenSearch memory allowance
-                                line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
+                        elif currentService == 'arkime':
+                            # stuff specifically in the arkime section
+                            if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
+                                # Arkime's reference to the PCAP directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    pcapDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
 
-                            elif (
-                                re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line)
-                                and (indexSnapshotDir is not None)
-                                and os.path.isdir(indexSnapshotDir)
-                            ):
-                                # OpenSearch backup directory
-                                volumeParts = line.strip().lstrip('-').lstrip().split(':')
-                                volumeParts[0] = indexSnapshotDir
-                                line = "{}- {}".format(sectionIndents[currentSection] * 3, ':'.join(volumeParts))
+                        elif currentService == 'filebeat':
+                            # stuff specifically in the filebeat section
+                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                # set bind IP based on whether it should be externally exposed or not
+                                line = re.sub(
+                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                    fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
+                                    line,
+                                )
+
+                            elif re.match(r'^\s*-.+:/suricata(:.+)?\s*$', line):
+                                # filebeat's reference to the suricata-logs directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    suricataLogDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/zeek(:.+)?\s*$', line):
+                                # filebeat's reference to the zeek-logs directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    zeekLogDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
 
                         elif currentService == 'logstash':
                             # stuff specifically in the logstash section
@@ -1120,14 +1248,74 @@ class Installer(object):
                                     line,
                                 )
 
-                        elif currentService == 'filebeat':
-                            # stuff specifically in the filebeat section
-                            if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                # set bind IP based on whether it should be externally exposed or not
-                                line = re.sub(
-                                    r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                    fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
+                        elif currentService == 'opensearch':
+                            # stuff specifically in the opensearch section
+                            if 'OPENSEARCH_JAVA_OPTS' in line:
+                                # OpenSearch memory allowance
+                                line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
+
+                            elif re.match(r'^\s*-.+:/usr/share/opensearch/data(:.+)?\s*$', line):
+                                # OpenSearch indexes directory
+                                line = ReplaceBindMountLocation(
                                     line,
+                                    indexDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line):
+                                # OpenSearch backup directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    indexSnapshotDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                        elif currentService == 'pcap-capture':
+                            # stuff specifically in the pcap-capture section
+                            if re.match(r'^\s*-.+:/pcap(:.+)?\s*$', line):
+                                # pcap-capture's reference to the PCAP directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(pcapDir, 'upload'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                        elif currentService == 'pcap-monitor':
+                            # stuff specifically in the pcap-monitor section
+                            if re.match(r'^\s*-.+:/pcap(:.+)?\s*$', line):
+                                # pcap-monitor's reference to the PCAP directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    pcapDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                        elif currentService == 'suricata':
+                            # stuff specifically in the suricata section
+                            if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
+                                # Suricata's reference to the PCAP directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    pcapDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/var/log/suricata(:.+)?\s*$', line):
+                                # suricata's reference to the suricata-logs directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    suricataLogDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                        elif currentService == 'suricata-live':
+                            # stuff specifically in the suricata-live section
+                            if re.match(r'^\s*-.+:/var/log/suricata(:.+)?\s*$', line):
+                                # suricata-live's reference to the suricata-logs directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    suricataLogDir,
+                                    sectionIndents[currentSection] * 3,
                                 )
 
                         elif currentService == 'upload':
@@ -1138,6 +1326,58 @@ class Installer(object):
                                     r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
                                     fr"\g<1>{'0.0.0.0' if sftpOpen else '127.0.0.1'}:\g<3>",
                                     line,
+                                )
+
+                            elif re.match(r'^\s*-.+:/var/www/upload/server/php/chroot/files(:.+)?\s*$', line):
+                                # upload's reference to the PCAP directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(pcapDir, 'upload'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                        elif currentService == 'zeek':
+                            # stuff specifically in the zeek section
+                            if re.match(r'^\s*-.+:/pcap(:.+)?\s*$', line):
+                                # Zeek's reference to the PCAP directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    pcapDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/zeek/upload(:.+)?\s*$', line):
+                                # zeek's reference to the zeek-logs/upload directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(zeekLogDir, 'upload'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/zeek/extract_files(:.+)?\s*$', line):
+                                # zeek's reference to the zeek-logs/extract_files directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(zeekLogDir, 'extract_files'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                        elif currentService == 'zeek-live':
+                            # stuff specifically in the zeek-live section
+                            if re.match(r'^\s*-.+:/zeek/live(:.+)?\s*$', line):
+                                # zeek-live's reference to the zeek-logs/live directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(zeekLogDir, 'live'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/zeek/extract_files(:.+)?\s*$', line):
+                                # zeek-lives's reference to the zeek-logs/extract_files directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(zeekLogDir, 'extract_files'),
+                                    sectionIndents[currentSection] * 3,
                                 )
 
                         elif currentService == 'nginx-proxy':
