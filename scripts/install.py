@@ -696,12 +696,17 @@ class Installer(object):
         pcapIface = 'lo'
         tweakIface = False
         pcapFilter = ''
+        arkimeManagePCAP = False
 
         if InstallerYesOrNo(
             'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
         ):
             pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
             pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
+            arkimeManagePCAP = InstallerYesOrNo(
+                'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+                default=False,
+            )
 
         liveSuricata = InstallerYesOrNo('Should Malcolm analyze live network traffic with Suricata?', default=False)
         liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
@@ -878,6 +883,12 @@ class Installer(object):
                             # capture pcaps via tcpdump
                             line = re.sub(
                                 r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
+                            )
+
+                        elif 'MANAGE_PCAP_FILES' in line:
+                            # Whether or not Arkime is allowed to delete uploaded/captured PCAP
+                            line = re.sub(
+                                r'(MANAGE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(arkimeManagePCAP)}", line
                             )
 
                         elif 'ZEEK_LIVE_CAPTURE' in line:
