@@ -383,9 +383,9 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
       - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
-      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
+      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
       interval: 30s
