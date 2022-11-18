@@ -1234,6 +1234,24 @@ class Installer(object):
                                     sectionIndents[currentSection] * 3,
                                 )
 
+                        elif currentService == 'file-monitor':
+                            # stuff specifically in the file-monitor section
+                            if re.match(r'^\s*-.+:/zeek/extract_files(:.+)?\s*$', line):
+                                # file-monitor's reference to the zeek-logs/extract_files directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(zeekLogDir, 'extract_files'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/zeek/logs(:.+)?\s*$', line):
+                                # zeek's reference to the zeek-logs/current directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    os.path.join(zeekLogDir, 'current'),
+                                    sectionIndents[currentSection] * 3,
+                                )
+
                         elif currentService == 'logstash':
                             # stuff specifically in the logstash section
                             if 'LS_JAVA_OPTS' in line:
