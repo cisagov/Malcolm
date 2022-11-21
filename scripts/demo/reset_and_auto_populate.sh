@@ -308,7 +308,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
         --header "Authorization:" \
-        "http://localhost:8005"
+        "http://localhost:8005" || true
     done
     sleep 5
     [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
