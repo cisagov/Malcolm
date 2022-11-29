@@ -150,7 +150,7 @@ def ReplaceBindMountLocation(line, location, linePrefix):
 def same_file_or_dir(path1, path2):
     try:
         return os.path.samefile(path1, path2)
-    except:
+    except Exception:
         return False
 
 
