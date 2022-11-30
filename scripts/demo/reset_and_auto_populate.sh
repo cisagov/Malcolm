@@ -326,11 +326,11 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
       $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
-      docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -sSL -XGET \
+      docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
         --header "Authorization:" \
-        "http://localhost:8005" || true
+        "https://localhost:8005" || true
     done
     sleep 5
     [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
