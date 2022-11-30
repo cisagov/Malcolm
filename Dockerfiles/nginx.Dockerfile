@@ -25,6 +25,7 @@ WORKDIR /site
 # build documentation, remove unnecessary files, then massage a bit to work nicely with NGINX (which will be serving it)
 RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$VCS_REVISION/g" "{}" \; && \
     ( [ -n "${GITHUB_TOKEN}" ] && export JEKYLL_GITHUB_TOKEN="${GITHUB_TOKEN}" || true ) && \
+    sed -i "s/^\(show_downloads:\).*/\1 false/" /site/_config.yml && \
     docker-entrypoint.sh bundle exec jekyll build && \
     find /site/_site -type f -name "*.md" -delete && \
     find /site/_site -type f -name "*.html" -exec sed -i "s@/\(docs\|assets\)@/readme/\1@g" "{}" \; && \
