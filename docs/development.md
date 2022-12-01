@@ -68,7 +68,7 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `malcolmnetsec/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
 * `malcolmnetsec/name-map-ui` (based on `alpine:3.17`)
 * `malcolmnetsec/netbox` (based on `netboxcommunity/netbox:latest`)
-* `malcolmnetsec/nginx-proxy` (based on `alpine:3.16`)
+* `malcolmnetsec/nginx-proxy` (based on `alpine:3.17`)
 * `malcolmnetsec/opensearch` (based on `opensearchproject/opensearch`)
 * `malcolmnetsec/pcap-capture` (based on `debian:11-slim`)
 * `malcolmnetsec/pcap-monitor` (based on `debian:11-slim`)
