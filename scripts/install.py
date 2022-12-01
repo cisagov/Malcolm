@@ -666,6 +666,13 @@ class Installer(object):
             os.path.join(zeekLogDirFull, os.path.join('extract_files', 'quarantine')),
         ):
             pathlib.Path(pathToCreate).mkdir(parents=True, exist_ok=True)
+            if (
+                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+                and (self.scriptUser == "root")
+                and (getpwuid(os.stat(pathToCreate).st_uid).pw_name == self.scriptUser)
+            ):
+                # change ownership of newly-created directory to match puid/pgid
+                os.chown(pathToCreate, int(puid), int(pgid))
 
         indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
 
