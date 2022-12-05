@@ -45,6 +45,7 @@ HostName = os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).spl
 ###################################################################################################
 args = None
 requests_imported = None
+yaml_imported = None
 
 ###################################################################################################
 # get interactive user response to Y/N question
@@ -665,14 +666,21 @@ class Installer(object):
             os.path.join(zeekLogDirFull, os.path.join('extract_files', 'preserved')),
             os.path.join(zeekLogDirFull, os.path.join('extract_files', 'quarantine')),
         ):
-            pathlib.Path(pathToCreate).mkdir(parents=True, exist_ok=True)
-            if (
-                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
-                and (self.scriptUser == "root")
-                and (getpwuid(os.stat(pathToCreate).st_uid).pw_name == self.scriptUser)
-            ):
-                # change ownership of newly-created directory to match puid/pgid
-                os.chown(pathToCreate, int(puid), int(pgid))
+            try:
+                if args.debug:
+                    eprint(f"Creating {pathToCreate}")
+                pathlib.Path(pathToCreate).mkdir(parents=True, exist_ok=True)
+                if (
+                    ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+                    and (self.scriptUser == "root")
+                    and (getpwuid(os.stat(pathToCreate).st_uid).pw_name == self.scriptUser)
+                ):
+                    if args.debug:
+                        eprint(f"Setting permissions of {pathToCreate} to {puid}:{pgid}")
+                    # change ownership of newly-created directory to match puid/pgid
+                    os.chown(pathToCreate, int(puid), int(pgid))
+            except Exception as e:
+                eprint(f"Creating {pathToCreate} failed: {e}")
 
         indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
 
@@ -1312,6 +1320,14 @@ class Installer(object):
                                 line = ReplaceBindMountLocation(
                                     line,
                                     pcapDir,
+                                    sectionIndents[currentSection] * 3,
+                                )
+
+                            elif re.match(r'^\s*-.+:/zeek(:.+)?\s*$', line):
+                                # pcap-monitor's reference to the zeek-logs directory
+                                line = ReplaceBindMountLocation(
+                                    line,
+                                    zeekLogDir,
                                     sectionIndents[currentSection] * 3,
                                 )
 
@@ -2338,6 +2354,7 @@ class MacInstaller(Installer):
 def main():
     global args
     global requests_imported
+    global yaml_imported
 
     # extract arguments from the command line
     # print (sys.argv[1:]);
@@ -2463,9 +2480,11 @@ def main():
         sys.tracebacklimit = 0
 
     requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
+    yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     if args.debug:
         eprint(f"Imported requests: {requests_imported}")
-    if not requests_imported:
+        eprint(f"Imported yaml: {yaml_imported}")
+    if (not requests_imported) or (not yaml_imported):
         exit(2)
 
     # If Malcolm and images tarballs are provided, we will use them.
