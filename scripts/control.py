@@ -48,6 +48,8 @@ args = None
 dockerBin = None
 dockerComposeBin = None
 opensslBin = None
+yamlImported = None
+dockerComposeYaml = None
 
 ###################################################################################################
 try:
@@ -495,6 +497,7 @@ def stop(wipe=False):
     global args
     global dockerBin
     global dockerComposeBin
+    global dockerComposeYaml
 
     # docker-compose use local temporary path
     osEnv = os.environ.copy()
@@ -515,47 +518,67 @@ def stop(wipe=False):
         exit(err)
 
     if wipe:
-        # delete OpenSearch database
-        shutil.rmtree(os.path.join(MalcolmPath, os.path.join('opensearch', 'nodes')), ignore_errors=True)
-
-        # delete Zeek live-related spool files
-        shutil.rmtree(
-            os.path.join(MalcolmPath, os.path.join('zeek-logs', os.path.join('live', 'spool'))), ignore_errors=True
+        # there is some overlap here among some of these containers, but it doesn't matter
+        boundPathsToWipe = (
+            BoundPath("arkime", "/opt/arkime/logs", True, None, None),
+            BoundPath("arkime", "/opt/arkime/raw", True, None, None),
+            BoundPath("filebeat", "/zeek", True, None, None),
+            BoundPath("file-monitor", "/zeek/logs", True, None, None),
+            BoundPath("netbox", "/opt/netbox/netbox/media", True, None, ["."]),
+            BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
+            BoundPath("netbox-redis", "/data", True, None, ["."]),
+            BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
+            BoundPath("pcap-capture", "/pcap", True, None, None),
+            BoundPath("pcap-monitor", "/pcap", True, ["processed", "upload"], None),
+            BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
+            BoundPath("upload", "/var/www/upload/server/php/chroot/files", True, None, None),
+            BoundPath("zeek", "/zeek/extract_files", True, None, None),
+            BoundPath("zeek", "/zeek/upload", True, None, None),
+            BoundPath("zeek-live", "/zeek/live", True, ["spool"], None),
+            BoundPath(
+                "filebeat",
+                "/zeek",
+                False,
+                ["processed", "current", "live"],
+                ["processed", "current", "live"],
+            ),
         )
-
-        # delete data files (backups, zeek logs, arkime logs, PCAP files, captured PCAP files)
-        for dataDir in [
-            'opensearch-backup',
-            'zeek-logs',
-            'suricata-logs',
-            'arkime-logs',
-            'pcap',
-            'arkime-raw',
-            os.path.join('netbox', 'media'),
-            os.path.join('netbox', 'postgres'),
-            os.path.join('netbox', 'redis'),
-        ]:
-            for root, dirnames, filenames in os.walk(os.path.join(MalcolmPath, dataDir), topdown=True, onerror=None):
-                for file in filenames:
-                    fileSpec = os.path.join(root, file)
-                    if (os.path.isfile(fileSpec) or os.path.islink(fileSpec)) and (not file.startswith('.git')):
-                        try:
-                            os.remove(fileSpec)
-                        except:
-                            pass
-
-        # clean up empty directories
-        for dataDir in [
-            os.path.join('opensearch-backup', 'logs'),
-            os.path.join('zeek-logs', 'processed'),
-            os.path.join('zeek-logs', 'current'),
-            os.path.join('zeek-logs', 'live'),
-            os.path.join('suricata-logs'),
-            os.path.join('netbox', 'media'),
-            os.path.join('netbox', 'postgres'),
-            os.path.join('netbox', 'redis'),
-        ]:
-            RemoveEmptyFolders(dataDir, removeRoot=False)
+        for boundPath in boundPathsToWipe:
+            localPath = LocalPathForContainerBindMount(
+                boundPath.service,
+                dockerComposeYaml,
+                boundPath.container_dir,
+                MalcolmPath,
+            )
+            if localPath and os.path.isdir(localPath):
+                # delete files
+                if boundPath.files:
+                    if args.debug:
+                        eprint(f'Walking "{localPath}" for file deletion')
+                    for root, dirnames, filenames in os.walk(localPath, topdown=True, onerror=None):
+                        for file in filenames:
+                            fileSpec = os.path.join(root, file)
+                            if (os.path.isfile(fileSpec) or os.path.islink(fileSpec)) and (not file.startswith('.git')):
+                                try:
+                                    os.remove(fileSpec)
+                                except:
+                                    pass
+                # delete whole directories
+                if boundPath.relative_dirs:
+                    for relDir in GetIterable(boundPath.relative_dirs):
+                        tmpPath = os.path.join(localPath, relDir)
+                        if os.path.isdir(tmpPath):
+                            if args.debug:
+                                eprint(f'Performing rmtree on "{tmpPath}"')
+                            shutil.rmtree(tmpPath, ignore_errors=True)
+                # cleanup empty directories
+                if boundPath.clean_empty_dirs:
+                    for cleanDir in GetIterable(boundPath.clean_empty_dirs):
+                        tmpPath = os.path.join(localPath, cleanDir)
+                        if os.path.isdir(tmpPath):
+                            if args.debug:
+                                eprint(f'Performing RemoveEmptyFolders on "{tmpPath}"')
+                            RemoveEmptyFolders(tmpPath, removeRoot=False)
 
         eprint("Malcolm has been stopped and its data cleared\n")
 
@@ -607,31 +630,54 @@ def start():
         os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
 
     # make sure some directories exist before we start
-    for path in [
-        os.path.join(MalcolmPath, 'opensearch'),
-        os.path.join(MalcolmPath, 'opensearch-backup'),
-        os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
-        os.path.join(MalcolmPath, os.path.join('netbox', 'media')),
-        os.path.join(MalcolmPath, os.path.join('netbox', 'postgres')),
-        os.path.join(MalcolmPath, os.path.join('netbox', 'redis')),
-        os.path.join(MalcolmPath, os.path.join('pcap', 'processed')),
-        os.path.join(MalcolmPath, os.path.join('pcap', 'upload')),
-        os.path.join(MalcolmPath, os.path.join('suricata-logs', 'live')),
-        os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'MISP'))),
-        os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'STIX'))),
-        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'current')),
-        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'live')),
-        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'extract_files')),
-        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'processed')),
-        os.path.join(MalcolmPath, os.path.join('zeek-logs', 'upload')),
-    ]:
-        try:
-            os.makedirs(path)
-        except OSError as exc:
-            if (exc.errno == errno.EEXIST) and os.path.isdir(path):
-                pass
-            else:
-                raise
+    boundPathsToCreate = (
+        BoundPath("arkime", "/opt/arkime/logs", False, None, None),
+        BoundPath("arkime", "/opt/arkime/raw", False, None, None),
+        BoundPath("file-monitor", "/zeek/logs", False, None, None),
+        BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
+        BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
+        BoundPath("netbox-postgres", "/var/lib/postgresql/data", False, None, None),
+        BoundPath("netbox-redis", "/data", False, None, None),
+        BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
+        BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
+        BoundPath("pcap-capture", "/pcap", False, ["processed", "upload"], None),
+        BoundPath("suricata", "/var/log/suricata", False, ["live"], None),
+        BoundPath("upload", "/var/www/upload/server/php/chroot/files", False, None, None),
+        BoundPath("zeek", "/zeek/extract_files", False, None, None),
+        BoundPath("zeek", "/zeek/upload", False, None, None),
+        BoundPath("zeek", "/opt/zeek/share/zeek/site/intel", False, ["MISP", "STIX"], None),
+        BoundPath("zeek-live", "/zeek/live", False, ["spool"], None),
+        BoundPath("filebeat", "/zeek", False, ["processed", "current", "live", "extract_files", "upload"], None),
+    )
+    for boundPath in boundPathsToCreate:
+        localPath = LocalPathForContainerBindMount(
+            boundPath.service,
+            dockerComposeYaml,
+            boundPath.container_dir,
+            MalcolmPath,
+        )
+        if localPath:
+            try:
+                if args.debug:
+                    eprint(f'Ensuring "{localPath}" exists')
+                os.makedirs(localPath)
+            except OSError as exc:
+                if (exc.errno == errno.EEXIST) and os.path.isdir(localPath):
+                    pass
+                else:
+                    raise
+            if boundPath.relative_dirs:
+                for relDir in GetIterable(boundPath.relative_dirs):
+                    tmpPath = os.path.join(localPath, relDir)
+                    try:
+                        if args.debug:
+                            eprint(f'Ensuring "{tmpPath}" exists')
+                        os.makedirs(tmpPath)
+                    except OSError as exc:
+                        if (exc.errno == errno.EEXIST) and os.path.isdir(tmpPath):
+                            pass
+                        else:
+                            raise
 
     # touch the zeek intel file
     open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
@@ -1208,6 +1254,8 @@ def main():
     global dockerBin
     global dockerComposeBin
     global opensslBin
+    global yamlImported
+    global dockerComposeYaml
 
     # extract arguments from the command line
     # print (sys.argv[1:]);
@@ -1298,6 +1346,12 @@ def main():
     else:
         sys.tracebacklimit = 0
 
+    yamlImported = YAMLDynamic(debug=args.debug)
+    if args.debug:
+        eprint(f"Imported yaml: {yamlImported}")
+    if not yamlImported:
+        exit(2)
+
     with pushd(MalcolmPath):
 
         # don't run this as root
@@ -1332,6 +1386,10 @@ def main():
         err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], env=osEnv, debug=args.debug)
         if err != 0:
             raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
+
+        # load compose file YAML (used to find some volume bind mount locations)
+        with open(args.composeFile, 'r') as cf:
+            dockerComposeYaml = yamlImported.safe_load(cf)
 
         # identify openssl binary
         opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('openssl.exe')) else 'openssl'

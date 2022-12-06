@@ -16,6 +16,7 @@
         "protocol": { "type": "keyword" },
         "quic.host": { "type": "keyword" },
         "quic.version": { "type": "keyword" },
+        "rootId": { "type": "keyword" },
         "source.geo.country_code2": { "type": "keyword" },
         "source.geo.country_code3": { "type": "keyword" },
         "source.geo.dma_code": { "type": "short" },

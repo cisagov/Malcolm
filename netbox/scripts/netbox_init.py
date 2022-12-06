@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+
 import argparse
 import ipaddress
 import json
@@ -13,6 +15,7 @@ import time
 
 from collections.abc import Iterable
 from slugify import slugify
+from netbox_library_import import import_library
 
 ###################################################################################################
 args = None
@@ -203,6 +206,15 @@ def main():
         default=[os.getenv('NETBOX_DEFAULT_DEVICE_TYPE', 'Unspecified')],
         required=False,
         help="Device types(s) to create",
+    )
+    parser.add_argument(
+        '-l',
+        '--library',
+        dest='libraryDir',
+        type=str,
+        default=None,
+        required=False,
+        help="Directory containing NetBox device type library",
     )
     try:
         parser.error = parser.exit
@@ -423,6 +435,14 @@ def main():
         logging.debug(f"sites (after): { {k:v.id for k, v in sites.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
+
+    # ###### Library ###############################################################################################
+    try:
+        counter = import_library(nb, args.libraryDir)
+        logging.debug(f"import library results: { counter }")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing library: {e}")
 
     # ###### Net Map ###############################################################################################
     try:

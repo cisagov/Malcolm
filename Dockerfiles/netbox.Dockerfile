@@ -28,6 +28,8 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
+
 ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=false
 
@@ -54,10 +56,12 @@ RUN apt-get -q update && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
-    useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
-    usermod -a -G tty ${PUSER} && \
-    mkdir -p /opt/unit && \
+      useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
+      usermod -a -G tty ${PUSER} && \
+    mkdir -p /opt/unit /opt/netbox-devicetype-library && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
+    cd /opt && \
+        curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./netbox-devicetype-library --strip-components 1 && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \
       mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq ".routes[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \

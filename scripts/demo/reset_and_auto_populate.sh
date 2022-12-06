@@ -24,6 +24,12 @@
 # -x <maximum number of seconds to wait for idle state before continuing anyway>
 # remaining parameters: PCAP file(s)
 
+# Those PCAP files with FILENAMES (not path) prepended with '=' will not be time-adjusted. eg.,
+# /home/ec2-user/artifacts/current/Cyberville.pcap - will be time-adjusted
+# /home/ec2-user/artifacts/ctf/=ctfd.pcap - will NOT be time-adjusted
+# The file itself shouldn't be named with a '=', it's just an indicator.
+# That character will be removed before processing.
+
 ###############################################################################
 # force bash
 if [ -z "$BASH_VERSION" ]; then
@@ -194,17 +200,32 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   pushd "$WORKDIR" >/dev/null 2>&1
 
   PCAP_FILES_ADJUSTED=()
+  PCAP_FILES_NOT_ADJUSTED=()
 
   if (( ${#PCAP_FILES[@]} > 0 )); then
     for ((i = 0; i < ${#PCAP_FILES[@]}; i++)); do
-      PCAP_FILE_ABSOLUTE="$($REALPATH -e "${PCAP_FILES[$i]}")"
-      PCAP_FILE_ADJUSTED="$WORKDIR"/"$(basename "${PCAP_FILES[$i]}")"
+      PCAP_FILE_DIRNAME="$(dirname "${PCAP_FILES[$i]}")"
+      PCAP_FILE_BASENAME="$(basename "${PCAP_FILES[$i]}")"
+      if [[ "$PCAP_FILE_BASENAME" =~ ^= ]]; then
+        # don't time-adjust files prepended with =, remove the = from the filename and insert as-is
+        PCAP_FILE_BASENAME="${PCAP_FILE_BASENAME:1}"
+        PCAP_ADJUST="false"
+      else
+        PCAP_ADJUST="true"
+      fi
+      PCAP_FILE_ABSOLUTE="$($REALPATH -e "$PCAP_FILE_DIRNAME"/"$PCAP_FILE_BASENAME")"
+      PCAP_FILE_ADJUSTED="$WORKDIR"/"$PCAP_FILE_BASENAME"
       cp $VERBOSE_FLAG "$PCAP_FILE_ABSOLUTE" "$PCAP_FILE_ADJUSTED"
-      [[ -f "$PCAP_FILE_ADJUSTED" ]] && \
-        PCAP_FILES_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
+      if [[ -f "$PCAP_FILE_ADJUSTED" ]]; then
+        if [[ "$PCAP_ADJUST" == "true" ]]; then
+          PCAP_FILES_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
+        else
+          PCAP_FILES_NOT_ADJUSTED+=("$PCAP_FILE_ADJUSTED")
+        fi
+      fi
     done
 
-    [[ -n "$PCAP_ADJUST_SCRIPT" ]] && \
+    [[ -n "$PCAP_ADJUST_SCRIPT" ]] && (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) && \
       "$PCAP_ADJUST_SCRIPT" $VERBOSE_FLAG \
         --time "$PCAP_DATE" \
         --relative "$PCAP_RELATIVE_ADJUST" \
@@ -244,9 +265,10 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   done
   sleep 30
 
-  if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )); then
-    # copy the adjusted PCAP file(s) to the Malcolm upload directory to be processed
-    cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
+  if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) || (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )); then
+    # copy the PCAP file(s) to the Malcolm upload directory to be processed
+    (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
+    (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_NOT_ADJUSTED[@]}" ./pcap/upload/
 
     if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
       # wait for processing to finish out (count becomes "idle", no longer increasing)
@@ -304,11 +326,11 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
       $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
-      docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -sSL -XGET \
+      docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
         --header "Authorization:" \
-        "http://localhost:8005"
+        "https://localhost:8005" || true
     done
     sleep 5
     [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
@@ -316,7 +338,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
-    for CONTAINER in filebeat logstash upload pcap-monitor zeek name-map-ui pcap-capture freq; do
+    for CONTAINER in filebeat logstash upload pcap-monitor zeek name-map-ui netbox netbox-postgres netbox-redis netbox-redis-cache pcap-capture freq; do
       docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5

@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM alpine:3.17
 
 # Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -26,13 +26,13 @@ ENV LISTJS_VERSION v1.5.0
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash php8 php8-fpm php8-mysqli php8-json php8-openssl php8-curl php8-fileinfo \
-    php8-zlib php8-xml php8-phar php8-intl php8-dom php8-xmlreader php8-ctype php8-session \
-    php8-mbstring php8-gd nginx supervisor curl inotify-tools file psmisc shadow openssl tini
+    apk --no-cache add bash php81 php81-fpm php81-mysqli php81-json php81-openssl php81-curl php81-fileinfo \
+    php81-zlib php81-xml php81-phar php81-intl php81-dom php81-xmlreader php81-ctype php81-session \
+    php81-mbstring php81-gd nginx supervisor curl inotify-tools file psmisc shadow openssl tini
 
 COPY name-map-ui/config/nginx.conf /etc/nginx/nginx.conf
-COPY name-map-ui/config/fpm-pool.conf /etc/php8/php-fpm.d/www.conf
-COPY name-map-ui/config/php.ini /etc/php8/conf.d/custom.ini
+COPY name-map-ui/config/fpm-pool.conf /etc/php81/php-fpm.d/www.conf
+COPY name-map-ui/config/php.ini /etc/php81/conf.d/custom.ini
 COPY name-map-ui/config/supervisord.conf /etc/supervisord.conf
 COPY name-map-ui/config/supervisor_logstash_ctl.conf /etc/supervisor/logstash/supervisord.conf
 COPY name-map-ui/config/supervisor_netbox_ctl.conf /etc/supervisor/netbox/supervisord.conf
