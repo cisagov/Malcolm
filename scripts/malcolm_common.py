@@ -14,7 +14,6 @@ import string
 import sys
 import time
 
-from collections import defaultdict
 from enum import IntFlag, auto
 
 try:
@@ -22,6 +21,14 @@ try:
 except ImportError:
     getpwuid = None
 from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+
+
+from collections import defaultdict, namedtuple
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 try:
     from dialog import Dialog
@@ -56,6 +63,12 @@ class UserInterfaceMode(IntFlag):
     InteractionDialog = auto()
     InteractionInput = auto()
 
+
+BoundPath = namedtuple(
+    "BoundPath",
+    ["service", "container_dir", "files", "relative_dirs", "clean_empty_dirs"],
+    rename=False,
+)
 
 # URLS for figuring things out if something goes wrong
 DOCKER_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/install/')
@@ -134,6 +147,52 @@ def UnescapeForCurl(s):
             r"\\": "\\",
         },
     )
+
+
+###################################################################################################
+# if the object is an iterable, return it, otherwise return a tuple with it as a single element.
+# useful if you want to user either a scalar or an array in a loop, etc.
+def GetIterable(x):
+    if isinstance(x, Iterable) and not isinstance(x, str):
+        return x
+    else:
+        return (x,)
+
+
+##################################################################################################
+def ReplaceBindMountLocation(line, location, linePrefix):
+    if os.path.isdir(location):
+        volumeParts = line.strip().lstrip('-').lstrip().split(':')
+        volumeParts[0] = location
+        return "{}- {}".format(linePrefix, ':'.join(volumeParts))
+    else:
+        return line
+
+
+##################################################################################################
+def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
+    localPath = None
+    if service and dockerComposeContents and containerPath:
+        vols = DeepGet(dockerComposeContents, ['services', service, 'volumes'])
+        if (vols is not None) and (len(vols) > 0):
+            for vol in vols:
+                volSplit = vol.split(':')
+                if (len(volSplit) >= 2) and (volSplit[1] == containerPath):
+                    if localBasePath and not os.path.isabs(volSplit[0]):
+                        localPath = os.path.realpath(os.path.join(localBasePath, volSplit[0]))
+                    else:
+                        localPath = volSplit[0]
+                    break
+
+    return localPath
+
+
+###################################################################################################
+def same_file_or_dir(path1, path2):
+    try:
+        return os.path.samefile(path1, path2)
+    except Exception:
+        return False
 
 
 ###################################################################################################
@@ -541,6 +600,23 @@ def LoadStrIfJson(jsonStr):
 
 
 ###################################################################################################
+# safe deep get for a dictionary
+#
+# Example:
+#   d = {'meta': {'status': 'OK', 'status_code': 200}}
+#   DeepGet(d, ['meta', 'status_code'])          # => 200
+#   DeepGet(d, ['garbage', 'status_code'])       # => None
+#   DeepGet(d, ['meta', 'garbage'], default='-') # => '-'
+def DeepGet(d, keys, default=None):
+    assert type(keys) is list
+    if d is None:
+        return default
+    if not keys:
+        return d
+    return DeepGet(d.get(keys[0]), keys[1:], default)
+
+
+###################################################################################################
 # run command with arguments and return its exit code, stdout, and stderr
 def check_output_input(*popenargs, **kwargs):
 
@@ -676,6 +752,10 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
 
 def RequestsDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("requests", "requests", interactive=forceInteraction, debug=debug)
+
+
+def YAMLDynamic(debug=False, forceInteraction=False):
+    return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
 
 
 ###################################################################################################
