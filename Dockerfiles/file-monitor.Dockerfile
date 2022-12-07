@@ -77,9 +77,8 @@ ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
 ENV YARA_VERSION "4.2.3"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
-ENV YARA_RULES_URL "https://github.com/Neo23x0/signature-base"
+ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
-ENV YARA_RULES_SRC_DIR "$SRC_BASE_DIR/signature-base"
 ENV CAPA_VERSION "4.0.1"
 ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 ENV CAPA_DIR "/opt/capa"
@@ -95,6 +94,8 @@ ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$
 ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "d7f4c0886eb85249ad05ed592902fa6865bb9d70"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
+COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
 
 RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
     apt-get -q update && \
@@ -138,23 +139,21 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       chmod +x "$SUPERCRONIC" && \
       mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
       ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
-    mkdir -p "${SRC_BASE_DIR}" && \
+    mkdir -p "${SRC_BASE_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
       cd "./yara-${YARA_VERSION}" && \
-      ./bootstrap.sh && \
-      ./configure --prefix=/usr \
-        --with-crypto \
-        --enable-magic \
-        --enable-cuckoo \
-        --enable-dotnet && \
-      make && \
-      make install && \
-    rm -rf "${SRC_BASE_DIR}"/yara* && \
-    cd /tmp && \
-      git clone --depth 1 --single-branch "${YARA_RULES_URL}" "${YARA_RULES_SRC_DIR}" && \
-      mkdir -p "${YARA_RULES_DIR}" && \
-      ln -f -s -r "${YARA_RULES_SRC_DIR}"/yara/* "${YARA_RULES_SRC_DIR}"/vendor/yara/* "${YARA_RULES_DIR}"/ && \
+        ./bootstrap.sh && \
+        ./configure --prefix=/usr \
+          --with-crypto \
+          --enable-magic \
+          --enable-cuckoo \
+          --enable-dotnet && \
+        make && \
+        make install && \
+      rm -rf "${SRC_BASE_DIR}"/yara* && \
+    cd "${YARA_RULES_SRC_DIR}" && \
+      /usr/local/bin/yara_rules_setup.sh -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}" && \
     cd /tmp && \
       curl -fsSL -o ./capa.zip "${CAPA_URL}" && \
       unzip ./capa.zip && \
@@ -199,7 +198,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
-      echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /bin/bash /usr/local/bin/yara-rules-update.sh" > ${SUPERCRONIC_CRONTAB}
+      echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \\"${YARA_RULES_SRC_DIR}\\" -y \\"${YARA_RULES_DIR}\\"" > ${SUPERCRONIC_CRONTAB}
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/zeek_carve*.py /usr/local/bin/
