@@ -35,6 +35,7 @@ OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRE
 
 # ip-to-segment-logstash.py translate $INPUT_CIDR_MAP, $INPUT_HOST_MAP, $INPUT_MIXED_MAP into this logstash filter file
 NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segment_filters.conf
+export NETWORK_MAP_ENRICHMENT=${LOGSTASH_NETWORK_MAP_ENRICHMENT:-"true"}
 
 # output plugin configuration for primary and secondary opensearch destinations
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
@@ -79,7 +80,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
 
 # create filters for network segment and host mapping in the enrichment directory
 rm -f "$NETWORK_MAP_OUTPUT_FILTER"
-/usr/local/bin/ip-to-segment-logstash.py --mixed "$INPUT_MIXED_MAP" --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
+[[ "$NETWORK_MAP_ENRICHMENT" == "true" ]] && /usr/local/bin/ip-to-segment-logstash.py --mixed "$INPUT_MIXED_MAP" --segment "$INPUT_CIDR_MAP" --host "$INPUT_HOST_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
 if [[ -z "$OPENSEARCH_SECONDARY_URL" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output

@@ -810,6 +810,10 @@ class Installer(object):
             'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
             default=False,
         )
+        netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
+            'Should Malcolm enrich network traffic using NetBox?',
+            default=netboxEnabled,
+        )
 
         # input packet capture parameters
         pcapNetSniff = False
@@ -1082,6 +1086,22 @@ class Installer(object):
                             # automatic MAC OUI lookup
                             line = re.sub(
                                 r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line
+                            )
+
+                        elif 'LOGSTASH_NETWORK_MAP_ENRICHMENT' in line:
+                            # enrich network traffic metadata directly from net-map.json
+                            line = re.sub(
+                                r'(LOGSTASH_NETWORK_MAP_ENRICHMENT\s*:(\s*&\S+)?\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(not netboxLogstashEnrich)}",
+                                line,
+                            )
+
+                        elif 'LOGSTASH_NETBOX_ENRICHMENT' in line:
+                            # enrich network traffic metadata via NetBox API calls
+                            line = re.sub(
+                                r'(LOGSTASH_NETBOX_ENRICHMENT\s*:(\s*&\S+)?\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(netboxLogstashEnrich)}",
+                                line,
                             )
 
                         elif 'NETBOX_DISABLED' in line:

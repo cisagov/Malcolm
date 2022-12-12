@@ -73,12 +73,16 @@ ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse,beats-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-os
 ARG LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-os,external-os
+ARG LOGSTASH_NETWORK_MAP_ENRICHMENT=true
+ARG LOGSTASH_NETBOX_ENRICHMENT=false
 
 ENV LOGSTASH_ENRICHMENT_PIPELINE $LOGSTASH_ENRICHMENT_PIPELINE
 ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES
+ENV LOGSTASH_NETWORK_MAP_ENRICHMENT $LOGSTASH_NETWORK_MAP_ENRICHMENT
+ENV LOGSTASH_NETBOX_ENRICHMENT $LOGSTASH_NETBOX_ENRICHMENT
 
 USER root
 
@@ -92,10 +96,11 @@ RUN apt-get -q update && \
         patch \
         python3-setuptools \
         python3-pip \
-        python3-requests && \
+        python3-requests \
+        tini && \
+    chmod +x /usr/bin/tini && \
     pip3 install ipaddress supervisor manuf pyyaml && \
     echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
-    echo "gem 'rest-client'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
@@ -104,11 +109,10 @@ RUN apt-get -q update && \
                                        logstash-filter-useragent \
                                        logstash-input-beats logstash-output-elasticsearch && \
     logstash-plugin install /opt/logstash-filter-fingerprint/logstash-filter-fingerprint-*.gem && \
-    chmod +x /usr/bin/tini && \
-    rm -rf /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
         apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/bin/jruby \
+           /opt/logstash-filter-fingerprint /root/.cache /root/.gem /root/.bundle
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD shared/bin/manuf-oui-parse.py /usr/local/bin/
