@@ -16,11 +16,11 @@ import uuid
 from collections import defaultdict
 
 UNSPECIFIED_TAG = '<~<~<none>~>~>'
-HOST_LIST_IDX = 0
+DEVICE_LIST_IDX = 0
 SEGMENT_LIST_IDX = 1
 
 JSON_MAP_TYPE_SEGMENT = 'segment'
-JSON_MAP_TYPE_HOST = 'host'
+JSON_MAP_TYPE_DEVICE = 'host'
 JSON_MAP_KEY_ADDR = 'address'
 JSON_MAP_KEY_NAME = 'name'
 JSON_MAP_KEY_TAG = 'tag'
@@ -71,7 +71,7 @@ def main():
         type=str,
         nargs='*',
         default='',
-        help='Input host mapping file(s)',
+        help='Input host/device mapping file(s)',
     )
     parser.add_argument('-o', '--output', dest='output', metavar='<STR>', type=str, default='-', help='Output file')
     try:
@@ -83,7 +83,7 @@ def main():
 
     # read each input file into its own list
     segmentLines = []
-    hostLines = []
+    deviceLines = []
     mixedEntries = []
 
     for inFile in args.segmentInput:
@@ -92,7 +92,7 @@ def main():
 
     for inFile in args.hostInput:
         if os.path.isfile(inFile):
-            hostLines.extend([line.strip() for line in open(inFile)])
+            deviceLines.extend([line.strip() for line in open(inFile)])
 
     for inFile in args.mixedInput:
         try:
@@ -104,9 +104,9 @@ def main():
 
     # remove comments
     segmentLines = list(filter(lambda x: (len(x) > 0) and (not x.startswith('#')), segmentLines))
-    hostLines = list(filter(lambda x: (len(x) > 0) and (not x.startswith('#')), hostLines))
+    deviceLines = list(filter(lambda x: (len(x) > 0) and (not x.startswith('#')), deviceLines))
 
-    if (len(segmentLines) > 0) or (len(hostLines) > 0) or (len(mixedEntries) > 0):
+    if (len(segmentLines) > 0) or (len(deviceLines) > 0) or (len(mixedEntries) > 0):
 
         filterId = 0
         addedFields = set()
@@ -156,19 +156,19 @@ def main():
                 else:
                     eprint('"{}" is not formatted correctly, ignoring'.format(line))
 
-            # handle hostname mappings
+            # handle device mappings
             macAddrRegex = re.compile(r'([a-fA-F0-9]{2}[:|\-]?){6}')
-            for line in hostLines:
-                # IP or MAC address to host name map:
-                #   address|host name|required tag
+            for line in deviceLines:
+                # IP or MAC address to device name map:
+                #   address|device name|required tag
                 #
                 # where:
                 #   address: comma-separated list of IPv4, IPv6, or MAC addresses
                 #          eg., 172.16.10.41, 02:42:45:dc:a2:96, 2001:0db8:85a3:0000:0000:8a2e:0370:7334
                 #
-                #   host name: host name to be assigned when event address(es) match
+                #   device name: device name to be assigned when event address(es) match
                 #
-                #   required tag (optional): only check match and apply host name if the event
+                #   required tag (optional): only check match and apply device name if the event
                 #                            contains this tag
                 #
                 values = [x.strip() for x in line.split('|')]
@@ -185,10 +185,10 @@ def main():
                                 addressList.append("_{}".format(addr.replace('-', ':').lower()))
                             else:
                                 eprint('"{}" is not a valid IP or MAC address, ignoring'.format(ip))
-                    hostName = values[1]
+                    device = values[1]
                     tagReq = values[2] if ((len(values) >= 3) and (len(values[2]) > 0)) else UNSPECIFIED_TAG
-                    if (len(addressList) > 0) and (len(hostName) > 0):
-                        tagListMap[tagReq][HOST_LIST_IDX][hostName].extend(addressList)
+                    if (len(addressList) > 0) and (len(device) > 0):
+                        tagListMap[tagReq][HOST_LIST_IDX][device].extend(addressList)
                     else:
                         eprint('"{}" is not formatted correctly, ignoring'.format(line))
                 else:
@@ -249,7 +249,7 @@ def main():
                         tagListMap[tagReq][HOST_LIST_IDX][entry[JSON_MAP_KEY_NAME]].extend(addressList)
 
             # go through the lists of segments/hosts, which will now be organized by required tag first, then
-            # segment/host name, then the list of addresses
+            # segment/device name, then the list of addresses
             for tag, nameMaps in tagListMap.items():
                 print("", file=outFile)
 
@@ -258,15 +258,15 @@ def main():
                     print('  if ("{}" in [tags]) {{'.format(tag), file=outFile)
                 try:
 
-                    # for the host names(s) to be checked, create two filters, one for source IP|MAC and one for dest IP|MAC
-                    for hostName, addrList in nameMaps[HOST_LIST_IDX].items():
+                    # for the device(s) to be checked, create two filters, one for source IP|MAC and one for dest IP|MAC
+                    for device, addrList in nameMaps[HOST_LIST_IDX].items():
 
-                        # ip addresses mapped to hostname
+                        # ip addresses mapped to device
                         ipList = list(set([a for a in addrList if not a.startswith('_')]))
                         if len(ipList) >= 1:
                             for source in ['source', 'destination']:
                                 filterId += 1
-                                newFieldName = "".join([f"[{x}]" for x in [source, "hostname"]])
+                                newFieldName = "".join([f"[{x}]" for x in [source, "device"]])
                                 print("", file=outFile)
                                 print(
                                     '    if ([{}][ip]) and ({}) {{ '.format(
@@ -275,25 +275,25 @@ def main():
                                     file=outFile,
                                 )
                                 print(
-                                    '      mutate {{ id => "mutate_add_autogen_{}_ip_hostname_{}"'.format(
+                                    '      mutate {{ id => "mutate_add_autogen_{}_ip_device_{}"'.format(
                                         source, filterId
                                     ),
                                     file=outFile,
                                 )
                                 print(
-                                    '        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName),
+                                    '        add_field => {{ "{}" => "{}" }}'.format(newFieldName, device),
                                     file=outFile,
                                 )
                                 print("      }", file=outFile)
                                 print("    }", file=outFile)
                                 addedFields.add(newFieldName)
 
-                        # mac addresses mapped to hostname
+                        # mac addresses mapped to device
                         macList = list(set([a for a in addrList if a.startswith('_')]))
                         if len(macList) >= 1:
                             for source in ['source', 'destination']:
                                 filterId += 1
-                                newFieldName = "".join([f"[{x}]" for x in [source, "hostname"]])
+                                newFieldName = "".join([f"[{x}]" for x in [source, "device"]])
                                 print("", file=outFile)
                                 print(
                                     '    if ([{}][mac]) and ({}) {{ '.format(
@@ -303,13 +303,13 @@ def main():
                                     file=outFile,
                                 )
                                 print(
-                                    '      mutate {{ id => "mutate_add_autogen_{}_mac_hostname_{}"'.format(
+                                    '      mutate {{ id => "mutate_add_autogen_{}_mac_device_{}"'.format(
                                         source, filterId
                                     ),
                                     file=outFile,
                                 )
                                 print(
-                                    '        add_field => {{ "{}" => "{}" }}'.format(newFieldName, hostName),
+                                    '        add_field => {{ "{}" => "{}" }}'.format(newFieldName, device),
                                     file=outFile,
                                 )
                                 print("      }", file=outFile)
@@ -349,7 +349,7 @@ def main():
             if addedFields:
                 print("", file=outFile)
                 print('  # deduplicate any added fields', file=outFile)
-                for field in list(itertools.product(['source', 'destination'], ['hostname', 'segment'])):
+                for field in list(itertools.product(['source', 'destination'], ['device', 'segment'])):
                     newFieldName = newFieldName = "".join([f"[{x}]" for x in [field[0], "field[1]"]])
                     if newFieldName in addedFields:
                         print("", file=outFile)

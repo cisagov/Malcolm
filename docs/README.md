@@ -72,10 +72,10 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 * Other Malcolm features
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
     - [Automatic host and subnet name assignment](host-and-subnet-mapping.md#HostAndSubnetNaming)
-        + [IP/MAC address to hostname mapping via `host-map.txt`](host-and-subnet-mapping.md#HostNaming)
-        + [CIDR subnet to network segment name mapping via `cidr-map.txt`](host-and-subnet-mapping.md#SegmentNaming)
         + [Defining hostname and CIDR subnet names interface](host-and-subnet-mapping.md#NameMapUI)
         + [Applying mapping changes](host-and-subnet-mapping.md#ApplyMapping)
+        + [IP/MAC address to hostname mapping](host-and-subnet-mapping.md#HostNaming)
+        + [CIDR subnet to network segment name mapping](host-and-subnet-mapping.md#SegmentNaming)
     - [OpenSearch index management](index-management.md#IndexManagement)
     - [Event severity scoring](severity.md#Severity)
         + [Customizing event severity scoring](severity.md#SeverityConfig)

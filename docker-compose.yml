@@ -359,7 +359,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.5.0
+    image: malcolmnetsec/opensearch:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -403,7 +403,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.5.0
+    image: malcolmnetsec/dashboards-helper:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -437,7 +437,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.5.0
+    image: malcolmnetsec/dashboards:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -465,7 +465,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.5.0
+    image: malcolmnetsec/logstash-oss:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -502,8 +502,6 @@ services:
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
-      - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
-      - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
       - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
@@ -515,7 +513,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.5.0
+    image: malcolmnetsec/filebeat-oss:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -557,7 +555,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.5.0
+    image: malcolmnetsec/arkime:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -601,7 +599,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.5.0
+    image: malcolmnetsec/zeek:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -644,7 +642,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.5.0
+    image: malcolmnetsec/zeek:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -680,7 +678,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.5.0
+    image: malcolmnetsec/suricata:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -720,7 +718,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.5.0
+    image: malcolmnetsec/suricata:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -750,7 +748,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.5.0
+    image: malcolmnetsec/file-monitor:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -777,7 +775,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.5.0
+    image: malcolmnetsec/pcap-capture:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -802,7 +800,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.5.0
+    image: malcolmnetsec/pcap-monitor:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -831,7 +829,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.5.0
+    image: malcolmnetsec/file-upload:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -859,7 +857,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.5.0
+    image: malcolmnetsec/htadmin:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -886,7 +884,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.5.0
+    image: malcolmnetsec/freq:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -910,7 +908,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.5.0
+    image: malcolmnetsec/name-map-ui:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -926,8 +924,6 @@ services:
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
-      - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
       - ./net-map.json:/var/www/html/maps/net-map.json:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8080/fpm-ping"]
@@ -936,7 +932,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: malcolmnetsec/netbox:6.5.0
+    image: malcolmnetsec/netbox:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -970,7 +966,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: malcolmnetsec/postgresql:6.5.0
+    image: malcolmnetsec/postgresql:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -996,7 +992,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: malcolmnetsec/redis:6.5.0
+    image: malcolmnetsec/redis:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1026,7 +1022,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: malcolmnetsec/redis:6.5.0
+    image: malcolmnetsec/redis:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1055,7 +1051,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: malcolmnetsec/api:6.5.0
+    image: malcolmnetsec/api:7.0.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -1084,7 +1080,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.5.0
+    image: malcolmnetsec/nginx-proxy:7.0.0
     restart: "no"
     stdin_open: false
     tty: true

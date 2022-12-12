@@ -40,7 +40,7 @@ class MalcolmSource extends WISESource {
       "destination.geo.country_iso_code",
       "destination.geo.country_name",
       "destination.geo.ip",
-      "destination.hostname",
+      "destination.device",
       "destination.ip",
       "destination.ip_reverse_dns",
       "destination.mac",
@@ -153,7 +153,7 @@ class MalcolmSource extends WISESource {
       "source.geo.country_iso_code",
       "source.geo.country_name",
       "source.geo.ip",
-      "source.hostname",
+      "source.device",
       "source.ip",
       "source.ip_reverse_dns",
       "source.mac",
@@ -1981,7 +1981,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
       "    +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
-      "    +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
+      "    +arrayList(session.source, 'device', 'Originating Device', 'source.device')\n" +
       "    +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
       "    +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
       "    +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
@@ -1990,7 +1990,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
       "    +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
       "    +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
-      "    +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
+      "    +arrayList(session.destination, 'device', 'Responding Device', 'destination.device')\n" +
       "    +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
       "    +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
       "    +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +

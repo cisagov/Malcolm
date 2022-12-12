@@ -91,8 +91,6 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
   touch "$DESTDIR/"auth.env
-  cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
-  cp $VERBOSE ./host-map.txt "$DESTDIR/"
   cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"

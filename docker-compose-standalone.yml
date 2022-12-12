@@ -356,7 +356,7 @@ x-pcap-capture-variables: &pcap-capture-variables
 
 services:
   opensearch:
-    image: malcolmnetsec/opensearch:6.5.0
+    image: malcolmnetsec/opensearch:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -397,7 +397,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: malcolmnetsec/dashboards-helper:6.5.0
+    image: malcolmnetsec/dashboards-helper:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -428,7 +428,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: malcolmnetsec/dashboards:6.5.0
+    image: malcolmnetsec/dashboards:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -453,7 +453,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: malcolmnetsec/logstash-oss:6.5.0
+    image: malcolmnetsec/logstash-oss:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -486,8 +486,6 @@ services:
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
-      - ./cidr-map.txt:/usr/share/logstash/config/cidr-map.txt:ro
-      - ./host-map.txt:/usr/share/logstash/config/host-map.txt:ro
       - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
@@ -496,7 +494,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: malcolmnetsec/filebeat-oss:6.5.0
+    image: malcolmnetsec/filebeat-oss:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -535,7 +533,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: malcolmnetsec/arkime:6.5.0
+    image: malcolmnetsec/arkime:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -573,7 +571,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: malcolmnetsec/zeek:6.5.0
+    image: malcolmnetsec/zeek:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -612,7 +610,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: malcolmnetsec/zeek:6.5.0
+    image: malcolmnetsec/zeek:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -644,7 +642,7 @@ services:
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
   suricata:
-    image: malcolmnetsec/suricata:6.5.0
+    image: malcolmnetsec/suricata:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -681,7 +679,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: malcolmnetsec/suricata:6.5.0
+    image: malcolmnetsec/suricata:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -708,7 +706,7 @@ services:
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
   file-monitor:
-    image: malcolmnetsec/file-monitor:6.5.0
+    image: malcolmnetsec/file-monitor:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -732,7 +730,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: malcolmnetsec/pcap-capture:6.5.0
+    image: malcolmnetsec/pcap-capture:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -754,7 +752,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: malcolmnetsec/pcap-monitor:6.5.0
+    image: malcolmnetsec/pcap-monitor:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -780,7 +778,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: malcolmnetsec/file-upload:6.5.0
+    image: malcolmnetsec/file-upload:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -808,7 +806,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.5.0
+    image: malcolmnetsec/htadmin:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -832,7 +830,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.5.0
+    image: malcolmnetsec/freq:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -853,7 +851,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.5.0
+    image: malcolmnetsec/name-map-ui:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -866,8 +864,6 @@ services:
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./cidr-map.txt:/var/www/html/maps/cidr-map.txt:ro
-      - ./host-map.txt:/var/www/html/maps/host-map.txt:ro
       - ./net-map.json:/var/www/html/maps/net-map.json:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8080/fpm-ping"]
@@ -876,7 +872,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: malcolmnetsec/netbox:6.5.0
+    image: malcolmnetsec/netbox:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -907,7 +903,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: malcolmnetsec/postgresql:6.5.0
+    image: malcolmnetsec/postgresql:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -930,7 +926,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: malcolmnetsec/redis:6.5.0
+    image: malcolmnetsec/redis:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -957,7 +953,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: malcolmnetsec/redis:6.5.0
+    image: malcolmnetsec/redis:7.0.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -983,7 +979,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: malcolmnetsec/api:6.5.0
+    image: malcolmnetsec/api:7.0.0
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -1006,7 +1002,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: malcolmnetsec/nginx-proxy:6.5.0
+    image: malcolmnetsec/nginx-proxy:7.0.0
     restart: "no"
     stdin_open: false
     tty: true

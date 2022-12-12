@@ -125,8 +125,6 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX"
   cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
-  cp ./cidr-map.txt "$MALCOLM_DEST_DIR/"
-  cp ./host-map.txt "$MALCOLM_DEST_DIR/"
   cp ./net-map.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
