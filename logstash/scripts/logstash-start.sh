@@ -78,7 +78,7 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
 
 # create filters for network segment and host mapping in the enrichment directory
 rm -f "$NETWORK_MAP_OUTPUT_FILTER"
-[[ "$NETWORK_MAP_ENRICHMENT" == "true" ]] && /usr/local/bin/ip-to-segment-logstash.py --mixed "$INPUT_MIXED_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
+[[ "$NETWORK_MAP_ENRICHMENT" == "true" ]] && /usr/local/bin/ip-to-segment-logstash.py --input "$INPUT_MIXED_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
 if [[ -z "$OPENSEARCH_SECONDARY_URL" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output
