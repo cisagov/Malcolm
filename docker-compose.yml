@@ -359,7 +359,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:6.4.4
+    image: malcolmnetsec/opensearch:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -403,7 +403,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:6.4.4
+    image: malcolmnetsec/dashboards-helper:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -437,7 +437,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:6.4.4
+    image: malcolmnetsec/dashboards:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -465,7 +465,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:6.4.4
+    image: malcolmnetsec/logstash-oss:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -515,7 +515,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:6.4.4
+    image: malcolmnetsec/filebeat-oss:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -557,7 +557,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:6.4.4
+    image: malcolmnetsec/arkime:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -601,7 +601,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.4.4
+    image: malcolmnetsec/zeek:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -644,7 +644,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:6.4.4
+    image: malcolmnetsec/zeek:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -680,7 +680,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.4.4
+    image: malcolmnetsec/suricata:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -720,7 +720,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:6.4.4
+    image: malcolmnetsec/suricata:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -750,7 +750,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:6.4.4
+    image: malcolmnetsec/file-monitor:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -777,7 +777,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:6.4.4
+    image: malcolmnetsec/pcap-capture:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -802,7 +802,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:6.4.4
+    image: malcolmnetsec/pcap-monitor:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -831,7 +831,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:6.4.4
+    image: malcolmnetsec/file-upload:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -859,7 +859,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:6.4.4
+    image: malcolmnetsec/htadmin:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -886,7 +886,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:6.4.4
+    image: malcolmnetsec/freq:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -910,7 +910,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:6.4.4
+    image: malcolmnetsec/name-map-ui:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -936,7 +936,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: malcolmnetsec/netbox:6.4.4
+    image: malcolmnetsec/netbox:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -970,7 +970,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: malcolmnetsec/postgresql:6.4.4
+    image: malcolmnetsec/postgresql:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -996,7 +996,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: malcolmnetsec/redis:6.4.4
+    image: malcolmnetsec/redis:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1026,7 +1026,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: malcolmnetsec/redis:6.4.4
+    image: malcolmnetsec/redis:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1055,7 +1055,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: malcolmnetsec/api:6.4.4
+    image: malcolmnetsec/api:6.5.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -1084,7 +1084,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:6.4.4
+    image: malcolmnetsec/nginx-proxy:6.5.0
     restart: "no"
     stdin_open: false
     tty: true
