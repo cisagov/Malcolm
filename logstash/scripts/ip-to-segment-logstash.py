@@ -33,6 +33,17 @@ def eprint(*args, **kwargs):
 
 
 ###################################################################################################
+# convenient boolean argument parsing
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+###################################################################################################
 # main
 def main():
 
@@ -53,7 +64,25 @@ def main():
         default='',
         help='JSON network mapping file(s)',
     )
-    parser.add_argument('-o', '--output', dest='output', metavar='<STR>', type=str, default='-', help='Output file')
+    parser.add_argument(
+        '-o',
+        '--output',
+        dest='output',
+        metavar='<STR>',
+        type=str,
+        default='-',
+        help='Output file',
+    )
+    parser.add_argument(
+        '-t',
+        '--tags',
+        dest='tagChecking',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help=f"Generate check for required tags based on {JSON_MAP_KEY_TAG} attribute",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -105,7 +134,7 @@ def main():
 
                     tagReq = (
                         entry[JSON_MAP_KEY_TAG]
-                        if (JSON_MAP_KEY_TAG in entry) and (len(entry[JSON_MAP_KEY_TAG]) > 0)
+                        if args.tagChecking and (JSON_MAP_KEY_TAG in entry) and (len(entry[JSON_MAP_KEY_TAG]) > 0)
                         else UNSPECIFIED_TAG
                     )
 

@@ -466,6 +466,7 @@ services:
         hard: -1
     cap_add:
       - IPC_LOCK
+    env_file: ./netbox/env/netbox.env
     environment:
       << : *process-variables
       << : *ssl-variables

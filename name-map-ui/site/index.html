@@ -30,7 +30,6 @@
                 <th class="sort" title="Mapping type (host or network segment)" data-sort="type">Type</th>
                 <th class="sort" title="Host address (IP or MAC) or CIDR-formatted IP range" data-sort="address">Address</th>
                 <th class="sort" title="Host or network segment name" data-sort="name">Name</th>
-                <th class="sort" title="Assign name only if the event contains this tag (optional)" data-sort="tag">Tag</th>
                 <th colspan="2">
                   <input type="text" class="search" placeholder="🔎 Search mappings" />
                 </th>
@@ -52,9 +51,6 @@
                 <td class="name">
                   <input type="text" id="name-field" placeholder="Name" />
                 </td>
-                <td class="tag">
-                  <input type="text" id="tag-field" placeholder="Tag (optional)" />
-                </td>
                 <td class="add" colspan="2">
                   <button title="Create new mapping" class="add-btn" id="add-btn">💾</button>
                   <button title="Modify mapping" class="update-btn" id="update-btn">💾</button>
@@ -69,7 +65,7 @@
                 <td class="foot">
                   <button title="Download mappings as a JSON file" class="export-btn" id="export-btn">📤 Export</button>
                 </td>
-                <td class="foot" colspan="2">
+                <td class="foot">
                   <button title="Write mappings to Malcolm's net-map.json" class="save-btn" id="save-btn">💾 Save Mappings</button>
                   <input type="hidden" value=0 id="save-state"/>
                 </td>
@@ -89,8 +85,8 @@
 
     // define value names and template for new list items
     var options = {
-      valueNames: [ 'id', 'type', 'address', 'name', 'tag' ],
-      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="update"><button title="Modify this mapping" class="edit-item-btn">📝</button></td><td class="remove"><button title="Remove this entry" class="remove-item-btn">🚫</button></td></tr>'
+      valueNames: [ 'id', 'type', 'address', 'name' ],
+      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="update"><button title="Modify this mapping" class="edit-item-btn">📝</button></td><td class="remove"><button title="Remove this entry" class="remove-item-btn">🚫</button></td></tr>'
     };
 
     // initialize list and other elements
@@ -100,7 +96,6 @@
         typeField = $('#type-field'),
         addressField = $('#address-field'),
         nameField = $('#name-field'),
-        tagField = $('#tag-field'),
         addBtn = $('#add-btn'),
         updateBtn = $('#update-btn').hide(),
         cancelBtn = $('#cancel-btn').hide(),
@@ -135,7 +130,6 @@
       const type = typeField.val();
       const address = addressField.val().trim();
       const name = nameField.val().trim();
-      const tag = tagField.val().trim();
       if ((map_types_valid.has(type)) &&
           (address) && (address.length > 0) &&
           (name) && (name.length > 0)) {
@@ -144,8 +138,7 @@
           id: Math.floor(Math.random()*110000),
           type: type,
           address: address,
-          name: name,
-          tag: tag
+          name: name
         });
         saveState.val(parseInt(saveState.val()) + 1);
         clearFields();
@@ -159,7 +152,6 @@
       const type = typeField.val();
       const address = addressField.val().trim();
       const name = nameField.val().trim();
-      const tag = tagField.val().trim();
       if ((map_types_valid.has(type)) &&
           (address) && (address.length > 0) &&
           (name) && (name.length > 0)) {
@@ -168,8 +160,7 @@
           id: itemId,
           type: type,
           address: addressField.val(),
-          name: nameField.val(),
-          tag: tagField.val()
+          name: nameField.val()
         });
         saveState.val(parseInt(saveState.val()) + 1);
         clearFields();
@@ -316,7 +307,6 @@
         typeField.val(itemValues.type);
         addressField.val(itemValues.address);
         nameField.val(itemValues.name);
-        tagField.val(itemValues.tag);
 
         updateBtn.show();
         cancelBtn.show();
@@ -333,7 +323,6 @@
       typeField.val('host');
       addressField.val('');
       nameField.val('');
-      tagField.val('');
     }
 
     const map_type_cidr  = 'segment';
@@ -434,8 +423,7 @@
       //   {
       //     "type": "segment",
       //     "address": "172.16.0.0/24",
-      //     "name": "home",
-      //     "tag": ""
+      //     "name": "home"
       //   }, ...
       mappingList.clear();
       loadMapsFromFiles(fileSpecs, function (mapsArray) {
@@ -457,8 +445,7 @@
               id: Math.floor(Math.random()*110000),
               type: map.type,
               address: map.address,
-              name: map.name,
-              tag: map.tag ? map.tag : ""
+              name: map.name
             });
           }
         }
