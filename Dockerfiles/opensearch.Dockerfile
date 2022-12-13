@@ -30,7 +30,9 @@ ARG MALCOLM_API_URL="http://api:5000/event"
 ENV MALCOLM_API_URL $MALCOLM_API_URL
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
+ARG DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
 ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
+ENV DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI $DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI
 ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
@@ -50,8 +52,7 @@ RUN yum install -y openssl util-linux procps && \
   mkdir -p /var/local/ca-trust && \
   chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml /var/local/ca-trust && \
   chmod +x /usr/bin/tini && \
-  sed -i "s/^\([[:space:]]*\)\([^#].*performance-analyzer-agent-cli\)/\1# \2/" /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
-  sed -i '/^[[:space:]]*[^#].*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
+  sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
 
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
