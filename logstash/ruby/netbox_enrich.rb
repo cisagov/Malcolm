@@ -23,8 +23,8 @@ def register(params)
   @page_size = params.fetch("page_size", 50)
 
   # caching parameters
-  @cache_size = params.fetch("cache_size", 500)
-  @cache_ttl = params.fetch("cache_ttl", 300)
+  @cache_size = params.fetch("cache_size", 1000)
+  @cache_ttl = params.fetch("cache_ttl", 600)
 
   # target field to store looked-up value
   @target = params["target"]
