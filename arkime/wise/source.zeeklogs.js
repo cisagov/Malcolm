@@ -40,14 +40,20 @@ class MalcolmSource extends WISESource {
       "destination.geo.country_iso_code",
       "destination.geo.country_name",
       "destination.geo.ip",
+      "destination.device.id",
       "destination.device.name",
+      "destination.device.display",
+      "destination.device.url",
       "destination.ip",
       "destination.ip_reverse_dns",
       "destination.mac",
       "destination.oui",
       "destination.packets",
       "destination.port",
+      "destination.segment.id",
       "destination.segment.name",
+      "destination.segment.display",
+      "destination.segment.url",
       "dns.answers.class",
       "dns.answers.data",
       "dns.answers.name",
@@ -153,7 +159,10 @@ class MalcolmSource extends WISESource {
       "source.geo.country_iso_code",
       "source.geo.country_name",
       "source.geo.ip",
+      "source.device.id",
       "source.device.name",
+      "source.device.display",
+      "source.device.url",
       "source.ip",
       "source.ip_reverse_dns",
       "source.mac",
@@ -162,7 +171,10 @@ class MalcolmSource extends WISESource {
       "source.oui",
       "source.packets",
       "source.port",
+      "source.segment.id",
       "source.segment.name",
+      "source.segment.display",
+      "source.segment.url",
       "suricata.action",
       "suricata.alert.action",
       "suricata.alert.metadata.created_at",
@@ -1982,8 +1994,10 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
       "    +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
       "    +arrayList(session.source.device, 'name', 'Originating Device Name', 'source.device.name')\n" +
+      "    +arrayList(session.source.device, 'id', 'Originating Device ID', 'source.device.id')\n" +
       "    +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
       "    +arrayList(session.source.segment, 'name', 'Originating Network Segment Name', 'source.segment.name')\n" +
+      "    +arrayList(session.source.segment, 'id', 'Originating Network Segment ID', 'source.segment.id')\n" +
       "    +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
       "    +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
       "    +arrayList(session.destination, 'ip', 'Responding Host', 'destination.ip')\n" +
@@ -1991,8 +2005,10 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
       "    +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
       "    +arrayList(session.destination.device, 'name', 'Responding Device Name', 'destination.device.name')\n" +
+      "    +arrayList(session.destination.device, 'id', 'Responding Device ID', 'destination.device.id')\n" +
       "    +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
       "    +arrayList(session.destination.segment, 'name', 'Responding Network Segment Name', 'destination.segment.name')\n" +
+      "    +arrayList(session.destination.segment, 'id', 'Responding Network Segment ID', 'destination.segment.id')\n" +
       "    +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
       "    +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
       "    +arrayList(session.related, 'ip', 'Related IP', 'related.ip')\n" +

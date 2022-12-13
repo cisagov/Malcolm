@@ -228,15 +228,17 @@ x-logstash-variables: &logstash-variables
   pipeline.batch.size : 75
   pipeline.batch.delay : 50
   # Whether or not Logstash will map MAC addresses to vendors for MAC addresses
-  LOGSTASH_OUI_LOOKUP             : 'true'
+  LOGSTASH_OUI_LOOKUP                : 'true'
   # Whether or not Logstash will perform severity scoring on network traffic metadata
-  LOGSTASH_SEVERITY_SCORING       : 'true'
+  LOGSTASH_SEVERITY_SCORING          : 'true'
   # Whether or not Logstash will perform a reverse DNS lookup for external IP addresses
-  LOGSTASH_REVERSE_DNS            : 'false'
+  LOGSTASH_REVERSE_DNS               : 'false'
   # Whether or not Logstash will enrich network traffic metadata directly from net-map.json
-  LOGSTASH_NETWORK_MAP_ENRICHMENT : 'true'
+  LOGSTASH_NETWORK_MAP_ENRICHMENT    : 'true'
   # Whether or not Logstash will enrich network traffic metadata via NetBox API calls
-  LOGSTASH_NETBOX_ENRICHMENT      : 'false'
+  LOGSTASH_NETBOX_ENRICHMENT         : 'false'
+  # Whether or not to be more verbose with NetBox-enriched traffic metadata
+  LOGSTASH_NETBOX_ENRICHMENT_VERBOSE : 'false'
 
 x-filebeat-variables: &filebeat-variables
   # filebeat parameters used for monitoring log files containing network traffic metadata
