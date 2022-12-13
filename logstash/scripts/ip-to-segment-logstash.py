@@ -254,7 +254,6 @@ def main():
                                 '      network => [ {} ]'.format(', '.join('"{}"'.format(ip) for ip in ipList)),
                                 file=outFile,
                             )
-                            print('      add_tag => [ "{}" ]'.format(segmentName), file=outFile)
                             print(
                                 '      add_field => {{ "{}" => "{}" }}'.format(newFieldName, segmentName), file=outFile
                             )
