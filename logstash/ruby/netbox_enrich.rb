@@ -47,8 +47,9 @@ def register(params)
   @verbose = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_verbose_str.to_s.downcase)
 
   # connection URL for netbox
-  @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").chomp("/")
-  @netbox_url_base = @netbox_url.delete_suffix("/netbox/api")
+  @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
+  @netbox_url_suffix = "/netbox/api"
+  @netbox_url_base = @netbox_url.delete_suffix(@netbox_url_suffix)
 
   # connection token (either specified directly or read from ENV via netbox_token_env)
   @netbox_token = params["netbox_token"]
@@ -68,6 +69,8 @@ def filter(event)
   end
 
   _url = @netbox_url
+  _url_base = @netbox_url_base
+  _url_suffix = @netbox_url_suffix
   _token = @netbox_token
   _page_size = @page_size
   _verbose = @verbose
@@ -92,8 +95,11 @@ def filter(event)
                     _tmp_prefixes.each do |p|
                         if (_vrf = p.fetch(:vrf, nil))
                           if _verbose then
-                            _vrfs << _vrf
+                            # verbose output is the vrf object, with the parent prefix
+                            #   object set as a child under :prefix (minus :vrf, obviously)
+                            _vrfs << _vrf.merge({:prefix => p.tap { |h| h.delete(:vrf) }})
                           else
+                            # non-verbose output is { :name => "name", :id => "id" }
                             _vrfs << {:name => _vrf.fetch(:name, _vrf.fetch(:display, nil)),
                                       :id => _vrf.fetch(:id, nil)}
                           end
@@ -102,7 +108,7 @@ def filter(event)
                     _query[:offset] += _tmp_prefixes.length()
                     break unless (_tmp_prefixes.length() >= _page_size)
                 end
-                collect_values(_vrfs)
+                collect_values(crush(_vrfs))
 
               #################################################################################
               when :ip_device
@@ -117,8 +123,16 @@ def filter(event)
                     _tmp_ip_addresses.each do |i|
                         if (_obj = i.fetch(:assigned_object, nil)) && ((_device = _obj.fetch(:device, nil)) || (_device = _obj.fetch(:virtual_machine, nil)))
                           if _verbose then
-                            _devices << _device
+                            # verbose output is the device object
+                            if _device.key?(:url) and (_full_device = _nb.get(_device[:url].delete_prefix(_url_base).delete_prefix(_url_suffix).delete_prefix("/")).body) then
+                              # if we can, follow the :assigned_object's "full" device URL to get more verbose information
+                              _devices << _full_device
+                            else
+                              # otherwise just include the device object under :assigned_object
+                              _devices << _device
+                            end
                           else
+                            # non-verbose output is { :name => "name", :id => "id" }
                             _devices << {:name => _device.fetch(:name, _device.fetch(:display, nil)),
                                          :id => _device.fetch(:id, nil)}
                           end
@@ -127,7 +141,7 @@ def filter(event)
                     _query[:offset] += _tmp_ip_addresses.length()
                     break unless (_tmp_ip_addresses.length() >= _page_size)
                 end
-                collect_values(_devices)
+                collect_values(crush(_devices))
 
               #################################################################################
               else
@@ -144,7 +158,23 @@ def filter(event)
 end
 
 def collect_values(hashes)
-  {}.tap{ |r| hashes.compact.uniq.each{ |h| h.compact.each{ |k,v| (r[k]||=[]) << v } } }
+  {}.tap{ |r| hashes.uniq.each{ |h| h.each{ |k,v| (r[k]||=[]) << v } } }
+end
+
+def crush(thing)
+  if thing.is_a?(Array)
+    thing.each_with_object([]) do |v, a|
+      v = crush(v)
+      a << v unless [nil, [], {}, "", "Unspecified", "unspecified"].include?(v)
+    end
+  elsif thing.is_a?(Hash)
+    thing.each_with_object({}) do |(k,v), h|
+      v = crush(v)
+      h[k] = v unless [nil, [], {}, "", "Unspecified", "unspecified"].include?(v)
+    end
+  else
+    thing
+  end
 end
 
 ###############################################################################

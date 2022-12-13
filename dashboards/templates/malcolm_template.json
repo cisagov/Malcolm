@@ -52,7 +52,8 @@
             "display": { "type": "keyword" },
             "id": { "type": "integer" },
             "name": { "type": "keyword" },
-            "url": { "type": "keyword" }
+            "url": { "type": "keyword" },
+            "prefix": { "type": "nested" }
           }
         },
         "event.freq_score_v1": { "type": "float" },
@@ -83,7 +84,8 @@
             "display": { "type": "keyword" },
             "id": { "type": "integer" },
             "name": { "type": "keyword" },
-            "url": { "type": "keyword" }
+            "url": { "type": "keyword" },
+            "prefix": { "type": "nested" }
           }
         },
         "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
