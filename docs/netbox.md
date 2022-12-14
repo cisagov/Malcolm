@@ -27,3 +27,22 @@ See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135).
 ## <a name="NetBoxPopActive"></a>Populate NetBox inventory via active discovery
 
 See [idaholab/Malcolm#136](https://github.com/idaholab/Malcolm/issues/136).
+
+## <a name="NetBoxBackup"></a>Backup and Restore
+
+Currently the NetBox database must be backed up and restored manually using `docker-compose`. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
+
+```
+$ docker-compose exec -u $(id -u) netbox-postgres pg_dump -U netbox -d netbox | gzip > netbox_$(date +%Y-%m-%d).psql.gz
+```
+
+To clear the existing NetBox database and restore a previous backup, run the following commands (substituting the filename of the `netbox_….psql.gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
+
+```
+$ docker-compose exec -u $(id -u) netbox-postgres dropdb -U netbox netbox --force
+
+$ docker-compose exec -u $(id -u) netbox-postgres createdb -U netbox netbox
+
+$ gunzip < netbox_$(date +%Y-%m-%d).psql.gz | docker-compose exec -u $(id -u) -T netbox-postgres psql -U netbox
+```
+
