@@ -44,5 +44,8 @@ $ docker-compose exec -u $(id -u) netbox-postgres dropdb -U netbox netbox --forc
 $ docker-compose exec -u $(id -u) netbox-postgres createdb -U netbox netbox
 
 $ gunzip < netbox_$(date +%Y-%m-%d).psql.gz | docker-compose exec -u $(id -u) -T netbox-postgres psql -U netbox
+
+$ docker-compose exec -u $(id -u) netbox /opt/netbox/netbox/manage.py migrate
 ```
 
+Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox.env` environment file. Restoring a NetBox backup may not work correctly if this value is different from when it was created.

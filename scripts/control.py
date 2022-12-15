@@ -1173,7 +1173,12 @@ def authSetup(wipe=False):
             eprint("Failed to store email alert sender account variables:\n")
             eprint("\n".join(results))
 
-    if YesOrNo('(Re)generate internal passwords for NetBox', default=True):
+    if YesOrNo(
+        '(Re)generate internal passwords for NetBox',
+        default=not os.path.isfile(
+            os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env')))
+        ),
+    ):
         with pushd(os.path.join(MalcolmPath, os.path.join('netbox', 'env'))):
             netboxPwAlphabet = string.ascii_letters + string.digits + '_'
             netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
