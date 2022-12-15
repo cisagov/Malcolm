@@ -90,9 +90,11 @@ def filter(event)
                 # retrieve the list VRFs containing IP address prefixes containing the search key
                 _vrfs = Array.new
                 _query = {:contains => _key, :offset => 0, :limit => _page_size}
-                while true do
-                    _tmp_prefixes = _nb.get('ipam/prefixes/', _query).body.fetch(:results, [])
-                    _tmp_prefixes.each do |p|
+                begin
+                  while true do
+                    if (_prefixes_response = _nb.get('ipam/prefixes/', _query).body) and _prefixes_response.is_a?(Hash) then
+                      _tmp_prefixes = _prefixes_response.fetch(:results, [])
+                      _tmp_prefixes.each do |p|
                         if (_vrf = p.fetch(:vrf, nil))
                           if _verbose then
                             # verbose output is the vrf object, with the parent prefix
@@ -104,9 +106,15 @@ def filter(event)
                                       :id => _vrf.fetch(:id, nil)}
                           end
                         end
+                      end
+                      _query[:offset] += _tmp_prefixes.length()
+                      break unless (_tmp_prefixes.length() >= _page_size)
+                    else
+                      break
                     end
-                    _query[:offset] += _tmp_prefixes.length()
-                    break unless (_tmp_prefixes.length() >= _page_size)
+                  end
+                rescue Faraday::Error
+                  # give up aka do nothing
                 end
                 collect_values(crush(_vrfs))
 
@@ -118,9 +126,11 @@ def filter(event)
                 # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
                 _devices = Array.new
                 _query = {:address => _key, :offset => 0, :limit => _page_size}
-                while true do
-                    _tmp_ip_addresses = _nb.get('ipam/ip-addresses/', _query).body.fetch(:results, [])
-                    _tmp_ip_addresses.each do |i|
+                begin
+                  while true do
+                    if (_ip_addresses_response = _nb.get('ipam/ip-addresses/', _query).body) and _ip_addresses_response.is_a?(Hash) then
+                      _tmp_ip_addresses = _ip_addresses_response.fetch(:results, [])
+                      _tmp_ip_addresses.each do |i|
                         if (_obj = i.fetch(:assigned_object, nil)) && ((_device = _obj.fetch(:device, nil)) || (_device = _obj.fetch(:virtual_machine, nil)))
                           if _verbose then
                             # verbose output is the device object
@@ -137,9 +147,15 @@ def filter(event)
                                          :id => _device.fetch(:id, nil)}
                           end
                         end
+                      end
+                      _query[:offset] += _tmp_ip_addresses.length()
+                      break unless (_tmp_ip_addresses.length() >= _page_size)
+                    else
+                      break
                     end
-                    _query[:offset] += _tmp_ip_addresses.length()
-                    break unless (_tmp_ip_addresses.length() >= _page_size)
+                  end
+                rescue Faraday::Error
+                  # give up aka do nothing
                 end
                 collect_values(crush(_devices))
 
