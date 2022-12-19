@@ -40,20 +40,26 @@
         "destination.device": {
           "type": "nested",
           "properties": {
-            "display": { "type": "keyword" },
+            "cluster": { "type": "keyword" },
+            "device_type": { "type": "keyword" },
             "id": { "type": "integer" },
+            "manufacturer": { "type": "keyword" },
             "name": { "type": "keyword" },
-            "url": { "type": "keyword" }
+            "role": { "type": "keyword" },
+            "site": { "type": "keyword" },
+            "url": { "type": "keyword" },
+            "details": { "type": "nested" }
           }
         },
         "destination.segment": {
           "type": "nested",
           "properties": {
-            "display": { "type": "keyword" },
             "id": { "type": "integer" },
             "name": { "type": "keyword" },
+            "site": { "type": "keyword" },
+            "tenant": { "type": "keyword" },
             "url": { "type": "keyword" },
-            "prefix": { "type": "nested" }
+            "details": { "type": "nested" }
           }
         },
         "event.freq_score_v1": { "type": "float" },
@@ -72,20 +78,26 @@
         "source.device": {
           "type": "nested",
           "properties": {
-            "display": { "type": "keyword" },
+            "cluster": { "type": "keyword" },
+            "device_type": { "type": "keyword" },
             "id": { "type": "integer" },
+            "manufacturer": { "type": "keyword" },
             "name": { "type": "keyword" },
-            "url": { "type": "keyword" }
+            "role": { "type": "keyword" },
+            "site": { "type": "keyword" },
+            "url": { "type": "keyword" },
+            "details": { "type": "nested" }
           }
         },
         "source.segment": {
           "type": "nested",
           "properties": {
-            "display": { "type": "keyword" },
             "id": { "type": "integer" },
             "name": { "type": "keyword" },
+            "site": { "type": "keyword" },
+            "tenant": { "type": "keyword" },
             "url": { "type": "keyword" },
-            "prefix": { "type": "nested" }
+            "details": { "type": "nested" }
           }
         },
         "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },

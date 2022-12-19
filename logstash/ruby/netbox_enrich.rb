@@ -96,15 +96,14 @@ def filter(event)
                       _tmp_prefixes = _prefixes_response.fetch(:results, [])
                       _tmp_prefixes.each do |p|
                         if (_vrf = p.fetch(:vrf, nil))
-                          if _verbose then
-                            # verbose output is the vrf object, with the parent prefix
-                            #   object set as a child under :prefix (minus :vrf, obviously)
-                            _vrfs << _vrf.merge({:prefix => p.tap { |h| h.delete(:vrf) }})
-                          else
-                            # non-verbose output is { :name => "name", :id => "id" }
-                            _vrfs << {:name => _vrf.fetch(:name, _vrf.fetch(:display, nil)),
-                                      :id => _vrf.fetch(:id, nil)}
-                          end
+                          # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
+                          # if _verbose, include entire object as :details
+                          _vrfs << { :name => _vrf.fetch(:name, _vrf.fetch(:display, nil)),
+                                     :id => _vrf.fetch(:id, nil),
+                                     :site => ((_site = p.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                                     :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
+                                     :url => p.fetch(:url, _vrf.fetch(:url, nil)),
+                                     :details => _verbose ? _vrf.merge({:prefix => p.tap { |h| h.delete(:vrf) }}) : nil }
                         end
                       end
                       _query[:offset] += _tmp_prefixes.length()
@@ -132,20 +131,19 @@ def filter(event)
                       _tmp_ip_addresses = _ip_addresses_response.fetch(:results, [])
                       _tmp_ip_addresses.each do |i|
                         if (_obj = i.fetch(:assigned_object, nil)) && ((_device = _obj.fetch(:device, nil)) || (_device = _obj.fetch(:virtual_machine, nil)))
-                          if _verbose then
-                            # verbose output is the device object
-                            if _device.key?(:url) and (_full_device = _nb.get(_device[:url].delete_prefix(_url_base).delete_prefix(_url_suffix).delete_prefix("/")).body) then
-                              # if we can, follow the :assigned_object's "full" device URL to get more verbose information
-                              _devices << _full_device
-                            else
-                              # otherwise just include the device object under :assigned_object
-                              _devices << _device
-                            end
-                          else
-                            # non-verbose output is { :name => "name", :id => "id" }
-                            _devices << {:name => _device.fetch(:name, _device.fetch(:display, nil)),
-                                         :id => _device.fetch(:id, nil)}
-                          end
+                          # if we can, follow the :assigned_object's "full" device URL to get more information
+                          _device = (_device.key?(:url) and (_full_device = _nb.get(_device[:url].delete_prefix(_url_base).delete_prefix(_url_suffix).delete_prefix("/")).body)) ? _full_device : _device
+                          # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
+                          # if _verbose, include entire object as :details
+                          _devices << { :name => _device.fetch(:name, _device.fetch(:display, nil)),
+                                        :id => _device.fetch(:id, nil),
+                                        :url => _device.fetch(:url, nil),
+                                        :site => ((_site = _device.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                                        :role => ((_role = _device.fetch(:role, _device.fetch(:device_role, nil))) && _role&.key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
+                                        :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
+                                        :device_type => ((_dtype = _device.fetch(:device_type, nil)) && _dtype&.key?(:name)) ? _dtype[:name] : _dtype&.fetch(:display, nil),
+                                        :manufacturer => ((_manuf = _device.dig(:device_type, :manufacturer)) && _manuf&.key?(:name)) ? _manuf[:name] : _manuf&.fetch(:display, nil),
+                                        :details => _verbose ? _device : nil }
                         end
                       end
                       _query[:offset] += _tmp_ip_addresses.length()

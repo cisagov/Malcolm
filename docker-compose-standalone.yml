@@ -237,8 +237,6 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_NETWORK_MAP_ENRICHMENT : 'true'
   # Whether or not Logstash will enrich network traffic metadata via NetBox API calls
   LOGSTASH_NETBOX_ENRICHMENT      : 'false'
-  # Whether or not to be more verbose with NetBox-enriched traffic metadata
-  LOGSTASH_NETBOX_ENRICHMENT_VERBOSE : 'false'
 
 x-filebeat-variables: &filebeat-variables
   # filebeat parameters used for monitoring log files containing network traffic metadata
