@@ -164,7 +164,7 @@ def filter(event)
             }
 
   if !_result.nil? && _result.key?(:url) && !_result[:url]&.empty? then
-    _result[:url].map! { |u| u.delete_prefix(@netbox_url_base) }
+    _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
   end
   event.set("#{@target}", _result) unless _result.nil? || _result&.empty?
 

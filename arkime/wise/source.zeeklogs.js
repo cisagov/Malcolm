@@ -1904,7 +1904,7 @@ class MalcolmSource extends WISESource {
 
     // add URL link for NetBox URLs
     var netboxUrlStr = allFields.filter(value => /^(source|destination)\.(device|segment)\.url$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_netbox_url", { name: "NetBox API", url: '%TEXT%', fields: netboxUrlStr });
+    this.api.addValueAction("malcolm_netbox_url", { name: "NetBox", url: '%TEXT%', fields: netboxUrlStr });
 
     // add URL link for assigned transport protocol numbers
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
