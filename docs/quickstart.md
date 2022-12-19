@@ -52,7 +52,7 @@ Pulling zeek              ... done
 You can then observe that the images have been retrieved by running `docker images`:
 ```
 $ docker images
-REPOSITORY                                                     TAG             IMAGE ID       CREATED      SIZE
+REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
 malcolmnetsec/api                                              23.01.0           xxxxxxxxxxxx   3 days ago   158MB
 malcolmnetsec/arkime                                           23.01.0           xxxxxxxxxxxx   3 days ago   816MB
 malcolmnetsec/dashboards                                       23.01.0           xxxxxxxxxxxx   3 days ago   1.02GB
