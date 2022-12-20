@@ -303,6 +303,9 @@ def logs():
       | esindices/list
       | executing\s+attempt_(transition|set_replica_count)\s+for
       | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+      | loaded\s+config\s+'/etc/netbox/config/
+      | "netbox"\s+application\s+started
+      | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
       | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
