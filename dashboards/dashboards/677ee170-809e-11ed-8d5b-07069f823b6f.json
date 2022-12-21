@@ -88,7 +88,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR (event.dataset:conn OR event.dataset:known*)) AND ((network.direction:(internal OR inbound) AND (destination.ip:*) AND (NOT destination.device:{id:*})) OR (network.direction:(internal OR outbound) AND (source.ip:*) AND (NOT source.device:{id:*})))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR (event.dataset:conn OR event.dataset:known*)) AND ((network.direction:(internal OR inbound) AND (destination.ip:*) AND (NOT destination.device.id:*)) OR (network.direction:(internal OR outbound) AND (source.ip:*) AND (NOT source.device.id:*)))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
