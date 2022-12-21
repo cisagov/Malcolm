@@ -38,7 +38,6 @@
         "destination.ip_reverse_dns": { "type": "keyword" },
         "destination.oui": { "type": "keyword" },
         "destination.device": {
-          "type": "nested",
           "properties": {
             "cluster": { "type": "keyword" },
             "device_type": { "type": "keyword" },
@@ -52,7 +51,6 @@
           }
         },
         "destination.segment": {
-          "type": "nested",
           "properties": {
             "id": { "type": "integer" },
             "name": { "type": "keyword" },
@@ -76,7 +74,6 @@
         "source.ip_reverse_dns": { "type": "keyword" },
         "source.oui": { "type": "keyword" },
         "source.device": {
-          "type": "nested",
           "properties": {
             "cluster": { "type": "keyword" },
             "device_type": { "type": "keyword" },
@@ -90,7 +87,6 @@
           }
         },
         "source.segment": {
-          "type": "nested",
           "properties": {
             "id": { "type": "integer" },
             "name": { "type": "keyword" },
