@@ -74,7 +74,8 @@ def filter(event)
   _token = @netbox_token
   _page_size = @page_size
   _verbose = @verbose
-  _result = @cache_hash.getset(@lookup_type){
+  _lookup_type = @lookup_type
+  _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
             }.getset(_key){
 
@@ -84,7 +85,7 @@ def filter(event)
                 conn.response :json, :parser_options => { :symbolize_names => true }
               end
 
-              case @lookup_type
+              case _lookup_type
               #################################################################################
               when :ip_vrf
                 # retrieve the list VRFs containing IP address prefixes containing the search key
@@ -165,6 +166,9 @@ def filter(event)
 
   if !_result.nil? && _result.key?(:url) && !_result[:url]&.empty? then
     _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
+    if (_lookup_type == :ip_device) && (!_result.key?(:device_type) || _result[:device_type]&.empty?) && _result[:url].any? { |u| u.include? "virtual-machines" } then
+      _result[:device_type] = [ "Virtual Machine" ]
+    end
   end
   event.set("#{@target}", _result) unless _result.nil? || _result&.empty?
 
