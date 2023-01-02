@@ -16,7 +16,7 @@ def register(params)
   @source = params["source"]
 
   # lookup type
-  #   valid values are: ip_device, ip_vrf, mac_device
+  #   valid values are: ip_device, ip_vrf
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
   # API parameters
