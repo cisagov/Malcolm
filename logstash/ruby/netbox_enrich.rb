@@ -20,7 +20,12 @@ def register(params)
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
   # whether or not to enrich service for ip_device
-  @lookup_service = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(params["lookup_service"].to_s.downcase)
+  _lookup_service_str = params["lookup_service"]
+  _lookup_service_env = params["lookup_service_env"]
+  if _lookup_service_str.nil? and !_lookup_service_env.nil?
+    _lookup_service_str = ENV[_lookup_service_env]
+  end
+  @lookup_service = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_lookup_service_str.to_s.downcase)
   @lookup_service_port_source = params.fetch("lookup_service_port_source", "[destination][port]")
 
   # API parameters
@@ -143,9 +148,9 @@ def filter(event)
                           # if we can, follow the :assigned_object's "full" device URL to get more information
                           _device = (_device.key?(:url) and (_full_device = _nb.get(_device[:url].delete_prefix(_url_base).delete_prefix(_url_suffix).delete_prefix("/")).body)) ? _full_device : _device
                           _device_id = _device.fetch(:id, nil)
-                          # look up service if requested
-                          _services = Array.new
+                          # look up service if requested (based on device/vm found and service port)
                           if (_lookup_service_port > 0) then
+                            _services = Array.new
                             _service_query = { (_is_device ? :device_id : :virtual_machine_id) => _device_id, :port => _lookup_service_port, :offset => 0, :limit => _page_size }
                             while true do
                               if (_services_response = _nb.get('ipam/services/', _service_query).body) and _services_response.is_a?(Hash) then
@@ -157,13 +162,14 @@ def filter(event)
                                 break
                               end
                             end
+                            _device[:service] = _services
                           end
                           # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
                           # if _verbose, include entire object as :details
                           _devices << { :name => _device.fetch(:name, _device.fetch(:display, nil)),
                                         :id => _device_id,
                                         :url => _device.fetch(:url, nil),
-                                        :service => _verbose ? _services : _services.map {|s| s.fetch(:name, s.fetch(:display, nil)) },
+                                        :service => _device.fetch(:service, []).map {|s| s.fetch(:name, s.fetch(:display, nil)) },
                                         :site => ((_site = _device.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
                                         :role => ((_role = _device.fetch(:role, _device.fetch(:device_role, nil))) && _role&.key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
                                         :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
