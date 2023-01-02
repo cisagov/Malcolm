@@ -19,6 +19,10 @@ def register(params)
   #   valid values are: ip_device, ip_vrf
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
+  # whether or not to enrich service for ip_device
+  @lookup_service = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(params["lookup_service"].to_s.downcase)
+  @lookup_service_port_source = params.fetch("lookup_service_port_source", "[destination][port]")
+
   # API parameters
   @page_size = params.fetch("page_size", 50)
 
@@ -75,6 +79,7 @@ def filter(event)
   _page_size = @page_size
   _verbose = @verbose
   _lookup_type = @lookup_type
+  _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
             }.getset(_key){
@@ -131,14 +136,34 @@ def filter(event)
                     if (_ip_addresses_response = _nb.get('ipam/ip-addresses/', _query).body) and _ip_addresses_response.is_a?(Hash) then
                       _tmp_ip_addresses = _ip_addresses_response.fetch(:results, [])
                       _tmp_ip_addresses.each do |i|
-                        if (_obj = i.fetch(:assigned_object, nil)) && ((_device = _obj.fetch(:device, nil)) || (_device = _obj.fetch(:virtual_machine, nil)))
+                        _is_device = nil
+                        if (_obj = i.fetch(:assigned_object, nil)) && ((_device_obj = _obj.fetch(:device, nil)) || (_virtualized_obj = _obj.fetch(:virtual_machine, nil)))
+                          _is_device = !_device_obj.nil?
+                          _device = _is_device ? _device_obj : _virtualized_obj
                           # if we can, follow the :assigned_object's "full" device URL to get more information
                           _device = (_device.key?(:url) and (_full_device = _nb.get(_device[:url].delete_prefix(_url_base).delete_prefix(_url_suffix).delete_prefix("/")).body)) ? _full_device : _device
+                          _device_id = _device.fetch(:id, nil)
+                          # look up service if requested
+                          _services = Array.new
+                          if (_lookup_service_port > 0) then
+                            _service_query = { (_is_device ? :device_id : :virtual_machine_id) => _device_id, :port => _lookup_service_port, :offset => 0, :limit => _page_size }
+                            while true do
+                              if (_services_response = _nb.get('ipam/services/', _service_query).body) and _services_response.is_a?(Hash) then
+                                _tmp_services = _services_response.fetch(:results, [])
+                                _services.unshift(*_tmp_services) unless _tmp_services.nil? || _tmp_services&.empty?
+                                _service_query[:offset] += _tmp_services.length()
+                                break unless (_tmp_services.length() >= _page_size)
+                              else
+                                break
+                              end
+                            end
+                          end
                           # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
                           # if _verbose, include entire object as :details
                           _devices << { :name => _device.fetch(:name, _device.fetch(:display, nil)),
-                                        :id => _device.fetch(:id, nil),
+                                        :id => _device_id,
                                         :url => _device.fetch(:url, nil),
+                                        :service => _verbose ? _services : _services.map {|s| s.fetch(:name, s.fetch(:display, nil)) },
                                         :site => ((_site = _device.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
                                         :role => ((_role = _device.fetch(:role, _device.fetch(:device_role, nil))) && _role&.key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
                                         :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),

@@ -45,6 +45,7 @@
             "manufacturer": { "type": "keyword" },
             "name": { "type": "keyword" },
             "role": { "type": "keyword" },
+            "service": { "type": "keyword" },
             "site": { "type": "keyword" },
             "url": { "type": "keyword" },
             "details": { "type": "nested" }
@@ -75,6 +76,7 @@
         "related.manufacturer": { "type": "keyword" },
         "related.role": { "type": "keyword" },
         "related.segment": { "type": "keyword" },
+        "related.service": { "type": "keyword" },
         "related.site": { "type": "keyword" },
         "source.ip_reverse_dns": { "type": "keyword" },
         "source.oui": { "type": "keyword" },
@@ -86,6 +88,7 @@
             "manufacturer": { "type": "keyword" },
             "name": { "type": "keyword" },
             "role": { "type": "keyword" },
+            "service": { "type": "keyword" },
             "site": { "type": "keyword" },
             "url": { "type": "keyword" },
             "details": { "type": "nested" }
