@@ -201,7 +201,9 @@ def filter(event)
                 rescue Faraday::Error
                   # give up aka do nothing
                 end
-                collect_values(crush(_devices))
+                _devices = collect_values(crush(_devices))
+                _devices.fetch(:service, [])&.flatten!&.uniq!
+                _devices
 
               #################################################################################
               else
