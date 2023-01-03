@@ -221,7 +221,8 @@ def filter(event)
 end
 
 def collect_values(hashes)
-  {}.tap{ |r| hashes.uniq.each{ |h| h.each{ |k,v| (r[k]||=[]) << v } } }
+  # https://stackoverflow.com/q/5490952
+  hashes.reduce({}){ |h, pairs| pairs.each { |k,v| (h[k] ||= []) << v}; h }
 end
 
 def crush(thing)
