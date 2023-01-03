@@ -19,6 +19,16 @@ def register(params)
   #   valid values are: ip_device, ip_vrf
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
+  # site value to include in queries for enrichment lookups, either specified directly or read from ENV
+  @lookup_site = params["lookup_site"]
+  _lookup_site_env = params["lookup_site_env"]
+  if @lookup_site.nil? and !_lookup_site_env.nil?
+    @lookup_site = ENV[_lookup_site_env]
+  end
+  if !@lookup_site.nil? && @lookup_site.empty? then
+    @lookup_site = nil
+  end
+
   # whether or not to enrich service for ip_device
   _lookup_service_str = params["lookup_service"]
   _lookup_service_env = params["lookup_service_env"]
@@ -84,6 +94,7 @@ def filter(event)
   _page_size = @page_size
   _verbose = @verbose
   _lookup_type = @lookup_type
+  _lookup_site = @lookup_site
   _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
@@ -101,6 +112,7 @@ def filter(event)
                 # retrieve the list VRFs containing IP address prefixes containing the search key
                 _vrfs = Array.new
                 _query = {:contains => _key, :offset => 0, :limit => _page_size}
+                _query[:site_n] = _lookup_site unless _lookup_site.nil? || _lookup_site&.empty?
                 begin
                   while true do
                     if (_prefixes_response = _nb.get('ipam/prefixes/', _query).body) and _prefixes_response.is_a?(Hash) then
@@ -148,6 +160,8 @@ def filter(event)
                           # if we can, follow the :assigned_object's "full" device URL to get more information
                           _device = (_device.key?(:url) and (_full_device = _nb.get(_device[:url].delete_prefix(_url_base).delete_prefix(_url_suffix).delete_prefix("/")).body)) ? _full_device : _device
                           _device_id = _device.fetch(:id, nil)
+                          _device_site = ((_site = _device.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil)
+                          next unless (_device_site.to_s.downcase == _lookup_site.to_s.downcase) || _lookup_site.nil? || _lookup_site&.empty? || _device_site.nil? || _device_site&.empty?
                           # look up service if requested (based on device/vm found and service port)
                           if (_lookup_service_port > 0) then
                             _services = Array.new
@@ -170,7 +184,7 @@ def filter(event)
                                         :id => _device_id,
                                         :url => _device.fetch(:url, nil),
                                         :service => _device.fetch(:service, []).map {|s| s.fetch(:name, s.fetch(:display, nil)) },
-                                        :site => ((_site = _device.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                                        :site => _device_site,
                                         :role => ((_role = _device.fetch(:role, _device.fetch(:device_role, nil))) && _role&.key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
                                         :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
                                         :device_type => ((_dtype = _device.fetch(:device_type, nil)) && _dtype&.key?(:name)) ? _dtype[:name] : _dtype&.fetch(:display, nil),
