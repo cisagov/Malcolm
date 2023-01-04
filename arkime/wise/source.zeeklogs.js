@@ -10,7 +10,7 @@ const WISESource = require('./wiseSource.js');
 // Data may be populated with Malcolm's Logstash filters:
 //   (https://github.com/idaholab/Malcolm/tree/main/logstash/pipelines)
 //
-// Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+// Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 // see https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 

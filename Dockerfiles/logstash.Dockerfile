@@ -1,6 +1,6 @@
 FROM amazonlinux:2 AS build
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 RUN amazon-linux-extras install -y epel && \
     yum install -y \
