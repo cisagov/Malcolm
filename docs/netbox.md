@@ -48,4 +48,4 @@ $ gunzip < netbox_$(date +%Y-%m-%d).psql.gz | docker-compose exec -u $(id -u) -T
 $ docker-compose exec -u $(id -u) netbox /opt/netbox/netbox/manage.py migrate
 ```
 
-Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox.env` environment file. Restoring a NetBox backup may not work correctly if this value is different from when it was created.
+Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.
