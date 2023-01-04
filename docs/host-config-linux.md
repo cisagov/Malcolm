@@ -23,7 +23,7 @@ You can test docker by running `docker info`, or (assuming you have internet acc
 
 ## Installing docker-compose
 
-Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing docker-compose.
+Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing `docker-compose`.
 
 ## Operating system configuration
 

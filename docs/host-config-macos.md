@@ -17,13 +17,24 @@ $ brew tap homebrew/cask-versions
 ## Install docker-edge
 
 ```
-$ brew cask install docker-edge
+$ brew install --cask docker-edge
 ```
-This will install the latest version of docker and docker-compose. It can be upgraded later using `brew` as well:
+This will install the latest version of `docker`. It can be upgraded later using `brew` as well:
 ```
-$ brew cask upgrade --no-quarantine docker-edge
+$ brew upgrade --cask --no-quarantine docker-edge
 ```
-You can now run docker from the Applications folder.
+You can now run Docker from the Applications folder.
+
+## Install docker-compose
+
+```
+$ brew install docker-compose
+```
+This will install the latest version of the `docker-compose` plugin. It can be upgraded later using `brew` as well:
+```
+$ brew upgrade --no-quarantine docker-compose
+```
+You can now run `docker-compose` (at `/usr/local/opt/docker-compose/bin/docker-compose`) from from the command-line
 
 ## Configure docker daemon option
 
