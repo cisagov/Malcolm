@@ -1382,11 +1382,18 @@ def main():
 
         # make sure docker/docker-compose is available
         dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker.exe')) else 'docker'
-        dockerComposeBin = (
-            'docker-compose.exe'
-            if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker-compose.exe'))
-            else 'docker-compose'
-        )
+        if (pyPlatform == PLATFORM_WINDOWS) and Which('docker-compose.exe'):
+            dockerComposeBin = 'docker-compose.exe'
+        elif Which('docker-compose'):
+            dockerComposeBin = 'docker-compose'
+        elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+            dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
+        elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
+            dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
+        elif os.path.isfile('/usr/local/bin/docker-compose'):
+            dockerComposeBin = '/usr/local/bin/docker-compose'
+        else:
+            dockerComposeBin = 'docker-compose'
         err, out = run_process([dockerBin, 'info'], debug=args.debug)
         if err != 0:
             raise Exception(f'{ScriptName} requires docker, please run install.py')
