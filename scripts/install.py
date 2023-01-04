@@ -30,7 +30,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "2.5.0"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.14.2"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
@@ -1804,7 +1804,7 @@ class LinuxInstaller(Installer):
 
                     # docker packages to install
                     if err == 0:
-                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'containerd.io'])
+                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 elif self.distro == PLATFORM_LINUX_FEDORA:
 
@@ -1824,7 +1824,7 @@ class LinuxInstaller(Installer):
 
                     # docker packages to install
                     if err == 0:
-                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'containerd.io'])
+                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 elif self.distro == PLATFORM_LINUX_CENTOS:
                     # add docker centos repository
@@ -1842,7 +1842,7 @@ class LinuxInstaller(Installer):
 
                     # docker packages to install
                     if err == 0:
-                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'containerd.io'])
+                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 else:
                     err, out = None, None
@@ -2097,6 +2097,7 @@ class LinuxInstaller(Installer):
                     'hirsute',
                     'impish',
                     'jammy',
+                    'kinetic',
                     'stretch',
                     'buster',
                     'bookworm',
@@ -2246,7 +2247,7 @@ class MacInstaller(Installer):
 
             if self.useBrew:
                 # install docker via brew cask (requires user interaction)
-                dockerPackages = [MAC_BREW_DOCKER_PACKAGE]
+                dockerPackages = [MAC_BREW_DOCKER_PACKAGE, "docker-compose"]
                 eprint(f"Installing docker packages: {dockerPackages}")
                 if self.install_package(dockerPackages):
                     eprint("Installation of docker packages apparently succeeded")
