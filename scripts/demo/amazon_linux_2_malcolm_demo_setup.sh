@@ -54,10 +54,7 @@ ENV_LIST=(
   jq
   yq
   ripgrep
-  watchexec
 )
-
-DOCKER_COMPOSE_INSTALL_VERSION=( 1.29.2 )
 
 ###################################################################################
 # _GetConfirmation - get a yes/no confirmation from the user (or accept the default)
@@ -242,7 +239,7 @@ function InstallDocker {
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       echo "Installing Docker Compose via curl to /usr/bin..." >&2
       InstallEssentialPackages
-      $SUDO_CMD curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_INSTALL_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
+      $SUDO_CMD curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
       $SUDO_CMD chmod +x /usr/bin/docker-compose
       if ! /usr/bin/docker-compose version >/dev/null 2>&1 ; then
         echo "Installing docker-compose failed" >&2
