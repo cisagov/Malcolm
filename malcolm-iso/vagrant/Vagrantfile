@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 unless Vagrant.has_plugin?("vagrant-sshfs")
   raise 'vagrant-sshfs plugin is not installed!'
@@ -68,7 +68,8 @@ Vagrant.configure("2") do |config|
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     apt-get -qqy update
-    apt-get -y install docker-ce docker-ce-cli containerd.io
+    apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    ln -s -r /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
     usermod -a -G docker vagrant
   STEP1
 end

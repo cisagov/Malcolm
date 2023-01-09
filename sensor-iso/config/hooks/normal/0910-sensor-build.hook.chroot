@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # some environment variables needed for build
 export CCACHE_DIR="/var/spool/ccache"
@@ -20,7 +20,7 @@ export PATH="${ZEEK_DIR}"/bin:$PATH
 
 SURICATA_RULES_DIR="/etc/suricata/rules"
 
-BEATS_VER="8.5.2"
+BEATS_VER="8.5.3"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
@@ -32,7 +32,7 @@ SUPERCRONIC_RELEASE_URL="https://api.github.com/repos/aptible/supercronic/releas
 CROC_RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
 STEP_RELEASE_URL="https://api.github.com/repos/smallstep/cli/releases/latest"
 YARA_RELEASE_URL="https://api.github.com/repos/VirusTotal/yara/releases/latest"
-YARA_RULES_URL="https://codeload.github.com/Neo23x0/signature-base/tar.gz/master"
+YARA_RULES_SRC_DIR="/opt/yara-rules-src"
 YARA_RULES_DIR="/opt/yara-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
@@ -223,16 +223,16 @@ cp *.deb /opt/hedgehog_install_artifacts/
 cd /tmp
 rm -rf /yara
 
-mkdir -p ./Neo23x0
-curl -sSL "$YARA_RULES_URL" | tar xzvf - -C ./Neo23x0 --strip-components 1
-mkdir -p "${YARA_RULES_DIR}"/custom
-cp ./Neo23x0/yara/* ./Neo23x0/vendor/yara/* "${YARA_RULES_DIR}"/
-cp ./Neo23x0/LICENSE "${YARA_RULES_DIR}"/_LICENSE
-rm -rf /tmp/Neo23x0
+mkdir -p "${YARA_RULES_DIR}"/custom "${YARA_RULES_SRC_DIR}"
+/usr/local/bin/yara_rules_setup.sh -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}"
 
 cd "${YARA_RULES_DIR}"/..
 tar czf yara-rules-hedgehog.tar.gz "$(basename "${YARA_RULES_DIR}")"
 mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+
+cd "${YARA_RULES_SRC_DIR}"/..
+tar czf yara-rules-src-hedgehog.tar.gz "$(basename "${YARA_RULES_SRC_DIR}")"
+mv ./yara-rules-src-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # capa

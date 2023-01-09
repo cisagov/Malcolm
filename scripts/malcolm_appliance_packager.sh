@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
@@ -91,8 +91,6 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
   touch "$DESTDIR/"auth.env
-  cp $VERBOSE ./cidr-map.txt "$DESTDIR/"
-  cp $VERBOSE ./host-map.txt "$DESTDIR/"
   cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"

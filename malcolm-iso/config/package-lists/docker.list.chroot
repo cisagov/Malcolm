@@ -1,3 +1,4 @@
 docker-ce
 docker-ce-cli
+docker-compose-plugin
 containerd.io

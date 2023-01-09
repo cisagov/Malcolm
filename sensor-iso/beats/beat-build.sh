@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
-VERSION="8.5.2"
+VERSION="8.5.3"
 THIRD_PARTY_BRANCH="master"
 while getopts b:v:t: opts; do
    case ${opts} in

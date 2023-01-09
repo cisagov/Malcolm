@@ -10,7 +10,7 @@ const WISESource = require('./wiseSource.js');
 // Data may be populated with Malcolm's Logstash filters:
 //   (https://github.com/cisagov/Malcolm/tree/main/logstash/pipelines)
 //
-// Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+// Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 // see https://raw.githubusercontent.com/cisagov/Malcolm/main/License.txt
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -40,14 +40,26 @@ class MalcolmSource extends WISESource {
       "destination.geo.country_iso_code",
       "destination.geo.country_name",
       "destination.geo.ip",
-      "destination.hostname",
+      "destination.device.cluster",
+      "destination.device.device_type",
+      "destination.device.id",
+      "destination.device.manufacturer",
+      "destination.device.name",
+      "destination.device.role",
+      "destination.device.service",
+      "destination.device.site",
+      "destination.device.url",
       "destination.ip",
       "destination.ip_reverse_dns",
       "destination.mac",
       "destination.oui",
       "destination.packets",
       "destination.port",
-      "destination.segment",
+      "destination.segment.id",
+      "destination.segment.name",
+      "destination.segment.site",
+      "destination.segment.tenant",
+      "destination.segment.url",
       "dns.answers.class",
       "dns.answers.data",
       "dns.answers.name",
@@ -130,12 +142,18 @@ class MalcolmSource extends WISESource {
       "oui.dst",
       "oui.src",
       "protocols",
+      "related.device_type",
       "related.hash",
       "related.hosts",
       "related.ip",
       "related.mac",
+      "related.manufacturer",
       "related.oui",
       "related.password",
+      "related.role",
+      "related.segment",
+      "related.service",
+      "related.site",
       "related.user",
       "rootId",
       "rule.author",
@@ -153,7 +171,15 @@ class MalcolmSource extends WISESource {
       "source.geo.country_iso_code",
       "source.geo.country_name",
       "source.geo.ip",
-      "source.hostname",
+      "source.device.cluster",
+      "source.device.device_type",
+      "source.device.id",
+      "source.device.manufacturer",
+      "source.device.name",
+      "source.device.role",
+      "source.device.service",
+      "source.device.site",
+      "source.device.url",
       "source.ip",
       "source.ip_reverse_dns",
       "source.mac",
@@ -162,7 +188,11 @@ class MalcolmSource extends WISESource {
       "source.oui",
       "source.packets",
       "source.port",
-      "source.segment",
+      "source.segment.id",
+      "source.segment.name",
+      "source.segment.site",
+      "source.segment.tenant",
+      "source.segment.url",
       "suricata.action",
       "suricata.alert.action",
       "suricata.alert.metadata.created_at",
@@ -770,10 +800,13 @@ class MalcolmSource extends WISESource {
       "zeek.bsap_serial_rdb_ext.seq",
       "zeek.bsap_serial_rdb_ext.sfun",
       "zeek.cip.attribute_id",
+      "zeek.cip.cip_extended_status",
+      "zeek.cip.cip_extended_status_code",
       "zeek.cip.cip_sequence_count",
       "zeek.cip.cip_service",
       "zeek.cip.cip_service_code",
       "zeek.cip.cip_status",
+      "zeek.cip.cip_status_code",
       "zeek.cip.class_id",
       "zeek.cip.class_name",
       "zeek.cip.direction",
@@ -1877,6 +1910,10 @@ class MalcolmSource extends WISESource {
     ];
     var allFieldsStr = allFields.join(',');
 
+    // add URL link for NetBox URLs
+    var netboxUrlStr = allFields.filter(value => /^(source|destination)\.(device|segment)\.url$/i.test(value)).join(',');
+    this.api.addValueAction("malcolm_netbox_url", { name: "NetBox", url: '%TEXT%', fields: netboxUrlStr });
+
     // add URL link for assigned transport protocol numbers
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_proto", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
@@ -1978,18 +2015,14 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.source, 'port', 'Originating Port', 'source.port')\n" +
       "    +arrayList(session.source, 'mac', 'Originating MAC', 'source.mac')\n" +
       "    +arrayList(session.source, 'oui', 'Originating OUI', 'source.oui')\n" +
-      "    +arrayList(session.source, 'hostname', 'Originating Host Name', 'source.hostname')\n" +
       "    +arrayList(session.source, 'ip_reverse_dns', 'Originating Host rDNS', 'source.ip_reverse_dns')\n" +
-      "    +arrayList(session.source, 'segment', 'Originating Network Segment', 'source.segment')\n" +
       "    +arrayList(session.source.geo, 'country_name', 'Originating GeoIP Country', 'source.geo.country_name')\n" +
       "    +arrayList(session.source.geo, 'city_name', 'Originating GeoIP City', 'source.geo.city_name')\n" +
       "    +arrayList(session.destination, 'ip', 'Responding Host', 'destination.ip')\n" +
       "    +arrayList(session.destination, 'port', 'Responding Port', 'destination.port')\n" +
       "    +arrayList(session.destination, 'mac', 'Responding MAC', 'destination.mac')\n" +
       "    +arrayList(session.destination, 'oui', 'Responding OUI', 'destination.oui')\n" +
-      "    +arrayList(session.destination, 'hostname', 'Responding Host Name', 'destination.hostname')\n" +
       "    +arrayList(session.destination, 'ip_reverse_dns', 'Responding Host rDNS', 'destination.ip_reverse_dns')\n" +
-      "    +arrayList(session.destination, 'segment', 'Responding Network Segment', 'destination.segment')\n" +
       "    +arrayList(session.destination.geo, 'country_name', 'Responding GeoIP Country', 'destination.geo.country_name')\n" +
       "    +arrayList(session.destination.geo, 'city_name', 'Responding GeoIP City', 'destination.geo.city_name')\n" +
       "    +arrayList(session.related, 'ip', 'Related IP', 'related.ip')\n" +

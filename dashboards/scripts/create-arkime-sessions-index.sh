@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 set -euo pipefail
 shopt -s nocasematch
@@ -82,50 +82,77 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             || true
         fi
 
-        if [[ -d /opt/ecs-templates/composable/component ]]; then
-          echo "Importing ECS composable templates..."
-          for i in /opt/ecs-templates/composable/component/*.json; do
-            TEMP_BASENAME="$(basename "$i")"
-            TEMP_FILENAME="${TEMP_BASENAME%.*}"
-            echo "Importing ECS composable template $TEMP_FILENAME ..."
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
-          done
-        fi
+        # calculate combined SHA sum of all templates to save as _meta.hash to determine if
+        # we need to do this import (mostly useful for the secondary loop)
+        TEMPLATE_HASH="$(find /opt/ecs-templates/composable "$MALCOLM_TEMPLATES_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
 
-        if [[ -d "$MALCOLM_TEMPLATES_DIR"/composable/component ]]; then
-          echo "Importing custom ECS composable templates..."
-          for i in "$MALCOLM_TEMPLATES_DIR"/composable/component/*.json; do
-            TEMP_BASENAME="$(basename "$i")"
-            TEMP_FILENAME="${TEMP_BASENAME%.*}"
-            echo "Importing custom ECS composable template $TEMP_FILENAME ..."
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
-          done
-        fi
+        # get the previous stored template hash (if any) to avoid importing if it's already been imported
+        set +e
+        TEMPLATE_HASH_OLD="$(curl "${CURL_CONFIG_PARAMS[@]}" -sSL --fail -XGET -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" 2>/dev/null | jq --raw-output '.index_templates[]|select(.name=="malcolm_template")|.index_template._meta.hash' 2>/dev/null)"
+        set -e
 
-        echo "Importing malcolm_template..."
-
-        if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
-          cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
-        fi
-
-        # load malcolm_template containing malcolm data source field type mappings (merged from /opt/templates/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
-        curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
-          "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
-
-        # import other templates as well (and get info for creating their index patterns)
+        # information about other index patterns will be obtained during template import
         OTHER_INDEX_PATTERNS=()
-        for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
-          TEMP_BASENAME="$(basename "$i")"
-          TEMP_FILENAME="${TEMP_BASENAME%.*}"
-          if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
-            echo "Importing template \"$TEMP_FILENAME\"..."
-            if curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1; then
-              for TEMPLATE_INDEX_PATTERN in $(jq '.index_patterns[]' "$i" | tr -d '"'); do
-                OTHER_INDEX_PATTERNS+=("$TEMPLATE_INDEX_PATTERN;$TEMPLATE_INDEX_PATTERN;@timestamp")
-              done
-            fi
+
+        # proceed only if the current template HASH doesn't match the previously imported one, or if there
+        # was an error calculating or storing either
+        if [[ "$TEMPLATE_HASH" != "$TEMPLATE_HASH_OLD" ]] || [[ -z "$TEMPLATE_HASH_OLD" ]] || [[ -z "$TEMPLATE_HASH" ]]; then
+
+          if [[ -d /opt/ecs-templates/composable/component ]]; then
+            echo "Importing ECS composable templates..."
+            for i in /opt/ecs-templates/composable/component/*.json; do
+              TEMP_BASENAME="$(basename "$i")"
+              TEMP_FILENAME="${TEMP_BASENAME%.*}"
+              echo "Importing ECS composable template $TEMP_FILENAME ..."
+              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+            done
           fi
-        done
+
+          if [[ -d "$MALCOLM_TEMPLATES_DIR"/composable/component ]]; then
+            echo "Importing custom ECS composable templates..."
+            for i in "$MALCOLM_TEMPLATES_DIR"/composable/component/*.json; do
+              TEMP_BASENAME="$(basename "$i")"
+              TEMP_FILENAME="${TEMP_BASENAME%.*}"
+              echo "Importing custom ECS composable template $TEMP_FILENAME ..."
+              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+            done
+          fi
+
+          echo "Importing malcolm_template ($TEMPLATE_HASH)..."
+
+          if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
+            cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
+          fi
+
+          # store the TEMPLATE_HASH we calculated earlier as the _meta.hash for the malcolm template
+          MALCOLM_TEMPLATE_FILE_TEMP="$(mktemp)"
+          ( jq "._meta.hash=\"$TEMPLATE_HASH\"" "$MALCOLM_TEMPLATE_FILE" >"$MALCOLM_TEMPLATE_FILE_TEMP" 2>/dev/null ) && \
+            [[ -s "$MALCOLM_TEMPLATE_FILE_TEMP" ]] && \
+            cp -f "$MALCOLM_TEMPLATE_FILE_TEMP" "$MALCOLM_TEMPLATE_FILE" && \
+            rm -f "$MALCOLM_TEMPLATE_FILE_TEMP"
+
+          # load malcolm_template containing malcolm data source field type mappings (merged from /opt/templates/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
+            "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
+
+          # import other templates as well (and get info for creating their index patterns)
+          for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
+            TEMP_BASENAME="$(basename "$i")"
+            TEMP_FILENAME="${TEMP_BASENAME%.*}"
+            if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
+              echo "Importing template \"$TEMP_FILENAME\"..."
+              if curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1; then
+                for TEMPLATE_INDEX_PATTERN in $(jq '.index_patterns[]' "$i" | tr -d '"'); do
+                  OTHER_INDEX_PATTERNS+=("$TEMPLATE_INDEX_PATTERN;$TEMPLATE_INDEX_PATTERN;@timestamp")
+                done
+              fi
+            fi
+          done
+
+        else
+          echo "malcolm_template ($TEMPLATE_HASH) already exists ($LOOP) at \"${OPENSEARCH_URL_TO_USE}\""
+
+        fi # TEMPLATE_HASH check
 
         if [[ "$LOOP" == "primary" ]]; then
           echo "Importing index pattern..."

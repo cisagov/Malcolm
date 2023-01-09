@@ -1,4 +1,4 @@
-/* Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved. */
+/* Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved. */
 
 html {
   font-family: sans-serif;
@@ -128,7 +128,7 @@ input {
   padding: 2px 10px;
   border-radius: 10px;
   border: solid 1px #555;
-  float: left;
+  float: center;
   margin-right: 10px;
   margin-bottom: 15px;
 }
@@ -225,5 +225,5 @@ button.restart-btn {
 }
 
 #mapping input.search {
-  width: 185px;
+  width: 250px;
 }

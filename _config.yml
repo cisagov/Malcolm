@@ -56,7 +56,6 @@ exclude:
   - arkime-logs
   - arkime-raw
   - auth.env
-  - cidr-map.txt
   - dashboards
   - docker-compose-standalone.yml
   - docker-compose.yml
@@ -73,7 +72,6 @@ exclude:
   - freq-server
   - Gemfile
   - Gemfile.lock
-  - host-map.txt
   - htadmin
   - logstash
   - malcolm-iso

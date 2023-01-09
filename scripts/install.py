@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
 import datetime
@@ -30,7 +30,7 @@ from collections import defaultdict, namedtuple
 from malcolm_common import *
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "2.5.0"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.14.2"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
@@ -810,6 +810,10 @@ class Installer(object):
             'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
             default=False,
         )
+        netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
+            'Should Malcolm enrich network traffic using NetBox?',
+            default=netboxEnabled,
+        )
 
         # input packet capture parameters
         pcapNetSniff = False
@@ -1082,6 +1086,22 @@ class Installer(object):
                             # automatic MAC OUI lookup
                             line = re.sub(
                                 r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line
+                            )
+
+                        elif 'LOGSTASH_NETWORK_MAP_ENRICHMENT' in line:
+                            # enrich network traffic metadata directly from net-map.json
+                            line = re.sub(
+                                r'(LOGSTASH_NETWORK_MAP_ENRICHMENT\s*:(\s*&\S+)?\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(not netboxLogstashEnrich)}",
+                                line,
+                            )
+
+                        elif 'LOGSTASH_NETBOX_ENRICHMENT' in line:
+                            # enrich network traffic metadata via NetBox API calls
+                            line = re.sub(
+                                r'(LOGSTASH_NETBOX_ENRICHMENT\s*:(\s*&\S+)?\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(netboxLogstashEnrich)}",
+                                line,
                             )
 
                         elif 'NETBOX_DISABLED' in line:
@@ -1784,7 +1804,7 @@ class LinuxInstaller(Installer):
 
                     # docker packages to install
                     if err == 0:
-                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'containerd.io'])
+                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 elif self.distro == PLATFORM_LINUX_FEDORA:
 
@@ -1804,7 +1824,7 @@ class LinuxInstaller(Installer):
 
                     # docker packages to install
                     if err == 0:
-                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'containerd.io'])
+                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 elif self.distro == PLATFORM_LINUX_CENTOS:
                     # add docker centos repository
@@ -1822,7 +1842,7 @@ class LinuxInstaller(Installer):
 
                     # docker packages to install
                     if err == 0:
-                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'containerd.io'])
+                        dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 else:
                     err, out = None, None
@@ -2077,6 +2097,7 @@ class LinuxInstaller(Installer):
                     'hirsute',
                     'impish',
                     'jammy',
+                    'kinetic',
                     'stretch',
                     'buster',
                     'bookworm',
@@ -2226,7 +2247,7 @@ class MacInstaller(Installer):
 
             if self.useBrew:
                 # install docker via brew cask (requires user interaction)
-                dockerPackages = [MAC_BREW_DOCKER_PACKAGE]
+                dockerPackages = [MAC_BREW_DOCKER_PACKAGE, "docker-compose"]
                 eprint(f"Installing docker packages: {dockerPackages}")
                 if self.install_package(dockerPackages):
                     eprint("Installation of docker packages apparently succeeded")

@@ -1,6 +1,6 @@
 <!doctype html>
 
-<!-- Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved. -->
+<!-- Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved. -->
 
 <!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
 <!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
@@ -30,7 +30,6 @@
                 <th class="sort" title="Mapping type (host or network segment)" data-sort="type">Type</th>
                 <th class="sort" title="Host address (IP or MAC) or CIDR-formatted IP range" data-sort="address">Address</th>
                 <th class="sort" title="Host or network segment name" data-sort="name">Name</th>
-                <th class="sort" title="Assign name only if the event contains this tag (optional)" data-sort="tag">Tag</th>
                 <th colspan="2">
                   <input type="text" class="search" placeholder="🔎 Search mappings" />
                 </th>
@@ -52,9 +51,6 @@
                 <td class="name">
                   <input type="text" id="name-field" placeholder="Name" />
                 </td>
-                <td class="tag">
-                  <input type="text" id="tag-field" placeholder="Tag (optional)" />
-                </td>
                 <td class="add" colspan="2">
                   <button title="Create new mapping" class="add-btn" id="add-btn">💾</button>
                   <button title="Modify mapping" class="update-btn" id="update-btn">💾</button>
@@ -69,7 +65,7 @@
                 <td class="foot">
                   <button title="Download mappings as a JSON file" class="export-btn" id="export-btn">📤 Export</button>
                 </td>
-                <td class="foot" colspan="2">
+                <td class="foot">
                   <button title="Write mappings to Malcolm's net-map.json" class="save-btn" id="save-btn">💾 Save Mappings</button>
                   <input type="hidden" value=0 id="save-state"/>
                 </td>
@@ -89,8 +85,8 @@
 
     // define value names and template for new list items
     var options = {
-      valueNames: [ 'id', 'type', 'address', 'name', 'tag' ],
-      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="tag"></td><td class="update"><button title="Modify this mapping" class="edit-item-btn">📝</button></td><td class="remove"><button title="Remove this entry" class="remove-item-btn">🚫</button></td></tr>'
+      valueNames: [ 'id', 'type', 'address', 'name' ],
+      item: '<tr><td class="id" style="display:none;"><td class="type"></td></td><td class="address"></td><td class="name"></td><td class="update"><button title="Modify this mapping" class="edit-item-btn">📝</button></td><td class="remove"><button title="Remove this entry" class="remove-item-btn">🚫</button></td></tr>'
     };
 
     // initialize list and other elements
@@ -100,7 +96,6 @@
         typeField = $('#type-field'),
         addressField = $('#address-field'),
         nameField = $('#name-field'),
-        tagField = $('#tag-field'),
         addBtn = $('#add-btn'),
         updateBtn = $('#update-btn').hide(),
         cancelBtn = $('#cancel-btn').hide(),
@@ -135,8 +130,7 @@
       const type = typeField.val();
       const address = addressField.val().trim();
       const name = nameField.val().trim();
-      const tag = tagField.val().trim();
-      if ((file_types_valid.has(type)) &&
+      if ((map_types_valid.has(type)) &&
           (address) && (address.length > 0) &&
           (name) && (name.length > 0)) {
         mappingList.add({
@@ -144,8 +138,7 @@
           id: Math.floor(Math.random()*110000),
           type: type,
           address: address,
-          name: name,
-          tag: tag
+          name: name
         });
         saveState.val(parseInt(saveState.val()) + 1);
         clearFields();
@@ -159,8 +152,7 @@
       const type = typeField.val();
       const address = addressField.val().trim();
       const name = nameField.val().trim();
-      const tag = tagField.val().trim();
-      if ((file_types_valid.has(type)) &&
+      if ((map_types_valid.has(type)) &&
           (address) && (address.length > 0) &&
           (name) && (name.length > 0)) {
         var item = mappingList.get('id', itemId)[0];
@@ -168,8 +160,7 @@
           id: itemId,
           type: type,
           address: addressField.val(),
-          name: nameField.val(),
-          tag: tagField.val()
+          name: nameField.val()
         });
         saveState.val(parseInt(saveState.val()) + 1);
         clearFields();
@@ -316,7 +307,6 @@
         typeField.val(itemValues.type);
         addressField.val(itemValues.address);
         nameField.val(itemValues.name);
-        tagField.val(itemValues.tag);
 
         updateBtn.show();
         cancelBtn.show();
@@ -333,51 +323,28 @@
       typeField.val('host');
       addressField.val('');
       nameField.val('');
-      tagField.val('');
     }
 
-    const file_type_txt_cidr  = 'segment';
-    const file_type_txt_host  = 'host';
-    const file_types_valid    = new Set([file_type_txt_cidr, file_type_txt_host]);
+    const map_type_cidr  = 'segment';
+    const map_type_host  = 'host';
+    const map_types_valid    = new Set([map_type_cidr, map_type_host]);
 
     const file_spec_on_server = 'SERVER';
     const file_spec_in_memory = 'LOCALSTR';
     const file_specs_valid    = new Set([file_spec_on_server, file_spec_in_memory]);
 
 
-    // given the text of a mapping file (eg., net-map.json, cidr-map.txt, host-map.txt)
+    // given the text of a mapping file (eg., net-map.json)
     // populate an array containing the mapping entries from that file
-    function parseMapFileText(fileTxt, mapType=null) {
+    function parseMapFileText(fileTxt) {
       let result;
 
       if (hasJsonStructure(fileTxt)) {
-        // is already JSON text, should be the format we want
+        // is JSON text, should be the format we want
         result = JSON.parse(fileTxt);
 
       } else {
-        // parse the lines from the cidr-map.txt/host-map.txt format
-        result = [];
-        const lines = fileTxt.split(/\r?\n/);
-        for (lineIdx in lines) {
-          let line = lines[lineIdx];
-          if (!line.startsWith("#")) {
-            const vals = line.split("|");
-            const valsLen = vals.length;
-            if ((valsLen >= 2) && (valsLen < 4)) {
-              const name = vals[1].trim();
-              const tag = (valsLen > 2) ? vals[2].trim() : "";
-              const addrs = vals[0].trim().split(",");
-              for (addrIdx in addrs) {
-                result.push({
-                  type: mapType,
-                  address: addrs[addrIdx],
-                  name: name,
-                  tag: tag
-                });
-              }
-            } // line has the right number of delimited fields
-          } // line is not a # comment
-        } // for (lineIdx in lines)
+        result = null;
       } // if/else hasJsonStructure
 
       if (!Array.isArray(result)) {
@@ -389,9 +356,7 @@
 
 
     // given an array of filespecs (eg.,
-    // [{fileType: file_type_txt_cidr, filePath: 'maps/cidr-map.txt'},
-    //  {fileType: file_type_txt_host, filePath: 'maps/host-map.txt'},
-    //  {fileType: null, filePath: 'maps/net-map.json'}]
+    // [{fileType: null, filePath: 'maps/net-map.json'}]
     // read and return an array of the mappings within those files
 
     function loadMapsFromFiles(fileSpecs, cb) {
@@ -400,18 +365,9 @@
 
       if ((fileSpecs.length > 0) && (fileSpecs[0]) && (file_specs_valid.has(fileSpecs[0].fileSrc))) {
 
-        // if this is a delimited file (not JSON) mark the type
-        let mapType = null;
-        if (fileSpecs[0].fileType === file_type_txt_cidr) {
-          mapType = "segment";
-        } else if (fileSpecs[0].fileType === file_type_txt_host) {
-          mapType = "host";
-        }
-        // else the type is per-item in the JSON
-
         if (fileSpecs[0].fileSrc === file_spec_in_memory) {
           // the text of the file is already in memory
-          result = parseMapFileText(fileSpecs[0].filePath, mapType);
+          result = parseMapFileText(fileSpecs[0].filePath);
           return cb(result);
 
         } else {
@@ -422,7 +378,7 @@
           txtFile.onreadystatechange = function() {
             if (txtFile.status === 200) {
               if (txtFile.readyState === 4) {
-                result = parseMapFileText(txtFile.responseText, mapType);
+                result = parseMapFileText(txtFile.responseText);
                 if (fileSpecs.length > 1) {
                   // we have processed this fileSpec, process the next
                   loadMapsFromFiles(fileSpecs.slice(1), function(nextFileResult) {
@@ -462,18 +418,12 @@
     } // loadMapsFromFiles
 
     function populateMapList(fileSpecs, newSaveState=0) {
-      // load old delimited plain text format
-      //   IP or MAC address to host name map:
-      //     address|host name|required tag
-      //   CIDR to network segment format:
-      //     IP(s)|segment name|required tag
-      // and JSON-formatted native format:
+      // load JSON-formatted native format:
       // [
       //   {
       //     "type": "segment",
       //     "address": "172.16.0.0/24",
-      //     "name": "home",
-      //     "tag": ""
+      //     "name": "home"
       //   }, ...
       mappingList.clear();
       loadMapsFromFiles(fileSpecs, function (mapsArray) {
@@ -487,7 +437,7 @@
         // populate the list.js List object
         for (mapKey in mapsHash) {
           let map = mapsHash[mapKey];
-          if ((file_types_valid.has(map.type)) &&
+          if ((map_types_valid.has(map.type)) &&
               (map.address) && (map.address.length > 0) &&
               (map.name) && (map.name.length > 0)) {
             mappingList.add({
@@ -495,8 +445,7 @@
               id: Math.floor(Math.random()*110000),
               type: map.type,
               address: map.address,
-              name: map.name,
-              tag: map.tag ? map.tag : ""
+              name: map.name
             });
           }
         }
@@ -506,14 +455,8 @@
       });
     } // populateMapList
 
-    // initial page load from cidr-map.txt, host-map.txt, and/or net-map.json
-    populateMapList([{fileType: file_type_txt_cidr,
-                      fileSrc: file_spec_on_server,
-                      filePath: 'name-map-ui/maps/cidr-map.txt',},
-                     {fileType: file_type_txt_host,
-                      fileSrc: file_spec_on_server,
-                      filePath: 'name-map-ui/maps/host-map.txt'},
-                     {fileType: null,
+    // initial page load from net-map.json
+    populateMapList([{fileType: null,
                       fileSrc: file_spec_on_server,
                       filePath: 'name-map-ui/maps/net-map.json'}]);
 
