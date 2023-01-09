@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}

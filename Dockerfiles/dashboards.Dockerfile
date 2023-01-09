@@ -1,7 +1,7 @@
 # build ####################################################################
 FROM amazonlinux:2 AS build
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # set up build environment for dashboard plugins built from source
 
@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="2.4.0"
+ARG OPENSEARCH_VERSION="2.4.1"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.4.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.4.1"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -68,7 +68,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:2.4.0
+FROM opensearchproject/opensearch-dashboards:2.4.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

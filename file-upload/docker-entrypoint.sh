@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
 if [[ -z $SITE_NAME || -z $MALCOLM_USERNAME || -z $MALCOLM_PASSWORD ]]

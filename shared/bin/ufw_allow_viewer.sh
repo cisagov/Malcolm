@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # manage a UFW rule for allowing a remote Arkime viewer instance (on the same host
 # to which arkime's capture is forwarding session logs) to connect to and

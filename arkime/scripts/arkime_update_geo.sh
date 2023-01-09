@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 cd "${ARKIME_DIR:-/opt/arkime}"/etc
 

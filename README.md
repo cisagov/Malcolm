@@ -25,7 +25,7 @@ You can help steer Malcolm's development by sharing your ideas and feedback. Ple
 
 ## <a name="Footer"></a>Copyright
 
-Malcolm is Copyright 2022 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
+Malcolm is Copyright 2023 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
 See `License.txt` for the terms of its release.
 

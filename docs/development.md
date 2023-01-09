@@ -40,9 +40,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 and the following files of special note:
 
 * `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
-* `cidr-map.txt` - specify custom IP address to network segment mapping
-* `host-map.txt` - specify custom IP and/or MAC address to host mapping
-* `net-map.json` - an alternative to `cidr-map.txt` and `host-map.txt`, mapping hosts and network segments to their names in a JSON-formatted file
+* `net-map.json` - a JSON-formatted file mapping devices and network segments to their names
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 

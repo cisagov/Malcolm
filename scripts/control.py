@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2022 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
 import errno
@@ -303,6 +303,9 @@ def logs():
       | esindices/list
       | executing\s+attempt_(transition|set_replica_count)\s+for
       | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+      | loaded\s+config\s+'/etc/netbox/config/
+      | "netbox"\s+application\s+started
+      | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
       | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
@@ -528,7 +531,6 @@ def stop(wipe=False):
             BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
             BoundPath("netbox-redis", "/data", True, None, ["."]),
             BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
-            BoundPath("pcap-capture", "/pcap", True, None, None),
             BoundPath("pcap-monitor", "/pcap", True, ["processed", "upload"], None),
             BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
             BoundPath("upload", "/var/www/upload/server/php/chroot/files", True, None, None),
@@ -640,7 +642,7 @@ def start():
         BoundPath("netbox-redis", "/data", False, None, None),
         BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
         BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
-        BoundPath("pcap-capture", "/pcap", False, ["processed", "upload"], None),
+        BoundPath("pcap-monitor", "/pcap", False, ["processed", "upload"], None),
         BoundPath("suricata", "/var/log/suricata", False, ["live"], None),
         BoundPath("upload", "/var/www/upload/server/php/chroot/files", False, None, None),
         BoundPath("zeek", "/zeek/extract_files", False, None, None),
@@ -1173,7 +1175,12 @@ def authSetup(wipe=False):
             eprint("Failed to store email alert sender account variables:\n")
             eprint("\n".join(results))
 
-    if YesOrNo('(Re)generate internal passwords for NetBox', default=True):
+    if YesOrNo(
+        '(Re)generate internal passwords for NetBox',
+        default=not os.path.isfile(
+            os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env')))
+        ),
+    ):
         with pushd(os.path.join(MalcolmPath, os.path.join('netbox', 'env'))):
             netboxPwAlphabet = string.ascii_letters + string.digits + '_'
             netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
@@ -1375,11 +1382,18 @@ def main():
 
         # make sure docker/docker-compose is available
         dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker.exe')) else 'docker'
-        dockerComposeBin = (
-            'docker-compose.exe'
-            if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker-compose.exe'))
-            else 'docker-compose'
-        )
+        if (pyPlatform == PLATFORM_WINDOWS) and Which('docker-compose.exe'):
+            dockerComposeBin = 'docker-compose.exe'
+        elif Which('docker-compose'):
+            dockerComposeBin = 'docker-compose'
+        elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+            dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
+        elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
+            dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
+        elif os.path.isfile('/usr/local/bin/docker-compose'):
+            dockerComposeBin = '/usr/local/bin/docker-compose'
+        else:
+            dockerComposeBin = 'docker-compose'
         err, out = run_process([dockerBin, 'info'], debug=args.debug)
         if err != 0:
             raise Exception(f'{ScriptName} requires docker, please run install.py')

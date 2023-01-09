@@ -91,12 +91,9 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-# docker-compose
-RELEASE_URL="https://api.github.com/repos/docker/compose/releases/latest"
-OUTPUT_FILENAME="/usr/local/bin/docker-compose"
-RELEASE_FILE_REGEX="docker-compose-linux-x86_64$"
-curl -o "$OUTPUT_FILENAME" "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')"
-chmod 755 "$OUTPUT_FILENAME"
+# docker-compose symlink
+dpkg -s docker-compose-plugin && \
+    ln -s -r /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 # croc
 RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
