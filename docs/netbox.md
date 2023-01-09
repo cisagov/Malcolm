@@ -28,6 +28,10 @@ See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135).
 
 See [idaholab/Malcolm#136](https://github.com/idaholab/Malcolm/issues/136).
 
+## <a name="NetBoxUI"></a>NetBox User Interfaces
+
+![The Network Assets dashboard](./images/screenshots/dashboards_network_assets.png)
+
 ## <a name="NetBoxBackup"></a>Backup and Restore
 
 Currently the NetBox database must be backed up and restored manually using `docker-compose`. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
