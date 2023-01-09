@@ -151,7 +151,6 @@ class MalcolmSource extends WISESource {
       "related.oui",
       "related.password",
       "related.role",
-      "related.segment",
       "related.service",
       "related.site",
       "related.user",
