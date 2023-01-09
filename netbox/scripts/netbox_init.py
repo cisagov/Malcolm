@@ -436,14 +436,6 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
 
-    # ###### Library ###############################################################################################
-    try:
-        counter = import_library(nb, args.libraryDir)
-        logging.debug(f"import library results: { counter }")
-
-    except Exception as e:
-        logging.error(f"{type(e).__name__} processing library: {e}")
-
     # ###### Net Map ###############################################################################################
     try:
         # load net-map.json from file
