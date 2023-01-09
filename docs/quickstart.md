@@ -53,26 +53,26 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              23.01.0           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           23.01.0           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       23.01.0           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                23.01.0           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/file-monitor                                     23.01.0           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      23.01.0           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/filebeat-oss                                     23.01.0           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/freq                                             23.01.0           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          23.01.0           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     23.01.0           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      23.01.0           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/netbox                                           23.01.0           xxxxxxxxxxxx   3 days ago   1.01GB
-malcolmnetsec/nginx-proxy                                      23.01.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       23.01.0           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     23.01.0           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     23.01.0           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/postgresql                                       23.01.0           xxxxxxxxxxxx   3 days ago   268MB
-malcolmnetsec/redis                                            23.01.0           xxxxxxxxxxxx   3 days ago   34.2MB
-malcolmnetsec/suricata                                         23.01.0           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             23.01.0           xxxxxxxxxxxx   3 days ago   1GB
+malcolmnetsec/api                                              23.01.1           xxxxxxxxxxxx   3 days ago   158MB
+malcolmnetsec/arkime                                           23.01.1           xxxxxxxxxxxx   3 days ago   816MB
+malcolmnetsec/dashboards                                       23.01.1           xxxxxxxxxxxx   3 days ago   1.02GB
+malcolmnetsec/dashboards-helper                                23.01.1           xxxxxxxxxxxx   3 days ago   184MB
+malcolmnetsec/file-monitor                                     23.01.1           xxxxxxxxxxxx   3 days ago   588MB
+malcolmnetsec/file-upload                                      23.01.1           xxxxxxxxxxxx   3 days ago   259MB
+malcolmnetsec/filebeat-oss                                     23.01.1           xxxxxxxxxxxx   3 days ago   624MB
+malcolmnetsec/freq                                             23.01.1           xxxxxxxxxxxx   3 days ago   132MB
+malcolmnetsec/htadmin                                          23.01.1           xxxxxxxxxxxx   3 days ago   242MB
+malcolmnetsec/logstash-oss                                     23.01.1           xxxxxxxxxxxx   3 days ago   1.35GB
+malcolmnetsec/name-map-ui                                      23.01.1           xxxxxxxxxxxx   3 days ago   143MB
+malcolmnetsec/netbox                                           23.01.1           xxxxxxxxxxxx   3 days ago   1.01GB
+malcolmnetsec/nginx-proxy                                      23.01.1           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/opensearch                                       23.01.1           xxxxxxxxxxxx   3 days ago   1.17GB
+malcolmnetsec/pcap-capture                                     23.01.1           xxxxxxxxxxxx   3 days ago   121MB
+malcolmnetsec/pcap-monitor                                     23.01.1           xxxxxxxxxxxx   3 days ago   213MB
+malcolmnetsec/postgresql                                       23.01.1           xxxxxxxxxxxx   3 days ago   268MB
+malcolmnetsec/redis                                            23.01.1           xxxxxxxxxxxx   3 days ago   34.2MB
+malcolmnetsec/suricata                                         23.01.1           xxxxxxxxxxxx   3 days ago   278MB
+malcolmnetsec/zeek                                             23.01.1           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 ### Import from pre-packaged tarballs
