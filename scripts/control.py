@@ -8,6 +8,7 @@ import errno
 import fileinput
 import getpass
 import glob
+import gzip
 import json
 import os
 import platform
@@ -17,6 +18,7 @@ import shutil
 import stat
 import string
 import sys
+import time
 
 from malcolm_common import *
 from base64 import b64encode
@@ -97,22 +99,16 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     localKeystorePreExists = False
     volumeKeystore = None
     volumeKeystoreDir = None
-    uidGidDict = defaultdict(str)
+    uidGidDict = None
 
     try:
 
+        uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+
         composeFileLines = list()
-        uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-        uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
         with open(args.composeFile, 'r') as f:
             allLines = f.readlines()
             composeFileLines = [x for x in allLines if re.search(fr'-.*?{service}.keystore\s*:.*{service}.keystore', x)]
-            uidGidDict.update(
-                dict(
-                    x.split(':')
-                    for x in [''.join(x.split()) for x in allLines if re.search(fr'^\s*P[UG]ID\s*:\s*\d+\s*$', x)]
-                )
-            )
 
         if (len(composeFileLines) == 1) and (len(composeFileLines[0]) > 0):
             matches = re.search(
@@ -141,6 +137,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 # assemble the service-keystore command
                 dockerCmd = [
                     dockerComposeBin,
+                    '-f',
+                    args.composeFile,
                     'exec',
                     # if using stdin, indicate the container is "interactive", else noop (duplicate --rm)
                     '-T' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
@@ -268,6 +266,99 @@ def status():
         eprint("Failed to display Malcolm status\n")
         eprint("\n".join(out))
         exit(err)
+
+
+###################################################################################################
+def netboxBackup(backupFileName=None):
+    global args
+    global dockerComposeBin
+
+    # docker-compose use local temporary path
+    osEnv = os.environ.copy()
+    osEnv['TMPDIR'] = MalcolmTmpPath
+
+    uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+
+    dockerCmd = [
+        dockerComposeBin,
+        '-f',
+        args.composeFile,
+        'exec',
+        # disable pseudo-TTY allocation
+        '-T',
+        # execute as UID:GID in docker-compose.yml file
+        '-u',
+        f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
+        'netbox-postgres',
+        'pg_dump',
+        '-U',
+        'netbox',
+        '-d',
+        'netbox',
+    ]
+
+    err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdout=True, stderr=False)
+    if (err != 0) or (len(results) == 0):
+        raise Exception(f'Error creating NetBox configuration database backup')
+
+    if (backupFileName is None) or (len(backupFileName) == 0):
+        backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.psql.gz"
+
+    with gzip.GzipFile(backupFileName, "wb") as f:
+        f.write(bytes('\n'.join(results), 'utf-8'))
+
+    return backupFileName
+
+
+###################################################################################################
+def netboxRestore(backupFileName=None):
+    global args
+    global dockerComposeBin
+
+    if backupFileName and os.path.isfile(backupFileName):
+
+        # docker-compose use local temporary path
+        osEnv = os.environ.copy()
+        osEnv['TMPDIR'] = MalcolmTmpPath
+
+        uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+
+        dockerCmdBase = [
+            dockerComposeBin,
+            '-f',
+            args.composeFile,
+            'exec',
+            # disable pseudo-TTY allocation
+            '-T',
+            # execute as UID:GID in docker-compose.yml file
+            '-u',
+            f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
+        ]
+
+        # drop the existing netbox database
+        dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+        if ((err != 0) or (len(results) == 0)) and args.debug:
+            eprint(f'Error dropping NetBox database: {results}')
+
+        # create a new netbox database
+        dockerCmd = dockerCmdBase + ['netbox-postgres', 'createdb', '-U', 'netbox', 'netbox']
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+        if err != 0:
+            raise Exception(f'Error creating new NetBox database')
+
+        # load the backed-up psql dump
+        dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
+        with gzip.open(backupFileName, 'rt') as f:
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
+        if (err != 0) or (len(results) == 0):
+            raise Exception(f'Error loading NetBox database')
+
+        # migrations if needed
+        dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+        if (err != 0) or (len(results) == 0):
+            raise Exception(f'Error performing NetBox migration')
 
 
 ###################################################################################################
@@ -1296,6 +1387,24 @@ def main():
         '-l', '--logs', dest='cmdLogs', type=str2bool, nargs='?', const=True, default=False, help="Tail Malcolm logs"
     )
     parser.add_argument(
+        '--netbox-backup',
+        dest='netboxBackupFile',
+        required=False,
+        metavar='<STR>',
+        type=str,
+        default=None,
+        help='Filename to which to back up NetBox configuration database',
+    )
+    parser.add_argument(
+        '--netbox-restore',
+        dest='netboxRestoreFile',
+        required=False,
+        metavar='<STR>',
+        type=str,
+        default=None,
+        help='Filename from which to restore NetBox configuration database',
+    )
+    parser.add_argument(
         '--start', dest='cmdStart', type=str2bool, nargs='?', const=True, default=False, help="Start Malcolm"
     )
     parser.add_argument(
@@ -1424,6 +1533,12 @@ def main():
                 args.cmdWipe = True
             elif ScriptName.startswith("auth"):
                 args.cmdAuthSetup = True
+            elif ScriptName == "netbox-backup":
+                args.netboxBackupFile = ""
+            elif ScriptName == "netbox-restore" and (
+                (not args.netboxRestoreFile) or (not os.path.isfile(args.netboxRestoreFile))
+            ):
+                raise Exception(f'NetBox configuration database file must be specified with --netbox-restore')
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:
@@ -1444,6 +1559,14 @@ def main():
         # display Malcolm status
         if args.cmdStatus:
             status()
+
+        # backup NetBox files
+        if args.netboxBackupFile is not None:
+            print(f"NetBox configuration database saved to {netboxBackup(args.netboxBackupFile)}")
+
+        # restore NetBox files
+        if args.netboxRestoreFile is not None:
+            netboxRestore(args.netboxRestoreFile)
 
 
 if __name__ == '__main__':

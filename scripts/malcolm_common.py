@@ -187,6 +187,26 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
     return localPath
 
 
+##################################################################################################
+def GetUidGidFromComposeFile(composeFile):
+    uidGidDict = defaultdict(str)
+    pyPlatform = platform.system()
+    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    if os.path.isfile(composeFile):
+        with open(composeFile, 'r') as f:
+            composeFileLines = f.readlines()
+            uidGidDict.update(
+                dict(
+                    x.split(':')
+                    for x in [
+                        ''.join(x.split()) for x in composeFileLines if re.search(fr'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
+                    ]
+                )
+            )
+    return uidGidDict
+
+
 ###################################################################################################
 def same_file_or_dir(path1, path2):
     try:

@@ -34,22 +34,18 @@ See [idaholab/Malcolm#136](https://github.com/idaholab/Malcolm/issues/136).
 
 ## <a name="NetBoxBackup"></a>Backup and Restore
 
-Currently the NetBox database must be backed up and restored manually using `docker-compose`. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
+The NetBox database may be backed up and restored using `./scripts/netbox-backup` and `./scripts/netbox-restore`, respectively. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
 
 ```
-$ docker-compose exec -u $(id -u) netbox-postgres pg_dump -U netbox -d netbox | gzip > netbox_$(date +%Y-%m-%d).psql.gz
+$ ./scripts/netbox-backup
+NetBox configuration database saved to malcolm_netbox_backup_20230110-125620.psql.gz
 ```
 
-To clear the existing NetBox database and restore a previous backup, run the following commands (substituting the filename of the `netbox_….psql.gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
+To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….psql.gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
 
 ```
-$ docker-compose exec -u $(id -u) netbox-postgres dropdb -U netbox netbox --force
+./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.psql.gz
 
-$ docker-compose exec -u $(id -u) netbox-postgres createdb -U netbox netbox
-
-$ gunzip < netbox_$(date +%Y-%m-%d).psql.gz | docker-compose exec -u $(id -u) -T netbox-postgres psql -U netbox
-
-$ docker-compose exec -u $(id -u) netbox /opt/netbox/netbox/manage.py migrate
 ```
 
 Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.
