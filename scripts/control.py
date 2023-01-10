@@ -18,6 +18,7 @@ import shutil
 import stat
 import string
 import sys
+import tarfile
 import time
 
 from malcolm_common import *
@@ -307,7 +308,12 @@ def netboxBackup(backupFileName=None):
     with gzip.GzipFile(backupFileName, "wb") as f:
         f.write(bytes('\n'.join(results), 'utf-8'))
 
-    return backupFileName
+    backupFileParts = os.path.splitext(backupFileName)
+    backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
+    with tarfile.open(backupMediaFileName, 'w:gz') as t:
+        t.add(os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media'), arcname='.')
+
+    return backupFileName, backupMediaFileName
 
 
 ###################################################################################################
@@ -359,6 +365,15 @@ def netboxRestore(backupFileName=None):
         err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
         if (err != 0) or (len(results) == 0):
             raise Exception(f'Error performing NetBox migration')
+
+        # restore media directory
+        backupFileParts = os.path.splitext(backupFileName)
+        backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
+        mediaPath = os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media')
+        if os.path.isfile(backupMediaFileName) and os.path.isdir(mediaPath):
+            RemoveEmptyFolders(mediaPath, removeRoot=False)
+            with tarfile.open(backupMediaFileName) as t:
+                t.extractall(mediaPath)
 
 
 ###################################################################################################
