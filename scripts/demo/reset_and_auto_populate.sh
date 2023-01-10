@@ -274,12 +274,13 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   if [[ -n "$NETBOX_BACKUP_FILE" ]] && [[ -f "$NETBOX_BACKUP_FILE" ]]; then
     # restore the netbox backup
     [[ -n $VERBOSE_FLAG ]] && echo "Restoring NetBox database backup" >&2
-    pgrep -f netbox_init | xargs -r kill
+    set +e
     docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) netbox-postgres dropdb -U netbox netbox --force
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) netbox-postgres createdb -U netbox netbox
     gunzip < "$NETBOX_BACKUP_FILE" | docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T netbox-postgres psql -U netbox
     docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) netbox /opt/netbox/netbox/manage.py migrate
+    set -e
   fi
 
   if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) || (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )); then
