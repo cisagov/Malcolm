@@ -34,7 +34,7 @@ Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch databa
 
 To temporarily set the Malcolm user interaces into a read-only configuration, run the following commands from the Malcolm installation directory.
 
-First, to configure [Nginx] to disable access to the upload and other interfaces for changing Malcolm settings, and to deny HTTP methods other than `GET` and `POST`:
+First, to configure [Nginx](https://nginx.org/) to disable access to the upload and other interfaces for changing Malcolm settings, and to deny HTTP methods other than `GET` and `POST`:
 
 ```
 docker-compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
