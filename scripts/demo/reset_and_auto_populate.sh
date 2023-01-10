@@ -86,7 +86,7 @@ PCAP_RELATIVE_ADJUST="false"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
 PCAP_PROCESS_IDLE_MAX_SECONDS=3600
-while getopts 'vwronlm:x:s:d:' OPTION; do
+while getopts 'vwronlb:m:x:s:d:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
