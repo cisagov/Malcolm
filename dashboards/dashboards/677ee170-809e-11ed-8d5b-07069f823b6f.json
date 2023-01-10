@@ -508,7 +508,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR event.dataset:(conn OR notice OR weird OR signatures OR known*)) AND ((network.direction:(internal OR inbound) AND (destination.ip:*) AND (NOT destination.device.id:*)) OR (network.direction:(internal OR outbound) AND (source.ip:*) AND (NOT source.device.id:*)))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR event.dataset:(conn OR notice OR weird OR signatures OR known*)) AND ((network.direction:(internal OR inbound) AND (destination.ip:*) AND (NOT destination.device.id:*)) OR (network.direction:(internal OR outbound) AND (source.ip:*) AND (NOT source.device.id:*)))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -540,7 +540,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR event.dataset:(conn OR notice OR weird OR signatures OR known*)) AND (network.direction:(internal OR inbound OR outbound))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR event.dataset:(conn OR notice OR weird OR signatures OR known*)) AND (network.direction:(internal OR inbound OR outbound))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
