@@ -303,7 +303,7 @@ def netboxBackup(backupFileName=None):
         raise Exception(f'Error creating NetBox configuration database backup')
 
     if (backupFileName is None) or (len(backupFileName) == 0):
-        backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.psql.gz"
+        backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.gz"
 
     with gzip.GzipFile(backupFileName, "wb") as f:
         f.write(bytes('\n'.join(results), 'utf-8'))

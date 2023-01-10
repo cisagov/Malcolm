@@ -38,13 +38,13 @@ The NetBox database may be backed up and restored using `./scripts/netbox-backup
 
 ```
 $ ./scripts/netbox-backup
-NetBox configuration database saved to ('malcolm_netbox_backup_20230110-133855.psql.gz', 'malcolm_netbox_backup_20230110-133855.psql.media.tar.gz')
+NetBox configuration database saved to ('malcolm_netbox_backup_20230110-133855.gz', 'malcolm_netbox_backup_20230110-133855.media.tar.gz')
 ```
 
-To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….psql.gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
+To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
 
 ```
-./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.psql.gz
+./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.gz
 
 ```
 
