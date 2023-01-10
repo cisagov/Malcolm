@@ -1392,6 +1392,8 @@ def main():
             dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
         elif os.path.isfile('/usr/local/bin/docker-compose'):
             dockerComposeBin = '/usr/local/bin/docker-compose'
+        elif os.path.isfile('/usr/bin/docker-compose'):
+            dockerComposeBin = '/usr/bin/docker-compose'
         else:
             dockerComposeBin = 'docker-compose'
         err, out = run_process([dockerBin, 'info'], debug=args.debug)
