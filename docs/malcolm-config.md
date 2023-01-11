@@ -17,6 +17,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](upload.md#Tagging) (default `true`)
 * `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external [Beats](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html)-based forwarders from which it will accept logs (default `true`)
 * `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](severity.md#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
+* `DASHBOARDS_DARKMODE` – if set to `true`, [OpenSearch Dashboards](dashboards.md#DashboardsVisualizations) will be set to dark mode upon initialization (default `true`)
 * `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
 * `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
 * `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)

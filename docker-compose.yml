@@ -210,6 +210,8 @@ x-suricata-variables: &suricata-variables
   #   required `SURICATA_` prefixing each)
 
 x-dashboards-helper-variables: &dashboards-helper-variables
+  # Whether or not to set OpenSearch Dashboards to dark mode
+  DASHBOARDS_DARKMODE : 'true'
   # The maximum cumulative size of OpenSearch indices containing network traffic metadata
   #   (arkime_sessions3-*) before which the oldest indices will be deleted ('' to disable
   #   storage-based index pruning).

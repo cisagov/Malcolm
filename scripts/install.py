@@ -849,6 +849,8 @@ class Installer(object):
                 'Disable capture interface hardware offloading and adjust ring buffer sizes?', default=False
             )
 
+        dashboardsDarkMode = InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=True)
+
         # modify specified values in-place in docker-compose files
         for composeFile in composeFiles:
             # save off owner of original files
@@ -1115,6 +1117,14 @@ class Installer(object):
                         elif 'pipeline.workers' in line:
                             # logstash pipeline workers
                             line = re.sub(r'(pipeline\.workers\s*:\s*)(\S+)', fr"\g<1>{lsWorkers}", line)
+
+                        elif 'DASHBOARDS_DARKMODE' in line:
+                            # turn on dark mode, or not
+                            line = re.sub(
+                                r'(DASHBOARDS_DARKMODE\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(dashboardsDarkMode)}",
+                                line,
+                            )
 
                         elif 'FREQ_LOOKUP' in line:
                             # freq.py string randomness calculations

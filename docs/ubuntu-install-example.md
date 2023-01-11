@@ -204,6 +204,8 @@ Capture filter (tcpdump-like filter expression; leave blank to capture all traff
 
 Disable capture interface hardware offloading and adjust ring buffer sizes? (y/N): n
 
+Enable dark mode for OpenSearch Dashboards? (n/Y): y
+
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
 ```
