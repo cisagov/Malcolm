@@ -1,8 +1,8 @@
 diff --git a/viewer/vueapp/src/components/spiview/Spiview.vue b/viewer/vueapp/src/components/spiview/Spiview.vue
-index 76dd613b..b8117034 100644
+index c178fe13..0f99b8b7 100644
 --- a/viewer/vueapp/src/components/spiview/Spiview.vue
 +++ b/viewer/vueapp/src/components/spiview/Spiview.vue
-@@ -960,6 +960,8 @@ export default {
+@@ -953,6 +953,8 @@ export default {
  
        // sorted list of categories for the view
        this.categoryList = Object.keys(this.categoryObjects).sort();
