@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-18T20:13:25.314Z",
-      "version": "WzkzNCwxXQ==",
+      "updated_at": "2023-01-18T20:30:24.557Z",
+      "version": "Wzk0MSwxXQ==",
       "attributes": {
         "title": "Zeek Known Summary",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":32,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":8,\"h\":9,\"i\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\"},\"panelIndex\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":16,\"y\":0,\"w\":32,\"h\":9,\"i\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\"},\"panelIndex\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_2\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":8,\"y\":9,\"w\":16,\"h\":23,\"i\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\"},\"panelIndex\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":24,\"y\":9,\"w\":24,\"h\":23,\"i\":\"31b95677-e589-42d4-b946-d08cc170ceca\"},\"panelIndex\":\"31b95677-e589-42d4-b946-d08cc170ceca\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":32,\"w\":24,\"h\":18,\"i\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\"},\"panelIndex\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":24,\"y\":32,\"w\":24,\"h\":18,\"i\":\"33f27d2e-207b-447c-a925-a64ae65357b5\"},\"panelIndex\":\"33f27d2e-207b-447c-a925-a64ae65357b5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":50,\"w\":48,\"h\":29,\"i\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\"},\"panelIndex\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":79,\"w\":48,\"h\":29,\"i\":\"9d58f954-a73a-46c7-8459-120e883d3a42\"},\"panelIndex\":\"9d58f954-a73a-46c7-8459-120e883d3a42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":108,\"w\":48,\"h\":25,\"i\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\"},\"panelIndex\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"}]",
+        "panelsJSON": "[{\"version\":\"2.4.1\",\"gridData\":{\"h\":32,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":9,\"i\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":9,\"i\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_2\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":23,\"i\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\",\"w\":14,\"x\":8,\"y\":9},\"panelIndex\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":23,\"i\":\"31b95677-e589-42d4-b946-d08cc170ceca\",\"w\":17,\"x\":22,\"y\":9},\"panelIndex\":\"31b95677-e589-42d4-b946-d08cc170ceca\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}},\"table\":null},\"panelRefName\":\"panel_4\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":23,\"i\":\"8357f56b-2e40-4f37-9b24-631abfda213e\",\"w\":9,\"x\":39,\"y\":9},\"panelIndex\":\"8357f56b-2e40-4f37-9b24-631abfda213e\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":null}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":18,\"i\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\",\"w\":24,\"x\":0,\"y\":32},\"panelIndex\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":18,\"i\":\"33f27d2e-207b-447c-a925-a64ae65357b5\",\"w\":24,\"x\":24,\"y\":32},\"panelIndex\":\"33f27d2e-207b-447c-a925-a64ae65357b5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":29,\"i\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\",\"w\":48,\"x\":0,\"y\":50},\"panelIndex\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":29,\"i\":\"9d58f954-a73a-46c7-8459-120e883d3a42\",\"w\":48,\"x\":0,\"y\":79},\"panelIndex\":\"9d58f954-a73a-46c7-8459-120e883d3a42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.4.1\",\"gridData\":{\"h\":25,\"i\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\",\"w\":48,\"x\":0,\"y\":108},\"panelIndex\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -50,25 +50,30 @@
         {
           "name": "panel_5",
           "type": "visualization",
-          "id": "14498210-976b-11ed-9269-5fb94c2c7d47"
+          "id": "8eeba230-976d-11ed-9269-5fb94c2c7d47"
         },
         {
           "name": "panel_6",
           "type": "visualization",
-          "id": "00e456e0-976c-11ed-9269-5fb94c2c7d47"
+          "id": "14498210-976b-11ed-9269-5fb94c2c7d47"
         },
         {
           "name": "panel_7",
-          "type": "search",
-          "id": "23f44e10-974e-11ed-bb6b-3fb06c879b11"
+          "type": "visualization",
+          "id": "00e456e0-976c-11ed-9269-5fb94c2c7d47"
         },
         {
           "name": "panel_8",
           "type": "search",
-          "id": "1cde3330-9752-11ed-bc48-97d8989caacc"
+          "id": "23f44e10-974e-11ed-bb6b-3fb06c879b11"
         },
         {
           "name": "panel_9",
+          "type": "search",
+          "id": "1cde3330-9752-11ed-bc48-97d8989caacc"
+        },
+        {
+          "name": "panel_10",
           "type": "search",
           "id": "8cfd2630-974d-11ed-bb6b-3fb06c879b11"
         }
@@ -166,11 +171,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-18T20:12:56.466Z",
-      "version": "WzkzMywxXQ==",
+      "updated_at": "2023-01-18T20:27:15.821Z",
+      "version": "WzkzNiwxXQ==",
       "attributes": {
         "title": "Observed Device Types",
-        "visState": "{\"title\":\"Observed Device Types\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"known_* Log Count\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.manufacturer\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Manufacturer\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.device_type\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Device Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "visState": "{\"title\":\"Observed Device Types\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.manufacturer\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Manufacturer\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.device_type\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Device Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}}}}",
         "description": "",
         "version": 1,
@@ -196,11 +201,11 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-18T20:12:34.947Z",
-      "version": "WzkzMiwxXQ==",
+      "updated_at": "2023-01-18T20:27:38.369Z",
+      "version": "WzkzNywxXQ==",
       "attributes": {
         "title": "Observed Devices",
-        "visState": "{\"title\":\"Observed Devices\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"known_* Log Count\"},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.site\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Site\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Network Segment\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.device_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Device\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "visState": "{\"title\":\"Observed Devices\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"\"},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.site\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Site\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Network Segment\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.device_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Device\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
@@ -214,6 +219,36 @@
           "name": "search_0",
           "type": "search",
           "id": "eecf7840-9752-11ed-bc48-97d8989caacc"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "8eeba230-976d-11ed-9269-5fb94c2c7d47",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-01-18T20:29:12.360Z",
+      "version": "WzkzOSwxXQ==",
+      "attributes": {
+        "title": "Uninventoried Observed Hosts",
+        "visState": "{\"title\":\"Uninventoried Observed Hosts\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":null}}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:known_hosts AND network.direction:(internal OR outbound) AND (NOT source.device.id:*) AND (NOT (network.type:ipv4 AND source.ip:(\\\"100.64.0.0/10\\\",\\\"127.0.0.0/8\\\",\\\"192.0.0.0/24\\\",\\\"192.0.2.0/24\\\",\\\"192.88.99.0/24\\\",\\\"198.18.0.0/15\\\",\\\"198.51.100.0/24\\\",\\\"203.0.113.0/24\\\",\\\"224.0.0.0/4\\\",\\\"240.0.0.0/4\\\"))) AND (NOT (network.type:ipv6 AND source.ip:(\\\"::1/128\\\",\\\"fe80::/10\\\",\\\"ff00::/8\\\")))\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "8cfd2630-974d-11ed-bb6b-3fb06c879b11"
         }
       ],
       "migrationVersion": {
