@@ -72,6 +72,7 @@
         "related.mac": { "type": "keyword" },
         "related.oui": { "type": "keyword" },
         "related.password": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
+        "related.device_name": { "type": "keyword" },
         "related.device_type": { "type": "keyword" },
         "related.manufacturer": { "type": "keyword" },
         "related.role": { "type": "keyword" },
