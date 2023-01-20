@@ -201,7 +201,7 @@
       ]
     },
     {
-      "name": "SMTPS",
+      "name": "SMTP SSL/TLS",
       "description": "",
       "protocols": [
         "tcp"
@@ -268,7 +268,7 @@
       ]
     },
     {
-      "name": "LDAPS",
+      "name": "LDAP SSL/TLS",
       "description": "",
       "protocols": [
         "tcp",
@@ -300,7 +300,7 @@
       ]
     },
     {
-      "name": "FTPS",
+      "name": "FTP SSL/TLS",
       "description": "",
       "protocols": [
         "tcp"
@@ -311,7 +311,7 @@
       ]
     },
     {
-      "name": "TelnetS",
+      "name": "Telnet SSL/TLS",
       "description": "",
       "protocols": [
         "tcp"
@@ -321,7 +321,7 @@
       ]
     },
     {
-      "name": "IMAPS",
+      "name": "IMAP SSL/TLS",
       "description": "",
       "protocols": [
         "tcp"
@@ -331,7 +331,7 @@
       ]
     },
     {
-      "name": "POP3S",
+      "name": "POP3 SSL/TLS",
       "description": "",
       "protocols": [
         "tcp"
