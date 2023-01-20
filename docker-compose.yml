@@ -964,6 +964,7 @@ services:
       - ./netbox/config/scripts:/etc/netbox/scripts:ro
       - ./netbox/media:/opt/netbox/netbox/media:rw
       - ./net-map.json:/usr/local/share/net-map.json:ro
+      - ./netbox/service-template-defaults.json:/etc/service-template-defaults.json:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/" ]
       interval: 60s
