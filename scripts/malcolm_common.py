@@ -200,7 +200,7 @@ def GetUidGidFromComposeFile(composeFile):
                 dict(
                     x.split(':')
                     for x in [
-                        ''.join(x.split()) for x in composeFileLines if re.search(fr'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
+                        ''.join(x.split()) for x in composeFileLines if re.search(r'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
                     ]
                 )
             )

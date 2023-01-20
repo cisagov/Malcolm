@@ -76,6 +76,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
+COPY --chmod=644 netbox/service-template-defaults.json /etc/service-template-defaults.json
 COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 EXPOSE 9001

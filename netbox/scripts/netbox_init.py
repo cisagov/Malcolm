@@ -5,6 +5,7 @@
 
 import argparse
 import ipaddress
+import itertools
 import json
 import logging
 import os
@@ -160,6 +161,14 @@ def main():
         default=None,
         required=False,
         help="Filename of JSON file containing network subnet/host name mapping",
+    )
+    parser.add_argument(
+        '--service-template',
+        dest='serviceTemplateFileName',
+        type=str,
+        default=None,
+        required=False,
+        help="Filename of JSON file containing default service template definitions",
     )
     parser.add_argument(
         '--default-group',
@@ -435,6 +444,47 @@ def main():
         logging.debug(f"sites (after): { {k:v.id for k, v in sites.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
+
+    # ###### Net Map ###############################################################################################
+    try:
+        # load service-template-defaults.json from file
+        serviceTemplatesJson = None
+        if args.serviceTemplateFileName is not None and os.path.isfile(args.serviceTemplateFileName):
+            with open(args.serviceTemplateFileName) as f:
+                serviceTemplatesJson = json.load(f)
+        if serviceTemplatesJson is not None and "service-templates" in serviceTemplatesJson:
+            for srv in serviceTemplatesJson["service-templates"]:
+                if (
+                    ("name" in srv)
+                    and (srv["name"])
+                    and ("protocols" in srv)
+                    and (len(srv["protocols"]) > 0)
+                    and ("ports" in srv)
+                    and (len(srv["ports"]) > 0)
+                ):
+                    for prot in srv["protocols"]:
+                        srvName = f"{srv['name']} ({prot.upper()})" if (len(srv["protocols"]) > 1) else srv["name"]
+                        portInts = [p for p in srv["ports"] if isinstance(p, int)]
+                        for portRange in [
+                            r.split('-') for r in srv["ports"] if isinstance(r, str) and re.match(r'^\d+-\d+$', r)
+                        ]:
+                            portInts = portInts + list(range(int(portRange[0]), int(portRange[1]) + 1))
+                        srvTempl = {
+                            "name": srvName,
+                            "protocol": prot.lower(),
+                            "ports": list(set(portInts)),
+                        }
+                        if ("description" in srv) and srv["description"]:
+                            srvTempl["description"] = srv["description"]
+                        try:
+                            srvTemplCreated = nb.ipam.service_templates.create(
+                                srvTempl,
+                            )
+                        except pynetbox.RequestError as nbe:
+                            logging.warning(f"{type(nbe).__name__} processing service template \"{srvName}\": {nbe}")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing service templates JSON \"{args.serviceTemplateFileName}\": {e}")
 
     # ###### Net Map ###############################################################################################
     try:

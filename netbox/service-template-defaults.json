@@ -1,148 +1,67 @@
 {
   "service-templates": [
     {
-      "name": "HTTP",
+      "name": "FTP",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
-        80,
-        8000,
-        8080
-      ]
-    },
-    {
-      "name": "HTTPS",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        443,
-        8443
+      "ports": [
+        20,
+        21
       ]
     },
     {
       "name": "SSH",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
+      "ports": [
         22
       ]
     },
     {
       "name": "Telnet",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
+      "ports": [
         23
       ]
     },
     {
-      "name": "MSSQL",
+      "name": "SMTP",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
-        1433,
-        1434,
-        5022
-      ]
-    },
-    {
-      "name": "MySQL",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        3306
-      ]
-    },
-    {
-      "name": "PostgreSQL",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        5432
-      ]
-    },
-    {
-      "name": "TelnetS",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        992
-      ]
-    },
-    {
-      "name": "NTP",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        123
-      ]
-    },
-    {
-      "name": "rsync",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        873
+      "ports": [
+        25,
+        2525
       ]
     },
     {
       "name": "DNS",
+      "description": "",
       "protocols": [
         "tcp",
         "udp"
       ],
-      "port": [
+      "ports": [
         53,
         853,
         5353
       ]
     },
     {
-      "name": "IPSec",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        500,
-        4500
-      ]
-    },
-    {
-      "name": "OpenVPN",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        1194
-      ]
-    },
-    {
-      "name": "WireGuard",
-      "protocols": [
-        "udp"
-      ],
-      "port": [
-        51820
-      ]
-    },
-    {
       "name": "DHCP",
+      "description": "",
       "protocols": [
         "udp"
       ],
-      "port": [
+      "ports": [
         67,
         68,
         546,
@@ -150,265 +69,64 @@
       ]
     },
     {
-      "name": "FTP",
+      "name": "HTTP",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
-        20,
-        21
-      ]
-    },
-    {
-      "name": "FTPS",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        989,
-        990
-      ]
-    },
-    {
-      "name": "SFTP",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        115
-      ]
-    },
-    {
-      "name": "IMAP",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        143
-      ]
-    },
-    {
-      "name": "Git",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        9418
-      ]
-    },
-    {
-      "name": "IMAPS",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        993
-      ]
-    },
-    {
-      "name": "POP3",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        110
-      ]
-    },
-    {
-      "name": "POP3S",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        995
-      ]
-    },
-    {
-      "name": "SMTP",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        25,
-        2525
-      ]
-    },
-    {
-      "name": "SMTPS",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        465,
-        587
-      ]
-    },
-    {
-      "name": "SNMP",
-      "protocols": [
-        "udp"
-      ],
-      "port": [
-        161,
-        162
-      ]
-    },
-    {
-      "name": "RDP",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        3389
-      ]
-    },
-    {
-      "name": "Tabular Data Stream",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        1443
-      ]
-    },
-    {
-      "name": "Syslog",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        514,
-        601
-      ]
-    },
-    {
-      "name": "Modbus",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        502
-      ]
-    },
-    {
-      "name": "Modbus/TCP",
-      "protocols": [
-        "tcp"
-      ],
-      "port": [
-        802
-      ]
-    },
-    {
-      "name": "LLMNR",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        5355
-      ]
-    },
-    {
-      "name": "CIP and EtherNet/IP",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        2222,
-        44818
-      ]
-    },
-    {
-      "name": "BACnet",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        47808
-      ]
-    },
-    {
-      "name": "LDAP",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        389,
-        3268
-      ]
-    },
-    {
-      "name": "LDAPS",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        636,
-        3269
-      ]
-    },
-    {
-      "name": "BACnet",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        47808
+      "ports": [
+        80,
+        8000,
+        8080
       ]
     },
     {
       "name": "COTP and S7comm",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
+      "ports": [
         102
       ]
     },
     {
-      "name": "IPP and CUPS",
-      "protocols": [
-        "tcp",
-        "udp"
-      ],
-      "port": [
-        631
-      ]
-    },
-    {
-      "name": "LPD",
+      "name": "POP3",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
-        515
+      "ports": [
+        110
       ]
     },
     {
-      "name": "VNC",
+      "name": "SFTP",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
-        5800,
-        "5900-5910",
-        6000
+      "ports": [
+        115
+      ]
+    },
+    {
+      "name": "NTP",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        123
       ]
     },
     {
       "name": "Microsoft-DS (UDP)",
+      "description": "",
       "protocols": [
         "udp"
       ],
-      "port": [
+      "ports": [
         135,
         137,
         138,
@@ -417,10 +135,11 @@
     },
     {
       "name": "Microsoft-DS (TCP)",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
+      "ports": [
         135,
         139,
         445
@@ -428,21 +147,336 @@
     },
     {
       "name": "NetBIOS",
+      "description": "",
       "protocols": [
         "tcp",
         "udp"
       ],
-      "port": [
+      "ports": [
         "137-139"
       ]
     },
     {
-      "name": "AppSocket and JetDirect",
+      "name": "IMAP",
+      "description": "",
       "protocols": [
         "tcp"
       ],
-      "port": [
+      "ports": [
+        143
+      ]
+    },
+    {
+      "name": "SNMP",
+      "description": "",
+      "protocols": [
+        "udp"
+      ],
+      "ports": [
+        161,
+        162
+      ]
+    },
+    {
+      "name": "LDAP",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        389,
+        3268
+      ]
+    },
+    {
+      "name": "HTTPS",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        443,
+        8443
+      ]
+    },
+    {
+      "name": "SMTPS",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        465,
+        587
+      ]
+    },
+    {
+      "name": "IPSec",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        500,
+        4500
+      ]
+    },
+    {
+      "name": "Modbus",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        502
+      ]
+    },
+    {
+      "name": "Syslog",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        514,
+        601
+      ]
+    },
+    {
+      "name": "LPD",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        515
+      ]
+    },
+    {
+      "name": "IPP and CUPS",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        631
+      ]
+    },
+    {
+      "name": "LDAPS",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        636,
+        3269
+      ]
+    },
+    {
+      "name": "Modbus/TCP",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        802
+      ]
+    },
+    {
+      "name": "rsync",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        873
+      ]
+    },
+    {
+      "name": "FTPS",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        989,
+        990
+      ]
+    },
+    {
+      "name": "TelnetS",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        992
+      ]
+    },
+    {
+      "name": "IMAPS",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        993
+      ]
+    },
+    {
+      "name": "POP3S",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        995
+      ]
+    },
+    {
+      "name": "OpenVPN",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        1194
+      ]
+    },
+    {
+      "name": "MSSQL",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        1433,
+        1434,
+        5022
+      ]
+    },
+    {
+      "name": "Tabular Data Stream",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        1443
+      ]
+    },
+    {
+      "name": "CIP and EtherNet/IP",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        2222,
+        44818
+      ]
+    },
+    {
+      "name": "MySQL",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        3306
+      ]
+    },
+    {
+      "name": "RDP",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        3389
+      ]
+    },
+    {
+      "name": "LLMNR",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        5355
+      ]
+    },
+    {
+      "name": "PostgreSQL",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        5432
+      ]
+    },
+    {
+      "name": "VNC",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        5800,
+        "5900-5910",
+        6000
+      ]
+    },
+    {
+      "name": "AppSocket and JetDirect",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
         "9100-9102"
+      ]
+    },
+    {
+      "name": "Git",
+      "description": "",
+      "protocols": [
+        "tcp"
+      ],
+      "ports": [
+        9418
+      ]
+    },
+    {
+      "name": "BACnet",
+      "description": "",
+      "protocols": [
+        "tcp",
+        "udp"
+      ],
+      "ports": [
+        47808
+      ]
+    },
+    {
+      "name": "WireGuard",
+      "description": "",
+      "protocols": [
+        "udp"
+      ],
+      "ports": [
+        51820
       ]
     }
   ]
