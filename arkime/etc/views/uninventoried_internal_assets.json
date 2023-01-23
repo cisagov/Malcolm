@@ -1,0 +1,6 @@
+{
+  "name": "Uninventoried Internal Assets",
+  "expression": "(event.provider != arkime) && ((event.provider != zeek) || ((event.dataset == [conn, notice, weird, signatures, software]) || (event.dataset == \"known*\"))) && (((network.direction == [internal, inbound]) && (destination.ip == EXISTS!) && (destination.device.id != EXISTS!)) || ((network.direction == [internal, outbound]) && (source.ip == EXISTS!) && (source.device.id != EXISTS!)))",
+  "roles": ["arkimeUser"],
+  "users" : [ ]
+}
