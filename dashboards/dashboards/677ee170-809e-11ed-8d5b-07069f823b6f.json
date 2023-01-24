@@ -589,7 +589,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR (event.dataset:(conn OR notice OR weird OR signatures OR software OR known*))) AND ((network.direction:(internal OR inbound)) AND (destination.ip:*) AND (destination.port:*) AND (NOT destination.device.service:*))\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR (event.dataset:(conn OR notice OR weird OR signatures OR software OR known*))) AND ((network.direction:(internal OR inbound)) AND (destination.ip:*) AND (destination.port:*) AND (NOT destination.device.service:*))\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
