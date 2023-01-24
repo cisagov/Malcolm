@@ -20,6 +20,7 @@ import logging
 import os
 import sys
 import zeekscript
+import operator
 from slugify import slugify
 
 ###################################################################################################
@@ -97,6 +98,43 @@ def main():
         required=False,
         help=".zeek script(s) to parse",
     )
+    parser.add_argument(
+        '-t',
+        '--tags',
+        dest='tags',
+        nargs='*',
+        type=str,
+        default=[],
+        required=False,
+        help="Tags to add to parsed events",
+    )
+    parser.add_argument(
+        '-p',
+        '--proto',
+        dest='protocol',
+        type=str,
+        default="",
+        required=False,
+        help="Value for proto field to add to parsed events (e.g., tcp)",
+    )
+    parser.add_argument(
+        '-s',
+        '--service',
+        dest='service',
+        type=str,
+        default="",
+        required=False,
+        help="Value for service field to add to parsed events (e.g., http)",
+    )
+    parser.add_argument(
+        '-u',
+        '--url',
+        dest='url',
+        type=str,
+        default="",
+        required=False,
+        help="Value for reference URL for the filter's comments",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -119,7 +157,7 @@ def main():
     records = []
 
     # parse each .zeek script
-    for val in args.input if args.input else ():
+    for val in sorted(args.input) if args.input else ():
         logging.info(val)
         contents = None
         with open(val, 'rb') as f:
@@ -214,6 +252,8 @@ def main():
         else:
             logging.error(f'Parsing {os.path.basename(val)}: "{script.get_error()}"')
 
+        records.sort(key=operator.itemgetter('name'))
+
         logging.debug(json.dumps({"records": records}, indent=2))
 
         # output boilerplate Logstash filter for use in Malcolm
@@ -221,13 +261,14 @@ def main():
             rName = record['name']
             rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
             rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
+            tags = ', '.join(['"' + x + '"' for x in args.tags])
             print(
                 '\n'.join(
                     (
                         f'}} else if ([log_source] == "{rName}") {{',
                         f'  #############################################################################################################################',
                         f'  # {rName}.log',
-                        f'  # {os.path.basename(val)}',
+                        f'  # {args.url}',
                         '',
                         f'  dissect {{',
                         f'    id => "dissect_zeek_{rName}"',
@@ -253,11 +294,11 @@ def main():
                         f'  mutate {{',
                         f'    id => "mutate_add_fields_zeek_{rName}"',
                         f'    add_field => {{',
-                        f'      "[zeek_cols][proto]" => ""',
-                        f'      "[zeek_cols][service]" => "{rName}"',
+                        f'      "[zeek_cols][proto]" => "{args.protocol}"',
+                        f'      "[zeek_cols][service]" => "{args.service}"',
                         f'    }}',
+                        f'    add_tag => [ {tags} ]' if tags else '',
                         f'  }}',
-                        '',
                         '',
                     )
                 )
