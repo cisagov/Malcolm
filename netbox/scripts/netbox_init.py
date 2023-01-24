@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import pynetbox
+import randomcolor
 import re
 import sys
 import time
@@ -163,7 +164,7 @@ def main():
         help="Filename of JSON file containing network subnet/host name mapping",
     )
     parser.add_argument(
-        '--service-template',
+        '--service-templates',
         dest='serviceTemplateFileName',
         type=str,
         default=None,
@@ -204,7 +205,15 @@ def main():
         type=str,
         default=[os.getenv('NETBOX_DEFAULT_DEVICE_ROLE', 'Unspecified')],
         required=False,
-        help="Device role(s) to create",
+        help="Device role(s) to create (see also --device-roles)",
+    )
+    parser.add_argument(
+        '--device-roles',
+        dest='deviceRolesFileName',
+        type=str,
+        default=None,
+        required=False,
+        help="Filename of JSON file containing default device role definitions (see also -r/--device-role)",
     )
     parser.add_argument(
         '-y',
@@ -259,6 +268,7 @@ def main():
     deviceTypes = {}
     deviceRoles = {}
     manufacturers = {}
+    randColor = randomcolor.RandomColor()
 
     # wait for a good connection
     while args.wait:
@@ -389,15 +399,41 @@ def main():
                         "name": deviceRoleName,
                         "slug": slugify(deviceRoleName),
                         "vm_role": True,
+                        "color": randColor.generate()[0][1:],
                     },
                 )
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing device role \"{deviceRoleName}\": {nbe}")
 
-        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
-        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing device roles: {e}")
+
+    try:
+        # load device-roles-defaults.json from file
+        deviceRolesJson = None
+        if args.deviceRolesFileName is not None and os.path.isfile(args.deviceRolesFileName):
+            with open(args.deviceRolesFileName) as f:
+                deviceRolesJson = json.load(f)
+        if deviceRolesJson is not None and "device-roles" in deviceRolesJson:
+            for role in [r for r in deviceRolesJson["device-roles"] if "name" in r]:
+                roleDef = {
+                    "name": role["name"],
+                    "slug": slugify(role["name"]),
+                    "vm_role": True,
+                    "color": randColor.generate()[0][1:],
+                }
+                if ("description" in role) and role["description"]:
+                    roleDef["description"] = role["description"]
+                try:
+                    nb.dcim.device_roles.create(roleDef)
+                except pynetbox.RequestError as nbe:
+                    logging.warning(f"{type(nbe).__name__} processing device role \"{role['name']}\": {nbe}")
+
+        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing device roles JSON \"{args.deviceRolesFileName}\": {e}")
 
     # ###### DEVICE TYPES ##########################################################################################
     try:
@@ -445,7 +481,7 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
 
-    # ###### Net Map ###############################################################################################
+    # ###### Service templates #####################################################################################
     try:
         # load service-template-defaults.json from file
         serviceTemplatesJson = None
@@ -477,7 +513,7 @@ def main():
                         if ("description" in srv) and srv["description"]:
                             srvTempl["description"] = srv["description"]
                         try:
-                            srvTemplCreated = nb.ipam.service_templates.create(
+                            nb.ipam.service_templates.create(
                                 srvTempl,
                             )
                         except pynetbox.RequestError as nbe:

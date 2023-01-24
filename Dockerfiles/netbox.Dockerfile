@@ -47,7 +47,7 @@ RUN apt-get -q update && \
       psmisc \
       supervisor \
       tini && \
-    /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify && \
+    /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify randomcolor && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -76,7 +76,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 netbox/service-template-defaults.json /etc/service-template-defaults.json
+COPY --chmod=644 netbox/*-defaults.json /etc/
 COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 EXPOSE 9001
