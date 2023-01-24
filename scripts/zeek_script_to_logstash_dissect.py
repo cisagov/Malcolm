@@ -157,8 +157,7 @@ def main():
     records = []
 
     # parse each .zeek script
-    for val in sorted(args.input) if args.input else ():
-        logging.info(val)
+    for val in args.input if args.input else ():
         contents = None
         with open(val, 'rb') as f:
             contents = f.read()
@@ -252,57 +251,57 @@ def main():
         else:
             logging.error(f'Parsing {os.path.basename(val)}: "{script.get_error()}"')
 
-        records.sort(key=operator.itemgetter('name'))
+    records.sort(key=operator.itemgetter('name'))
 
-        logging.debug(json.dumps({"records": records}, indent=2))
+    logging.debug(json.dumps({"records": records}, indent=2))
 
-        # output boilerplate Logstash filter for use in Malcolm
-        for record in records:
-            rName = record['name']
-            rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
-            rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
-            tags = ', '.join(['"' + x + '"' for x in args.tags])
-            print(
-                '\n'.join(
-                    (
-                        f'}} else if ([log_source] == "{rName}") {{',
-                        f'  #############################################################################################################################',
-                        f'  # {rName}.log',
-                        f'  # {args.url}',
-                        '',
-                        f'  dissect {{',
-                        f'    id => "dissect_zeek_{rName}"',
-                        f"    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
-                        f'    mapping => {{',
-                        f'      "[message]" => "{rFieldsDissect}"',
-                        f'    }}',
-                        f'  }}',
-                        '',
-                        f'  if ("_dissectfailure" in [tags]) {{',
-                        f'    mutate {{',
-                        f'      id => "mutate_split_zeek_{rName}"',
-                        f"      # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
-                        f'      split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
-                        f'    }}',
-                        f'    ruby {{',
-                        f'      id => "ruby_zip_zeek_{rName}"',
-                        f'      init => "$zeek_{rName}_field_names = [ {rFieldsZip} ]"',
-                        f"      code => \"event.set('[zeek_cols]', $zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
-                        f'    }}',
-                        f'  }}',
-                        '',
-                        f'  mutate {{',
-                        f'    id => "mutate_add_fields_zeek_{rName}"',
-                        f'    add_field => {{',
-                        f'      "[zeek_cols][proto]" => "{args.protocol}"',
-                        f'      "[zeek_cols][service]" => "{args.service}"',
-                        f'    }}',
-                        f'    add_tag => [ {tags} ]' if tags else '',
-                        f'  }}',
-                        '',
-                    )
+    # output boilerplate Logstash filter for use in Malcolm
+    for record in records:
+        rName = record['name']
+        rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
+        rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
+        tags = ', '.join(['"' + x + '"' for x in args.tags])
+        print(
+            '\n'.join(
+                (
+                    f'}} else if ([log_source] == "{rName}") {{',
+                    f'  #############################################################################################################################',
+                    f'  # {rName}.log',
+                    f'  # {os.path.basename(val)} ({args.url})',
+                    '',
+                    f'  dissect {{',
+                    f'    id => "dissect_zeek_{rName}"',
+                    f"    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
+                    f'    mapping => {{',
+                    f'      "[message]" => "{rFieldsDissect}"',
+                    f'    }}',
+                    f'  }}',
+                    '',
+                    f'  if ("_dissectfailure" in [tags]) {{',
+                    f'    mutate {{',
+                    f'      id => "mutate_split_zeek_{rName}"',
+                    f"      # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
+                    f'      split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
+                    f'    }}',
+                    f'    ruby {{',
+                    f'      id => "ruby_zip_zeek_{rName}"',
+                    f'      init => "$zeek_{rName}_field_names = [ {rFieldsZip} ]"',
+                    f"      code => \"event.set('[zeek_cols]', $zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
+                    f'    }}',
+                    f'  }}',
+                    '',
+                    f'  mutate {{',
+                    f'    id => "mutate_add_fields_zeek_{rName}"',
+                    f'    add_field => {{',
+                    f'      "[zeek_cols][proto]" => "{args.protocol}"',
+                    f'      "[zeek_cols][service]" => "{args.service}"',
+                    f'    }}',
+                    f'    add_tag => [ {tags} ]' if tags else '',
+                    f'  }}',
+                    '',
                 )
             )
+        )
 
 
 ###################################################################################################
