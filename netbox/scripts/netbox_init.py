@@ -16,6 +16,7 @@ import sys
 import time
 
 from collections.abc import Iterable
+from datetime import datetime
 from slugify import slugify
 from netbox_library_import import import_library
 
@@ -268,7 +269,7 @@ def main():
     deviceTypes = {}
     deviceRoles = {}
     manufacturers = {}
-    randColor = randomcolor.RandomColor()
+    randColor = randomcolor.RandomColor(seed=datetime.now().timestamp())
 
     # wait for a good connection
     while args.wait:
