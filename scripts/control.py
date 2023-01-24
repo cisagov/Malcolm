@@ -417,6 +417,7 @@ def logs():
       | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
       | POST\s+HTTP/[\d\.].+\b200\b
       | reaped\s+unknown\s+pid
+      | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
       | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
       | retry\.go.+(send\s+unwait|done$)
       | running\s+full\s+sweep
