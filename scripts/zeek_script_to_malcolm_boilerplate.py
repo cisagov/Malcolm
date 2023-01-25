@@ -185,6 +185,20 @@ def main():
     )
     parser.set_defaults(expandId=True)
     parser.add_argument(
+        '-c',
+        '--include-cst',
+        dest='includeCst',
+        action='store_true',
+        help='Include CST nodes',
+    )
+    parser.add_argument(
+        '--no-include-cst',
+        dest='includeCst',
+        action='store_false',
+        help='Do not include CST nodes',
+    )
+    parser.set_defaults(includeCst=False)
+    parser.add_argument(
         '-i',
         '--input',
         dest='input',
@@ -306,13 +320,13 @@ def main():
                     #   e.g.:           Log::create_stream(ICSNPP_OPCUA_Binary::LOG, [$columns=OPCUA_Binary::Info, $path="opcua-binary"]);
                     #   would yield:    "opcua_binary_info": "opcua-binary"
                     for createStreamNode, indent in current_script.root.traverse(
-                        include_cst=False,
+                        include_cst=args.includeCst,
                         predicate=IsCreateStreamExprNode,
                     ):
                         # within that list of expressions for that statement find the
                         # expression which itself is the list of $columns and $path
                         for childNode, indentToo in createStreamNode.traverse(
-                            include_cst=False,
+                            include_cst=args.includeCst,
                             predicate=IsCreateStreamExprStreamListNode,
                         ):
                             # now, within this list, get the slugified version of the record name
@@ -321,7 +335,7 @@ def main():
                             logPath = None
 
                             for argNode, indentThree in childNode.traverse(
-                                include_cst=False,
+                                include_cst=args.includeCst,
                                 predicate=IsColumnsExprNode,
                             ):
                                 sib = argNode
@@ -332,7 +346,7 @@ def main():
                                         ).replace('-', '_')
 
                             for argNode, indentThree in childNode.traverse(
-                                include_cst=False,
+                                include_cst=args.includeCst,
                                 predicate=IsPathExprNode,
                             ):
                                 sib = argNode
@@ -349,7 +363,7 @@ def main():
                 if parseLoop == 1:
                     # find each "record" node
                     for typeDeclNode, _ in current_script.root.traverse(
-                        include_cst=False,
+                        include_cst=args.includeCst,
                         predicate=IsRecordNode,
                     ):
                         # determine the name of the record node
@@ -362,7 +376,7 @@ def main():
                                     *[
                                         n
                                         for n, _ in typeDeclNode.traverse(
-                                            include_cst=False,
+                                            include_cst=args.includeCst,
                                         )
                                         if n.name() == 'id'
                                     ][0].script_range()
@@ -381,7 +395,7 @@ def main():
 
                             # find each "logged field" inside this record
                             for typeInfoNode, indent in typeDeclNode.traverse(
-                                include_cst=False,
+                                include_cst=args.includeCst,
                                 predicate=IsLoggedFieldNode,
                             ):
                                 # determine the field's name and type
@@ -393,7 +407,7 @@ def main():
                                             *[
                                                 n
                                                 for n, _ in typeInfoNode.traverse(
-                                                    include_cst=False,
+                                                    include_cst=args.includeCst,
                                                 )
                                                 if n.name() == 'id'
                                             ][0].script_range()
@@ -404,7 +418,7 @@ def main():
                                             *[
                                                 n
                                                 for n, _ in typeInfoNode.traverse(
-                                                    include_cst=False,
+                                                    include_cst=args.includeCst,
                                                 )
                                                 if n.name() == 'type'
                                             ][0].script_range()
