@@ -11,7 +11,7 @@
 # (see https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek).
 # Pay close attention to the comment in the logstash filter:
 #    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP
-# If you are copy/pasting this boilerplace, ensure your editor doesn't lose the TAB characters
+# If you are copy/pasting this boilerplate, ensure your editor doesn't lose the TAB characters
 
 import argparse
 import io
@@ -31,8 +31,66 @@ orig_path = os.getcwd()
 
 ZEEK_DELIMITER_CHAR = '\t'
 
+# hate to use a global for this but not sure how to get the script from the node
+current_script = None
+
 # Used as a predicate to filter nodes during tree traversal.
 # see https://github.com/zeek/zeekscript/blob/4a3512dd114e2709d6738016176c27a65f3f1492/zeekscript/node.py#L157
+
+# This Node is a "create_stream" expression, e.g.:
+#   Log::create_stream(ICSNPP_OPCUA_Binary::LOG, [$columns=OPCUA_Binary::Info, $path="opcua-binary"])
+def IsCreateStreamExprNode(Node):
+    try:
+        return (
+            (Node.name() == 'expr')
+            and current_script.get_content(*Node.script_range())
+            .decode('utf-8')
+            .lower()
+            .startswith('log::create_stream')
+            and any([c for c in Node.nonerr_children if c.name() == 'expr_list'])
+        )
+    except (AttributeError, IndexError):
+        return False
+
+    return False
+
+
+# This Node is an expression that looks like:
+#   $columns=OPCUA_Binary::VariantData
+def IsColumnsExprNode(Node):
+    try:
+        return (Node.name() == 'id') and (
+            current_script.get_content(*Node.script_range()).decode('utf-8').lower() == 'columns'
+        )
+    except (AttributeError, IndexError):
+        return False
+
+
+# This Node is an expression that looks like:
+#   $path="opcua-binary"
+def IsPathExprNode(Node):
+    try:
+        return (Node.name() == 'id') and (
+            current_script.get_content(*Node.script_range()).decode('utf-8').lower() == 'path'
+        )
+    except (AttributeError, IndexError):
+        return False
+
+
+# This Node is a "create_stream" expression LIST node, e.g.:
+#   $columns=OPCUA_Binary::Info, $path="opcua-binary"
+def IsCreateStreamExprStreamListNode(Node):
+    try:
+        if Node.name() == 'expr_list':
+            for exprNode in [n for n in Node.nonerr_children if (n.name() == 'expr') and (len(n.nonerr_children) > 0)]:
+                if any([p for p in exprNode.nonerr_children if IsColumnsExprNode(p)]):
+                    return True
+
+    except (AttributeError, IndexError):
+        return False
+
+    return False
+
 
 # This Node is a "record" node, e.g.:
 #   type OPCUA_Binary::CreateSubscription: record
@@ -62,6 +120,7 @@ def IsLoggedFieldNode(Node):
 # main
 def main():
     global args
+    global current_script
 
     parser = argparse.ArgumentParser(
         description='\n'.join(
@@ -155,109 +214,167 @@ def main():
 
     # this array will hold all of the different log types until the end when we print them out
     records = []
+    recordsPathMap = {}
 
-    # parse each .zeek script
-    for val in args.input if args.input else ():
-        contents = None
-        with open(val, 'rb') as f:
-            contents = f.read()
-        script = zeekscript.Script(io.BytesIO(contents))
-        if script.parse() and not script.has_error():
-            logging.info(f'Parsed {os.path.basename(val)}')
+    # Parse all of the .zeek scripts TWICE: once to find the mapping of record names to .log paths,
+    # and a second time to get the fields for those recoreds. Yeah, it's inefficient, but this
+    # is something you do once in a blue moon so I don't care.
+    for parseLoop in (0, 1):
+        for val in args.input if args.input else ():
+            contents = None
+            with open(val, 'rb') as f:
+                contents = f.read()
+            current_script = zeekscript.Script(io.BytesIO(contents))
+            if current_script.parse() and not current_script.has_error():
+                logging.debug(f'Parsed {os.path.basename(val)}')
 
-            # find each "record" node
-            for typeDeclNode, _ in script.root.traverse(
-                include_cst=False,
-                predicate=IsRecordNode,
-            ):
-                # determine the name of the record node
-                # this isn't *exactly* going to match the acutal filename
-                # of the .log file, but it'll be close enough for a good start
-                typeName = None
-                try:
-                    typeName = slugify(
-                        script.get_content(
-                            *[
-                                n
-                                for n, _ in typeDeclNode.traverse(
-                                    include_cst=False,
-                                )
-                                if n.name() == 'id'
-                            ][0].script_range()
-                        ).decode('utf-8')
-                    ).replace('-', '_')
-                except (AttributeError, IndexError):
-                    pass
-
-                # process the fields belonging to this record
-                if typeName:
-                    logging.info(f'Found record {typeName}')
-                    record = {}
-                    record["name"] = typeName
-                    record["fields"] = []
-
-                    # find each "logged field" inside this record
-                    for typeInfoNode, indent in typeDeclNode.traverse(
+                if parseLoop == 0:
+                    # find create_stream expression list nodes to map record names to .log paths
+                    #   e.g.:           Log::create_stream(ICSNPP_OPCUA_Binary::LOG, [$columns=OPCUA_Binary::Info, $path="opcua-binary"]);
+                    #   would yield:    "opcua_binary_info": "opcua-binary"
+                    for createStreamNode, indent in current_script.root.traverse(
                         include_cst=False,
-                        predicate=IsLoggedFieldNode,
+                        predicate=IsCreateStreamExprNode,
                     ):
-                        # determine the field's name and type
-                        fieldName = None
-                        fieldType = None
+                        # within that list of expressions for that statement find the
+                        # expression which itself is the list of $columns and $path
+                        for childNode, indentToo in createStreamNode.traverse(
+                            include_cst=False,
+                            predicate=IsCreateStreamExprStreamListNode,
+                        ):
+                            # now, within this list, get the slugified version of the record name
+                            # (from $columns) and the log filename (from $path)
+                            columnName = None
+                            logPath = None
+
+                            for argNode, indentThree in childNode.traverse(
+                                include_cst=False,
+                                predicate=IsColumnsExprNode,
+                            ):
+                                sib = argNode
+                                while (sib := sib.next_sibling) and (not columnName):
+                                    if sib.name() == "expr":
+                                        columnName = slugify(
+                                            current_script.get_content(*sib.script_range()).decode('utf-8')
+                                        ).replace('-', '_')
+
+                            for argNode, indentThree in childNode.traverse(
+                                include_cst=False,
+                                predicate=IsPathExprNode,
+                            ):
+                                sib = argNode
+                                while (sib := sib.next_sibling) and (not logPath):
+                                    if sib.name() == "expr":
+                                        logPath = slugify(
+                                            current_script.get_content(*sib.script_range()).decode('utf-8')
+                                        ).replace('-', '_')
+
+                            if columnName and logPath:
+                                # I cannot believe it. We did it.
+                                recordsPathMap[columnName] = logPath
+
+                if parseLoop == 1:
+                    # find each "record" node
+                    for typeDeclNode, _ in current_script.root.traverse(
+                        include_cst=False,
+                        predicate=IsRecordNode,
+                    ):
+                        # determine the name of the record node
+                        # this isn't *exactly* going to match the acutal filename
+                        # of the .log file, but it'll be close enough for a good start
+                        typeName = None
                         try:
-                            fieldName = slugify(
-                                script.get_content(
+                            typeName = slugify(
+                                current_script.get_content(
                                     *[
                                         n
-                                        for n, _ in typeInfoNode.traverse(
+                                        for n, _ in typeDeclNode.traverse(
                                             include_cst=False,
                                         )
                                         if n.name() == 'id'
                                     ][0].script_range()
                                 ).decode('utf-8')
                             ).replace('-', '_')
-                            fieldType = slugify(
-                                script.get_content(
-                                    *[
-                                        n
-                                        for n, _ in typeInfoNode.traverse(
-                                            include_cst=False,
-                                        )
-                                        if n.name() == 'type'
-                                    ][0].script_range()
-                                ).decode('utf-8')
-                            )
                         except (AttributeError, IndexError):
                             pass
 
-                        # if we found the name and type, add it to the record
-                        if fieldName and fieldType:
-                            logging.info(f'Found field {typeName}.{fieldName} ({fieldType})')
-                            if args.expandId and (fieldType == "conn-id"):
-                                # conn-id actually is a 4-tuple
-                                record["fields"] = record["fields"] + [
-                                    {"name": "orig_h", "type": "addr"},
-                                    {"name": "orig_p", "type": "port"},
-                                    {"name": "resp_h", "type": "addr"},
-                                    {"name": "resp_p", "type": "port"},
-                                ]
-                            else:
-                                record["fields"].append({"name": fieldName, "type": fieldType})
+                        # process the fields belonging to this record
+                        if typeName:
+                            logging.debug(f'Found record {typeName} ({recordsPathMap.get(typeName, "")})')
+                            record = {}
+                            record["name"] = typeName
+                            record["path"] = recordsPathMap.get(typeName, None)
+                            record["fields"] = []
 
-                    # valid record? add it to the final list
-                    if len(record["fields"]) > 0:
-                        records.append(record)
+                            # find each "logged field" inside this record
+                            for typeInfoNode, indent in typeDeclNode.traverse(
+                                include_cst=False,
+                                predicate=IsLoggedFieldNode,
+                            ):
+                                # determine the field's name and type
+                                fieldName = None
+                                fieldType = None
+                                try:
+                                    fieldName = slugify(
+                                        current_script.get_content(
+                                            *[
+                                                n
+                                                for n, _ in typeInfoNode.traverse(
+                                                    include_cst=False,
+                                                )
+                                                if n.name() == 'id'
+                                            ][0].script_range()
+                                        ).decode('utf-8')
+                                    ).replace('-', '_')
+                                    fieldType = slugify(
+                                        current_script.get_content(
+                                            *[
+                                                n
+                                                for n, _ in typeInfoNode.traverse(
+                                                    include_cst=False,
+                                                )
+                                                if n.name() == 'type'
+                                            ][0].script_range()
+                                        ).decode('utf-8')
+                                    )
+                                except (AttributeError, IndexError):
+                                    pass
 
-        else:
-            logging.error(f'Parsing {os.path.basename(val)}: "{script.get_error()}"')
+                                # if we found the name and type, add it to the record
+                                if fieldName and fieldType:
+                                    logging.debug(f'Found field {typeName}.{fieldName} ({fieldType})')
+                                    if args.expandId and (fieldType == "conn-id"):
+                                        # conn-id actually is a 4-tuple
+                                        record["fields"] = record["fields"] + [
+                                            {"name": "orig_h", "type": "addr"},
+                                            {"name": "orig_p", "type": "port"},
+                                            {"name": "resp_h", "type": "addr"},
+                                            {"name": "resp_p", "type": "port"},
+                                        ]
+                                    else:
+                                        record["fields"].append({"name": fieldName, "type": fieldType})
+
+                            # this record has been parsed, add it to the final list
+                            records.append(record)
+
+            else:
+                logging.error(f'Parsing {os.path.basename(val)}: "{current_script.get_error()}"')
 
     records.sort(key=operator.itemgetter('name'))
 
-    logging.debug(json.dumps({"records": records}, indent=2))
+    logging.info(
+        json.dumps(
+            {
+                "records": records,
+            },
+            indent=2,
+        )
+    )
 
     # output boilerplate Logstash filter for use in Malcolm
-    for record in records:
-        rName = record['name']
+    for record in [r for r in records if len(r["fields"]) > 0]:
+        # default to the record's log path, fall back to the slugified record name
+        rName = record['path'] if ('path' in record) and record['path'] else record['name']
         rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
         rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
         tags = ', '.join(['"' + x + '"' for x in args.tags])
