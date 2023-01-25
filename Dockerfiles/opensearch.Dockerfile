@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:2.4.1
+FROM opensearchproject/opensearch:2.5.0
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -41,7 +41,6 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
-# override_main_response_version - https://opensearch.org/docs/latest/clients/agents-and-ingestion-tools/index/#compatibility-matrices
 RUN yum install -y openssl util-linux procps && \
   yum upgrade -y && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
