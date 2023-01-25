@@ -42,6 +42,8 @@ The following modifications must be made in order for Malcolm to be able to pars
 1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/11_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/14_zeek_convert.conf)
 1. Identify the new fields and add them as described in [Adding new log fields](contributing-new-log-fields.md#NewFields)
 
+The script [`scripts/zeek_script_to_malcolm_boilerplate.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/zeek_script_to_malcolm_boilerplate.py) may help by autogenerating these filters for you.
+
 ## <a name="LogstashEnrichments"></a>Enrichments
 
 Malcolm's Logstash instance will do a lot of enrichments for you automatically: see the [enrichment pipeline]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment), including MAC address to vendor by OUI, GeoIP, ASN, and a few others. In order to take advantage of these enrichments that are already in place, normalize new fields to use the same standardized field names Malcolm uses for things like IP addresses, MAC addresses, etc. You can add your own additional enrichments by creating new `.conf` files containing [Logstash filters](https://www.elastic.co/guide/en/logstash/7.10/filter-plugins.html) in the [enrichment pipeline]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/enrichment) directory and using either of the techniques in the [Local modifications](contributing-local-modifications.md#LocalMods) section to implement your changes in the `logstash` container
