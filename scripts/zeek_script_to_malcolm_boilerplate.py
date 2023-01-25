@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+#
 # This script takes as input the filenames of one or more .zeek scripts which
 # contain records (see https://docs.zeek.org/en/master/script-reference/types.html#type-record).
+#
 # The scripts are parsed into their constitutent records and &log fields.
-# Each record is then printed out in the format used by Malcolm's logstash
-# filters for parsing Zeek logs (see
-# https://github.com/idaholab/Malcolm/blob/76525caadfc7b0c27d0e7764a388559c18f63903/logstash/pipelines/zeek/11_zeek_logs.conf#L279-L311),
-# which can be used to create boilerplate for adding a new Zeek parser to Malcolm
-# (see https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek).
-# Pay close attention to the comment in the logstash filter:
+#
+# Each record is then printed out in the formats used by Malcolm for parsing and defining Zeek logs:
+# - Logstash (https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/11_zeek_parse.conf
+# - Arkime (https://idaholab.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./arkime/etc/config.ini
+# - OpenSearch tndex templates (https://idaholab.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./dashboards/templates/composable/component/zeek*.json
+#
+# For Logstash boilerplate, pay close attention to the comment in the logstash filter:
 #    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP
-# If you are copy/pasting this boilerplate, ensure your editor doesn't lose the TAB characters
+# If you are copy/pasting, ensure your editor doesn't lose the TAB characters.
+#
 
 import argparse
 import io
@@ -21,6 +25,8 @@ import os
 import sys
 import zeekscript
 import operator
+from collections import defaultdict
+from datetime import datetime
 from slugify import slugify
 
 ###################################################################################################
@@ -30,6 +36,35 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 
 ZEEK_DELIMITER_CHAR = '\t'
+
+ZEEK_COMMON_FIELDS = (
+    'ts',
+    'uid',
+    'fuid',
+    'is_orig',
+    'orig_h',
+    'orig_p',
+    'orig_l2_addr',
+    'resp_h',
+    'resp_p',
+    'resp_l2_addr',
+    'proto',
+    'service',
+    'user',
+    'password',
+    'community_id',
+)
+
+ZEEK_TO_ARKIME_TYPES = defaultdict(lambda: "termfield")
+for fType in ('count', 'int', 'port'):
+    ZEEK_TO_ARKIME_TYPES[fType] = 'integer'
+
+ZEEK_TO_INDEX_TEMPLATE_TYPES = defaultdict(lambda: "keyword")
+ZEEK_TO_INDEX_TEMPLATE_TYPES['int'] = 'integer'
+ZEEK_TO_INDEX_TEMPLATE_TYPES['count'] = 'long'
+ZEEK_TO_INDEX_TEMPLATE_TYPES['time'] = 'date'
+ZEEK_TO_INDEX_TEMPLATE_TYPES['double'] = 'float'
+ZEEK_TO_INDEX_TEMPLATE_TYPES['interval'] = 'float'
 
 # hate to use a global for this but not sure how to get the script from the node
 current_script = None
@@ -122,11 +157,13 @@ def main():
     global args
     global current_script
 
+    nowTimeStr = datetime.now().strftime("%Y%m%d-%H%M%S")
+
     parser = argparse.ArgumentParser(
         description='\n'.join(
             [
-                'Parse Zeek .script files and generate boilerplate for a Malcolm Logstash filter for parsing those Zeek logs.',
-                'see https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek',
+                'Parse Zeek .script files and generate boilerplate for a Malcolm boilerplate for parsing and defining those Zeek logs.',
+                'see https://idaholab.github.io/Malcolm/docs/contributing-guide.html',
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
@@ -193,6 +230,42 @@ def main():
         default="",
         required=False,
         help="Value for reference URL for the filter's comments",
+    )
+    parser.add_argument(
+        '-l',
+        '--logstash',
+        dest='logstashOutFile',
+        type=str,
+        default=f"{nowTimeStr}.logstash.conf",
+        required=False,
+        help="Filename to which the Logstash filter boilerplate will be written",
+    )
+    parser.add_argument(
+        '-a',
+        '--arkime',
+        dest='arkimeOutFile',
+        type=str,
+        default=f"{nowTimeStr}.arkime.ini",
+        required=False,
+        help="Filename to which the Arkime config.ini boilerplate will be written",
+    )
+    parser.add_argument(
+        '-x',
+        '--index',
+        dest='indexOutFile',
+        type=str,
+        default=f"{nowTimeStr}.template.json",
+        required=False,
+        help="Filename to which the OpenSearch index template boilerplate will be written",
+    )
+    parser.add_argument(
+        '-j',
+        '--json',
+        dest='jsonOutFile',
+        type=str,
+        default="",
+        required=False,
+        help="Filename to which the intermediate structures' JSON be written",
     )
     try:
         parser.error = parser.exit
@@ -335,7 +408,9 @@ def main():
                                                 )
                                                 if n.name() == 'type'
                                             ][0].script_range()
-                                        ).decode('utf-8')
+                                        )
+                                        .decode('utf-8')
+                                        .lower()
                                     )
                                 except (AttributeError, IndexError):
                                     pass
@@ -362,63 +437,110 @@ def main():
 
     records.sort(key=operator.itemgetter('name'))
 
-    logging.info(
-        json.dumps(
-            {
-                "records": records,
-            },
-            indent=2,
-        )
-    )
+    # write output file(s)
 
-    # output boilerplate Logstash filter for use in Malcolm
-    for record in [r for r in records if len(r["fields"]) > 0]:
-        # default to the record's log path, fall back to the slugified record name
-        rName = record['path'] if ('path' in record) and record['path'] else record['name']
-        rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
-        rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
-        tags = ', '.join(['"' + x + '"' for x in args.tags])
-        print(
-            '\n'.join(
-                (
-                    f'}} else if ([log_source] == "{rName}") {{',
-                    f'  #############################################################################################################################',
-                    f'  # {rName}.log',
-                    f'  # {os.path.basename(val)} ({args.url})',
-                    '',
-                    f'  dissect {{',
-                    f'    id => "dissect_zeek_{rName}"',
-                    f"    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
-                    f'    mapping => {{',
-                    f'      "[message]" => "{rFieldsDissect}"',
-                    f'    }}',
-                    f'  }}',
-                    '',
-                    f'  if ("_dissectfailure" in [tags]) {{',
-                    f'    mutate {{',
-                    f'      id => "mutate_split_zeek_{rName}"',
-                    f"      # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
-                    f'      split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
-                    f'    }}',
-                    f'    ruby {{',
-                    f'      id => "ruby_zip_zeek_{rName}"',
-                    f'      init => "$zeek_{rName}_field_names = [ {rFieldsZip} ]"',
-                    f"      code => \"event.set('[zeek_cols]', $zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
-                    f'    }}',
-                    f'  }}',
-                    '',
-                    f'  mutate {{',
-                    f'    id => "mutate_add_fields_zeek_{rName}"',
-                    f'    add_field => {{',
-                    f'      "[zeek_cols][proto]" => "{args.protocol}"',
-                    f'      "[zeek_cols][service]" => "{args.service}"',
-                    f'    }}',
-                    f'    add_tag => [ {tags} ]' if tags else '',
-                    f'  }}',
-                    '',
+    if args.jsonOutFile:
+        with open(args.jsonOutFile, "w") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "records": records,
+                    },
+                    indent=2,
                 )
             )
-        )
+
+    # output boilerplate Logstash filter for use in Malcolm
+    with open(args.logstashOutFile, "w") as f:
+        for record in [r for r in records if len(r["fields"]) > 0]:
+            # default to the record's log path, fall back to the slugified record name
+            rName = record['path'] if ('path' in record) and record['path'] else record['name']
+            rFieldsZip = ', '.join(["'" + x['name'] + "'" for x in record['fields']])
+            rFieldsDissect = ZEEK_DELIMITER_CHAR.join([f'%{{[zeek_cols][{x["name"]}]}}' for x in record['fields']])
+            tags = ', '.join(['"' + x + '"' for x in args.tags])
+            print(
+                '\n'.join(
+                    (
+                        f'}} else if ([log_source] == "{rName}") {{',
+                        f'  #############################################################################################################################',
+                        f'  # {rName}.log',
+                        f'  # {os.path.basename(val)} ({args.url})',
+                        '',
+                        f'  dissect {{',
+                        f'    id => "dissect_zeek_{rName}"',
+                        f"    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
+                        f'    mapping => {{',
+                        f'      "[message]" => "{rFieldsDissect}"',
+                        f'    }}',
+                        f'  }}',
+                        '',
+                        f'  if ("_dissectfailure" in [tags]) {{',
+                        f'    mutate {{',
+                        f'      id => "mutate_split_zeek_{rName}"',
+                        f"      # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
+                        f'      split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
+                        f'    }}',
+                        f'    ruby {{',
+                        f'      id => "ruby_zip_zeek_{rName}"',
+                        f'      init => "$zeek_{rName}_field_names = [ {rFieldsZip} ]"',
+                        f"      code => \"event.set('[zeek_cols]', $zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
+                        f'    }}',
+                        f'  }}',
+                        '',
+                        f'  mutate {{',
+                        f'    id => "mutate_add_fields_zeek_{rName}"',
+                        f'    add_field => {{',
+                        f'      "[zeek_cols][proto]" => "{args.protocol}"',
+                        f'      "[zeek_cols][service]" => "{args.service}"',
+                        f'    }}',
+                        f'    add_tag => [ {tags} ]' if tags else '',
+                        f'  }}',
+                        '',
+                    )
+                ),
+                file=f,
+            )
+
+    # output boilerplate Arkime definitions for use in Malcolm
+    with open(args.arkimeOutFile, "w") as f:
+        for record in [r for r in records if len(r["fields"]) > 0]:
+            # default to the record's log path, fall back to the slugified record name
+            rName = record['path'] if ('path' in record) and record['path'] else record['name']
+            print(f"# {rName}.log", file=f)
+            print(f"# {args.url}", file=f)
+            # https://github.com/cisagov/ICSNPP
+            for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
+                print(
+                    f"zeek.{rName}.{field['name']}=db:zeek.{rName}.{field['name']};group:zeek_{rName};kind:{ZEEK_TO_ARKIME_TYPES[field['type']]};friendly:{field['name']};help:{field['name']}",
+                    file=f,
+                )
+            print("", file=f)
+
+        print("[custom-views]", file=f)
+        for record in [r for r in records if len(r["fields"]) > 0]:
+            rName = record['path'] if ('path' in record) and record['path'] else record['name']
+            rFields = ','.join(
+                [f"zeek.{rName}.{f['name']}" for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]
+            )
+            print(
+                f"zeek_{rName}=require:zeek.{rName};title:Zeek {rName}.log;fields:{rFields}",
+                file=f,
+            )
+
+    # output boilerplate OpenSearch index template fields for use in Malcolm
+    with open(args.indexOutFile, "w") as f:
+        mappings = {"template": {"mappings": {"properties": {}}}}
+        for record in [r for r in records if len(r["fields"]) > 0]:
+            for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
+                mappings["template"]["mappings"]["properties"][f"zeek.{rName}.{field['name']}"] = {
+                    "type": ZEEK_TO_INDEX_TEMPLATE_TYPES[field['type']]
+                }
+            f.write(
+                json.dumps(
+                    mappings,
+                    indent=2,
+                )
+            )
 
 
 ###################################################################################################
