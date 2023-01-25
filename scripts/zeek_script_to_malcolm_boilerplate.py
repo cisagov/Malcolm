@@ -528,19 +528,21 @@ def main():
             )
 
     # output boilerplate OpenSearch index template fields for use in Malcolm
+    mappings = {"template": {"mappings": {"properties": {}}}}
     with open(args.indexOutFile, "w") as f:
-        mappings = {"template": {"mappings": {"properties": {}}}}
         for record in [r for r in records if len(r["fields"]) > 0]:
+            # default to the record's log path, fall back to the slugified record name
+            rName = record['path'] if ('path' in record) and record['path'] else record['name']
             for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
                 mappings["template"]["mappings"]["properties"][f"zeek.{rName}.{field['name']}"] = {
                     "type": ZEEK_TO_INDEX_TEMPLATE_TYPES[field['type']]
                 }
-            f.write(
-                json.dumps(
-                    mappings,
-                    indent=2,
-                )
+        f.write(
+            json.dumps(
+                mappings,
+                indent=2,
             )
+        )
 
 
 ###################################################################################################
