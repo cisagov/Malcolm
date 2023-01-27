@@ -220,18 +220,16 @@ def main():
         osInfo = osInfoResponse.json()
 
         # normalize allocation statistics' sizes (eg., 100mb) into bytes
-        if len(osInfo) > 1:
-            esDiskUsageStats = []
-            for stat in osInfo:
-                if ('node' in stat) and (stat['node'] != 'UNASSIGNED'):
-                    esDiskUsageStats.append(
-                        {
-                            key: humanfriendly.parse_size(value)
-                            if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
-                            else value
-                            for (key, value) in stat.items()
-                        }
-                    )
+        for stat in osInfo:
+            if ('node' in stat) and (stat['node'] != 'UNASSIGNED'):
+                esDiskUsageStats.append(
+                    {
+                        key: humanfriendly.parse_size(value)
+                        if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
+                        else value
+                        for (key, value) in stat.items()
+                    }
+                )
 
         if debug:
             eprint(json.dumps(esDiskUsageStats))
