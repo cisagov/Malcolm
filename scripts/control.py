@@ -358,8 +358,17 @@ def logs():
     )
     print("\n".join(out))
 
+    if args.logLineCount is None:
+        args.logLineCount = 'all'
+
     process = Popen(
-        [dockerComposeBin, '-f', args.composeFile, 'logs', '-f', args.service][: 6 if args.service is not None else -1],
+        [
+            dockerComposeBin,
+            '-f', args.composeFile,
+            'logs',
+            '--tail', str(args.logLineCount),
+            '-f', args.service
+        ][: 6 if args.service is not None else -1],
         env=osEnv,
         stdout=PIPE,
     )
@@ -1294,6 +1303,16 @@ def main():
     )
     parser.add_argument(
         '-l', '--logs', dest='cmdLogs', type=str2bool, nargs='?', const=True, default=False, help="Tail Malcolm logs"
+    )
+    parser.add_argument(
+        '-n',
+        '--lines',
+        dest='logLineCount',
+        type=posInt,
+        nargs='?',
+        const=False,
+        default=None,
+        help='Number of log lines to output. Outputs all lines by default (only for logs operation)',
     )
     parser.add_argument(
         '--start', dest='cmdStart', type=str2bool, nargs='?', const=True, default=False, help="Start Malcolm"
