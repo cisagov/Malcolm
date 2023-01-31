@@ -94,6 +94,8 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
         /usr/share/logstash/malcolm-patterns \
         /usr/share/logstash/malcolm-ruby \
         /logstash-persistent-queue && \
+    # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
+    chown --silent -R root:root /usr/share/logstash/vendor/* && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Retrieving JA3 fingerprint lists..." && \

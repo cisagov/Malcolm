@@ -121,7 +121,10 @@ RUN yum upgrade -y && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
-    chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards/plugins/* && \
+    # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
+    chown --silent -R root:root /usr/share/opensearch-dashboards/plugins/* \
+                                /usr/share/opensearch-dashboards/node_modules/* \
+                                /usr/share/opensearch-dashboards/src/* && \
     chmod +x /usr/bin/tini && \
     yum clean all && \
     rm -rf /var/cache/yum
