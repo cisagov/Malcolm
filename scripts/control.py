@@ -478,7 +478,7 @@ def logs():
             str(args.logLineCount),
             '-f',
             args.service,
-        ][: 6 if args.service is not None else -1],
+        ][: 8 if args.service is not None else -1],
         env=osEnv,
         stdout=PIPE,
     )
