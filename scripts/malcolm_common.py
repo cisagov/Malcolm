@@ -3,6 +3,7 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import argparse
 import contextlib
 import getpass
 import importlib
@@ -590,6 +591,17 @@ def str2bool(v):
     else:
         raise ValueError("Boolean value expected")
 
+###################################################################################################
+# Dies if $value isn't positive. NoneType is also acceptable
+def posInt(value):
+    if value is None:
+        return None
+
+    ivalue = int(value)
+    if ivalue <= 0:
+        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
+
+    return ivalue
 
 ###################################################################################################
 # determine if a program/script exists and is executable in the system path

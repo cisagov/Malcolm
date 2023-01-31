@@ -465,8 +465,20 @@ def logs():
     )
     print("\n".join(out))
 
+    if args.logLineCount is None:
+        args.logLineCount = 'all'
+
     process = Popen(
-        [dockerComposeBin, '-f', args.composeFile, 'logs', '-f', args.service][: 6 if args.service is not None else -1],
+        [
+            dockerComposeBin,
+            '-f',
+            args.composeFile,
+            'logs',
+            '--tail',
+            str(args.logLineCount),
+            '-f',
+            args.service,
+        ][: 6 if args.service is not None else -1],
         env=osEnv,
         stdout=PIPE,
     )
@@ -1374,10 +1386,19 @@ def main():
     # extract arguments from the command line
     # print (sys.argv[1:]);
     parser = argparse.ArgumentParser(
-        description='Malcolm control script', add_help=False, usage=f'{ScriptName} <arguments>'
+        description='Malcolm control script',
+        add_help=False,
+        usage=f'{ScriptName} <arguments>',
     )
     parser.add_argument(
-        '-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output"
+        '-v',
+        '--verbose',
+        dest='debug',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Verbose output",
     )
     parser.add_argument(
         '-f',
@@ -1400,7 +1421,24 @@ def main():
         help='docker-compose service (only for status and logs operations)',
     )
     parser.add_argument(
-        '-l', '--logs', dest='cmdLogs', type=str2bool, nargs='?', const=True, default=False, help="Tail Malcolm logs"
+        '-l',
+        '--logs',
+        dest='cmdLogs',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Tail Malcolm logs",
+    )
+    parser.add_argument(
+        '-n',
+        '--lines',
+        dest='logLineCount',
+        type=posInt,
+        nargs='?',
+        const=False,
+        default=None,
+        help='Number of log lines to output. Outputs all lines by default (only for logs operation)',
     )
     parser.add_argument(
         '--netbox-backup',
@@ -1421,7 +1459,13 @@ def main():
         help='Filename from which to restore NetBox configuration database',
     )
     parser.add_argument(
-        '--start', dest='cmdStart', type=str2bool, nargs='?', const=True, default=False, help="Start Malcolm"
+        '--start',
+        dest='cmdStart',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Start Malcolm",
     )
     parser.add_argument(
         '--restart',
@@ -1433,7 +1477,13 @@ def main():
         help="Stop and restart Malcolm",
     )
     parser.add_argument(
-        '--stop', dest='cmdStop', type=str2bool, nargs='?', const=True, default=False, help="Stop Malcolm"
+        '--stop',
+        dest='cmdStop',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Stop Malcolm",
     )
     parser.add_argument(
         '--wipe',
