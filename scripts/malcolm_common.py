@@ -591,6 +591,7 @@ def str2bool(v):
     else:
         raise ValueError("Boolean value expected")
 
+
 ###################################################################################################
 # Dies if $value isn't positive. NoneType is also acceptable
 def posInt(value):
@@ -602,6 +603,7 @@ def posInt(value):
         raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
 
     return ivalue
+
 
 ###################################################################################################
 # determine if a program/script exists and is executable in the system path
