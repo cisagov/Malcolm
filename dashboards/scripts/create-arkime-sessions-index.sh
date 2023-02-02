@@ -213,6 +213,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # pin filters by default
           curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/filters:pinnedByDefault" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
 
+          # enable in-session storage
+          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/state:storeInSessionStorage" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+
           echo "OpenSearch Dashboards saved objects import complete!"
 
           # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents

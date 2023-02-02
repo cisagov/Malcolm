@@ -90,6 +90,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.5.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL="true"
@@ -121,6 +122,7 @@ RUN yum upgrade -y && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
+    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip --allow-root && \
     # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
     chown --silent -R root:root /usr/share/opensearch-dashboards/plugins/* \
                                 /usr/share/opensearch-dashboards/node_modules/* \
