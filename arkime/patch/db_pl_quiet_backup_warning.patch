@@ -1,8 +1,8 @@
 diff --git a/db/db.pl b/db/db.pl
-index bcb3948a..995c7e4e 100755
+index 9aa04d2d..44145db0 100755
 --- a/db/db.pl
 +++ b/db/db.pl
-@@ -7383,7 +7383,7 @@ my $health = dbCheckHealth();
+@@ -7418,7 +7418,7 @@ my $health = dbCheckHealth();
  
  my $nodes = esGet("/_nodes");
  $main::numberOfNodes = dataNodes($nodes->{nodes});

@@ -5,15 +5,18 @@
 
 import argparse
 import ipaddress
+import itertools
 import json
 import logging
 import os
 import pynetbox
+import randomcolor
 import re
 import sys
 import time
 
 from collections.abc import Iterable
+from datetime import datetime
 from slugify import slugify
 from netbox_library_import import import_library
 
@@ -162,6 +165,14 @@ def main():
         help="Filename of JSON file containing network subnet/host name mapping",
     )
     parser.add_argument(
+        '--service-templates',
+        dest='serviceTemplateFileName',
+        type=str,
+        default=None,
+        required=False,
+        help="Filename of JSON file containing default service template definitions",
+    )
+    parser.add_argument(
         '--default-group',
         dest='defaultGroupName',
         type=str,
@@ -195,7 +206,15 @@ def main():
         type=str,
         default=[os.getenv('NETBOX_DEFAULT_DEVICE_ROLE', 'Unspecified')],
         required=False,
-        help="Device role(s) to create",
+        help="Device role(s) to create (see also --device-roles)",
+    )
+    parser.add_argument(
+        '--device-roles',
+        dest='deviceRolesFileName',
+        type=str,
+        default=None,
+        required=False,
+        help="Filename of JSON file containing default device role definitions (see also -r/--device-role)",
     )
     parser.add_argument(
         '-y',
@@ -250,6 +269,7 @@ def main():
     deviceTypes = {}
     deviceRoles = {}
     manufacturers = {}
+    randColor = randomcolor.RandomColor(seed=datetime.now().timestamp())
 
     # wait for a good connection
     while args.wait:
@@ -380,15 +400,41 @@ def main():
                         "name": deviceRoleName,
                         "slug": slugify(deviceRoleName),
                         "vm_role": True,
+                        "color": randColor.generate()[0][1:],
                     },
                 )
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing device role \"{deviceRoleName}\": {nbe}")
 
-        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
-        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing device roles: {e}")
+
+    try:
+        # load device-roles-defaults.json from file
+        deviceRolesJson = None
+        if args.deviceRolesFileName is not None and os.path.isfile(args.deviceRolesFileName):
+            with open(args.deviceRolesFileName) as f:
+                deviceRolesJson = json.load(f)
+        if deviceRolesJson is not None and "device-roles" in deviceRolesJson:
+            for role in [r for r in deviceRolesJson["device-roles"] if "name" in r]:
+                roleDef = {
+                    "name": role["name"],
+                    "slug": slugify(role["name"]),
+                    "vm_role": True,
+                    "color": randColor.generate()[0][1:],
+                }
+                if ("description" in role) and role["description"]:
+                    roleDef["description"] = role["description"]
+                try:
+                    nb.dcim.device_roles.create(roleDef)
+                except pynetbox.RequestError as nbe:
+                    logging.warning(f"{type(nbe).__name__} processing device role \"{role['name']}\": {nbe}")
+
+        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing device roles JSON \"{args.deviceRolesFileName}\": {e}")
 
     # ###### DEVICE TYPES ##########################################################################################
     try:
@@ -435,6 +481,47 @@ def main():
         logging.debug(f"sites (after): { {k:v.id for k, v in sites.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
+
+    # ###### Service templates #####################################################################################
+    try:
+        # load service-template-defaults.json from file
+        serviceTemplatesJson = None
+        if args.serviceTemplateFileName is not None and os.path.isfile(args.serviceTemplateFileName):
+            with open(args.serviceTemplateFileName) as f:
+                serviceTemplatesJson = json.load(f)
+        if serviceTemplatesJson is not None and "service-templates" in serviceTemplatesJson:
+            for srv in serviceTemplatesJson["service-templates"]:
+                if (
+                    ("name" in srv)
+                    and (srv["name"])
+                    and ("protocols" in srv)
+                    and (len(srv["protocols"]) > 0)
+                    and ("ports" in srv)
+                    and (len(srv["ports"]) > 0)
+                ):
+                    for prot in srv["protocols"]:
+                        srvName = f"{srv['name']} ({prot.upper()})" if (len(srv["protocols"]) > 1) else srv["name"]
+                        portInts = [p for p in srv["ports"] if isinstance(p, int)]
+                        for portRange in [
+                            r.split('-') for r in srv["ports"] if isinstance(r, str) and re.match(r'^\d+-\d+$', r)
+                        ]:
+                            portInts = portInts + list(range(int(portRange[0]), int(portRange[1]) + 1))
+                        srvTempl = {
+                            "name": srvName,
+                            "protocol": prot.lower(),
+                            "ports": list(set(portInts)),
+                        }
+                        if ("description" in srv) and srv["description"]:
+                            srvTempl["description"] = srv["description"]
+                        try:
+                            nb.ipam.service_templates.create(
+                                srvTempl,
+                            )
+                        except pynetbox.RequestError as nbe:
+                            logging.warning(f"{type(nbe).__name__} processing service template \"{srvName}\": {nbe}")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing service templates JSON \"{args.serviceTemplateFileName}\": {e}")
 
     # ###### Net Map ###############################################################################################
     try:

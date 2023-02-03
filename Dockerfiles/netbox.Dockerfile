@@ -30,10 +30,12 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
 
+ARG NETBOX_DEVICETYPE_LIBRARY_PATH="/opt/netbox-devicetype-library"
 ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=false
 
 ENV BASE_PATH netbox
+ENV NETBOX_DEVICETYPE_LIBRARY_PATH $NETBOX_DEVICETYPE_LIBRARY_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
 
@@ -45,7 +47,7 @@ RUN apt-get -q update && \
       psmisc \
       supervisor \
       tini && \
-    /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify && \
+    /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify randomcolor && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -58,10 +60,10 @@ RUN apt-get -q update && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    mkdir -p /opt/unit /opt/netbox-devicetype-library && \
+    mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
-    cd /opt && \
-        curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./netbox-devicetype-library --strip-components 1 && \
+    cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
+        curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \
       mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq ".routes[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
@@ -74,6 +76,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
+COPY --chmod=644 netbox/*-defaults.json /etc/
 COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 EXPOSE 9001

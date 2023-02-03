@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:2.4.1
+FROM opensearchproject/opensearch:2.5.0
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -41,12 +41,11 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
-# override_main_response_version - https://opensearch.org/docs/latest/clients/agents-and-ingestion-tools/index/#compatibility-matrices
 RUN yum install -y openssl util-linux procps && \
   yum upgrade -y && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
-  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true' > /usr/share/opensearch/config/opensearch.yml && \
+  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true\nhttp.cors.enabled: true\nhttp.cors.allow-origin: "*"\nhttp.cors.allow-methods: OPTIONS, HEAD, GET, POST, PUT, DELETE\nhttp.cors.allow-headers: "kbn-version, Origin, X-Requested-With, Content-Type, Accept, Engaged-Auth-Token Authorization"' > /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
   mkdir -p /var/local/ca-trust && \

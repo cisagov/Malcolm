@@ -188,6 +188,26 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
     return localPath
 
 
+##################################################################################################
+def GetUidGidFromComposeFile(composeFile):
+    uidGidDict = defaultdict(str)
+    pyPlatform = platform.system()
+    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    if os.path.isfile(composeFile):
+        with open(composeFile, 'r') as f:
+            composeFileLines = f.readlines()
+            uidGidDict.update(
+                dict(
+                    x.split(':')
+                    for x in [
+                        ''.join(x.split()) for x in composeFileLines if re.search(r'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
+                    ]
+                )
+            )
+    return uidGidDict
+
+
 ###################################################################################################
 def same_file_or_dir(path1, path2):
     try:
@@ -582,6 +602,19 @@ def posInt(value):
         raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
 
     return ivalue
+
+###################################################################################################
+# Dies if $value isn't positive. NoneType is also acceptable
+def posInt(value):
+    if value is None:
+        return None
+
+    ivalue = int(value)
+    if ivalue <= 0:
+        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
+
+    return ivalue
+
 
 ###################################################################################################
 # determine if a program/script exists and is executable in the system path
