@@ -18,6 +18,7 @@
 # -o        (set to read-only after processing)
 # -n        (pause nginx-proxy for the duration)
 # -l        (for multiple PCAP files, maintain offsets relative to each other)
+# -b <backup of netbox database>
 # -m <malcolm docker-compose file>
 # -d <PCAP start date or offset>
 # -s <seconds after inserts become "idle" before we assume the data has been inserted>
@@ -77,6 +78,7 @@ RESTART="false"
 READ_ONLY="false"
 NGINX_DISABLE="false"
 MALCOLM_DOCKER_COMPOSE="$FULL_PWD"/docker-compose.yml
+NETBOX_BACKUP_FILE=""
 PCAP_FILES=()
 PCAP_ADJUST_SCRIPT=""
 PCAP_DATE="two days ago"
@@ -84,7 +86,7 @@ PCAP_RELATIVE_ADJUST="false"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
 PCAP_PROCESS_IDLE_MAX_SECONDS=3600
-while getopts 'vwronlm:x:s:d:' OPTION; do
+while getopts 'vwronlb:m:x:s:d:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -108,6 +110,10 @@ while getopts 'vwronlm:x:s:d:' OPTION; do
 
     l)
       PCAP_RELATIVE_ADJUST="true"
+      ;;
+
+    b)
+      NETBOX_BACKUP_FILE="$OPTARG"
       ;;
 
     m)
@@ -265,6 +271,12 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   done
   sleep 30
 
+  if [[ -n "$NETBOX_BACKUP_FILE" ]] && [[ -f "$NETBOX_BACKUP_FILE" ]]; then
+    # restore the netbox backup
+    [[ -n $VERBOSE_FLAG ]] && echo "Restoring NetBox database backup" >&2
+    ./scripts/netbox-restore $VERBOSE_FLAG -f "$MALCOLM_FILE" --netbox-restore "$NETBOX_BACKUP_FILE" || true
+  fi
+
   if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) || (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )); then
     # copy the PCAP file(s) to the Malcolm upload directory to be processed
     (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
@@ -338,7 +350,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
-    for CONTAINER in filebeat logstash upload pcap-monitor zeek name-map-ui netbox netbox-postgres netbox-redis netbox-redis-cache pcap-capture freq; do
+    for CONTAINER in filebeat logstash upload pcap-monitor zeek name-map-ui pcap-capture freq; do
       docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5

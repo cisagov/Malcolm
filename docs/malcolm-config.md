@@ -17,6 +17,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](upload.md#Tagging) (default `true`)
 * `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external [Beats](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html)-based forwarders from which it will accept logs (default `true`)
 * `CONNECTION_SECONDS_SEVERITY_THRESHOLD` - when [severity scoring](severity.md#Severity) is enabled, this variable indicates the duration threshold (in seconds) for assigning severity to long connections (default `3600`)
+* `DASHBOARDS_DARKMODE` – if set to `true`, [OpenSearch Dashboards](dashboards.md#DashboardsVisualizations) will be set to dark mode upon initialization (default `true`)
 * `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
 * `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) that are determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)
 * `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
@@ -43,7 +44,7 @@ Various other environment variables inside of `docker-compose.yml` can be tweake
 * `OPENSEARCH_SECONDARY` - if set to `true`, Malcolm will forward logs to a secondary remote OpenSearch instance in addition to the primary (local or remote) OpenSearch instance (default `false`)
 * `OPENSEARCH_SECONDARY_URL` - when forwarding to a secondary remote OpenSearch instance (i.e., `OPENSEARCH_SECONDARY` is `true`) this value specifies the secondary remote instance URL in the format `protocol://host:port`
 * `OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION` - if set to `true`, connections to the secondary remote OpenSearch instance will require full TLS certificate validation (this may fail if using self-signed certificates) (default `false`)
-* `NETBOX_DISABLED` - if set to `true`, Malcolm will **not** start and manage a [NetBox](netbox.md#NetBox) instance (default `true`)
+* `NETBOX_DISABLED` - if set to `true`, Malcolm will **not** start and manage a [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis) instance (default `true`)
 * `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](authsetup.md#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](authsetup.md#AuthLDAP) authentication
 * `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](quickstart.md#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
 * `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy like Traefik, Caddy, etc.)

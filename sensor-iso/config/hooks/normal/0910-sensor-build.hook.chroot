@@ -13,14 +13,14 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-ZEEK_VER=5.0.4-0
+ZEEK_VER=5.0.6-0
 ZEEK_LTS=true
 ZEEK_DIR="/opt/zeek"
 export PATH="${ZEEK_DIR}"/bin:$PATH
 
 SURICATA_RULES_DIR="/etc/suricata/rules"
 
-BEATS_VER="8.5.3"
+BEATS_VER="8.6.1"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"

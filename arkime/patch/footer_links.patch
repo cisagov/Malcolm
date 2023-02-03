@@ -1,5 +1,5 @@
 diff --git a/viewer/vueapp/src/components/utils/Footer.vue b/viewer/vueapp/src/components/utils/Footer.vue
-index 84b28a45..320dd70c 100644
+index 84b28a45..7a414ca2 100644
 --- a/viewer/vueapp/src/components/utils/Footer.vue
 +++ b/viewer/vueapp/src/components/utils/Footer.vue
 @@ -4,9 +4,12 @@

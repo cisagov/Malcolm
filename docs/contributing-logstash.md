@@ -34,13 +34,15 @@ Finally, in your `docker-compose` files, set a new `LOGSTASH_PARSE_PIPELINE_ADDR
 
 The following modifications must be made in order for Malcolm to be able to parse new Zeek log files:
 
-1. Add a parsing section to [`logstash/pipelines/zeek/11_zeek_logs.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/11_zeek_logs.conf)
+1. Add a parsing section to [`logstash/pipelines/zeek/11_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/11_zeek_parse.conf)
     * Follow patterns for existing log files as an example
     * For common Zeek fields like the `id` four-tuple, timestamp, etc., use the same convention used by existing Zeek logs in that file (e.g., `ts`, `uid`, `orig_h`, `orig_p`, `resp_h`, `resp_p`)
     * Take care, especially when copy-pasting filter code, that the Zeek delimiter isn't modified from a tab character to a space character (see "*zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP*" warnings in that file)
 1. If necessary, perform log normalization in [`logstash/pipelines/zeek/12_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/12_zeek_normalize.conf) for values like action (`event.action`), result (`event.result`), application protocol version (`network.protocol_version`), etc.
-1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/11_zeek_logs.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/13_zeek_convert.conf)
+1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/11_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/14_zeek_convert.conf)
 1. Identify the new fields and add them as described in [Adding new log fields](contributing-new-log-fields.md#NewFields)
+
+The script [`scripts/zeek_script_to_malcolm_boilerplate.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/zeek_script_to_malcolm_boilerplate.py) may help by autogenerating these filters for you.
 
 ## <a name="LogstashEnrichments"></a>Enrichments
 

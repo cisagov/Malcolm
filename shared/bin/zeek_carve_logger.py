@@ -180,7 +180,7 @@ def main():
     broSigLogSpec = args.broSigLogSpec
     if broSigLogSpec is not None:
         if os.path.isdir(broSigLogSpec):
-            # _carved tag will be recognized by 11_zeek_logs.conf in logstash
+            # _carved tag will be recognized by 12_zeek_mutate.conf in logstash
             broSigLogSpec = os.path.join(broSigLogSpec, "signatures(_carved).log")
         else:
             # make sure path to write to zeek signatures log file exists before we start writing

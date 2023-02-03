@@ -3,6 +3,7 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import argparse
 import contextlib
 import getpass
 import importlib
@@ -185,6 +186,26 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
                     break
 
     return localPath
+
+
+##################################################################################################
+def GetUidGidFromComposeFile(composeFile):
+    uidGidDict = defaultdict(str)
+    pyPlatform = platform.system()
+    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    if os.path.isfile(composeFile):
+        with open(composeFile, 'r') as f:
+            composeFileLines = f.readlines()
+            uidGidDict.update(
+                dict(
+                    x.split(':')
+                    for x in [
+                        ''.join(x.split()) for x in composeFileLines if re.search(r'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
+                    ]
+                )
+            )
+    return uidGidDict
 
 
 ###################################################################################################
@@ -569,6 +590,19 @@ def str2bool(v):
             raise ValueError("Boolean value expected")
     else:
         raise ValueError("Boolean value expected")
+
+
+###################################################################################################
+# Dies if $value isn't positive. NoneType is also acceptable
+def posInt(value):
+    if value is None:
+        return None
+
+    ivalue = int(value)
+    if ivalue <= 0:
+        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
+
+    return ivalue
 
 
 ###################################################################################################

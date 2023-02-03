@@ -6,6 +6,7 @@ server.host: "0.0.0.0"
 server.basePath: "/dashboards"
 server.rewriteBasePath: true
 server.maxPayloadBytes: 8388608
+server.cors: true
 opensearch.hosts: ["${OPENSEARCH_URL}"]
 opensearch.username: "_MALCOLM_DASHBOARDS_OPENSEARCH_USER_"
 opensearch.password: "_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_"
@@ -29,3 +30,11 @@ map.regionmap:
             description: "Country Code2"
           - name: "NAME"
             description: "Country Name"
+
+# to enable third-party visualization libraries (see https://github.com/lguillaud/osd_transform_vis#server-side)
+csp.strict: false
+csp.warnLegacyBrowsers: false
+csp.rules:
+  - "script-src 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com/ https://d3js.org/ https://cdn.jsdelivr.net/ https://cdnjs.cloudflare.com/ https://cdn.datatables.net/ 'self'"
+  - "worker-src blob: *"
+  - "child-src data: * blob: *"

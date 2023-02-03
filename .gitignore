@@ -22,6 +22,7 @@
 .direnv
 .vagrant
 malcolm_*images.tar.gz
+malcolm_netbox_backup_*.psql.gz
 *.iso
 *-build.log
 Gemfile.lock
