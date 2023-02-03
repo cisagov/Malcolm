@@ -591,17 +591,6 @@ def str2bool(v):
     else:
         raise ValueError("Boolean value expected")
 
-###################################################################################################
-# Dies if $value isn't positive. NoneType is also acceptable
-def posInt(value):
-    if value is None:
-        return None
-
-    ivalue = int(value)
-    if ivalue <= 0:
-        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
-
-    return ivalue
 
 ###################################################################################################
 # Dies if $value isn't positive. NoneType is also acceptable
