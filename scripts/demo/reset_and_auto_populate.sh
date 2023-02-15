@@ -86,7 +86,8 @@ PCAP_RELATIVE_ADJUST="false"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
 PCAP_PROCESS_IDLE_MAX_SECONDS=3600
-while getopts 'vwronlb:m:x:s:d:' OPTION; do
+NETBOX_INIT_MAX_SECONDS=300
+while getopts 'vwronlb:m:i:x:s:d:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -129,6 +130,12 @@ while getopts 'vwronlb:m:x:s:d:' OPTION; do
     x)
       if [[ $OPTARG =~ $NUMERIC_REGEX ]] ; then
          PCAP_PROCESS_IDLE_MAX_SECONDS=$OPTARG
+      fi
+      ;;
+
+    i)
+      if [[ $OPTARG =~ $NUMERIC_REGEX ]] ; then
+         NETBOX_INIT_MAX_SECONDS=$OPTARG
       fi
       ;;
 
@@ -275,9 +282,17 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     # restore the netbox backup
     [[ -n $VERBOSE_FLAG ]] && echo "Restoring NetBox database backup" >&2
     # wait for NetBox to be ready with the initial startup before we go mucking around
-    until docker-compose -f "$MALCOLM_FILE" logs netbox 2>/dev/null | grep -q 'Unit configuration loaded successfully'; do
+    CURRENT_TIME=$(date -u +%s)
+    FIRST_NETBOX_INIT_CHECK_TIME=$CURRENT_TIME
+    until docker-compose -f "$MALCOLM_FILE" logs netbox 2>/dev/null | tr -cd '\11\12\15\40-\176' | grep -q "Unit configuration loaded successfully"; do
       [[ -n $VERBOSE_FLAG ]] && echo "waiting for NetBox initialization to complete..." >&2
       sleep 10
+      # if it's been more than the maximum wait time, bail
+      CURRENT_TIME=$(date -u +%s)
+      if (( ($CURRENT_TIME - $FIRST_NETBOX_INIT_CHECK_TIME) >= $NETBOX_INIT_MAX_SECONDS )); then
+        [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for netbox_init" >&2
+        break
+      fi
     done
     sleep 20
     ./scripts/netbox-restore $VERBOSE_FLAG -f "$MALCOLM_FILE" --netbox-restore "$NETBOX_BACKUP_FILE" || true
