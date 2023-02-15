@@ -68,7 +68,6 @@ FULL_PWD="$($REALPATH "$(pwd)" | head -n 1)"
 # script options
 set -e
 set -u
-set -o pipefail
 ENCODING="utf-8"
 
 # parse command-line options
