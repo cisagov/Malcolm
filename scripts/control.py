@@ -63,6 +63,7 @@ try:
 except:
     coloramaImported = False
 
+
 ###################################################################################################
 # perform a service-keystore operation in a Docker container
 #
@@ -103,7 +104,6 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     uidGidDict = None
 
     try:
-
         uidGidDict = GetUidGidFromComposeFile(args.composeFile)
 
         composeFileLines = list()
@@ -213,7 +213,6 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     raise Exception(f'Unable to identify docker image for {service} in {args.composeFile}')
 
             if dockerCmd is not None:
-
                 # append whatever other arguments to pass to the executable filespec
                 if keystore_args:
                     dockerCmd.extend(list(keystore_args))
@@ -326,7 +325,6 @@ def netboxRestore(backupFileName=None):
     global dockerComposeBin
 
     if backupFileName and os.path.isfile(backupFileName):
-
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
@@ -344,6 +342,12 @@ def netboxRestore(backupFileName=None):
             '-u',
             f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
         ]
+
+        # if the netbox_init.py process is happening, interrupt it
+        dockerCmd = dockerCmdBase + ['netbox', 'bash', '-c', 'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill']
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+        if (err != 0) and args.debug:
+            eprint(f'Error interrupting netbox_init.py: {results}')
 
         # drop the existing netbox database
         dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
@@ -510,7 +514,6 @@ def logs():
 
                 outputJson = LoadStrIfJson(messageStrToTestJson)
                 if isinstance(outputJson, dict):
-
                     # if there's a timestamp, move it outside of the JSON to the beginning of the log string
                     timeKey = None
                     if 'time' in outputJson:
@@ -531,7 +534,6 @@ def logs():
                         and ('job.position' in outputJson)
                         and ('job.command' in outputJson)
                     ):
-
                         # this is a status output line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
 
                         # remove some clutter for the display
@@ -844,7 +846,6 @@ def authSetup(wipe=False):
     global opensslBin
 
     if YesOrNo('Store administrator username/password for local Malcolm access?', default=True):
-
         # prompt username and password
         usernamePrevious = None
         password = None
@@ -1023,7 +1024,6 @@ def authSetup(wipe=False):
     filebeatPath = os.path.join(MalcolmPath, os.path.join('filebeat', 'certs'))
     if YesOrNo('(Re)generate self-signed certificates for a remote log forwarder', default=True):
         with pushd(logstashPath):
-
             # make clean to clean previous files
             for pat in ['*.srl', '*.csr', '*.key', '*.crt', '*.pem']:
                 for oldfile in glob.glob(pat):
@@ -1262,7 +1262,6 @@ def authSetup(wipe=False):
         'Store username/password for email alert sender account? (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account)',
         default=False,
     ):
-
         # prompt username and password
         emailPassword = None
         emailPasswordConfirm = None
@@ -1539,7 +1538,6 @@ def main():
         exit(2)
 
     with pushd(MalcolmPath):
-
         # don't run this as root
         if (pyPlatform != PLATFORM_WINDOWS) and (
             (os.getuid() == 0) or (os.geteuid() == 0) or (getpass.getuser() == 'root')

@@ -274,6 +274,12 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   if [[ -n "$NETBOX_BACKUP_FILE" ]] && [[ -f "$NETBOX_BACKUP_FILE" ]]; then
     # restore the netbox backup
     [[ -n $VERBOSE_FLAG ]] && echo "Restoring NetBox database backup" >&2
+    # wait for NetBox to be ready with the initial startup before we go mucking around
+    until docker-compose -f "$MALCOLM_FILE" logs netbox 2>/dev/null | grep -q 'Unit configuration loaded successfully'; do
+      [[ -n $VERBOSE_FLAG ]] && echo "waiting for NetBox initialization to complete..." >&2
+      sleep 10
+    done
+    sleep 20
     ./scripts/netbox-restore $VERBOSE_FLAG -f "$MALCOLM_FILE" --netbox-restore "$NETBOX_BACKUP_FILE" || true
   fi
 
