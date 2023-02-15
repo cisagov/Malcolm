@@ -283,7 +283,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     # wait for NetBox to be ready with the initial startup before we go mucking around
     CURRENT_TIME=$(date -u +%s)
     FIRST_NETBOX_INIT_CHECK_TIME=$CURRENT_TIME
-    until docker-compose -f "$MALCOLM_FILE" logs netbox 2>/dev/null | tr -cd '\11\12\15\40-\176' | grep -q "Unit configuration loaded successfully"; do
+    until docker-compose -f "$MALCOLM_FILE" logs netbox 2>/dev/null | grep -q "Unit configuration loaded successfully"; do
       [[ -n $VERBOSE_FLAG ]] && echo "waiting for NetBox initialization to complete..." >&2
       sleep 10
       # if it's been more than the maximum wait time, bail
