@@ -623,6 +623,19 @@ def logs():
 
         if finishedStarting:
             process.terminate()
+            # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
+            # accessing these from the Malcolm server.
+            print("Started Malcolm\n\n")
+            print("Malcolm services can be accessed via the following URLs:")
+            print("------------------------------------------------------------------------------")
+            print("  - Arkime: https://localhost/")
+            print("  - OpenSearch Dashboards: https://localhost/dashboards/")
+            print("  - PCAP upload (web): https://localhost/upload/")
+            print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
+            print("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
+            print("  - NetBox: https://localhost/netbox/\n")
+            print("  - Account management: https://localhost:488/\n")
+            print("  - Documentation: https://localhost/readme/\n")
 
     process.poll()
 
@@ -827,19 +840,7 @@ def start():
 
     # start docker
     err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
-    if err == 0:
-        eprint("Started Malcolm\n\n")
-        eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")
-        eprint("------------------------------------------------------------------------------")
-        eprint("  - Arkime: https://localhost/")
-        eprint("  - OpenSearch Dashboards: https://localhost/dashboards/")
-        eprint("  - PCAP upload (web): https://localhost/upload/")
-        eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-        eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
-        eprint("  - NetBox: https://localhost/netbox/\n")
-        eprint("  - Account management: https://localhost:488/\n")
-        eprint("  - Documentation: https://localhost/readme/\n")
-    else:
+    if err != 0:
         eprint("Malcolm failed to start\n")
         eprint("\n".join(out))
         exit(err)
