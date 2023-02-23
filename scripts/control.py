@@ -456,6 +456,9 @@ def logs():
         r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
     )
 
+    finishedStartingRegEx = re.compile(r'.+Pipelines\s+running\s+\{.*:non_running_pipelines=>\[\]\}')
+    finishedStarting = False
+
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
     osEnv = os.environ.copy()
     osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
@@ -495,6 +498,8 @@ def logs():
             outputStrEscaped = EscapeAnsi(outputStr)
             if ignoreRegEx.match(outputStrEscaped):
                 pass  ### print(f'!!!!!!!: {outputStr}')
+            elif finishedStartingRegEx.match(outputStrEscaped) and (args.cmdStart or args.cmdRestart):
+                finishedStarting = True
             else:
                 serviceMatch = serviceRegEx.search(outputStrEscaped)
                 serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
@@ -615,6 +620,10 @@ def logs():
 
         else:
             time.sleep(0.5)
+
+        if finishedStarting:
+            process.terminate()
+
     process.poll()
 
 
