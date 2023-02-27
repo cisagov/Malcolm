@@ -24,7 +24,7 @@ import time
 from malcolm_common import *
 from base64 import b64encode
 from collections import defaultdict, namedtuple
-from subprocess import PIPE, STDOUT, Popen, check_call, CalledProcessError
+from subprocess import PIPE, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
 
 try:
@@ -492,6 +492,7 @@ def logs():
         ][: 8 if args.service is not None else -1],
         env=osEnv,
         stdout=PIPE,
+        stderr=None if args.debug else DEVNULL,
     )
     while True:
         output = process.stdout.readline()
@@ -502,7 +503,11 @@ def logs():
             outputStrEscaped = EscapeAnsi(outputStr)
             if ignoreRegEx.match(outputStrEscaped):
                 pass  ### print(f'!!!!!!!: {outputStr}')
-            elif finishedStartingRegEx.match(outputStrEscaped) and (args.cmdStart or args.cmdRestart):
+            elif (
+                (args.cmdStart or args.cmdRestart)
+                and (not args.cmdLogs)
+                and finishedStartingRegEx.match(outputStrEscaped)
+            ):
                 finishedStarting = True
             else:
                 serviceMatch = serviceRegEx.search(outputStrEscaped)
@@ -625,9 +630,13 @@ def logs():
 
         if finishedStarting:
             process.terminate()
+            try:
+                process.wait(timeout=5.0)
+            except TimeoutExpired:
+                process.kill()
             # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
             # accessing these from the Malcolm server.
-            print("Started Malcolm\n\n")
+            print("\nStarted Malcolm\n\n")
             print("Malcolm services can be accessed via the following URLs:")
             print("------------------------------------------------------------------------------")
             print("  - Arkime: https://localhost/")
