@@ -1,4 +1,4 @@
-FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:8.4.0
+FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:8.6.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -46,7 +46,8 @@ USER root
 
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
-RUN apt-get -q update && \
+RUN set -x && \
+    apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
         gettext \
@@ -57,6 +58,8 @@ RUN apt-get -q update && \
         tini && \
     chmod +x /usr/bin/tini && \
     pip3 install ipaddress supervisor manuf pyyaml && \
+    export JAVA_HOME=/usr/share/logstash/jdk && \
+    /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
     echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
