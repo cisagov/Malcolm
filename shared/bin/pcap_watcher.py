@@ -449,7 +449,7 @@ def main():
     else:
         preexistingDir = False
         if debug:
-            eprint(f'{scriptname}: creating "{args.baseDir}" to monitor')
+            eprint(f'{scriptName}: creating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
