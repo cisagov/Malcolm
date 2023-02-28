@@ -62,6 +62,8 @@ RUN apt-get -q update && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
     chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
+    # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
+    chown --silent -R root:root /opt/netbox/venv/* && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
         curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \
