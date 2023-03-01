@@ -26,8 +26,7 @@ import zmq
 from pcap_utils import *
 from collections import defaultdict
 
-import opensearchpy
-import opensearch_dsl
+from opensearchpy import OpenSearch, Search
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -44,33 +43,33 @@ debug = False
 verboseDebug = False
 pdbFlagged = False
 args = None
-opensearchDslHttpAuth = None
+opensearchHttpAuth = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
 DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 
+
 ###################################################################################################
 # watch files written to and moved to this directory
 class EventWatcher(pyinotify.ProcessEvent):
-
     # notify on files written in-place then closed (IN_CLOSE_WRITE), and moved into this directory (IN_MOVED_TO)
     _methods = ["IN_CLOSE_WRITE", "IN_MOVED_TO"]
 
     def __init__(self):
         global args
-        global opensearchDslHttpAuth
+        global opensearchHttpAuth
         global debug
         global verboseDebug
 
         super().__init__()
 
         self.useOpenSearch = False
+        self.openSearchClient = None
 
         # if we're going to be querying OpenSearch for past PCAP file status, connect now
         if args.opensearchUrl is not None:
-
             connected = False
             healthy = False
 
@@ -79,16 +78,18 @@ class EventWatcher(pyinotify.ProcessEvent):
                 try:
                     if debug:
                         eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
-                    opensearch_dsl.connections.create_connection(
+
+                    openSearchClient = OpenSearch(
                         hosts=[args.opensearchUrl],
-                        http_auth=opensearchDslHttpAuth,
+                        http_auth=opensearchHttpAuth,
                         verify_certs=args.opensearchSslVerify,
                         ssl_assert_hostname=False,
                         ssl_show_warn=False,
                     )
+
                     if verboseDebug:
-                        eprint(f"{scriptName}:\t{opensearch_dsl.connections.get_connection().cluster.health()}")
-                    connected = opensearch_dsl.connections.get_connection() is not None
+                        eprint(f"{scriptName}:\t{openSearchClient.cluster.health()}")
+                    connected = openSearchClient is not None
 
                 except opensearchpy.exceptions.ConnectionError as connError:
                     if debug:
@@ -104,11 +105,12 @@ class EventWatcher(pyinotify.ProcessEvent):
                 try:
                     if debug:
                         eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
-                    opensearch_dsl.connections.get_connection().cluster.health(
-                        index=ARKIME_FILES_INDEX, wait_for_status='yellow'
+                    openSearchClient.cluster.health(
+                        index=ARKIME_FILES_INDEX,
+                        wait_for_status='yellow',
                     )
                     if verboseDebug:
-                        eprint(f"{scriptName}:\t{opensearch_dsl.connections.get_connection().cluster.health()}")
+                        eprint(f"{scriptName}:\t{openSearchClient.cluster.health()}")
                     healthy = True
 
                 except opensearchpy.exceptions.ConnectionTimeout as connError:
@@ -140,10 +142,8 @@ class EventWatcher(pyinotify.ProcessEvent):
 ###################################################################################################
 # set up event processor to append processed events from to the event queue
 def event_process_generator(cls, method):
-
     # actual method called when we are notified of a file
     def _method_name(self, event):
-
         global args
         global debug
         global verboseDebug
@@ -153,7 +153,6 @@ def event_process_generator(cls, method):
 
         # the entity must be a regular PCAP file and actually exist
         if (not event.dir) and os.path.isfile(event.pathname):
-
             # get the file magic description and mime type
             fileMime = magic.from_file(event.pathname, mime=True)
             fileType = magic.from_file(event.pathname)
@@ -163,14 +162,13 @@ def event_process_generator(cls, method):
             if (args.minBytes <= fileSize <= args.maxBytes) and (
                 (fileMime in PCAP_MIME_TYPES) or ('pcap-ng' in fileType)
             ):
-
                 relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
 
                 # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
                 fileIsDuplicate = False
                 if self.useOpenSearch:
                     s = (
-                        opensearch_dsl.Search(index=ARKIME_FILES_INDEX)
+                        Search(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
                         .filter("term", node=args.nodeName)
                         .query("wildcard", name=f"*{os.path.sep}{relativePath}")
                     )
@@ -243,7 +241,7 @@ def debug_toggle_handler(signum, frame):
 # main
 def main():
     global args
-    global opensearchDslHttpAuth
+    global opensearchHttpAuth
     global debug
     global verboseDebug
     global debugToggled
@@ -423,7 +421,7 @@ def main():
             args.opensearchUrl = 'http://opensearch:9200'
         elif 'url' in opensearchCreds:
             args.opensearchUrl = opensearchCreds['url']
-    opensearchDslHttpAuth = (
+    opensearchHttpAuth = (
         f"{opensearchCreds['user']}:{opensearchCreds['password']}" if opensearchCreds['user'] is not None else None
     )
 
