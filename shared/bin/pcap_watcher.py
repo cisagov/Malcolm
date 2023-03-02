@@ -27,6 +27,7 @@ from pcap_utils import *
 from collections import defaultdict
 
 from opensearchpy import OpenSearch, Search
+from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -91,7 +92,7 @@ class EventWatcher(pyinotify.ProcessEvent):
                         eprint(f"{scriptName}:\t{openSearchClient.cluster.health()}")
                     connected = openSearchClient is not None
 
-                except opensearchpy.exceptions.ConnectionError as connError:
+                except ConnectionError as connError:
                     if debug:
                         eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
 
@@ -113,7 +114,7 @@ class EventWatcher(pyinotify.ProcessEvent):
                         eprint(f"{scriptName}:\t{openSearchClient.cluster.health()}")
                     healthy = True
 
-                except opensearchpy.exceptions.ConnectionTimeout as connError:
+                except ConnectionTimeout as connError:
                     if verboseDebug:
                         eprint(f"{scriptName}:\tOpenSearch health check: {connError}")
 
