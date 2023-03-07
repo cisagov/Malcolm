@@ -28,6 +28,7 @@ from collections import defaultdict
 
 from opensearchpy import OpenSearch, Search
 from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
+from urllib3.exceptions import NewConnectionError
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -77,28 +78,52 @@ class EventWatcher(pyinotify.ProcessEvent):
             # create the connection to OpenSearch
             while (not connected) and (not shuttingDown):
                 try:
+                    try:
+                        if debug:
+                            eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
+
+                        self.openSearchClient = OpenSearch(
+                            hosts=[args.opensearchUrl],
+                            http_auth=opensearchHttpAuth,
+                            verify_certs=args.opensearchSslVerify,
+                            ssl_assert_hostname=False,
+                            ssl_show_warn=False,
+                            request_timeout=1,
+                        )
+
+                        if verboseDebug:
+                            eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+
+                        self.openSearchClient.cluster.health(
+                            wait_for_status='red',
+                            request_timeout=1,
+                        )
+
+                        if verboseDebug:
+                            eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+
+                        connected = self.openSearchClient is not None
+                        if not connected:
+                            time.sleep(1)
+
+                    except (
+                        ConnectionError,
+                        ConnectionTimeout,
+                        ConnectionRefusedError,
+                        NewConnectionError,
+                    ) as connError:
+                        if debug:
+                            eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
+
+                except Exception as genericError:
                     if debug:
-                        eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
-
-                    openSearchClient = OpenSearch(
-                        hosts=[args.opensearchUrl],
-                        http_auth=opensearchHttpAuth,
-                        verify_certs=args.opensearchSslVerify,
-                        ssl_assert_hostname=False,
-                        ssl_show_warn=False,
-                    )
-
-                    if verboseDebug:
-                        eprint(f"{scriptName}:\t{openSearchClient.cluster.health()}")
-                    connected = openSearchClient is not None
-
-                except ConnectionError as connError:
-                    if debug:
-                        eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
+                        eprint(f"{scriptName}:\tUnexpected exception while connecting to OpenSearch: {genericError}")
 
                 if (not connected) and args.opensearchWaitForHealth:
                     time.sleep(1)
                 else:
+                    if args.opensearchWaitForHealth:
+                        time.sleep(1)
                     break
 
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
@@ -106,15 +131,20 @@ class EventWatcher(pyinotify.ProcessEvent):
                 try:
                     if debug:
                         eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
-                    openSearchClient.cluster.health(
+                    self.openSearchClient.cluster.health(
                         index=ARKIME_FILES_INDEX,
                         wait_for_status='yellow',
                     )
                     if verboseDebug:
-                        eprint(f"{scriptName}:\t{openSearchClient.cluster.health()}")
+                        eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
                     healthy = True
 
-                except ConnectionTimeout as connError:
+                except (
+                    ConnectionError,
+                    ConnectionTimeout,
+                    ConnectionRefusedError,
+                    NewConnectionError,
+                ) as connError:
                     if verboseDebug:
                         eprint(f"{scriptName}:\tOpenSearch health check: {connError}")
 
