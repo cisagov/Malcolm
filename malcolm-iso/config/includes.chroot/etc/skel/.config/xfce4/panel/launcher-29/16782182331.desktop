@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Configure Malcolm
+Exec=tilix --title="Malcolm Configuration" --maximize -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/install.py --configure"
+Comment=install.py --configure
+Terminal=false
+Type=Application
+Icon=org.xfce.settings.manager
+Categories=Network;
+StartupNotify=true
+X-XFCE-Source=file:///usr/share/applications/malcolm-configure.desktop
