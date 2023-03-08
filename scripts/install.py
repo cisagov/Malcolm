@@ -785,11 +785,11 @@ class Installer(object):
                     'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
                 )
             if fileCarveMode is not None:
-                if InstallerYesOrNo('Scan extracted files with ClamAV?', default=False):
+                if InstallerYesOrNo('Scan extracted files with ClamAV?', default=True):
                     clamAvScan = True
-                if InstallerYesOrNo('Scan extracted files with Yara?', default=False):
+                if InstallerYesOrNo('Scan extracted files with Yara?', default=True):
                     yaraScan = True
-                if InstallerYesOrNo('Scan extracted PE files with Capa?', default=False):
+                if InstallerYesOrNo('Scan extracted PE files with Capa?', default=True):
                     capaScan = True
                 if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
                     while len(vtotApiKey) <= 1:

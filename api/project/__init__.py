@@ -1,7 +1,6 @@
 import dateparser
 import json
 import malcolm_common
-import opensearch_dsl
 import opensearchpy
 import os
 import pytz
@@ -167,15 +166,15 @@ opensearchCreds = (
     else defaultdict(lambda: None)
 )
 if opensearchCreds['user'] is not None:
-    opensearchDslHttpAuth = f"{opensearchCreds['user']}:{opensearchCreds['password']}"
+    opensearchHttpAuth = f"{opensearchCreds['user']}:{opensearchCreds['password']}"
     opensearchReqHttpAuth = HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
 else:
-    opensearchDslHttpAuth = None
+    opensearchHttpAuth = None
     opensearchReqHttpAuth = None
 
-opensearch_dsl.connections.create_connection(
+opensearchClient = opensearchpy.OpenSearch(
     hosts=[opensearchUrl],
-    http_auth=opensearchDslHttpAuth,
+    http_auth=opensearchHttpAuth,
     verify_certs=opensearchSslVerify,
     ssl_assert_hostname=False,
     ssl_show_warn=False,
@@ -333,7 +332,7 @@ def filtertime(search, args, default_from="1 day ago", default_to="now"):
 
     Parameters
     ----------
-    search : opensearch_dsl.Search
+    search : opensearchpy.Search
         The object representing the OpenSearch Search query
     args : dict
         The dictionary which should contain 'from' and 'to' times (see gettimes)
@@ -377,7 +376,7 @@ def filtervalues(search, args):
 
     Parameters
     ----------
-    search : opensearch_dsl.Search
+    search : opensearchpy.Search
         The object representing the OpenSearch Search query
     args : dict
         The dictionary which should contain 'filter' (see getfilters)
@@ -413,7 +412,7 @@ def filtervalues(search, args):
                     )
                 else:
                     # field does not exist ("is null")
-                    s = s.filter('bool', must_not=opensearch_dsl.Q('exists', field=fieldname))
+                    s = s.filter('bool', must_not=opensearchpy.helpers.query.Q('exists', field=fieldname))
 
     if debugApi:
         print(f'filtervalues: {json.dumps(s.to_dict())}')
@@ -442,8 +441,11 @@ def bucketfield(fieldname, current_request, urls=None):
     fields
         the name of the field(s) on which the aggregation was performed
     """
-    s = opensearch_dsl.Search(
-        using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_INDEX_PATTERN"]
+    global opensearchClient
+
+    s = opensearchpy.Search(
+        using=opensearchClient,
+        index=app.config["ARKIME_INDEX_PATTERN"],
     ).extra(size=0)
     args = get_request_arguments(current_request)
     start_time_ms, end_time_ms, s = filtertime(s, args)
@@ -523,10 +525,13 @@ def document(index):
     results
         array of the documents retrieved (up to 'limit')
     """
+    global opensearchClient
+
     args = get_request_arguments(request)
-    s = opensearch_dsl.Search(using=opensearch_dsl.connections.get_connection(), index=index).extra(
-        size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"]))
-    )
+    s = opensearchpy.Search(
+        using=opensearchClient,
+        index=index,
+    ).extra(size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
     filters, s = filtervalues(s, args)
     return jsonify(
@@ -574,6 +579,8 @@ def fields():
     fields
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
+    global opensearchClient
+
     args = get_request_arguments(request)
 
     templateName = args['template'] if 'template' in args else app.config["MALCOLM_TEMPLATE"]
@@ -585,8 +592,9 @@ def fields():
     if arkimeFields:
         try:
             # get fields from Arkime's field's table
-            s = opensearch_dsl.Search(
-                using=opensearch_dsl.connections.get_connection(), index=app.config["ARKIME_FIELDS_INDEX"]
+            s = opensearchpy.Search(
+                using=opensearchClient,
+                index=app.config["ARKIME_FIELDS_INDEX"],
             ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
                 if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
@@ -697,6 +705,8 @@ def version():
     opensearch_health
         a JSON structure containing OpenSearch cluster health
     """
+    global opensearchClient
+
     return jsonify(
         version=app.config["MALCOLM_VERSION"],
         built=app.config["BUILD_DATE"],
@@ -706,7 +716,7 @@ def version():
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
         ).json(),
-        opensearch_health=opensearch_dsl.connections.get_connection().cluster.health(),
+        opensearch_health=opensearchClient.cluster.health(),
     )
 
 
@@ -783,6 +793,8 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
+    global opensearchClient
+
     alert = {}
     idxResponse = {}
     data = get_request_arguments(request)
@@ -880,7 +892,7 @@ def event():
                     alert['event']['hits'] = hitCount
 
         docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
-        idxResponse = opensearch_dsl.connections.get_connection().index(
+        idxResponse = opensearchClient.index(
             index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
             id=f"{docDateStr}-{alert['event']['id']}",
             body=alert,
