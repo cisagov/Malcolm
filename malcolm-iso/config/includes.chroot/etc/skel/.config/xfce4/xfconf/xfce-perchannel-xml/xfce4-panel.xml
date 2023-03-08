@@ -22,6 +22,7 @@
         <value type="int" value="21"/>
         <value type="int" value="19"/>
         <value type="int" value="18"/>
+        <value type="int" value="29"/>
         <value type="int" value="17"/>
         <value type="int" value="23"/>
         <value type="int" value="25"/>
@@ -63,6 +64,7 @@
     <property name="plugin-6" type="string" value="systray">
       <property name="square-icons" type="bool" value="true"/>
       <property name="known-legacy-items" type="array">
+        <value type="string" value="thunar"/>
         <value type="string" value="clipman"/>
         <value type="string" value="xfce4-power-manager"/>
         <value type="string" value="networkmanager applet"/>
@@ -148,6 +150,11 @@
     <property name="plugin-28" type="string" value="launcher">
       <property name="items" type="array">
         <value type="string" value="16343171811.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-29" type="string" value="launcher">
+      <property name="items" type="array">
+        <value type="string" value="16782182331.desktop"/>
       </property>
     </property>
   </property>

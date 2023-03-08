@@ -24,7 +24,7 @@ import time
 from malcolm_common import *
 from base64 import b64encode
 from collections import defaultdict, namedtuple
-from subprocess import PIPE, STDOUT, Popen, check_call, CalledProcessError
+from subprocess import PIPE, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
 
 try:
@@ -62,6 +62,7 @@ try:
     coloramaImported = True
 except:
     coloramaImported = False
+
 
 ###################################################################################################
 # perform a service-keystore operation in a Docker container
@@ -103,7 +104,6 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     uidGidDict = None
 
     try:
-
         uidGidDict = GetUidGidFromComposeFile(args.composeFile)
 
         composeFileLines = list()
@@ -213,7 +213,6 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     raise Exception(f'Unable to identify docker image for {service} in {args.composeFile}')
 
             if dockerCmd is not None:
-
                 # append whatever other arguments to pass to the executable filespec
                 if keystore_args:
                     dockerCmd.extend(list(keystore_args))
@@ -326,7 +325,6 @@ def netboxRestore(backupFileName=None):
     global dockerComposeBin
 
     if backupFileName and os.path.isfile(backupFileName):
-
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
@@ -344,6 +342,12 @@ def netboxRestore(backupFileName=None):
             '-u',
             f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
         ]
+
+        # if the netbox_init.py process is happening, interrupt it
+        dockerCmd = dockerCmdBase + ['netbox', 'bash', '-c', 'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill']
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+        if (err != 0) and args.debug:
+            eprint(f'Error interrupting netbox_init.py: {results}')
 
         # drop the existing netbox database
         dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
@@ -456,6 +460,9 @@ def logs():
         r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
     )
 
+    finishedStartingRegEx = re.compile(r'.+Pipelines\s+running\s+\{.*:non_running_pipelines=>\[\]\}')
+    finishedStarting = False
+
     # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
     osEnv = os.environ.copy()
     osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
@@ -485,6 +492,7 @@ def logs():
         ][: 8 if args.service is not None else -1],
         env=osEnv,
         stdout=PIPE,
+        stderr=None if args.debug else DEVNULL,
     )
     while True:
         output = process.stdout.readline()
@@ -495,6 +503,12 @@ def logs():
             outputStrEscaped = EscapeAnsi(outputStr)
             if ignoreRegEx.match(outputStrEscaped):
                 pass  ### print(f'!!!!!!!: {outputStr}')
+            elif (
+                (args.cmdStart or args.cmdRestart)
+                and (not args.cmdLogs)
+                and finishedStartingRegEx.match(outputStrEscaped)
+            ):
+                finishedStarting = True
             else:
                 serviceMatch = serviceRegEx.search(outputStrEscaped)
                 serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
@@ -510,7 +524,6 @@ def logs():
 
                 outputJson = LoadStrIfJson(messageStrToTestJson)
                 if isinstance(outputJson, dict):
-
                     # if there's a timestamp, move it outside of the JSON to the beginning of the log string
                     timeKey = None
                     if 'time' in outputJson:
@@ -531,7 +544,6 @@ def logs():
                         and ('job.position' in outputJson)
                         and ('job.command' in outputJson)
                     ):
-
                         # this is a status output line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
 
                         # remove some clutter for the display
@@ -615,6 +627,27 @@ def logs():
 
         else:
             time.sleep(0.5)
+
+        if finishedStarting:
+            process.terminate()
+            try:
+                process.wait(timeout=5.0)
+            except TimeoutExpired:
+                process.kill()
+            # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
+            # accessing these from the Malcolm server.
+            print("\nStarted Malcolm\n\n")
+            print("Malcolm services can be accessed via the following URLs:")
+            print("------------------------------------------------------------------------------")
+            print("  - Arkime: https://localhost/")
+            print("  - OpenSearch Dashboards: https://localhost/dashboards/")
+            print("  - PCAP upload (web): https://localhost/upload/")
+            print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
+            print("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
+            print("  - NetBox: https://localhost/netbox/\n")
+            print("  - Account management: https://localhost:488/\n")
+            print("  - Documentation: https://localhost/readme/\n")
+
     process.poll()
 
 
@@ -818,19 +851,7 @@ def start():
 
     # start docker
     err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
-    if err == 0:
-        eprint("Started Malcolm\n\n")
-        eprint("In a few minutes, Malcolm services will be accessible via the following URLs:")
-        eprint("------------------------------------------------------------------------------")
-        eprint("  - Arkime: https://localhost/")
-        eprint("  - OpenSearch Dashboards: https://localhost/dashboards/")
-        eprint("  - PCAP upload (web): https://localhost/upload/")
-        eprint("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-        eprint("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
-        eprint("  - NetBox: https://localhost/netbox/\n")
-        eprint("  - Account management: https://localhost:488/\n")
-        eprint("  - Documentation: https://localhost/readme/\n")
-    else:
+    if err != 0:
         eprint("Malcolm failed to start\n")
         eprint("\n".join(out))
         exit(err)
@@ -844,7 +865,6 @@ def authSetup(wipe=False):
     global opensslBin
 
     if YesOrNo('Store administrator username/password for local Malcolm access?', default=True):
-
         # prompt username and password
         usernamePrevious = None
         password = None
@@ -1023,7 +1043,6 @@ def authSetup(wipe=False):
     filebeatPath = os.path.join(MalcolmPath, os.path.join('filebeat', 'certs'))
     if YesOrNo('(Re)generate self-signed certificates for a remote log forwarder', default=True):
         with pushd(logstashPath):
-
             # make clean to clean previous files
             for pat in ['*.srl', '*.csr', '*.key', '*.crt', '*.pem']:
                 for oldfile in glob.glob(pat):
@@ -1262,7 +1281,6 @@ def authSetup(wipe=False):
         'Store username/password for email alert sender account? (see https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account)',
         default=False,
     ):
-
         # prompt username and password
         emailPassword = None
         emailPasswordConfirm = None
@@ -1539,7 +1557,6 @@ def main():
         exit(2)
 
     with pushd(MalcolmPath):
-
         # don't run this as root
         if (pyPlatform != PLATFORM_WINDOWS) and (
             (os.getuid() == 0) or (os.geteuid() == 0) or (getpass.getuser() == 'root')
