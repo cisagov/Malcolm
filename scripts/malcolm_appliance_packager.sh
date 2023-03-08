@@ -106,6 +106,8 @@ if mkdir "$DESTDIR"; then
   pushd "./scripts" >/dev/null 2>&1
   ln -s ./control.py auth_setup
   ln -s ./control.py logs
+  ln -s ./control.py netbox-backup
+  ln -s ./control.py netbox-restore
   ln -s ./control.py restart
   ln -s ./control.py start
   ln -s ./control.py status

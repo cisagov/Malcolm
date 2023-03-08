@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="2.5.0"
+ARG OPENSEARCH_VERSION="2.6.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.5.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.6.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -68,7 +68,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:2.5.0
+FROM opensearchproject/opensearch-dashboards:2.6.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -122,7 +122,7 @@ RUN yum upgrade -y && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
-    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip --allow-root && \
+    # TODO: when 2.6.0 is released /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip --allow-root && \
     # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
     chown --silent -R root:root /usr/share/opensearch-dashboards/plugins/* \
                                 /usr/share/opensearch-dashboards/node_modules/* \

@@ -108,6 +108,8 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mmguero-dev/bzar"
+  "https://github.com/ncsa/bro-is-darknet"
+  "https://github.com/ncsa/bro-simple-scan"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/salesforce/GQUIC_Protocol_Analyzer"
   "https://github.com/salesforce/hassh"
