@@ -47,6 +47,7 @@ args = None
 requests_imported = None
 yaml_imported = None
 
+
 ###################################################################################################
 # get interactive user response to Y/N question
 def InstallerYesOrNo(
@@ -100,7 +101,6 @@ def InstallerChooseOne(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
 ):
-
     global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
@@ -123,7 +123,6 @@ def InstallerChooseMultiple(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
 ):
-
     global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
@@ -163,7 +162,6 @@ def TrueOrFalseQuote(expression):
 
 ###################################################################################################
 class Installer(object):
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def __init__(self, debug=False, configOnly=False):
         self.debug = debug
@@ -191,7 +189,6 @@ class Installer(object):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def run_process(self, command, stdout=True, stderr=True, stdin=None, privileged=False, retry=0, retrySleepSec=5):
-
         # if privileged, put the sudo command at the beginning of the command
         if privileged and (len(self.sudoCmd) > 0):
             command = self.sudoCmd + command
@@ -270,7 +267,6 @@ class Installer(object):
                 f'Extract Malcolm runtime files from {malcolm_install_file}', default=True, forceInteraction=True
             )
         ):
-
             # determine and create destination path for installation
             while True:
                 defaultPath = os.path.join(origPath, 'malcolm')
@@ -1557,6 +1553,11 @@ class Installer(object):
                 # restore ownership
                 os.chown(composeFile, origUid, origGuid)
 
+        try:
+            Touch(MalcolmCfgRunOnceFile)
+        except Exception as e:
+            pass
+
         # if the Malcolm dir is owned by root, see if they want to reassign ownership to a non-root user
         if (
             ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
@@ -1584,7 +1585,6 @@ class Installer(object):
 
 ###################################################################################################
 class LinuxInstaller(Installer):
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def __init__(self, debug=False, configOnly=False):
         super().__init__(debug, configOnly)
@@ -1737,9 +1737,7 @@ class LinuxInstaller(Installer):
             result = True
 
         elif InstallerYesOrNo('"docker info" failed, attempt to install Docker?', default=True):
-
             if InstallerYesOrNo('Attempt to install Docker using official repositories?', default=True):
-
                 # install required packages for repo-based install
                 if self.distro == PLATFORM_LINUX_UBUNTU:
                     requiredRepoPackages = [
@@ -1771,7 +1769,6 @@ class LinuxInstaller(Installer):
                 # install docker via repo if possible
                 dockerPackages = []
                 if ((self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN)) and self.codename:
-
                     # for debian/ubuntu, add docker GPG key and check its fingerprint
                     if self.debug:
                         eprint("Requesting docker GPG key for package signing")
@@ -1817,7 +1814,6 @@ class LinuxInstaller(Installer):
                         dockerPackages.extend(['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io'])
 
                 elif self.distro == PLATFORM_LINUX_FEDORA:
-
                     # add docker fedora repository
                     if self.debug:
                         eprint("Adding docker repository")
@@ -1944,7 +1940,6 @@ class LinuxInstaller(Installer):
         if (err != 0) and InstallerYesOrNo(
             '"docker-compose version" failed, attempt to install docker-compose?', default=True
         ):
-
             if InstallerYesOrNo('Install docker-compose directly from docker github?', default=True):
                 # download docker-compose from github and put it in /usr/local/bin
 
@@ -2010,7 +2005,6 @@ class LinuxInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def tweak_system_files(self):
-
         # make some system configuration changes with permission
 
         ConfigLines = namedtuple("ConfigLines", ["distros", "filename", "prefix", "description", "lines"], rename=False)
@@ -2123,14 +2117,12 @@ class LinuxInstaller(Installer):
         ]
 
         for config in configLinesToAdd:
-
             if ((len(config.distros) == 0) or (self.codename in config.distros)) and (
                 os.path.isfile(config.filename)
                 or InstallerYesOrNo(
                     f'\n{config.description}\n{config.filename} does not exist, create it?', default=True
                 )
             ):
-
                 confFileLines = (
                     [line.rstrip('\n') for line in open(config.filename)] if os.path.isfile(config.filename) else []
                 )
@@ -2146,7 +2138,6 @@ class LinuxInstaller(Installer):
                         )
                     )
                 ):
-
                     echoNewLineJoin = '\\n'
                     err, out = self.run_process(
                         [
@@ -2160,7 +2151,6 @@ class LinuxInstaller(Installer):
 
 ###################################################################################################
 class MacInstaller(Installer):
-
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def __init__(self, debug=False, configOnly=False):
         super().__init__(debug, configOnly)
@@ -2254,7 +2244,6 @@ class MacInstaller(Installer):
             result = True
 
         elif InstallerYesOrNo('"docker info" failed, attempt to install Docker?', default=True):
-
             if self.useBrew:
                 # install docker via brew cask (requires user interaction)
                 dockerPackages = [MAC_BREW_DOCKER_PACKAGE, "docker-compose"]
@@ -2305,7 +2294,6 @@ class MacInstaller(Installer):
             and os.path.isfile(settingsFile)
             and InstallerYesOrNo(f'Configure Docker resource usage in {settingsFile}?', default=True)
         ):
-
             # adjust CPU and RAM based on system resources
             if self.totalCores >= 16:
                 newCpus = 12

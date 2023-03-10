@@ -17,6 +17,10 @@
 /htadmin/config.ini
 /htadmin/metadata
 
+# runtime
+.tmp
+.configured
+
 # development
 .envrc
 .direnv
@@ -40,4 +44,3 @@ __pycache__/
 __pypackages__/
 *.py[cod]
 *$py.class
-.tmp

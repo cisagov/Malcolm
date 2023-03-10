@@ -14,6 +14,7 @@
 **/.envrc
 **/.direnv
 **/.opensearch*.curlrc
+.configured
 .trigger_workflow_build
 .tmp
 docker-compose*yml
