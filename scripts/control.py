@@ -1000,6 +1000,10 @@ def authSetup(wipe=False):
         # touch the metadata file
         open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
+        DisplayMessage(
+            f'Additional local accounts can be created at https://localhost:488/ when Malcolm is running',
+        )
+
     # generate HTTPS self-signed certificates
     if YesOrNo('(Re)generate self-signed certificates for HTTPS access', default=True):
         with pushd(os.path.join(MalcolmPath, os.path.join('nginx', 'certs'))):
@@ -1220,60 +1224,64 @@ def authSetup(wipe=False):
                     os.remove(oldfile)
 
     # create and populate connection parameters file for remote OpenSearch instance(s)
-    for instance in ['primary', 'secondary']:
-        openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
-        if YesOrNo(
-            f'Store username/password for {instance} remote OpenSearch instance?',
-            default=False,
-        ):
-            prevCurlContents = ParseCurlFile(openSearchCredFileName)
+    if YesOrNo(
+        'Will Malcolm be using an existing remote primary or secondary OpenSearch instance?',
+        default=False,
+    ):
+        for instance in ['primary', 'secondary']:
+            openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
+            if YesOrNo(
+                f'Store username/password for {instance} remote OpenSearch instance?',
+                default=False,
+            ):
+                prevCurlContents = ParseCurlFile(openSearchCredFileName)
 
-            # prompt host, username and password
-            esUsername = None
-            esPassword = None
-            esPasswordConfirm = None
+                # prompt host, username and password
+                esUsername = None
+                esPassword = None
+                esPasswordConfirm = None
 
-            while True:
-                esUsername = AskForString(
-                    "OpenSearch username",
-                    default=prevCurlContents['user'],
+                while True:
+                    esUsername = AskForString(
+                        "OpenSearch username",
+                        default=prevCurlContents['user'],
+                    )
+                    if (len(esUsername) > 0) and (':' not in esUsername):
+                        break
+                    eprint("Username is blank (or contains a colon, which is not allowed)")
+
+                while True:
+                    esPassword = AskForPassword(f"{esUsername} password: ")
+                    if (
+                        (len(esPassword) == 0)
+                        and (prevCurlContents['password'] is not None)
+                        and YesOrNo(f'Use previously entered password for "{esUsername}"?', default=True)
+                    ):
+                        esPassword = prevCurlContents['password']
+                        esPasswordConfirm = esPassword
+                    else:
+                        esPasswordConfirm = AskForPassword(f"{esUsername} password (again): ")
+                    if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
+                        break
+                    eprint("Passwords do not match")
+
+                esSslVerify = YesOrNo(
+                    f'Require SSL certificate validation for OpenSearch communication?',
+                    default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
                 )
-                if (len(esUsername) > 0) and (':' not in esUsername):
-                    break
-                eprint("Username is blank (or contains a colon, which is not allowed)")
 
-            while True:
-                esPassword = AskForPassword(f"{esUsername} password: ")
-                if (
-                    (len(esPassword) == 0)
-                    and (prevCurlContents['password'] is not None)
-                    and YesOrNo(f'Use previously entered password for "{esUsername}"?', default=True)
-                ):
-                    esPassword = prevCurlContents['password']
-                    esPasswordConfirm = esPassword
-                else:
-                    esPasswordConfirm = AskForPassword(f"{esUsername} password (again): ")
-                if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
-                    break
-                eprint("Passwords do not match")
+                with open(openSearchCredFileName, 'w') as f:
+                    f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')
+                    if not esSslVerify:
+                        f.write('insecure\n')
 
-            esSslVerify = YesOrNo(
-                f'Require SSL certificate validation for OpenSearch communication?',
-                default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
-            )
-
-            with open(openSearchCredFileName, 'w') as f:
-                f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')
-                if not esSslVerify:
-                    f.write('insecure\n')
-
-        else:
-            try:
-                os.remove(openSearchCredFileName)
-            except:
-                pass
-        open(openSearchCredFileName, 'a').close()
-        os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
+            else:
+                try:
+                    os.remove(openSearchCredFileName)
+                except:
+                    pass
+            open(openSearchCredFileName, 'a').close()
+            os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
 
     # OpenSearch authenticate sender account credentials
     # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account

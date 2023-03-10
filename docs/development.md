@@ -93,13 +93,13 @@ Administrator username: analyst
 analyst password:
 analyst password (again):
 
+Additional local accounts can be created at https://localhost:488/ when Malcolm is running
+
 (Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): y
 
-Store username/password for primary remote OpenSearch instance? (y/N): n
-
-Store username/password for secondary remote OpenSearch instance? (y/N): n
+Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): n
 
 Store username/password for email alert sender account? (y/N): n
 
