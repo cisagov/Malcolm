@@ -73,8 +73,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/0xl3x1/zeek-EternalSafety"
   "https://github.com/0xxon/cve-2020-0601"
   "https://github.com/0xxon/cve-2020-13777"
-  "https://github.com/amzn/zeek-plugin-profinet|master"
-  "https://github.com/amzn/zeek-plugin-tds|master"
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap"
   "https://github.com/cisagov/icsnpp-dnp3"
@@ -109,6 +107,8 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
   "https://github.com/mmguero-dev/bzar"
+  "https://github.com/mmguero-dev/zeek-plugin-profinet|master"
+  "https://github.com/mmguero-dev/zeek-plugin-tds|master"
   "https://github.com/ncsa/bro-is-darknet"
   "https://github.com/ncsa/bro-simple-scan"
   "https://github.com/precurse/zeek-httpattacks"
@@ -122,7 +122,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/zeek/spicy-pe"
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
-  "https://github.com/zeek/zeek-af_packet-plugin|master"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
