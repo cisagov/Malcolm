@@ -68,6 +68,7 @@ RUN apt-get -q update && \
       openssl \
       procps \
       psmisc \
+      rsync \
       supervisor \
       tcpdump \
       tini && \

@@ -38,6 +38,7 @@ RUN apt-get -q update && \
       python3 \
       python3-dev \
       python3-pip \
+      rsync \
       tini && \
     pip3 install supervisor six && \
     cd /opt && \

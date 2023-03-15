@@ -102,6 +102,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       python3-tz \
       python3-wheel \
       python3-zmq \
+      rsync \
       supervisor \
       swig \
       tini \

@@ -51,6 +51,7 @@ RUN apt-get -q update && \
       php$PHP_VERSION-fpm \
       php$PHP_VERSION-gd \
       procps \
+      rsync \
       supervisor \
       tini && \
     ( yes '' | pecl channel-update pecl.php.net ) && \

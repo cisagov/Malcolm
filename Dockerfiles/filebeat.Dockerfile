@@ -86,6 +86,7 @@ RUN apt-get -q update && \
         psmisc \
         python3-pip \
         python3-setuptools \
+        rsync \
         tar \
         unar \
         unzip \

@@ -27,7 +27,7 @@ COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk add --no-cache bash procps psmisc shadow tini && \
+    apk add --no-cache bash procps psmisc rsync shadow tini && \
     apk add --no-cache --virtual .build-deps rsync && \
     rsync -a /usr/local/bin/ /usr/bin/ && \
     rsync -a /usr/local/share/ /usr/share/ && \

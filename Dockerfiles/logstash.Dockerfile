@@ -55,6 +55,7 @@ RUN set -x && \
         python3-setuptools \
         python3-pip \
         python3-requests \
+        rsync \
         tini && \
     chmod +x /usr/bin/tini && \
     pip3 install ipaddress supervisor manuf pyyaml && \

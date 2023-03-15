@@ -92,6 +92,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         psmisc \
         python3-ruamel.yaml \
         python3-zmq \
+        rsync \
         supervisor \
         vim-tiny \
         tini \
