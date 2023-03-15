@@ -116,7 +116,7 @@ COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnS
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl python3 zip unzip && \
+    yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \

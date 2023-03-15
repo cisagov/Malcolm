@@ -67,6 +67,7 @@ RUN apt-get -q update && \
       php$PHP_VERSION-fpm \
       php$PHP_VERSION-apcu \
       nginx-light \
+      rsync \
       tini && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*

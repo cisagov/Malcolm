@@ -45,6 +45,7 @@ RUN apt-get -q update && \
       jq \
       procps \
       psmisc \
+      rsync \
       supervisor \
       tini && \
     /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify randomcolor && \

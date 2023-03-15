@@ -143,7 +143,7 @@ RUN set -x ; \
   " ; \
   apk update --no-cache; \
   apk upgrade --no-cache; \
-  apk add --no-cache curl shadow libressl; \
+  apk add --no-cache curl rsync shadow libressl; \
   addgroup -g ${DEFAULT_GID} -S ${PGROUP} ; \
   adduser -S -D -H -u ${DEFAULT_UID} -h /var/cache/nginx -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
   addgroup ${PUSER} shadow ; \
