@@ -47,7 +47,7 @@ spec:
   selector:
     app: malcolm-app
     name: freq-container
-  
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -71,6 +71,8 @@ spec:
         ports:
           - containerPort: 10004
         env:
+          - name: CONFIG_MAP_DIR
+            value: 'configmap'
           - name: PUID
             value: '1000'
           - name: PGID
@@ -79,18 +81,18 @@ spec:
             value: '/var/local/ca-trust'
           - name: VIRTUAL_HOST
             value: 'freq.malcolm.local'
-          - name: FREQ_LOOKUP 
+          - name: FREQ_LOOKUP
             value: 'true'
-          - name: FREQ_SEVERITY_THRESHOLD 
+          - name: FREQ_SEVERITY_THRESHOLD
             value: '2.0'
-          - name: TOTAL_MEGABYTES_SEVERITY_THRESHOLD 
-            value: 1000
-          - name: CONNECTION_SECONDS_SEVERITY_THRESHOLD 
-            value: 3600
-          - name: SENSITIVE_COUNTRY_CODES 
+          - name: TOTAL_MEGABYTES_SEVERITY_THRESHOLD
+            value: '1000'
+          - name: CONNECTION_SECONDS_SEVERITY_THRESHOLD
+            value: '3600'
+          - name: SENSITIVE_COUNTRY_CODES
             value: 'AM,AZ,BY,CN,CU,DZ,GE,HK,IL,IN,IQ,IR,KG,KP,KZ,LY,MD,MO,PK,RU,SD,SS,SY,TJ,TM,TW,UA,UZ'
       - name: nginx-proxy-container
-        image: malcolmnetsec/nginx-proxy:kubernetes
+        image: ghcr.io/idaholab/malcolmnetsec/nginx-proxy:kubernetes
         imagePullPolicy: Always
         ports:
           - containerPort: 443
