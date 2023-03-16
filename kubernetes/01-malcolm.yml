@@ -52,7 +52,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: malcolmnetsec/nginx-proxy:kubernetes
+        image: ghcr.io/idaholab/malcolmnetsec/nginx-proxy:kubernetes
         imagePullPolicy: Always
         ports:
           - containerPort: 443
