@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - kubernetes
     paths:
       - 'logstash/**'
       - 'Dockerfiles/logstash.Dockerfile'

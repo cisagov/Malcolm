@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - kubernetes
     paths:
       - 'pcap-monitor/**'
       - 'Dockerfiles/pcap-monitor.Dockerfile'

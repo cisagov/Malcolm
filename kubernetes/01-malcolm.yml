@@ -52,7 +52,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: malcolmnetsec/nginx-proxy:23.05.0
+        image: malcolmnetsec/nginx-proxy:kubernetes
         imagePullPolicy: Always
         ports:
           - containerPort: 443
