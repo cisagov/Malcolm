@@ -98,7 +98,7 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
   nginx-proxy:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
-      - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx/htpasswd:/etc/nginx/htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
 ```

@@ -38,7 +38,7 @@ NGINX_SSL_CONF=/etc/nginx/nginx_ssl_config.conf
 # a blank file just to use as an "include" placeholder for the nginx's LDAP config when LDAP is not used
 NGINX_BLANK_CONF=/etc/nginx/nginx_blank.conf
 
-# "include" file for auth_basic, prompt, and .htpasswd location
+# "include" file for auth_basic, prompt, and htpasswd location
 NGINX_BASIC_AUTH_CONF=/etc/nginx/nginx_auth_basic.conf
 
 # "include" file for auth_ldap, prompt, and "auth_ldap_servers" name
