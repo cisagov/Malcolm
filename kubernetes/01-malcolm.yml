@@ -60,7 +60,8 @@ spec:
         app: malcolm-app
     spec:
       containers:
-<<<<<<< HEAD
+      - name: freq-container
+        image: ghcr.io/idaholab/malcolmnetsec/nginx-proxy:kubernetes
       - env:
         - name: PUID
           value: "1000"
@@ -81,10 +82,8 @@ spec:
         - name: SENSITIVE_COUNTRY_CODES
           value: AM,AZ,BY,CN,CU,DZ,GE,HK,IL,IN,IQ,IR,KG,KP,KZ,LY,MD,MO,PK,RU,SD,SS,SY,TJ,TM,TW,UA,UZ
         image: ghcr.io/idaholab/malcolmnetsec/freq:kubernetes
-=======
       - name: nginx-proxy-container
         image: ghcr.io/idaholab/malcolmnetsec/nginx-proxy:kubernetes
->>>>>>> becaaa2d32c13210d43033e3c2f7af86324b37c5
         imagePullPolicy: Always
         name: freq-container
         ports:
