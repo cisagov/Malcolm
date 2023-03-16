@@ -68,6 +68,8 @@ spec:
       - name: freq-container
         image: ghcr.io/idaholab/malcolmnetsec/freq:kubernetes
         imagePullPolicy: Always
+        stdin: false
+        tty: true
         ports:
           - containerPort: 10004
         env:
@@ -83,6 +85,8 @@ spec:
             value: 'freq.malcolm.local'
           - name: FREQ_LOOKUP
             value: 'true'
+          - name: FREQ_PORT
+            value: '10004'
           - name: FREQ_SEVERITY_THRESHOLD
             value: '2.0'
           - name: TOTAL_MEGABYTES_SEVERITY_THRESHOLD
@@ -94,6 +98,8 @@ spec:
       - name: nginx-proxy-container
         image: ghcr.io/idaholab/malcolmnetsec/nginx-proxy:kubernetes
         imagePullPolicy: Always
+        stdin: false
+        tty: true
         ports:
           - containerPort: 443
         env:
