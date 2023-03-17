@@ -2,6 +2,8 @@
 
 **Network Traffic Capture Appliance**
 
+![Hedgehog Linux](./images/hedgehog/logo/hedgehog-color-w-text.png)
+
 Hedgehog Linux is a Debian-based operating system built to
 
 * monitor network interfaces
