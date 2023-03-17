@@ -85,8 +85,6 @@ spec:
             value: 'freq.malcolm.local'
           - name: FREQ_LOOKUP
             value: 'true'
-          - name: FREQ_PORT
-            value: '10004'
           - name: FREQ_SEVERITY_THRESHOLD
             value: '2.0'
           - name: TOTAL_MEGABYTES_SEVERITY_THRESHOLD

@@ -21,11 +21,11 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG FREQ_PORT=10004
+ARG FREQ_API_PORT=10004
 ARG FREQ_LOOKUP=true
 
-ENV FREQ_PORT   $FREQ_PORT
-ENV FREQ_LOOKUP $FREQ_LOOKUP
+ENV FREQ_API_PORT $FREQ_API_PORT
+ENV FREQ_LOOKUP   $FREQ_LOOKUP
 
 ENV FREQ_URL "https://codeload.github.com/markbaggett/freq/tar.gz/master"
 
@@ -60,7 +60,7 @@ ADD freq-server/supervisord.conf /etc/supervisord.conf
 
 WORKDIR /opt/freq_server
 
-EXPOSE $FREQ_PORT
+EXPOSE $FREQ_API_PORT
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
 
