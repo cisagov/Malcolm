@@ -60,4 +60,4 @@ jobs:
           context: .
           file: ./Dockerfiles/suricata.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/suricata:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/suricata:${{ steps.extract_branch.outputs.branch }}

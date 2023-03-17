@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/postgresql'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/postgresql'
 LABEL org.opencontainers.image.description='Malcolm container providing the PostgreSQL object-relational database'
 
 ARG DEFAULT_UID=1000

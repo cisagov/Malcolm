@@ -60,4 +60,4 @@ jobs:
           context: .
           file: ./Dockerfiles/name-map-ui.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/name-map-ui:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/name-map-ui:${{ steps.extract_branch.outputs.branch }}

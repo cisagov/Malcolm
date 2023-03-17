@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/file-monitor'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/file-monitor'
 LABEL org.opencontainers.image.description='Malcolm container for scanning files extracted by Zeek'
 
 ARG DEFAULT_UID=1000

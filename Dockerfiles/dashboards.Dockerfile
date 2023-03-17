@@ -76,7 +76,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/opensearch-dashboards'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/opensearch-dashboards'
 LABEL org.opencontainers.image.description='Malcolm container providing OpenSearch Dashboards'
 
 ARG DEFAULT_UID=1000

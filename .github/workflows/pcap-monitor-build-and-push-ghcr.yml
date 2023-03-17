@@ -60,4 +60,4 @@ jobs:
           context: .
           file: ./Dockerfiles/pcap-monitor.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/pcap-monitor:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/pcap-monitor:${{ steps.extract_branch.outputs.branch }}

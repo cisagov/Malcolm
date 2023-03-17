@@ -4,7 +4,7 @@
 
 ### Docker images
 
-Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. Its Docker images can be pulled from [Docker Hub](https://hub.docker.com/u/malcolmnetsec) or built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
+Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. Its Docker images can be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
 
 ### Installer ISO
 

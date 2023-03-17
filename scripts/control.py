@@ -162,7 +162,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 serviceImage = None
                 composeFileLines = list()
                 with open(args.composeFile, 'r') as f:
-                    composeFileLines = [x for x in f.readlines() if f'image: malcolmnetsec/{service}' in x]
+                    composeFileLines = [x for x in f.readlines() if f'image: ghcr.io/idaholab/malcolm/{service}' in x]
                 if (len(composeFileLines) > 0) and (len(composeFileLines[0]) > 0):
                     imageLineValues = composeFileLines[0].split()
                     if len(imageLineValues) > 1:
