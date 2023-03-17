@@ -69,7 +69,7 @@ RUN apt-get -q update && \
         curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \
       mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static && \
-      jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
+      jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
       mv /etc/unit/nginx-unit-new.json /etc/unit/nginx-unit.json && \
       chmod 644 /etc/unit/nginx-unit.json && \
     tr -cd '\11\12\15\40-\176' < /opt/netbox/netbox/netbox/configuration.py > /opt/netbox/netbox/netbox/configuration_ascii.py && \
