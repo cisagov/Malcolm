@@ -75,7 +75,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: false, inline: <<-STEP2
     mkdir -p ~/.local/bin ~/.config
-    curl -sSL -o ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/demo/amazon_linux_2_malcolm_demo_setup.sh
+    curl -sSL -o ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh https://raw.githubusercontent.com/idaholab/Malcolm/main/scripts/demo/amazon_linux_2_malcolm_demo_setup.sh
     chmod 755 ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh
 
     MALCOLM_SETUP_NONINTERACTIVE=1 ~/.local/bin/amazon_linux_2_malcolm_demo_setup.sh

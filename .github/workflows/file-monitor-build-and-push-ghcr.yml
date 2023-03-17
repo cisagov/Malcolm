@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - kubernetes
     paths:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'
