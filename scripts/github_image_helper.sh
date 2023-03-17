@@ -49,7 +49,7 @@ function _gitreponame() {
 
 # get the current git working copy's Malcolm version (grepped from docker-compose.yml, e.g., 5.0.3)
 function _malcolmversion() {
-  grep -P "^\s+image:\s*malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
+  grep -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
 }
 
 ################################################################################
