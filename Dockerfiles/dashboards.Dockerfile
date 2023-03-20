@@ -131,8 +131,10 @@ RUN yum upgrade -y && \
     yum clean all && \
     rm -rf /var/cache/yum
 
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD scripts/malcolm_common.py /usr/local/bin/
 
@@ -150,7 +152,11 @@ ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/
 ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
 
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/share/opensearch-dashboards/opensearch-dashboards-docker-entrypoint.sh"]
 

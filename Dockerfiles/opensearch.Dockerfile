@@ -54,14 +54,17 @@ RUN yum install -y openssl util-linux procps rsync && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/docker-entrypoint.sh
-COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 VOLUME ["/var/local/ca-trust"]
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
 

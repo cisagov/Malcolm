@@ -72,9 +72,10 @@ RUN apt-get -q update && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
-ADD file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD file-upload/jquery-file-upload/bootstrap.min.css /var/www/upload/bower_components/bootstrap/dist/css/bootstrap.min.css
 ADD file-upload/jquery-file-upload/index.html /var/www/upload/index.html
 ADD file-upload/jquery-file-upload/index.php /var/www/upload/server/php/index.php
@@ -101,7 +102,11 @@ RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]
 EXPOSE 22 80
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "/docker-entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

@@ -63,10 +63,11 @@ ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
 ADD dashboards/templates /opt/templates
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/opensearch_status.sh /data/
-ADD shared/bin/opensearch_index_size_prune.py /data/
-ADD shared/bin/opensearch_read_only.py /data/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/opensearch_status.sh /data/
+COPY --chmod=755 shared/bin/opensearch_index_size_prune.py /data/
+COPY --chmod=755 shared/bin/opensearch_read_only.py /data/
 ADD scripts/malcolm_common.py /data/
 
 RUN apk update --no-cache && \
@@ -100,7 +101,10 @@ RUN apk update --no-cache && \
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

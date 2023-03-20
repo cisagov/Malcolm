@@ -64,7 +64,8 @@ RUN apt-get -q update && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD pcap-monitor/scripts/ /usr/local/bin/
 ADD shared/bin/pcap_watcher.py /usr/local/bin/
@@ -73,7 +74,10 @@ ADD scripts/malcolm_common.py /usr/local/bin/
 
 EXPOSE 30441
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

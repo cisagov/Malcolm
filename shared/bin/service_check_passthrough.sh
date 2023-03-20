@@ -100,7 +100,7 @@ fi
 if [[ -n "$SERVICE" ]]; then
     if [[ -z "$PORT" ]]; then
         if [[ "$SERVICE" == "api" ]]; then
-            PORT=500
+            PORT=5000
         elif [[ "$SERVICE" == "arkime" ]]; then
             PORT=8005
         elif [[ "$SERVICE" == "dashboards" ]]; then
@@ -121,17 +121,13 @@ if [[ -n "$SERVICE" ]]; then
             PORT=9200
         fi
     fi
-    if [[ -z "$FORMAT" ]]; then
-        if [[ "$SERVICE" == "api" ]]; then
-            FORMAT=json
-        elif [[ "$SERVICE" == "logstash" ]]; then
-            FORMAT=json
-        elif [[ "$SERVICE" == "netbox" ]]; then
-            FORMAT=json
-        elif [[ "$SERVICE" == "opensearch" ]]; then
-            FORMAT=json
-        fi
-    fi
+    [[ -z "$FORMAT" ]] && \
+        ([[ "$SERVICE" == "api" ]] || \
+         [[ "$SERVICE" == "dashboards-helper" ]] || \
+         [[ "$SERVICE" == "freq" ]] || \
+         [[ "$SERVICE" == "logstash" ]] || \
+         [[ "$SERVICE" == "netbox" ]] || \
+         [[ "$SERVICE" == "opensearch" ]]) && FORMAT=json
 fi
 [[ -z "$PORT" ]] && PORT=80
 [[ -z "$FORMAT" ]] && FORMAT=http

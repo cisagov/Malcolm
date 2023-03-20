@@ -176,7 +176,8 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
@@ -219,7 +220,11 @@ ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"
 EXPOSE 8000 8005 8081
 WORKDIR $ARKIME_DIR
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/opt/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "/opt/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

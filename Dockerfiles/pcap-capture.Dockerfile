@@ -52,8 +52,9 @@ ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_FILTER $PCAP_FILTER
 ENV PCAP_SNAPLEN $PCAP_SNAPLEN
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/nic-capture-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 ADD pcap-capture/supervisord.conf /etc/supervisord.conf
 ADD pcap-capture/scripts/*.sh /usr/local/bin/
 ADD pcap-capture/templates/*.template /etc/supervisor.d/
@@ -89,7 +90,10 @@ RUN apt-get -q update && \
 
 WORKDIR "$PCAP_PATH"
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/local/bin/supervisor.sh"]
 

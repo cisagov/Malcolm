@@ -76,7 +76,8 @@ RUN apt-get -q update && \
   apt-get clean -y -q && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/html
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD docs/images/favicon/favicon.ico /var/www/htadmin/
 ADD htadmin/supervisord.conf /supervisord.conf
 ADD htadmin/htadmin.sh /usr/local/bin/
@@ -86,7 +87,10 @@ ADD htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

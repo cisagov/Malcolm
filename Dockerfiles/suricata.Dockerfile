@@ -124,6 +124,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 COPY --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
@@ -180,6 +181,10 @@ VOLUME ["$SURICATA_RUN_DIR"]
 
 WORKDIR $SURICATA_RUN_DIR
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]

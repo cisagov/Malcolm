@@ -61,14 +61,18 @@ VOLUME /var/www/html
 
 WORKDIR /var/www/html
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY name-map-ui/site/ /var/www/html/
 COPY docs/images/logo/Malcolm_banner.png /var/www/html/
 COPY docs/images/favicon/favicon.ico /var/www/html/
 
 EXPOSE 8080
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

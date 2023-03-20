@@ -149,7 +149,8 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/*/*
 
 # add configuration and scripts
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD shared/bin/pcap_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
 ADD shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
@@ -274,7 +275,11 @@ ENV PUSER_CHOWN "$ZEEK_DIR"
 
 VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/docker_entrypoint.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

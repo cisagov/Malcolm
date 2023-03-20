@@ -73,13 +73,14 @@ COPY ./api "${APP_HOME}"
 COPY scripts/malcolm_common.py "${APP_HOME}"/
 COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \
     && apt-get -y -q --no-install-recommends install curl netcat rsync tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
-    && chmod 755 /usr/local/bin/docker-uid-gid-setup.sh \
     && groupadd --gid ${DEFAULT_GID} ${PGROUP} \
     &&   useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home "${HOME}" ${PUSER} \
     &&   chown -R ${PUSER}:${PGROUP} "${HOME}" \
@@ -89,7 +90,11 @@ RUN    apt-get -q update \
 
 EXPOSE 5000
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "${APP_HOME}/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "/malcolm/api/entrypoint.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

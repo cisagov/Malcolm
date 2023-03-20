@@ -74,9 +74,10 @@ RUN set -x && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/bin/jruby \
            /root/.cache /root/.gem /root/.bundle
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/manuf-oui-parse.py /usr/local/bin/
-ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/manuf-oui-parse.py /usr/local/bin/
+COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
@@ -118,7 +119,10 @@ EXPOSE 5044
 EXPOSE 9001
 EXPOSE 9600
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

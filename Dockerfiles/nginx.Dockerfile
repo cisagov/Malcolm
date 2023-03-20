@@ -224,7 +224,7 @@ COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/ngi
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
@@ -233,7 +233,10 @@ ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
