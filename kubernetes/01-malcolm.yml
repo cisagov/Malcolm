@@ -46,7 +46,6 @@ spec:
       protocol: TCP
   selector:
     app: malcolm-app
-    name: freq-container
 
 ---
 apiVersion: apps/v1
