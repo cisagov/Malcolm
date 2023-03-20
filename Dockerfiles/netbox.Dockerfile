@@ -77,6 +77,7 @@ RUN apt-get -q update && \
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 netbox/*-defaults.json /etc/

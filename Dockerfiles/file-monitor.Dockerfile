@@ -203,6 +203,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD shared/bin/zeek_carve*.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh

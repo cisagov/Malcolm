@@ -76,6 +76,7 @@ RUN set -x && \
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/manuf-oui-parse.py /usr/local/bin/
 COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/

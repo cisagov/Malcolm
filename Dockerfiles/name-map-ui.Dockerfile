@@ -63,6 +63,7 @@ WORKDIR /var/www/html
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY name-map-ui/site/ /var/www/html/
 COPY docs/images/logo/Malcolm_banner.png /var/www/html/
 COPY docs/images/favicon/favicon.ico /var/www/html/

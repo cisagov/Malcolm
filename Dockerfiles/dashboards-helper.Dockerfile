@@ -65,6 +65,7 @@ ADD dashboards/supervisord.conf /etc/supervisord.conf
 ADD dashboards/templates /opt/templates
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/opensearch_status.sh /data/
 COPY --chmod=755 shared/bin/opensearch_index_size_prune.py /data/
 COPY --chmod=755 shared/bin/opensearch_read_only.py /data/

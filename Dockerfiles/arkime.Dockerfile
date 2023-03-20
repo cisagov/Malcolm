@@ -178,6 +178,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 # add configuration and scripts
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/

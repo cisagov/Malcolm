@@ -74,6 +74,7 @@ RUN apt-get -q update && \
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
 ADD file-upload/jquery-file-upload/bootstrap.min.css /var/www/upload/bower_components/bootstrap/dist/css/bootstrap.min.css
