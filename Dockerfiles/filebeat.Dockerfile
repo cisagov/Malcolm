@@ -161,7 +161,8 @@ VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/shar
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "filebeat"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

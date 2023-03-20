@@ -93,7 +93,8 @@ WORKDIR "$PCAP_PATH"
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "pcap-capture"]
 
 CMD ["/usr/local/bin/supervisor.sh"]
 

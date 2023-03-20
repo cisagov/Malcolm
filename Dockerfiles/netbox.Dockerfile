@@ -87,7 +87,8 @@ EXPOSE 9001
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "netbox"]
 
 CMD ["/opt/netbox/docker-entrypoint.sh", "/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

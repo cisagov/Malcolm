@@ -94,6 +94,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "api", \
             "/malcolm/api/entrypoint.sh"]
 
 # to be populated at build-time:

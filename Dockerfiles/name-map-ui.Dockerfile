@@ -72,7 +72,8 @@ EXPOSE 8080
 ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "name-map-ui"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

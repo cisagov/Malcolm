@@ -77,7 +77,8 @@ EXPOSE 30441
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "pcapmon"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

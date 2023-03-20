@@ -64,7 +64,8 @@ VOLUME ["/var/local/ca-trust"]
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "opensearch"]
 
 CMD ["/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
 

@@ -34,7 +34,8 @@ WORKDIR /home/${PUSER}
 ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/usr/local/bin/service_check_passthrough.sh"]
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "netbox-redis"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
