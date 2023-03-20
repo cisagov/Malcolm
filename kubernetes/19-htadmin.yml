@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: htadmin
+  namespace: malcolm
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+  selector:
+    name: htadmin-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: htadmin-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: htadmin-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: htadmin-deployment
+    spec:
+      containers:
+      - name: htadmin-container
+        image: ghcr.io/idaholab/malcolm/htadmin:kubernetes
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: auth-env
+        env:
+          - name: HTADMIN_DISABLED
+            value: "true"

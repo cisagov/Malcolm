@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-postgres
+  namespace: malcolm
+spec:
+  ports:
+    - port: 5432
+      protocol: TCP
+  selector:
+    name: netbox-postgres-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-postgres-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: netbox-postgres-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: netbox-postgres-deployment
+    spec:
+      containers:
+      - name: netbox-postgres-container
+        image: ghcr.io/idaholab/malcolm/postgresql:kubernetes
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - containerPort: 5432
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: netbox-env
+        env:
+          - name: NETBOX_POSTGRES_DISABLED
+            value: "true"

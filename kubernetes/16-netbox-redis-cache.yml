@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-redis-cache
+  namespace: malcolm
+spec:
+  ports:
+    - port: 6379
+      protocol: TCP
+  selector:
+    name: netbox-redis-cache-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-redis-cache-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: netbox-redis-cache-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: netbox-redis-cache-deployment
+    spec:
+      containers:
+      - name: netbox-redis-cache-container
+        image: ghcr.io/idaholab/malcolm/redis:kubernetes
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - containerPort: 6379
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: netbox-env
+        env:
+          - name: NETBOX_REDIS_CACHE_DISABLED
+            value: "true"

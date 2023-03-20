@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pcap-capture-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: pcap-capture-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: pcap-capture-deployment
+    spec:
+      containers:
+      - name: pcap-capture-container
+        image: ghcr.io/idaholab/malcolm/pcap-capture:kubernetes
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: pcap-capture-env
+        env:
+          - name: PCAP_CAPTURE_DISABLED
+            value: "true"
