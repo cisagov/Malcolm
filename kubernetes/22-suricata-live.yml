@@ -34,5 +34,5 @@ spec:
           - configMapRef:
               name: pcap-capture-env
         env:
-          - name: SURICATA_LIVE_DISABLED
+          - name: SURICATA_DISABLED
             value: "true"

@@ -34,5 +34,5 @@ spec:
           - configMapRef:
               name: pcap-capture-env
         env:
-          - name: ZEEK_LIVE_DISABLED
+          - name: ZEEK_DISABLED
             value: "true"

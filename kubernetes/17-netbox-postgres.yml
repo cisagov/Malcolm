@@ -43,7 +43,5 @@ spec:
           - configMapRef:
               name: netbox-env
         env:
-          - name: NETBOX_POSTGRES_DISABLED
-            value: "true"
           - name: VIRTUAL_HOST
             value: "netbox-postgres.malcolm.local"
