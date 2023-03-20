@@ -45,3 +45,5 @@ spec:
         env:
           - name: FILE_MONITOR_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "file-monitor.malcolm.local"

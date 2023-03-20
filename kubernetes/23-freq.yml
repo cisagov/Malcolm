@@ -42,3 +42,6 @@ spec:
               name: ssl-env
           - configMapRef:
               name: common-lookup-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "freq.malcolm.local"

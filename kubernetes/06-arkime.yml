@@ -49,3 +49,5 @@ spec:
         env:
           - name: ARKIME_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "arkime.malcolm.local"

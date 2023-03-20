@@ -45,3 +45,5 @@ spec:
         env:
           - name: DASHBOARDS_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "dashboards.malcolm.local"

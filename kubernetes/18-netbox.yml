@@ -54,3 +54,5 @@ spec:
         env:
           - name: NETBOX_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "netbox.malcolm.local"

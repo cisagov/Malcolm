@@ -48,3 +48,5 @@ spec:
         env:
           - name: UPLOAD_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "upload.malcolm.local"

@@ -43,3 +43,5 @@ spec:
         env:
           - name: NAME_MAP_UI_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "name-map-ui.malcolm.local"

@@ -45,3 +45,5 @@ spec:
         env:
           - name: API_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "api.malcolm.local"

@@ -45,3 +45,5 @@ spec:
         env:
           - name: NETBOX_REDIS_CACHE_DISABLED
             value: "true"
+          - name: VIRTUAL_HOST
+            value: "netbox-redis-cache.malcolm.local"
