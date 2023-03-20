@@ -55,7 +55,11 @@ OpenSearch username: servicedb
 servicedb password:
 servicedb password (again):
 
+Additional local accounts can be created at https://localhost:488/ when Malcolm is running
+
 Require SSL certificate validation for OpenSearch communication? (Y/n): n
+
+Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): y
 
 Store username/password for secondary remote OpenSearch instance? (y/N): y
 

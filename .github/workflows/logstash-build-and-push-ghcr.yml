@@ -60,4 +60,4 @@ jobs:
           context: .
           file: ./Dockerfiles/logstash.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/logstash-oss:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/logstash-oss:${{ steps.extract_branch.outputs.branch }}

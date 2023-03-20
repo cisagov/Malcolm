@@ -4,7 +4,7 @@
 
 ### Docker images
 
-Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. Its Docker images can be pulled from [Docker Hub](https://hub.docker.com/u/malcolmnetsec) or built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
+Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. Its Docker images can be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
 
 ### Installer ISO
 
@@ -16,7 +16,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | ISO | SHA256 |
 |---|---|
-| [malcolm-kubernetes.iso](/iso/malcolm-kubernetes.iso) (5.3GiB) |  [`9459fb0ce61fba8c7a9a9457b24d42182519dbb62247111471e38f8c190113eb`](/iso/malcolm-kubernetes.iso.sha256.txt) |
+| [malcolm-kubernetes.iso](/iso/malcolm-kubernetes.iso) (5.3GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/malcolm-kubernetes.iso.sha256.txt) |
 
 ## Hedgehog Linux
 
@@ -26,7 +26,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | ISO | SHA256 |
 |---|---|
-| [hedgehog-kubernetes.iso](/iso/hedgehog-kubernetes.iso) (2.3GiB) |  [`3cdba91e417f6ada83130aabc3be38dd0a8b12b6bda227859a546ace198680bc`](/iso/hedgehog-kubernetes.iso.sha256.txt) |
+| [hedgehog-kubernetes.iso](/iso/hedgehog-kubernetes.iso) (2.3GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-kubernetes.iso.sha256.txt) |
 
 ## Warning
 

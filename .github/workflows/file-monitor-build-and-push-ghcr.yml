@@ -60,4 +60,4 @@ jobs:
           context: .
           file: ./Dockerfiles/file-monitor.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/file-monitor:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/file-monitor:${{ steps.extract_branch.outputs.branch }}

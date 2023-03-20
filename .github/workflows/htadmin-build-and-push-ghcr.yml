@@ -60,4 +60,4 @@ jobs:
           context: .
           file: ./Dockerfiles/htadmin.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/htadmin:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/htadmin:${{ steps.extract_branch.outputs.branch }}

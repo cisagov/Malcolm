@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/freq'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/freq'
 LABEL org.opencontainers.image.description='Malcolm container providing an interface to Mark Baggett''s freq_server.py'
 
 ARG DEFAULT_UID=1000

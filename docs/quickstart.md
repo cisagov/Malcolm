@@ -24,7 +24,7 @@ You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's D
     
 ### Pull Malcolm's Docker images
 
-Malcolm's Docker images are periodically built and hosted on [Docker Hub](https://hub.docker.com/u/malcolmnetsec). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
+Malcolm's Docker images are periodically built and hosted on [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
 ```
 $ docker-compose pull
 Pulling api               ... done
@@ -53,26 +53,26 @@ You can then observe that the images have been retrieved by running `docker imag
 ```
 $ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-malcolmnetsec/api                                              kubernetes           xxxxxxxxxxxx   3 days ago   158MB
-malcolmnetsec/arkime                                           kubernetes           xxxxxxxxxxxx   3 days ago   816MB
-malcolmnetsec/dashboards                                       kubernetes           xxxxxxxxxxxx   3 days ago   1.02GB
-malcolmnetsec/dashboards-helper                                kubernetes           xxxxxxxxxxxx   3 days ago   184MB
-malcolmnetsec/file-monitor                                     kubernetes           xxxxxxxxxxxx   3 days ago   588MB
-malcolmnetsec/file-upload                                      kubernetes           xxxxxxxxxxxx   3 days ago   259MB
-malcolmnetsec/filebeat-oss                                     kubernetes           xxxxxxxxxxxx   3 days ago   624MB
-malcolmnetsec/freq                                             kubernetes           xxxxxxxxxxxx   3 days ago   132MB
-malcolmnetsec/htadmin                                          kubernetes           xxxxxxxxxxxx   3 days ago   242MB
-malcolmnetsec/logstash-oss                                     kubernetes           xxxxxxxxxxxx   3 days ago   1.35GB
-malcolmnetsec/name-map-ui                                      kubernetes           xxxxxxxxxxxx   3 days ago   143MB
-malcolmnetsec/netbox                                           kubernetes           xxxxxxxxxxxx   3 days ago   1.01GB
-malcolmnetsec/nginx-proxy                                      kubernetes           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/opensearch                                       kubernetes           xxxxxxxxxxxx   3 days ago   1.17GB
-malcolmnetsec/pcap-capture                                     kubernetes           xxxxxxxxxxxx   3 days ago   121MB
-malcolmnetsec/pcap-monitor                                     kubernetes           xxxxxxxxxxxx   3 days ago   213MB
-malcolmnetsec/postgresql                                       kubernetes           xxxxxxxxxxxx   3 days ago   268MB
-malcolmnetsec/redis                                            kubernetes           xxxxxxxxxxxx   3 days ago   34.2MB
-malcolmnetsec/suricata                                         kubernetes           xxxxxxxxxxxx   3 days ago   278MB
-malcolmnetsec/zeek                                             kubernetes           xxxxxxxxxxxx   3 days ago   1GB
+ghcr.io/idaholab/malcolm/api                                              kubernetes           xxxxxxxxxxxx   3 days ago   158MB
+ghcr.io/idaholab/malcolm/arkime                                           kubernetes           xxxxxxxxxxxx   3 days ago   816MB
+ghcr.io/idaholab/malcolm/dashboards                                       kubernetes           xxxxxxxxxxxx   3 days ago   1.02GB
+ghcr.io/idaholab/malcolm/dashboards-helper                                kubernetes           xxxxxxxxxxxx   3 days ago   184MB
+ghcr.io/idaholab/malcolm/file-monitor                                     kubernetes           xxxxxxxxxxxx   3 days ago   588MB
+ghcr.io/idaholab/malcolm/file-upload                                      kubernetes           xxxxxxxxxxxx   3 days ago   259MB
+ghcr.io/idaholab/malcolm/filebeat-oss                                     kubernetes           xxxxxxxxxxxx   3 days ago   624MB
+ghcr.io/idaholab/malcolm/freq                                             kubernetes           xxxxxxxxxxxx   3 days ago   132MB
+ghcr.io/idaholab/malcolm/htadmin                                          kubernetes           xxxxxxxxxxxx   3 days ago   242MB
+ghcr.io/idaholab/malcolm/logstash-oss                                     kubernetes           xxxxxxxxxxxx   3 days ago   1.35GB
+ghcr.io/idaholab/malcolm/name-map-ui                                      kubernetes           xxxxxxxxxxxx   3 days ago   143MB
+ghcr.io/idaholab/malcolm/netbox                                           kubernetes           xxxxxxxxxxxx   3 days ago   1.01GB
+ghcr.io/idaholab/malcolm/nginx-proxy                                      kubernetes           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/opensearch                                       kubernetes           xxxxxxxxxxxx   3 days ago   1.17GB
+ghcr.io/idaholab/malcolm/pcap-capture                                     kubernetes           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/pcap-monitor                                     kubernetes           xxxxxxxxxxxx   3 days ago   213MB
+ghcr.io/idaholab/malcolm/postgresql                                       kubernetes           xxxxxxxxxxxx   3 days ago   268MB
+ghcr.io/idaholab/malcolm/redis                                            kubernetes           xxxxxxxxxxxx   3 days ago   34.2MB
+ghcr.io/idaholab/malcolm/suricata                                         kubernetes           xxxxxxxxxxxx   3 days ago   278MB
+ghcr.io/idaholab/malcolm/zeek                                             kubernetes           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 ### Import from pre-packaged tarballs
