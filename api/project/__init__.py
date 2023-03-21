@@ -478,8 +478,15 @@ def bucketfield(fieldname, current_request, urls=None):
         )
 
 
-@app.route("/agg", defaults={'fieldname': 'event.provider'}, methods=['GET', 'POST'])
-@app.route("/agg/<fieldname>", methods=['GET', 'POST'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/agg",
+    defaults={'fieldname': 'event.provider'},
+    methods=['GET', 'POST'],
+)
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/agg/<fieldname>",
+    methods=['GET', 'POST'],
+)
 def aggregate(fieldname):
     """Returns the aggregated values and counts for a given field name, see bucketfield
 
@@ -506,8 +513,15 @@ def aggregate(fieldname):
     )
 
 
-@app.route("/document", defaults={'index': app.config["ARKIME_INDEX_PATTERN"]}, methods=['GET', 'POST'])
-@app.route("/document/<index>", methods=['GET', 'POST'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/document",
+    defaults={'index': app.config["ARKIME_INDEX_PATTERN"]},
+    methods=['GET', 'POST'],
+)
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/document/<index>",
+    methods=['GET', 'POST'],
+)
 def document(index):
     """Returns the matching document(s) from the specified index
 
@@ -541,9 +555,15 @@ def document(index):
     )
 
 
-@app.route("/index", methods=['GET'])
-@app.route("/indexes", methods=['GET'])
-@app.route("/indices", methods=['GET'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/index", methods=['GET']
+)
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/indexes", methods=['GET']
+)
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/indices", methods=['GET']
+)
 def indices():
     """Provide a list of indices in the OpenSearch data store
 
@@ -564,7 +584,9 @@ def indices():
     )
 
 
-@app.route("/fields", methods=['GET'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/fields", methods=['GET']
+)
 def fields():
     """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
     OpenSearch template for the sessions indices, and Kibana's field list
@@ -684,8 +706,10 @@ def fields():
     return jsonify(fields=fields, total=len(fields))
 
 
-@app.route("/", methods=['GET'])
-@app.route("/version", methods=['GET'])
+@app.route(f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/", methods=['GET'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/version", methods=['GET']
+)
 def version():
     """Provides version information about Malcolm and the underlying OpenSearch instance
 
@@ -720,7 +744,9 @@ def version():
     )
 
 
-@app.route("/ping", methods=['GET'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/ping", methods=['GET']
+)
 def ping():
     """Says 'pong' (for a simple health check)
 
@@ -735,8 +761,12 @@ def ping():
     return jsonify(ping="pong")
 
 
-@app.route('/alert', methods=['POST'])
-@app.route('/event', methods=['POST'])
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/alert", methods=['POST']
+)
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/event", methods=['POST']
+)
 def event():
     """Webhook that accepts alert data (like that from the OpenSearch Alerting API) to be
     reindexed into OpenSearch as session records (e.g., arkime_sessions3-*) for viewing

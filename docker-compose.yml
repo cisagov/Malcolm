@@ -1050,7 +1050,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/ping"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/mapi/ping"]
       interval: 30s
       timeout: 15s
       retries: 3
