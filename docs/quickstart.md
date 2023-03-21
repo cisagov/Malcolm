@@ -36,7 +36,6 @@ Pulling filebeat          ... done
 Pulling freq              ... done
 Pulling htadmin           ... done
 Pulling logstash          ... done
-Pulling name-map-ui       ... done
 Pulling netbox            ... done
 Pulling netbox-postgresql ... done
 Pulling netbox-redis      ... done
@@ -63,7 +62,6 @@ ghcr.io/idaholab/malcolm/filebeat-oss                                     kubern
 ghcr.io/idaholab/malcolm/freq                                             kubernetes           xxxxxxxxxxxx   3 days ago   132MB
 ghcr.io/idaholab/malcolm/htadmin                                          kubernetes           xxxxxxxxxxxx   3 days ago   242MB
 ghcr.io/idaholab/malcolm/logstash-oss                                     kubernetes           xxxxxxxxxxxx   3 days ago   1.35GB
-ghcr.io/idaholab/malcolm/name-map-ui                                      kubernetes           xxxxxxxxxxxx   3 days ago   143MB
 ghcr.io/idaholab/malcolm/netbox                                           kubernetes           xxxxxxxxxxxx   3 days ago   1.01GB
 ghcr.io/idaholab/malcolm/nginx-proxy                                      kubernetes           xxxxxxxxxxxx   3 days ago   121MB
 ghcr.io/idaholab/malcolm/opensearch                                       kubernetes           xxxxxxxxxxxx   3 days ago   1.17GB
@@ -92,6 +90,5 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/): [https://localhost/dashboards/](https://localhost/dashboards/) or [https://localhost:5601](https://localhost:5601)
 * [Capture File and Log Archive Upload (Web)](upload.md#Upload): [https://localhost/upload/](https://localhost/upload/)
 * [Capture File and Log Archive Upload (SFTP)](upload.md#Upload): `sftp://<username>@127.0.0.1:8022/files`
-* [Host and Subnet Name Mapping](host-and-subnet-mapping.md#HostAndSubnetNaming) Editor: [https://localhost/name-map-ui/](https://localhost/name-map-ui/)
 * [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis): [https://localhost/netbox/](https://localhost/netbox/)
 * [Account Management](authsetup.md#AuthBasicAccountManagement): [https://localhost:488](https://localhost:488)

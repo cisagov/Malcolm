@@ -5,7 +5,7 @@
 
 As Zeek logs are parsed and enriched prior to indexing, a severity score up to `100` (a higher score indicating a more severe event) can be assigned when one or more of the following conditions are met:
 
-* cross-segment network traffic (if [network subnets were defined](host-and-subnet-mapping.md#HostAndSubnetNaming))
+* cross-segment network traffic (if [network subnets were defined](asset-interaction-analysis.md#AssetInteractionAnalysis))
 * connection origination and destination (e.g., inbound, outbound, external, internal)
 * traffic to or from sensitive countries
     - The comma-separated list of countries (by [ISO 3166-1 alpha-2 code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Current_codes)) can be customized by setting the `SENSITIVE_COUNTRY_CODES` environment variable in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml).
@@ -42,6 +42,6 @@ These categories' severity scores can be customized by editing `logstash/maps/ma
 "PROTOCOL_SSH": 40
 ```
 
-Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take effect. The [hostname and CIDR subnet names interface](host-and-subnet-mapping.md#NameMapUI) provides a convenient button for restarting Logstash.
+Restart Logstash after modifying `malcolm_severity.yaml` for the changes to take effect.
 
 Severity scoring can be disabled globally by setting the `LOGSTASH_SEVERITY_SCORING` environment variable to `false`  in the [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) file and [restarting Malcolm](running.md#StopAndRestart).

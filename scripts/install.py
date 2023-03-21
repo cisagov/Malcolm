@@ -1086,14 +1086,6 @@ class Installer(object):
                                 r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line
                             )
 
-                        elif 'LOGSTASH_NETWORK_MAP_ENRICHMENT' in line:
-                            # enrich network traffic metadata directly from net-map.json
-                            line = re.sub(
-                                r'(LOGSTASH_NETWORK_MAP_ENRICHMENT\s*:(\s*&\S+)?\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(not netboxLogstashEnrich)}",
-                                line,
-                            )
-
                         elif 'LOGSTASH_NETBOX_ENRICHMENT' in line:
                             # enrich network traffic metadata via NetBox API calls
                             line = re.sub(

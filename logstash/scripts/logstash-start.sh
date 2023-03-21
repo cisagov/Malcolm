@@ -17,9 +17,6 @@ export PIPELINES_CFG="/usr/share/logstash/config/pipelines.yml"
 # pipeline section in pipelines.yml (then delete 00_config.conf before starting)
 export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
 
-# files defining IP->host and MAC->host mapping
-INPUT_MIXED_MAP="/usr/share/logstash/config/net-map.json"
-
 # the name of the enrichment pipeline subdirectory under $PIPELINES_DIR
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 
@@ -30,10 +27,6 @@ PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse,surica
 export OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-os"}
 export OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL:-"external-os"}
 OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES:-"$OPENSEARCH_PIPELINE_ADDRESS_INTERNAL,$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL"}
-
-# ip-to-segment-logstash.py translates $INPUT_MIXED_MAP into this logstash filter file
-NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segment_filters.conf
-export NETWORK_MAP_ENRICHMENT=${LOGSTASH_NETWORK_MAP_ENRICHMENT:-"true"}
 
 # output plugin configuration for primary and secondary opensearch destinations
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
@@ -75,10 +68,6 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
     echo                                               >> "$PIPELINES_CFG"
   fi
 '
-
-# create filters for network segment and host mapping in the enrichment directory
-rm -f "$NETWORK_MAP_OUTPUT_FILTER"
-[[ "$NETWORK_MAP_ENRICHMENT" == "true" ]] && /usr/local/bin/ip-to-segment-logstash.py --input "$INPUT_MIXED_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
 
 if [[ -z "$OPENSEARCH_SECONDARY_URL" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output

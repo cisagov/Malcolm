@@ -113,8 +113,6 @@ if [[ -n "$SERVICE" ]]; then
             PORT=10004
         elif [[ "$SERVICE" == "logstash" ]]; then
             PORT=9600
-        elif [[ "$SERVICE" == "name-map-ui" ]]; then
-            PORT=8080
         elif [[ "$SERVICE" == "netbox" ]]; then
             PORT=8080
         elif [[ "$SERVICE" == "opensearch" ]]; then

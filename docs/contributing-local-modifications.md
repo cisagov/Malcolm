@@ -29,7 +29,6 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
-      - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
   filebeat:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
@@ -89,9 +88,6 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
   freq:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-  name-map-ui:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./net-map.json:/var/www/html/maps/net-map.json:rw
   api:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro

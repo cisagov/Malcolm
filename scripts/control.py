@@ -643,7 +643,6 @@ def logs():
             print("  - OpenSearch Dashboards: https://localhost/dashboards/")
             print("  - PCAP upload (web): https://localhost/upload/")
             print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-            print("  - Host and subnet name mapping editor: https://localhost/name-map-ui/")
             print("  - NetBox: https://localhost/netbox/\n")
             print("  - Account management: https://localhost:488/\n")
             print("  - Documentation: https://localhost/readme/\n")

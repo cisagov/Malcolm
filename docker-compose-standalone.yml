@@ -235,8 +235,6 @@ x-logstash-variables: &logstash-variables
   LOGSTASH_SEVERITY_SCORING       : 'true'
   # Whether or not Logstash will perform a reverse DNS lookup for external IP addresses
   LOGSTASH_REVERSE_DNS            : 'false'
-  # Whether or not Logstash will enrich network traffic metadata directly from net-map.json
-  LOGSTASH_NETWORK_MAP_ENRICHMENT : 'true'
   # Whether or not Logstash will enrich network traffic metadata via NetBox API calls
   LOGSTASH_NETBOX_ENRICHMENT      : 'false'
 
@@ -491,7 +489,6 @@ services:
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
-      - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
       interval: 30s
@@ -855,27 +852,6 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
-  name-map-ui:
-    image: ghcr.io/idaholab/malcolm/name-map-ui:kubernetes
-    restart: "no"
-    stdin_open: false
-    tty: true
-    hostname: name-map-ui
-    networks:
-      - default
-    environment:
-      << : *process-variables
-      << : *ssl-variables
-      VIRTUAL_HOST : 'name-map-ui.malcolm.local'
-    volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./net-map.json:/var/www/html/maps/net-map.json:rw
-    healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8080/fpm-ping"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
   netbox:
     image: ghcr.io/idaholab/malcolm/netbox:kubernetes
     restart: "no"
@@ -1025,7 +1001,6 @@ services:
       - dashboards
       - file-monitor
       - htadmin
-      - name-map-ui
       - netbox
       - upload
     ports:

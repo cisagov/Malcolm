@@ -153,7 +153,6 @@ if mkdir "$DESTDIR"; then
   echo "  - OpenSearch Dashboards: https://localhost/dashboards/" | tee -a "$README"
   echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
   echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
-  echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"
   echo "  - NetBox: https://localhost/netbox/" | tee -a "$README"
   echo "  - Account management: https://localhost:488/" | tee -a "$README"
   echo "  - Documentation: https://localhost/readme/" | tee -a "$README"

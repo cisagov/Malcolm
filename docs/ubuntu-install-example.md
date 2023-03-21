@@ -247,7 +247,6 @@ Pulling filebeat          ... done
 Pulling freq              ... done
 Pulling htadmin           ... done
 Pulling logstash          ... done
-Pulling name-map-ui       ... done
 Pulling netbox            ... done
 Pulling netbox-postgresql ... done
 Pulling netbox-redis      ... done
@@ -271,7 +270,6 @@ ghcr.io/idaholab/malcolm/filebeat-oss                                     kubern
 ghcr.io/idaholab/malcolm/freq                                             kubernetes           xxxxxxxxxxxx   3 days ago   132MB
 ghcr.io/idaholab/malcolm/htadmin                                          kubernetes           xxxxxxxxxxxx   3 days ago   242MB
 ghcr.io/idaholab/malcolm/logstash-oss                                     kubernetes           xxxxxxxxxxxx   3 days ago   1.35GB
-ghcr.io/idaholab/malcolm/name-map-ui                                      kubernetes           xxxxxxxxxxxx   3 days ago   143MB
 ghcr.io/idaholab/malcolm/netbox                                           kubernetes           xxxxxxxxxxxx   3 days ago   1.01GB
 ghcr.io/idaholab/malcolm/nginx-proxy                                      kubernetes           xxxxxxxxxxxx   3 days ago   121MB
 ghcr.io/idaholab/malcolm/opensearch                                       kubernetes           xxxxxxxxxxxx   3 days ago   1.17GB
@@ -292,7 +290,6 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - OpenSearch Dashboards: https://localhost/dashboards/
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
-  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - NetBox: https://localhost/netbox/  
   - Account management: https://localhost:488/
   - Documentation: https://localhost/readme/
@@ -307,7 +304,6 @@ malcolm-filebeat-1             "/usr/local/bin/dock…"   filebeat             r
 malcolm-freq-1                 "/usr/local/bin/dock…"   freq                 running (starting)   …
 malcolm-htadmin-1              "/usr/local/bin/dock…"   htadmin              running (starting)   …
 malcolm-logstash-1             "/usr/local/bin/dock…"   logstash             running (starting)   …
-malcolm-name-map-ui-1          "/usr/local/bin/dock…"   name-map-ui          running (starting)   …
 malcolm-netbox-1               "/usr/bin/tini -- /u…"   netbox               running (starting)   …
 malcolm-netbox-postgres-1      "/usr/bin/docker-uid…"   netbox-postgres      running (starting)   …
 malcolm-netbox-redis-1         "/sbin/tini -- /usr/…"   netbox-redis         running (starting)   …

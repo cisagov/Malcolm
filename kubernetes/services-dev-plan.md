@@ -20,7 +20,6 @@ See **support Malcolm deployment with Kubernetes** [idaholab/Malcolm#149](https:
 * freq
     - This one really doesn't have many dependencies on other services, so it could be done whenever.
 * logstash
-* name-map-ui
 * netbox-redis
 * netbox-redis-cache
 * netbox-postgres
