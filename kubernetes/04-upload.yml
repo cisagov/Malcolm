@@ -45,8 +45,12 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - configMapRef:
+              name: main-auth-env
         env:
           - name: UPLOAD_DISABLED
-            value: "true"
+            value: "false"
+          - name: SITE_NAME
+            value: "Malcolm K8s Test"
           - name: VIRTUAL_HOST
             value: "upload.malcolm.local"
