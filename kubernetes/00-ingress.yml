@@ -9,8 +9,12 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "https"
     nginx.ingress.kubernetes.io/preserve-trailing-slash: "false"
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^(.+)/$ $1 permanent;
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "512k"
+    nginx.ingress.kubernetes.io/proxy-max-temp-file-size: "8192m"
 spec:
   rules:
   - http:

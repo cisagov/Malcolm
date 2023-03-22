@@ -6,7 +6,7 @@ metadata:
   namespace: malcolm
 spec:
   capacity:
-    storage: 500Gi
+    storage: 400Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -36,5 +36,129 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 500Gi
+      storage: 400Gi
   volumeName: pcap-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zeek-volume
+  namespace: malcolm
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/zeek-logs
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zeek-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: zeek-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: suricata-volume
+  namespace: malcolm
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/suricata-logs
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suricata-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: suricata-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: config-volume
+  namespace: malcolm
+spec:
+  capacity:
+    storage: 50Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/config
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: config-volume
+

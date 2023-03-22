@@ -32,3 +32,22 @@ See **support Malcolm deployment with Kubernetes** [idaholab/Malcolm#149](https:
     - See note for `pcap-capture`.
 * suricata-live
     - See note for `pcap-capture`.
+    
+## Groupings
+
+Note: this is all dependent on if we can get things in the same deployment to communicate via hostname.
+
+* dashboards
+  - dashboards
+  - dashboards-helper
+* logs/enrichment
+  - logstash
+  - freq
+* netbox
+  - netbox
+  - netbox-redis
+  - netbox-redis-cache
+  - netbox-postgres
+* proxy/auth
+  - nginx-proxy
+  - htadmin

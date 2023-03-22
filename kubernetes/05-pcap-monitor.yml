@@ -47,3 +47,10 @@ spec:
         env:
           - name: PCAPMON_DISABLED
             value: "true"
+        volumeMounts:
+          - mountPath: "/pcap"
+            name: pcapmon-pcap-volume
+      volumes:
+        - name: pcapmon-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim
