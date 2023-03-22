@@ -54,3 +54,11 @@ spec:
             value: "Malcolm K8s Test"
           - name: VIRTUAL_HOST
             value: "upload.malcolm.local"
+        volumeMounts:
+          - mountPath: "/var/www/upload/server/php/chroot/files"
+            name: upload-pcap-volume
+            subPath: upload
+      volumes:
+        - name: upload-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim

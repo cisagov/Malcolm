@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pcap-volume
+  namespace: malcolm
+spec:
+  capacity:
+    storage: 500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/pcap
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcap-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
+  volumeName: pcap-volume
