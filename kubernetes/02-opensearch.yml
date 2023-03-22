@@ -47,3 +47,25 @@ spec:
             value: "true"
           - name: VIRTUAL_HOST
             value: "os.malcolm.local"
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: var-local-catrust-volume
+          - mountPath: /var/local/curlrc/configmap
+            name: opensearch-curlrc-volume
+          - mountPath: "/usr/share/opensearch/data"
+            name: opensearch-data-volume
+          - mountPath: "/opt/opensearch/backup"
+            name: opensearch-backup-volume
+      volumes:
+        - name: var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: opensearch-curlrc-volume
+          configMap:
+            name: opensearch-curlrc
+        - name: opensearch-data-volume
+          persistentVolumeClaim:
+            claimName: opensearch-claim
+        - name: opensearch-backup-volume
+          persistentVolumeClaim:
+            claimName: opensearch-backup-claim

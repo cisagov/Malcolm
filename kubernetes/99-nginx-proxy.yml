@@ -65,6 +65,8 @@ spec:
           mountPath: /etc/nginx/certs/configmap
         - name: etc-nginx-certs-pem-volume
           mountPath: /etc/nginx/dhparam/configmap
+        - name: opensearch-curlrc-volume
+          mountPath: /var/local/curlrc/configmap
       volumes:
       - name: etc-nginx-volume
         configMap:
@@ -78,3 +80,6 @@ spec:
       - name: etc-nginx-certs-pem-volume
         configMap:
           name: etc-nginx-certs-pem
+      - name: opensearch-curlrc-volume
+        configMap:
+          name: opensearch-curlrc

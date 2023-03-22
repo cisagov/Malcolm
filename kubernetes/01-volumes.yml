@@ -6,7 +6,7 @@ metadata:
   namespace: malcolm
 spec:
   capacity:
-    storage: 400Gi
+    storage: 250Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -36,7 +36,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 400Gi
+      storage: 250Gi
   volumeName: pcap-volume
 
 ---
@@ -162,3 +162,84 @@ spec:
       storage: 50Gi
   volumeName: config-volume
 
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: opensearch-volume
+  namespace: malcolm
+spec:
+  capacity:
+    storage: 250Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/opensearch
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 250Gi
+  volumeName: opensearch-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: opensearch-backup-volume
+  namespace: malcolm
+spec:
+  capacity:
+    storage: 250Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/opensearch-backup
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-backup-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 250Gi
+  volumeName: opensearch-backup-volume

@@ -48,9 +48,19 @@ spec:
           - name: PCAPMON_DISABLED
             value: "true"
         volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: var-local-catrust-volume
+          - mountPath: /var/local/curlrc/configmap
+            name: opensearch-curlrc-volume
           - mountPath: "/pcap"
             name: pcapmon-pcap-volume
       volumes:
+        - name: var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: opensearch-curlrc-volume
+          configMap:
+            name: opensearch-curlrc
         - name: pcapmon-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
