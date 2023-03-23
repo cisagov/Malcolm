@@ -61,8 +61,8 @@ x-opensearch-variables: &opensearch-variables
   #   user (with a "user:password" value) and "insecure" (if the certificate verification
   #   setting below is 'false'). See cURL config file format at
   #   https://everything.curl.dev/cmdline/configfile. This file is bind mounted locally
-  #   from .opensearch.primary.curlrc as /var/local/opensearch.primary.curlrc
-  OPENSEARCH_CREDS_CONFIG_FILE : '/var/local/opensearch.primary.curlrc'
+  #   from .opensearch.primary.curlrc as /var/local/curlrc/.opensearch.primary.curlrc
+  OPENSEARCH_CREDS_CONFIG_FILE : '/var/local/curlrc/.opensearch.primary.curlrc'
   # Whether or not connections to the primary remote OpenSearch instance require full
   #  TLS certificate validation for the connection (this may fail if using self-signed
   #  certificates).
@@ -76,8 +76,8 @@ x-opensearch-variables: &opensearch-variables
   # Used when OPENSEARCH_SECONDARY is 'true', the cURL-formatted config file contains login
   #   credentials for the secondary OpenSearch instance. The comments describing
   #   OPENSEARCH_CREDS_CONFIG_FILE above also apply here. This file is bind mounted locally
-  #   from .opensearch.secondary.curlrc as /var/local/opensearch.secondary.curlrc
-  OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE : '/var/local/opensearch.secondary.curlrc'
+  #   from .opensearch.secondary.curlrc as /var/local/curlrc/.opensearch.secondary.curlrc
+  OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE : '/var/local/curlrc/.opensearch.secondary.curlrc'
   # Whether or not connections to the secondary remote OpenSearch instance require full
   #  TLS certificate validation for the connection (this may fail if using self-signed
   #  certificates).
@@ -381,8 +381,8 @@ services:
       - IPC_LOCK
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
       - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
@@ -413,8 +413,8 @@ services:
       - opensearch
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
@@ -442,7 +442,7 @@ services:
       - dashboards-helper
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
@@ -482,8 +482,8 @@ services:
       - "127.0.0.1:5044:5044"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.orig.yml:ro
       - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
       - ./logstash/patterns:/usr/share/logstash/malcolm-patterns:ro
@@ -523,7 +523,7 @@ services:
       - "127.0.0.1:5045:5045"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - nginx-log-path:/nginx:ro
       - ./zeek-logs:/zeek
       - ./suricata-logs:/suricata
@@ -564,7 +564,7 @@ services:
       - opensearch
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
       - ./arkime-logs:/opt/arkime/logs
       - ./arkime-raw:/opt/arkime/raw
@@ -798,7 +798,7 @@ services:
       - opensearch
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./zeek-logs:/zeek
       - ./pcap:/pcap
     healthcheck:
@@ -1027,7 +1027,7 @@ services:
       VIRTUAL_HOST : 'api.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/mapi/ping"]
       interval: 30s
