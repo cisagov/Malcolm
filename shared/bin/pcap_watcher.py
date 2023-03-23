@@ -336,7 +336,7 @@ def main():
         dest='opensearchCurlRcFile',
         metavar='<filename>',
         type=str,
-        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
         help='cURL.rc formatted file containing OpenSearch connection parameters',
     )
     parser.add_argument(

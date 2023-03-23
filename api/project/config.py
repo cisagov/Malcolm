@@ -18,7 +18,7 @@ class Config(object):
     OPENSEARCH_LOCAL = f"{os.getenv('OPENSEARCH_LOCAL', 'true')}"
     OPENSEARCH_SSL_CERTIFICATE_VERIFICATION = f"{os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', 'false')}"
     OPENSEARCH_CREDS_CONFIG_FILE = (
-        f"{os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc')}"
+        f"{os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc')}"
     )
     RESULT_SET_LIMIT = int(f"{os.getenv('RESULT_SET_LIMIT', '500')}")
     VCS_REVISION = f"{os.getenv('VCS_REVISION', 'unknown')}"

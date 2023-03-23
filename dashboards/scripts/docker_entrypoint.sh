@@ -6,7 +6,7 @@ FINAL_YML=/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
 
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 
 if [[ -f "$ORIG_YML" ]]; then
     cp "$ORIG_YML" "$FINAL_YML"
