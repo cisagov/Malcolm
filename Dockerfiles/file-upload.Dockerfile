@@ -4,9 +4,6 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG SITE_NAME="Capture File and Log Archive Upload"
-
-ENV SITE_NAME $SITE_NAME
 ENV JQUERY_FILE_UPLOAD_VERSION v9.19.1
 ENV JQUERY_FILE_UPLOAD_URL "https://github.com/blueimp/jQuery-File-Upload/archive/${JQUERY_FILE_UPLOAD_VERSION}.tar.gz"
 
@@ -51,6 +48,9 @@ ENV TERM xterm
 
 ARG PHP_VERSION=7.4
 ENV PHP_VERSION $PHP_VERSION
+
+ARG SITE_NAME="Capture File and Log Archive Upload"
+ENV SITE_NAME $SITE_NAME
 
 COPY --from=build /jQuery-File-Upload/ /var/www/upload/
 

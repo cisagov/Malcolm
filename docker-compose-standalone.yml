@@ -368,16 +368,8 @@ services:
       << : *process-variables
       << : *ssl-variables
       << : *opensearch-variables
-      logger.level : 'WARN'
-      bootstrap.memory_lock : 'true'
-      MAX_LOCKED_MEMORY : 'unlimited'
       OPENSEARCH_JAVA_OPTS : '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
-      discovery.type : 'single-node'
-      cluster.routing.allocation.disk.threshold_enabled : 'false'
-      cluster.routing.allocation.node_initial_primaries_recoveries : 8
-      indices.query.bool.max_clause_count : 4096
-      path.repo : '/opt/opensearch/backup'
     ulimits:
       memlock:
         soft: -1
@@ -410,12 +402,7 @@ services:
       << : *ssl-variables
       << : *opensearch-variables
       << : *dashboards-helper-variables
-      DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
-      ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
-      ARKIME_INDEX_PATTERN_ID : 'arkime_sessions3-*'
-      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
-      CREATE_OS_ARKIME_SESSION_INDEX : 'true'
     depends_on:
       - opensearch
     volumes:
@@ -511,10 +498,6 @@ services:
       << : *filebeat-variables
       << : *common-upload-variables
       << : *common-beats-variables
-      FILEBEAT_ZEEK_LOG_PATH : '/zeek/current'
-      FILEBEAT_ZEEK_LOG_LIVE_PATH : '/zeek/live'
-      FILEBEAT_SURICATA_LOG_PATH : '/suricata'
-      FILEBEAT_NGINX_LOG_PATH : '/nginx'
     depends_on:
       - logstash
     ports:
@@ -551,9 +534,6 @@ services:
       << : *common-upload-variables
       << : *arkime-variables
       VIRTUAL_HOST : 'arkime.malcolm.local'
-      OPENSEARCH_MAX_SHARDS_PER_NODE : 2500
-      VIEWER : 'on'
-      WISE : 'on'
     ulimits:
       memlock:
         soft: -1
@@ -792,7 +772,6 @@ services:
     environment:
       << : *process-variables
       << : *ssl-variables
-      SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
       - arkime
