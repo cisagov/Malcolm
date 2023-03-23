@@ -58,11 +58,11 @@ spec:
             value: "netbox.malcolm.local"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: var-local-catrust-volume
+            name: netbox-var-local-catrust-volume
           - mountPath: /usr/local/share/configmap
             name: netbox-netmap-json-volume
       volumes:
-        - name: var-local-catrust-volume
+        - name: netbox-var-local-catrust-volume
           configMap:
             name: var-local-catrust
         - name: netbox-netmap-json-volume

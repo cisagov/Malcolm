@@ -36,11 +36,11 @@ spec:
             value: "true"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: var-local-catrust-volume
+            name: suricata-var-local-catrust-volume
           - mountPath: "/data/pcap"
             name: suricata-pcap-volume
       volumes:
-        - name: var-local-catrust-volume
+        - name: suricata-var-local-catrust-volume
           configMap:
             name: var-local-catrust
         - name: suricata-pcap-volume

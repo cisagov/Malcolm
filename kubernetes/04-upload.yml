@@ -56,12 +56,12 @@ spec:
             value: "upload.malcolm.local"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: var-local-catrust-volume
+            name: upload-var-local-catrust-volume
           - mountPath: "/var/www/upload/server/php/chroot/files"
             name: upload-pcap-volume
             subPath: upload
       volumes:
-        - name: var-local-catrust-volume
+        - name: upload-var-local-catrust-volume
           configMap:
             name: var-local-catrust
         - name: upload-pcap-volume

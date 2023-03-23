@@ -38,8 +38,8 @@ spec:
             value: "true"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: var-local-catrust-volume
+            name: zeek-live-var-local-catrust-volume
       volumes:
-        - name: var-local-catrust-volume
+        - name: zeek-live-var-local-catrust-volume
           configMap:
             name: var-local-catrust
