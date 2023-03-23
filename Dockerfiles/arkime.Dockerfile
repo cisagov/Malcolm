@@ -45,7 +45,6 @@ RUN apt-get -q update && \
         python3-pip \
         python3-setuptools \
         python3-wheel \
-        rsync \
         sudo \
         swig \
         wget \
@@ -162,6 +161,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-setuptools \
       python3-wheel \
       rename \
+      rsync \
       sudo \
       supervisor \
       vim-tiny \
