@@ -25,7 +25,7 @@ if [[ -n ${CONFIG_MAP_DIR} ]] && command -v rsync >/dev/null 2>&1; then
   awk '{print gsub("/","/"), $0}' | sort -n | cut -d' ' -f2- | \
   while read CMDIR; do
 
-    rsync --recursive --mkpath --copy-links \
+    rsync --recursive --copy-links \
           "--usermap=*:${PUID:-${DEFAULT_UID}}" \
           "--groupmap=*:${PGID:-${DEFAULT_GID}}" \
           --exclude='..*' --exclude="${CONFIG_MAP_DIR}"/ --exclude=.dockerignore --exclude=.gitignore \
