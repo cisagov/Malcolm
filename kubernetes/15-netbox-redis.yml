@@ -41,7 +41,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
-              name: netbox-env
+              name: netbox-common-env
           - configMapRef:
               name: netbox-redis-env
         env:

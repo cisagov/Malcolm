@@ -77,6 +77,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/opensearch/nodes/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
+  mkdir $VERBOSE -p "$DESTDIR/config/"
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
   mkdir $VERBOSE -p "$DESTDIR/suricata-logs/live"
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
@@ -90,7 +91,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
-  touch "$DESTDIR/"auth.env
+  touch "$DESTDIR/"config/auth.env
   cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"

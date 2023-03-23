@@ -778,13 +778,13 @@ def start():
         os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
         os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
         os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
-        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env'))),
-        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'postgres.env'))),
-        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'redis-cache.env'))),
-        os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'redis.env'))),
     ]:
         # chmod 600 authFile
         os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
+    with pushd(os.path.join(MalcolmPath, 'config')):
+        for envFile in glob.glob("*.env"):
+            # chmod 600 envFile
+            os.chmod(envFile, stat.S_IRUSR | stat.S_IWUSR)
 
     # make sure some directories exist before we start
     boundPathsToCreate = (
@@ -883,7 +883,7 @@ def authSetup(wipe=False):
             eprint("Passwords do not match")
 
         # get previous admin username to remove from htpasswd file if it's changed
-        authEnvFile = os.path.join(MalcolmPath, 'auth.env')
+        authEnvFile = os.path.join(MalcolmPath, os.path.join('config', 'auth.env'))
         if os.path.isfile(authEnvFile):
             prevAuthInfo = defaultdict(str)
             with open(authEnvFile, 'r') as f:
@@ -1325,11 +1325,9 @@ def authSetup(wipe=False):
 
     if YesOrNo(
         '(Re)generate internal passwords for NetBox',
-        default=not os.path.isfile(
-            os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env')))
-        ),
+        default=not os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'netbox.env'))),
     ):
-        with pushd(os.path.join(MalcolmPath, os.path.join('netbox', 'env'))):
+        with pushd(os.path.join(MalcolmPath, 'config')):
             netboxPwAlphabet = string.ascii_letters + string.digits + '_'
             netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
             netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
@@ -1339,19 +1337,19 @@ def authSetup(wipe=False):
             netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
             netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
 
-            with open('postgres.env', 'w') as f:
+            with open('netbox-postgres.env', 'w') as f:
                 f.write('POSTGRES_DB=netbox\n')
                 f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
                 f.write('POSTGRES_USER=netbox\n')
-            os.chmod('postgres.env', stat.S_IRUSR | stat.S_IWUSR)
+            os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
 
-            with open('redis-cache.env', 'w') as f:
+            with open('netbox-redis-cache.env', 'w') as f:
                 f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
-            os.chmod('redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
+            os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
 
-            with open('redis.env', 'w') as f:
+            with open('netbox-redis.env', 'w') as f:
                 f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
-            os.chmod('redis.env', stat.S_IRUSR | stat.S_IWUSR)
+            os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
 
             if (not os.path.isfile('netbox.env')) and (os.path.isfile('netbox.env.example')):
                 shutil.copy2('netbox.env.example', 'netbox.env')

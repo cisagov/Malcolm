@@ -11,6 +11,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
 * `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
+* `config` - a directory containing the environment variable files that define Malcolm's configuration
 * `docs` - a directory containing instructions and documentation
 * `opensearch` - an initially empty directory where the OpenSearch database instance will reside
 * `opensearch-backup` - an initially empty directory for storing OpenSearch [index snapshots](index-management.md#IndexManagement) 
@@ -38,7 +39,6 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 
 and the following files of special note:
 
-* `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 

@@ -48,13 +48,13 @@ spec:
           - configMapRef:
               name: opensearch-env
           - configMapRef:
-              name: netbox-env
+              name: netbox-common-env
           - configMapRef:
               name: logstash-env
           - configMapRef:
-              name: common-beats-env
+              name: beats-common-env
           - configMapRef:
-              name: common-lookup-env
+              name: lookup-common-env
         env:
           - name: LOGSTASH_DISABLED
             value: "true"

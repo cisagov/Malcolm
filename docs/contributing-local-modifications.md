@@ -38,7 +38,6 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./filebeat/certs/client.crt:/certs/client.crt:ro
       - ./filebeat/certs/client.key:/certs/client.key:ro
   arkime:
-      - ./auth.env
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
@@ -78,7 +77,6 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./zeek-logs:/zeek
       - ./pcap:/pcap
   upload:
-      - ./auth.env
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
