@@ -45,8 +45,6 @@ spec:
           - configMapRef:
               name: dashboards-helper-env
         env:
-          - name: DASHBOARDS_HELPER_DISABLED
-            value: "true"
           - name: VIRTUAL_HOST
             value: "dashboards-helper.malcolm.local"
         volumeMounts:
