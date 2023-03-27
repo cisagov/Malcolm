@@ -50,10 +50,19 @@ spec:
           - configMapRef:
               name: upload-env
         env:
-          - name: UPLOAD_DISABLED
-            value: "false"
           - name: VIRTUAL_HOST
             value: "upload.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - wget
+            - -qO-
+            - http://localhost
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: upload-var-local-catrust-volume

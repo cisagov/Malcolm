@@ -44,9 +44,18 @@ spec:
               name: opensearch-env
           - configMapRef:
               name: upload-common-env
-        env:
-          - name: PCAPMON_DISABLED
-            value: "true"
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - watch-upload
+            - pcap-publisher
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: pcapmon-var-local-catrust-volume
@@ -54,6 +63,8 @@ spec:
             name: pcapmon-opensearch-curlrc-volume
           - mountPath: "/pcap"
             name: pcapmon-pcap-volume
+          - mountPath: "/zeek"
+            name: pcapmon-zeek-volume
       volumes:
         - name: pcapmon-var-local-catrust-volume
           configMap:
@@ -64,3 +75,6 @@ spec:
         - name: pcapmon-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: pcapmon-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
