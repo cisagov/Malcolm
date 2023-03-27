@@ -108,6 +108,7 @@ services:
       - ./config/ssl.env
       - ./config/opensearch.env
       - ./config/netbox-common.env
+      - ./config/netbox.env
       - ./config/beats-common.env
       - ./config/lookup-common.env
       - ./config/logstash.env

@@ -50,6 +50,8 @@ spec:
           - configMapRef:
               name: netbox-common-env
           - configMapRef:
+              name: netbox-env
+          - configMapRef:
               name: logstash-env
           - configMapRef:
               name: beats-common-env
