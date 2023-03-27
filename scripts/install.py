@@ -2474,7 +2474,7 @@ def main():
         dest='configDir',
         metavar='<STR>',
         type=str,
-        default='',
+        default=None,
         help="Directory containing Malcolm's .env files",
     )
     parser.add_argument(

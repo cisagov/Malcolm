@@ -790,18 +790,21 @@ def DotEnvDynamic(debug=False, forceInteraction=False):
 
 ###################################################################################################
 # do the required auth files for Malcolm exist?
-def MalcolmAuthFilesExist():
+def MalcolmAuthFilesExist(configDir=None):
+    configDirToCheck = (
+        configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
+    )
     return (
         os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'netbox.env')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'netbox-postgres.env')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'netbox-redis-cache.env')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'netbox-redis.env')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'auth.env')))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-redis-cache.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-redis.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
         and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 

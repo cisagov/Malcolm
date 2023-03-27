@@ -772,11 +772,11 @@ def start():
 
     # make sure the auth files exist. if we are in an interactive shell and we're
     # missing any of the auth files, prompt to create them now
-    if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist()):
+    if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist(configDir=args.configDir)):
         authSetup()
 
     # still missing? sorry charlie
-    if not MalcolmAuthFilesExist():
+    if not MalcolmAuthFilesExist(configDir=args.configDir):
         raise Exception(
             'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
         )
@@ -805,7 +805,7 @@ def start():
     ]:
         # chmod 600 authFile
         os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
-    with pushd(os.path.join(MalcolmPath, 'config')):
+    with pushd(args.configDir):
         for envFile in glob.glob("*.env"):
             # chmod 600 envFile
             os.chmod(envFile, stat.S_IRUSR | stat.S_IWUSR)
@@ -907,7 +907,7 @@ def authSetup(wipe=False):
             eprint("Passwords do not match")
 
         # get previous admin username to remove from htpasswd file if it's changed
-        authEnvFile = os.path.join(MalcolmPath, os.path.join('config', 'auth.env'))
+        authEnvFile = os.path.join(args.configDir, 'auth.env')
         if os.path.isfile(authEnvFile):
             prevAuthInfo = defaultdict(str)
             with open(authEnvFile, 'r') as f:
@@ -1349,9 +1349,9 @@ def authSetup(wipe=False):
 
     if YesOrNo(
         '(Re)generate internal passwords for NetBox',
-        default=not os.path.isfile(os.path.join(MalcolmPath, os.path.join('config', 'netbox.env'))),
+        default=not os.path.isfile(os.path.join(args.configDir, 'netbox.env')),
     ):
-        with pushd(os.path.join(MalcolmPath, 'config')):
+        with pushd(args.configDir):
             netboxPwAlphabet = string.ascii_letters + string.digits + '_'
             netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
             netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
@@ -1468,7 +1468,7 @@ def main():
         dest='configDir',
         metavar='<STR>',
         type=str,
-        default='',
+        default=None,
         help="Directory containing Malcolm's .env files",
     )
     parser.add_argument(
