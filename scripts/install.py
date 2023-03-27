@@ -5,6 +5,7 @@
 
 import argparse
 import datetime
+import errno
 import fileinput
 import getpass
 import glob
@@ -336,16 +337,7 @@ class Installer(object):
         global args
         global dotenv_imported
 
-        envFilesDir = None
         composeFiles = []
-
-        # determine directory containing .env files
-        if (not args.configDir) or (not os.path.isdir(args.configDir)):
-            # use default config directory
-            envFilesDir = os.path.join(malcolm_install_path, 'config')
-        else:
-            # configuration directory explicitly specified
-            envFilesDir = args.configDir
 
         # determine docker-compose file(s)
         if not args.configFile:
@@ -357,7 +349,7 @@ class Installer(object):
             composeFiles = [os.path.realpath(args.configFile)]
             malcolm_install_path = os.path.dirname(composeFiles[0])
 
-        if (not envFilesDir) or (not os.path.isdir(envFilesDir)):
+        if (not args.configDir) or (not os.path.isdir(args.configDir)):
             raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
         # figure out what UID/GID to run non-rood processes under docker as
@@ -389,7 +381,7 @@ class Installer(object):
 
         if self.debug:
             eprint(
-                f'{malcolm_install_path} with "{composeFiles}" and "{envFilesDir}", system memory is {self.totalMemoryGigs} GiB'
+                f'{malcolm_install_path} with "{composeFiles}" and "{args.configDir}", system memory is {self.totalMemoryGigs} GiB'
             )
 
         if self.totalMemoryGigs >= 63.0:
@@ -870,20 +862,20 @@ class Installer(object):
 
         dashboardsDarkMode = InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=True)
 
-        # modify values in .env files in envFilesDir
+        # modify values in .env files in args.configDir
 
-        # first, if the envFilesDir is completely empty, then populate from defaults
+        # first, if the args.configDir is completely empty, then populate from defaults
         defaultConfigDir = os.path.join(malcolm_install_path, 'config')
         if (
             os.path.isdir(defaultConfigDir)
-            and (not same_file_or_dir(defaultConfigDir, envFilesDir))
-            and (not os.listdir(envFilesDir))
+            and (not same_file_or_dir(defaultConfigDir, args.configDir))
+            and (not os.listdir(args.configDir))
         ):
             for defaultEnvExampleFile in glob.glob(os.path.join(defaultConfigDir, '*.env.example')):
-                shutil.copy2(defaultEnvExampleFile, envFilesDir)
+                shutil.copy2(defaultEnvExampleFile, args.configDir)
 
         # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-        envExampleFiles = glob.glob(os.path.join(envFilesDir, '*.env.example'))
+        envExampleFiles = glob.glob(os.path.join(args.configDir, '*.env.example'))
         for envExampleFile in envExampleFiles:
             envFile = envExampleFile[: -len('.example')]
             if not os.path.isfile(envFile):
@@ -894,337 +886,337 @@ class Installer(object):
         EnvValues = [
             # Whether or not Arkime is allowed to delete uploaded/captured PCAP
             EnvValue(
-                os.path.join(envFilesDir, 'arkime.env'),
+                os.path.join(args.configDir, 'arkime.env'),
                 'MANAGE_PCAP_FILES',
                 TrueOrFalseNoQuote(arkimeManagePCAP),
             ),
             # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
             EnvValue(
-                os.path.join(envFilesDir, 'auth-common.env'),
+                os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_BASIC_AUTH',
                 TrueOrFalseNoQuote(useBasicAuth),
             ),
             # StartTLS vs. ldap:// or ldaps://
             EnvValue(
-                os.path.join(envFilesDir, 'auth-common.env'),
+                os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_LDAP_TLS_STUNNEL',
                 TrueOrFalseNoQuote(((not useBasicAuth) and ldapStartTLS)),
             ),
             # turn on dark mode, or not
             EnvValue(
-                os.path.join(envFilesDir, 'dashboards-helper.env'),
+                os.path.join(args.configDir, 'dashboards-helper.env'),
                 'DASHBOARDS_DARKMODE',
                 TrueOrFalseNoQuote(dashboardsDarkMode),
             ),
             # OpenSearch index state management snapshot compression
             EnvValue(
-                os.path.join(envFilesDir, 'dashboards-helper.env'),
+                os.path.join(args.configDir, 'dashboards-helper.env'),
                 'ISM_SNAPSHOT_COMPRESSED',
                 TrueOrFalseNoQuote(indexSnapshotCompressed),
             ),
             # delete based on index pattern size
             EnvValue(
-                os.path.join(envFilesDir, 'dashboards-helper.env'),
+                os.path.join(args.configDir, 'dashboards-helper.env'),
                 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT',
                 indexPruneSizeLimit,
             ),
             # delete based on index pattern size (sorted by name vs. creation time)
             EnvValue(
-                os.path.join(envFilesDir, 'dashboards-helper.env'),
+                os.path.join(args.configDir, 'dashboards-helper.env'),
                 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT',
                 TrueOrFalseNoQuote(indexPruneNameSort),
             ),
             # expose a filebeat TCP input listener
             EnvValue(
-                os.path.join(envFilesDir, 'filebeat.env'),
+                os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_LISTEN',
                 TrueOrFalseNoQuote(filebeatTcpOpen),
             ),
             # log format expected for events sent to the filebeat TCP input listener
             EnvValue(
-                os.path.join(envFilesDir, 'filebeat.env'),
+                os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_LOG_FORMAT',
                 filebeatTcpFormat,
             ),
             # source field name to parse for events sent to the filebeat TCP input listener
             EnvValue(
-                os.path.join(envFilesDir, 'filebeat.env'),
+                os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_PARSE_SOURCE_FIELD',
                 filebeatTcpSourceField,
             ),
             # target field name to store decoded JSON fields for events sent to the filebeat TCP input listener
             EnvValue(
-                os.path.join(envFilesDir, 'filebeat.env'),
+                os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_PARSE_TARGET_FIELD',
                 filebeatTcpTargetField,
             ),
             # field to drop in events sent to the filebeat TCP input listener
             EnvValue(
-                os.path.join(envFilesDir, 'filebeat.env'),
+                os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_PARSE_DROP_FIELD',
                 filebeatTcpDropField,
             ),
             # tag to append to events sent to the filebeat TCP input listener
             EnvValue(
-                os.path.join(envFilesDir, 'filebeat.env'),
+                os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_TAG',
                 filebeatTcpTag,
             ),
             # logstash memory allowance
             EnvValue(
-                os.path.join(envFilesDir, 'logstash.env'),
+                os.path.join(args.configDir, 'logstash.env'),
                 'LS_JAVA_OPTS',
                 re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', LOGSTASH_JAVA_OPTS_DEFAULT),
             ),
             # automatic local reverse dns lookup
             EnvValue(
-                os.path.join(envFilesDir, 'logstash.env'),
+                os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_REVERSE_DNS',
                 TrueOrFalseNoQuote(reverseDns),
             ),
             # automatic MAC OUI lookup
             EnvValue(
-                os.path.join(envFilesDir, 'logstash.env'),
+                os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_OUI_LOOKUP',
                 TrueOrFalseNoQuote(autoOui),
             ),
             # enrich network traffic metadata via NetBox API calls
             EnvValue(
-                os.path.join(envFilesDir, 'logstash.env'),
+                os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_NETBOX_ENRICHMENT',
                 TrueOrFalseNoQuote(netboxLogstashEnrich),
             ),
             # logstash pipeline workers
             EnvValue(
-                os.path.join(envFilesDir, 'logstash.env'),
+                os.path.join(args.configDir, 'logstash.env'),
                 'pipeline.workers',
                 lsWorkers,
             ),
             # freq.py string randomness calculations
             EnvValue(
-                os.path.join(envFilesDir, 'lookup-common.env'),
+                os.path.join(args.configDir, 'lookup-common.env'),
                 'FREQ_LOOKUP',
                 TrueOrFalseNoQuote(autoFreq),
             ),
             # enable/disable netbox
             EnvValue(
-                os.path.join(envFilesDir, 'netbox-common.env'),
+                os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # enable/disable netbox (postgres)
             EnvValue(
-                os.path.join(envFilesDir, 'netbox-common.env'),
+                os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_POSTGRES_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # enable/disable netbox (redis)
             EnvValue(
-                os.path.join(envFilesDir, 'netbox-common.env'),
+                os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_REDIS_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # enable/disable netbox (redis cache)
             EnvValue(
-                os.path.join(envFilesDir, 'netbox-common.env'),
+                os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_REDIS_CACHE_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
-                os.path.join(envFilesDir, 'nginx.env'),
+                os.path.join(args.configDir, 'nginx.env'),
                 'NGINX_SSL',
                 TrueOrFalseNoQuote(nginxSSL),
             ),
             # OpenSearch primary instance is local vs. remote
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_LOCAL',
                 TrueOrFalseNoQuote(not opensearchPrimaryRemote),
             ),
             # OpenSearch primary instance URL
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_URL',
                 opensearchPrimaryUrl,
             ),
             # OpenSearch primary instance needs SSL verification
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SSL_CERTIFICATE_VERIFICATION',
                 TrueOrFalseNoQuote(opensearchPrimarySslVerify),
             ),
             # OpenSearch secondary instance URL
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY_URL',
                 opensearchSecondaryUrl,
             ),
             # OpenSearch secondary instance needs SSL verification
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION',
                 TrueOrFalseNoQuote(opensearchSecondarySslVerify),
             ),
             # OpenSearch secondary remote instance is enabled
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY',
                 TrueOrFalseNoQuote(opensearchSecondaryRemote),
             ),
             # OpenSearch memory allowance
             EnvValue(
-                os.path.join(envFilesDir, 'opensearch.env'),
+                os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_JAVA_OPTS',
                 re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', OPENSEARCH_JAVA_OPTS_DEFAULT),
             ),
             # capture pcaps via netsniff-ng
             EnvValue(
-                os.path.join(envFilesDir, 'pcap-capture.env'),
+                os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_ENABLE_NETSNIFF',
                 TrueOrFalseNoQuote(pcapNetSniff),
             ),
             # capture pcaps via tcpdump
             EnvValue(
-                os.path.join(envFilesDir, 'pcap-capture.env'),
+                os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_ENABLE_TCPDUMP',
                 TrueOrFalseNoQuote(pcapTcpDump and (not pcapNetSniff)),
             ),
             # disable NIC hardware offloading features and adjust ring buffers
             EnvValue(
-                os.path.join(envFilesDir, 'pcap-capture.env'),
+                os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_IFACE_TWEAK',
                 TrueOrFalseNoQuote(tweakIface),
             ),
             # capture interface(s)
             EnvValue(
-                os.path.join(envFilesDir, 'pcap-capture.env'),
+                os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_IFACE',
                 pcapIface,
             ),
             # capture filter
             EnvValue(
-                os.path.join(envFilesDir, 'pcap-capture.env'),
+                os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_FILTER',
                 pcapFilter,
             ),
             # process UID
             EnvValue(
-                os.path.join(envFilesDir, 'process.env'),
+                os.path.join(args.configDir, 'process.env'),
                 'PUID',
                 puid,
             ),
             # process GID
             EnvValue(
-                os.path.join(envFilesDir, 'process.env'),
+                os.path.join(args.configDir, 'process.env'),
                 'PGID',
                 pgid,
             ),
             # Suricata signature updates (via suricata-update)
             EnvValue(
-                os.path.join(envFilesDir, 'suricata.env'),
+                os.path.join(args.configDir, 'suricata.env'),
                 'SURICATA_UPDATE_RULES',
                 TrueOrFalseNoQuote(suricataRuleUpdate),
             ),
             # live traffic analysis with Suricata
             EnvValue(
-                os.path.join(envFilesDir, 'suricata-live.env'),
+                os.path.join(args.configDir, 'suricata-live.env'),
                 'SURICATA_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveSuricata),
             ),
             # rotated captured PCAP analysis with Suricata (not live capture)
             EnvValue(
-                os.path.join(envFilesDir, 'suricata-offline.env'),
+                os.path.join(args.configDir, 'suricata-offline.env'),
                 'SURICATA_ROTATED_PCAP',
                 TrueOrFalseNoQuote(autoSuricata and (not liveSuricata)),
             ),
             # automatic uploaded pcap analysis with suricata
             EnvValue(
-                os.path.join(envFilesDir, 'suricata-offline.env'),
+                os.path.join(args.configDir, 'suricata-offline.env'),
                 'SURICATA_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoSuricata),
             ),
             # capture source "node name" for locally processed PCAP files
             EnvValue(
-                os.path.join(envFilesDir, 'upload-common.env'),
+                os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_NODE_NAME',
                 HostName,
             ),
             # zeek file extraction mode
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'ZEEK_EXTRACTOR_MODE',
                 fileCarveMode,
             ),
             # zeek file preservation mode
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_PRESERVATION',
                 filePreserveMode,
             ),
             # HTTP server for extracted files
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_ENABLE',
                 TrueOrFalseNoQuote(fileCarveHttpServer),
             ),
             # encrypt HTTP server for extracted files
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT',
                 TrueOrFalseNoQuote(fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0)),
             ),
             # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_KEY',
                 fileCarveHttpServeEncryptKey,
             ),
             # virustotal API key
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'VTOT_API2_KEY',
                 vtotApiKey,
             ),
             # file scanning via yara
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_ENABLE_YARA',
                 TrueOrFalseNoQuote(yaraScan),
             ),
             # PE file scanning via capa
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_ENABLE_CAPA',
                 TrueOrFalseNoQuote(capaScan),
             ),
             # file scanning via clamav
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_ENABLE_CLAMAV',
                 TrueOrFalseNoQuote(clamAvScan),
             ),
             # rule updates (yara/capa via git, clamav via freshclam)
             EnvValue(
-                os.path.join(envFilesDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_UPDATE_RULES',
                 TrueOrFalseNoQuote(fileScanRuleUpdate),
             ),
             # live traffic analysis with Zeek
             EnvValue(
-                os.path.join(envFilesDir, 'zeek-live.env'),
+                os.path.join(args.configDir, 'zeek-live.env'),
                 'ZEEK_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveZeek),
             ),
             # rotated captured PCAP analysis with Zeek (not live capture)
             EnvValue(
-                os.path.join(envFilesDir, 'zeek-offline.env'),
+                os.path.join(args.configDir, 'zeek-offline.env'),
                 'ZEEK_ROTATED_PCAP',
                 TrueOrFalseNoQuote(autoZeek and (not liveZeek)),
             ),
             # automatic uploaded pcap analysis with Zeek
             EnvValue(
-                os.path.join(envFilesDir, 'zeek-offline.env'),
+                os.path.join(args.configDir, 'zeek-offline.env'),
                 'ZEEK_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoZeek),
             ),
@@ -2623,10 +2615,21 @@ def main():
         if hasattr(installer, 'install_docker_images'):
             success = installer.install_docker_images(imageFile)
 
+    # if .env directory is unspecified, use the default ./config directory
+    if args.configDir is None:
+        args.configDir = os.path.join(MalcolmPath, 'config')
+    try:
+        os.makedirs(args.configDir)
+    except OSError as exc:
+        if (exc.errno == errno.EEXIST) and os.path.isdir(args.configDir):
+            pass
+        else:
+            raise
+
     if (
         args.configOnly
-        or (args.configDir and os.path.isdir(args.configDir))
         or (args.configFile and os.path.isfile(args.configFile))
+        or (args.configDir and os.path.isdir(args.configDir))
     ):
         if args.configFile and os.path.isfile(args.configFile):
             installPath = os.path.dirname(os.path.realpath(args.configFile))
