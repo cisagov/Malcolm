@@ -68,7 +68,7 @@ spec:
             name: upload-var-local-catrust-volume
           - mountPath: "/var/www/upload/server/php/chroot/files"
             name: upload-pcap-volume
-            subPath: upload
+            subPath: "upload"
       volumes:
         - name: upload-var-local-catrust-volume
           configMap:

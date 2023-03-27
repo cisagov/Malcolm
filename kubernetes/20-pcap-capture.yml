@@ -35,7 +35,7 @@ spec:
             name: capture-var-local-catrust-volume
           - mountPath: "/pcap"
             name: capture-pcap-volume
-            subPath: upload
+            subPath: "upload"
       volumes:
         - name: capture-var-local-catrust-volume
           configMap:

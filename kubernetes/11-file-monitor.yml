@@ -43,14 +43,38 @@ spec:
           - configMapRef:
               name: zeek-env
         env:
-          - name: FILE_MONITOR_DISABLED
-            value: "true"
           - name: VIRTUAL_HOST
             value: "file-monitor.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - watcher
+            - logger
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: file-monitor-var-local-catrust-volume
+          - mountPath: "/zeek/extract_files"
+            name: file-monitor-zeek-volume
+            subPath: "extract_files"
+          - mountPath: "/zeek/logs"
+            name: file-monitor-zeek-volume
+            subPath: "current"
+          - mountPath: "/yara-rules/custom/configmap"
+            name: file-monitor-yara-rules-custom-volume
       volumes:
         - name: file-monitor-var-local-catrust-volume
           configMap:
             name: var-local-catrust
+        - name: file-monitor-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: file-monitor-yara-rules-custom-volume
+          configMap:
+            name: yara-rules
