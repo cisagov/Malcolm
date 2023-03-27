@@ -1001,6 +1001,24 @@ class Installer(object):
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
+            # enable/disable netbox (postgres)
+            EnvValue(
+                os.path.join(envFilesDir, 'netbox-common.env'),
+                'NETBOX_POSTGRES_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            # enable/disable netbox (redis)
+            EnvValue(
+                os.path.join(envFilesDir, 'netbox-common.env'),
+                'NETBOX_REDIS_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            # enable/disable netbox (redis cache)
+            EnvValue(
+                os.path.join(envFilesDir, 'netbox-common.env'),
+                'NETBOX_REDIS_CACHE_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
                 os.path.join(envFilesDir, 'nginx.env'),
