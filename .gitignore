@@ -21,6 +21,7 @@
 # runtime
 .tmp
 .configured
+config.*/
 
 # development
 .envrc

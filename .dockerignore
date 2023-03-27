@@ -17,6 +17,7 @@
 .configured
 .trigger_workflow_build
 .tmp
+config.*
 docker-compose*yml
 Dockerfiles
 Gemfile.lock

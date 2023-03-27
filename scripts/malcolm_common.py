@@ -784,6 +784,10 @@ def YAMLDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
 
 
+def DotEnvDynamic(debug=False, forceInteraction=False):
+    return DoDynamicImport("dotenv", "python-dotenv", interactive=forceInteraction, debug=debug)
+
+
 ###################################################################################################
 # do the required auth files for Malcolm exist?
 def MalcolmAuthFilesExist():
