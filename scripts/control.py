@@ -251,6 +251,30 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
 
 
 ###################################################################################################
+def checkEnvFilesExist():
+    global args
+
+    # first, if the configDir is completely empty, then populate from defaults
+    defaultConfigDir = os.path.join(MalcolmPath, 'config')
+    if (
+        (args.configDir is not None)
+        and os.path.isdir(args.configDir)
+        and os.path.isdir(defaultConfigDir)
+        and (not same_file_or_dir(defaultConfigDir, args.configDir))
+        and (not os.listdir(args.configDir))
+    ):
+        for defaultEnvExampleFile in glob.glob(os.path.join(defaultConfigDir, '*.env.example')):
+            shutil.copy2(defaultEnvExampleFile, args.configDir)
+
+    # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
+    envExampleFiles = glob.glob(os.path.join(args.configDir, '*.env.example'))
+    for envExampleFile in envExampleFiles:
+        envFile = envExampleFile[: -len('.example')]
+        if not os.path.isfile(envFile):
+            shutil.copyfile(envExampleFile, envFile)
+
+
+###################################################################################################
 def status():
     global args
     global dockerComposeBin
@@ -1438,6 +1462,16 @@ def main():
         help='docker-compose YML file',
     )
     parser.add_argument(
+        '-e',
+        '--environment-dir',
+        required=False,
+        dest='configDir',
+        metavar='<STR>',
+        type=str,
+        default='',
+        help="Directory containing Malcolm's .env files",
+    )
+    parser.add_argument(
         '-s',
         '--service',
         required=False,
@@ -1568,6 +1602,22 @@ def main():
         ):
             raise Exception(f'{ScriptName} should not be run as root')
 
+        # if .env directory is unspecified, use the default ./config directory
+        for firstLoop in (True, False):
+            if (args.configDir is None) or (not os.path.isdir(args.configDir)):
+                if firstLoop:
+                    if args.configDir is None:
+                        args.configDir = os.path.join(MalcolmPath, 'config')
+                    try:
+                        os.makedirs(args.configDir)
+                    except OSError as exc:
+                        if (exc.errno == errno.EEXIST) and os.path.isdir(args.configDir):
+                            pass
+                        else:
+                            raise
+                else:
+                    raise Exception(f"Could not determine configuration directory containing Malcolm's .env files")
+
         # create local temporary directory for docker-compose because we may have noexec on /tmp
         try:
             os.makedirs(MalcolmTmpPath)
@@ -1633,6 +1683,10 @@ def main():
                 (not args.netboxRestoreFile) or (not os.path.isfile(args.netboxRestoreFile))
             ):
                 raise Exception(f'NetBox configuration database file must be specified with --netbox-restore')
+
+        # the compose file references various .env files in just about every operation this script does,
+        # so make sure they exist right off the bat
+        checkEnvFilesExist()
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:

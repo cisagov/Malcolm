@@ -872,7 +872,17 @@ class Installer(object):
 
         # modify values in .env files in envFilesDir
 
-        # first, look at the ".env.example" files and if the corresponding .env file doesn't exist, create it
+        # first, if the envFilesDir is completely empty, then populate from defaults
+        defaultConfigDir = os.path.join(malcolm_install_path, 'config')
+        if (
+            os.path.isdir(defaultConfigDir)
+            and (not same_file_or_dir(defaultConfigDir, envFilesDir))
+            and (not os.listdir(envFilesDir))
+        ):
+            for defaultEnvExampleFile in glob.glob(os.path.join(defaultConfigDir, '*.env.example')):
+                shutil.copy2(defaultEnvExampleFile, envFilesDir)
+
+        # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
         envExampleFiles = glob.glob(os.path.join(envFilesDir, '*.env.example'))
         for envExampleFile in envExampleFiles:
             envFile = envExampleFile[: -len('.example')]
