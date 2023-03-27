@@ -5,6 +5,7 @@
 
 import argparse
 import datetime
+import errno
 import fileinput
 import getpass
 import glob
@@ -37,6 +38,9 @@ DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian
 MAC_BREW_DOCKER_PACKAGE = 'docker-edge'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
 origPath = os.getcwd()
@@ -46,6 +50,11 @@ HostName = os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).spl
 args = None
 requests_imported = None
 yaml_imported = None
+dotenv_imported = None
+
+###################################################################################################
+TrueOrFalseQuote = lambda x: "'true'" if x else "'false'"
+TrueOrFalseNoQuote = lambda x: 'true' if x else 'false'
 
 
 ###################################################################################################
@@ -154,10 +163,6 @@ def InstallerDisplayMessage(
         defaultBehavior=defBehavior,
         uiMode=uiMode,
     )
-
-
-def TrueOrFalseQuote(expression):
-    return "'{}'".format('true' if expression else 'false')
 
 
 ###################################################################################################
@@ -330,7 +335,11 @@ class Installer(object):
         restart_mode_default=False,
     ):
         global args
+        global dotenv_imported
 
+        composeFiles = []
+
+        # determine docker-compose file(s)
         if not args.configFile:
             # get a list of all of the docker-compose files
             composeFiles = glob.glob(os.path.join(malcolm_install_path, 'docker-compose*.yml'))
@@ -339,6 +348,9 @@ class Installer(object):
             # single docker-compose file explicitly specified
             composeFiles = [os.path.realpath(args.configFile)]
             malcolm_install_path = os.path.dirname(composeFiles[0])
+
+        if (not args.configDir) or (not os.path.isdir(args.configDir)):
+            raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
         # figure out what UID/GID to run non-rood processes under docker as
         puid = '1000'
@@ -368,7 +380,9 @@ class Installer(object):
         # guestimate how much memory we should use based on total system memory
 
         if self.debug:
-            eprint(f"{malcolm_install_path} contains {composeFiles}, system memory is {self.totalMemoryGigs} GiB")
+            eprint(
+                f'{malcolm_install_path} with "{composeFiles}" and "{args.configDir}", system memory is {self.totalMemoryGigs} GiB'
+            )
 
         if self.totalMemoryGigs >= 63.0:
             osMemory = '30g'
@@ -825,7 +839,8 @@ class Installer(object):
             'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
         ):
             pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
-            pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
+            if not pcapNetSniff:
+                pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=True)
             arkimeManagePCAP = InstallerYesOrNo(
                 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
                 default=False,
@@ -847,7 +862,385 @@ class Installer(object):
 
         dashboardsDarkMode = InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=True)
 
-        # modify specified values in-place in docker-compose files
+        # modify values in .env files in args.configDir
+
+        # first, if the args.configDir is completely empty, then populate from defaults
+        defaultConfigDir = os.path.join(malcolm_install_path, 'config')
+        if (
+            os.path.isdir(defaultConfigDir)
+            and (not same_file_or_dir(defaultConfigDir, args.configDir))
+            and (not os.listdir(args.configDir))
+        ):
+            for defaultEnvExampleFile in glob.glob(os.path.join(defaultConfigDir, '*.env.example')):
+                shutil.copy2(defaultEnvExampleFile, args.configDir)
+
+        # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
+        envExampleFiles = glob.glob(os.path.join(args.configDir, '*.env.example'))
+        for envExampleFile in envExampleFiles:
+            envFile = envExampleFile[: -len('.example')]
+            if not os.path.isfile(envFile):
+                shutil.copyfile(envExampleFile, envFile)
+
+        EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
+
+        EnvValues = [
+            # Whether or not Arkime is allowed to delete uploaded/captured PCAP
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'MANAGE_PCAP_FILES',
+                TrueOrFalseNoQuote(arkimeManagePCAP),
+            ),
+            # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
+            EnvValue(
+                os.path.join(args.configDir, 'auth-common.env'),
+                'NGINX_BASIC_AUTH',
+                TrueOrFalseNoQuote(useBasicAuth),
+            ),
+            # StartTLS vs. ldap:// or ldaps://
+            EnvValue(
+                os.path.join(args.configDir, 'auth-common.env'),
+                'NGINX_LDAP_TLS_STUNNEL',
+                TrueOrFalseNoQuote(((not useBasicAuth) and ldapStartTLS)),
+            ),
+            # turn on dark mode, or not
+            EnvValue(
+                os.path.join(args.configDir, 'dashboards-helper.env'),
+                'DASHBOARDS_DARKMODE',
+                TrueOrFalseNoQuote(dashboardsDarkMode),
+            ),
+            # OpenSearch index state management snapshot compression
+            EnvValue(
+                os.path.join(args.configDir, 'dashboards-helper.env'),
+                'ISM_SNAPSHOT_COMPRESSED',
+                TrueOrFalseNoQuote(indexSnapshotCompressed),
+            ),
+            # delete based on index pattern size
+            EnvValue(
+                os.path.join(args.configDir, 'dashboards-helper.env'),
+                'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT',
+                indexPruneSizeLimit,
+            ),
+            # delete based on index pattern size (sorted by name vs. creation time)
+            EnvValue(
+                os.path.join(args.configDir, 'dashboards-helper.env'),
+                'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT',
+                TrueOrFalseNoQuote(indexPruneNameSort),
+            ),
+            # expose a filebeat TCP input listener
+            EnvValue(
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_TCP_LISTEN',
+                TrueOrFalseNoQuote(filebeatTcpOpen),
+            ),
+            # log format expected for events sent to the filebeat TCP input listener
+            EnvValue(
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_TCP_LOG_FORMAT',
+                filebeatTcpFormat,
+            ),
+            # source field name to parse for events sent to the filebeat TCP input listener
+            EnvValue(
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_TCP_PARSE_SOURCE_FIELD',
+                filebeatTcpSourceField,
+            ),
+            # target field name to store decoded JSON fields for events sent to the filebeat TCP input listener
+            EnvValue(
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_TCP_PARSE_TARGET_FIELD',
+                filebeatTcpTargetField,
+            ),
+            # field to drop in events sent to the filebeat TCP input listener
+            EnvValue(
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_TCP_PARSE_DROP_FIELD',
+                filebeatTcpDropField,
+            ),
+            # tag to append to events sent to the filebeat TCP input listener
+            EnvValue(
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_TCP_TAG',
+                filebeatTcpTag,
+            ),
+            # logstash memory allowance
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'LS_JAVA_OPTS',
+                re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', LOGSTASH_JAVA_OPTS_DEFAULT),
+            ),
+            # automatic local reverse dns lookup
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'LOGSTASH_REVERSE_DNS',
+                TrueOrFalseNoQuote(reverseDns),
+            ),
+            # automatic MAC OUI lookup
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'LOGSTASH_OUI_LOOKUP',
+                TrueOrFalseNoQuote(autoOui),
+            ),
+            # enrich network traffic metadata via NetBox API calls
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'LOGSTASH_NETBOX_ENRICHMENT',
+                TrueOrFalseNoQuote(netboxLogstashEnrich),
+            ),
+            # logstash pipeline workers
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'pipeline.workers',
+                lsWorkers,
+            ),
+            # freq.py string randomness calculations
+            EnvValue(
+                os.path.join(args.configDir, 'lookup-common.env'),
+                'FREQ_LOOKUP',
+                TrueOrFalseNoQuote(autoFreq),
+            ),
+            # enable/disable netbox
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            # enable/disable netbox (postgres)
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_POSTGRES_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            # enable/disable netbox (redis)
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_REDIS_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            # enable/disable netbox (redis cache)
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_REDIS_CACHE_DISABLED',
+                TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
+            EnvValue(
+                os.path.join(args.configDir, 'nginx.env'),
+                'NGINX_SSL',
+                TrueOrFalseNoQuote(nginxSSL),
+            ),
+            # OpenSearch primary instance is local vs. remote
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_LOCAL',
+                TrueOrFalseNoQuote(not opensearchPrimaryRemote),
+            ),
+            # OpenSearch primary instance URL
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_URL',
+                opensearchPrimaryUrl,
+            ),
+            # OpenSearch primary instance needs SSL verification
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_SSL_CERTIFICATE_VERIFICATION',
+                TrueOrFalseNoQuote(opensearchPrimarySslVerify),
+            ),
+            # OpenSearch secondary instance URL
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_SECONDARY_URL',
+                opensearchSecondaryUrl,
+            ),
+            # OpenSearch secondary instance needs SSL verification
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION',
+                TrueOrFalseNoQuote(opensearchSecondarySslVerify),
+            ),
+            # OpenSearch secondary remote instance is enabled
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_SECONDARY',
+                TrueOrFalseNoQuote(opensearchSecondaryRemote),
+            ),
+            # OpenSearch memory allowance
+            EnvValue(
+                os.path.join(args.configDir, 'opensearch.env'),
+                'OPENSEARCH_JAVA_OPTS',
+                re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', OPENSEARCH_JAVA_OPTS_DEFAULT),
+            ),
+            # capture pcaps via netsniff-ng
+            EnvValue(
+                os.path.join(args.configDir, 'pcap-capture.env'),
+                'PCAP_ENABLE_NETSNIFF',
+                TrueOrFalseNoQuote(pcapNetSniff),
+            ),
+            # capture pcaps via tcpdump
+            EnvValue(
+                os.path.join(args.configDir, 'pcap-capture.env'),
+                'PCAP_ENABLE_TCPDUMP',
+                TrueOrFalseNoQuote(pcapTcpDump and (not pcapNetSniff)),
+            ),
+            # disable NIC hardware offloading features and adjust ring buffers
+            EnvValue(
+                os.path.join(args.configDir, 'pcap-capture.env'),
+                'PCAP_IFACE_TWEAK',
+                TrueOrFalseNoQuote(tweakIface),
+            ),
+            # capture interface(s)
+            EnvValue(
+                os.path.join(args.configDir, 'pcap-capture.env'),
+                'PCAP_IFACE',
+                pcapIface,
+            ),
+            # capture filter
+            EnvValue(
+                os.path.join(args.configDir, 'pcap-capture.env'),
+                'PCAP_FILTER',
+                pcapFilter,
+            ),
+            # process UID
+            EnvValue(
+                os.path.join(args.configDir, 'process.env'),
+                'PUID',
+                puid,
+            ),
+            # process GID
+            EnvValue(
+                os.path.join(args.configDir, 'process.env'),
+                'PGID',
+                pgid,
+            ),
+            # Suricata signature updates (via suricata-update)
+            EnvValue(
+                os.path.join(args.configDir, 'suricata.env'),
+                'SURICATA_UPDATE_RULES',
+                TrueOrFalseNoQuote(suricataRuleUpdate),
+            ),
+            # live traffic analysis with Suricata
+            EnvValue(
+                os.path.join(args.configDir, 'suricata-live.env'),
+                'SURICATA_LIVE_CAPTURE',
+                TrueOrFalseNoQuote(liveSuricata),
+            ),
+            # rotated captured PCAP analysis with Suricata (not live capture)
+            EnvValue(
+                os.path.join(args.configDir, 'suricata-offline.env'),
+                'SURICATA_ROTATED_PCAP',
+                TrueOrFalseNoQuote(autoSuricata and (not liveSuricata)),
+            ),
+            # automatic uploaded pcap analysis with suricata
+            EnvValue(
+                os.path.join(args.configDir, 'suricata-offline.env'),
+                'SURICATA_AUTO_ANALYZE_PCAP_FILES',
+                TrueOrFalseNoQuote(autoSuricata),
+            ),
+            # capture source "node name" for locally processed PCAP files
+            EnvValue(
+                os.path.join(args.configDir, 'upload-common.env'),
+                'PCAP_NODE_NAME',
+                HostName,
+            ),
+            # zeek file extraction mode
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'ZEEK_EXTRACTOR_MODE',
+                fileCarveMode,
+            ),
+            # zeek file preservation mode
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_PRESERVATION',
+                filePreserveMode,
+            ),
+            # HTTP server for extracted files
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_HTTP_SERVER_ENABLE',
+                TrueOrFalseNoQuote(fileCarveHttpServer),
+            ),
+            # encrypt HTTP server for extracted files
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT',
+                TrueOrFalseNoQuote(fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0)),
+            ),
+            # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_HTTP_SERVER_KEY',
+                fileCarveHttpServeEncryptKey,
+            ),
+            # virustotal API key
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'VTOT_API2_KEY',
+                vtotApiKey,
+            ),
+            # file scanning via yara
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_ENABLE_YARA',
+                TrueOrFalseNoQuote(yaraScan),
+            ),
+            # PE file scanning via capa
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_ENABLE_CAPA',
+                TrueOrFalseNoQuote(capaScan),
+            ),
+            # file scanning via clamav
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_ENABLE_CLAMAV',
+                TrueOrFalseNoQuote(clamAvScan),
+            ),
+            # rule updates (yara/capa via git, clamav via freshclam)
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_UPDATE_RULES',
+                TrueOrFalseNoQuote(fileScanRuleUpdate),
+            ),
+            # live traffic analysis with Zeek
+            EnvValue(
+                os.path.join(args.configDir, 'zeek-live.env'),
+                'ZEEK_LIVE_CAPTURE',
+                TrueOrFalseNoQuote(liveZeek),
+            ),
+            # rotated captured PCAP analysis with Zeek (not live capture)
+            EnvValue(
+                os.path.join(args.configDir, 'zeek-offline.env'),
+                'ZEEK_ROTATED_PCAP',
+                TrueOrFalseNoQuote(autoZeek and (not liveZeek)),
+            ),
+            # automatic uploaded pcap analysis with Zeek
+            EnvValue(
+                os.path.join(args.configDir, 'zeek-offline.env'),
+                'ZEEK_AUTO_ANALYZE_PCAP_FILES',
+                TrueOrFalseNoQuote(autoZeek),
+            ),
+        ]
+
+        # now, go through and modify the values in the .env files
+        for val in EnvValues:
+            try:
+                Touch(val.envFile)
+            except Exception as e:
+                pass
+
+            try:
+                dotenv_imported.set_key(
+                    val.envFile,
+                    val.key,
+                    val.value,
+                    quote_mode='never',
+                    encoding='utf-8',
+                )
+            except Exception as e:
+                eprint(f"Setting value for {val.key} in {val.envFile} module failed: {e}")
+
+        # modify docker-compose specific values (port mappings, volume bind mounts, etc.) in-place in docker-compose files
         for composeFile in composeFiles:
             # save off owner of original files
             composeFileStat = os.stat(composeFile)
@@ -890,341 +1283,7 @@ class Installer(object):
                             currentService = serviceMatch.group(1).lower()
                             serviceStartLine = True
 
-                    if currentSection is None:
-                        # variables defined in the sections at the top of the compose file
-
-                        if 'PUID' in line:
-                            # process UID
-                            line = re.sub(r'(PUID\s*:\s*)(\S+)', fr"\g<1>{puid}", line)
-
-                        elif 'PGID' in line:
-                            # process GID
-                            line = re.sub(r'(PGID\s*:\s*)(\S+)', fr"\g<1>{pgid}", line)
-
-                        elif 'PCAP_NODE_NAME' in line:
-                            # capture source "node name" for locally processed PCAP files
-                            line = re.sub(r'(PCAP_NODE_NAME\s*:\s*)(\S+)', fr"\g<1>'{HostName}'", line)
-
-                        elif 'NGINX_SSL' in line:
-                            # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
-                            line = re.sub(r'(NGINX_SSL\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(nginxSSL)}", line)
-
-                        elif 'NGINX_BASIC_AUTH' in line:
-                            # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
-                            line = re.sub(
-                                r'(NGINX_BASIC_AUTH\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(useBasicAuth)}", line
-                            )
-
-                        elif 'NGINX_LDAP_TLS_STUNNEL' in line:
-                            # StartTLS vs. ldap:// or ldaps://
-                            line = re.sub(
-                                r'(NGINX_LDAP_TLS_STUNNEL\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(((not useBasicAuth) and ldapStartTLS))}",
-                                line,
-                            )
-
-                        elif 'ZEEK_EXTRACTOR_MODE' in line:
-                            # zeek file extraction mode
-                            line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', fr"\g<1>'{fileCarveMode}'", line)
-
-                        elif 'EXTRACTED_FILE_PRESERVATION' in line:
-                            # zeek file preservation mode
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_PRESERVATION\s*:\s*)(\S+)', fr"\g<1>'{filePreserveMode}'", line
-                            )
-
-                        elif 'EXTRACTED_FILE_HTTP_SERVER_ENABLE' in line:
-                            # HTTP server for extracted files
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_HTTP_SERVER_ENABLE\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(fileCarveHttpServer)}",
-                                line,
-                            )
-
-                        elif 'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT' in line:
-                            # encrypt HTTP server for extracted files
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_HTTP_SERVER_ENCRYPT\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0))}",
-                                line,
-                            )
-
-                        elif 'EXTRACTED_FILE_HTTP_SERVER_KEY' in line:
-                            # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
-                            fileCarveHttpServeEncryptKeyEscaped = fileCarveHttpServeEncryptKey.replace("'", "''")
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_HTTP_SERVER_KEY\s*:\s*)(\S+)',
-                                fr"\g<1>'{fileCarveHttpServeEncryptKeyEscaped}'",
-                                line,
-                            )
-
-                        elif 'VTOT_API2_KEY' in line:
-                            # virustotal API key
-                            line = re.sub(r'(VTOT_API2_KEY\s*:\s*)(\S+)', fr"\g<1>'{vtotApiKey}'", line)
-
-                        elif 'EXTRACTED_FILE_ENABLE_YARA' in line:
-                            # file scanning via yara
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_ENABLE_YARA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(yaraScan)}", line
-                            )
-
-                        elif 'EXTRACTED_FILE_ENABLE_CAPA' in line:
-                            # PE file scanning via capa
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_ENABLE_CAPA\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(capaScan)}", line
-                            )
-
-                        elif 'EXTRACTED_FILE_ENABLE_CLAMAV' in line:
-                            # file scanning via clamav
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_ENABLE_CLAMAV\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(clamAvScan)}",
-                                line,
-                            )
-
-                        elif 'EXTRACTED_FILE_UPDATE_RULES' in line:
-                            # rule updates (yara/capa via git, clamav via freshclam)
-                            line = re.sub(
-                                r'(EXTRACTED_FILE_UPDATE_RULES\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(fileScanRuleUpdate)}",
-                                line,
-                            )
-
-                        elif 'SURICATA_UPDATE_RULES' in line:
-                            # Suricata signature updates (via suricata-update)
-                            line = re.sub(
-                                r'(SURICATA_UPDATE_RULES\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(suricataRuleUpdate)}",
-                                line,
-                            )
-
-                        elif 'PCAP_ENABLE_NETSNIFF' in line:
-                            # capture pcaps via netsniff-ng
-                            line = re.sub(
-                                r'(PCAP_ENABLE_NETSNIFF\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapNetSniff)}", line
-                            )
-
-                        elif 'PCAP_ENABLE_TCPDUMP' in line:
-                            # capture pcaps via tcpdump
-                            line = re.sub(
-                                r'(PCAP_ENABLE_TCPDUMP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(pcapTcpDump)}", line
-                            )
-
-                        elif 'MANAGE_PCAP_FILES' in line:
-                            # Whether or not Arkime is allowed to delete uploaded/captured PCAP
-                            line = re.sub(
-                                r'(MANAGE_PCAP_FILES\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(arkimeManagePCAP)}", line
-                            )
-
-                        elif 'ZEEK_LIVE_CAPTURE' in line:
-                            # live traffic analysis with Zeek
-                            line = re.sub(
-                                r'(ZEEK_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveZeek)}", line
-                            )
-
-                        elif 'ZEEK_ROTATED_PCAP' in line:
-                            # rotated captured PCAP analysis with Zeek (not live capture)
-                            line = re.sub(
-                                r'(ZEEK_ROTATED_PCAP\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(autoZeek and (not liveZeek))}",
-                                line,
-                            )
-
-                        elif 'SURICATA_LIVE_CAPTURE' in line:
-                            # live traffic analysis with Suricata
-                            line = re.sub(
-                                r'(SURICATA_LIVE_CAPTURE\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(liveSuricata)}", line
-                            )
-
-                        elif 'SURICATA_ROTATED_PCAP' in line:
-                            # rotated captured PCAP analysis with Suricata (not live capture)
-                            line = re.sub(
-                                r'(SURICATA_ROTATED_PCAP\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(autoSuricata and (not liveSuricata))}",
-                                line,
-                            )
-
-                        elif 'PCAP_IFACE_TWEAK' in line:
-                            # disable NIC hardware offloading features and adjust ring buffers
-                            line = re.sub(
-                                r'(PCAP_IFACE_TWEAK\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(tweakIface)}", line
-                            )
-
-                        elif 'PCAP_IFACE' in line:
-                            # capture interface(s)
-                            line = re.sub(r'(PCAP_IFACE\s*:\s*)(\S+)', fr"\g<1>'{pcapIface}'", line)
-
-                        elif 'PCAP_FILTER' in line:
-                            # capture filter
-                            line = re.sub(r'(PCAP_FILTER\s*:)(.*)', fr"\g<1> '{pcapFilter}'", line)
-
-                        elif 'ZEEK_AUTO_ANALYZE_PCAP_FILES' in line:
-                            # automatic uploaded pcap analysis with Zeek
-                            line = re.sub(
-                                r'(ZEEK_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(autoZeek)}",
-                                line,
-                            )
-
-                        elif 'SURICATA_AUTO_ANALYZE_PCAP_FILES' in line:
-                            # automatic uploaded pcap analysis with suricata
-                            line = re.sub(
-                                r'(SURICATA_AUTO_ANALYZE_PCAP_FILES\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(autoSuricata)}",
-                                line,
-                            )
-
-                        elif 'LOGSTASH_REVERSE_DNS' in line:
-                            # automatic local reverse dns lookup
-                            line = re.sub(
-                                r'(LOGSTASH_REVERSE_DNS\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(reverseDns)}", line
-                            )
-
-                        elif 'LOGSTASH_OUI_LOOKUP' in line:
-                            # automatic MAC OUI lookup
-                            line = re.sub(
-                                r'(LOGSTASH_OUI_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoOui)}", line
-                            )
-
-                        elif 'LOGSTASH_NETBOX_ENRICHMENT' in line:
-                            # enrich network traffic metadata via NetBox API calls
-                            line = re.sub(
-                                r'(LOGSTASH_NETBOX_ENRICHMENT\s*:(\s*&\S+)?\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(netboxLogstashEnrich)}",
-                                line,
-                            )
-
-                        elif 'NETBOX_DISABLED' in line:
-                            # enable/disable netbox
-                            line = re.sub(
-                                r'(NETBOX_DISABLED\s*:(\s*&\S+)?\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(not netboxEnabled)}",
-                                line,
-                            )
-
-                        elif 'pipeline.workers' in line:
-                            # logstash pipeline workers
-                            line = re.sub(r'(pipeline\.workers\s*:\s*)(\S+)', fr"\g<1>{lsWorkers}", line)
-
-                        elif 'DASHBOARDS_DARKMODE' in line:
-                            # turn on dark mode, or not
-                            line = re.sub(
-                                r'(DASHBOARDS_DARKMODE\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(dashboardsDarkMode)}",
-                                line,
-                            )
-
-                        elif 'FREQ_LOOKUP' in line:
-                            # freq.py string randomness calculations
-                            line = re.sub(r'(FREQ_LOOKUP\s*:\s*)(\S+)', fr"\g<1>{TrueOrFalseQuote(autoFreq)}", line)
-
-                        elif 'FILEBEAT_TCP_LISTEN' in line:
-                            # expose a filebeat TCP input listener
-                            line = re.sub(
-                                r'(FILEBEAT_TCP_LISTEN\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(filebeatTcpOpen)}",
-                                line,
-                            )
-
-                        elif 'FILEBEAT_TCP_LOG_FORMAT' in line:
-                            # log format expected for events sent to the filebeat TCP input listener
-                            line = re.sub(
-                                r'(FILEBEAT_TCP_LOG_FORMAT\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpFormat}'", line
-                            )
-
-                        elif 'FILEBEAT_TCP_PARSE_SOURCE_FIELD' in line:
-                            # source field name to parse for events sent to the filebeat TCP input listener
-                            line = re.sub(
-                                r'(FILEBEAT_TCP_PARSE_SOURCE_FIELD\s*:\s*)(\S+)',
-                                fr"\g<1>'{filebeatTcpSourceField}'",
-                                line,
-                            )
-
-                        elif 'FILEBEAT_TCP_PARSE_TARGET_FIELD' in line:
-                            # target field name to store decoded JSON fields for events sent to the filebeat TCP input listener
-                            line = re.sub(
-                                r'(FILEBEAT_TCP_PARSE_TARGET_FIELD\s*:\s*)(\S+)',
-                                fr"\g<1>'{filebeatTcpTargetField}'",
-                                line,
-                            )
-
-                        elif 'FILEBEAT_TCP_PARSE_DROP_FIELD' in line:
-                            # field to drop in events sent to the filebeat TCP input listener
-                            line = re.sub(
-                                r'(FILEBEAT_TCP_PARSE_DROP_FIELD\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpDropField}'", line
-                            )
-
-                        elif 'FILEBEAT_TCP_TAG' in line:
-                            # tag to append to events sent to the filebeat TCP input listener
-                            line = re.sub(r'(FILEBEAT_TCP_TAG\s*:\s*)(\S+)', fr"\g<1>'{filebeatTcpTag}'", line)
-
-                        elif 'OPENSEARCH_LOCAL' in line:
-                            # OpenSearch primary instance is local vs. remote
-                            line = re.sub(
-                                r'(OPENSEARCH_LOCAL\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(not opensearchPrimaryRemote)}",
-                                line,
-                            )
-
-                        elif 'OPENSEARCH_URL' in line:
-                            # OpenSearch primary instance URL
-                            line = re.sub(r'(OPENSEARCH_URL\s*:\s*)(\S+)', fr"\g<1>'{opensearchPrimaryUrl}'", line)
-
-                        elif 'OPENSEARCH_SSL_CERTIFICATE_VERIFICATION' in line:
-                            # OpenSearch primary instance needs SSL verification
-                            line = re.sub(
-                                r'(OPENSEARCH_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(opensearchPrimarySslVerify)}",
-                                line,
-                            )
-
-                        elif 'OPENSEARCH_SECONDARY_URL' in line:
-                            # OpenSearch secondary instance URL
-                            line = re.sub(
-                                r'(OPENSEARCH_SECONDARY_URL\s*:\s*)(\S+)', fr"\g<1>'{opensearchSecondaryUrl}'", line
-                            )
-
-                        elif 'OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION' in line:
-                            # OpenSearch secondary instance needs SSL verification
-                            line = re.sub(
-                                r'(OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(opensearchSecondarySslVerify)}",
-                                line,
-                            )
-
-                        elif 'OPENSEARCH_SECONDARY' in line:
-                            # OpenSearch secondary remote instance is enabled
-                            line = re.sub(
-                                r'(OPENSEARCH_SECONDARY\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(opensearchSecondaryRemote)}",
-                                line,
-                            )
-
-                        elif 'ISM_SNAPSHOT_COMPRESSED' in line:
-                            # OpenSearch index state management snapshot compression
-                            line = re.sub(
-                                r'(ISM_SNAPSHOT_COMPRESSED\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(indexSnapshotCompressed)}",
-                                line,
-                            )
-
-                        elif 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT' in line:
-                            # delete based on index pattern size
-                            line = re.sub(
-                                r'(OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT\s*:\s*)(\S+)',
-                                fr"\g<1>'{indexPruneSizeLimit}'",
-                                line,
-                            )
-
-                        elif 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT' in line:
-                            # delete based on index pattern size (sorted by name vs. creation time)
-                            line = re.sub(
-                                r'(OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT\s*:\s*)(\S+)',
-                                fr"\g<1>{TrueOrFalseQuote(indexPruneNameSort)}",
-                                line,
-                            )
-
-                    elif (currentSection == 'services') and (not serviceStartLine) and (currentService is not None):
+                    if (currentSection == 'services') and (not serviceStartLine) and (currentService is not None):
                         # down in the individual services sections of the compose file
 
                         if re.match(r'^\s*restart\s*:.*$', line):
@@ -1287,10 +1346,6 @@ class Installer(object):
 
                         elif currentService == 'logstash':
                             # stuff specifically in the logstash section
-                            if 'LS_JAVA_OPTS' in line:
-                                # logstash memory allowance
-                                line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', line)
-
                             if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
                                 # set bind IP based on whether it should be externally exposed or not
                                 line = re.sub(
@@ -1301,11 +1356,7 @@ class Installer(object):
 
                         elif currentService == 'opensearch':
                             # stuff specifically in the opensearch section
-                            if 'OPENSEARCH_JAVA_OPTS' in line:
-                                # OpenSearch memory allowance
-                                line = re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', line)
-
-                            elif re.match(r'^\s*-.+:/usr/share/opensearch/data(:.+)?\s*$', line):
+                            if re.match(r'^\s*-.+:/usr/share/opensearch/data(:.+)?\s*$', line):
                                 # OpenSearch indexes directory
                                 line = ReplaceBindMountLocation(
                                     line,
@@ -2366,6 +2417,7 @@ def main():
     global args
     global requests_imported
     global yaml_imported
+    global dotenv_imported
 
     # extract arguments from the command line
     # print (sys.argv[1:]);
@@ -2416,6 +2468,16 @@ def main():
         help='Single docker-compose YML file to configure',
     )
     parser.add_argument(
+        '-e',
+        '--environment-dir',
+        required=False,
+        dest='configDir',
+        metavar='<STR>',
+        type=str,
+        default=None,
+        help="Directory containing Malcolm's .env files",
+    )
+    parser.add_argument(
         '-d',
         '--defaults',
         dest='acceptDefaultsNonInteractive',
@@ -2426,7 +2488,6 @@ def main():
         help="Accept defaults to prompts without user interaction",
     )
     parser.add_argument(
-        '-l',
         '--logstash-expose',
         dest='exposeLogstash',
         type=str2bool,
@@ -2436,7 +2497,6 @@ def main():
         help="Expose Logstash port to external hosts",
     )
     parser.add_argument(
-        '-e',
         '--opensearch-expose',
         dest='exposeOpenSearch',
         type=str2bool,
@@ -2446,7 +2506,6 @@ def main():
         help="Expose OpenSearch port to external hosts",
     )
     parser.add_argument(
-        '-t',
         '--filebeat-tcp-expose',
         dest='exposeFilebeatTcp',
         type=str2bool,
@@ -2456,7 +2515,6 @@ def main():
         help="Expose Filebeat TCP port to external hosts",
     )
     parser.add_argument(
-        '-s',
         '--sftp-expose',
         dest='exposeSFTP',
         type=str2bool,
@@ -2492,10 +2550,12 @@ def main():
 
     requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
+    dotenv_imported = DotEnvDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     if args.debug:
         eprint(f"Imported requests: {requests_imported}")
         eprint(f"Imported yaml: {yaml_imported}")
-    if (not requests_imported) or (not yaml_imported):
+        eprint(f"Imported dotenv: {dotenv_imported}")
+    if (not requests_imported) or (not yaml_imported) or (not dotenv_imported):
         exit(2)
 
     # If Malcolm and images tarballs are provided, we will use them.
@@ -2555,13 +2615,36 @@ def main():
         if hasattr(installer, 'install_docker_images'):
             success = installer.install_docker_images(imageFile)
 
-    if args.configOnly or (args.configFile and os.path.isfile(args.configFile)):
-        if not args.configFile:
-            for testPath in [origPath, ScriptPath, os.path.realpath(os.path.join(ScriptPath, ".."))]:
-                if os.path.isfile(os.path.join(testPath, "docker-compose.yml")):
-                    installPath = testPath
+    # if .env directory is unspecified, use the default ./config directory
+    if args.configDir is None:
+        args.configDir = os.path.join(MalcolmPath, 'config')
+    try:
+        os.makedirs(args.configDir)
+    except OSError as exc:
+        if (exc.errno == errno.EEXIST) and os.path.isdir(args.configDir):
+            pass
         else:
+            raise
+
+    if (
+        args.configOnly
+        or (args.configFile and os.path.isfile(args.configFile))
+        or (args.configDir and os.path.isdir(args.configDir))
+    ):
+        if args.configFile and os.path.isfile(args.configFile):
             installPath = os.path.dirname(os.path.realpath(args.configFile))
+
+        elif args.configDir and os.path.isfile(args.configDir):
+            installPath = os.path.dirname(os.path.realpath(args.configDir))
+
+        else:
+            for testPath in [origPath, ScriptPath, os.path.realpath(os.path.join(ScriptPath, ".."))]:
+                if os.path.isfile(os.path.join(testPath, "docker-compose.yml")) or os.path.isdir(
+                    os.path.join(testPath, "config")
+                ):
+                    installPath = testPath
+                    break
+
         success = (installPath is not None) and os.path.isdir(installPath)
         if args.debug:
             eprint(f"Malcolm installation detected at {installPath}")

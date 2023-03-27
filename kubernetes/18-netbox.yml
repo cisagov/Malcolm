@@ -50,9 +50,9 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
-              name: netbox-env
+              name: netbox-common-env
           - configMapRef:
-              name: netbox-netbox-env
+              name: netbox-env
         env:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"

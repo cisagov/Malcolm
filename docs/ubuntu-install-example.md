@@ -190,8 +190,6 @@ Should Malcolm capture live network traffic to PCAP files for analysis with Arki
 
 Capture packets using netsniff-ng? (Y/n): y   
 
-Capture packets using tcpdump? (y/N): n
-
 Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y/N): y
 
 Should Malcolm analyze live network traffic with Suricata? (y/N): y

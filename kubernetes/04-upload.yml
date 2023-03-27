@@ -46,7 +46,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
-              name: main-auth-env
+              name: auth-env
           - configMapRef:
               name: upload-env
         env:

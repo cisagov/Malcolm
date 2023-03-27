@@ -26,7 +26,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
-              name: common-upload-env
+              name: upload-common-env
           - configMapRef:
               name: zeek-env
           - configMapRef:

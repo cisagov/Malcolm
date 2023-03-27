@@ -10,37 +10,36 @@ Some configuration changes can be put in place by modifying local copies of conf
 $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
   opensearch:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
   dashboards-helper:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
   dashboards:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
   logstash:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
   filebeat:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./zeek-logs:/zeek
       - ./suricata-logs:/suricata
       - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
       - ./filebeat/certs/client.crt:/certs/client.crt:ro
       - ./filebeat/certs/client.key:/certs/client.key:ro
   arkime:
-      - ./auth.env
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
       - ./arkime-logs:/opt/arkime/logs
       - ./arkime-raw:/opt/arkime/raw
@@ -74,11 +73,10 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./pcap/upload:/pcap
   pcap-monitor:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./zeek-logs:/zeek
       - ./pcap:/pcap
   upload:
-      - ./auth.env
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
   htadmin:
@@ -90,7 +88,7 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./nginx/ca-trust:/var/local/ca-trust:ro
   api:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
   nginx-proxy:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro

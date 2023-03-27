@@ -39,7 +39,7 @@ If you installed Malcolm from [pre-packaged installation files]({{ site.github.r
     * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
 3. backup current Malcolm scripts, configuration files and certificates
     * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
-    * `cp -r filebeat/ htadmin/ logstash/ nginx/ auth.env docker-compose.yml ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
+    * `cp -r filebeat/ htadmin/ logstash/ nginx/ config/ docker-compose.yml ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
 3. replace scripts and local documentation in your existing installation with the new ones
     * `rm -rf ./scripts ./README.md`
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`

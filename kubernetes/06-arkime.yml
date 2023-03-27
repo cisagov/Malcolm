@@ -43,7 +43,9 @@ spec:
           - configMapRef:
               name: opensearch-env
           - configMapRef:
-              name: common-upload-env
+              name: auth-env
+          - configMapRef:
+              name: upload-common-env
           - configMapRef:
               name: arkime-env
         env:

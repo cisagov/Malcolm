@@ -43,7 +43,7 @@ spec:
           - configMapRef:
               name: opensearch-env
           - configMapRef:
-              name: common-upload-env
+              name: upload-common-env
         env:
           - name: PCAPMON_DISABLED
             value: "true"

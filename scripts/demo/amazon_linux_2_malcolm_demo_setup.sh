@@ -572,7 +572,8 @@ function InstallMalcolm {
           sed -i "s/\(^[[:space:]]*$KEY[[:space:]]*:[[:space:]]*\).*/\1$VALUE/g" "$CONFIG"
         done
       done
-      touch auth.env
+      mkdir -p ./config
+      touch ./config/auth.env
       grep image: docker-compose-standalone.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1

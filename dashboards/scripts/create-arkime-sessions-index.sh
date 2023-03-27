@@ -38,7 +38,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     if [[ "$LOOP" == "primary" ]]; then
       OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"http://opensearch:9200"}
       OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-      OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+      OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
       if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
         CURL_CONFIG_PARAMS=(
           --config
@@ -51,7 +51,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     elif [[ "$LOOP" == "secondary" ]] && [[ "${OPENSEARCH_SECONDARY:-"false"}" == "true" ]] && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then
       OPENSEARCH_URL_TO_USE=$OPENSEARCH_SECONDARY_URL
       OPENSEARCH_LOCAL=false
-      OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/opensearch.secondary.curlrc"}
+      OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.secondary.curlrc"}
       if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
         CURL_CONFIG_PARAMS=(
           --config

@@ -41,7 +41,7 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
-              name: auth-env
+              name: auth-common-env
           - configMapRef:
               name: nginx-env
         livenessProbe:

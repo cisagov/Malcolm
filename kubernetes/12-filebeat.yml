@@ -47,9 +47,9 @@ spec:
           - configMapRef:
               name: filebeat-env
           - configMapRef:
-              name: common-upload-env
+              name: upload-common-env
           - configMapRef:
-              name: common-beats-env
+              name: beats-common-env
         env:
           - name: FILEBEAT_DISABLED
             value: "true"
