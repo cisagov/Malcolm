@@ -14,7 +14,7 @@
 /nginx/certs
 /nginx/ca-trust
 /nginx/htpasswd
-/nginx/nginx_ldap.conf
+/nginx/nginx_ldap*.conf
 /htadmin/config.ini
 /htadmin/metadata
 
