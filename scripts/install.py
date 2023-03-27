@@ -847,7 +847,8 @@ class Installer(object):
             'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
         ):
             pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
-            pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=(not pcapNetSniff))
+            if not pcapNetSniff:
+                pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=True)
             arkimeManagePCAP = InstallerYesOrNo(
                 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
                 default=False,
