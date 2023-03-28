@@ -47,6 +47,18 @@ spec:
         env:
           - name: VIRTUAL_HOST
             value: "dashboards-helper.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - cron
+            - maps
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: dashboards-helper-var-local-catrust-volume

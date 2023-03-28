@@ -45,6 +45,18 @@ spec:
         env:
           - name: VIRTUAL_HOST
             value: "dashboards.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - --silent
+            - --fail
+            - http://localhost:5601/dashboards/api/status
+          initialDelaySeconds: 210
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: dashboards-var-local-catrust-volume
