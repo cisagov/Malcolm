@@ -50,10 +50,10 @@ spec:
         livenessProbe:
           exec:
             command:
-            - bash
+            - sh
             - -c
-            - "[[ $(NETBOX_POSTGRES_DISABLED) == 'true' ]] || pg_isready -d $(POSTGRES_DB) -U $(POSTGRES_USER)"
-          initialDelaySeconds: 45
+            - "pg_isready || pidof goStatic || exit 1"
+          initialDelaySeconds: 90
           periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1
