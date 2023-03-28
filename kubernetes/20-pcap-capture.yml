@@ -20,6 +20,13 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+            - NET_ADMIN
+            - NET_RAW
+            - SYS_ADMIN
         envFrom:
           - configMapRef:
               name: process-env

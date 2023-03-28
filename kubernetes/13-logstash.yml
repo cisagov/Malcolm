@@ -37,6 +37,10 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
         ports:
           - containerPort: 5044
           - containerPort: 9600
@@ -52,14 +56,23 @@ spec:
           - configMapRef:
               name: netbox-env
           - configMapRef:
-              name: logstash-env
-          - configMapRef:
               name: beats-common-env
           - configMapRef:
               name: lookup-common-env
-        env:
-          - name: LOGSTASH_DISABLED
-            value: "true"
+          - configMapRef:
+              name: logstash-env
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - --silent
+            - --fail
+            - http://localhost:9600
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: logstash-var-local-catrust-volume
