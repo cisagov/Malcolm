@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zeek-deployment
+  name: zeek-offline-deployment
   namespace: malcolm
 spec:
   selector:
     matchLabels:
-      name: zeek-deployment
+      name: zeek-offline-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        name: zeek-deployment
+        name: zeek-offline-deployment
     spec:
       containers:
-      - name: zeek-container
+      - name: zeek-offline-container
         image: ghcr.io/idaholab/malcolm/zeek:kubernetes
         imagePullPolicy: Always
         stdin: false
@@ -38,18 +38,41 @@ spec:
               name: zeek-env
           - configMapRef:
               name: zeek-offline-env
-        env:
-          - name: ZEEK_DISABLED
-            value: "true"
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - pcap-zeek
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: zeek-var-local-catrust-volume
+            name: zeek-offline-var-local-catrust-volume
           - mountPath: "/pcap"
-            name: zeek-pcap-volume
+            name: zeek-offline-pcap-volume
+          - mountPath: "/zeek/extract_files"
+            name: zeek-offline-zeek-volume
+            subPath: "extract_files"
+          - mountPath: "/zeek/upload"
+            name: zeek-offline-zeek-volume
+            subPath: "upload"
+          - mountPath: "/opt/zeek/share/zeek/site/intel"
+            name: zeek-offline-zeek-intel
+            subPath: "zeek/intel"
       volumes:
-        - name: zeek-var-local-catrust-volume
+        - name: zeek-offline-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: zeek-pcap-volume
+        - name: zeek-offline-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: zeek-offline-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: zeek-offline-zeek-intel
+          persistentVolumeClaim:
+            claimName: config-claim

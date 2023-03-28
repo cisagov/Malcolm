@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: suricata-deployment
+  name: suricata-offline-deployment
   namespace: malcolm
 spec:
   selector:
     matchLabels:
-      name: suricata-deployment
+      name: suricata-offline-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        name: suricata-deployment
+        name: suricata-offline-deployment
     spec:
       containers:
-      - name: suricata-container
+      - name: suricata-offline-container
         image: ghcr.io/idaholab/malcolm/suricata:kubernetes
         imagePullPolicy: Always
         stdin: false
@@ -38,18 +38,36 @@ spec:
               name: suricata-env
           - configMapRef:
               name: suricata-offline-env
-        env:
-          - name: SURICATA_DISABLED
-            value: "true"
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - pcap-suricata
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: suricata-var-local-catrust-volume
+            name: suricata-offline-var-local-catrust-volume
           - mountPath: "/data/pcap"
-            name: suricata-pcap-volume
+            name: suricata-offline-pcap-volume
+          - mountPath: "/var/log/suricata"
+            name: suricata-offline-suricata-logs-volume
+          - mountPath: "/opt/suricata/rules/configmap"
+            name: suricata-offline-custom-rules-volume
       volumes:
-        - name: suricata-var-local-catrust-volume
+        - name: suricata-offline-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: suricata-pcap-volume
+        - name: suricata-offline-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: suricata-offline-suricata-logs-volume
+          persistentVolumeClaim:
+            claimName: suricata-claim
+        - name: suricata-offline-custom-rules-volume
+          configMap:
+            name: suricata-rules
