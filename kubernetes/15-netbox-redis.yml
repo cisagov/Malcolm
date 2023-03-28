@@ -52,9 +52,14 @@ spec:
         livenessProbe:
           exec:
             command:
-            - sh
-            - -c
-            - "pidof redis-server || pidof goStatic || exit 1"
+             - sh
+             - "-c"
+             - |
+               /bin/bash <<'EOF'
+
+               [[ "$NETBOX_REDIS_DISABLED" == 'true' ]] || ( pidof redis-server || exit 1 )
+
+               EOF
           initialDelaySeconds: 45
           periodSeconds: 60
           timeoutSeconds: 15
