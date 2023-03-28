@@ -49,10 +49,21 @@ spec:
           - configMapRef:
               name: arkime-env
         env:
-          - name: ARKIME_DISABLED
-            value: "true"
           - name: VIRTUAL_HOST
             value: "arkime.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - --insecure
+            - --silent
+            - --fail
+            - https://localhost:8005/_ns_/nstest.html
+          initialDelaySeconds: 210
+          periodSeconds: 90
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: arkime-var-local-catrust-volume
