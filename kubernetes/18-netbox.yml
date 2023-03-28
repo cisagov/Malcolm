@@ -58,7 +58,7 @@ spec:
             value: "netbox.malcolm.local"
         livenessProbe:
           httpGet:
-            path: /netbox/api
+            path: /netbox/api/
             port: 8080
             scheme: HTTP
           initialDelaySeconds: 300
