@@ -49,7 +49,17 @@ spec:
         env:
           - name: VIRTUAL_HOST
             value: "netbox-redis-cache.malcolm.local"
-        # TODO: livenessProbe
+        livenessProbe:
+          exec:
+            command:
+            - bash
+            - -c
+            - "[[ $(NETBOX_REDIS_DISABLED) == 'true' ]] || ( pidof redis-server || exit 1 )"
+          initialDelaySeconds: 45
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: netbox-redis-cache-var-local-catrust-volume

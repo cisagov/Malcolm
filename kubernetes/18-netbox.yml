@@ -62,7 +62,7 @@ spec:
             - curl
             - --silent
             - http://localhost:8080/netbox/api
-          initialDelaySeconds: 120
+          initialDelaySeconds: 300
           periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1
