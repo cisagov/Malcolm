@@ -33,6 +33,8 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
+        command: ["sh"]
+        args: ["-c", "redis-server --appendonly yes --requirepass $(REDIS_PASSWORD)"]
         ports:
           - containerPort: 6379
         envFrom:
@@ -47,10 +49,17 @@ spec:
         env:
           - name: VIRTUAL_HOST
             value: "netbox-redis.malcolm.local"
+        # TODO: livenessProbe
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: netbox-redis-var-local-catrust-volume
+          - mountPath: /data
+            name: netbox-redis-volume
+            subPath: netbox/redis
       volumes:
         - name: netbox-redis-var-local-catrust-volume
           configMap:
             name: var-local-catrust
+        - name: netbox-redis-volume
+          persistentVolumeClaim:
+            claimName: config-claim

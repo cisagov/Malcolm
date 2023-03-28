@@ -56,11 +56,31 @@ spec:
         env:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - --silent
+            - http://localhost:8080/netbox/api
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: netbox-var-local-catrust-volume
           - mountPath: /usr/local/share/configmap
             name: netbox-netmap-json-volume
+          - mountPath: /etc/netbox/config/configmap
+            name: netbox-config-volume
+          - mountPath: /etc/netbox/reports/configmap
+            name: netbox-reports-volume
+          - mountPath: /etc/netbox/scripts/configmap
+            name: netbox-scripts-volume
+          - mountPath: /opt/netbox/netbox/media
+            name: netbox-media-volume
+            subPath: netbox/media
       volumes:
         - name: netbox-var-local-catrust-volume
           configMap:
@@ -68,3 +88,16 @@ spec:
         - name: netbox-netmap-json-volume
           configMap:
             name: netbox-netmap-json
+        - name: netbox-config-volume
+          configMap:
+            name: netbox-config
+        - name: netbox-reports-volume
+          configMap:
+            name: netbox-reports
+        - name: netbox-scripts-volume
+          configMap:
+            name: netbox-scripts
+        - name: netbox-media-volume
+          persistentVolumeClaim:
+            claimName: config-claim
+

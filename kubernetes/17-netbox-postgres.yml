@@ -47,10 +47,17 @@ spec:
         env:
           - name: VIRTUAL_HOST
             value: "netbox-postgres.malcolm.local"
+        # TODO: livenessProbe
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: netbox-postgres-var-local-catrust-volume
+          - mountPath: /var/lib/postgresql/data
+            name: netbox-postgres-volume
+            subPath: netbox/postgres
       volumes:
         - name: netbox-postgres-var-local-catrust-volume
           configMap:
             name: var-local-catrust
+        - name: netbox-postgres-volume
+          persistentVolumeClaim:
+            claimName: config-claim
