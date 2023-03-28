@@ -45,14 +45,22 @@ spec:
           - configMapRef:
               name: opensearch-env
           - configMapRef:
-              name: filebeat-env
-          - configMapRef:
               name: upload-common-env
           - configMapRef:
               name: beats-common-env
-        env:
-          - name: FILEBEAT_DISABLED
-            value: "true"
+          - configMapRef:
+              name: filebeat-env
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - filebeat
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: filebeat-var-local-catrust-volume
@@ -60,6 +68,11 @@ spec:
             name: filebeat-opensearch-curlrc-volume
           - mountPath: /certs/configmap
             name: filebeat-certs-volume
+          - mountPath: "/zeek"
+            name: filebeat-zeek-volume
+          - mountPath: "/suricata"
+            name: filebeat-suricata-volume
+          # TODO: live nginx-logs from nginx-proxy container
       volumes:
         - name: filebeat-var-local-catrust-volume
           configMap:
@@ -70,3 +83,9 @@ spec:
         - name: filebeat-certs-volume
           configMap:
             name: filebeat-certs
+        - name: filebeat-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: filebeat-suricata-volume
+          persistentVolumeClaim:
+            claimName: suricata-claim

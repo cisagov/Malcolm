@@ -68,7 +68,7 @@ spec:
             - --silent
             - --fail
             - http://localhost:9600
-          initialDelaySeconds: 60
+          initialDelaySeconds: 600
           periodSeconds: 30
           timeoutSeconds: 15
           successThreshold: 1
