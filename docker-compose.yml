@@ -426,7 +426,7 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: pcapmon
+    hostname: pcap-monitor
     networks:
       - default
     env_file:

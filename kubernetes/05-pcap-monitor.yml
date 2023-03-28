@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: pcapmon
+  name: pcap-monitor
   namespace: malcolm
 spec:
   ports:
@@ -58,23 +58,23 @@ spec:
           failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: pcapmon-var-local-catrust-volume
+            name: pcap-monitor-var-local-catrust-volume
           - mountPath: /var/local/curlrc/configmap
-            name: pcapmon-opensearch-curlrc-volume
+            name: pcap-monitor-opensearch-curlrc-volume
           - mountPath: "/pcap"
-            name: pcapmon-pcap-volume
+            name: pcap-monitor-pcap-volume
           - mountPath: "/zeek"
-            name: pcapmon-zeek-volume
+            name: pcap-monitor-zeek-volume
       volumes:
-        - name: pcapmon-var-local-catrust-volume
+        - name: pcap-monitor-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: pcapmon-opensearch-curlrc-volume
+        - name: pcap-monitor-opensearch-curlrc-volume
           configMap:
             name: opensearch-curlrc
-        - name: pcapmon-pcap-volume
+        - name: pcap-monitor-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
-        - name: pcapmon-zeek-volume
+        - name: pcap-monitor-zeek-volume
           persistentVolumeClaim:
             claimName: zeek-claim
