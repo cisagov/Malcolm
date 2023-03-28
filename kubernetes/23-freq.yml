@@ -46,12 +46,10 @@ spec:
           - name: VIRTUAL_HOST
             value: "freq.malcolm.local"
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --silent
-            - --fail
-            - http://localhost:10004
+          httpGet:
+            path: /
+            port: 10004
+            scheme: HTTP
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

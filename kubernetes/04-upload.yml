@@ -53,11 +53,10 @@ spec:
           - name: VIRTUAL_HOST
             value: "upload.malcolm.local"
         livenessProbe:
-          exec:
-            command:
-            - wget
-            - -qO-
-            - http://localhost
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

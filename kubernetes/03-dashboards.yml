@@ -46,12 +46,10 @@ spec:
           - name: VIRTUAL_HOST
             value: "dashboards.malcolm.local"
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --silent
-            - --fail
-            - http://localhost:5601/dashboards/api/status
+          httpGet:
+            path: /dashboards/api/status
+            port: 5601
+            scheme: HTTP
           initialDelaySeconds: 210
           periodSeconds: 30
           timeoutSeconds: 15

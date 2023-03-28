@@ -48,12 +48,10 @@ spec:
           - name: VIRTUAL_HOST
             value: "api.malcolm.local"
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --silent
-            - --fail
-            - http://localhost:5000/mapi/ping
+          httpGet:
+            path: /mapi/ping
+            port: 5000
+            scheme: HTTP
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

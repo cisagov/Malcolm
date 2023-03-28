@@ -57,11 +57,10 @@ spec:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --silent
-            - http://localhost:8080/netbox/api
+          httpGet:
+            path: /netbox/api
+            port: 8080
+            scheme: HTTP
           initialDelaySeconds: 300
           periodSeconds: 60
           timeoutSeconds: 15

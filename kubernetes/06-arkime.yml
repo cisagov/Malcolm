@@ -52,13 +52,10 @@ spec:
           - name: VIRTUAL_HOST
             value: "arkime.malcolm.local"
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --insecure
-            - --silent
-            - --fail
-            - https://localhost:8005/_ns_/nstest.html
+          httpGet:
+            path: /_ns_/nstest.html
+            port: 8005
+            scheme: HTTPS
           initialDelaySeconds: 210
           periodSeconds: 90
           timeoutSeconds: 30

@@ -62,12 +62,10 @@ spec:
           - configMapRef:
               name: logstash-env
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --silent
-            - --fail
-            - http://localhost:9600
+          httpGet:
+            path: /
+            port: 9600
+            scheme: HTTP
           initialDelaySeconds: 600
           periodSeconds: 30
           timeoutSeconds: 15

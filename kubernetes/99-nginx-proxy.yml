@@ -35,6 +35,7 @@ spec:
         tty: true
         ports:
           - containerPort: 443
+          - containerPort: 8443
         envFrom:
           - configMapRef:
               name: process-env
@@ -45,12 +46,10 @@ spec:
           - configMapRef:
               name: nginx-env
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - --insecure
-            - --silent
-            - https://localhost:443
+          httpGet:
+            path: /
+            port: 8443
+            scheme: HTTPS
           initialDelaySeconds: 120
           periodSeconds: 30
           timeoutSeconds: 15
