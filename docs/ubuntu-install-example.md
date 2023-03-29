@@ -196,6 +196,8 @@ Should Malcolm analyze live network traffic with Suricata? (y/N): y
 
 Should Malcolm analyze live network traffic with Zeek? (y/N): y
 
+Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek? (y/N): n
+
 Specify capture interface(s) (comma-separated): eth0
 
 Capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200

@@ -824,11 +824,22 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=netboxEnabled,
         )
+        netboxSiteName = (
+            InstallerAskForString(
+                'Specify default NetBox site name',
+                default='',
+            )
+            if netboxEnabled
+            else ''
+        )
+        if len(netboxSiteName) == 0:
+            netboxSiteName = 'Malcolm'
 
         # input packet capture parameters
         pcapNetSniff = False
         pcapTcpDump = False
         liveZeek = False
+        zeekICSBestGuess = False
         liveSuricata = False
         pcapIface = 'lo'
         tweakIface = False
@@ -848,6 +859,10 @@ class Installer(object):
 
         liveSuricata = InstallerYesOrNo('Should Malcolm analyze live network traffic with Suricata?', default=False)
         liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
+
+        zeekICSBestGuess = (autoZeek or liveZeek) and InstallerYesOrNo(
+            'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?', default=False
+        )
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
@@ -997,6 +1012,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'lookup-common.env'),
                 'FREQ_LOOKUP',
                 TrueOrFalseNoQuote(autoFreq),
+            ),
+            # NetBox default site name
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_DEFAULT_SITE',
+                netboxSiteName,
             ),
             # enable/disable netbox
             EnvValue(
@@ -1201,6 +1222,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_UPDATE_RULES',
                 TrueOrFalseNoQuote(fileScanRuleUpdate),
+            ),
+            # disable/enable ICS best guess
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'ZEEK_DISABLE_BEST_GUESS_ICS',
+                '' if zeekICSBestGuess else TrueOrFalseNoQuote(not zeekICSBestGuess),
             ),
             # live traffic analysis with Zeek
             EnvValue(
