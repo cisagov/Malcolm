@@ -156,8 +156,8 @@ def InstallerDisplayMessage(
     )
 
 
-def TrueOrFalseQuote(expression):
-    return "'{}'".format('true' if expression else 'false')
+def TrueOrFalseQuote(expression, falseIsBlank=False):
+    return "'{}'".format('true' if expression else '' if falseIsBlank else 'false')
 
 
 ###################################################################################################
@@ -810,11 +810,22 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=netboxEnabled,
         )
+        netboxSiteName = (
+            InstallerAskForString(
+                'Specify default NetBox site name',
+                default='',
+            )
+            if netboxEnabled
+            else ''
+        )
+        if len(netboxSiteName) == 0:
+            netboxSiteName = 'Malcolm'
 
         # input packet capture parameters
         pcapNetSniff = False
         pcapTcpDump = False
         liveZeek = False
+        zeekICSBestGuess = False
         liveSuricata = False
         pcapIface = 'lo'
         tweakIface = False
@@ -833,6 +844,10 @@ class Installer(object):
 
         liveSuricata = InstallerYesOrNo('Should Malcolm analyze live network traffic with Suricata?', default=False)
         liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
+
+        zeekICSBestGuess = (autoZeek or liveZeek) and InstallerYesOrNo(
+            'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?', default=False
+        )
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
@@ -926,6 +941,14 @@ class Installer(object):
                         elif 'ZEEK_EXTRACTOR_MODE' in line:
                             # zeek file extraction mode
                             line = re.sub(r'(ZEEK_EXTRACTOR_MODE\s*:\s*)(\S+)', fr"\g<1>'{fileCarveMode}'", line)
+
+                        elif 'ZEEK_DISABLE_BEST_GUESS_ICS' in line:
+                            # disable/enable ICS best guess
+                            line = re.sub(
+                                r'(ZEEK_DISABLE_BEST_GUESS_ICS\s*:\s*)(\S+)',
+                                fr"\g<1>{TrueOrFalseQuote(not zeekICSBestGuess, falseIsBlank=True)}",
+                                line,
+                            )
 
                         elif 'EXTRACTED_FILE_PRESERVATION' in line:
                             # zeek file preservation mode
@@ -1107,6 +1130,14 @@ class Installer(object):
                             line = re.sub(
                                 r'(NETBOX_DISABLED\s*:(\s*&\S+)?\s*)(\S+)',
                                 fr"\g<1>{TrueOrFalseQuote(not netboxEnabled)}",
+                                line,
+                            )
+
+                        elif 'NETBOX_DEFAULT_SITE' in line:
+                            # NetBox default site name
+                            line = re.sub(
+                                r'(NETBOX_DEFAULT_SITE\s*:\s*)(\S+)',
+                                fr"\g<1>'{netboxSiteName}'",
                                 line,
                             )
 
