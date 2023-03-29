@@ -91,7 +91,7 @@ RUN apt-get -q update && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor && \
+    python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
