@@ -20,3 +20,11 @@ EOF
   python3 -m http.server 80
   popd >/dev/null 2>&1
 fi
+
+if [[ ! -f /var/www/htadmin/config/config.ini ]]; then
+  cp /var/www/htadmin/config/default/config.ini /var/www/htadmin/config/config.ini
+fi
+
+if [[ ! -f /var/www/htadmin/config/metadata ]]; then
+  cp /var/www/htadmin/config/default/metadata /var/www/htadmin/config/metadata
+fi
