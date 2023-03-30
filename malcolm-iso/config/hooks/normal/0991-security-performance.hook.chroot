@@ -25,6 +25,7 @@ UFW_ALLOW_RULES=(
   5045/tcp
   5601/tcp
   8022/tcp
+  9009:9013/tcp
   9200/tcp
 )
 for i in ${UFW_ALLOW_RULES[@]}; do
