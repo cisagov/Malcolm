@@ -237,7 +237,7 @@ EOF
 
 fi # basic vs. ldap
 
-if [![-f /etc/nginx/auth/]] ; then
+if [[ ! -f /etc/nginx/auth/htpasswd ]]; then
   cp /etc/nginx/auth/default/htpasswd /etc/nginx/auth/
 fi
 
