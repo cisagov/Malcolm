@@ -134,7 +134,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-requests \
       python3-zmq \
       rsync && \
-    pip3 install clamd supervisor yara-python python-magic psutil pycryptodome && \
+    pip3 install clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \

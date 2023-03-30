@@ -90,13 +90,17 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         moreutils \
         procps \
         psmisc \
+        python3-pip \
         python3-ruamel.yaml \
+        python3-setuptools \
+        python3-wheel \
         python3-zmq \
         rsync \
         supervisor \
         vim-tiny \
         tini \
         zlib1g && \
+    pip3 install --no-cache-dir watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \
