@@ -34,7 +34,7 @@ except ImportError:
 try:
     from dialog import Dialog
 
-    MainDialog = None  # Dialog(dialog='dialog', autowidgetsize=True)
+    MainDialog = Dialog(dialog='dialog', autowidgetsize=True)
 except ImportError:
     Dialog = None
     MainDialog = None
