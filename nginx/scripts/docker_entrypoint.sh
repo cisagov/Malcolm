@@ -237,5 +237,8 @@ EOF
 
 fi # basic vs. ldap
 
+if [![-f /etc/nginx/auth/]] ; then
+  cp /etc/nginx/auth/default/htpasswd /etc/nginx/auth/
+
 # start supervisor (which will spawn nginx, stunnel, etc.) or whatever the default command is
 exec "$@"
