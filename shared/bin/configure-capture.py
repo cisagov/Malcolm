@@ -1215,9 +1215,6 @@ def main():
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
 
-                    code = d.msgbox(
-                        text='Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
-                    )
                     with Popen(
                         [txRxScript, '-s', tx_ip, '-r', rx_token, '-o', BEAT_LS_CERT_DIR_DEFAULT],
                         stdout=PIPE,
