@@ -1402,6 +1402,44 @@ def authSetup(wipe=False):
 
             os.chmod('netbox.env', stat.S_IRUSR | stat.S_IWUSR)
 
+    if (pyPlatform != PLATFORM_WINDOWS) and Which("croc"):
+        txRxScript = 'tx-rx-secure.sh' if Which('tx-rx-secure.sh') else None
+        if not txRxScript:
+            txRxScript = os.path.join(
+                MalcolmPath, os.path.join('shared', os.path.join('bin', os.path.join('tx-rx-secure.sh')))
+            )
+            txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/local/bin/tx-rx-secure.sh'
+            txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
+            txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else None
+        if txRxScript and YesOrNo('Transfer self-signed client certificates to a remote log forwarder?', default=False):
+            DisplayMessage(
+                f'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files',
+            )
+            with pushd(filebeatPath):
+                with Popen(
+                    [txRxScript, '-t', "ca.crt", "client.crt", "client.key"],
+                    stdout=PIPE,
+                    stderr=STDOUT,
+                    bufsize=0 if MainDialog else -1,
+                ) as p:
+                    if MainDialog:
+                        DisplayProgramBox(
+                            fileDescriptor=p.stdout.fileno(),
+                            text='ssl-client-transmit',
+                            clearScreen=True,
+                        )
+                    else:
+                        while True:
+                            output = p.stdout.readline()
+                            if (len(output) == 0) and (p.poll() is not None):
+                                break
+                            if output:
+                                print(output.decode('utf-8').rstrip())
+                            else:
+                                time.sleep(0.5)
+
+                    p.poll()
+
 
 ###################################################################################################
 # main

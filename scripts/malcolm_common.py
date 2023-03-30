@@ -572,6 +572,37 @@ def DisplayMessage(
 
 
 ###################################################################################################
+# display streaming content via Dialog.programbox
+def DisplayProgramBox(
+    filePath=None,
+    fileFlags=0,
+    fileDescriptor=None,
+    text=None,
+    clearScreen=False,
+):
+    reply = False
+
+    if MainDialog is not None:
+        code = MainDialog.programbox(
+            file_path=filePath,
+            file_flags=fileFlags,
+            fd=fileDescriptor,
+            text=text,
+            width=78,
+            height=20,
+        )
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise RuntimeError("Operation cancelled")
+        else:
+            reply = True
+
+            if clearScreen is True:
+                ClearScreen()
+
+    return reply
+
+
+###################################################################################################
 # convenient boolean argument parsing
 def str2bool(v):
     if isinstance(v, bool):
