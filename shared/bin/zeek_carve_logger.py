@@ -24,7 +24,11 @@ import zmq
 from collections import defaultdict
 from contextlib import nullcontext
 from datetime import datetime
+
 from zeek_carve_utils import *
+
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, AtomicInt, same_file_or_dir
 
 ###################################################################################################
 debug = False
@@ -36,6 +40,7 @@ scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -58,15 +63,6 @@ def debug_toggle_handler(signum, frame):
     global debugToggled
     debug = not debug
     debugToggled = True
-
-
-###################################################################################################
-#
-def same_file_or_dir(path1, path2):
-    try:
-        return os.path.samefile(path1, path2)
-    except:
-        return False
 
 
 ###################################################################################################
@@ -235,7 +231,6 @@ def main():
             print(f'#types\t{BroSignatureLine.signature_types_line()}', file=broSigFile, end='\n')
 
         while not shuttingDown:
-
             if pdbFlagged:
                 pdbFlagged = False
                 breakpoint()
@@ -251,7 +246,6 @@ def main():
                     eprint(f"{scriptName}:\t🕑\t(recv)")
 
             if isinstance(scanResult, dict):
-
                 # register/deregister scanners
                 if FILE_SCAN_RESULT_SCANNER in scanResult:
                     scanner = scanResult[FILE_SCAN_RESULT_SCANNER].lower()
@@ -279,7 +273,6 @@ def main():
                         FILE_SCAN_RESULT_DESCRIPTION,
                     )
                 ):
-
                     triggered = scanResult[FILE_SCAN_RESULT_HITS] > 0
                     fileName = scanResult[FILE_SCAN_RESULT_FILE]
                     fileNameBase = os.path.basename(fileName)
@@ -318,19 +311,16 @@ def main():
 
                     # finally, what to do with the file itself
                     if os.path.isfile(fileName):
-
                         # once all of the scanners have had their turn...
                         if fileScanCount >= len(scanners):
                             fileScanCounts.pop(fileNameBase, None)
                             fileScanHits.pop(fileNameBase, None)
 
                             if (fileScanHitCount > 0) and (args.preserveMode != PRESERVE_NONE):
-
                                 # move triggering file to quarantine
                                 if not same_file_or_dir(
                                     fileName, os.path.join(quarantineDir, fileNameBase)
                                 ):  # unless it's somehow already there
-
                                     try:
                                         shutil.move(fileName, quarantineDir)
                                         if debug:
@@ -344,7 +334,6 @@ def main():
                                 if not same_file_or_dir(
                                     quarantineDir, os.path.dirname(fileName)
                                 ):  # don't move or delete if it's somehow already quarantined
-
                                     if args.preserveMode == PRESERVE_ALL:
                                         # move non-triggering file to preserved directory
                                         try:

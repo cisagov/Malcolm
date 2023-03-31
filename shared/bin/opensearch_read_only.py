@@ -14,27 +14,14 @@ import urllib3
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
+import malcolm_utils
+from malcolm_utils import eprint, str2bool
+
 ###################################################################################################
 debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 urllib3.disable_warnings()
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 ###################################################################################################

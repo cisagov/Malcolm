@@ -27,6 +27,8 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
+from malcolm_utils import val2bool
+
 ###################################################################################################
 args = None
 script_return_code = 0
@@ -37,67 +39,6 @@ orig_path = os.getcwd()
 ###################################################################################################
 YAML_VERSION = (1, 1)
 BACKUP_FILES_MAX = 10
-
-###################################################################################################
-def val2bool(v):
-    try:
-        if v is None:
-            return False
-        elif isinstance(v, bool):
-            return v
-        elif isinstance(v, str):
-            if v.lower() in ("yes", "true", "t", "y"):
-                return True
-            elif v.lower() in ("no", "false", "f", "n"):
-                return False
-            else:
-                raise ValueError(f'Boolean value expected (got {v})')
-        else:
-            raise ValueError(f'Boolean value expected (got {v})')
-    except:
-        # just pitch it back and let the caller worry about it
-        return v
-
-
-###################################################################################################
-@contextlib.contextmanager
-def pushd(directory):
-    prevDir = os.getcwd()
-    os.chdir(directory)
-    try:
-        yield
-    finally:
-        os.chdir(prevDir)
-
-
-###################################################################################################
-def get_iterable(x):
-    if isinstance(x, Iterable) and not isinstance(x, str):
-        return x
-    else:
-        return (x,)
-
-
-###################################################################################################
-def deep_get(d, keys, default=None):
-    k = get_iterable(keys)
-    if d is None:
-        return default
-    if not keys:
-        return d
-    return deep_get(d.get(k[0]), k[1:], default)
-
-
-###################################################################################################
-def deep_set(d, keys, value, deleteIfNone=False):
-    k = get_iterable(keys)
-    for key in k[:-1]:
-        if (key not in d) or (not isinstance(d[key], dict)):
-            d[key] = dict()
-        d = d[key]
-    d[k[-1]] = value
-    if (deleteIfNone == True) and (value is None):
-        d.pop(k[-1], None)
 
 
 ###################################################################################################

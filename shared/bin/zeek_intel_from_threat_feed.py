@@ -13,11 +13,13 @@ import argparse
 import logging
 import os
 import sys
+import malcolm_utils
 import zeek_threat_feed_utils
 
 ###################################################################################################
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
+
 
 ###################################################################################################
 # main
@@ -154,7 +156,7 @@ def main():
 
                     elif '://' in infileArg:
                         # download from URL and read input from remote file
-                        with zeek_threat_feed_utils.temporary_filename(suffix='.txt') as tmpFileName:
+                        with malcolm_utils.temporary_filename(suffix='.txt') as tmpFileName:
                             dlFileName = zeek_threat_feed_utils.download_to_file(
                                 infileArg,
                                 local_filename=tmpFileName,
@@ -177,7 +179,7 @@ def main():
         # we'll queue and then process all of the input arguments in workers
         inputQueue = deque()
         inputQueue.extend(args.input)
-        workerThreadCount = zeek_threat_feed_utils.AtomicInt(value=0)
+        workerThreadCount = malcolm_utils.AtomicInt(value=0)
         workerThreads = ThreadPool(
             args.threads,
             zeek_threat_feed_utils.ProcessThreatInputWorker,

@@ -20,8 +20,12 @@ import threading
 import time
 import zmq
 
-from zeek_carve_utils import *
 from multiprocessing.pool import ThreadPool
+
+from zeek_carve_utils import *
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, AtomicInt
+
 
 ###################################################################################################
 debug = False
@@ -34,6 +38,7 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -71,7 +76,6 @@ def locate_file(fileInfo):
         fileName = None
 
     if fileName is not None:
-
         if os.path.isfile(fileName):
             return fileName
 
@@ -103,7 +107,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
     try:
         if isinstance(checkConnInfo, FileScanProvider):
-
             # initialize ZeroMQ context and socket(s) to send scan results
             context = zmq.Context()
 
@@ -121,7 +124,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
             # loop forever, or until we're told to shut down
             while not shuttingDown:
-
                 # "register" this scanner with the logger
                 while (not scannerRegistered) and (not shuttingDown):
                     try:
@@ -153,7 +155,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                 fileName = locate_file(fileInfo)
                 if (fileName is not None) and os.path.isfile(fileName):
-
                     # file exists, submit for scanning
                     if debug:
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
@@ -190,13 +191,11 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                         # todo: maximum time we wait for a single file to be scanned?
                         while (not requestComplete) and (not shuttingDown):
-
                             # wait a moment then check to see if the scan is complete
                             time.sleep(scan.provider.check_interval())
                             response = scan.provider.check_result(scan.submissionResponse)
 
                             if isinstance(response, AnalyzerResult):
-
                                 # whether the scan has completed
                                 requestComplete = response.finished
 

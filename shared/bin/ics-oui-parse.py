@@ -14,6 +14,9 @@ except ImportError:
 from netaddr import *
 from operator import itemgetter
 
+import malcolm_utils
+from malcolm_utils import eprint, str2bool
+
 ###################################################################################################
 args = None
 debug = False
@@ -23,23 +26,6 @@ orig_path = os.getcwd()
 
 padded_mac_low = '00:00:00:00:00:00'
 padded_mac_high = 'FF:FF:FF:FF:FF:FF'
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-    sys.stderr.flush()
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    elif v.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    else:
-        raise ValueError("Boolean value expected")
 
 
 ###################################################################################################

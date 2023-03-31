@@ -14,9 +14,11 @@ import fileinput
 from collections import defaultdict
 from dialog import Dialog
 
+from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+
 from zeek_carve_utils import *
 from sensorcommon import *
-from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+from malcolm_common import run_process
 
 
 class Constants:

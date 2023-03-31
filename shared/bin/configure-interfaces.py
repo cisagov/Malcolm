@@ -15,6 +15,8 @@ from dialog import Dialog
 from debinterface.interfaces import Interfaces
 from sensorcommon import *
 
+from malcolm_utils import run_process
+
 
 class Constants:
     DHCP = 'dhcp'
@@ -79,6 +81,7 @@ class Constants:
 d = Dialog(dialog='dialog', autowidgetsize=True)
 d.set_background_title(Constants.MSG_BACKGROUND_TITLE)
 
+
 ###################################################################################################
 # if the given interface is up, "ifdown" it
 def network_stop(selected_iface):
@@ -112,7 +115,6 @@ def network_start(selected_iface):
 ###################################################################################################
 # for a given interface, bring it down, write its new settings, and bring it back up
 def write_and_display_results(interfaces, selected_iface):
-
     ecode, stop_results = network_stop(selected_iface)
     stop_results = list(
         filter(
@@ -182,7 +184,6 @@ def main():
     while not quit_flag:
         os.chdir(start_dir)
         try:
-
             # welcome
             code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
             if code == Dialog.CANCEL or code == Dialog.ESC:

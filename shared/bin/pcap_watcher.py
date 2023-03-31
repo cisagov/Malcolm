@@ -24,6 +24,9 @@ import time
 import zmq
 
 from pcap_utils import *
+import malcolm_utils
+from malcolm_utils import eprint, str2bool
+
 from collections import defaultdict
 
 from opensearchpy import OpenSearch, Search

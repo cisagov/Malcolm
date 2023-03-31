@@ -6,7 +6,6 @@
 # - BSD 3-Clause license: https://github.com/tenzir/threatbus/blob/master/COPYING
 # - Zeek Plugin: https://github.com/tenzir/threatbus/blob/master/COPYING
 
-from base64 import b64decode
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from collections.abc import Iterable
@@ -27,7 +26,6 @@ from taxii2client.v20 import Server as TaxiiServer_v20
 from taxii2client.v21 import as_pages as TaxiiAsPages_v21
 from taxii2client.v21 import Collection as TaxiiCollection_v21
 from taxii2client.v21 import Server as TaxiiServer_v21
-from tempfile import NamedTemporaryFile
 from threading import Lock
 from time import sleep, mktime
 from typing import Tuple, Union
@@ -37,6 +35,7 @@ import os
 import re
 import requests
 
+from malcolm_utils import base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson
 
 # keys for dict returned by map_stix_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
@@ -111,38 +110,6 @@ MISP_ZEEK_INTEL_TYPE_MAP = {
     "url": "URL",
     "x509-fingerprint-sha1": "CERT_HASH",
 }
-
-
-def base64_decode_if_prefixed(s: str):
-    if s.startswith('base64:'):
-        return b64decode(s[7:]).decode('utf-8')
-    else:
-        return s
-
-
-def LoadStrIfJson(jsonStr):
-    try:
-        return json.loads(jsonStr)
-    except ValueError as e:
-        return None
-
-
-def LoadFileIfJson(fileHandle):
-    try:
-        return json.load(fileHandle)
-    except ValueError as e:
-        return None
-
-
-@contextmanager
-def temporary_filename(suffix=None):
-    try:
-        f = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
-        tmp_name = f.name
-        f.close()
-        yield tmp_name
-    finally:
-        os.unlink(tmp_name)
 
 
 # get URL directory listing
@@ -225,7 +192,6 @@ def is_stix_point_equality_ioc(indicator_type: type, pattern_str: str, logger=No
     """
     try:
         if pattern := stix_pattern_from_str(indicator_type, pattern_str):
-
             # InspectionListener https://github.com/oasis-open/cti-pattern-validator/blob/e926d0a14adf88de08acb908a51db1f453c13647/stix2patterns/v21/inspector.py#L5
             # E.g.,   pattern = "[domain-name:value = 'evil.com']"
             # =>           il = pattern_data(comparisons={'domain-name': [(['value'], '=', "'evil.com'")]}, observation_ops=set(), qualifiers=set())
@@ -273,7 +239,6 @@ def split_stix_object_path_and_value(
         for comparison in list(il.comparisons.keys()):
             for element in il.comparisons[comparison]:
                 if isinstance(element, Iterable) and (len(element) == 3) and (element[1] in ('=', '==')):
-
                     # construct object path name, e.g.:
                     #     file:hashes.'SHA-1'
                     #     software:name
@@ -334,7 +299,6 @@ def map_stix_indicator_to_zeek(
 
     results = []
     for object_path, ioc_value in split_stix_object_path_and_value(type(indicator), indicator.pattern, logger):
-
         # get matching Zeek intel type
         if not (zeek_type := STIX_ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
             if logger is not None:
@@ -420,7 +384,6 @@ def map_misp_attribute_to_zeek(
 
     # process type/value pairs
     for zeek_type, attribute_value in valTypePairs:
-
         if zeek_type == "URL":
             # remove leading protocol, if any
             parsed = urlparse(attribute_value)
@@ -455,32 +418,6 @@ def map_misp_attribute_to_zeek(
             logger.debug(zeekItem)
 
     return results
-
-
-class AtomicInt:
-    def __init__(self, value=0):
-        self.val = RawValue('i', value)
-        self.lock = Lock()
-
-    def increment(self):
-        with self.lock:
-            self.val.value += 1
-            return self.val.value
-
-    def decrement(self):
-        with self.lock:
-            self.val.value -= 1
-            return self.val.value
-
-    def value(self):
-        with self.lock:
-            return self.val.value
-
-    def __enter__(self):
-        return self.increment()
-
-    def __exit__(self, type, value, traceback):
-        return self.decrement()
 
 
 class FeedParserZeekPrinter(object):
@@ -538,7 +475,6 @@ class FeedParserZeekPrinter(object):
             # parse the STIX and process all "Indicator" objects
             for obj in STIXParse(toParse, allow_custom=True).objects:
                 if type(obj).__name__ == "Indicator":
-
                     # map indicator object to Zeek value(s)
                     if ((self.since is None) or (obj.created >= self.since) or (obj.modified >= self.since)) and (
                         vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger)
@@ -591,7 +527,6 @@ class FeedParserZeekPrinter(object):
                 certainty = None
 
             for attribute in event.attributes:
-
                 # map event attribute to Zeek value(s)
                 if (
                     ((not hasattr(attribute, 'deleted')) or (attribute.deleted == False))
@@ -620,7 +555,6 @@ class FeedParserZeekPrinter(object):
 
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
-
     inputQueue, zeekPrinter, since, workerThreadCount, logger = (
         threatInputWorkerArgs[0],
         threatInputWorkerArgs[1],
@@ -641,9 +575,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                 sleep(1)
             else:
                 try:
-
                     with open(inarg) if ((inarg is not None) and os.path.isfile(inarg)) else nullcontext() as infile:
-
                         if infile:
                             ##################################################################################
                             # JSON FILE (STIX or MISP)
@@ -686,7 +618,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 mispAuthKey = mispConnInfo[1]
 
                             with requests.Session() as mispSession:
-
                                 if mispAuthKey is not None:
                                     mispSession.headers.update({'Authorization': mispAuthKey})
 
@@ -849,7 +780,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                     else TaxiiCollection_v20(info['url'], user=taxiiUsername, password=taxiiPassword)
                                 )
                                 try:
-
                                     # loop over paginated results
                                     for envelope in (
                                         TaxiiAsPages_v21(
