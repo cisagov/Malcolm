@@ -1198,26 +1198,25 @@ def main():
 
                     tx_ip = None
                     rx_token = None
-                    while not tx_ip:
-                        code, tx_ip = d.inputbox(
-                            "Malcolm server IP",
-                            width=40,
-                            height=8,
+
+                    while True:
+                        code, values = d.form(
+                            Constants.MSG_CONFIG_TXRX[1],
+                            [
+                                ('Malcolm Server IP', 1, 1, "", 1, 25, 40, 255),
+                                ('Single-use Code Phrase', 2, 1, "", 2, 25, 40, 255),
+                            ],
                         )
-                        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-                            raise CancelledError
-                    while not rx_token:
-                        code, rx_token = d.inputbox(
-                            "Single-use code phrase",
-                            width=40,
-                            height=8,
-                        )
+                        values = [x.strip() for x in values]
+
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
 
-                    code = d.msgbox(
-                        text='Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
-                    )
+                        elif (len(values[0]) >= 3) and (len(values[1]) >= 16):
+                            tx_ip = values[0]
+                            rx_token = values[1]
+                            break
+
                     with Popen(
                         [txRxScript, '-s', tx_ip, '-r', rx_token, '-o', BEAT_LS_CERT_DIR_DEFAULT],
                         stdout=PIPE,
