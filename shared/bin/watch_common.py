@@ -63,9 +63,7 @@ class FileOperationEventHandler(FileSystemEventHandler):
         self.on_modified(event)
 
     def on_modified(self, event):
-        # we only care about "created" and "modified" events if polling,
-        # otherwise "on_closed" will take care of us
-        if not event.is_directory and self.polling:
+        if not event.is_directory:
             with self.deck as d:
                 d[event.src_path] = self.nowTime
                 d.move_to_end(event.src_path, last=True)
@@ -128,7 +126,12 @@ def ProcessFileEventWorker(workerArgs):
                     else:
                         del d[fileName]
                         if fileProcessor is not None:
-                            fileProcessor(fileName, func(**fileProcessorKwargs))
+                            fileProcessor(
+                                fileName,
+                                **fileProcessorKwargs
+                                if fileProcessorKwargs and isinstance(fileProcessorKwargs, dict)
+                                else {},
+                            )
                         if logger is not None:
                             logger.debug(
                                 f"processed {fileName} at {(nowTime-eventTime) if (eventTime > 0) else 0} seconds"
