@@ -238,7 +238,8 @@ EOF
 fi # basic vs. ldap
 
 if [[ ! -f /etc/nginx/auth/htpasswd ]]; then
-  cp /etc/nginx/auth/default/htpasswd /etc/nginx/auth/
+  cp /tmp/auth/default/htpasswd /etc/nginx/auth/
+  rm -rf /tmp/auth/*
 fi
 
 # start supervisor (which will spawn nginx, stunnel, etc.) or whatever the default command is
