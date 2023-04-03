@@ -29,7 +29,6 @@ from malcolm_common import (
     ChooseOne,
     DisplayMessage,
     DisplayProgramBox,
-    GetIterable,
     GetUidGidFromComposeFile,
     LocalPathForContainerBindMount,
     MainDialog,
@@ -46,6 +45,7 @@ from malcolm_utils import (
     eprint,
     EscapeForCurl,
     EscapeAnsi,
+    get_iterable,
     LoadStrIfJson,
     ParseCurlFile,
     RemoveEmptyFolders,
@@ -780,7 +780,7 @@ def stop(wipe=False):
                                     pass
                 # delete whole directories
                 if boundPath.relative_dirs:
-                    for relDir in GetIterable(boundPath.relative_dirs):
+                    for relDir in get_iterable(boundPath.relative_dirs):
                         tmpPath = os.path.join(localPath, relDir)
                         if os.path.isdir(tmpPath):
                             if args.debug:
@@ -788,7 +788,7 @@ def stop(wipe=False):
                             shutil.rmtree(tmpPath, ignore_errors=True)
                 # cleanup empty directories
                 if boundPath.clean_empty_dirs:
-                    for cleanDir in GetIterable(boundPath.clean_empty_dirs):
+                    for cleanDir in get_iterable(boundPath.clean_empty_dirs):
                         tmpPath = os.path.join(localPath, cleanDir)
                         if os.path.isdir(tmpPath):
                             if args.debug:
@@ -882,7 +882,7 @@ def start():
                 else:
                     raise
             if boundPath.relative_dirs:
-                for relDir in GetIterable(boundPath.relative_dirs):
+                for relDir in get_iterable(boundPath.relative_dirs):
                     tmpPath = os.path.join(localPath, relDir)
                     try:
                         if args.debug:
