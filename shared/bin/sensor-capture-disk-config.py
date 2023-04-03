@@ -17,8 +17,9 @@ import uuid
 import argparse
 import fileinput
 from collections import defaultdict
-from sensorcommon import *
 from fstab import Fstab
+
+from malcolm_utils import remove_prefix, str2bool, sizeof_fmt, run_process, eprint
 
 MINIMUM_CAPTURE_DEVICE_BYTES = 100 * 1024 * 1024 * 1024  # 100GiB
 CAPTURE_MOUNT_ROOT_PATH = "/capture"
@@ -36,6 +37,7 @@ CAPTURE_CRYPT_KEYFILE_PERMS = 0o600
 CAPTURE_CRYPT_DEV_PREFIX = 'capture_vault_'
 
 debug = False
+
 
 ###################################################################################################
 # used to map output of lsblk
@@ -73,6 +75,7 @@ def CreateMapperDeviceName(device):
 
 
 ###################################################################################################
+
 
 ###################################################################################################
 # determine if a device (eg., sda) is an internal (True) or removable (False) device
@@ -124,7 +127,6 @@ def GetDeviceSize(device):
 # main
 ###################################################################################################
 def main():
-
     # to parse fdisk output, look for partitions after partitions header line
     fdisk_pars_begin_pattern = re.compile(r'^Device\s+Start\s+End\s+Sectors\s+Size\s+Type\s*$')
     # to parse partitions from fdisk output after parted creates partition table
@@ -194,9 +196,9 @@ def main():
 
     # unmount existing mounts if requested
     if args.umount and (not args.dryrun):
-        if (not args.interactive) or YesOrNo(f'Unmount any mounted capture path(s)?'):
+        if (not args.interactive) or YesOrNo('Unmount any mounted capture path(s)?'):
             if debug:
-                eprint(f"Attempting unmount of capture path(s)...")
+                eprint("Attempting unmount of capture path(s)...")
             run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR)}")
             run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_ZEEK_DIR)}")
             run_process(f"umount {CAPTURE_MOUNT_ROOT_PATH}")
@@ -212,7 +214,7 @@ def main():
                 if debug:
                     for line in cryptOut:
                         eprint(f"\t{line}")
-            _, reloadOut = run_process(f"systemctl daemon-reload")
+            _, reloadOut = run_process("systemctl daemon-reload")
 
     # check existing mounts, if the capture path(s) are already mounted, then abort
     with open('/proc/mounts', 'r') as f:
@@ -225,7 +227,7 @@ def main():
                         f"It appears there is already a device mounted under {CAPTURE_MOUNT_ROOT_PATH} at {mountPoint}."
                     )
                     eprint(
-                        f"If you wish to continue, you may run this script with the '-u|--umount' option to umount first."
+                        "If you wish to continue, you may run this script with the '-u|--umount' option to umount first."
                     )
                     eprint()
                     parser.print_help()
@@ -234,7 +236,7 @@ def main():
     # get physical disks, partitions, device maps, and any mountpoints and UUID associated
     allDisks = defaultdict(list)
     if debug:
-        eprint(f"Block devices:")
+        eprint("Block devices:")
     for device in GetInternalDevices():
         ecode, deviceTree = run_process(
             f'/bin/lsblk -o name,uuid,mountpoint --paths --noheadings /dev/{device}', stdout=True, stderr=False
@@ -308,7 +310,6 @@ def main():
         eprint(f"Device candidates: {[(x, sizeof_fmt(GetDeviceSize(x))) for x in candidateDevs]}")
 
     if len(candidateDevs) > 0:
-
         if args.encrypt:
             # create keyfile (will be on the encrypted system drive, and used to automatically unlock the encrypted capture drives)
             with open(CAPTURE_CRYPT_KEYFILE, 'wb') as f:
@@ -318,7 +319,6 @@ def main():
 
         # partition/format each candidate device
         for device in candidateDevs:
-
             # we only need at most two drives (one for pcap, one for zeek), or at least one
             if len(formattedDevs) >= 2:
                 break
@@ -326,7 +326,6 @@ def main():
             if (not args.interactive) or YesOrNo(
                 f'Partition and format {device}{" (dry-run)" if args.dryrun else ""}?'
             ):
-
                 if args.dryrun:
                     eprint(f"Partitioning {device} (dry run only)...")
                     eprint(
@@ -366,7 +365,6 @@ def main():
                                     pars.append(match.group('device'))
 
                         if len(pars) == 1:
-
                             parDev = pars[0]
                             parUuid = str(uuid.uuid4())
                             parMapperDev = None
@@ -386,7 +384,7 @@ def main():
                                             else:
                                                 print(line)
 
-                                _, reloadOut = run_process(f"systemctl daemon-reload")
+                                _, reloadOut = run_process("systemctl daemon-reload")
 
                                 # for good measure, run luksErase in case it was a previous luks volume
                                 if debug:
@@ -401,7 +399,7 @@ def main():
                                     for line in cryptOut:
                                         eprint(f"\t{line}")
 
-                                _, reloadOut = run_process(f"systemctl daemon-reload")
+                                _, reloadOut = run_process("systemctl daemon-reload")
 
                                 # luks volume creation
 
@@ -418,7 +416,6 @@ def main():
                                     for line in cryptOut:
                                         eprint(f"\t{line}")
                                 if ecode == 0:
-
                                     # open the luks volume in /dev/mapper/
                                     if debug:
                                         eprint(f"Running crypsetup luksOpen on {device}...")
@@ -468,7 +465,9 @@ def main():
                                     )
 
                                 else:
-                                    eprint(f"Error {ecode} formatting {formatPath}, giving up on {device}")
+                                    eprint(
+                                        f"Error {ecode} formatting {parMapperDev if args.encrypt else parDev}, giving up on {device}"
+                                    )
 
                         else:
                             eprint(
@@ -494,7 +493,7 @@ def main():
         run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_ZEEK_DIR)}")
         run_process(f"umount {CAPTURE_MOUNT_ROOT_PATH}")
 
-        _, reloadOut = run_process(f"systemctl daemon-reload")
+        _, reloadOut = run_process("systemctl daemon-reload")
 
         # clean out any previous fstab entries that might be interfering from previous configurations
         if Fstab.remove_by_mountpoint(os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR), path=FSTAB_FILE):
@@ -512,7 +511,7 @@ def main():
                 eprint(f"Removed previous {CAPTURE_MOUNT_ROOT_PATH} mount from {FSTAB_FILE}")
 
         # reload tab files with systemctl
-        _, reloadOut = run_process(f"systemctl daemon-reload")
+        _, reloadOut = run_process("systemctl daemon-reload")
 
         # get the GID of the group of the user(s) that will be doing the capture
         try:
@@ -521,7 +520,7 @@ def main():
                 netdevGuid = int(guidGetOut[0].split(':')[2])
             else:
                 netdevGuid = -1
-        except:
+        except Exception:
             netdevGuid = -1
 
         # rmdir any mount directories that might be interfering from previous configurations
@@ -558,7 +557,7 @@ def main():
                 entry = Fstab.add(
                     device=f"{par.mapper}",
                     mountpoint=par.mount,
-                    options=f"defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s",
+                    options="defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s",
                     fs_passno=2,
                     filesystem='xfs',
                     path=FSTAB_FILE,
@@ -567,7 +566,7 @@ def main():
                 entry = Fstab.add(
                     device=f"UUID={par.uuid}",
                     mountpoint=par.mount,
-                    options=f"defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s",
+                    options="defaults,inode64,noatime,rw,auto,user,x-systemd.device-timeout=600s",
                     fs_passno=2,
                     filesystem='xfs',
                     path=FSTAB_FILE,
@@ -575,11 +574,10 @@ def main():
             eprint(f'Added "{entry}" to {FSTAB_FILE} for {par.partition}')
 
         # reload tab files with systemctl
-        _, reloadOut = run_process(f"systemctl daemon-reload")
+        _, reloadOut = run_process("systemctl daemon-reload")
 
         # mount the partitions and create a directory with user permissions
         for par in formattedDevs:
-
             ecode, mountOut = run_process(f"mount {par.mount}")
             if ecode == 0:
                 if debug:
@@ -629,7 +627,7 @@ def main():
                 eprint(f"Error {ecode} mounting {par.partition}")
 
     else:
-        eprint(f"Could not find any unmounted devices greater than 100GB, giving up")
+        eprint("Could not find any unmounted devices greater than 100GB, giving up")
 
 
 if __name__ == '__main__':

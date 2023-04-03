@@ -14,7 +14,6 @@ import glob
 import json
 import logging
 import magic
-import malcolm_common
 import os
 import pathlib
 import pyinotify
@@ -23,9 +22,19 @@ import sys
 import time
 import zmq
 
-from pcap_utils import *
+from pcap_utils import (
+    FILE_INFO_DICT_NAME,
+    FILE_INFO_DICT_NODE,
+    FILE_INFO_DICT_SIZE,
+    FILE_INFO_DICT_TAGS,
+    FILE_INFO_FILE_MIME,
+    FILE_INFO_FILE_TYPE,
+    PCAP_MIME_TYPES,
+    PCAP_TOPIC_PORT,
+    tags_from_filename,
+)
 import malcolm_utils
-from malcolm_utils import eprint, str2bool
+from malcolm_utils import eprint, str2bool, ParseCurlFile, remove_prefix, touch
 
 from collections import defaultdict
 
@@ -234,7 +243,7 @@ def event_process_generator(cls, method):
                         self.topic_socket.send_string(json.dumps(fileInfo))
                         if debug:
                             eprint(f"{scriptName}:\t📫\t{fileInfo}")
-                    except zmq.Again as timeout:
+                    except zmq.Again:
                         if verboseDebug:
                             eprint(f"{scriptName}:\t🕑\t{event.pathname}")
 
@@ -446,9 +455,7 @@ def main():
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
-        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
-        if (not args.opensearchIsLocal)
-        else defaultdict(lambda: None)
+        ParseCurlFile(args.opensearchCurlRcFile) if (not args.opensearchIsLocal) else defaultdict(lambda: None)
     )
     if not args.opensearchUrl:
         if args.opensearchIsLocal:

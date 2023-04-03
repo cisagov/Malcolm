@@ -149,7 +149,13 @@ def main():
         help=f"Encrypt files with aes-256-cbc ({defaultEncrypt})",
     )
     parser.add_argument(
-        '-k', '--key', dest='key', help=f"File encryption key", metavar='<str>', type=str, default=defaultKey
+        '-k',
+        '--key',
+        dest='key',
+        help="File encryption key",
+        metavar='<str>',
+        type=str,
+        default=defaultKey,
     )
     try:
         parser.error = parser.exit

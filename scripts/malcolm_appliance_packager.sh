@@ -96,6 +96,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
@@ -120,6 +121,7 @@ if mkdir "$DESTDIR"; then
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
+  cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
 

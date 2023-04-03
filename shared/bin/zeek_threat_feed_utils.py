@@ -487,7 +487,7 @@ class FeedParserZeekPrinter(object):
 
         except STIXError as ve:
             if self.logger is not None:
-                self.logger.warning(f"{type(ve).__name__} parsing '{infile}': {ve}")
+                self.logger.warning(f"{type(ve).__name__}: {ve}")
 
     def ProcessMISP(
         self,
@@ -520,7 +520,7 @@ class FeedParserZeekPrinter(object):
                 certaintyTags = [x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')]
                 try:
                     certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
-                except ValueError as ve:
+                except ValueError:
                     certainty = None
             else:
                 tags = []
@@ -529,7 +529,7 @@ class FeedParserZeekPrinter(object):
             for attribute in event.attributes:
                 # map event attribute to Zeek value(s)
                 if (
-                    ((not hasattr(attribute, 'deleted')) or (attribute.deleted == False))
+                    ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
                     and ((self.since is None) or (event.timestamp >= self.since) or (attribute.timestamp >= self.since))
                     and (
                         vals := map_misp_attribute_to_zeek(
@@ -555,12 +555,13 @@ class FeedParserZeekPrinter(object):
 
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
-    inputQueue, zeekPrinter, since, workerThreadCount, logger = (
+    inputQueue, zeekPrinter, since, defaultNow, workerThreadCount, logger = (
         threatInputWorkerArgs[0],
         threatInputWorkerArgs[1],
         threatInputWorkerArgs[2],
         threatInputWorkerArgs[3],
         threatInputWorkerArgs[4],
+        threatInputWorkerArgs[5],
     )
 
     with workerThreadCount as workerId:
@@ -592,7 +593,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                     # TODO: is this always the case? anything other than "Event", or multiple objects?
                                     # MISP input file
                                     zeekPrinter.ProcessMISP(
-                                        mispJson,
+                                        infileJson,
                                         source=[os.path.splitext(os.path.basename(inarg))[0]],
                                     )
 

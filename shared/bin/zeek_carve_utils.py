@@ -24,7 +24,7 @@ from subprocess import PIPE, Popen
 from threading import get_ident
 from threading import Lock
 
-from malcolm_utils import eprint, sha256sum, run_process
+from malcolm_utils import eprint, sha256sum, run_process, AtomicInt, dictsearch
 
 ###################################################################################################
 VENTILATOR_PORT = 5987
@@ -316,7 +316,7 @@ class CarvedFileSubscriberThreaded:
             # accept a fileinfo dict from newFilesSocket
             try:
                 fileinfo.update(json.loads(self.newFilesSocket.recv_string()))
-            except zmq.Again as timeout:
+            except zmq.Again:
                 # no file received due to timeout, return empty dict. which means no file available
                 pass
 
@@ -423,7 +423,7 @@ class VirusTotalSearch(FileScanProvider):
             if allowed:
                 try:
                     response = requests.get(VTOT_URL, params={'apikey': self.apiKey, 'resource': sha256sum(fileName)})
-                except requests.exceptions.RequestException as e:
+                except requests.exceptions.RequestException:
                     # things are bad
                     return None
 
@@ -444,7 +444,7 @@ class VirusTotalSearch(FileScanProvider):
         if submissionResponse is not None:
             try:
                 result.success = submissionResponse.ok
-            except:
+            except Exception:
                 pass
 
             try:
@@ -488,7 +488,7 @@ class VirusTotalSearch(FileScanProvider):
                         scans = {
                             engine: resp['scans'][engine]
                             for engine in resp['scans']
-                            if ('detected' in resp['scans'][engine]) and (resp['scans'][engine]['detected'] == True)
+                            if ('detected' in resp['scans'][engine]) and (resp['scans'][engine]['detected'])
                         }
                         hits = defaultdict(list)
                         for k, v in scans.items():
@@ -549,6 +549,8 @@ class ClamAVScan(FileScanProvider):
 
         # while limit only repeats if block=True
         while (not allowed) and (not clamavResult.finished):
+            nowTime = int(time.time())
+
             if not connected:
                 if self.verboseDebug:
                     eprint(
@@ -684,9 +686,8 @@ class YaraScan(FileScanProvider):
                     if file.startswith(".") or file.startswith("~") or file.startswith("_"):
                         continue
                     filename = os.path.join(root, file)
-                    extension = os.path.splitext(file)[1].lower()
                     try:
-                        testCompile = yara.compile(filename)
+                        yara.compile(filename)
                         self.ruleFilespecs[filename] = filename
                     except yara.SyntaxError as e:
                         if self.debug:
@@ -722,13 +723,14 @@ class YaraScan(FileScanProvider):
     def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=YARA_SUBMIT_TIMEOUT_SEC):
         yaraResult = AnalyzerResult()
         allowed = False
-        matches = []
 
         # timeout only applies if block=True
         timeoutTime = int(time.time()) + timeout
 
         # while limit only repeats if block=True
         while (not allowed) and (not yaraResult.finished):
+            nowTime = int(time.time())
+
             # first make sure we haven't exceeded rate limits
             if self.scanningFilesCount.increment() <= self.reqLimit:
                 # we've got fewer than the allowed requests open, so we're good to go!
@@ -854,6 +856,8 @@ class CapaScan(FileScanProvider):
 
             # while limit only repeats if block=True
             while (not allowed) and (not capaResult.finished):
+                nowTime = int(time.time())
+
                 # first make sure we haven't exceeded rate limits
                 if self.scanningFilesCount.increment() <= self.reqLimit:
                     # we've got fewer than the allowed requests open, so we're good to go!
@@ -935,7 +939,7 @@ class CapaScan(FileScanProvider):
                         try:
                             if os.path.isfile(fileName + CAPA_VIV_SUFFIX):
                                 os.remove(fileName + CAPA_VIV_SUFFIX)
-                        except Exception as fe:
+                        except Exception:
                             pass
 
                 elif block and (nowTime < timeoutTime):

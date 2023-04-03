@@ -22,7 +22,36 @@ import zmq
 
 from multiprocessing.pool import ThreadPool
 
-from zeek_carve_utils import *
+from zeek_carve_utils import (
+    AnalyzerResult,
+    AnalyzerScan,
+    BroSignatureLine,
+    CapaScan,
+    CarvedFileSubscriberThreaded,
+    ClamAVScan,
+    extracted_filespec_to_fields,
+    FILE_SCAN_RESULT_DESCRIPTION,
+    FILE_SCAN_RESULT_ENGINES,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_FILE_SIZE,
+    FILE_SCAN_RESULT_HITS,
+    FILE_SCAN_RESULT_MESSAGE,
+    FILE_SCAN_RESULT_SCANNER,
+    FILE_SCAN_RESULT_FILE_TYPE,
+    FileScanProvider,
+    PRESERVE_ALL,
+    PRESERVE_NONE,
+    PRESERVE_PRESERVED_DIR_NAME,
+    PRESERVE_QUARANTINED,
+    PRESERVE_QUARANTINED_DIR_NAME,
+    SINK_PORT,
+    VENTILATOR_PORT,
+    VirusTotalSearch,
+    YARA_CUSTOM_RULES_DIR,
+    YARA_RULES_DIR,
+    YaraScan,
+    ZEEK_SIGNATURE_NOTICE,
+)
 import malcolm_utils
 from malcolm_utils import eprint, str2bool, AtomicInt
 
@@ -134,7 +163,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                         if debug:
                             eprint(f"{scriptName}[{scanWorkerId}]:\t🇷\t{checkConnInfo.scanner_name()}")
 
-                    except zmq.Again as timeout:
+                    except zmq.Again:
                         # todo: what to do here?
                         if verboseDebug:
                             eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🇷")
@@ -231,7 +260,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                             if debug:
                                 eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
 
-                        except zmq.Again as timeout:
+                        except zmq.Again:
                             # todo: what to do here?
                             if verboseDebug:
                                 eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
@@ -249,7 +278,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                 scannerRegistered = False
                 if debug:
                     eprint(f"{scriptName}[{scanWorkerId}]:\t🙃\t{checkConnInfo.scanner_name()}")
-            except zmq.Again as timeout:
+            except zmq.Again:
                 # todo: what to do here?
                 if verboseDebug:
                     eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🙃")
@@ -438,7 +467,7 @@ def main():
     )
 
     # start scanner threads which will pull filenames to be scanned and send the results to the logger
-    scannerThreads = ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
+    ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
     while not shuttingDown:
         if pdbFlagged:
             pdbFlagged = False

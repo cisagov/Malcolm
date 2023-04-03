@@ -6,7 +6,6 @@
 import argparse
 import json
 import requests
-import malcolm_common
 import os
 import sys
 import urllib3
@@ -15,7 +14,7 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool
+from malcolm_utils import eprint, str2bool, ParseCurlFile
 
 ###################################################################################################
 debug = False
@@ -120,7 +119,7 @@ def main():
     try:
         parser.error = parser.exit
         args = parser.parse_args()
-    except Exception as e:
+    except Exception:
         parser.print_help()
         exit(2)
 
@@ -134,9 +133,7 @@ def main():
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
-        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
-        if (not args.opensearchIsLocal)
-        else defaultdict(lambda: None)
+        ParseCurlFile(args.opensearchCurlRcFile) if (not args.opensearchIsLocal) else defaultdict(lambda: None)
     )
     if not args.opensearchUrl:
         if args.opensearchIsLocal:

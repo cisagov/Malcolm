@@ -27,7 +27,7 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
-from malcolm_utils import val2bool
+from malcolm_utils import val2bool, deep_set, pushd, run_process
 
 ###################################################################################################
 args = None
@@ -52,7 +52,7 @@ class NullRepresenter:
 ###################################################################################################
 def ObjToYamlStrLines(obj, options=None):
     outputStr = None
-    if options == None:
+    if options is None:
         options = {}
 
     yaml = YAML()
@@ -527,7 +527,7 @@ def GetRuleSources(requireRulesExist=False):
 
     ruleSources = []
 
-    if val2bool(DEFAULT_VARS['CUSTOM_RULES_ONLY']) == False:
+    if not val2bool(DEFAULT_VARS['CUSTOM_RULES_ONLY']):
         ruleSources.append('suricata.rules')
 
     customRuleFiles = (
@@ -536,7 +536,7 @@ def GetRuleSources(requireRulesExist=False):
         else []
     )
 
-    if (DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None) and ((requireRulesExist == False) or (len(customRuleFiles) > 0)):
+    if (DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None) and ((not requireRulesExist) or (len(customRuleFiles) > 0)):
         ruleSources.append(os.path.join(DEFAULT_VARS['CUSTOM_RULES_DIR'], '*.rules'))
 
     return ruleSources
@@ -1127,11 +1127,11 @@ def main():
     if DEFAULT_VARS['RUN_DIR'] is not None and os.path.isdir(os.path.join(DEFAULT_VARS['RUN_DIR'])):
         try:
             os.remove(os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata.pid'))
-        except:
+        except Exception:
             pass
         try:
             os.remove(os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata-command.socket'))
-        except:
+        except Exception:
             pass
 
 

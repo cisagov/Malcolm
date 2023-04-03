@@ -71,7 +71,7 @@ ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD pcap-monitor/scripts/ /usr/local/bin/
 ADD shared/bin/pcap_watcher.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 
 EXPOSE 30441
 

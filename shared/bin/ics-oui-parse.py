@@ -11,7 +11,8 @@ try:
     import ruamel.yaml as yaml
 except ImportError:
     import yaml
-from netaddr import *
+
+from netaddr import EUI
 from operator import itemgetter
 
 import malcolm_utils
@@ -86,14 +87,13 @@ def main():
         macPadHigh = macPad + padded_mac_high[-(len(padded_mac_high) - len(macPad)) :]
         macLow = EUI(macPadLow.replace(':', '-'))
         macHigh = EUI(macPadHigh.replace(':', '-'))
-        eui64 = int(macHigh.eui64()) - int(macLow.eui64())
         companies.append(
             {
                 'name': oui['companyName'],
                 'low': str(macLow),
-                #'low': int(re.sub("[.:-]", "", str(macLow)), 16),
+                # 'low': int(re.sub("[.:-]", "", str(macLow)), 16),
                 'high': str(macHigh),
-                #'high': int(re.sub("[.:-]", "", str(macHigh)), 16),
+                # 'high': int(re.sub("[.:-]", "", str(macHigh)), 16),
             }
         )
 

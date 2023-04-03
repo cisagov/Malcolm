@@ -168,7 +168,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       wget \
       tini \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
-    pip3 install --no-cache-dir beautifulsoup4 pyzmq && \
+    pip3 install --no-cache-dir beautifulsoup4 pyzmq watchdog && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
@@ -184,7 +184,8 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
-ADD scripts/malcolm_common.py /opt/
+ADD scripts/malcolm_utils.py /opt/
+ADD shared/bin/watch_common.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
 ADD shared/bin/self_signed_key_gen.sh /usr/local/bin/
 ADD arkime/etc $ARKIME_DIR/etc/

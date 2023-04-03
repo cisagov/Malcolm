@@ -4,7 +4,6 @@
 import argparse
 import humanfriendly
 import json
-import malcolm_common
 import re
 import requests
 import os
@@ -15,7 +14,7 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool
+from malcolm_utils import eprint, str2bool, ParseCurlFile
 
 ###################################################################################################
 debug = False
@@ -134,7 +133,7 @@ def main():
     try:
         parser.error = parser.exit
         args = parser.parse_args()
-    except Exception as e:
+    except Exception:
         parser.print_help()
         exit(2)
 
@@ -152,9 +151,7 @@ def main():
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
-        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
-        if (not args.opensearchIsLocal)
-        else defaultdict(lambda: None)
+        ParseCurlFile(args.opensearchCurlRcFile) if (not args.opensearchIsLocal) else defaultdict(lambda: None)
     )
     if not args.opensearchUrl:
         if args.opensearchIsLocal:
@@ -236,10 +233,10 @@ def main():
         #     ...
         # ]
         if len(esDiskUsageStats) != 1:
-            raise Exception(f'Unable to determine node, please specify --node if using a percentage limit')
+            raise Exception('Unable to determine node, please specify --node if using a percentage limit')
         elif 'disk.total' not in esDiskUsageStats[0]:
             raise Exception(
-                f'Unable to determine disk.total for {esDiskUsageStats[0]["node"] if "node" in esDiskUsageStats[0] else node}'
+                f'Unable to determine disk.total for {esDiskUsageStats[0]["node"] if "node" in esDiskUsageStats[0] else "node"}'
             )
         limitMegabytes = int(float(esDiskUsageStats[0]['disk.total']) * (float(limitPercent) / 100.0)) // 1000000
 

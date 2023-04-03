@@ -22,6 +22,17 @@ import tarfile
 import time
 
 from malcolm_common import *
+from malcolm_utils import (
+    eprint,
+    EscapeForCurl,
+    EscapeAnsi,
+    LoadStrIfJson,
+    ParseCurlFile,
+    RemoveEmptyFolders,
+    run_process,
+    same_file_or_dir,
+    which,
+)
 from base64 import b64encode
 from collections import defaultdict, namedtuple
 from subprocess import PIPE, DEVNULL, Popen, TimeoutExpired
@@ -892,8 +903,8 @@ def authSetup(wipe=False):
     filebeatPath = os.path.join(MalcolmPath, os.path.join('filebeat', 'certs'))
 
     txRxScript = None
-    if (pyPlatform != PLATFORM_WINDOWS) and Which("croc"):
-        txRxScript = 'tx-rx-secure.sh' if Which('tx-rx-secure.sh') else None
+    if (pyPlatform != PLATFORM_WINDOWS) and which("croc"):
+        txRxScript = 'tx-rx-secure.sh' if which('tx-rx-secure.sh') else None
         if not txRxScript:
             txRxScript = os.path.join(
                 MalcolmPath, os.path.join('shared', os.path.join('bin', os.path.join('tx-rx-secure.sh')))
@@ -1740,10 +1751,10 @@ def main():
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         # make sure docker/docker-compose is available
-        dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('docker.exe')) else 'docker'
-        if (pyPlatform == PLATFORM_WINDOWS) and Which('docker-compose.exe'):
+        dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
+        if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
             dockerComposeBin = 'docker-compose.exe'
-        elif Which('docker-compose'):
+        elif which('docker-compose'):
             dockerComposeBin = 'docker-compose'
         elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
             dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
@@ -1767,7 +1778,7 @@ def main():
             dockerComposeYaml = yamlImported.safe_load(cf)
 
         # identify openssl binary
-        opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and Which('openssl.exe')) else 'openssl'
+        opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('openssl.exe')) else 'openssl'
 
         # if executed via a symlink, figure out what was intended via the symlink name
         if os.path.islink(os.path.join(ScriptPath, ScriptName)):

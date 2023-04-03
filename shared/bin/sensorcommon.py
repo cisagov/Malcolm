@@ -11,14 +11,13 @@ import socket
 import ssl
 import sys
 import urllib.request
+import subprocess
 
 from base64 import b64encode
 from bs4 import BeautifulSoup
 from bs4.element import Comment
-from contextlib import closing
 from http.client import HTTPSConnection, HTTPConnection
-from multiprocessing import RawValue
-from threading import Lock
+from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 
 from malcolm_utils import run_subprocess
 
@@ -113,17 +112,6 @@ def test_connection(
 
 
 ###################################################################################################
-# test if a remote port is open
-def check_socket(host, port):
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-        sock.settimeout(10)
-        if sock.connect_ex((host, port)) == 0:
-            return True
-        else:
-            return False
-
-
-###################################################################################################
 # determine a list of available (non-virtual) adapters (Iface's)
 def get_available_adapters():
     available_adapters = []
@@ -137,12 +125,12 @@ def get_available_adapters():
         try:
             with open(f"/sys/class/net/{adapter}/address", 'r') as f:
                 mac_address = f.readline().strip()
-        except:
+        except Exception:
             pass
         try:
             with open(f"/sys/class/net/{adapter}/speed", 'r') as f:
                 speed = f.readline().strip()
-        except:
+        except Exception:
             pass
         description = f"{mac_address} ({speed} Mbits/sec)"
         iface = Iface(adapter, description)

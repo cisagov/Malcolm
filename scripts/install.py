@@ -29,6 +29,8 @@ except ImportError:
 from collections import defaultdict, namedtuple
 
 from malcolm_common import *
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, run_process, same_file_or_dir, touch, which
 
 ###################################################################################################
 DOCKER_COMPOSE_INSTALL_VERSION = "2.14.2"
@@ -180,7 +182,7 @@ class Installer(object):
         self.requiredPackages = []
 
         self.pipCmd = 'pip3'
-        if not Which(self.pipCmd, debug=self.debug):
+        if not which(self.pipCmd, debug=self.debug):
             self.pipCmd = 'pip'
 
         self.tempDirName = tempfile.mkdtemp()
@@ -1252,7 +1254,7 @@ class Installer(object):
         # now, go through and modify the values in the .env files
         for val in EnvValues:
             try:
-                Touch(val.envFile)
+                touch(val.envFile)
             except Exception as e:
                 pass
 
@@ -1624,7 +1626,7 @@ class Installer(object):
                 os.chown(composeFile, origUid, origGuid)
 
         try:
-            Touch(MalcolmCfgRunOnceFile)
+            touch(MalcolmCfgRunOnceFile)
         except Exception as e:
             pass
 
@@ -1748,24 +1750,24 @@ class LinuxInstaller(Installer):
                 raise Exception(f'{ScriptName} must be run as root, or {self.sudoCmd} must be available')
 
         # determine command to use to query if a package is installed
-        if Which('dpkg', debug=self.debug):
+        if which('dpkg', debug=self.debug):
             os.environ["DEBIAN_FRONTEND"] = "noninteractive"
             self.checkPackageCmds.append(['dpkg', '-s'])
-        elif Which('rpm', debug=self.debug):
+        elif which('rpm', debug=self.debug):
             self.checkPackageCmds.append(['rpm', '-q'])
-        elif Which('dnf', debug=self.debug):
+        elif which('dnf', debug=self.debug):
             self.checkPackageCmds.append(['dnf', 'list', 'installed'])
-        elif Which('yum', debug=self.debug):
+        elif which('yum', debug=self.debug):
             self.checkPackageCmds.append(['yum', 'list', 'installed'])
 
         # determine command to install a package from the distro's repos
-        if Which('apt-get', debug=self.debug):
+        if which('apt-get', debug=self.debug):
             self.installPackageCmds.append(['apt-get', 'install', '-y', '-qq'])
-        elif Which('apt', debug=self.debug):
+        elif which('apt', debug=self.debug):
             self.installPackageCmds.append(['apt', 'install', '-y', '-qq'])
-        elif Which('dnf', debug=self.debug):
+        elif which('dnf', debug=self.debug):
             self.installPackageCmds.append(['dnf', '-y', 'install', '--nobest'])
-        elif Which('yum', debug=self.debug):
+        elif which('yum', debug=self.debug):
             self.installPackageCmds.append(['yum', '-y', 'install'])
 
         # determine total system memory
@@ -1996,7 +1998,7 @@ class LinuxInstaller(Installer):
         result = False
 
         dockerComposeCmd = 'docker-compose'
-        if not Which(dockerComposeCmd, debug=self.debug):
+        if not which(dockerComposeCmd, debug=self.debug):
             if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
                 dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
             elif os.path.isfile('/usr/local/bin/docker-compose'):

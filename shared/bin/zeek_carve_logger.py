@@ -10,7 +10,6 @@
 ###################################################################################################
 
 import argparse
-import datetime
 import json
 import os
 import pathlib
@@ -25,7 +24,23 @@ from collections import defaultdict
 from contextlib import nullcontext
 from datetime import datetime
 
-from zeek_carve_utils import *
+from zeek_carve_utils import (
+    BroSignatureLine,
+    extracted_filespec_to_fields,
+    FILE_SCAN_RESULT_DESCRIPTION,
+    FILE_SCAN_RESULT_ENGINES,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_HITS,
+    FILE_SCAN_RESULT_MESSAGE,
+    FILE_SCAN_RESULT_SCANNER,
+    PRESERVE_ALL,
+    PRESERVE_NONE,
+    PRESERVE_PRESERVED_DIR_NAME,
+    PRESERVE_QUARANTINED,
+    PRESERVE_QUARANTINED_DIR_NAME,
+    SINK_PORT,
+    ZEEK_SIGNATURE_NOTICE,
+)
 
 import malcolm_utils
 from malcolm_utils import eprint, str2bool, AtomicInt, same_file_or_dir
@@ -240,7 +255,7 @@ def main():
                 scanResult = json.loads(scanned_files_socket.recv_string())
                 if debug:
                     eprint(f"{scriptName}:\t📨\t{scanResult}")
-            except zmq.Again as timeout:
+            except zmq.Again:
                 scanResult = None
                 if verboseDebug:
                     eprint(f"{scriptName}:\t🕑\t(recv)")

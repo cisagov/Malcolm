@@ -4,7 +4,7 @@
 import os
 import time
 
-from malcolm_utils import AtomicInt, ContextLockedOrderedDict
+from malcolm_utils import AtomicInt, ContextLockedOrderedDict, same_file_or_dir
 
 from watchdog.events import (
     FileSystemEventHandler,
@@ -154,7 +154,7 @@ def WatchAndProcessDirectory(
     observer.start()
     try:
         workerThreadCount = AtomicInt(value=0)
-        workerThreads = ThreadPool(
+        ThreadPool(
             1,
             ProcessFileEventWorker(
                 [
@@ -175,7 +175,7 @@ def WatchAndProcessDirectory(
         if shuttingDown[0]:
             raise WatchdogShutdown()
 
-    except WatchdogShutdown as wdshut:
+    except WatchdogShutdown:
         observer.unschedule_all()
 
     finally:

@@ -52,7 +52,7 @@ class NullRepresenter:
 ###################################################################################################
 def ObjToYamlStrLines(obj, options=None):
     outputStr = None
-    if options == None:
+    if options is None:
         options = {}
 
     yaml = YAML()
@@ -162,7 +162,6 @@ def main():
         args.output if args.output else args.input if args.inplace else inFileParts[0] + "_new" + inFileParts[1]
     )
 
-    argsOrigVerbose = args.verbose
     args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
     logging.basicConfig(
         level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'

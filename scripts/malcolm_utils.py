@@ -1,25 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-import json
-import hashlib
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+
 import contextlib
+import datetime
+import hashlib
+import ipaddress
+import json
+import os
+import re
+import socket
+import string
 import subprocess
 import sys
+import tempfile
+import time
 
-from collections import OrderedDict
-from multiprocessing import RawValue
-from threading import Lock
+
 from base64 import b64decode
+from multiprocessing import RawValue
+from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 from tempfile import NamedTemporaryFile
-from Crypto.Cipher import AES
+from threading import Lock
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+from collections import defaultdict, namedtuple, OrderedDict
 
 
 ###################################################################################################
 # urlencode each character of a string
-def aggressive_url_encode(string):
-    return "".join("%{0:0>2}".format(format(ord(char), "x")) for char in string)
+def aggressive_url_encode(val):
+    return "".join("%{0:0>2}".format(format(ord(char), "x")) for char in val)
 
 
 ###################################################################################################
@@ -60,6 +75,22 @@ def base64_decode_if_prefixed(s: str):
 
 
 ###################################################################################################
+# test if a remote port is open
+def check_socket(host, port):
+    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        sock.settimeout(10)
+        if sock.connect_ex((host, port)) == 0:
+            return True
+        else:
+            return False
+
+
+###################################################################################################
+def contains_whitespace(s):
+    return True in [c in s for c in string.whitespace]
+
+
+###################################################################################################
 # an OrderedDict that locks itself and unlocks itself as a context manager
 class ContextLockedOrderedDict(OrderedDict):
     def __init__(self, *args, **kwargs):
@@ -76,7 +107,19 @@ class ContextLockedOrderedDict(OrderedDict):
 
 
 ###################################################################################################
-# convenience routine for deep-getting a value from a dictionary
+def custom_make_translation(text, translation):
+    regex = re.compile('|'.join(map(re.escape, translation)))
+    return regex.sub(lambda match: translation[match.group(0)], text)
+
+
+###################################################################################################
+# safe deep get for a dictionary
+#
+# Example:
+#   d = {'meta': {'status': 'OK', 'status_code': 200}}
+#   DeepGet(d, ['meta', 'status_code'])          # => 200
+#   DeepGet(d, ['garbage', 'status_code'])       # => None
+#   DeepGet(d, ['meta', 'garbage'], default='-') # => '-'
 def deep_get(d, keys, default=None):
     k = get_iterable(keys)
     if d is None:
@@ -95,7 +138,7 @@ def deep_set(d, keys, value, deleteIfNone=False):
             d[key] = dict()
         d = d[key]
     d[k[-1]] = value
-    if (deleteIfNone == True) and (value is None):
+    if deleteIfNone and (value is None):
         d.pop(k[-1], None)
 
 
@@ -117,6 +160,42 @@ def eprint(*args, **kwargs):
         print(*args, file=sys.stderr, **kwargs)
     if "flush" in kwargs and kwargs["flush"]:
         sys.stderr.flush()
+
+
+###################################################################################################
+def EscapeAnsi(line):
+    ansiEscape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+    return ansiEscape.sub('', line)
+
+
+###################################################################################################
+def EscapeForCurl(s):
+    return s.translate(
+        str.maketrans(
+            {
+                '"': r'\"',
+                "\\": r"\\",
+                "\t": r"\t",
+                "\n": r"\n",
+                "\r": r"\r",
+                "\v": r"\v",
+            }
+        )
+    )
+
+
+def UnescapeForCurl(s):
+    return custom_make_translation(
+        s,
+        {
+            r'\"': '"',
+            r"\t": "\t",
+            r"\n": "\n",
+            r"\r": "\r",
+            r"\v": "\v",
+            r"\\": "\\",
+        },
+    )
 
 
 ###################################################################################################
@@ -161,7 +240,8 @@ def EVP_BytesToKey(key_length: int, iv_length: int, md, salt: bytes, data: bytes
 
 
 ###################################################################################################
-# return just about any object as an iterable
+# if the object is an iterable, return it, otherwise return a tuple with it as a single element.
+# useful if you want to user either a scalar or an array in a loop, etc.
 def get_iterable(x):
     if isinstance(x, Iterable) and not isinstance(x, str):
         return x
@@ -186,10 +266,10 @@ def isipaddress(value):
     try:
         if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
             for v in value:
-                ip = ipaddress.ip_address(v)
+                ipaddress.ip_address(v)
         else:
-            ip = ipaddress.ip_address(value)
-    except:
+            ipaddress.ip_address(value)
+    except Exception:
         result = False
     return result
 
@@ -199,7 +279,7 @@ def isipaddress(value):
 def LoadStrIfJson(jsonStr):
     try:
         return json.loads(jsonStr)
-    except ValueError as e:
+    except ValueError:
         return None
 
 
@@ -209,8 +289,47 @@ def LoadStrIfJson(jsonStr):
 def LoadFileIfJson(fileHandle):
     try:
         return json.load(fileHandle)
-    except ValueError as e:
+    except ValueError:
         return None
+
+
+###################################################################################################
+# parse a curl-formatted config file, with special handling for user:password and URL
+# see https://everything.curl.dev/cmdline/configfile
+# e.g.:
+#
+# given .opensearch.primary.curlrc containing:
+# -
+# user: "sikari:changethis"
+# insecure
+# -
+#
+# ParseCurlFile('.opensearch.primary.curlrc') returns:
+#   {
+#    'user': 'sikari',
+#    'password': 'changethis',
+#    'insecure': ''
+#   }
+def ParseCurlFile(curlCfgFileName):
+    result = defaultdict(lambda: None)
+    if os.path.isfile(curlCfgFileName):
+        itemRegEx = re.compile(r'^([^\s:=]+)((\s*[:=]?\s*)(.*))?$')
+        with open(curlCfgFileName, 'r') as f:
+            allLines = [x.strip().lstrip('-') for x in f.readlines() if not x.startswith('#')]
+        for line in allLines:
+            found = itemRegEx.match(line)
+            if found is not None:
+                key = found.group(1)
+                value = UnescapeForCurl(found.group(4).lstrip('"').rstrip('"'))
+                if (key == 'user') and (':' in value):
+                    splitVal = value.split(':', 1)
+                    result[key] = splitVal[0]
+                    if len(splitVal) > 1:
+                        result['password'] = splitVal[1]
+                else:
+                    result[key] = value
+
+    return result
 
 
 ###################################################################################################
@@ -223,6 +342,27 @@ def pushd(directory):
         yield
     finally:
         os.chdir(prevDir)
+
+
+###################################################################################################
+# recursively remove empty subfolders
+def RemoveEmptyFolders(path, removeRoot=True):
+    if not os.path.isdir(path):
+        return
+
+    files = os.listdir(path)
+    if len(files):
+        for f in files:
+            fullpath = os.path.join(path, f)
+            if os.path.isdir(fullpath):
+                RemoveEmptyFolders(fullpath)
+
+    files = os.listdir(path)
+    if len(files) == 0 and removeRoot:
+        try:
+            os.rmdir(path)
+        except Exception:
+            pass
 
 
 ###################################################################################################
@@ -260,20 +400,25 @@ def sha256sum(filename):
 def sizeof_fmt(num, suffix='B'):
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
+            return f"{num:3.1f}{unit}{suffix}"
         num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
+    return f"{num:.1f}{'Yi'}{suffix}"
 
 
 ###################################################################################################
 # convenient boolean argument parsing
 def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
+    if isinstance(v, bool):
+        return v
+    elif isinstance(v, str):
+        if v.lower() in ("yes", "true", "t", "y", "1"):
+            return True
+        elif v.lower() in ("no", "false", "f", "n", "0"):
+            return False
+        else:
+            raise ValueError("Boolean value expected")
     else:
-        raise ValueError('Boolean value expected.')
+        raise ValueError("Boolean value expected")
 
 
 ###################################################################################################
@@ -312,9 +457,18 @@ def val2bool(v):
                 raise ValueError(f'Boolean value expected (got {v})')
         else:
             raise ValueError(f'Boolean value expected (got {v})')
-    except:
+    except Exception:
         # just pitch it back and let the caller worry about it
         return v
+
+
+###################################################################################################
+# determine if a program/script exists and is executable in the system path
+def which(cmd, debug=False):
+    result = any(os.access(os.path.join(path, cmd), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
+    if debug:
+        eprint(f"which {cmd} returned {result}")
+    return result
 
 
 ###################################################################################################
@@ -338,7 +492,7 @@ def check_output_input(*popenargs, **kwargs):
     process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
     try:
         output, errput = process.communicate(inputdata)
-    except:
+    except Exception:
         process.kill()
         process.wait()
         raise
@@ -350,13 +504,29 @@ def check_output_input(*popenargs, **kwargs):
 
 ###################################################################################################
 # run command with arguments and return its exit code and output
-def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None, debug=False, logger=None):
+def run_process(
+    command,
+    stdout=True,
+    stderr=True,
+    stdin=None,
+    retry=0,
+    retrySleepSec=5,
+    cwd=None,
+    env=None,
+    debug=False,
+    logger=None,
+):
     retcode = -1
     output = []
 
     try:
         # run the command
-        retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
+        retcode, cmdout, cmderr = check_output_input(
+            command,
+            input=stdin.encode() if stdin else None,
+            cwd=cwd,
+            env=env,
+        )
 
         # split the output on newlines to return a list
         if stderr and (len(cmderr) > 0):
@@ -364,7 +534,7 @@ def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=Non
         if stdout and (len(cmdout) > 0):
             output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
 
-    except (FileNotFoundError, OSError, IOError) as e:
+    except (FileNotFoundError, OSError, IOError):
         if stderr:
             output.append("Command {} not found or unable to execute".format(command))
 
@@ -377,7 +547,12 @@ def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=Non
         else:
             eprint(dbgStr)
 
-    return retcode, output
+    if (retcode != 0) and retry and (retry > 0):
+        # sleep then retry
+        time.sleep(retrySleepSec)
+        return run_process(command, stdout, stderr, stdin, retry - 1, retrySleepSec, cwd, env, debug, logger)
+    else:
+        return retcode, output
 
 
 ###################################################################################################

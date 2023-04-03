@@ -1,6 +1,6 @@
 import dateparser
 import json
-import malcolm_common
+import malcolm_utils
 import opensearchpy
 import os
 import pytz
@@ -161,7 +161,7 @@ dashboardsUrl = app.config["DASHBOARDS_URL"]
 opensearchLocal = (app.config["OPENSEARCH_LOCAL"] == "true") or (opensearchUrl == 'http://opensearch:9200')
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = (
-    malcolm_common.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
+    malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
     if (not opensearchLocal)
     else defaultdict(lambda: None)
 )

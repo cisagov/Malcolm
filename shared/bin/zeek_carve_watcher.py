@@ -22,9 +22,16 @@ import sys
 import time
 import zmq
 
-from zeek_carve_utils import *
+from zeek_carve_utils import (
+    CAPA_VIV_MIME,
+    CAPA_VIV_SUFFIX,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_FILE_SIZE,
+    FILE_SCAN_RESULT_FILE_TYPE,
+    VENTILATOR_PORT,
+)
 
-from malcolm_utils import touch
+from malcolm_utils import touch, eprint, str2bool
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 64
@@ -101,7 +108,7 @@ def event_process_generator(cls, method):
                         self.ventilator_socket.send_string(fileInfo)
                         if debug:
                             eprint(f"{scriptName}:\t📫\t{event.pathname}")
-                    except zmq.Again as timeout:
+                    except zmq.Again:
                         if verboseDebug:
                             eprint(f"{scriptName}:\t🕑\t{event.pathname}")
 
@@ -268,7 +275,7 @@ def main():
     else:
         preexistingDir = False
         if debug:
-            eprint(f'{scriptname}: creating "{args.baseDir}" to monitor')
+            eprint(f'{scriptName}: creating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor

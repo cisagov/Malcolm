@@ -13,8 +13,10 @@ import argparse
 import logging
 import os
 import sys
-import malcolm_utils
 import zeek_threat_feed_utils
+
+import malcolm_utils
+from malcolm_utils import nullcontext
 
 ###################################################################################################
 script_name = os.path.basename(__file__)
@@ -180,7 +182,7 @@ def main():
         inputQueue = deque()
         inputQueue.extend(args.input)
         workerThreadCount = malcolm_utils.AtomicInt(value=0)
-        workerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             zeek_threat_feed_utils.ProcessThreatInputWorker,
             (
@@ -188,6 +190,7 @@ def main():
                     inputQueue,
                     zeekPrinter,
                     since,
+                    defaultNow,
                     workerThreadCount,
                     logging,
                 ],

@@ -21,9 +21,19 @@ import tempfile
 import time
 import zmq
 
-from pcap_utils import *
+from pcap_utils import (
+    FILE_INFO_DICT_NAME,
+    FILE_INFO_DICT_NODE,
+    FILE_INFO_DICT_SIZE,
+    FILE_INFO_DICT_TAGS,
+    FILE_INFO_FILE_MIME,
+    FILE_INFO_FILE_TYPE,
+    PCAP_MIME_TYPES,
+    PCAP_TOPIC_PORT,
+    tags_from_filename,
+)
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, AtomicInt
+from malcolm_utils import eprint, str2bool, AtomicInt, run_process
 
 from multiprocessing.pool import ThreadPool
 from collections import deque
@@ -730,7 +740,7 @@ def main():
 
     # start worker threads which will pull filenames/tags to be processed by capture
     if processingMode == PCAP_PROCESSING_MODE_ARKIME:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             arkimeCaptureFileWorker,
             (
@@ -745,7 +755,7 @@ def main():
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             zeekFileWorker,
             (
@@ -762,7 +772,7 @@ def main():
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             suricataFileWorker,
             (
@@ -788,7 +798,7 @@ def main():
         # accept a file info dict from new_files_socket as json
         try:
             fileInfo = json.loads(new_files_socket.recv_string())
-        except zmq.Again as timeout:
+        except zmq.Again:
             # no file received due to timeout, we'll go around and try again
             if verboseDebug:
                 eprint(f"{scriptName}:\t🕑\t(recv)")
