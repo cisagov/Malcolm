@@ -21,7 +21,27 @@ import sys
 import tarfile
 import time
 
-from malcolm_common import *
+from malcolm_common import (
+    MalcolmTmpPath,
+    AskForPassword,
+    AskForString,
+    BoundPath,
+    ChooseOne,
+    DisplayMessage,
+    DisplayProgramBox,
+    GetIterable,
+    GetUidGidFromComposeFile,
+    LocalPathForContainerBindMount,
+    MainDialog,
+    MalcolmAuthFilesExist,
+    MalcolmPath,
+    PLATFORM_WINDOWS,
+    posInt,
+    ScriptPath,
+    YAMLDynamic,
+    YesOrNo,
+)
+
 from malcolm_utils import (
     eprint,
     EscapeForCurl,
@@ -32,10 +52,12 @@ from malcolm_utils import (
     run_process,
     same_file_or_dir,
     which,
+    str2bool,
+    pushd,
 )
 from base64 import b64encode
 from collections import defaultdict, namedtuple
-from subprocess import PIPE, DEVNULL, Popen, TimeoutExpired
+from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
 
 try:
@@ -71,7 +93,7 @@ try:
 
     ColoramaInit()
     coloramaImported = True
-except:
+except Exception:
     coloramaImported = False
 
 
@@ -338,7 +360,7 @@ def netboxBackup(backupFileName=None):
 
     err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdout=True, stderr=False)
     if (err != 0) or (len(results) == 0):
-        raise Exception(f'Error creating NetBox configuration database backup')
+        raise Exception('Error creating NetBox configuration database backup')
 
     if (backupFileName is None) or (len(backupFileName) == 0):
         backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.gz"
@@ -394,20 +416,20 @@ def netboxRestore(backupFileName=None):
         dockerCmd = dockerCmdBase + ['netbox-postgres', 'createdb', '-U', 'netbox', 'netbox']
         err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
         if err != 0:
-            raise Exception(f'Error creating new NetBox database')
+            raise Exception('Error creating new NetBox database')
 
         # load the backed-up psql dump
         dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
         with gzip.open(backupFileName, 'rt') as f:
             err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
         if (err != 0) or (len(results) == 0):
-            raise Exception(f'Error loading NetBox database')
+            raise Exception('Error loading NetBox database')
 
         # migrations if needed
         dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
         err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
         if (err != 0) or (len(results) == 0):
-            raise Exception(f'Error performing NetBox migration')
+            raise Exception('Error performing NetBox migration')
 
         # restore media directory
         backupFileParts = os.path.splitext(backupFileName)
@@ -481,14 +503,14 @@ def logs():
 
     # logs we don't want to eliminate, but we don't want to repeat ad-nauseum
     # TODO: not implemented yet
-    dupeRegEx = re.compile(
-        r"""
-    .+(
-        Maybe the destination pipeline is down or stopping
-    )
-  """,
-        re.VERBOSE | re.IGNORECASE,
-    )
+    #   dupeRegEx = re.compile(
+    #       r"""
+    #   .+(
+    #       Maybe the destination pipeline is down or stopping
+    #   )
+    # """,
+    #       re.VERBOSE | re.IGNORECASE,
+    #   )
 
     serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
     iso8601TimeRegEx = re.compile(
@@ -537,7 +559,8 @@ def logs():
             outputStr = urlUserPassRegEx.sub(r"\1xxxxxxxx\2", output.decode().strip())
             outputStrEscaped = EscapeAnsi(outputStr)
             if ignoreRegEx.match(outputStrEscaped):
-                pass  ### print(f'!!!!!!!: {outputStr}')
+                # print(f'!!!!!!!: {outputStr}')
+                pass
             elif (
                 (args.cmdStart or args.cmdRestart)
                 and (not args.cmdLogs)
@@ -753,7 +776,7 @@ def stop(wipe=False):
                             if (os.path.isfile(fileSpec) or os.path.islink(fileSpec)) and (not file.startswith('.git')):
                                 try:
                                     os.remove(fileSpec)
-                                except:
+                                except Exception:
                                     pass
                 # delete whole directories
                 if boundPath.relative_dirs:
@@ -994,7 +1017,7 @@ def authSetup(wipe=False):
                             try:
                                 k, v = line.rstrip().split("=")
                                 prevAuthInfo[k] = v.strip('"')
-                            except:
+                            except Exception:
                                 pass
                     if len(prevAuthInfo['MALCOLM_USERNAME']) > 0:
                         usernamePrevious = prevAuthInfo['MALCOLM_USERNAME']
@@ -1050,7 +1073,7 @@ def authSetup(wipe=False):
                                 try:
                                     k, v = line.rstrip().split("=")
                                     ldapDefaults[k] = v.strip('"').strip("'")
-                                except:
+                                except Exception:
                                     pass
                     ldapProto = ldapDefaults.get("LDAP_PROTO", "ldap://")
                     ldapHost = ldapDefaults.get("LDAP_HOST", "ds.example.com")
@@ -1110,7 +1133,7 @@ def authSetup(wipe=False):
                 open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
                 DisplayMessage(
-                    f'Additional local accounts can be created at https://localhost:488/ when Malcolm is running',
+                    'Additional local accounts can be created at https://localhost:488/ when Malcolm is running',
                 )
 
             # generate HTTPS self-signed certificates
@@ -1383,7 +1406,7 @@ def authSetup(wipe=False):
                             eprint("Passwords do not match")
 
                         esSslVerify = YesOrNo(
-                            f'Require SSL certificate validation for OpenSearch communication?',
+                            'Require SSL certificate validation for OpenSearch communication?',
                             default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
                         )
 
@@ -1395,7 +1418,7 @@ def authSetup(wipe=False):
                     else:
                         try:
                             os.remove(openSearchCredFileName)
-                        except:
+                        except Exception:
                             pass
                     open(openSearchCredFileName, 'a').close()
                     os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
@@ -1515,7 +1538,7 @@ def authSetup(wipe=False):
 
             elif authItem[0] == 'txfwcerts':
                 DisplayMessage(
-                    f'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
+                    'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
                 )
                 with pushd(filebeatPath):
                     with Popen(
@@ -1735,7 +1758,7 @@ def main():
                         else:
                             raise
                 else:
-                    raise Exception(f"Could not determine configuration directory containing Malcolm's .env files")
+                    raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
         # create local temporary directory for docker-compose because we may have noexec on /tmp
         try:
@@ -1801,7 +1824,7 @@ def main():
             elif ScriptName == "netbox-restore" and (
                 (not args.netboxRestoreFile) or (not os.path.isfile(args.netboxRestoreFile))
             ):
-                raise Exception(f'NetBox configuration database file must be specified with --netbox-restore')
+                raise Exception('NetBox configuration database file must be specified with --netbox-restore')
 
         # the compose file references various .env files in just about every operation this script does,
         # so make sure they exist right off the bat

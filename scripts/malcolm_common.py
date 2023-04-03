@@ -12,7 +12,7 @@ import string
 import sys
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, run_process
+from malcolm_utils import eprint, str2bool, run_process, deep_get
 
 from collections import defaultdict, namedtuple
 from enum import IntFlag, auto
@@ -95,7 +95,7 @@ def ReplaceBindMountLocation(line, location, linePrefix):
 def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
     localPath = None
     if service and dockerComposeContents and containerPath:
-        vols = DeepGet(dockerComposeContents, ['services', service, 'volumes'])
+        vols = deep_get(dockerComposeContents, ['services', service, 'volumes'])
         if (vols is not None) and (len(vols) > 0):
             for vol in vols:
                 volSplit = vol.split(':')
