@@ -16,7 +16,6 @@ import logging
 import magic
 import os
 import pathlib
-import pyinotify
 import signal
 import sys
 import time
@@ -35,12 +34,18 @@ from pcap_utils import (
 )
 import malcolm_utils
 from malcolm_utils import eprint, str2bool, ParseCurlFile, remove_prefix, touch
+import watch_common
 
 from collections import defaultdict
+from multiprocessing.pool import ThreadPool
 
 from opensearchpy import OpenSearch, Search
 from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
 from urllib3.exceptions import NewConnectionError
+
+from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
+from watchdog.utils import WatchdogShutdown
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -61,21 +66,19 @@ opensearchHttpAuth = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
-shuttingDown = False
+shuttingDown = [False]
 DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 
 
 ###################################################################################################
 # watch files written to and moved to this directory
-class EventWatcher(pyinotify.ProcessEvent):
-    # notify on files written in-place then closed (IN_CLOSE_WRITE), and moved into this directory (IN_MOVED_TO)
-    _methods = ["IN_CLOSE_WRITE", "IN_MOVED_TO"]
-
+class EventWatcher:
     def __init__(self):
         global args
         global opensearchHttpAuth
         global debug
         global verboseDebug
+        global shuttingDown
 
         super().__init__()
 
@@ -88,7 +91,7 @@ class EventWatcher(pyinotify.ProcessEvent):
             healthy = False
 
             # create the connection to OpenSearch
-            while (not connected) and (not shuttingDown):
+            while (not connected) and (not shuttingDown[0]):
                 try:
                     try:
                         if debug:
@@ -139,7 +142,7 @@ class EventWatcher(pyinotify.ProcessEvent):
                     break
 
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
-            while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown):
+            while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown[0]):
                 try:
                     if debug:
                         eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
@@ -181,31 +184,28 @@ class EventWatcher(pyinotify.ProcessEvent):
         if debug:
             eprint(f"{scriptName}:\tEventWatcher initialized")
 
-
-###################################################################################################
-# set up event processor to append processed events from to the event queue
-def event_process_generator(cls, method):
-    # actual method called when we are notified of a file
-    def _method_name(self, event):
+    ###################################################################################################
+    # set up event processor to append processed events from to the event queue
+    def processFile(self, pathname):
         global args
         global debug
         global verboseDebug
 
         if debug:
-            eprint(f"{scriptName}:\t👓\t{event.pathname}")
+            eprint(f"{scriptName}:\t👓\t{pathname}")
 
         # the entity must be a regular PCAP file and actually exist
-        if (not event.dir) and os.path.isfile(event.pathname):
+        if os.path.isfile(pathname):
             # get the file magic description and mime type
-            fileMime = magic.from_file(event.pathname, mime=True)
-            fileType = magic.from_file(event.pathname)
+            fileMime = magic.from_file(pathname, mime=True)
+            fileType = magic.from_file(pathname)
 
             # get the file size, in bytes to compare against sane values
-            fileSize = os.path.getsize(event.pathname)
+            fileSize = os.path.getsize(pathname)
             if (args.minBytes <= fileSize <= args.maxBytes) and (
                 (fileMime in PCAP_MIME_TYPES) or ('pcap-ng' in fileType)
             ):
-                relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
+                relativePath = remove_prefix(pathname, os.path.join(args.baseDir, ''))
 
                 # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
                 fileIsDuplicate = False
@@ -225,15 +225,15 @@ def event_process_generator(cls, method):
                 if fileIsDuplicate:
                     # this is duplicate file (it's been processed before) so ignore it
                     if debug:
-                        eprint(f"{scriptName}:\t📋\t{event.pathname}")
+                        eprint(f"{scriptName}:\t📋\t{pathname}")
 
                 else:
                     # the entity is a right-sized non-duplicate file, and it exists, so send it to get processed
                     if debug:
-                        eprint(f"{scriptName}:\t📩\t{event.pathname}")
+                        eprint(f"{scriptName}:\t📩\t{pathname}")
                     try:
                         fileInfo = {
-                            FILE_INFO_DICT_NAME: event.pathname if args.includeAbsolutePath else relativePath,
+                            FILE_INFO_DICT_NAME: pathname if args.includeAbsolutePath else relativePath,
                             FILE_INFO_DICT_SIZE: fileSize,
                             FILE_INFO_FILE_MIME: fileMime,
                             FILE_INFO_FILE_TYPE: fileType,
@@ -245,23 +245,24 @@ def event_process_generator(cls, method):
                             eprint(f"{scriptName}:\t📫\t{fileInfo}")
                     except zmq.Again:
                         if verboseDebug:
-                            eprint(f"{scriptName}:\t🕑\t{event.pathname}")
+                            eprint(f"{scriptName}:\t🕑\t{pathname}")
 
             else:
                 # too small/big to care about, or the wrong type, ignore it
                 if debug:
-                    eprint(f"{scriptName}:\t✋\t{event.pathname}")
+                    eprint(f"{scriptName}:\t✋\t{pathname}")
 
-    # assign process method to class
-    _method_name.__name__ = "process_{}".format(method)
-    setattr(cls, _method_name.__name__, _method_name)
+
+def file_processor(pathname, **kwargs):
+    if "watcher" in kwargs and kwargs["watcher"]:
+        kwargs["watcher"].processFile(pathname)
 
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
 def shutdown_handler(signum, frame):
     global shuttingDown
-    shuttingDown = True
+    shuttingDown[0] = True
 
 
 ###################################################################################################
@@ -430,6 +431,28 @@ def main():
         type=str,
         required=False,
     )
+    parser.add_argument(
+        '-p',
+        '--polling',
+        dest='polling',
+        help="Use polling (instead of inotify)",
+        metavar='true|false',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=os.getenv('PCAP_PIPELINE_POLLING', False),
+        required=False,
+    )
+    parser.add_argument(
+        '-c',
+        '--closed-sec',
+        dest='assumeClosedSec',
+        help="When polling, assume a file is closed after this many seconds of inactivity",
+        metavar='<seconds>',
+        type=int,
+        default=int(os.getenv('PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC', str(watch_common.ASSUME_CLOSED_SEC_DEFAULT))),
+        required=False,
+    )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
         '-d', '--directory', dest='baseDir', help='Directory to monitor', metavar='<directory>', type=str, required=True
@@ -474,13 +497,9 @@ def main():
 
     # sleep for a bit if requested
     sleepCount = 0
-    while (not shuttingDown) and (sleepCount < args.startSleepSec):
+    while (not shuttingDown[0]) and (sleepCount < args.startSleepSec):
         time.sleep(1)
         sleepCount += 1
-
-    # add events to watch to EventWatcher class
-    for method in EventWatcher._methods:
-        event_process_generator(EventWatcher, method)
 
     # if directory to monitor doesn't exist, create it now
     if os.path.isdir(args.baseDir):
@@ -488,7 +507,7 @@ def main():
     else:
         preexistingDir = False
         if debug:
-            eprint(f'{scriptName}: creating "{args.baseDir}" to monitor')
+            eprint(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
@@ -502,44 +521,81 @@ def main():
     # begin threaded watch of path(s)
     time.sleep(1)
 
-    event_notifier_started = False
-    watch_manager = pyinotify.WatchManager()
-    event_notifier = pyinotify.ThreadedNotifier(watch_manager, EventWatcher())
+    observer = PollingObserver() if args.polling else Observer()
+    handler = watch_common.FileOperationEventHandler(
+        logger=None,
+        polling=args.polling,
+    )
     for watchDir in watchDirs:
-        watch_manager.add_watch(os.path.abspath(watchDir), pyinotify.ALL_EVENTS)
+        if verboseDebug:
+            eprint(f"{scriptName}:\tScheduling {watchDir}")
+        observer.schedule(handler, watchDir, recursive=False)
+
+    observer.start()
+
     if debug:
-        eprint(f"{scriptName}: monitoring {watchDirs}")
-    time.sleep(2)
-    if not shuttingDown:
-        event_notifier.start()
-        event_notifier_started = True
+        eprint(f"{scriptName}:\tmonitoring {watchDirs}")
 
-    # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
-    if preexistingDir and (not args.ignoreExisting) and (not shuttingDown):
-        filesTouched = 0
-        for watchDir in watchDirs:
-            for preexistingFile in [os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()]:
-                touch(preexistingFile)
-                filesTouched += 1
-        if debug and (filesTouched > 0):
-            eprint(f"{scriptName}: found {filesTouched} preexisting files to check")
+    try:
+        time.sleep(2)
 
-    # loop forever, or until we're told to shut down, whichever comes first
-    while not shuttingDown:
-        if pdbFlagged:
-            pdbFlagged = False
-            breakpoint()
-        time.sleep(0.2)
+        # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
+        if preexistingDir and (not args.ignoreExisting) and (not shuttingDown[0]):
+            filesTouched = 0
+            for watchDir in watchDirs:
+                for preexistingFile in [
+                    os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()
+                ]:
+                    touch(preexistingFile)
+                    filesTouched += 1
+            if debug and (filesTouched > 0):
+                eprint(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
 
-    # graceful shutdown
-    if debug:
-        eprint(f"{scriptName}: shutting down...")
-    if event_notifier_started:
-        event_notifier.stop()
+        # start the thread to actually handle the files as they're queued by the FileOperationEventHandler handler
+        workerThreadCount = malcolm_utils.AtomicInt(value=0)
+        ThreadPool(
+            1,
+            watch_common.ProcessFileEventWorker(
+                [
+                    handler,
+                    observer,
+                    file_processor,
+                    {'watcher': EventWatcher()},
+                    args.assumeClosedSec,
+                    workerThreadCount,
+                    shuttingDown,
+                    None,
+                ],
+            ),
+        )
+
+        # loop forever, or until we're told to shut down, whichever comes first
+        while (not shuttingDown[0]) and observer.is_alive():
+            if pdbFlagged:
+                pdbFlagged = False
+                breakpoint()
+            observer.join(1)
+
+        # graceful shutdown
+        if debug:
+            eprint(f"{scriptName}:\tshutting down...")
+
+        if shuttingDown[0]:
+            raise WatchdogShutdown()
+
+    except WatchdogShutdown:
+        observer.unschedule_all()
+
+    finally:
+        observer.stop()
+        observer.join()
+
     time.sleep(1)
+    while workerThreadCount.value() > 0:
+        time.sleep(1)
 
     if debug:
-        eprint(f"{scriptName}: finished monitoring {watchDirs}")
+        eprint(f"{scriptName}:\tfinished monitoring {watchDirs}")
 
 
 if __name__ == '__main__':

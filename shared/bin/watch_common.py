@@ -27,6 +27,8 @@ from watchdog.utils import WatchdogShutdown
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 
+ASSUME_CLOSED_SEC_DEFAULT = 10
+
 
 ###################################################################################################
 class FileOperationEventHandler(FileSystemEventHandler):
@@ -100,7 +102,7 @@ class FileOperationEventHandler(FileSystemEventHandler):
 
 ###################################################################################################
 def ProcessFileEventWorker(workerArgs):
-    handler, observer, fileProcessor, assumeClosedSec, workerThreadCount, shutDown, logger = (
+    handler, observer, fileProcessor, fileProcessorKwargs, assumeClosedSec, workerThreadCount, shutDown, logger = (
         workerArgs[0],
         workerArgs[1],
         workerArgs[2],
@@ -108,6 +110,7 @@ def ProcessFileEventWorker(workerArgs):
         workerArgs[4],
         workerArgs[5],
         workerArgs[6],
+        workerArgs[7],
     )
 
     with workerThreadCount as workerId:
@@ -125,8 +128,11 @@ def ProcessFileEventWorker(workerArgs):
                     else:
                         del d[fileName]
                         if fileProcessor is not None:
-                            fileProcessor(fileName)
-                        logger.debug(f"processed {fileName} at {(nowTime-eventTime) if (eventTime > 0) else 0} seconds")
+                            fileProcessor(fileName, func(**fileProcessorKwargs))
+                        if logger is not None:
+                            logger.debug(
+                                f"processed {fileName} at {(nowTime-eventTime) if (eventTime > 0) else 0} seconds"
+                            )
 
         time.sleep(1)
         if logger is not None:
@@ -137,6 +143,7 @@ def WatchAndProcessDirectory(
     directories,
     polling,
     fileProcessor,
+    fileProcessorKwargs,
     assumeClosedSec,
     shuttingDown,
     logger,
@@ -161,6 +168,7 @@ def WatchAndProcessDirectory(
                     handler,
                     observer,
                     fileProcessor,
+                    fileProcessorKwargs,
                     assumeClosedSec,
                     workerThreadCount,
                     shuttingDown,

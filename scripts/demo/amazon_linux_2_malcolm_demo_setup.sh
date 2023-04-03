@@ -559,6 +559,7 @@ function InstallMalcolm {
         "LOGSTASH_REVERSE_DNS:'true'"
         "LOGSTASH_SEVERITY_SCORING:'true'"
         "PCAP_PIPELINE_IGNORE_PREEXISTING:'true'"
+        "PCAP_PIPELINE_POLLING:'true'"
         "YARA_MAX_REQUESTS:4"
         "ZEEK_AUTO_ANALYZE_PCAP_FILES:'true'"
         "ZEEK_DISABLE_BEST_GUESS_ICS:''"
