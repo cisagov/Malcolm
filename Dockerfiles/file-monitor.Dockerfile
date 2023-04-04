@@ -134,7 +134,6 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-bs4 \
       python3-dev \
       python3-pip \
-      python3-pyinotify \
       python3-requests \
       python3-zmq \
       rsync && \

@@ -64,7 +64,7 @@ RUN apt-get -q update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    pip3 install --no-cache-dir opensearch-py pyzmq pyinotify python-magic requests watchdog && \
+    pip3 install --no-cache-dir opensearch-py pyzmq python-magic requests watchdog && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
