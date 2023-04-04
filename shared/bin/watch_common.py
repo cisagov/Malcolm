@@ -126,11 +126,14 @@ def ProcessFileEventWorker(workerArgs):
                     else:
                         del d[fileName]
                         if fileProcessor is not None:
+                            extraArgs = (
+                                fileProcessorKwargs
+                                if fileProcessorKwargs and isinstance(fileProcessorKwargs, dict)
+                                else {}
+                            )
                             fileProcessor(
                                 fileName,
-                                **fileProcessorKwargs
-                                if fileProcessorKwargs and isinstance(fileProcessorKwargs, dict)
-                                else {},
+                                **extraArgs,
                             )
                         if logger is not None:
                             logger.debug(
