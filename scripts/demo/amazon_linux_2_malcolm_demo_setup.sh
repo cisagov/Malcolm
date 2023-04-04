@@ -559,6 +559,7 @@ function InstallMalcolm {
         "LOGSTASH_REVERSE_DNS:'true'"
         "LOGSTASH_SEVERITY_SCORING:'true'"
         "PCAP_PIPELINE_IGNORE_PREEXISTING:'true'"
+        "PCAP_PIPELINE_POLLING:'true'"
         "YARA_MAX_REQUESTS:4"
         "ZEEK_AUTO_ANALYZE_PCAP_FILES:'true'"
         "ZEEK_DISABLE_BEST_GUESS_ICS:''"
@@ -580,7 +581,7 @@ function InstallMalcolm {
     fi
 
     pushd "$LOCAL_BIN_PATH" >/dev/null 2>&1
-    curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm/development/scripts/demo/reset_and_auto_populate.sh
+    curl -sSL -J -O https://raw.githubusercontent.com/idaholab/Malcolm/main/scripts/demo/reset_and_auto_populate.sh
     curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm-PCAP/main/tools/pcap_time_shift.py
     chmod 755 reset_and_auto_populate.sh pcap_time_shift.py
     popd >/dev/null 2>&1

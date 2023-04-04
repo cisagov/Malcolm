@@ -21,7 +21,20 @@ import tempfile
 import time
 import zmq
 
-from pcap_utils import *
+from pcap_utils import (
+    FILE_INFO_DICT_NAME,
+    FILE_INFO_DICT_NODE,
+    FILE_INFO_DICT_SIZE,
+    FILE_INFO_DICT_TAGS,
+    FILE_INFO_FILE_MIME,
+    FILE_INFO_FILE_TYPE,
+    PCAP_MIME_TYPES,
+    PCAP_TOPIC_PORT,
+    tags_from_filename,
+)
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, AtomicInt, run_process
+
 from multiprocessing.pool import ThreadPool
 from collections import deque
 from itertools import chain, repeat
@@ -76,6 +89,7 @@ shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
 arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
 arkimeDataset = os.getenv('ARKIME_ECS_DATASET', 'session')
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -132,7 +146,6 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-
                 if pcapBaseDir and os.path.isdir(pcapBaseDir):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
@@ -217,7 +230,6 @@ def zeekFileWorker(zeekWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isdir(uploadDir):
-
                 if pcapBaseDir and os.path.isdir(pcapBaseDir):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
@@ -237,7 +249,6 @@ def zeekFileWorker(zeekWorkerArgs):
                             )
                         )
                     ):
-
                         extractFileMode = defaultExtractFileMode
 
                         # if file carving was specified via tag, make note of it
@@ -266,7 +277,6 @@ def zeekFileWorker(zeekWorkerArgs):
                         # create a temporary work directory where zeek will be executed to generate the log files
                         with tempfile.TemporaryDirectory() as tmpLogDir:
                             if os.path.isdir(tmpLogDir):
-
                                 processTimeUsec = int(round(time.time() * 1000000))
 
                                 # use Zeek to process the pcap
@@ -302,7 +312,6 @@ def zeekFileWorker(zeekWorkerArgs):
                                 # make sure log files were generated
                                 logFiles = [logFile for logFile in os.listdir(tmpLogDir) if logFile.endswith('.log')]
                                 if len(logFiles) > 0:
-
                                     # tar up the results
                                     tgzFileName = os.path.join(
                                         tmpLogDir,
@@ -373,7 +382,6 @@ def suricataFileWorker(suricataWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-
                 # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
                 # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
                 # as Suricata now does its own network capture in Malcolm standalone mode.
@@ -391,12 +399,10 @@ def suricataFileWorker(suricataWorkerArgs):
                         )
                     )
                 ):
-
                     if pcapBaseDir and os.path.isdir(pcapBaseDir):
                         fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
                     if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-
                         # finalize tags list
                         fileInfo[FILE_INFO_DICT_TAGS] = (
                             [
@@ -413,7 +419,6 @@ def suricataFileWorker(suricataWorkerArgs):
                         # create a temporary work directory where suricata will be executed to generate the log files
                         with tempfile.TemporaryDirectory() as tmpLogDir:
                             if os.path.isdir(tmpLogDir):
-
                                 processTimeUsec = int(round(time.time() * 1000000))
 
                                 # put together suricata execution command
@@ -467,7 +472,6 @@ def suricataFileWorker(suricataWorkerArgs):
 ###################################################################################################
 # main
 def main():
-
     processingMode = None
     if 'pcap_processor' in scriptName:
         eprint(
@@ -736,7 +740,7 @@ def main():
 
     # start worker threads which will pull filenames/tags to be processed by capture
     if processingMode == PCAP_PROCESSING_MODE_ARKIME:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             arkimeCaptureFileWorker,
             (
@@ -751,7 +755,7 @@ def main():
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             zeekFileWorker,
             (
@@ -768,7 +772,7 @@ def main():
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             suricataFileWorker,
             (
@@ -794,7 +798,7 @@ def main():
         # accept a file info dict from new_files_socket as json
         try:
             fileInfo = json.loads(new_files_socket.recv_string())
-        except zmq.Again as timeout:
+        except zmq.Again:
             # no file received due to timeout, we'll go around and try again
             if verboseDebug:
                 eprint(f"{scriptName}:\t🕑\t(recv)")

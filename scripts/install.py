@@ -28,7 +28,44 @@ except ImportError:
     getpwuid = None
 from collections import defaultdict, namedtuple
 
-from malcolm_common import *
+from malcolm_common import (
+    AskForString,
+    ChooseMultiple,
+    ChooseOne,
+    DisplayMessage,
+    DOCKER_COMPOSE_INSTALL_URLS,
+    dockerComposeUrl,
+    DOCKER_INSTALL_URLS,
+    DotEnvDynamic,
+    DownloadToFile,
+    HOMEBREW_INSTALL_URLS,
+    MalcolmCfgRunOnceFile,
+    MalcolmPath,
+    PLATFORM_LINUX,
+    PLATFORM_LINUX_CENTOS,
+    PLATFORM_LINUX_DEBIAN,
+    PLATFORM_LINUX_FEDORA,
+    PLATFORM_LINUX_UBUNTU,
+    PLATFORM_MAC,
+    PLATFORM_WINDOWS,
+    ReplaceBindMountLocation,
+    RequestsDynamic,
+    ScriptPath,
+    UserInputDefaultsBehavior,
+    UserInterfaceMode,
+    WindowsInstaller,
+    YAMLDynamic,
+    YesOrNo,
+)
+from malcolm_utils import (
+    deep_get,
+    eprint,
+    run_process,
+    same_file_or_dir,
+    str2bool,
+    touch,
+    which,
+)
 
 ###################################################################################################
 DOCKER_COMPOSE_INSTALL_VERSION = "2.14.2"
@@ -180,7 +217,7 @@ class Installer(object):
         self.requiredPackages = []
 
         self.pipCmd = 'pip3'
-        if not Which(self.pipCmd, debug=self.debug):
+        if not which(self.pipCmd, debug=self.debug):
             self.pipCmd = 'pip'
 
         self.tempDirName = tempfile.mkdtemp()
@@ -285,7 +322,7 @@ class Installer(object):
                 else:
                     try:
                         os.makedirs(installPath)
-                    except:
+                    except Exception:
                         pass
                     if os.path.isdir(installPath):
                         break
@@ -361,7 +398,7 @@ class Installer(object):
                 pgid = str(os.getgid())
                 if (puid == '0') or (pgid == '0'):
                     raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
-        except:
+        except Exception:
             puid = '1000'
             pgid = '1000'
 
@@ -537,7 +574,7 @@ class Installer(object):
             ldapServerType = None
             while ldapServerType not in allowedLdapModes:
                 ldapServerType = InstallerChooseOne(
-                    f'Select LDAP server compatibility type',
+                    'Select LDAP server compatibility type',
                     choices=[(x, '', x == 'winldap') for x in allowedLdapModes],
                 )
             ldapStartTLS = InstallerYesOrNo(
@@ -553,7 +590,7 @@ class Installer(object):
                         file=ldapDefaultsFile,
                     )
                     print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
-            except:
+            except Exception:
                 pass
 
         # directories for data volume mounts (PCAP storage, Zeek log storage, OpenSearch indexes, etc.)
@@ -747,11 +784,11 @@ class Installer(object):
                     default="miscbeat",
                 )
                 filebeatTcpDropField = InstallerAskForString(
-                    f'Field to drop from events sent to Filebeat TCP listener',
+                    'Field to drop from events sent to Filebeat TCP listener',
                     default=filebeatTcpSourceField,
                 )
             filebeatTcpTag = InstallerAskForString(
-                f'Tag to apply to messages sent to Filebeat TCP listener',
+                'Tag to apply to messages sent to Filebeat TCP listener',
                 default=filebeatTcpTag,
             )
         else:
@@ -765,7 +802,6 @@ class Installer(object):
         allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
         allowedFilePreserveModes = ('quarantined', 'all', 'none')
 
-        fileCarveModeUser = None
         fileCarveMode = None
         filePreserveMode = None
         vtotApiKey = '0'
@@ -1252,8 +1288,8 @@ class Installer(object):
         # now, go through and modify the values in the .env files
         for val in EnvValues:
             try:
-                Touch(val.envFile)
-            except Exception as e:
+                touch(val.envFile)
+            except Exception:
                 pass
 
             try:
@@ -1298,7 +1334,7 @@ class Installer(object):
                         currentService = None
 
                     # determine indentation for each compose file section (assumes YML file is consistently indented)
-                    if (currentSection is not None) and (not currentSection in sectionIndents):
+                    if (currentSection is not None) and (currentSection not in sectionIndents):
                         indentMatch = re.search(r'^(\s+)\S+\s*:\s*$', line)
                         if indentMatch is not None:
                             sectionIndents[currentSection] = indentMatch.group(1)
@@ -1535,7 +1571,7 @@ class Installer(object):
                                     fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
                                     line,
                                 )
-                                if nginxSSL == False:
+                                if nginxSSL is False:
                                     if ':443:' in line:
                                         line = line.replace(':443:', ':80:')
                                     if ':9200:' in line:
@@ -1624,8 +1660,8 @@ class Installer(object):
                 os.chown(composeFile, origUid, origGuid)
 
         try:
-            Touch(MalcolmCfgRunOnceFile)
-        except Exception as e:
+            touch(MalcolmCfgRunOnceFile)
+        except Exception:
             pass
 
         # if the Malcolm dir is owned by root, see if they want to reassign ownership to a non-root user
@@ -1674,17 +1710,17 @@ class LinuxInstaller(Installer):
                     try:
                         k, v = line.rstrip().split("=")
                         osInfo[k] = v.strip('"')
-                    except:
+                    except Exception:
                         pass
 
             if ('NAME' in osInfo) and (len(osInfo['NAME']) > 0):
-                distro = osInfo['NAME'].lower().split()[0]
+                self.distro = osInfo['NAME'].lower().split()[0]
 
             if ('VERSION_CODENAME' in osInfo) and (len(osInfo['VERSION_CODENAME']) > 0):
-                codename = osInfo['VERSION_CODENAME'].lower().split()[0]
+                self.codename = osInfo['VERSION_CODENAME'].lower().split()[0]
 
             if ('VERSION_ID' in osInfo) and (len(osInfo['VERSION_ID']) > 0):
-                release = osInfo['VERSION_ID'].lower().split()[0]
+                self.release = osInfo['VERSION_ID'].lower().split()[0]
 
         # try lsb_release next
         if self.distro is None:
@@ -1748,31 +1784,31 @@ class LinuxInstaller(Installer):
                 raise Exception(f'{ScriptName} must be run as root, or {self.sudoCmd} must be available')
 
         # determine command to use to query if a package is installed
-        if Which('dpkg', debug=self.debug):
+        if which('dpkg', debug=self.debug):
             os.environ["DEBIAN_FRONTEND"] = "noninteractive"
             self.checkPackageCmds.append(['dpkg', '-s'])
-        elif Which('rpm', debug=self.debug):
+        elif which('rpm', debug=self.debug):
             self.checkPackageCmds.append(['rpm', '-q'])
-        elif Which('dnf', debug=self.debug):
+        elif which('dnf', debug=self.debug):
             self.checkPackageCmds.append(['dnf', 'list', 'installed'])
-        elif Which('yum', debug=self.debug):
+        elif which('yum', debug=self.debug):
             self.checkPackageCmds.append(['yum', 'list', 'installed'])
 
         # determine command to install a package from the distro's repos
-        if Which('apt-get', debug=self.debug):
+        if which('apt-get', debug=self.debug):
             self.installPackageCmds.append(['apt-get', 'install', '-y', '-qq'])
-        elif Which('apt', debug=self.debug):
+        elif which('apt', debug=self.debug):
             self.installPackageCmds.append(['apt', 'install', '-y', '-qq'])
-        elif Which('dnf', debug=self.debug):
+        elif which('dnf', debug=self.debug):
             self.installPackageCmds.append(['dnf', '-y', 'install', '--nobest'])
-        elif Which('yum', debug=self.debug):
+        elif which('yum', debug=self.debug):
             self.installPackageCmds.append(['yum', '-y', 'install'])
 
         # determine total system memory
         try:
             totalMemBytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
             self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0**3))
-        except:
+        except Exception:
             self.totalMemoryGigs = 0.0
 
         # determine total system memory a different way if the first way didn't work
@@ -1785,7 +1821,7 @@ class LinuxInstaller(Installer):
         # determine total system CPU cores
         try:
             self.totalCores = os.sysconf('SC_NPROCESSORS_ONLN')
-        except:
+        except Exception:
             self.totalCores = 0
 
         # determine total system CPU cores a different way if the first way didn't work
@@ -1996,7 +2032,7 @@ class LinuxInstaller(Installer):
         result = False
 
         dockerComposeCmd = 'docker-compose'
-        if not Which(dockerComposeCmd, debug=self.debug):
+        if not which(dockerComposeCmd, debug=self.debug):
             if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
                 dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
             elif os.path.isfile('/usr/local/bin/docker-compose'):
@@ -2269,7 +2305,7 @@ class MacInstaller(Installer):
         try:
             totalMemBytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
             self.totalMemoryGigs = math.ceil(totalMemBytes / (1024.0**3))
-        except:
+        except Exception:
             self.totalMemoryGigs = 0.0
 
         # determine total system memory a different way if the first way didn't work
@@ -2282,7 +2318,7 @@ class MacInstaller(Installer):
         # determine total system CPU cores
         try:
             self.totalCores = os.sysconf('SC_NPROCESSORS_ONLN')
-        except:
+        except Exception:
             self.totalCores = 0
 
         # determine total system CPU cores a different way if the first way didn't work
@@ -2398,7 +2434,7 @@ class MacInstaller(Installer):
                 newCpus = InstallerAskForString('Enter Docker CPU cores (e.g., 4, 8, 16)')
                 newMemoryGiB = InstallerAskForString('Enter Docker RAM MiB (e.g., 8, 16, etc.)')
 
-            if newCpus or newMemoryMiB:
+            if newCpus or newMemoryGiB:
                 with open(settingsFile, 'r+') as f:
                     data = json.load(f)
                     if newCpus:

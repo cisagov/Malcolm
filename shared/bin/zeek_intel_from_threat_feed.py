@@ -15,9 +15,13 @@ import os
 import sys
 import zeek_threat_feed_utils
 
+import malcolm_utils
+from malcolm_utils import nullcontext
+
 ###################################################################################################
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
+
 
 ###################################################################################################
 # main
@@ -30,7 +34,7 @@ def main():
                 ' - MISP core format JSON files',
                 '',
                 'See:',
-                ' - Malcolm documentation: https://github.com/idaholab/Malcolm#zeek-intelligence-framework',
+                ' - Malcolm documentation: https://idaholab.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel',
                 ' - Zeek intelligence framework: https://docs.zeek.org/en/master/frameworks/intel.html',
                 ' - Zeek intel types: https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type',
                 ' - Introduction to STIX: https://oasis-open.github.io/cti-documentation/stix/intro.html',
@@ -154,7 +158,7 @@ def main():
 
                     elif '://' in infileArg:
                         # download from URL and read input from remote file
-                        with zeek_threat_feed_utils.temporary_filename(suffix='.txt') as tmpFileName:
+                        with malcolm_utils.temporary_filename(suffix='.txt') as tmpFileName:
                             dlFileName = zeek_threat_feed_utils.download_to_file(
                                 infileArg,
                                 local_filename=tmpFileName,
@@ -177,8 +181,8 @@ def main():
         # we'll queue and then process all of the input arguments in workers
         inputQueue = deque()
         inputQueue.extend(args.input)
-        workerThreadCount = zeek_threat_feed_utils.AtomicInt(value=0)
-        workerThreads = ThreadPool(
+        workerThreadCount = malcolm_utils.AtomicInt(value=0)
+        ThreadPool(
             args.threads,
             zeek_threat_feed_utils.ProcessThreatInputWorker,
             (
@@ -186,6 +190,7 @@ def main():
                     inputQueue,
                     zeekPrinter,
                     since,
+                    defaultNow,
                     workerThreadCount,
                     logging,
                 ],

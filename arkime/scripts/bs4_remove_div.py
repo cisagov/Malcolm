@@ -16,14 +16,11 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 
 ###################################################################################################
-if not PY3:
-    if hasattr(__builtins__, 'raw_input'):
-        input = raw_input
-
 try:
     FileNotFoundError
 except NameError:
     FileNotFoundError = IOError
+
 
 ###################################################################################################
 # print to stderr

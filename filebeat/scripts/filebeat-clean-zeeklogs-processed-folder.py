@@ -43,7 +43,6 @@ def silentRemove(filename):
 
 
 def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
-
     try:
         # first check to see if it's in the filebeat registry
         if filebeatReg is not None:
@@ -70,16 +69,15 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
         fuserProcess.communicate()
         fuserExitCode = fuserProcess.wait()
         if fuserExitCode != 0:
-
             # the file is not in use, let's check it's mtime/ctime
             logTime = max(os.path.getctime(filename), os.path.getmtime(filename))
             lastUseTime = nowTime - logTime
 
             # get the file type
             fileType = magic.from_file(filename, mime=True)
-            if (checkLogs == True) and (cleanLogSeconds > 0) and (fileType == logMimeType):
+            if (checkLogs is True) and (cleanLogSeconds > 0) and (fileType == logMimeType):
                 cleanSeconds = cleanLogSeconds
-            elif (checkArchives == True) and (cleanZipSeconds > 0) and archiveMimeTypeRegex.match(fileType) is not None:
+            elif (checkArchives is True) and (cleanZipSeconds > 0) and archiveMimeTypeRegex.match(fileType) is not None:
                 cleanSeconds = cleanZipSeconds
             else:
                 # not a file we're going to be messing with
@@ -90,7 +88,7 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
                 print('removing old file "{}" ({}, used {} seconds ago)'.format(filename, fileType, lastUseTime))
                 silentRemove(filename)
 
-    except FileNotFoundError as fnf:
+    except FileNotFoundError:
         # file's already gone, oh well
         pass
 
@@ -99,7 +97,6 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
 
 
 def pruneFiles():
-
     if (cleanLogSeconds <= 0) and (cleanZipSeconds <= 0):
         # disabled, don't do anything
         return
@@ -143,7 +140,7 @@ def pruneFiles():
     candidateDirs.sort(reverse=True)
     candidateDirs.sort(key=len, reverse=True)
     candidateDirsAndTimes = zip(candidateDirs, [os.path.getmtime(dirToRm) for dirToRm in candidateDirs])
-    for (dirToRm, dirTime) in candidateDirsAndTimes:
+    for dirToRm, dirTime in candidateDirsAndTimes:
         dirAge = nowTime - dirTime
         if dirAge >= cleanDirSeconds:
             try:

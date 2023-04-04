@@ -12,11 +12,11 @@ RUN    apt-get update -q \
     && python3 -m pip install flake8
 
 COPY ./api /usr/src/app/
-COPY scripts/malcolm_common.py /usr/src/app/
+COPY scripts/malcolm_utils.py /usr/src/app/
 WORKDIR /usr/src/app
 
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
-    && flake8 --ignore=E501,F401,W503
+    && flake8 --ignore=E203,E501,F401,W503
 
 FROM python:3-slim
 
@@ -70,7 +70,7 @@ WORKDIR "${APP_HOME}"
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 COPY ./api "${APP_HOME}"
-COPY scripts/malcolm_common.py "${APP_HOME}"/
+COPY scripts/malcolm_utils.py "${APP_HOME}"/
 COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

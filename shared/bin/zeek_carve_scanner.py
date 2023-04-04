@@ -20,8 +20,41 @@ import threading
 import time
 import zmq
 
-from zeek_carve_utils import *
 from multiprocessing.pool import ThreadPool
+
+from zeek_carve_utils import (
+    AnalyzerResult,
+    AnalyzerScan,
+    BroSignatureLine,
+    CapaScan,
+    CarvedFileSubscriberThreaded,
+    ClamAVScan,
+    extracted_filespec_to_fields,
+    FILE_SCAN_RESULT_DESCRIPTION,
+    FILE_SCAN_RESULT_ENGINES,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_FILE_SIZE,
+    FILE_SCAN_RESULT_HITS,
+    FILE_SCAN_RESULT_MESSAGE,
+    FILE_SCAN_RESULT_SCANNER,
+    FILE_SCAN_RESULT_FILE_TYPE,
+    FileScanProvider,
+    PRESERVE_ALL,
+    PRESERVE_NONE,
+    PRESERVE_PRESERVED_DIR_NAME,
+    PRESERVE_QUARANTINED,
+    PRESERVE_QUARANTINED_DIR_NAME,
+    SINK_PORT,
+    VENTILATOR_PORT,
+    VirusTotalSearch,
+    YARA_CUSTOM_RULES_DIR,
+    YARA_RULES_DIR,
+    YaraScan,
+    ZEEK_SIGNATURE_NOTICE,
+)
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, AtomicInt
+
 
 ###################################################################################################
 debug = False
@@ -34,6 +67,7 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -71,7 +105,6 @@ def locate_file(fileInfo):
         fileName = None
 
     if fileName is not None:
-
         if os.path.isfile(fileName):
             return fileName
 
@@ -103,7 +136,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
     try:
         if isinstance(checkConnInfo, FileScanProvider):
-
             # initialize ZeroMQ context and socket(s) to send scan results
             context = zmq.Context()
 
@@ -121,7 +153,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
             # loop forever, or until we're told to shut down
             while not shuttingDown:
-
                 # "register" this scanner with the logger
                 while (not scannerRegistered) and (not shuttingDown):
                     try:
@@ -132,7 +163,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                         if debug:
                             eprint(f"{scriptName}[{scanWorkerId}]:\t🇷\t{checkConnInfo.scanner_name()}")
 
-                    except zmq.Again as timeout:
+                    except zmq.Again:
                         # todo: what to do here?
                         if verboseDebug:
                             eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🇷")
@@ -153,7 +184,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                 fileName = locate_file(fileInfo)
                 if (fileName is not None) and os.path.isfile(fileName):
-
                     # file exists, submit for scanning
                     if debug:
                         eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
@@ -190,13 +220,11 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                         # todo: maximum time we wait for a single file to be scanned?
                         while (not requestComplete) and (not shuttingDown):
-
                             # wait a moment then check to see if the scan is complete
                             time.sleep(scan.provider.check_interval())
                             response = scan.provider.check_result(scan.submissionResponse)
 
                             if isinstance(response, AnalyzerResult):
-
                                 # whether the scan has completed
                                 requestComplete = response.finished
 
@@ -232,7 +260,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                             if debug:
                                 eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
 
-                        except zmq.Again as timeout:
+                        except zmq.Again:
                             # todo: what to do here?
                             if verboseDebug:
                                 eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
@@ -250,7 +278,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                 scannerRegistered = False
                 if debug:
                     eprint(f"{scriptName}[{scanWorkerId}]:\t🙃\t{checkConnInfo.scanner_name()}")
-            except zmq.Again as timeout:
+            except zmq.Again:
                 # todo: what to do here?
                 if verboseDebug:
                     eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🙃")
@@ -439,7 +467,7 @@ def main():
     )
 
     # start scanner threads which will pull filenames to be scanned and send the results to the logger
-    scannerThreads = ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
+    ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
     while not shuttingDown:
         if pdbFlagged:
             pdbFlagged = False

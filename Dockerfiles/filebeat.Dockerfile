@@ -109,7 +109,7 @@ ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN for INPUT in nginx tcp; do \

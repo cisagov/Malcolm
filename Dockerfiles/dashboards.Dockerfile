@@ -137,7 +137,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
 ADD dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 
 # Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the

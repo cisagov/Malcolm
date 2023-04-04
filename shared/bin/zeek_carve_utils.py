@@ -4,7 +4,6 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import clamd
-import hashlib
 import json
 import os
 import re
@@ -24,6 +23,8 @@ from multiprocessing import RawValue
 from subprocess import PIPE, Popen
 from threading import get_ident
 from threading import Lock
+
+from malcolm_utils import eprint, sha256sum, run_process, AtomicInt, dictsearch
 
 ###################################################################################################
 VENTILATOR_PORT = 5987
@@ -236,44 +237,6 @@ class ExtractedFileNameParts:
 
 
 ###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), *args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-# calculate a sha256 hash of a file
-def sha256sum(filename):
-    h = hashlib.sha256()
-    b = bytearray(64 * 1024)
-    mv = memoryview(b)
-    with open(filename, 'rb', buffering=0) as f:
-        for n in iter(lambda: f.readinto(mv), 0):
-            h.update(mv[:n])
-    return h.hexdigest()
-
-
-###################################################################################################
-# recursive dictionary key search
-def dictsearch(d, target):
-    val = filter(
-        None, [[b] if a == target else dictsearch(b, target) if isinstance(b, dict) else None for a, b in d.items()]
-    )
-    return [i for b in val for i in b]
-
-
-###################################################################################################
 # filespec to various fields as per the extractor zeek script (/opt/zeek/share/zeek/site/extractor.zeek)
 #   source-fuid-uid-time.ext
 #   eg.
@@ -311,95 +274,6 @@ def extracted_filespec_to_fields(filespec):
 
 
 ###################################################################################################
-# open a file and close it, updating its access time
-def touch(filename):
-    open(filename, 'a').close()
-    os.utime(filename, None)
-
-
-###################################################################################################
-# run command with arguments and return its exit code, stdout, and stderr
-def check_output_input(*popenargs, **kwargs):
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden')
-
-    if 'stderr' in kwargs:
-        raise ValueError('stderr argument not allowed, it will be overridden')
-
-    if 'input' in kwargs and kwargs['input']:
-        if 'stdin' in kwargs:
-            raise ValueError('stdin and input arguments may not both be used')
-        inputdata = kwargs['input']
-        kwargs['stdin'] = PIPE
-    else:
-        inputdata = None
-    kwargs.pop('input', None)
-
-    process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
-    try:
-        output, errput = process.communicate(input=inputdata)
-    except:
-        process.kill()
-        process.wait()
-        raise
-
-    retcode = process.poll()
-
-    return retcode, output, errput
-
-
-###################################################################################################
-# run command with arguments and return its exit code and output
-def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None, debug=False):
-    retcode = -1
-    output = []
-
-    try:
-        # run the command
-        retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
-
-        # split the output on newlines to return a list
-        if stderr and (len(cmderr) > 0):
-            output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
-        if stdout and (len(cmdout) > 0):
-            output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
-
-    except (FileNotFoundError, OSError, IOError) as e:
-        if stderr:
-            output.append("Command {} not found or unable to execute".format(command))
-
-    if debug:
-        eprint(
-            "{}{} returned {}: {}".format(
-                command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output
-            )
-        )
-
-    return retcode, output
-
-
-###################################################################################################
-class AtomicInt:
-    def __init__(self, value=0):
-        self.val = RawValue('i', value)
-        self.lock = Lock()
-
-    def increment(self):
-        with self.lock:
-            self.val.value += 1
-            return self.val.value
-
-    def decrement(self):
-        with self.lock:
-            self.val.value -= 1
-            return self.val.value
-
-    def value(self):
-        with self.lock:
-            return self.val.value
-
-
-###################################################################################################
 class CarvedFileSubscriberThreaded:
     # ---------------------------------------------------------------------------------
     # constructor
@@ -429,7 +303,10 @@ class CarvedFileSubscriberThreaded:
         self.newFilesSocket.setsockopt(zmq.SUBSCRIBE, bytes(topic, encoding='ascii'))
         self.newFilesSocket.RCVTIMEO = rcvTimeout
         if self.debug:
-            eprint(f"{self.scriptName}:\tbound to ventilator at {port}")
+            eprint(
+                f"{self.scriptName}:\tbound to ventilator at {port}",
+                timestamp=True,
+            )
 
     # ---------------------------------------------------------------------------------
     def Pull(self, scanWorkerId=0):
@@ -439,13 +316,14 @@ class CarvedFileSubscriberThreaded:
             # accept a fileinfo dict from newFilesSocket
             try:
                 fileinfo.update(json.loads(self.newFilesSocket.recv_string()))
-            except zmq.Again as timeout:
+            except zmq.Again:
                 # no file received due to timeout, return empty dict. which means no file available
                 pass
 
         if self.verboseDebug:
             eprint(
-                f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}"
+                f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}",
+                timestamp=True,
             )
 
         return fileinfo
@@ -545,7 +423,7 @@ class VirusTotalSearch(FileScanProvider):
             if allowed:
                 try:
                     response = requests.get(VTOT_URL, params={'apikey': self.apiKey, 'resource': sha256sum(fileName)})
-                except requests.exceptions.RequestException as e:
+                except requests.exceptions.RequestException:
                     # things are bad
                     return None
 
@@ -566,7 +444,7 @@ class VirusTotalSearch(FileScanProvider):
         if submissionResponse is not None:
             try:
                 result.success = submissionResponse.ok
-            except:
+            except Exception:
                 pass
 
             try:
@@ -610,7 +488,7 @@ class VirusTotalSearch(FileScanProvider):
                         scans = {
                             engine: resp['scans'][engine]
                             for engine in resp['scans']
-                            if ('detected' in resp['scans'][engine]) and (resp['scans'][engine]['detected'] == True)
+                            if ('detected' in resp['scans'][engine]) and (resp['scans'][engine]['detected'])
                         }
                         hits = defaultdict(list)
                         for k, v in scans.items():
@@ -671,9 +549,14 @@ class ClamAVScan(FileScanProvider):
 
         # while limit only repeats if block=True
         while (not allowed) and (not clamavResult.finished):
+            nowTime = int(time.time())
+
             if not connected:
                 if self.verboseDebug:
-                    eprint(f"{get_ident()}: ClamAV attempting connection")
+                    eprint(
+                        f"{get_ident()}: ClamAV attempting connection",
+                        timestamp=True,
+                    )
                 clamAv = (
                     clamd.ClamdUnixSocket(path=self.socketFileName)
                     if self.socketFileName is not None
@@ -683,11 +566,17 @@ class ClamAVScan(FileScanProvider):
                 clamAv.ping()
                 connected = True
                 if self.verboseDebug:
-                    eprint(f"{get_ident()}: ClamAV connected!")
+                    eprint(
+                        f"{get_ident()}: ClamAV connected!",
+                        timestamp=True,
+                    )
             except Exception as e:
                 connected = False
                 if self.debug:
-                    eprint(f"{get_ident()}: ClamAV connection failed: {str(e)}")
+                    eprint(
+                        f"{get_ident()}: ClamAV connection failed: {str(e)}",
+                        timestamp=True,
+                    )
 
             if connected:
                 # first make sure we haven't exceeded rate limits
@@ -700,17 +589,26 @@ class ClamAVScan(FileScanProvider):
             if connected and allowed:
                 try:
                     if self.verboseDebug:
-                        eprint(f'{get_ident()} ClamAV scanning: {fileName}')
+                        eprint(
+                            f'{get_ident()} ClamAV scanning: {fileName}',
+                            timestamp=True,
+                        )
                     clamavResult.result = clamAv.scan(fileName)
                     if self.verboseDebug:
-                        eprint(f'{get_ident()} ClamAV scan result: {clamavResult.result}')
+                        eprint(
+                            f'{get_ident()} ClamAV scan result: {clamavResult.result}',
+                            timestamp=True,
+                        )
                     clamavResult.success = clamavResult.result is not None
                     clamavResult.finished = True
                 except Exception as e:
                     if clamavResult.result is None:
                         clamavResult.result = str(e)
                     if self.debug:
-                        eprint(f'{get_ident()} ClamAV scan error: {clamavResult.result}')
+                        eprint(
+                            f'{get_ident()} ClamAV scan error: {clamavResult.result}',
+                            timestamp=True,
+                        )
                 finally:
                     self.scanningFilesCount.decrement()
 
@@ -788,17 +686,25 @@ class YaraScan(FileScanProvider):
                     if file.startswith(".") or file.startswith("~") or file.startswith("_"):
                         continue
                     filename = os.path.join(root, file)
-                    extension = os.path.splitext(file)[1].lower()
                     try:
-                        testCompile = yara.compile(filename)
+                        yara.compile(filename)
                         self.ruleFilespecs[filename] = filename
                     except yara.SyntaxError as e:
                         if self.debug:
-                            eprint(f'{get_ident()} Ignored Yara compile error in {filename}: {e}')
+                            eprint(
+                                f'{get_ident()} Ignored Yara compile error in {filename}: {e}',
+                                timestamp=True,
+                            )
         if self.verboseDebug:
-            eprint(f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files: {self.ruleFilespecs}")
+            eprint(
+                f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files: {self.ruleFilespecs}",
+                timestamp=True,
+            )
         elif self.debug:
-            eprint(f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files")
+            eprint(
+                f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files",
+                timestamp=True,
+            )
         self.compiledRules = yara.compile(filepaths=self.ruleFilespecs)
 
     @staticmethod
@@ -817,13 +723,14 @@ class YaraScan(FileScanProvider):
     def submit(self, fileName=None, fileSize=None, fileType=None, block=False, timeout=YARA_SUBMIT_TIMEOUT_SEC):
         yaraResult = AnalyzerResult()
         allowed = False
-        matches = []
 
         # timeout only applies if block=True
         timeoutTime = int(time.time()) + timeout
 
         # while limit only repeats if block=True
         while (not allowed) and (not yaraResult.finished):
+            nowTime = int(time.time())
+
             # first make sure we haven't exceeded rate limits
             if self.scanningFilesCount.increment() <= self.reqLimit:
                 # we've got fewer than the allowed requests open, so we're good to go!
@@ -834,10 +741,16 @@ class YaraScan(FileScanProvider):
             if allowed:
                 try:
                     if self.verboseDebug:
-                        eprint(f'{get_ident()} Yara scanning: {fileName}')
+                        eprint(
+                            f'{get_ident()} Yara scanning: {fileName}',
+                            timestamp=True,
+                        )
                     yaraResult.result = self.compiledRules.match(fileName, timeout=YARA_RUN_TIMEOUT_SEC)
                     if self.verboseDebug:
-                        eprint(f'{get_ident()} Yara scan result: {yaraResult.result}')
+                        eprint(
+                            f'{get_ident()} Yara scan result: {yaraResult.result}',
+                            timestamp=True,
+                        )
                     yaraResult.success = yaraResult.result is not None
                     yaraResult.finished = True
                 except Exception as e:
@@ -846,7 +759,10 @@ class YaraScan(FileScanProvider):
                     yaraResult.success = False
                     yaraResult.finished = True
                     if self.debug:
-                        eprint(f'{get_ident()} Yara scan error: {yaraResult.result}')
+                        eprint(
+                            f'{get_ident()} Yara scan error: {yaraResult.result}',
+                            timestamp=True,
+                        )
                 finally:
                     self.scanningFilesCount.decrement()
 
@@ -940,6 +856,8 @@ class CapaScan(FileScanProvider):
 
             # while limit only repeats if block=True
             while (not allowed) and (not capaResult.finished):
+                nowTime = int(time.time())
+
                 # first make sure we haven't exceeded rate limits
                 if self.scanningFilesCount.increment() <= self.reqLimit:
                     # we've got fewer than the allowed requests open, so we're good to go!
@@ -950,7 +868,10 @@ class CapaScan(FileScanProvider):
                 if allowed:
                     try:
                         if self.verboseDebug:
-                            eprint(f'{get_ident()} Capa scanning: {fileName}')
+                            eprint(
+                                f'{get_ident()} Capa scanning: {fileName}',
+                                timestamp=True,
+                            )
 
                         if self.rulesDir is not None:
                             cmd = [
@@ -997,7 +918,10 @@ class CapaScan(FileScanProvider):
                             capaResult.result = {"error": str(capaErr)}
 
                         if self.verboseDebug:
-                            eprint(f'{get_ident()} Capa scan result: {capaResult.result}')
+                            eprint(
+                                f'{get_ident()} Capa scan result: {capaResult.result}',
+                                timestamp=True,
+                            )
                         capaResult.success = capaResult.result is not None
                         capaResult.finished = True
 
@@ -1005,14 +929,17 @@ class CapaScan(FileScanProvider):
                         if capaResult.result is None:
                             capaResult.result = str(e)
                         if self.debug:
-                            eprint(f'{get_ident()} Capa scan error: {capaResult.result}')
+                            eprint(
+                                f'{get_ident()} Capa scan error: {capaResult.result}',
+                                timestamp=True,
+                            )
 
                     finally:
                         self.scanningFilesCount.decrement()
                         try:
                             if os.path.isfile(fileName + CAPA_VIV_SUFFIX):
                                 os.remove(fileName + CAPA_VIV_SUFFIX)
-                        except Exception as fe:
+                        except Exception:
                             pass
 
                 elif block and (nowTime < timeoutTime):

@@ -3,33 +3,24 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import argparse
-import contextlib
 import getpass
 import importlib
-import json
 import os
 import platform
 import re
 import string
 import sys
-import time
 
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, run_process, deep_get
+
+from collections import defaultdict, namedtuple
 from enum import IntFlag, auto
 
 try:
     from pwd import getpwuid
 except ImportError:
     getpwuid = None
-from subprocess import PIPE, STDOUT, Popen, CalledProcessError
-
-
-from collections import defaultdict, namedtuple
-
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 
 try:
     from dialog import Dialog
@@ -90,77 +81,6 @@ DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compo
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
 
 
-###################################################################################################
-# chdir to directory as context manager, returning automatically
-@contextlib.contextmanager
-def pushd(directory):
-    prevDir = os.getcwd()
-    os.chdir(directory)
-    try:
-        yield
-    finally:
-        os.chdir(prevDir)
-
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-def EscapeAnsi(line):
-    ansiEscape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
-    return ansiEscape.sub('', line)
-
-
-###################################################################################################
-def EscapeForCurl(s):
-    return s.translate(
-        str.maketrans(
-            {
-                '"': r'\"',
-                "\\": r"\\",
-                "\t": r"\t",
-                "\n": r"\n",
-                "\r": r"\r",
-                "\v": r"\v",
-            }
-        )
-    )
-
-
-###################################################################################################
-def custom_make_translation(text, translation):
-    regex = re.compile('|'.join(map(re.escape, translation)))
-    return regex.sub(lambda match: translation[match.group(0)], text)
-
-
-##################################################################################################
-def UnescapeForCurl(s):
-    return custom_make_translation(
-        s,
-        {
-            r'\"': '"',
-            r"\t": "\t",
-            r"\n": "\n",
-            r"\r": "\r",
-            r"\v": "\v",
-            r"\\": "\\",
-        },
-    )
-
-
-###################################################################################################
-# if the object is an iterable, return it, otherwise return a tuple with it as a single element.
-# useful if you want to user either a scalar or an array in a loop, etc.
-def GetIterable(x):
-    if isinstance(x, Iterable) and not isinstance(x, str):
-        return x
-    else:
-        return (x,)
-
-
 ##################################################################################################
 def ReplaceBindMountLocation(line, location, linePrefix):
     if os.path.isdir(location):
@@ -175,7 +95,7 @@ def ReplaceBindMountLocation(line, location, linePrefix):
 def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
     localPath = None
     if service and dockerComposeContents and containerPath:
-        vols = DeepGet(dockerComposeContents, ['services', service, 'volumes'])
+        vols = deep_get(dockerComposeContents, ['services', service, 'volumes'])
         if (vols is not None) and (len(vols) > 0):
             for vol in vols:
                 volSplit = vol.split(':')
@@ -207,58 +127,6 @@ def GetUidGidFromComposeFile(composeFile):
                 )
             )
     return uidGidDict
-
-
-###################################################################################################
-def same_file_or_dir(path1, path2):
-    try:
-        return os.path.samefile(path1, path2)
-    except Exception:
-        return False
-
-
-###################################################################################################
-# parse a curl-formatted config file, with special handling for user:password and URL
-# see https://everything.curl.dev/cmdline/configfile
-# e.g.:
-#
-# given .opensearch.primary.curlrc containing:
-# -
-# user: "sikari:changethis"
-# insecure
-# -
-#
-# ParseCurlFile('.opensearch.primary.curlrc') returns:
-#   {
-#    'user': 'sikari',
-#    'password': 'changethis',
-#    'insecure': ''
-#   }
-def ParseCurlFile(curlCfgFileName):
-    result = defaultdict(lambda: None)
-    if os.path.isfile(curlCfgFileName):
-        itemRegEx = re.compile(r'^([^\s:=]+)((\s*[:=]?\s*)(.*))?$')
-        with open(curlCfgFileName, 'r') as f:
-            allLines = [x.strip().lstrip('-') for x in f.readlines() if not x.startswith('#')]
-        for line in allLines:
-            found = itemRegEx.match(line)
-            if found is not None:
-                key = found.group(1)
-                value = UnescapeForCurl(found.group(4).lstrip('"').rstrip('"'))
-                if (key == 'user') and (':' in value):
-                    splitVal = value.split(':', 1)
-                    result[key] = splitVal[0]
-                    if len(splitVal) > 1:
-                        result['password'] = splitVal[1]
-                else:
-                    result[key] = value
-
-    return result
-
-
-###################################################################################################
-def contains_whitespace(s):
-    return True in [c in s for c in string.whitespace]
 
 
 ###################################################################################################
@@ -603,22 +471,6 @@ def DisplayProgramBox(
 
 
 ###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    elif isinstance(v, str):
-        if v.lower() in ("yes", "true", "t", "y", "1"):
-            return True
-        elif v.lower() in ("no", "false", "f", "n", "0"):
-            return False
-        else:
-            raise ValueError("Boolean value expected")
-    else:
-        raise ValueError("Boolean value expected")
-
-
-###################################################################################################
 # Dies if $value isn't positive. NoneType is also acceptable
 def posInt(value):
     if value is None:
@@ -626,120 +478,9 @@ def posInt(value):
 
     ivalue = int(value)
     if ivalue <= 0:
-        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
+        raise ValueError("{} is an invalid positive int value".format(value))
 
     return ivalue
-
-
-###################################################################################################
-# determine if a program/script exists and is executable in the system path
-def Which(cmd, debug=False):
-    result = any(os.access(os.path.join(path, cmd), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
-    if debug:
-        eprint(f"Which {cmd} returned {result}")
-    return result
-
-
-###################################################################################################
-# nice human-readable file sizes
-def SizeHumanFormat(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
-        if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
-        num /= 1024.0
-    return f"{num:.1f}{'Yi'}{suffix}"
-
-
-###################################################################################################
-# is this string valid json? if so, load and return it
-def LoadStrIfJson(jsonStr):
-    try:
-        return json.loads(jsonStr)
-    except ValueError:
-        return None
-
-
-###################################################################################################
-# safe deep get for a dictionary
-#
-# Example:
-#   d = {'meta': {'status': 'OK', 'status_code': 200}}
-#   DeepGet(d, ['meta', 'status_code'])          # => 200
-#   DeepGet(d, ['garbage', 'status_code'])       # => None
-#   DeepGet(d, ['meta', 'garbage'], default='-') # => '-'
-def DeepGet(d, keys, default=None):
-    assert type(keys) is list
-    if d is None:
-        return default
-    if not keys:
-        return d
-    return DeepGet(d.get(keys[0]), keys[1:], default)
-
-
-###################################################################################################
-# run command with arguments and return its exit code, stdout, and stderr
-def check_output_input(*popenargs, **kwargs):
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden')
-
-    if 'stderr' in kwargs:
-        raise ValueError('stderr argument not allowed, it will be overridden')
-
-    if 'input' in kwargs and kwargs['input']:
-        if 'stdin' in kwargs:
-            raise ValueError('stdin and input arguments may not both be used')
-        inputdata = kwargs['input']
-        kwargs['stdin'] = PIPE
-    else:
-        inputdata = None
-    kwargs.pop('input', None)
-
-    process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
-    try:
-        output, errput = process.communicate(inputdata)
-    except Exception:
-        process.kill()
-        process.wait()
-        raise
-
-    retcode = process.poll()
-
-    return retcode, output, errput
-
-
-###################################################################################################
-# run command with arguments and return its exit code, stdout, and stderr
-def run_process(
-    command, stdout=True, stderr=True, stdin=None, retry=0, retrySleepSec=5, cwd=None, env=None, debug=False
-):
-    retcode = -1
-    output = []
-
-    try:
-        # run the command
-        retcode, cmdout, cmderr = check_output_input(
-            command, input=stdin.encode() if stdin else stdin, cwd=cwd, env=env
-        )
-
-        # split the output on newlines to return a list
-        if stderr and (len(cmderr) > 0):
-            output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
-        if stdout and (len(cmdout) > 0):
-            output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
-
-    except (FileNotFoundError, OSError, IOError):
-        if stderr:
-            output.append(f"Command {command} not found or unable to execute")
-
-    if debug:
-        eprint(f"{command}({stdin[:80] + bool(stdin[80:]) * '...' if stdin else ''}) returned {retcode}: {output}")
-
-    if (retcode != 0) and retry and (retry > 0):
-        # sleep then retry
-        time.sleep(retrySleepSec)
-        return run_process(command, stdout, stderr, stdin, retry - 1, retrySleepSec, cwd, env, debug)
-    else:
-        return retcode, output
 
 
 ###################################################################################################
@@ -766,12 +507,12 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
         pyPlatform = platform.system()
         pyExec = sys.executable
         pipCmd = "pip3"
-        if not Which(pipCmd, debug=debug):
+        if not malcolm_utils.which(pipCmd, debug=debug):
             pipCmd = "pip"
 
         eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
-        if interactive and Which(pipCmd, debug=debug):
+        if interactive and malcolm_utils.which(pipCmd, debug=debug):
             if YesOrNo(f"Importing the {pipPkgName} module failed. Attempt to install via {pipCmd}?"):
                 installCmd = None
 
@@ -852,34 +593,6 @@ def DownloadToFile(url, local_filename, debug=False):
     fSize = os.path.getsize(local_filename)
     if debug:
         eprint(
-            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({SizeHumanFormat(fSize)})"
+            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({malcolm_utils.sizeof_fmt(fSize)})"
         )
     return fExists and (fSize > 0)
-
-
-###################################################################################################
-# recursively remove empty subfolders
-def RemoveEmptyFolders(path, removeRoot=True):
-    if not os.path.isdir(path):
-        return
-
-    files = os.listdir(path)
-    if len(files):
-        for f in files:
-            fullpath = os.path.join(path, f)
-            if os.path.isdir(fullpath):
-                RemoveEmptyFolders(fullpath)
-
-    files = os.listdir(path)
-    if len(files) == 0 and removeRoot:
-        try:
-            os.rmdir(path)
-        except Exception:
-            pass
-
-
-###################################################################################################
-# open a file and close it, updating its access time
-def Touch(filename):
-    open(filename, 'a').close()
-    os.utime(filename, None)

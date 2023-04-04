@@ -27,6 +27,8 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
+from malcolm_utils import val2bool, deep_set, pushd, run_process
+
 ###################################################################################################
 args = None
 script_return_code = 0
@@ -37,129 +39,6 @@ orig_path = os.getcwd()
 ###################################################################################################
 YAML_VERSION = (1, 1)
 BACKUP_FILES_MAX = 10
-
-###################################################################################################
-def val2bool(v):
-    try:
-        if v is None:
-            return False
-        elif isinstance(v, bool):
-            return v
-        elif isinstance(v, str):
-            if v.lower() in ("yes", "true", "t", "y"):
-                return True
-            elif v.lower() in ("no", "false", "f", "n"):
-                return False
-            else:
-                raise ValueError(f'Boolean value expected (got {v})')
-        else:
-            raise ValueError(f'Boolean value expected (got {v})')
-    except:
-        # just pitch it back and let the caller worry about it
-        return v
-
-
-###################################################################################################
-@contextlib.contextmanager
-def pushd(directory):
-    prevDir = os.getcwd()
-    os.chdir(directory)
-    try:
-        yield
-    finally:
-        os.chdir(prevDir)
-
-
-###################################################################################################
-def get_iterable(x):
-    if isinstance(x, Iterable) and not isinstance(x, str):
-        return x
-    else:
-        return (x,)
-
-
-###################################################################################################
-def deep_get(d, keys, default=None):
-    k = get_iterable(keys)
-    if d is None:
-        return default
-    if not keys:
-        return d
-    return deep_get(d.get(k[0]), k[1:], default)
-
-
-###################################################################################################
-def deep_set(d, keys, value, deleteIfNone=False):
-    k = get_iterable(keys)
-    for key in k[:-1]:
-        if (key not in d) or (not isinstance(d[key], dict)):
-            d[key] = dict()
-        d = d[key]
-    d[k[-1]] = value
-    if (deleteIfNone == True) and (value is None):
-        d.pop(k[-1], None)
-
-
-###################################################################################################
-# run command with arguments and return its exit code, stdout, and stderr
-def check_output_input(*popenargs, **kwargs):
-
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden')
-
-    if 'stderr' in kwargs:
-        raise ValueError('stderr argument not allowed, it will be overridden')
-
-    if 'input' in kwargs and kwargs['input']:
-        if 'stdin' in kwargs:
-            raise ValueError('stdin and input arguments may not both be used')
-        inputdata = kwargs['input']
-        kwargs['stdin'] = PIPE
-    else:
-        inputdata = None
-    kwargs.pop('input', None)
-
-    process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
-    try:
-        output, errput = process.communicate(input=inputdata)
-    except:
-        process.kill()
-        process.wait()
-        raise
-
-    retcode = process.poll()
-
-    return retcode, output, errput
-
-
-###################################################################################################
-# run command with arguments and return its exit code and output
-def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None):
-
-    retcode = -1
-    output = []
-
-    try:
-        # run the command
-        retcode, cmdout, cmderr = check_output_input(command, input=stdin.encode() if stdin else None, cwd=cwd, env=env)
-
-        # split the output on newlines to return a list
-        if stderr and (len(cmderr) > 0):
-            output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
-        if stdout and (len(cmdout) > 0):
-            output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
-
-    except (FileNotFoundError, OSError, IOError) as e:
-        if stderr:
-            output.append("Command {} not found or unable to execute".format(command))
-
-    logging.debug(
-        "{}{} returned {}: {}".format(
-            command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output
-        )
-    )
-
-    return retcode, output
 
 
 ###################################################################################################
@@ -173,7 +52,7 @@ class NullRepresenter:
 ###################################################################################################
 def ObjToYamlStrLines(obj, options=None):
     outputStr = None
-    if options == None:
+    if options is None:
         options = {}
 
     yaml = YAML()
@@ -641,13 +520,14 @@ DECODER_CONFIGS.update(
     }
 )
 
+
 ###################################################################################################
 def GetRuleSources(requireRulesExist=False):
     global DEFAULT_VARS
 
     ruleSources = []
 
-    if val2bool(DEFAULT_VARS['CUSTOM_RULES_ONLY']) == False:
+    if not val2bool(DEFAULT_VARS['CUSTOM_RULES_ONLY']):
         ruleSources.append('suricata.rules')
 
     customRuleFiles = (
@@ -656,7 +536,7 @@ def GetRuleSources(requireRulesExist=False):
         else []
     )
 
-    if (DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None) and ((requireRulesExist == False) or (len(customRuleFiles) > 0)):
+    if (DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None) and ((not requireRulesExist) or (len(customRuleFiles) > 0)):
         ruleSources.append(os.path.join(DEFAULT_VARS['CUSTOM_RULES_DIR'], '*.rules'))
 
     return ruleSources
@@ -844,7 +724,6 @@ def main():
 
             # while we're here, configure the eve-log section of outputs
             if name == 'eve-log':
-
                 # enable community-id for easier cross-referencing and pcap-file for
                 # tying back to the original PCAP filename
                 cfg['outputs'][outputIdx][name]['community-id'] = True
@@ -852,7 +731,6 @@ def main():
 
                 # configure the various different output types belonging to eve-log
                 if 'types' in cfg['outputs'][outputIdx][name]:
-
                     remainingTypes = set(list(PROTOCOL_CONFIGS.keys()))
 
                     for dumperIdx in reversed(range(len(cfg['outputs'][outputIdx][name]['types']))):
@@ -1218,7 +1096,9 @@ def main():
                     '-l',
                     tmpLogDir,
                     '-T',
-                ]
+                ],
+                debug=args.verbose > logging.DEBUG,
+                logger=logging,
             )
             logging.info(f'suricata configuration test returned {script_return_code}')
             if script_return_code != 0:
@@ -1247,11 +1127,11 @@ def main():
     if DEFAULT_VARS['RUN_DIR'] is not None and os.path.isdir(os.path.join(DEFAULT_VARS['RUN_DIR'])):
         try:
             os.remove(os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata.pid'))
-        except:
+        except Exception:
             pass
         try:
             os.remove(os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata-command.socket'))
-        except:
+        except Exception:
             pass
 
 

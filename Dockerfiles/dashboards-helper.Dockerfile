@@ -69,7 +69,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/opensearch_status.sh /data/
 COPY --chmod=755 shared/bin/opensearch_index_size_prune.py /data/
 COPY --chmod=755 shared/bin/opensearch_read_only.py /data/
-ADD scripts/malcolm_common.py /data/
+ADD scripts/malcolm_utils.py /data/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
