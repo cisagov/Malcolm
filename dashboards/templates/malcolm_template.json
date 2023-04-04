@@ -36,7 +36,6 @@
     },
     "mappings": {
       "properties": {
-        "timestamp": { "type": "date" },
         "destination.ip_reverse_dns": { "type": "keyword" },
         "destination.oui": { "type": "keyword" },
         "destination.device": {
