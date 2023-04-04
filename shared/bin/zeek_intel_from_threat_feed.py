@@ -34,7 +34,7 @@ def main():
                 ' - MISP core format JSON files',
                 '',
                 'See:',
-                ' - Malcolm documentation: https://github.com/idaholab/Malcolm#zeek-intelligence-framework',
+                ' - Malcolm documentation: https://idaholab.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel',
                 ' - Zeek intelligence framework: https://docs.zeek.org/en/master/frameworks/intel.html',
                 ' - Zeek intel types: https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type',
                 ' - Introduction to STIX: https://oasis-open.github.io/cti-documentation/stix/intro.html',

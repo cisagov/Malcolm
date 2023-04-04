@@ -1226,8 +1226,22 @@ def main():
                             rx_token = values[1]
                             break
 
+                    for oldFile in ('ca.crt', 'client.crt', 'client.key'):
+                        try:
+                            os.unlink(os.path.join(Constants.BEAT_LS_CERT_DIR_DEFAULT, oldFile))
+                        except Exception:
+                            pass
+
                     with Popen(
-                        [txRxScript, '-s', tx_ip, '-r', rx_token, '-o', Constants.BEAT_LS_CERT_DIR_DEFAULT],
+                        [
+                            txRxScript,
+                            '-s',
+                            tx_ip,
+                            '-r',
+                            rx_token,
+                            '-o',
+                            Constants.BEAT_LS_CERT_DIR_DEFAULT,
+                        ],
                         stdout=PIPE,
                         stderr=STDOUT,
                         bufsize=0,
