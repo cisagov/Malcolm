@@ -16,7 +16,7 @@ import sys
 import zeek_threat_feed_utils
 
 import malcolm_utils
-from malcolm_utils import nullcontext
+from contextlib import nullcontext
 
 ###################################################################################################
 script_name = os.path.basename(__file__)

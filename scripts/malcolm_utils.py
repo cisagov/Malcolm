@@ -4,7 +4,6 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import contextlib
-import datetime
 import hashlib
 import ipaddress
 import json
@@ -19,6 +18,7 @@ import time
 
 
 from base64 import b64decode
+from datetime import datetime
 from multiprocessing import RawValue
 from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 from tempfile import NamedTemporaryFile
@@ -154,10 +154,18 @@ def dictsearch(d, target):
 ###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
+    filteredArgs = (
+        {k: v for (k, v) in kwargs.items() if k not in ('timestamp', 'flush')} if isinstance(kwargs, dict) else {}
+    )
     if "timestamp" in kwargs and kwargs["timestamp"]:
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), *args, file=sys.stderr, **kwargs)
+        print(
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            *args,
+            file=sys.stderr,
+            **filteredArgs,
+        )
     else:
-        print(*args, file=sys.stderr, **kwargs)
+        print(*args, file=sys.stderr, **filteredArgs)
     if "flush" in kwargs and kwargs["flush"]:
         sys.stderr.flush()
 
