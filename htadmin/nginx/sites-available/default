@@ -3,13 +3,13 @@ server {
 
     sendfile on;
 
-    root /var/www/htadmin;
+    root /var/www/;
     index index.php index.html index.htm;
 
     server_name htaccess.malcolm.local;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/htadmin htadmin/$uri/n =404;
     }
 
     location ~ \.php$ {
@@ -18,7 +18,7 @@ server {
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
 
-    location /config {
+    location /htadmin/config {
         deny all;
         return 404;
     }
