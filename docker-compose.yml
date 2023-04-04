@@ -370,9 +370,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
+      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
@@ -414,10 +412,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *dashboards-helper-variables
+      <<: [*dashboards-helper-variables, *opensearch-variables, *ssl-variables, *process-variables]
       DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
@@ -448,9 +443,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
+      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
       - opensearch
@@ -483,13 +476,7 @@ services:
       - IPC_LOCK
     env_file: ./netbox/env/netbox.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *netbox-variables
-      << : *logstash-variables
-      << : *common-beats-variables
-      << : *common-lookup-variables
+      <<: [*common-lookup-variables, *common-beats-variables, *logstash-variables, *netbox-variables, *opensearch-variables, *ssl-variables, *process-variables]
       LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
@@ -526,13 +513,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *nginx-variables
-      << : *opensearch-variables
-      << : *filebeat-variables
-      << : *common-upload-variables
-      << : *common-beats-variables
+      <<: [*common-beats-variables, *common-upload-variables, *filebeat-variables, *opensearch-variables, *nginx-variables, *ssl-variables, *process-variables]
       FILEBEAT_ZEEK_LOG_PATH : '/zeek/current'
       FILEBEAT_ZEEK_LOG_LIVE_PATH : '/zeek/live'
       FILEBEAT_SURICATA_LOG_PATH : '/suricata'
@@ -570,11 +551,7 @@ services:
     env_file:
       - ./auth.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *common-upload-variables
-      << : *arkime-variables
+      <<: [*arkime-variables, *common-upload-variables, *opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'arkime.malcolm.local'
       OPENSEARCH_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
@@ -621,11 +598,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *zeek-variables
-      << : *zeek-offline-variables
+      <<: [*zeek-offline-variables, *zeek-variables, *common-upload-variables, *ssl-variables, *process-variables]
       ZEEK_PCAP_PROCESSOR : 'true'
       ZEEK_CRON : 'false'
     depends_on:
@@ -662,12 +635,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *zeek-variables
-      << : *zeek-live-variables
-      << : *pcap-capture-variables
+      <<: [*pcap-capture-variables, *zeek-live-variables, *zeek-variables, *common-upload-variables, *ssl-variables, *process-variables]
       ZEEK_PCAP_PROCESSOR : 'false'
       ZEEK_CRON : 'true'
       ZEEK_LOG_PATH : '/zeek/live'
@@ -700,11 +668,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *suricata-variables
-      << : *suricata-offline-variables
+      <<: [*suricata-offline-variables, *suricata-variables, *common-upload-variables, *ssl-variables, *process-variables]
       SURICATA_PCAP_PROCESSOR : 'true'
     depends_on:
       - logstash
@@ -738,12 +702,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *suricata-variables
-      << : *suricata-live-variables
-      << : *pcap-capture-variables
+      <<: [*pcap-capture-variables, *suricata-live-variables, *suricata-variables, *common-upload-variables, *ssl-variables, *process-variables]
       SURICATA_PCAP_PROCESSOR : 'false'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -761,9 +720,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *zeek-variables
+      <<: [*zeek-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'file-monitor.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -795,9 +752,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *pcap-capture-variables
+      <<: [*pcap-capture-variables, *ssl-variables, *process-variables]
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
@@ -813,10 +768,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *common-upload-variables
+      <<: [*common-upload-variables, *opensearch-variables, *ssl-variables, *process-variables]
     depends_on:
       - opensearch
     volumes:
@@ -844,8 +796,7 @@ services:
     env_file:
       - ./auth.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
+      <<: [*ssl-variables, *process-variables]
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
@@ -873,9 +824,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *auth-variables
+      <<: [*auth-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -900,9 +849,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-lookup-variables
+      <<: [*common-lookup-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'freq.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -924,8 +871,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
+      <<: [*ssl-variables, *process-variables]
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -949,9 +895,7 @@ services:
       - default
     env_file: ./netbox/env/netbox.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox.malcolm.local'
     depends_on:
       - netbox-postgres
@@ -984,9 +928,7 @@ services:
       - default
     env_file: ./netbox/env/postgres.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -1010,9 +952,7 @@ services:
       - default
     env_file: ./netbox/env/redis.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-redis.malcolm.local'
     command:
       - sh
@@ -1040,9 +980,7 @@ services:
       - default
     env_file: ./netbox/env/redis-cache.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
     command:
       - sh
@@ -1069,9 +1007,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
+      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'api.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -1094,10 +1030,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *auth-variables
-      << : *nginx-variables
+      <<: [*nginx-variables, *auth-variables, *ssl-variables, *process-variables]
     depends_on:
       - api
       - arkime
