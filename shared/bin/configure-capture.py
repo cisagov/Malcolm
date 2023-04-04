@@ -1218,7 +1218,7 @@ def main():
                             break
 
                     with Popen(
-                        [txRxScript, '-s', tx_ip, '-r', rx_token, '-o', BEAT_LS_CERT_DIR_DEFAULT],
+                        [txRxScript, '-s', tx_ip, '-r', rx_token, '-o', Constants.BEAT_LS_CERT_DIR_DEFAULT],
                         stdout=PIPE,
                         stderr=STDOUT,
                         bufsize=0,

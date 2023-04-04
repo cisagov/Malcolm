@@ -885,51 +885,59 @@ def authSetup(wipe=False):
             'all',
             "Configure all authentication-related settings",
             True,
+            True,
         ),
         (
             'admin',
             "Store administrator username/password for local Malcolm access",
             False,
+            True,
         ),
         (
             'webcerts',
             "(Re)generate self-signed certificates for HTTPS access",
             False,
+            True,
         ),
         (
             'fwcerts',
             "(Re)generate self-signed certificates for a remote log forwarder",
             False,
+            True,
         ),
         (
             'remoteos',
             "Configure remote primary or secondary OpenSearch instance",
+            False,
             False,
         ),
         (
             'email',
             "Store username/password for email alert sender account",
             False,
+            False,
         ),
         (
             'netbox',
             "(Re)generate internal passwords for NetBox",
             False,
+            True,
         ),
         (
             'txfwcerts',
             "Transfer self-signed client certificates to a remote log forwarder",
+            False,
             False,
         ),
     )[: 8 if txRxScript else -1]
 
     authMode = ChooseOne(
         'Configure Authentication',
-        choices=authModeChoices,
+        choices=[x[:-1] for x in authModeChoices],
     )
 
     for authItem in authModeChoices[1:]:
-        if ((authMode == 'all') and YesOrNo(f'{authItem[1]}?', default=True)) or (
+        if ((authMode == 'all') and YesOrNo(f'{authItem[1]}?', default=authItem[3])) or (
             (authMode != 'all') and (authMode == authItem[0])
         ):
             if authItem[0] == 'admin':
