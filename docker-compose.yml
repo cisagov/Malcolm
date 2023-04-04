@@ -362,7 +362,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:23.03.1
+    image: ghcr.io/idaholab/malcolm/opensearch:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -406,7 +406,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.03.1
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -440,7 +440,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:23.03.1
+    image: ghcr.io/idaholab/malcolm/dashboards:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -468,7 +468,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:23.03.1
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -518,7 +518,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.03.1
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -560,7 +560,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:23.03.1
+    image: ghcr.io/idaholab/malcolm/arkime:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -604,7 +604,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:23.03.1
+    image: ghcr.io/idaholab/malcolm/zeek:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -647,7 +647,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:23.03.1
+    image: ghcr.io/idaholab/malcolm/zeek:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -683,7 +683,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:23.03.1
+    image: ghcr.io/idaholab/malcolm/suricata:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -723,7 +723,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:23.03.1
+    image: ghcr.io/idaholab/malcolm/suricata:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -753,7 +753,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:23.03.1
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -780,7 +780,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:23.03.1
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -805,7 +805,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.03.1
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -834,7 +834,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:23.03.1
+    image: ghcr.io/idaholab/malcolm/file-upload:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -862,7 +862,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:23.03.1
+    image: ghcr.io/idaholab/malcolm/htadmin:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -889,7 +889,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:23.03.1
+    image: ghcr.io/idaholab/malcolm/freq:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -913,7 +913,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: ghcr.io/idaholab/malcolm/name-map-ui:23.03.1
+    image: ghcr.io/idaholab/malcolm/name-map-ui:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -937,7 +937,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:23.03.1
+    image: ghcr.io/idaholab/malcolm/netbox:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -972,7 +972,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:23.03.1
+    image: ghcr.io/idaholab/malcolm/postgresql:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -998,7 +998,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:23.03.1
+    image: ghcr.io/idaholab/malcolm/redis:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1028,7 +1028,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:23.03.1
+    image: ghcr.io/idaholab/malcolm/redis:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1057,7 +1057,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:23.03.1
+    image: ghcr.io/idaholab/malcolm/api:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -1086,7 +1086,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.03.1
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
