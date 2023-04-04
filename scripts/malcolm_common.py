@@ -43,6 +43,7 @@ except ImportError:
 ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
+MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"
@@ -278,7 +279,6 @@ def YesOrNo(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
-
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
         and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
@@ -296,7 +296,6 @@ def YesOrNo(
             reply = 'n' if (reply == Dialog.OK) else 'y'
 
     elif uiMode & UserInterfaceMode.InteractionInput:
-
         if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
             if str2bool(default):
                 questionStr = f"\n{question} (Y/n): "
@@ -346,7 +345,6 @@ def AskForString(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
-
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
         and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
@@ -390,7 +388,6 @@ def AskForPassword(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
-
     if (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.passwordbox(prompt, insecure=True)
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
@@ -421,7 +418,6 @@ def ChooseOne(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
-
     validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
     defaulted = next(iter([x for x in validChoices if x[2] is True]), None)
 
@@ -483,7 +479,6 @@ def ChooseMultiple(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
-
     validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
     defaulted = [x[0] for x in validChoices if x[2] is True]
 
@@ -577,6 +572,37 @@ def DisplayMessage(
 
 
 ###################################################################################################
+# display streaming content via Dialog.programbox
+def DisplayProgramBox(
+    filePath=None,
+    fileFlags=0,
+    fileDescriptor=None,
+    text=None,
+    clearScreen=False,
+):
+    reply = False
+
+    if MainDialog is not None:
+        code = MainDialog.programbox(
+            file_path=filePath,
+            file_flags=fileFlags,
+            fd=fileDescriptor,
+            text=text,
+            width=78,
+            height=20,
+        )
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise RuntimeError("Operation cancelled")
+        else:
+            reply = True
+
+            if clearScreen is True:
+                ClearScreen()
+
+    return reply
+
+
+###################################################################################################
 # convenient boolean argument parsing
 def str2bool(v):
     if isinstance(v, bool):
@@ -653,7 +679,6 @@ def DeepGet(d, keys, default=None):
 ###################################################################################################
 # run command with arguments and return its exit code, stdout, and stderr
 def check_output_input(*popenargs, **kwargs):
-
     if 'stdout' in kwargs:
         raise ValueError('stdout argument not allowed, it will be overridden')
 
@@ -687,7 +712,6 @@ def check_output_input(*popenargs, **kwargs):
 def run_process(
     command, stdout=True, stderr=True, stdin=None, retry=0, retrySleepSec=5, cwd=None, env=None, debug=False
 ):
-
     retcode = -1
     output = []
 
@@ -728,7 +752,6 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
 
     # see if we've already imported it
     if not DynImports[importName]:
-
         # if not, attempt the import
         try:
             tmpImport = importlib.import_module(importName)
@@ -846,3 +869,10 @@ def RemoveEmptyFolders(path, removeRoot=True):
             os.rmdir(path)
         except Exception:
             pass
+
+
+###################################################################################################
+# open a file and close it, updating its access time
+def Touch(filename):
+    open(filename, 'a').close()
+    os.utime(filename, None)

@@ -320,7 +320,6 @@ def touch(filename):
 ###################################################################################################
 # run command with arguments and return its exit code, stdout, and stderr
 def check_output_input(*popenargs, **kwargs):
-
     if 'stdout' in kwargs:
         raise ValueError('stdout argument not allowed, it will be overridden')
 
@@ -352,7 +351,6 @@ def check_output_input(*popenargs, **kwargs):
 ###################################################################################################
 # run command with arguments and return its exit code and output
 def run_process(command, stdout=True, stderr=True, stdin=None, cwd=None, env=None, debug=False):
-
     retcode = -1
     output = []
 
@@ -403,7 +401,6 @@ class AtomicInt:
 
 ###################################################################################################
 class CarvedFileSubscriberThreaded:
-
     # ---------------------------------------------------------------------------------
     # constructor
     def __init__(
@@ -436,7 +433,6 @@ class CarvedFileSubscriberThreaded:
 
     # ---------------------------------------------------------------------------------
     def Pull(self, scanWorkerId=0):
-
         fileinfo = defaultdict(str)
 
         with self.lock:
@@ -494,7 +490,6 @@ class FileScanProvider(ABC):
 ###################################################################################################
 # class for searching for a hash with a VirusTotal public API, handling rate limiting
 class VirusTotalSearch(FileScanProvider):
-
     # ---------------------------------------------------------------------------------
     # constructor
     def __init__(self, apiKey, reqLimit=None, reqLimitSec=None):
@@ -532,7 +527,6 @@ class VirusTotalSearch(FileScanProvider):
 
         # while limit only repeats if block=True
         while (not allowed) and (response is None):
-
             with self.lock:
                 # first make sure we haven't exceeded rate limits
                 nowTime = int(time.time())
@@ -645,7 +639,6 @@ class VirusTotalSearch(FileScanProvider):
 ###################################################################################################
 # class for scanning a file with ClamAV
 class ClamAVScan(FileScanProvider):
-
     # ---------------------------------------------------------------------------------
     # constructor
     def __init__(self, debug=False, verboseDebug=False, socketFileName=None, reqLimit=None):
@@ -678,7 +671,6 @@ class ClamAVScan(FileScanProvider):
 
         # while limit only repeats if block=True
         while (not allowed) and (not clamavResult.finished):
-
             if not connected:
                 if self.verboseDebug:
                     eprint(f"{get_ident()}: ClamAV attempting connection")
@@ -781,7 +773,6 @@ class ClamAVScan(FileScanProvider):
 ###################################################################################################
 # class for scanning a file with Yara
 class YaraScan(FileScanProvider):
-
     # ---------------------------------------------------------------------------------
     # constructor
     def __init__(self, debug=False, verboseDebug=False, rulesDirs=[], reqLimit=None):
@@ -833,7 +824,6 @@ class YaraScan(FileScanProvider):
 
         # while limit only repeats if block=True
         while (not allowed) and (not yaraResult.finished):
-
             # first make sure we haven't exceeded rate limits
             if self.scanningFilesCount.increment() <= self.reqLimit:
                 # we've got fewer than the allowed requests open, so we're good to go!
@@ -916,7 +906,6 @@ class YaraScan(FileScanProvider):
 ###################################################################################################
 # class for scanning a file with Capa
 class CapaScan(FileScanProvider):
-
     # ---------------------------------------------------------------------------------
     # constructor
     def __init__(self, debug=False, verboseDebug=False, rulesDir=None, verboseHits=False, reqLimit=None):
@@ -951,7 +940,6 @@ class CapaScan(FileScanProvider):
 
             # while limit only repeats if block=True
             while (not allowed) and (not capaResult.finished):
-
                 # first make sure we haven't exceeded rate limits
                 if self.scanningFilesCount.increment() <= self.reqLimit:
                     # we've got fewer than the allowed requests open, so we're good to go!

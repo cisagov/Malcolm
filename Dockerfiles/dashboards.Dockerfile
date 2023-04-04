@@ -76,7 +76,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/master/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/opensearch-dashboards'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/opensearch-dashboards'
 LABEL org.opencontainers.image.description='Malcolm container providing OpenSearch Dashboards'
 
 ARG DEFAULT_UID=1000
@@ -116,7 +116,7 @@ COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnS
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl python3 zip unzip && \
+    yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \

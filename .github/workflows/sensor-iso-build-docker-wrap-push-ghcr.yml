@@ -117,4 +117,4 @@ jobs:
         with:
           context: ./sensor-iso
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/hedgehog:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog:${{ steps.extract_branch.outputs.branch }}

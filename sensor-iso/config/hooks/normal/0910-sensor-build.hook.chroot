@@ -13,8 +13,8 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-ZEEK_VER=5.0.7-0
-ZEEK_LTS=true
+ZEEK_VER=5.2.0-0
+ZEEK_LTS=
 ZEEK_DIR="/opt/zeek"
 export PATH="${ZEEK_DIR}"/bin:$PATH
 

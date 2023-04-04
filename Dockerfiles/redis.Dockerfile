@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/redis'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/redis'
 LABEL org.opencontainers.image.description='Malcolm container providing Redis, an in-memory data structure store'
 
 ARG DEFAULT_UID=999
@@ -26,7 +26,7 @@ COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash psmisc shadow tini && \
+    apk --no-cache add bash psmisc rsync shadow tini && \
     addgroup ${PUSER} tty
 
 WORKDIR /home/${PUSER}

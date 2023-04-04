@@ -20,9 +20,7 @@ Store administrator username/password for local Malcolm access? (Y/n): n
 
 (Re)generate self-signed certificates for a remote log forwarder (Y/n): n
 
-Store username/password for primary remote OpenSearch instance? (y/N): n
-
-Store username/password for secondary remote OpenSearch instance? (y/N): n
+Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): n
 
 Store username/password for email alert sender account? (y/N): y
 
