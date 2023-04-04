@@ -541,7 +541,7 @@ function InstallMalcolm {
 
   CONFIRMATION=$(_GetConfirmation "Clone and setup Malcolm [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-    if _GitClone https://github.com/cisagov/Malcolm "$MALCOLM_PATH"; then
+    if _GitClone https://github.com/idaholab/Malcolm "$MALCOLM_PATH"; then
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
       python3 ./scripts/install.py -c -d
       CONFIG_PAIRS=(

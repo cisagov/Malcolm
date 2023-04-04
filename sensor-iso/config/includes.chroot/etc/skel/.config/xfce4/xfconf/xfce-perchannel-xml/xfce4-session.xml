@@ -15,6 +15,7 @@
   <property name="general" type="empty">
     <property name="FailsafeSessionName" type="empty"/>
     <property name="LockCommand" type="string" value="light-locker-command -l"/>
+    <property name="SaveOnExit" type="bool" value="false"/>
   </property>
   <property name="sessions" type="empty">
     <property name="Failsafe" type="empty">

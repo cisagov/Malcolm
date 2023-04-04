@@ -13,8 +13,10 @@ import sys
 import fileinput
 from collections import defaultdict
 from dialog import Dialog
+
 from zeek_carve_utils import *
 from sensorcommon import *
+from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 
 
 class Constants:
@@ -56,6 +58,7 @@ class Constants:
     FILEBEAT = 'filebeat'
     MISCBEAT = 'miscbeat'
     ARKIMECAP = 'arkime-capture'
+    TX_RX_SECURE = 'ssl-client-receive'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -121,6 +124,7 @@ class Constants:
     MSG_CONFIG_ARKIME_COMPRESSION_LEVEL = 'Specify Arkime PCAP {} compression level'
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
+    MSG_CONFIG_TXRX = (f'{TX_RX_SECURE}', f'Receive client SSL files for {FILEBEAT} from Malcolm')
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
@@ -170,6 +174,7 @@ class Constants:
 d = Dialog(dialog='dialog', autowidgetsize=True)
 d.set_background_title(Constants.MSG_BACKGROUND_TITLE)
 
+
 ###################################################################################################
 def mime_to_extension_mappings(mapfile):
     # get all mime-to-extension mappings from our mapping zeek file into a dictionary
@@ -201,7 +206,6 @@ def input_opensearch_connection_info(
     default_username=None,
     default_password=None,
 ):
-
     return_dict = defaultdict(str)
 
     # OpenSearch configuration
@@ -413,7 +417,6 @@ def main():
                     no_label="Cancel",
                 )
                 if code == Dialog.OK:
-
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
                     autostart_re = re.compile(r"(\bAUTOSTART_\w+)\s*=\s*.+?$")
                     with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
@@ -602,7 +605,6 @@ def main():
                 if zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM) or zeek_carve_mode.startswith(
                     Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT
                 ):
-
                     # get all known mime-to-extension mappings into a dictionary
                     all_mime_maps = mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_DEFAULTS)
 
@@ -660,7 +662,6 @@ def main():
 
                 # what to do with carved files
                 if zeek_carve_mode != Constants.ZEEK_FILE_CARVING_NONE:
-
                     # select engines for file scanning
                     scanner_choices = []
                     for k, v in sorted(capture_config_dict.items()):
@@ -735,7 +736,6 @@ def main():
                     no_label="Cancel",
                 )
                 if code == Dialog.OK:
-
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
                     with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
                         for line in file:
@@ -794,13 +794,22 @@ def main():
             elif mode == Constants.MSG_CONFIG_MODE_FORWARD:
                 ##### sensor forwarding (beats) configuration #########################################################################
 
+                # only display MSG_CONFIG_TXRX if we have appropriate executable and script
+                txRxScript = '/opt/sensor/sensor_ctl/tx-rx-secure.sh'
+                txRxScript = (
+                    txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/local/bin/tx-rx-secure.sh'
+                )
+                txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
+                txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else None
+
                 code, fwd_mode = d.menu(
                     Constants.MSG_CONFIG_MODE,
                     choices=[
                         Constants.MSG_CONFIG_ARKIME,
                         Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
-                    ],
+                        Constants.MSG_CONFIG_TXRX,
+                    ][: 4 if txRxScript else -1],
                 )
                 if code != Dialog.OK:
                     raise CancelledError
@@ -1182,6 +1191,62 @@ def main():
                     else:
                         # keystore list failed
                         raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
+
+                elif (fwd_mode == Constants.TX_RX_SECURE) and txRxScript:
+                    # use tx-rx-secure.sh (via croc) to get certs from Malcolm
+                    code = d.msgbox(text='Run auth_setup on Malcolm "Transfer self-signed client certificates..."')
+
+                    tx_ip = None
+                    rx_token = None
+
+                    while True:
+                        code, values = d.form(
+                            Constants.MSG_CONFIG_TXRX[1],
+                            [
+                                ('Malcolm Server IP', 1, 1, "", 1, 25, 40, 255),
+                                ('Single-use Code Phrase', 2, 1, "", 2, 25, 40, 255),
+                            ],
+                        )
+                        values = [x.strip() for x in values]
+
+                        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+                            raise CancelledError
+
+                        elif (len(values[0]) >= 3) and (len(values[1]) >= 16):
+                            tx_ip = values[0]
+                            rx_token = values[1]
+                            break
+
+                    for oldFile in ('ca.crt', 'client.crt', 'client.key'):
+                        try:
+                            os.unlink(os.path.join(Constants.BEAT_LS_CERT_DIR_DEFAULT, oldFile))
+                        except Exception:
+                            pass
+
+                    with Popen(
+                        [
+                            txRxScript,
+                            '-s',
+                            tx_ip,
+                            '-r',
+                            rx_token,
+                            '-o',
+                            Constants.BEAT_LS_CERT_DIR_DEFAULT,
+                        ],
+                        stdout=PIPE,
+                        stderr=STDOUT,
+                        bufsize=0,
+                    ) as p:
+                        d.programbox(
+                            fd=p.stdout.fileno(),
+                            text=os.path.basename(txRxScript),
+                            width=78,
+                            height=20,
+                        )
+                        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+                            raise RuntimeError("Operation cancelled")
+
+                        p.poll()
 
                 else:
                     # we're here without a valid forwarding type selection?!?

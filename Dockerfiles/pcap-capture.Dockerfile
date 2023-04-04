@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
-LABEL org.opencontainers.image.title='malcolmnetsec/pcap-capture'
+LABEL org.opencontainers.image.title='ghcr.io/cisagov/malcolm/pcap-capture'
 LABEL org.opencontainers.image.description='Malcolm container providing network traffic capture capabilities via netsniff-ng and tcpdump'
 
 ARG DEFAULT_UID=1000
@@ -68,6 +68,7 @@ RUN apt-get -q update && \
       openssl \
       procps \
       psmisc \
+      rsync \
       supervisor \
       tcpdump \
       tini && \

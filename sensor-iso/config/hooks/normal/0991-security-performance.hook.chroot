@@ -10,6 +10,7 @@ sed -i "s/LOGLEVEL=.*/LOGLEVEL=off/" /etc/ufw/ufw.conf
 UFW_ALLOW_RULES=(
   ntp
   ssh
+  9009:9013/tcp
 )
 for i in ${UFW_ALLOW_RULES[@]}; do
   ufw allow "$i"

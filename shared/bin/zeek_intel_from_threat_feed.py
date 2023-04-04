@@ -19,6 +19,7 @@ import zeek_threat_feed_utils
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 
+
 ###################################################################################################
 # main
 def main():
