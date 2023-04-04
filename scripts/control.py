@@ -921,7 +921,7 @@ def authSetup(wipe=False):
             'netbox',
             "(Re)generate internal passwords for NetBox",
             False,
-            True,
+            not os.path.isfile(os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env')))),
         ),
         (
             'txfwcerts',
