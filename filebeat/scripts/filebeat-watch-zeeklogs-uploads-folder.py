@@ -15,12 +15,13 @@ import logging
 import magic
 import os
 import pathlib
+import shutil
 import signal
 import sys
 import time
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, touch
+from malcolm_utils import eprint, str2bool, remove_suffix
 import watch_common
 
 ###################################################################################################
@@ -71,12 +72,12 @@ def file_processor(pathname, **kwargs):
 
             if fileMime in mime_types:
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
-                logger.debug(f"{scriptName}:\t📩\t{pathname} ({fileMime})")
+                logger.debug(f"{scriptName}:\t🖅\t{pathname} ({fileMime}) to {destination}")
                 shutil.move(pathname, destination)
 
             else:
                 # unhandled file type uploaded, delete it
-                logger.info(f"{scriptName}:\t✋\t{pathname} ({fileMime})")
+                logger.info(f"{scriptName}:\t🗑\t{pathname} ({fileMime})")
                 os.unlink(pathname)
 
         except Exception as genericError:
@@ -93,6 +94,7 @@ def main():
         add_help=False,
         usage='{} <arguments>'.format(scriptName),
     )
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '-r',
         '--recursive-directory',
@@ -126,27 +128,27 @@ def main():
         ),
         required=False,
     )
-    requiredNamed.add_argument(
+    parser.add_argument(
         '-i',
         '--in',
         dest='srcDir',
         help='Source directory to monitor',
         metavar='<directory>',
         type=str,
-        default=os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', '/zeek'), 'upload'),
+        default=os.path.join(remove_suffix(os.getenv('FILEBEAT_ZEEK_DIR', '/zeek'), '/'), 'upload'),
         required=False,
     )
-    requiredNamed.add_argument(
+    parser.add_argument(
         '-o',
         '--out',
         dest='dstDir',
         help='Destination directory',
         metavar='<directory>',
         type=str,
-        default=os.getenv('FILEBEAT_ZEEK_DIR', '/zeek'),
+        default=remove_suffix(os.getenv('FILEBEAT_ZEEK_DIR', '/zeek'), '/'),
         required=False,
     )
-    requiredNamed.add_argument(
+    parser.add_argument(
         '-u',
         '--uid',
         dest='chownUid',
@@ -156,7 +158,7 @@ def main():
         default=int(os.getenv('PUID', os.getenv('DEFAULT_UID', '1000'))),
         required=False,
     )
-    requiredNamed.add_argument(
+    parser.add_argument(
         '-g',
         '--gid',
         dest='chownGid',
@@ -196,14 +198,15 @@ def main():
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
-    signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
     while (not shuttingDown[0]) and (sleepCount < args.startSleepSec):
         time.sleep(1)
         sleepCount += 1
+
+    args.dstDir = remove_suffix(args.dstDir, '/')
+    args.srcDir = remove_suffix(args.srcDir, '/')
 
     # if directory to monitor doesn't exist, create it now
     if not os.path.isdir(args.srcDir):

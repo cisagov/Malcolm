@@ -383,6 +383,15 @@ def remove_prefix(text, prefix):
 
 
 ###################################################################################################
+# strip a suffix from the end of a string if needed
+def remove_suffix(text, suffix):
+    if (len(suffix) > 0) and text.endswith(suffix):
+        return text[: len(text) - len(suffix)]
+    else:
+        return text
+
+
+###################################################################################################
 # return true if os.path.samefile, also False on exception
 def same_file_or_dir(path1, path2):
     try:
