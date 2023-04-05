@@ -63,7 +63,7 @@ def file_processor(pathname, **kwargs):
 
     if os.path.isfile(pathname) and os.path.isdir(destination):
         time.sleep(0.1)
-        try
+        try:
             os.chown(pathname, uid, gid)
 
             # get the file magic mime type
