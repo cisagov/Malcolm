@@ -92,7 +92,7 @@ if (( ${#CA_FILES} )) ; then
 
     # variables for nginx config
     NGINX_LDAP_CA_PATH_LINE="  ssl_ca_dir $CA_TRUST_RUN_DIR;"
-    ( [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] || [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] ) && NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;" || NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert chain;"
+    ( [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] || [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] ) && NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;" || NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert off;"
   fi
   popd >/dev/null 2>&1
 fi
@@ -237,7 +237,7 @@ EOF
 
 fi # basic vs. ldap
 
-if [[ ! -f /etc/nginx/auth/htpasswd ]]; then
+if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; then
   cp /tmp/auth/default/htpasswd /etc/nginx/auth/
   rm -rf /tmp/auth/*
 fi
