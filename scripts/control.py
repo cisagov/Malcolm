@@ -747,6 +747,11 @@ def start():
     global dockerBin
     global dockerComposeBin
 
+    # touch the htadmin metadata file and .opensearch.*.curlrc files
+    open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
+    open(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'), 'a').close()
+    open(os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'), 'a').close()
+
     # make sure the auth files exist. if we are in an interactive shell and we're
     # missing any of the auth files, prompt to create them now
     if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist()):
@@ -757,11 +762,6 @@ def start():
         raise Exception(
             'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
         )
-
-    # touch the htadmin metadata file and .opensearch.*.curlrc files
-    open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
-    open(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'), 'a').close()
-    open(os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'), 'a').close()
 
     # if the OpenSearch keystore doesn't exist exist, create empty ones
     if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore'))):

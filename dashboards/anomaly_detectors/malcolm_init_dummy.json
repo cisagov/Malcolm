@@ -1,7 +1,7 @@
 {
   "name": "malcolm_init_dummy",
   "description": "A dummy detector to force opensearch anomaly detection index creation",
-  "time_field": "timestamp",
+  "time_field": "firstPacket",
   "indices": [
     "arkime_sessions3-*"
   ],
