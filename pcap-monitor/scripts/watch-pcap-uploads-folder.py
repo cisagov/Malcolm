@@ -30,20 +30,6 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = [False]
 
-SUPPORTED_MIME_TYPES = [
-    'application/gzip',
-    'application/x-gzip',
-    'application/x-7z-compressed',
-    'application/x-bzip2',
-    'application/x-cpio',
-    'application/x-lzip',
-    'application/x-lzma',
-    'application/x-rar-compressed',
-    'application/x-tar',
-    'application/x-xz',
-    'application/zip',
-]
-
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -54,30 +40,53 @@ def shutdown_handler(signum, frame):
 
 ###################################################################################################
 def file_processor(pathname, **kwargs):
-    mime_types = kwargs["mime_types"]
     uid = kwargs["uid"]
     gid = kwargs["gid"]
-    destination = kwargs["destination"]
+    pcapDir = kwargs["destination"]
+    zeekDir = kwargs["zeek"]
     logger = kwargs["logger"]
 
     logger.info(f"{scriptName}:\t👓\t{pathname}")
 
-    if os.path.isfile(pathname) and os.path.isdir(destination):
+    if os.path.isfile(pathname):
         time.sleep(0.1)
         try:
             os.chown(pathname, uid, gid)
 
             # get the file magic mime type
             fileMime = magic.from_file(pathname, mime=True)
+            fileType = magic.from_file(pathname)
 
-            if fileMime in mime_types:
+            if os.path.isdir(pcapDir) and (
+                (fileMime in ('application/vnd.tcpdump.pcap', 'application/x-pcapng')) or ('pcap-ng' in fileType)
+            ):
+                # a pcap file to be processed by dropping it into pcapDir
+                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {pcapDir}")
+                shutil.move(pathname, pcapDir)
+
+            elif os.path.isdir(zeekDir) and (
+                fileMime
+                in [
+                    'application/gzip',
+                    'application/x-gzip',
+                    'application/x-7z-compressed',
+                    'application/x-bzip2',
+                    'application/x-cpio',
+                    'application/x-lzip',
+                    'application/x-lzma',
+                    'application/x-rar-compressed',
+                    'application/x-tar',
+                    'application/x-xz',
+                    'application/zip',
+                ]
+            ):
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
-                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}) to {destination}")
-                shutil.move(pathname, destination)
+                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {zeekDir}")
+                shutil.move(pathname, zeekDir)
 
             else:
                 # unhandled file type uploaded, delete it
-                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime})")
+                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime}/{fileType})")
                 os.unlink(pathname)
 
         except Exception as genericError:
@@ -113,7 +122,7 @@ def main():
         type=str2bool,
         nargs='?',
         const=True,
-        default=os.getenv('FILEBEAT_WATCHER_POLLING', False),
+        default=os.getenv('PCAP_PIPELINE_POLLING', False),
         required=False,
     )
     parser.add_argument(
@@ -123,9 +132,7 @@ def main():
         help="When polling, assume a file is closed after this many seconds of inactivity",
         metavar='<seconds>',
         type=int,
-        default=int(
-            os.getenv('FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC', str(watch_common.ASSUME_CLOSED_SEC_DEFAULT))
-        ),
+        default=int(os.getenv('PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC', str(watch_common.ASSUME_CLOSED_SEC_DEFAULT))),
         required=False,
     )
     parser.add_argument(
@@ -135,7 +142,7 @@ def main():
         help='Source directory to monitor',
         metavar='<directory>',
         type=str,
-        default=os.path.join(remove_suffix(os.getenv('FILEBEAT_ZEEK_DIR', '/zeek'), '/'), 'upload'),
+        default=os.path.join(remove_suffix(os.getenv('PCAP_PATH', '/pcap'), '/'), 'upload'),
         required=False,
     )
     parser.add_argument(
@@ -145,7 +152,17 @@ def main():
         help='Destination directory',
         metavar='<directory>',
         type=str,
-        default=remove_suffix(os.getenv('FILEBEAT_ZEEK_DIR', '/zeek'), '/'),
+        default=os.path.join(remove_suffix(os.getenv('PCAP_PATH', '/pcap'), '/'), 'processed'),
+        required=False,
+    )
+    parser.add_argument(
+        '-z',
+        '--zeek',
+        dest='zeekDir',
+        help='Zeek upload directory',
+        metavar='<directory>',
+        type=str,
+        default=os.path.join(remove_suffix(os.getenv('ZEEK_PATH', '/zeek'), '/'), 'upload'),
         required=False,
     )
     parser.add_argument(
@@ -207,6 +224,7 @@ def main():
 
     args.dstDir = remove_suffix(args.dstDir, '/')
     args.srcDir = remove_suffix(args.srcDir, '/')
+    args.zeekDir = remove_suffix(args.zeekDir, '/')
 
     # if directory to monitor doesn't exist, create it now
     if not os.path.isdir(args.srcDir):
@@ -229,9 +247,9 @@ def main():
         {
             "logger": logging,
             "destination": args.dstDir,
+            "zeek": args.zeekDir,
             "uid": args.chownUid,
             "gid": args.chownGid,
-            "mime_types": SUPPORTED_MIME_TYPES,
         },
         args.assumeClosedSec,
         shuttingDown,
