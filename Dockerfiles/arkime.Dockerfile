@@ -142,6 +142,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       file \
       geoip-bin \
       gettext \
+      inotify-tools \
       jq \
       libcap2-bin \
       libjson-perl \

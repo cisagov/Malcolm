@@ -12,4 +12,5 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   debinterface \
   pymisp \
   stix2 \
-  taxii2-client
+  taxii2-client \
+  watchdog

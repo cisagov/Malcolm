@@ -34,7 +34,6 @@ from malcolm_common import (
     ChooseOne,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
-    dockerComposeUrl,
     DOCKER_INSTALL_URLS,
     DotEnvDynamic,
     DownloadToFile,
@@ -53,7 +52,6 @@ from malcolm_common import (
     ScriptPath,
     UserInputDefaultsBehavior,
     UserInterfaceMode,
-    WindowsInstaller,
     YAMLDynamic,
     YesOrNo,
 )

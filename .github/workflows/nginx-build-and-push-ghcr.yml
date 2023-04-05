@@ -17,6 +17,7 @@ on:
       - '_includes/**'
       - '_layouts/**'
       - 'docs/**'
+      - '!docs/download.md'
       - 'Gemfile'
       - 'README.md'
   workflow_dispatch:

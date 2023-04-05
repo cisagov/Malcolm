@@ -190,7 +190,8 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/capstats && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
-    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py
+    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
+    ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true

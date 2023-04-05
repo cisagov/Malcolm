@@ -26,6 +26,8 @@ ARG ZEEK_LOG_DIRECTORY=/zeek/logs
 ARG EXTRACTED_FILE_IGNORE_EXISTING=false
 ARG EXTRACTED_FILE_PRESERVATION=quarantined
 ARG EXTRACTED_FILE_WATCHER_START_SLEEP=30
+ARG EXTRACTED_FILE_WATCHER_POLLING=false
+ARG EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC=10
 ARG EXTRACTED_FILE_SCANNER_START_SLEEP=10
 ARG EXTRACTED_FILE_LOGGER_START_SLEEP=5
 ARG EXTRACTED_FILE_MIN_BYTES=64
@@ -55,6 +57,8 @@ ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
 ENV EXTRACTED_FILE_IGNORE_EXISTING $EXTRACTED_FILE_IGNORE_EXISTING
 ENV EXTRACTED_FILE_PRESERVATION $EXTRACTED_FILE_PRESERVATION
 ENV EXTRACTED_FILE_WATCHER_START_SLEEP $EXTRACTED_FILE_WATCHER_START_SLEEP
+ENV EXTRACTED_FILE_WATCHER_POLLING $EXTRACTED_FILE_WATCHER_POLLING
+ENV EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC $EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC
 ENV EXTRACTED_FILE_SCANNER_START_SLEEP $EXTRACTED_FILE_SCANNER_START_SLEEP
 ENV EXTRACTED_FILE_LOGGER_START_SLEEP $EXTRACTED_FILE_LOGGER_START_SLEEP
 ENV EXTRACTED_FILE_MIN_BYTES $EXTRACTED_FILE_MIN_BYTES
@@ -130,7 +134,6 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-bs4 \
       python3-dev \
       python3-pip \
-      python3-pyinotify \
       python3-requests \
       python3-zmq \
       rsync && \
@@ -205,6 +208,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD shared/bin/zeek_carve*.py /usr/local/bin/
+ADD shared/bin/watch_common.py /usr/local/bin/
 ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
