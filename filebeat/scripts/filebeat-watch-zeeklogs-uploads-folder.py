@@ -60,7 +60,7 @@ def file_processor(pathname, **kwargs):
     destination = kwargs["destination"]
     logger = kwargs["logger"]
 
-    logger.debug(f"{scriptName}:\t👓\t{pathname}")
+    logger.info(f"{scriptName}:\t👓\t{pathname}")
 
     if os.path.isfile(pathname) and os.path.isdir(destination):
         time.sleep(0.1)
@@ -72,16 +72,16 @@ def file_processor(pathname, **kwargs):
 
             if fileMime in mime_types:
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
-                logger.debug(f"{scriptName}:\t🖅\t{pathname} ({fileMime}) to {destination}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}) to {destination}")
                 shutil.move(pathname, destination)
 
             else:
                 # unhandled file type uploaded, delete it
-                logger.info(f"{scriptName}:\t🗑\t{pathname} ({fileMime})")
+                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime})")
                 os.unlink(pathname)
 
         except Exception as genericError:
-            logger.warning(f"{scriptName}:\texception: {genericError}")
+            logger.error(f"{scriptName}:\texception: {genericError}")
 
 
 ###################################################################################################
@@ -189,9 +189,9 @@ def main():
     logging.basicConfig(
         level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
     )
-    logging.debug(os.path.join(scriptPath, scriptName))
-    logging.debug("Arguments: {}".format(sys.argv[1:]))
-    logging.debug("Arguments: {}".format(args))
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 

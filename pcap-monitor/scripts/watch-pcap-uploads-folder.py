@@ -46,7 +46,7 @@ def file_processor(pathname, **kwargs):
     zeekDir = kwargs["zeek"]
     logger = kwargs["logger"]
 
-    logger.debug(f"{scriptName}:\t👓\t{pathname}")
+    logger.info(f"{scriptName}:\t👓\t{pathname}")
 
     if os.path.isfile(pathname):
         time.sleep(0.1)
@@ -61,7 +61,7 @@ def file_processor(pathname, **kwargs):
                 (fileMime in ('application/vnd.tcpdump.pcap', 'application/x-pcapng')) or ('pcap-ng' in fileType)
             ):
                 # a pcap file to be processed by dropping it into pcapDir
-                logger.debug(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {pcapDir}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {pcapDir}")
                 shutil.move(pathname, pcapDir)
 
             elif os.path.isdir(zeekDir) and (
@@ -81,16 +81,16 @@ def file_processor(pathname, **kwargs):
                 ]
             ):
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
-                logger.debug(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {zeekDir}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {zeekDir}")
                 shutil.move(pathname, zeekDir)
 
             else:
                 # unhandled file type uploaded, delete it
-                logger.info(f"{scriptName}:\t🗑\t{pathname} ({fileMime}/{fileType})")
+                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime}/{fileType})")
                 os.unlink(pathname)
 
         except Exception as genericError:
-            logger.warning(f"{scriptName}:\texception: {genericError}")
+            logger.error(f"{scriptName}:\texception: {genericError}")
 
 
 ###################################################################################################
@@ -206,9 +206,9 @@ def main():
     logging.basicConfig(
         level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
     )
-    logging.debug(os.path.join(scriptPath, scriptName))
-    logging.debug("Arguments: {}".format(sys.argv[1:]))
-    logging.debug("Arguments: {}".format(args))
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 

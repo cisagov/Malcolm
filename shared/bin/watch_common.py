@@ -57,7 +57,7 @@ class FileOperationEventHandler(FileSystemEventHandler):
         if not event.is_directory:
             self.updateTime()
             if self.logger:
-                self.logger.debug(f"{self.nowTime}: {event.event_type} {event.src_path}")
+                self.logger.info(f"{self.nowTime}: {event.event_type} {event.src_path}")
 
     def on_created(self, event):
         self.on_modified(event)
@@ -113,7 +113,7 @@ def ProcessFileEventWorker(workerArgs):
 
     with workerThreadCount as workerId:
         if logger is not None:
-            logger.debug(f"[{workerId}]:started")
+            logger.info(f"[{workerId}]:started")
 
         while (not shutDown[0]) and observer.is_alive():
             time.sleep(1)
@@ -136,13 +136,13 @@ def ProcessFileEventWorker(workerArgs):
                                 **extraArgs,
                             )
                         if logger is not None:
-                            logger.debug(
+                            logger.info(
                                 f"processed {fileName} at {(nowTime-eventTime) if (eventTime > 0) else 0} seconds"
                             )
 
         time.sleep(1)
         if logger is not None:
-            logger.debug(f"[{workerId}]: finished")
+            logger.info(f"[{workerId}]: finished")
 
 
 def WatchAndProcessDirectory(
@@ -161,7 +161,7 @@ def WatchAndProcessDirectory(
     )
     for directory in directories:
         if logger:
-            logger.debug(f"Scheduling {directory}")
+            logger.info(f"Scheduling {directory}")
         observer.schedule(handler, directory, recursive=True)
 
     observer.start()
