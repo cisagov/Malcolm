@@ -48,7 +48,7 @@ If you installed Malcolm from [pre-packaged installation files]({{ site.github.r
 5. re-run `./scripts/install.py --configure` as described in [System configuration and tuning](malcolm-config.md#ConfigAndTuning)
 6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](malcolm-config.md#DockerComposeYml) you may have edited by hand in `docker-compose.yml` that's not prompted for in `install.py --configure`)
 7. pull the new docker images (this will take a while)
-    * `docker-compose pull` to pull them from Docker Hub or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
+    * `docker-compose pull` to pull them from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
 8. start Malcolm
     * `./scripts/start`
 9. you may be prompted to [configure authentication](authsetup.md#AuthSetup) if there are new authentication-related files that need to be generated

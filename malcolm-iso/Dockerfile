@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
-LABEL org.opencontainers.image.title='malcolmnetsec/malcolm'
+LABEL org.opencontainers.image.title='ghcr.io/cisagov/malcolm/malcolm'
 LABEL org.opencontainers.image.description='Malcolm network traffic analysis tool suite ISO in qemu'
 
 ARG QEMU_CPU=4

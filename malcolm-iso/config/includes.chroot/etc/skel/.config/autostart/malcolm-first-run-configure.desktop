@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=malcolm-first-run-configure
+Comment=First-time Malcolm configuration
+Exec=/usr/local/bin/malcolm-first-run-configure.sh
+Terminal=false
+Type=Application

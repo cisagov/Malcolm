@@ -27,7 +27,7 @@ LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
-LABEL org.opencontainers.image.title='malcolmnetsec/api'
+LABEL org.opencontainers.image.title='ghcr.io/cisagov/malcolm/api'
 LABEL org.opencontainers.image.description='Malcolm container providing a REST API for some information about network traffic'
 
 ARG DEFAULT_UID=1000
@@ -76,7 +76,7 @@ COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \
-    && apt-get -y -q --no-install-recommends install curl netcat tini \
+    && apt-get -y -q --no-install-recommends install curl netcat rsync tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
     && chmod 755 /usr/local/bin/docker-uid-gid-setup.sh \

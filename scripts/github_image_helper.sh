@@ -49,7 +49,7 @@ function _gitreponame() {
 
 # get the current git working copy's Malcolm version (grepped from docker-compose.yml, e.g., 5.0.3)
 function _malcolmversion() {
-  grep -P "^\s+image:\s*malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
+  grep -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
 }
 
 ################################################################################
@@ -63,8 +63,8 @@ function _cleanup {
 }
 
 ################################################################################
-# pull ghcr.io/$OWNER/$IMG:$BRANCH for each image in docker-compose.yml and re-tag as $IMG:$VERSION
-# e.g., pull ghcr.io/johndoe/malcolmnetsec/arkime:main and tag as malcolmnetsec/arkime:5.0.3
+# pull ghcr.io/$OWNER/$IMG:$BRANCH for each image in docker-compose.yml and re-tag as ghcr.io/idaholab/$IMG:$VERSION
+# e.g., pull ghcr.io/johndoe/malcolm/arkime:main and tag as ghcr.io/idaholab/malcolm/arkime:5.0.3
 function _PullAndTagGithubWorkflowBuild() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
@@ -72,7 +72,7 @@ function _PullAndTagGithubWorkflowBuild() {
   IMAGE=$1
 
   docker pull ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" && \
-    docker tag ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" "$IMAGE":"$VERSION"
+    docker tag ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" ghcr.io/idaholab/"$IMAGE":"$VERSION"
 }
 
 function PullAndTagGithubWorkflowImages() {
@@ -80,7 +80,7 @@ function PullAndTagGithubWorkflowImages() {
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
   echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
-  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u); do
+  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u | sed "s/.*\/\(malcolm\)/\1/"); do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
   echo "done"
@@ -91,7 +91,7 @@ function PullAndTagGithubWorkflowISOImages() {
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
   echo "Pulling ISO wrapper images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
-  for IMG in malcolmnetsec/{malcolm,hedgehog}; do
+  for IMG in malcolm/{malcolm,hedgehog}; do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
   echo "done"
@@ -99,7 +99,7 @@ function PullAndTagGithubWorkflowISOImages() {
 
 ################################################################################
 # extract the ISO wrapped in the ghcr.io docker image to the current directory
-# e.g., extract live.iso from ghcr.io/johndoe/malcolmnetsec/hedgehog:development
+# e.g., extract live.iso from ghcr.io/johndoe/malcolm/hedgehog:development
 # and save locally as hedgehog-5.0.3.iso
 function _ExtractISOFromGithubWorkflowBuild() {
   BRANCH="$(_gitbranch)"
@@ -111,7 +111,7 @@ function _ExtractISOFromGithubWorkflowBuild() {
   ISO_NAME="${3:-"$TOOL-$VERSION"}"
 
   docker run --rm -d --name "$TOOL"-iso-srv -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
-      ghcr.io/"$OWNER"/malcolmnetsec/"$TOOL":"$BRANCH" && \
+      ghcr.io/"$OWNER"/malcolm/"$TOOL":"$BRANCH" && \
     sleep 10 && \
     curl -sSL -o "$DEST_DIR"/"$ISO_NAME".iso http://localhost:8000/live.iso && \
     curl -sSL -o "$DEST_DIR"/"$ISO_NAME"-build.log http://localhost:8000/"$TOOL"-"$VERSION"-build.log

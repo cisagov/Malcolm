@@ -45,6 +45,7 @@ RUN apt-get -q update && \
         python3-pip \
         python3-setuptools \
         python3-wheel \
+        rsync \
         sudo \
         swig \
         wget \
@@ -79,7 +80,7 @@ LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
 LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
-LABEL org.opencontainers.image.title='malcolmnetsec/arkime'
+LABEL org.opencontainers.image.title='ghcr.io/cisagov/malcolm/arkime'
 LABEL org.opencontainers.image.description='Malcolm container providing Arkime'
 
 ARG DEFAULT_UID=1000
