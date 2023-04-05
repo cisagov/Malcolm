@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/name-map-ui'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/name-map-ui'
 LABEL org.opencontainers.image.description='Malcolm container providing a user interface for mapping names to network hosts and subnets'
 
 ARG DEFAULT_UID=1000
@@ -28,7 +28,7 @@ RUN apk update --no-cache && \
     apk upgrade --no-cache && \
     apk --no-cache add bash php81 php81-fpm php81-mysqli php81-json php81-openssl php81-curl php81-fileinfo \
     php81-zlib php81-xml php81-phar php81-intl php81-dom php81-xmlreader php81-ctype php81-session \
-    php81-mbstring php81-gd nginx supervisor curl inotify-tools file psmisc shadow openssl tini
+    php81-mbstring php81-gd nginx supervisor curl inotify-tools file psmisc rsync shadow openssl tini
 
 COPY name-map-ui/config/nginx.conf /etc/nginx/nginx.conf
 COPY name-map-ui/config/fpm-pool.conf /etc/php81/php-fpm.d/www.conf

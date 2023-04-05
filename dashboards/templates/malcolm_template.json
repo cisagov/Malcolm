@@ -30,7 +30,8 @@
   "template" :{
     "settings" : {
       "index" : {
-        "mapping.total_fields.limit" : "5000"
+        "mapping.total_fields.limit" : "5000",
+        "mapping.nested_fields.limit" : "250"
       }
     },
     "mappings": {

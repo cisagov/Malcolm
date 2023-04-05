@@ -9,6 +9,7 @@ on:
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
+      - '!shared/bin/configure-capture.py'
       - '.trigger_iso_workflow_build'
       - '.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
@@ -95,7 +96,7 @@ jobs:
         run: |
           IMAGES=( $(grep image: docker-compose.yml | awk '{print $2}' | sort -u) )
           for IMAGE in "${IMAGES[@]}"; do
-            REPO_IMAGE="$(echo "$IMAGE" | sed "s@^\(malcolmnetsec\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"
+            REPO_IMAGE="$(echo "$IMAGE" | sed "s@^.*\(malcolm\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"
             docker pull "$REPO_IMAGE" && \
               docker tag "$REPO_IMAGE" "$IMAGE" && \
               docker rmi "$REPO_IMAGE"
@@ -125,4 +126,4 @@ jobs:
         with:
           context: ./malcolm-iso
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/malcolm:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/malcolm:${{ steps.extract_branch.outputs.branch }}

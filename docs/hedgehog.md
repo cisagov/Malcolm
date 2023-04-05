@@ -2,7 +2,7 @@
 
 **Network Traffic Capture Appliance**
 
-![](./images/hedgehog/logo/hedgehog-color-w-text.png)
+![Hedgehog Linux](./images/hedgehog/logo/hedgehog-color-w-text.png)
 
 Hedgehog Linux is a Debian-based operating system built to
 

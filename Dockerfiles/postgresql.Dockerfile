@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/postgresql'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/postgresql'
 LABEL org.opencontainers.image.description='Malcolm container providing the PostgreSQL object-relational database'
 
 ARG DEFAULT_UID=1000
@@ -27,7 +27,7 @@ COPY --from=pierrezemb/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk add --no-cache bash procps psmisc shadow tini && \
+    apk add --no-cache bash procps psmisc rsync shadow tini && \
     apk add --no-cache --virtual .build-deps rsync && \
     rsync -a /usr/local/bin/ /usr/bin/ && \
     rsync -a /usr/local/share/ /usr/share/ && \

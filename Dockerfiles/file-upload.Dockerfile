@@ -32,7 +32,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/file-upload'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/file-upload'
 LABEL org.opencontainers.image.description='Malcolm container providing an interface for uploading PCAP files and Zeek logs for processing'
 
 ARG DEFAULT_UID=33
@@ -67,6 +67,7 @@ RUN apt-get -q update && \
       php$PHP_VERSION-fpm \
       php$PHP_VERSION-apcu \
       nginx-light \
+      rsync \
       tini && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*

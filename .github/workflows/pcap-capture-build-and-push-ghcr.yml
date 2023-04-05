@@ -10,6 +10,8 @@ on:
       - 'pcap-capture/**'
       - 'Dockerfiles/pcap-capture.Dockerfile'
       - 'shared/bin/*'
+      - '!shared/bin/configure-interfaces.py'
+      - '!shared/bin/configure-capture.py'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
@@ -60,4 +62,4 @@ jobs:
           context: .
           file: ./Dockerfiles/pcap-capture.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/pcap-capture:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/pcap-capture:${{ steps.extract_branch.outputs.branch }}

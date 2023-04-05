@@ -10,6 +10,8 @@ on:
       - 'file-upload/**'
       - 'Dockerfiles/file-upload.Dockerfile'
       - 'shared/bin/*'
+      - '!shared/bin/configure-interfaces.py'
+      - '!shared/bin/configure-capture.py'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
@@ -60,4 +62,4 @@ jobs:
           context: .
           file: ./Dockerfiles/file-upload.Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/malcolmnetsec/file-upload:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/file-upload:${{ steps.extract_branch.outputs.branch }}

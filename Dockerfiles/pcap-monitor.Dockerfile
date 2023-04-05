@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
 LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='malcolmnetsec/pcap-monitor'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/pcap-monitor'
 LABEL org.opencontainers.image.description='Malcolm container watching for captured or uploaded artifacts to be processed'
 
 ARG DEFAULT_UID=1000
@@ -54,6 +54,7 @@ RUN apt-get -q update && \
       python3-pip \
       python3-setuptools \
       python3-wheel \
+      rsync \
       supervisor \
       tini \
       vim-tiny && \

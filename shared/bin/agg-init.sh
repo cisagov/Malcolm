@@ -24,7 +24,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --restart-malcolm
       fi
-      rm -f "$MAIN_USER_HOME"/Malcolm/firstrun
+      rm -f "$MAIN_USER_HOME"/Malcolm/firstrun "$MAIN_USER_HOME"/Malcolm/.configured
     fi
 
     # make sure read permission is set correctly for the nginx worker processes

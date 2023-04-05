@@ -362,7 +362,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: malcolmnetsec/opensearch:23.03.0
+    image: ghcr.io/idaholab/malcolm/opensearch:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -370,9 +370,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
+      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
       MAX_LOCKED_MEMORY : 'unlimited'
@@ -406,7 +404,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: malcolmnetsec/dashboards-helper:23.03.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -414,10 +412,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *dashboards-helper-variables
+      <<: [*dashboards-helper-variables, *opensearch-variables, *ssl-variables, *process-variables]
       DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
       ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
@@ -440,7 +435,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: malcolmnetsec/dashboards:23.03.0
+    image: ghcr.io/idaholab/malcolm/dashboards:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -448,9 +443,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
+      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
       - opensearch
@@ -468,7 +461,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: malcolmnetsec/logstash-oss:23.03.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -483,13 +476,7 @@ services:
       - IPC_LOCK
     env_file: ./netbox/env/netbox.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *netbox-variables
-      << : *logstash-variables
-      << : *common-beats-variables
-      << : *common-lookup-variables
+      <<: [*common-lookup-variables, *common-beats-variables, *logstash-variables, *netbox-variables, *opensearch-variables, *ssl-variables, *process-variables]
       LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
     depends_on:
       - opensearch
@@ -518,7 +505,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: malcolmnetsec/filebeat-oss:23.03.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -526,13 +513,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *nginx-variables
-      << : *opensearch-variables
-      << : *filebeat-variables
-      << : *common-upload-variables
-      << : *common-beats-variables
+      <<: [*common-beats-variables, *common-upload-variables, *filebeat-variables, *opensearch-variables, *nginx-variables, *ssl-variables, *process-variables]
       FILEBEAT_ZEEK_LOG_PATH : '/zeek/current'
       FILEBEAT_ZEEK_LOG_LIVE_PATH : '/zeek/live'
       FILEBEAT_SURICATA_LOG_PATH : '/suricata'
@@ -560,7 +541,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: malcolmnetsec/arkime:23.03.0
+    image: ghcr.io/idaholab/malcolm/arkime:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -570,11 +551,7 @@ services:
     env_file:
       - ./auth.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *common-upload-variables
-      << : *arkime-variables
+      <<: [*arkime-variables, *common-upload-variables, *opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'arkime.malcolm.local'
       OPENSEARCH_MAX_SHARDS_PER_NODE : 2500
       VIEWER : 'on'
@@ -604,7 +581,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:23.03.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -621,11 +598,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *zeek-variables
-      << : *zeek-offline-variables
+      <<: [*zeek-offline-variables, *zeek-variables, *common-upload-variables, *ssl-variables, *process-variables]
       ZEEK_PCAP_PROCESSOR : 'true'
       ZEEK_CRON : 'false'
     depends_on:
@@ -647,7 +620,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: malcolmnetsec/zeek:23.03.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -662,12 +635,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *zeek-variables
-      << : *zeek-live-variables
-      << : *pcap-capture-variables
+      <<: [*pcap-capture-variables, *zeek-live-variables, *zeek-variables, *common-upload-variables, *ssl-variables, *process-variables]
       ZEEK_PCAP_PROCESSOR : 'false'
       ZEEK_CRON : 'true'
       ZEEK_LOG_PATH : '/zeek/live'
@@ -683,7 +651,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:23.03.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -700,11 +668,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *suricata-variables
-      << : *suricata-offline-variables
+      <<: [*suricata-offline-variables, *suricata-variables, *common-upload-variables, *ssl-variables, *process-variables]
       SURICATA_PCAP_PROCESSOR : 'true'
     depends_on:
       - logstash
@@ -723,7 +687,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: malcolmnetsec/suricata:23.03.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -738,12 +702,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-upload-variables
-      << : *suricata-variables
-      << : *suricata-live-variables
-      << : *pcap-capture-variables
+      <<: [*pcap-capture-variables, *suricata-live-variables, *suricata-variables, *common-upload-variables, *ssl-variables, *process-variables]
       SURICATA_PCAP_PROCESSOR : 'false'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -753,7 +712,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: malcolmnetsec/file-monitor:23.03.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -761,9 +720,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *zeek-variables
+      <<: [*zeek-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'file-monitor.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -780,7 +737,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: malcolmnetsec/pcap-capture:23.03.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -795,9 +752,7 @@ services:
       - NET_RAW
       - SYS_ADMIN
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *pcap-capture-variables
+      <<: [*pcap-capture-variables, *ssl-variables, *process-variables]
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
@@ -805,7 +760,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: malcolmnetsec/pcap-monitor:23.03.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -813,10 +768,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
-      << : *common-upload-variables
+      <<: [*common-upload-variables, *opensearch-variables, *ssl-variables, *process-variables]
     depends_on:
       - opensearch
     volumes:
@@ -834,7 +786,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: malcolmnetsec/file-upload:23.03.0
+    image: ghcr.io/idaholab/malcolm/file-upload:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -844,8 +796,7 @@ services:
     env_file:
       - ./auth.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
+      <<: [*ssl-variables, *process-variables]
       SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
@@ -862,7 +813,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: malcolmnetsec/htadmin:23.03.0
+    image: ghcr.io/idaholab/malcolm/htadmin:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -873,9 +824,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *auth-variables
+      <<: [*auth-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -889,7 +838,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: malcolmnetsec/freq:23.03.0
+    image: ghcr.io/idaholab/malcolm/freq:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -900,9 +849,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *common-lookup-variables
+      <<: [*common-lookup-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'freq.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -913,7 +860,7 @@ services:
       retries: 3
       start_period: 60s
   name-map-ui:
-    image: malcolmnetsec/name-map-ui:23.03.0
+    image: ghcr.io/idaholab/malcolm/name-map-ui:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/name-map-ui.Dockerfile
@@ -924,8 +871,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
+      <<: [*ssl-variables, *process-variables]
       VIRTUAL_HOST : 'name-map-ui.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -937,7 +883,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: malcolmnetsec/netbox:23.03.0
+    image: ghcr.io/idaholab/malcolm/netbox:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -949,9 +895,7 @@ services:
       - default
     env_file: ./netbox/env/netbox.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox.malcolm.local'
     depends_on:
       - netbox-postgres
@@ -972,7 +916,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: malcolmnetsec/postgresql:23.03.0
+    image: ghcr.io/idaholab/malcolm/postgresql:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -984,9 +928,7 @@ services:
       - default
     env_file: ./netbox/env/postgres.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -998,7 +940,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: malcolmnetsec/redis:23.03.0
+    image: ghcr.io/idaholab/malcolm/redis:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1010,9 +952,7 @@ services:
       - default
     env_file: ./netbox/env/redis.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-redis.malcolm.local'
     command:
       - sh
@@ -1028,7 +968,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: malcolmnetsec/redis:23.03.0
+    image: ghcr.io/idaholab/malcolm/redis:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -1040,9 +980,7 @@ services:
       - default
     env_file: ./netbox/env/redis-cache.env
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *netbox-variables
+      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
     command:
       - sh
@@ -1057,7 +995,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: malcolmnetsec/api:23.03.0
+    image: ghcr.io/idaholab/malcolm/api:23.04.0
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -1069,9 +1007,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *opensearch-variables
+      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'api.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -1086,7 +1022,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: malcolmnetsec/nginx-proxy:23.03.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.04.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -1094,10 +1030,7 @@ services:
     networks:
       - default
     environment:
-      << : *process-variables
-      << : *ssl-variables
-      << : *auth-variables
-      << : *nginx-variables
+      <<: [*nginx-variables, *auth-variables, *ssl-variables, *process-variables]
     depends_on:
       - api
       - arkime
