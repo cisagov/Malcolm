@@ -17,7 +17,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "filebeat"
 ENV PGROUP "filebeat"
 # not dropping privileges globally: supervisord will take care of it
-# on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.sh)
+# on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.py)
 # can chown uploaded files
 ENV PUSER_PRIV_DROP false
 
@@ -37,6 +37,8 @@ ARG FILEBEAT_ZEEK_LOG_PATH="/zeek/current"
 ARG FILEBEAT_ZEEK_LOG_LIVE_PATH="/zeek/live"
 ARG FILEBEAT_SURICATA_LOG_PATH="/suricata"
 ARG FILEBEAT_NGINX_LOG_PATH="/nginx"
+ARG FILEBEAT_WATCHER_POLLING=false
+ARG FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC=10
 ARG LOG_CLEANUP_MINUTES=0
 ARG ZIP_CLEANUP_MINUTES=0
 ARG NGINX_LOG_ACCESS_AND_ERRORS=false
@@ -110,6 +112,7 @@ ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
 ADD scripts/malcolm_utils.py /usr/local/bin/
+ADD shared/bin/watch_common.py /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN for INPUT in nginx tcp; do \
@@ -125,6 +128,8 @@ RUN for INPUT in nginx tcp; do \
 ENV AUTO_TAG $AUTO_TAG
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
 ENV ZIP_CLEANUP_MINUTES $ZIP_CLEANUP_MINUTES
+ENV FILEBEAT_WATCHER_POLLING $FILEBEAT_WATCHER_POLLING
+ENV FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC $FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC
 ENV FILEBEAT_SCAN_FREQUENCY $FILEBEAT_SCAN_FREQUENCY
 ENV FILEBEAT_CLEAN_INACTIVE $FILEBEAT_CLEAN_INACTIVE
 ENV FILEBEAT_IGNORE_OLDER $FILEBEAT_IGNORE_OLDER
