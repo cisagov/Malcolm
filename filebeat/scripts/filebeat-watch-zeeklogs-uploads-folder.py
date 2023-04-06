@@ -73,7 +73,7 @@ def file_processor(pathname, **kwargs):
             if fileMime in mime_types:
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
                 logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}) to {destination}")
-                shutil.move(pathname, destination)
+                shutil.move(pathname, os.path.join(destination, os.path.basename(pathname)))
 
             else:
                 # unhandled file type uploaded, delete it

@@ -62,7 +62,7 @@ def file_processor(pathname, **kwargs):
             ):
                 # a pcap file to be processed by dropping it into pcapDir
                 logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {pcapDir}")
-                shutil.move(pathname, pcapDir)
+                shutil.move(pathname, os.path.join(pcapDir, os.path.basename(pathname)))
 
             elif os.path.isdir(zeekDir) and (
                 fileMime
@@ -82,7 +82,7 @@ def file_processor(pathname, **kwargs):
             ):
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
                 logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {zeekDir}")
-                shutil.move(pathname, zeekDir)
+                shutil.move(pathname, os.path.join(zeekDir, os.path.basename(pathname)))
 
             else:
                 # unhandled file type uploaded, delete it
@@ -228,8 +228,7 @@ def main():
 
     # if directory to monitor doesn't exist, create it now
     if not os.path.isdir(args.srcDir):
-        if debug:
-            eprint(f'{scriptName}:\tcreating "{args.srcDir}" to monitor')
+        logging.info(f'{scriptName}:\tcreating "{args.srcDir}" to monitor')
         pathlib.Path(args.srcDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
