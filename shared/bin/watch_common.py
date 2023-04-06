@@ -70,11 +70,11 @@ class FileOperationEventHandler(FileSystemEventHandler):
             if isinstance(event, FileSystemMovedEvent):
                 fName = event.dest_path
                 fNameOld = event.src_path
-                self.logger.info(f"↦\t{event.event_type: >10}\t{event.src_path} {event.dest_path}")
+                self.logger.debug(f"↦\t{event.event_type: >10}\t{event.src_path} {event.dest_path}")
             else:
                 fName = event.src_path
                 fNameOld = None
-                self.logger.info(f"🗲\t{event.event_type: <10}\t{event.src_path}")
+                self.logger.debug(f"🗲\t{event.event_type: <10}\t{event.src_path}")
 
             # This is a pain, but due to this watchdog issue (see
             # https://github.com/gorakhargosh/watchdog/issues/260 and)
