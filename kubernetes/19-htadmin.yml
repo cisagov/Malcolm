@@ -43,14 +43,27 @@ spec:
           - configMapRef:
               name: auth-common-env
         env:
-          - name: HTADMIN_DISABLED
-            value: "true"
           - name: VIRTUAL_HOST
             value: "htadmin.malcolm.local"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: htadmin-var-local-catrust-volume
+          - mountPath: /var/www/htadmin/config/auth
+            name: htadmin-config-volume
+            subPath: "auth"
+          - mountPath: /var/www/htadmin/config/default/configmap
+            name: htadmin-config-default-volume 
+          - mountPath: /var/www/htadmin/config/
+            name: htadmin-config-volume
+            subPath: "htadmin"
       volumes:
         - name: htadmin-var-local-catrust-volume
           configMap:
             name: var-local-catrust
+        - name: htadmin-config-volume
+          persistentVolumeClaim:
+            claimName: config-claim
+        - name: htadmin-config-default-volume
+          configMap:
+            name: htadmin-config
+        
