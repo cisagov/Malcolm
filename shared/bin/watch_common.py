@@ -53,6 +53,8 @@ class FileOperationEventHandler(FileSystemEventHandler):
         #   for files and we've ONLY seen open and/or attribute-only modify events (i.e.,
         #   the size doesn't change) then we're just going to hold on to them here in
         #   self.modDeck until we promote them to self.deck for processing.
+        #   Once gorakhargosh/watchdog#800 is pulled (resolving gorakhargosh/watchdog#260)
+        #   we can get rid of this complication and just ignore attribute-only events.
         self.modDeck = OrderedDict()
 
     def done(self):
