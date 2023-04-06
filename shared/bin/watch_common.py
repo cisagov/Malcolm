@@ -10,25 +10,19 @@ from malcolm_utils import AtomicInt, ContextLockedOrderedDict, same_file_or_dir
 
 from watchdog.events import (
     FileSystemEventHandler,
-    FileSystemEvent,
     FileSystemMovedEvent,
-    FileMovedEvent,
-    DirMovedEvent,
     FileModifiedEvent,
-    DirModifiedEvent,
     FileCreatedEvent,
     FileClosedEvent,
     FileOpenedEvent,
-    DirCreatedEvent,
     FileDeletedEvent,
-    DirDeletedEvent,
 )
 
 from multiprocessing.pool import ThreadPool
 from watchdog.utils import WatchdogShutdown
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
-from collections import namedtuple, defaultdict
+from collections import namedtuple, defaultdict, OrderedDict
 
 ASSUME_CLOSED_SEC_DEFAULT = 10
 
@@ -51,9 +45,15 @@ class FileOperationEventHandler(FileSystemEventHandler):
         # self.deck is a dictionary mapping filenames to a list of OperationEvent of length n,
         #   with [0] being the oldest timestamp/operation and [n-1] being the newest
         #   timestamp/operation.
-        # In self.dec itself, items at the first (idx=0) of this OrderedDict are the
+        # In self.deck itself, items at the first (idx=0) of this OrderedDict are the
         #   oldest, items at the last (idx=len-1) are the newest.
         self.deck = ContextLockedOrderedDict()
+        # because of the pain in the butt that is the fact that we get the modify events
+        #   on attributes-only changes (see below where I set fSize), if events show up
+        #   for files and we've ONLY seen open and/or attribute-only modify events (i.e.,
+        #   the size doesn't change) then we're just going to hold on to them here in
+        #   self.modDeck until we promote them to self.deck for processing.
+        self.modDeck = OrderedDict()
 
     def done(self):
         return True
@@ -77,7 +77,8 @@ class FileOperationEventHandler(FileSystemEventHandler):
                 self.logger.debug(f"🗲\t{event.event_type: <10}\t{event.src_path}")
 
             # This is a pain, but due to this watchdog issue (see
-            # https://github.com/gorakhargosh/watchdog/issues/260 and)
+            # https://github.com/gorakhargosh/watchdog/issues/260 and
+            # https://github.com/gorakhargosh/watchdog/pull/800)
             # we get FileModifiedEvent triggered for metadata-only changes
             # even if content has not changed (e.g., file access time).
             # So for now, if we detect a file has been modified but the size
@@ -99,16 +100,21 @@ class FileOperationEventHandler(FileSystemEventHandler):
 
             with self.deck as d:
                 try:
+                    deckInserted = d
+
                     if fNameOld and same_file_or_dir(os.path.dirname(fNameOld), os.path.dirname(fName)):
                         # a file was simply renamed in the watched directory (not moved
                         # from some other directory) so remove the old filename from our list
                         # and a new one will get added
-                        d.pop(fNameOld, None)
+                        if fNameOld in d:
+                            d.pop(fNameOld, None)
+                        if fNameOld in self.modDeck:
+                            self.modDeck(d.pop(fNameOld, None))
 
                     # insert or update file event(s)
 
                     if fName in d:
-                        # this is a file we're already currently tracking
+                        # this is a file we're already currently tracking in main deck
 
                         # see comment about fSize above (FileModifiedEvent only counts if the file size is changed)
                         if (
@@ -130,10 +136,38 @@ class FileOperationEventHandler(FileSystemEventHandler):
                             # otherwise append a new history item
                             d[fName].append(newOpLog)
 
-                    else:
-                        # this is a file we were not previously tracking
-                        d[fName] = [newOpLog]
+                    elif fName in self.modDeck:
+                        # we've seen this entry before, but it's in the staging modDeck
 
+                        modifyOpSizes = [
+                            optLog.size for optLog in self.modDeck[fName] if optLog.operation == "modified"
+                        ]
+                        # promote to main deck if either:
+                        # - this is something more than just an open/modify attribute event OR
+                        # - this is a modified event, but the size is different now so it is an actual modification
+                        if (not isinstance(event, FileOpenedEvent) and not isinstance(event, FileModifiedEvent)) or (
+                            isinstance(event, FileModifiedEvent)
+                            and (len(modifyOpSizes) > 0)
+                            and (newOpLog.size > 0)
+                            and (newOpLog.size != modifyOpSizes[-1])
+                        ):
+                            # promote what's already in modDec to the real deck, then append this new history item
+                            self.logger.debug(f"𝦸\t{event.event_type: <10}\t{fName}")
+                            d[fName] = self.modDeck.pop(fName)
+                            d[fName].append(newOpLog)
+
+                    else:
+                        # this is a file we were not previously tracking at all, in either deck
+
+                        if isinstance(event, FileOpenedEvent) or isinstance(event, FileModifiedEvent):
+                            # this is the very first time we've seen this file, if this
+                            # is "open" or "modified" with no other context yet then
+                            # put it in modDec until it shows up like a real modification
+                            deckInserted = self.modDeck
+
+                        deckInserted[fName] = [newOpLog]
+
+                    # move the file to the appropriate end of its deck, if needed
                     if not noop:
                         if (
                             isinstance(event, FileModifiedEvent)
@@ -143,11 +177,11 @@ class FileOperationEventHandler(FileSystemEventHandler):
                         ):
                             # put FileClosedEvent events (which now have a timestamp of 0) at the front of
                             # the deck (to be processed first), and others to the back
-                            d.move_to_end(fName, last=d[fName][-1].timestamp > 0)
+                            deckInserted.move_to_end(fName, last=deckInserted[fName][-1].timestamp > 0)
 
                         elif isinstance(event, FileDeletedEvent):
                             # if a file is deleted I guess we don't need to track it any more
-                            d.pop(fName, None)
+                            deckInserted.pop(fName, None)
                             fName = None
 
                         else:
@@ -157,7 +191,10 @@ class FileOperationEventHandler(FileSystemEventHandler):
                         self.logger.debug(f"🗑\t{event.event_type: <10}\t{fName}")
 
                     elif fName:
-                        self.logger.debug(f"⎗\t{fName}\t{json.dumps(d[fName])}")
+                        if fName in d:
+                            self.logger.debug(f"➊\t{fName}\t{json.dumps(d[fName])}")
+                        if fName in self.modDeck:
+                            self.logger.debug(f"➋\t{fName}\t{json.dumps(self.modDeck[fName])}")
 
                 except Exception as e:
                     self.logger.error(f"⨳\t{fName}\t{e}")
