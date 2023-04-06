@@ -12,6 +12,7 @@
 import argparse
 import glob
 import json
+import logging
 import magic
 import os
 import pathlib

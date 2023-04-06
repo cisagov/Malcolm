@@ -4,6 +4,7 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import clamd
+import logging
 import json
 import os
 import re
@@ -279,8 +280,7 @@ class CarvedFileSubscriberThreaded:
     # constructor
     def __init__(
         self,
-        debug=False,
-        verboseDebug=False,
+        logger=None,
         host="localhost",
         port=VENTILATOR_PORT,
         context=None,
@@ -288,8 +288,7 @@ class CarvedFileSubscriberThreaded:
         rcvTimeout=5000,
         scriptName='',
     ):
-        self.debug = debug
-        self.verboseDebug = verboseDebug
+        self.logger = logger if logger else logging
         self.scriptName = scriptName
 
         self.lock = Lock()
@@ -302,11 +301,10 @@ class CarvedFileSubscriberThreaded:
         self.newFilesSocket.connect(f"tcp://{host}:{port}")
         self.newFilesSocket.setsockopt(zmq.SUBSCRIBE, bytes(topic, encoding='ascii'))
         self.newFilesSocket.RCVTIMEO = rcvTimeout
-        if self.debug:
-            eprint(
-                f"{self.scriptName}:\tbound to ventilator at {port}",
-                timestamp=True,
-            )
+        self.logger.info(
+            f"{self.scriptName}:\tbound to ventilator at {port}",
+            timestamp=True,
+        )
 
     # ---------------------------------------------------------------------------------
     def Pull(self, scanWorkerId=0):
@@ -320,11 +318,10 @@ class CarvedFileSubscriberThreaded:
                 # no file received due to timeout, return empty dict. which means no file available
                 pass
 
-        if self.verboseDebug:
-            eprint(
-                f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}",
-                timestamp=True,
-            )
+        self.logger.debug(
+            f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}",
+            timestamp=True,
+        )
 
         return fileinfo
 
@@ -519,10 +516,14 @@ class VirusTotalSearch(FileScanProvider):
 class ClamAVScan(FileScanProvider):
     # ---------------------------------------------------------------------------------
     # constructor
-    def __init__(self, debug=False, verboseDebug=False, socketFileName=None, reqLimit=None):
+    def __init__(
+        self,
+        logger=None,
+        socketFileName=None,
+        reqLimit=None,
+    ):
         self.scanningFilesCount = AtomicInt(value=0)
-        self.debug = debug
-        self.verboseDebug = verboseDebug
+        self.logger = logger if logger else logging
         self.socketFileName = socketFileName
         self.reqLimit = reqLimit if reqLimit else CLAM_MAX_REQS
 
@@ -552,11 +553,10 @@ class ClamAVScan(FileScanProvider):
             nowTime = int(time.time())
 
             if not connected:
-                if self.verboseDebug:
-                    eprint(
-                        f"{get_ident()}: ClamAV attempting connection",
-                        timestamp=True,
-                    )
+                self.logger.debug(
+                    f"{get_ident()}: ClamAV attempting connection",
+                    timestamp=True,
+                )
                 clamAv = (
                     clamd.ClamdUnixSocket(path=self.socketFileName)
                     if self.socketFileName is not None
@@ -565,18 +565,16 @@ class ClamAVScan(FileScanProvider):
             try:
                 clamAv.ping()
                 connected = True
-                if self.verboseDebug:
-                    eprint(
-                        f"{get_ident()}: ClamAV connected!",
-                        timestamp=True,
-                    )
+                self.logger.debug(
+                    f"{get_ident()}: ClamAV connected!",
+                    timestamp=True,
+                )
             except Exception as e:
                 connected = False
-                if self.debug:
-                    eprint(
-                        f"{get_ident()}: ClamAV connection failed: {str(e)}",
-                        timestamp=True,
-                    )
+                self.logger.info(
+                    f"{get_ident()}: ClamAV connection failed: {str(e)}",
+                    timestamp=True,
+                )
 
             if connected:
                 # first make sure we haven't exceeded rate limits
@@ -588,27 +586,24 @@ class ClamAVScan(FileScanProvider):
 
             if connected and allowed:
                 try:
-                    if self.verboseDebug:
-                        eprint(
-                            f'{get_ident()} ClamAV scanning: {fileName}',
-                            timestamp=True,
-                        )
+                    self.logger.debug(
+                        f'{get_ident()} ClamAV scanning: {fileName}',
+                        timestamp=True,
+                    )
                     clamavResult.result = clamAv.scan(fileName)
-                    if self.verboseDebug:
-                        eprint(
-                            f'{get_ident()} ClamAV scan result: {clamavResult.result}',
-                            timestamp=True,
-                        )
+                    self.logger.debug(
+                        f'{get_ident()} ClamAV scan result: {clamavResult.result}',
+                        timestamp=True,
+                    )
                     clamavResult.success = clamavResult.result is not None
                     clamavResult.finished = True
                 except Exception as e:
                     if clamavResult.result is None:
                         clamavResult.result = str(e)
-                    if self.debug:
-                        eprint(
-                            f'{get_ident()} ClamAV scan error: {clamavResult.result}',
-                            timestamp=True,
-                        )
+                    self.logger.info(
+                        f'{get_ident()} ClamAV scan error: {clamavResult.result}',
+                        timestamp=True,
+                    )
                 finally:
                     self.scanningFilesCount.decrement()
 
@@ -673,10 +668,14 @@ class ClamAVScan(FileScanProvider):
 class YaraScan(FileScanProvider):
     # ---------------------------------------------------------------------------------
     # constructor
-    def __init__(self, debug=False, verboseDebug=False, rulesDirs=[], reqLimit=None):
+    def __init__(
+        self,
+        logger=None,
+        rulesDirs=[],
+        reqLimit=None,
+    ):
         self.scanningFilesCount = AtomicInt(value=0)
-        self.debug = debug
-        self.verboseDebug = verboseDebug
+        self.logger = logger if logger else logging
         self.reqLimit = reqLimit if reqLimit else YARA_MAX_REQS
         self.ruleFilespecs = {}
         for yaraDir in rulesDirs:
@@ -690,21 +689,19 @@ class YaraScan(FileScanProvider):
                         yara.compile(filename)
                         self.ruleFilespecs[filename] = filename
                     except yara.SyntaxError as e:
-                        if self.debug:
-                            eprint(
-                                f'{get_ident()} Ignored Yara compile error in {filename}: {e}',
-                                timestamp=True,
-                            )
-        if self.verboseDebug:
-            eprint(
-                f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files: {self.ruleFilespecs}",
-                timestamp=True,
-            )
-        elif self.debug:
-            eprint(
-                f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files",
-                timestamp=True,
-            )
+                        self.logger.info(
+                            f'{get_ident()} Ignored Yara compile error in {filename}: {e}',
+                            timestamp=True,
+                        )
+        self.logger.info(
+            f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files",
+            timestamp=True,
+        )
+        self.logger.debug(
+            f"{get_ident()}: Initializing Yara with {len(self.ruleFilespecs)} rules files: {self.ruleFilespecs}",
+            timestamp=True,
+        )
+
         self.compiledRules = yara.compile(filepaths=self.ruleFilespecs)
 
     @staticmethod
@@ -740,17 +737,15 @@ class YaraScan(FileScanProvider):
 
             if allowed:
                 try:
-                    if self.verboseDebug:
-                        eprint(
-                            f'{get_ident()} Yara scanning: {fileName}',
-                            timestamp=True,
-                        )
+                    self.logger.debug(
+                        f'{get_ident()} Yara scanning: {fileName}',
+                        timestamp=True,
+                    )
                     yaraResult.result = self.compiledRules.match(fileName, timeout=YARA_RUN_TIMEOUT_SEC)
-                    if self.verboseDebug:
-                        eprint(
-                            f'{get_ident()} Yara scan result: {yaraResult.result}',
-                            timestamp=True,
-                        )
+                    self.logger.debug(
+                        f'{get_ident()} Yara scan result: {yaraResult.result}',
+                        timestamp=True,
+                    )
                     yaraResult.success = yaraResult.result is not None
                     yaraResult.finished = True
                 except Exception as e:
@@ -758,11 +753,10 @@ class YaraScan(FileScanProvider):
                         yaraResult.result = {"error": str(e)}
                     yaraResult.success = False
                     yaraResult.finished = True
-                    if self.debug:
-                        eprint(
-                            f'{get_ident()} Yara scan error: {yaraResult.result}',
-                            timestamp=True,
-                        )
+                    self.logger.info(
+                        f'{get_ident()} Yara scan error: {yaraResult.result}',
+                        timestamp=True,
+                    )
                 finally:
                     self.scanningFilesCount.decrement()
 
@@ -824,11 +818,16 @@ class YaraScan(FileScanProvider):
 class CapaScan(FileScanProvider):
     # ---------------------------------------------------------------------------------
     # constructor
-    def __init__(self, debug=False, verboseDebug=False, rulesDir=None, verboseHits=False, reqLimit=None):
+    def __init__(
+        self,
+        logger=None,
+        rulesDir=None,
+        verboseHits=False,
+        reqLimit=None,
+    ):
         self.scanningFilesCount = AtomicInt(value=0)
         self.rulesDir = rulesDir
-        self.debug = debug
-        self.verboseDebug = verboseDebug
+        self.logger = logger if logger else logging
         self.verboseHits = verboseHits
         self.reqLimit = reqLimit if reqLimit else CAPA_MAX_REQS
 
@@ -867,11 +866,10 @@ class CapaScan(FileScanProvider):
 
                 if allowed:
                     try:
-                        if self.verboseDebug:
-                            eprint(
-                                f'{get_ident()} Capa scanning: {fileName}',
-                                timestamp=True,
-                            )
+                        self.logger.debug(
+                            f'{get_ident()} Capa scanning: {fileName}',
+                            timestamp=True,
+                        )
 
                         if self.rulesDir is not None:
                             cmd = [
@@ -905,7 +903,7 @@ class CapaScan(FileScanProvider):
                                 'never',
                                 fileName,
                             ]
-                        capaErr, capaOut = run_process(cmd, stderr=False, debug=self.debug)
+                        capaErr, capaOut = run_process(cmd, stderr=False, logger=self.logger)
                         if (capaErr == 0) and (len(capaOut) > 0) and (len(capaOut[0]) > 0):
                             # load the JSON output from capa into the .result
                             try:
@@ -917,22 +915,20 @@ class CapaScan(FileScanProvider):
                             # probably failed because it's not an executable, ignore it
                             capaResult.result = {"error": str(capaErr)}
 
-                        if self.verboseDebug:
-                            eprint(
-                                f'{get_ident()} Capa scan result: {capaResult.result}',
-                                timestamp=True,
-                            )
+                        self.logger.debug(
+                            f'{get_ident()} Capa scan result: {capaResult.result}',
+                            timestamp=True,
+                        )
                         capaResult.success = capaResult.result is not None
                         capaResult.finished = True
 
                     except Exception as e:
                         if capaResult.result is None:
                             capaResult.result = str(e)
-                        if self.debug:
-                            eprint(
-                                f'{get_ident()} Capa scan error: {capaResult.result}',
-                                timestamp=True,
-                            )
+                        self.logger.debug(
+                            f'{get_ident()} Capa scan error: {capaResult.result}',
+                            timestamp=True,
+                        )
 
                     finally:
                         self.scanningFilesCount.decrement()
