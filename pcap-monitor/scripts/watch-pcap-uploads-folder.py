@@ -44,7 +44,7 @@ def file_processor(pathname, **kwargs):
     gid = kwargs["gid"]
     pcapDir = kwargs["destination"]
     zeekDir = kwargs["zeek"]
-    logger = kwargs["logger"]
+    logger = kwargs["logger"] if "logger" in kwargs and kwargs["logger"] else logging
 
     logger.info(f"{scriptName}:\t👓\t{pathname}")
 
@@ -61,7 +61,7 @@ def file_processor(pathname, **kwargs):
                 (fileMime in ('application/vnd.tcpdump.pcap', 'application/x-pcapng')) or ('pcap-ng' in fileType)
             ):
                 # a pcap file to be processed by dropping it into pcapDir
-                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {pcapDir}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {pcapDir}")
                 shutil.move(pathname, os.path.join(pcapDir, os.path.basename(pathname)))
 
             elif os.path.isdir(zeekDir) and (
@@ -81,7 +81,7 @@ def file_processor(pathname, **kwargs):
                 ]
             ):
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
-                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}/{fileType}) to {zeekDir}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {zeekDir}")
                 shutil.move(pathname, os.path.join(zeekDir, os.path.basename(pathname)))
 
             else:

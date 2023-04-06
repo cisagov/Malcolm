@@ -58,7 +58,7 @@ def file_processor(pathname, **kwargs):
     uid = kwargs["uid"]
     gid = kwargs["gid"]
     destination = kwargs["destination"]
-    logger = kwargs["logger"]
+    logger = kwargs["logger"] if "logger" in kwargs and kwargs["logger"] else logging
 
     logger.info(f"{scriptName}:\t👓\t{pathname}")
 
@@ -72,12 +72,12 @@ def file_processor(pathname, **kwargs):
 
             if fileMime in mime_types:
                 # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
-                logger.info(f"{scriptName}:\t🖅\t{pathname} ({fileMime}) to {destination}")
+                logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {destination}")
                 shutil.move(pathname, os.path.join(destination, os.path.basename(pathname)))
 
             else:
                 # unhandled file type uploaded, delete it
-                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime})")
+                logger.warning(f"{scriptName}:\t🗑\t{pathname} [{fileMime}]")
                 os.unlink(pathname)
 
         except Exception as genericError:
@@ -210,8 +210,7 @@ def main():
 
     # if directory to monitor doesn't exist, create it now
     if not os.path.isdir(args.srcDir):
-        if debug:
-            eprint(f'{scriptName}:\tcreating "{args.srcDir}" to monitor')
+        logging.info(f'{scriptName}:\tcreating "{args.srcDir}" to monitor')
         pathlib.Path(args.srcDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor

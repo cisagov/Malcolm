@@ -43,8 +43,6 @@ MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 64
 MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 134217728
 
 ###################################################################################################
-debug = False
-verboseDebug = False
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
@@ -56,17 +54,16 @@ shuttingDown = [False]
 ###################################################################################################
 # watch files written to and moved to this directory
 class EventWatcher:
-    def __init__(self):
-        global debug
-
+    def __init__(self, logger=None):
         super().__init__()
+
+        self.logger = logger if logger else logging
 
         # initialize ZeroMQ context and socket(s) to send messages to
         self.context = zmq.Context()
 
         # Socket to send messages on
-        if debug:
-            eprint(f"{scriptName}:\tbinding ventilator port {VENTILATOR_PORT}")
+        self.logger.info(f"{scriptName}:\tbinding ventilator port {VENTILATOR_PORT}")
         self.ventilator_socket = self.context.socket(zmq.PUB)
         self.ventilator_socket.bind(f"tcp://*:{VENTILATOR_PORT}")
 
@@ -74,18 +71,14 @@ class EventWatcher:
         # and if he can't then what's the point? just block
         # self.ventilator_socket.SNDTIMEO = 5000
 
-        if debug:
-            eprint(f"{scriptName}:\tEventWatcher initialized")
+        self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
     ###################################################################################################
     # set up event processor to append processed events from to the event queue
     def processFile(self, pathname):
         global args
-        global debug
-        global verboseDebug
 
-        if debug:
-            eprint(f"{scriptName}:\t👓\t{pathname}")
+        self.logger.info(f"{scriptName}:\t👓\t{pathname}")
 
         if os.path.isfile(pathname):
             fileSize = os.path.getsize(pathname)
@@ -101,26 +94,21 @@ class EventWatcher:
                             FILE_SCAN_RESULT_FILE_TYPE: fileType,
                         }
                     )
-                    if debug:
-                        eprint(f"{scriptName}:\t📩\t{fileInfo}")
+                    self.logger.info(f"{scriptName}:\t📩\t{fileInfo}")
                     try:
                         self.ventilator_socket.send_string(fileInfo)
-                        if debug:
-                            eprint(f"{scriptName}:\t📫\t{pathname}")
+                        self.logger.info(f"{scriptName}:\t📫\t{pathname}")
                     except zmq.Again:
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t🕑\t{pathname}")
+                        self.logger.debug(f"{scriptName}:\t🕑\t{pathname}")
 
                 else:
                     # temporary capa .viv file, just ignore it as it will get cleaned up by the scanner when it's done
-                    if debug:
-                        eprint(f"{scriptName}:\t🚧\t{pathname}")
+                    self.logger.info(f"{scriptName}:\t🚧\t{pathname}")
 
             else:
                 # too small/big to care about, delete it
                 os.remove(pathname)
-                if debug:
-                    eprint(f"{scriptName}:\t🚫\t{pathname}")
+                self.logger.info(f"{scriptName}:\t🚫\t{pathname}")
 
 
 def file_processor(pathname, **kwargs):
@@ -143,48 +131,14 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
 # main
 def main():
     global args
-    global debug
-    global verboseDebug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--ignore-existing',
         dest='ignoreExisting',
@@ -268,20 +222,20 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
@@ -294,8 +248,7 @@ def main():
         preexistingDir = True
     else:
         preexistingDir = False
-        if debug:
-            eprint(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
+        logging.info(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
@@ -315,14 +268,12 @@ def main():
         polling=args.polling,
     )
     for watchDir in watchDirs:
-        if verboseDebug:
-            eprint(f"{scriptName}:\tScheduling {watchDir}")
+        logging.info(f"{scriptName}:\tScheduling {watchDir}")
         observer.schedule(handler, watchDir, recursive=False)
 
     observer.start()
 
-    if debug:
-        eprint(f"{scriptName}:\tmonitoring {watchDirs}")
+    logging.info(f"{scriptName}:\tmonitoring {watchDirs}")
 
     try:
         time.sleep(2)
@@ -336,8 +287,8 @@ def main():
                 ]:
                     touch(preexistingFile)
                     filesTouched += 1
-            if debug and (filesTouched > 0):
-                eprint(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
+            if filesTouched > 0:
+                logging.info(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
 
         # start the thread to actually handle the files as they're queued by the FileOperationEventHandler handler
         workerThreadCount = malcolm_utils.AtomicInt(value=0)
@@ -348,11 +299,11 @@ def main():
                     handler,
                     observer,
                     file_processor,
-                    {'watcher': EventWatcher()},
+                    {'watcher': EventWatcher(logger=logging)},
                     args.assumeClosedSec,
                     workerThreadCount,
                     shuttingDown,
-                    None,
+                    logging,
                 ],
             ),
         )
@@ -365,8 +316,7 @@ def main():
             observer.join(1)
 
         # graceful shutdown
-        if debug:
-            eprint(f"{scriptName}:\tshutting down...")
+        logging.info(f"{scriptName}:\tshutting down...")
 
         if shuttingDown[0]:
             raise WatchdogShutdown()
@@ -382,8 +332,7 @@ def main():
     while workerThreadCount.value() > 0:
         time.sleep(1)
 
-    if debug:
-        eprint(f"{scriptName}:\tfinished monitoring {watchDirs}")
+    logging.info(f"{scriptName}:\tfinished monitoring {watchDirs}")
 
 
 if __name__ == '__main__':

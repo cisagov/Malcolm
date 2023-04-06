@@ -58,8 +58,6 @@ ARKIME_FILES_INDEX = "arkime_files"
 ARKIME_FILE_SIZE_FIELD = "filesize"
 
 ###################################################################################################
-debug = False
-verboseDebug = False
 pdbFlagged = False
 args = None
 opensearchHttpAuth = None
@@ -73,15 +71,14 @@ DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 ###################################################################################################
 # watch files written to and moved to this directory
 class EventWatcher:
-    def __init__(self):
+    def __init__(self, logger=None):
         global args
         global opensearchHttpAuth
-        global debug
-        global verboseDebug
         global shuttingDown
 
         super().__init__()
 
+        self.logger = logger if logger else logging
         self.useOpenSearch = False
         self.openSearchClient = None
 
@@ -94,8 +91,7 @@ class EventWatcher:
             while (not connected) and (not shuttingDown[0]):
                 try:
                     try:
-                        if debug:
-                            eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
+                        self.logger.info(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
 
                         self.openSearchClient = OpenSearch(
                             hosts=[args.opensearchUrl],
@@ -106,16 +102,14 @@ class EventWatcher:
                             request_timeout=1,
                         )
 
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+                        self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
 
                         self.openSearchClient.cluster.health(
                             wait_for_status='red',
                             request_timeout=1,
                         )
 
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+                        self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
 
                         connected = self.openSearchClient is not None
                         if not connected:
@@ -127,12 +121,12 @@ class EventWatcher:
                         ConnectionRefusedError,
                         NewConnectionError,
                     ) as connError:
-                        if debug:
-                            eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
+                        self.logger.error(f"{scriptName}:\tOpenSearch connection error: {connError}")
 
                 except Exception as genericError:
-                    if debug:
-                        eprint(f"{scriptName}:\tUnexpected exception while connecting to OpenSearch: {genericError}")
+                    self.logger.error(
+                        f"{scriptName}:\tUnexpected exception while connecting to OpenSearch: {genericError}"
+                    )
 
                 if (not connected) and args.opensearchWaitForHealth:
                     time.sleep(1)
@@ -144,14 +138,12 @@ class EventWatcher:
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
             while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown[0]):
                 try:
-                    if debug:
-                        eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
+                    self.logger.info(f"{scriptName}:\twaiting for OpenSearch to be healthy")
                     self.openSearchClient.cluster.health(
                         index=ARKIME_FILES_INDEX,
                         wait_for_status='yellow',
                     )
-                    if verboseDebug:
-                        eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+                    self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
                     healthy = True
 
                 except (
@@ -160,8 +152,7 @@ class EventWatcher:
                     ConnectionRefusedError,
                     NewConnectionError,
                 ) as connError:
-                    if verboseDebug:
-                        eprint(f"{scriptName}:\tOpenSearch health check: {connError}")
+                    self.logger.debug(f"{scriptName}:\tOpenSearch health check: {connError}")
 
                 if not healthy:
                     time.sleep(1)
@@ -172,8 +163,7 @@ class EventWatcher:
         self.context = zmq.Context()
 
         # Socket to send messages on
-        if debug:
-            eprint(f"{scriptName}:\tbinding publisher port {PCAP_TOPIC_PORT}")
+        self.logger.info(f"{scriptName}:\tbinding publisher port {PCAP_TOPIC_PORT}")
         self.topic_socket = self.context.socket(zmq.PUB)
         self.topic_socket.bind(f"tcp://*:{PCAP_TOPIC_PORT}")
 
@@ -181,18 +171,14 @@ class EventWatcher:
         # and if he can't then what's the point? just block
         # self.topic_socket.SNDTIMEO = 5000
 
-        if debug:
-            eprint(f"{scriptName}:\tEventWatcher initialized")
+        self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
     ###################################################################################################
     # set up event processor to append processed events from to the event queue
     def processFile(self, pathname):
         global args
-        global debug
-        global verboseDebug
 
-        if debug:
-            eprint(f"{scriptName}:\t👓\t{pathname}")
+        self.logger.info(f"{scriptName}:\t👓\t{pathname}")
 
         # the entity must be a regular PCAP file and actually exist
         if os.path.isfile(pathname):
@@ -224,13 +210,11 @@ class EventWatcher:
 
                 if fileIsDuplicate:
                     # this is duplicate file (it's been processed before) so ignore it
-                    if debug:
-                        eprint(f"{scriptName}:\t📋\t{pathname}")
+                    self.logger.info(f"{scriptName}:\t📋\t{pathname}")
 
                 else:
                     # the entity is a right-sized non-duplicate file, and it exists, so send it to get processed
-                    if debug:
-                        eprint(f"{scriptName}:\t📩\t{pathname}")
+                    self.logger.info(f"{scriptName}:\t📩\t{pathname}")
                     try:
                         fileInfo = {
                             FILE_INFO_DICT_NAME: pathname if args.includeAbsolutePath else relativePath,
@@ -241,16 +225,13 @@ class EventWatcher:
                             FILE_INFO_DICT_TAGS: tags_from_filename(relativePath),
                         }
                         self.topic_socket.send_string(json.dumps(fileInfo))
-                        if debug:
-                            eprint(f"{scriptName}:\t📫\t{fileInfo}")
+                        self.logger.info(f"{scriptName}:\t📫\t{fileInfo}")
                     except zmq.Again:
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t🕑\t{pathname}")
+                        self.logger.debug(f"{scriptName}:\t🕑\t{pathname}")
 
             else:
                 # too small/big to care about, or the wrong type, ignore it
-                if debug:
-                    eprint(f"{scriptName}:\t✋\t{pathname}")
+                self.logger.info(f"{scriptName}:\t✋\t{pathname}")
 
 
 def file_processor(pathname, **kwargs):
@@ -273,50 +254,15 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
 # main
 def main():
     global args
     global opensearchHttpAuth
-    global debug
-    global verboseDebug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--min-bytes',
         dest='minBytes',
@@ -465,16 +411,15 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
-
-    logging.basicConfig(level=logging.ERROR)
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
@@ -493,7 +438,6 @@ def main():
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
@@ -506,8 +450,7 @@ def main():
         preexistingDir = True
     else:
         preexistingDir = False
-        if debug:
-            eprint(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
+        logging.info(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
@@ -527,14 +470,12 @@ def main():
         polling=args.polling,
     )
     for watchDir in watchDirs:
-        if verboseDebug:
-            eprint(f"{scriptName}:\tScheduling {watchDir}")
+        logging.debug(f"{scriptName}:\tScheduling {watchDir}")
         observer.schedule(handler, watchDir, recursive=False)
 
     observer.start()
 
-    if debug:
-        eprint(f"{scriptName}:\tmonitoring {watchDirs}")
+    logging.info(f"{scriptName}:\tmonitoring {watchDirs}")
 
     try:
         time.sleep(2)
@@ -548,8 +489,8 @@ def main():
                 ]:
                     touch(preexistingFile)
                     filesTouched += 1
-            if debug and (filesTouched > 0):
-                eprint(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
+            if filesTouched > 0:
+                logging.info(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
 
         # start the thread to actually handle the files as they're queued by the FileOperationEventHandler handler
         workerThreadCount = malcolm_utils.AtomicInt(value=0)
@@ -560,11 +501,11 @@ def main():
                     handler,
                     observer,
                     file_processor,
-                    {'watcher': EventWatcher()},
+                    {'watcher': EventWatcher(logger=logging)},
                     args.assumeClosedSec,
                     workerThreadCount,
                     shuttingDown,
-                    None,
+                    logging,
                 ],
             ),
         )
@@ -577,8 +518,7 @@ def main():
             observer.join(1)
 
         # graceful shutdown
-        if debug:
-            eprint(f"{scriptName}:\tshutting down...")
+        logging.info(f"{scriptName}:\tshutting down...")
 
         if shuttingDown[0]:
             raise WatchdogShutdown()
@@ -594,8 +534,7 @@ def main():
     while workerThreadCount.value() > 0:
         time.sleep(1)
 
-    if debug:
-        eprint(f"{scriptName}:\tfinished monitoring {watchDirs}")
+    logging.info(f"{scriptName}:\tfinished monitoring {watchDirs}")
 
 
 if __name__ == '__main__':
