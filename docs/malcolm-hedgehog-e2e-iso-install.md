@@ -12,7 +12,10 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
 * ["Burning" the Installation ISOs to USB Flash Drive](#ISOBurning)
 * [Booting the Installation Media](#BootUSB)
 * [Malcolm Installation and Configuration](#MalcolmInstallAndConfig)
-    - [Malcolm ISO Installation](#ISOInstallMalcolm)
+    - [ISO Installation](#ISOInstallMalcolm)
+    - [System](#MalcolmSystem)
+    - [Configuration](#MalcolmConfig)
+    - [Setting up Authentication](#MalcolmAuthSetup)
 * [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig)
     - [Hedgehog Linux ISO Installation](#ISOInstallHedgehog)
 
@@ -100,6 +103,27 @@ At the end of the installation process, you will be prompted with a few self-exp
 Following these prompts, the installer will reboot and the Malcolm base operating system will boot.
 
 The Malcolm installer does not require an internet connection to complete successfully. If the installer prompts you to configure network connectivity, you may choose "do not configure the network at this time."
+
+### <a name="MalcolmSystem"></a> Malcolm System
+
+The Malcolm base operating system is a [hardened](hardening.md#Hardening) Linux installation based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/) [running](https://wiki.debian.org/Xfce) the [XFCE desktop environment](https://www.xfce.org/). It has been preloaded with all of the [components](components.md#Components) that make up Malcolm.
+
+[NetworkManager](https://wiki.debian.org/NetworkManager) can be used to configure networking for Malcolm. NetworkManager can be configured by clicking the 🖧 (networked computers) icon in the system tray in the upper-right corner of the screen, or right-clicking the icon and selecting **Edit Connections...** to modify the properties of a given connection.
+
+Display resolution should be detected and adjusted automatically. If you need to make changes to display properties, click the **Applications** menu and select **Settings** → **Display**.
+
+The panel bordering the top of the Malcolm desktop is home to a number of useful shortcuts:
+
+![Malcolm Desktop](./images/screenshots/malcolm_desktop.png)
+
+
+### <a name="MalcolmConfig"></a> Malcolm Configuration
+
+The first time the Malcolm base operating system boots the **Malcolm Configuration** wizard will start automatically. This same configuration script can be run again later by running [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning) from the Malcolm installation directory.
+
+![Malcolm Configuration on first boot](./images/screenshots/malcolm_first_boot_config.png)
+
+### <a name="MalcolmAuthSetup"></a> Setting up Authentication for Malcolm
 
 ## <a name="HedgehogInstallAndConfig"></a> Hedgehog Linux Installation and Configuration
 
