@@ -119,9 +119,91 @@ The panel bordering the top of the Malcolm desktop is home to a number of useful
 
 ### <a name="MalcolmConfig"></a> Malcolm Configuration
 
-The first time the Malcolm base operating system boots the **Malcolm Configuration** wizard will start automatically. This same configuration script can be run again later by running [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning) from the Malcolm installation directory.
+The first time the Malcolm base operating system boots the **Malcolm Configuration** wizard will start automatically. This same configuration script can be run again later by running [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning) from the Malcolm installation directory, or clicking the **Configure Malcolm** 🔳 icon in the top panel.
 
 ![Malcolm Configuration on first boot](./images/screenshots/malcolm_first_boot_config.png)
+
+The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's questions proceed as follows. Note that you may not necessarily see every question listed here depending on how you answered earlier questions. Usually the default selection is what you'll want to select unless otherwise indicated below.
+
+* Malcolm processes will run as UID 1000 and GID 1000. Is this OK?
+    - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
+* Should Malcolm use and maintain its own OpenSearch instance?
+    - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch cluster instead.
+* Forward Logstash logs to a secondary remote OpenSearch instance?
+    - Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can be configured additionally forward logs to a secondary remote OpenSearch instance. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance.
+* Setting 16g for OpenSearch and 3g for Logstash. Is this OK?
+    - Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory to be set aside for their use. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 16 gigabytes. For a pleasant experience, I would suggest not using a value under 10 gigabytes for OpenSearch and 2500 megabytes for Logstash.
+* Setting 3 workers for Logstash pipelines. Is this OK?
+    - This setting is used to tune the performance and resource utilization of the the `logstash` container. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
+* Restart Malcolm upon system or Docker daemon restart?
+    - This question allows you to configure Docker's [restart policy](https://docs.docker.com/config/containers/start-containers-automatically/#use-a-restart-policy) for Malcolm (ie., the behavior used to restart Malcolm should the system be shut down or rebooted, or should one of Malcolm's components should crash). Possible options are:
+        + no - do not automatically restart the container
+        + on-failure - restart the container if it exits due to an error, which manifests as a non-zero exit code
+        + always - always restart the container if it stops
+        + unless-stopped - similar to always, except that when the container is stopped (manually or otherwise), it is not restarted even after Docker daemon restarts; this is usually a good choice
+* Require encrypted HTTPS connections?
+    - Malcolm uses [TLS](authsetup.md#TLSCerts) encryption for its web browser-accessible user interfaces. Answering **Y** to this question is almost always what you want. The only situation in which you might want to answer **N** is if you are running Malcolm behind a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates for you and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities like [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm. **Make sure** you understand what you are doing and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying your local firewall configuration, should you choose to answer **N** to this question.
+* Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?
+    - See the previous question. If Malcolm is configured behind a remote proxy, Malcolm can prompt you to *Configure labels for Traefik?* to allow it to identify itself to Traefik.
+* Specify external Docker network name (or leave blank for default networking)
+    - This allows you to configure Malcolm to use [custom Docker networks](https://docs.docker.com/compose/networking/#specify-custom-networks). Leave this blank unless you know you want to do otherwise.
+* Authenticate against Lightweight Directory Access Protocol (LDAP) server?
+    - Answer **N** to use Malcolm's own built-in [local account management](authsetup.md#AuthBasicAccountManagement), or **Y** to use [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP).
+* Select LDAP server compatibility type
+    - This question allows you to specify Microsoft Active Directory compatibility (**winldap**) or generic LDAP compatibility (**openldap**, for OpenLDAP, glauth, etc.) when using [LDAP authentication](authsetup.md#AuthLDAP)
+* Use StartTLS (rather than LDAPS) for LDAP connection security?
+    - When using LDAP authentication, this question allows you to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
+* Store PCAP, log and index files locally under /home/user/Malcolm?
+    - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows you to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
+* Compress OpenSearch index snapshots?
+    - Choose whether OpenSearch [index snapshots](https://opensearch.org/docs/2.6/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/) should be compressed or not, should you opt to configure them later in [OpenSearch index management](index-management.md#IndexManagement).
+* Delete the oldest indices when the database exceeds a certain size?
+    - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
+* Automatically analyze all PCAP files with Suricata?
+    - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
+* Download updated Suricata signatures periodically?
+    - This option is used to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
+* Automatically analyze all PCAP files with Zeek?
+    - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface
+* Perform reverse DNS lookup locally for source and destination IP addresses in logs?
+* Perform hardware vendor OUI lookups for MAC addresses?
+* Perform string randomness scoring on some fields?
+* Expose OpenSearch port to external hosts?
+* Expose Logstash port to external hosts?
+* Expose Filebeat TCP port to external hosts?
+* Select log format for messages sent to Filebeat TCP listener
+* Source field to parse for messages sent to Filebeat TCP listener
+* Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener
+* Field to drop from events sent to Filebeat TCP listener
+* Tag to apply to messages sent to Filebeat TCP listener
+* Expose SFTP server (for PCAP upload) to external hosts?
+* Enable file extraction with Zeek?
+* Select file extraction behavior
+* Select file preservation behavior
+* Expose web interface for downloading preserved files?
+* Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)
+* Scan extracted files with ClamAV?
+* Scan extracted files with Yara?
+* Scan extracted PE files with Capa?
+* Lookup extracted file hashes with VirusTotal?
+* Enter VirusTotal API key
+* Download updated file scanner signatures periodically?
+* Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?
+* Should Malcolm enrich network traffic using NetBox?
+* Specify default NetBox site name
+* Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?
+* Capture packets using netsniff-ng?
+* Capture packets using tcpdump?
+* Should Arkime delete PCAP files based on available storage?
+    - OpenSearch index state management and snapshot management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. This option can be used to also allow Arkime to prune old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
+* Should Malcolm analyze live network traffic with Suricata?
+* Should Malcolm analyze live network traffic with Zeek?
+* Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?
+* Specify capture interface(s) (comma-separated)
+* Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)
+    - `not port 5044 and not port * 8005 and not port 9200`
+* Disable capture interface hardware offloading and adjust ring buffer sizes?
+* Enable dark mode for OpenSearch Dashboards?
 
 ### <a name="MalcolmAuthSetup"></a> Setting up Authentication for Malcolm
 
