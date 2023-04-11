@@ -13,11 +13,13 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
 * [Booting the Installation Media](#BootUSB)
 * [Malcolm Installation and Configuration](#MalcolmInstallAndConfig)
     - [ISO Installation](#ISOInstallMalcolm)
-    - [System](#MalcolmSystem)
+    - [Desktop Environment](#MalcolmDesktop)
     - [Configuration](#MalcolmConfig)
     - [Setting up Authentication](#MalcolmAuthSetup)
 * [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig)
     - [Hedgehog Linux ISO Installation](#ISOInstallHedgehog)
+    - [Configure Interfaces](#HedgehogInterfaces)
+    - [Configure Capture and Forwarding](#HedgehogCapture)
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
 
@@ -104,7 +106,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 The Malcolm installer does not require an internet connection to complete successfully. If the installer prompts you to configure network connectivity, you may choose "do not configure the network at this time."
 
-### <a name="MalcolmSystem"></a> Malcolm System
+### <a name="MalcolmDesktop"></a> Malcolm Desktop Environment
 
 The Malcolm base operating system is a [hardened](hardening.md#Hardening) Linux installation based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/) [running](https://wiki.debian.org/Xfce) the [XFCE desktop environment](https://www.xfce.org/). It has been preloaded with all of the [components](components.md#Components) that make up Malcolm.
 
@@ -250,6 +252,25 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 
 ### <a name="MalcolmAuthSetup"></a> Setting up Authentication for Malcolm
 
+Once the [configuration](#MalcolmConfig) questions have been completed as described above, you can click the circular yellow Malcolm icon the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm. As you have not yet configured authentication, you will be prompted to do so. This authentication setup can be run again later by running [`./scripts/auth_setup`](authsetup.md#AuthSetup) from the Malcolm installation directory.
+
+![Setting up authentication on Malcolm's first run](./images/screenshots/iso_install_auth_setup.png)
+
+*The Configure Authentication dialog*
+
+As this is the first time setting up authentication, ensure the **all** option is selected and press **OK**.
+
+You will be prompted to do the following:
+
+* Store administrator username/password for local Malcolm access: specifies the administrator credentials when using [local account management](#AuthBasicAccountManagement) (instead of LDAP) for authentication.
+* (Re)generate self-signed certificates for HTTPS access: creates the self-signed [TLS certificates](#TLSCerts) used for encrypting the connections between users' web browsers and Malcolm
+* (Re)generate self-signed certificates for a remote log forwarder: creates the self-signed [TLS certificates](#TLSCerts) for communications from a remote log forwarder (such as Hedgehog Linux or forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs))
+* Configure remote primary or secondary OpenSearch instance: **N** if you are using Malcolm's local OpenSearch instance, or **Y** to specify credentials for a remote OpenSearch cluster (see [OpenSearch instances](opensearch-instances.md#OpenSearchInstance))
+* Store username/password for email alert sender account: answer **Y** to specify credentials for [Email Sender Accounts](alerting.md#AlertingEmail) to be used with OpenSearch Dashboards' alerting plugin
+* (Re)generate internal passwords for NetBox: if you answered **Y** to "Should Malcolm run and maintain an instance of NetBox...?" during the configuration questions, you should need to asnwer **Y** to this question at least the first time you start Malcolm
+* Transfer self-signed client certificates to a remote log forwarder: in order for a Hedgehog Linux to securely communicate with Malcolm, it needs the client certificates generated when you answered **Y** to "(Re)generate self-signed certificates for a remote log forwarder" a few moments ago. Malcolm can facilitate the secure transfer of these to a sensor running Hedgehog. If you will be continuing on to configure a sensor running Hedgehog Linux, answer **Y** here.
+    - You're prompted to "Run configure-capture on the remote log forwarder, select 'Configure Forwarding,' then 'Receive client SSL files...'." Return here and press **Enter** when you've finished with [Configure Capture and Forwarding](#HedgehogCapture) below.
+
 ## <a name="HedgehogInstallAndConfig"></a> Hedgehog Linux Installation and Configuration
 
 ## <a name="ISOInstallHedgehog"></a> Hedgehog Linux ISO Installation
@@ -271,3 +292,6 @@ At the end of the installation process, you will be prompted with a few self-exp
 
 Following these prompts, the installer will reboot and Hedgehog Linux will boot.
 
+## <a name="HedgehogInterfaces"></a> Configure Interfaces
+
+## <a name="HedgehogCapture"></a> Configure Capture and Forwarding
