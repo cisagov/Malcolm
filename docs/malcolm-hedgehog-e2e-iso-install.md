@@ -162,48 +162,91 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * Automatically analyze all PCAP files with Suricata?
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
 * Download updated Suricata signatures periodically?
-    - This option is used to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
+    - If your Malcolm instance has internet connectivity, answer **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
 * Automatically analyze all PCAP files with Zeek?
-    - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface
+    - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
 * Perform reverse DNS lookup locally for source and destination IP addresses in logs?
+    - If enabled, this option will perform reverse [DNS lookups](https://www.elastic.co/guide/en/logstash/current/plugins-filters-dns.html) on IP addresses found in traffic and use the results to enrich network logs. Answer **Y** if your Malcolm instance has access to a DNS server to perform these lookups.
 * Perform hardware vendor OUI lookups for MAC addresses?
+    - Malcolm will [map MAC addresses](https://standards.ieee.org/products-programs/regauth/) to hardware manufacturer when possible. You probably want to answer **Y** to this question.
 * Perform string randomness scoring on some fields?
+    - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). You probably want to answer **Y** to this question.
 * Expose OpenSearch port to external hosts?
+    - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 9200 so that Arkime sessions can be written to Malcolm's OpenSearch database.
 * Expose Logstash port to external hosts?
+    - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 5044 so that Zeek and Suricata logs can be ingested by Malcolm's Logstash instance.
 * Expose Filebeat TCP port to external hosts?
+    - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
 * Select log format for messages sent to Filebeat TCP listener
+    - Possible choices include `json` and `raw`; you probably want to choose `json`.
 * Source field to parse for messages sent to Filebeat TCP listener
+    - The default choice (and the one Hedgehog Linux will be sending) is `message`.
 * Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener
+    - The default choice (and the one that corresponds to Malcolm's dashboards built for the resource utilization metrics sent by Hedgehog Linux) is `miscbeat`.
 * Field to drop from events sent to Filebeat TCP listener
+    - You most likely want this to be the default, `message`, to match the field name specified above.
 * Tag to apply to messages sent to Filebeat TCP listener
+    - The default is `_malcolm_beats`, which is used by Malcolm to recognize and parse metrics sent from Hedgehog Linux.
 * Expose SFTP server (for PCAP upload) to external hosts?
+    - Answer **N** unless you plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; answering **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
 * Enable file extraction with Zeek?
+    - Answer **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
 * Select file extraction behavior
+    - This determines which files Zeek should extract for scanning:
+        + `none`: no file extraction
+        + `interesting`: extraction of files with mime types of common attack vectors
+        + `mapped`: extraction of files with recognized mime types
+        + `known`: extraction of files for which any mime type can be determined
+        + `all`: extract all files
 * Select file preservation behavior
+    - This determines the behavior for preservation of Zeek-extracted files:
+        +  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
+        + `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
+        + `none`: preserve no extracted files
 * Expose web interface for downloading preserved files?
+    - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at `https://<Malcolm host or IP address>/extracted-files/`. Beware that Zeek-extracted files may contain malware.
 * Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)
+    - If a password is specified here, Zeek-extracted files downloaded as described under the previous question will be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
 * Scan extracted files with ClamAV?
+    - Answer **Y** to scan extracted files with [ClamAV](https://www.clamav.net/), an antivirus engine.
 * Scan extracted files with Yara?
+    - Answer **Y** to scan extracted files with [Yara](https://github.com/VirusTotal/yara), a tool used to identify and classify malware samples.
 * Scan extracted PE files with Capa?
+    - Answer **Y** to scan extracted executable files with [Capa](https://github.com/fireeye/capa), a tool for detecting capabilities in executable files.
 * Lookup extracted file hashes with VirusTotal?
+    - Answer **Y** to be prompted for your [**VirusTotal**](https://www.virustotal.com/en/#search) API key which will be used for submitting the hashes of extracted files. Only specify this option if your Malcolm instance has internet connectivity.
 * Enter VirusTotal API key
+    - Specify your [**VirusTotal**](https://www.virustotal.com/en/#search) [API key](https://support.virustotal.com/hc/en-us/articles/115002100149-API) as indicated under the previous question.
 * Download updated file scanner signatures periodically?
+    - If your Malcolm instance has internet connectivity, answer **Y** to enable periodic downloads of signatures used by ClamAV and YARA.
 * Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?
+    - Answer **Y** if you would like to use [NetBox](https://netbox.dev/), a suite for modeling and documenting modern networks, to maintain an inventory of your network assets.    
 * Should Malcolm enrich network traffic using NetBox?
+    - Answer **Y** to [cross-reference](asset-interaction-analysis.md#AssetInteractionAnalysis) network traffic logs your NetBox asset inventory.
 * Specify default NetBox site name
+    - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges, of course. This default site name will be used as a query parameter for these enrichment lookups.
 * Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?
+    - Malcolm itself can perform [live analysis](live-analysis.md#LocalPCAP) of traffic it sees on another network interface (ideally not the same one used for its management). If you are using Hedgehog Linux you probably want to answer **N** to this question. If you want Malcolm to observe and capture traffic instead of or in addition to a sensor running Hedgehog Linux, answer **Y**.
 * Capture packets using netsniff-ng?
+    - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [netsniff-ng](http://netsniff-ng.org/) (instead of tcpdump). These PCAP files are then periodically rotated into Arkime for analysis. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
 * Capture packets using tcpdump?
+    - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng).
 * Should Arkime delete PCAP files based on available storage?
-    - OpenSearch index state management and snapshot management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. This option can be used to also allow Arkime to prune old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
+    - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
 * Should Malcolm analyze live network traffic with Suricata?
+    - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Suricata. If you are using Hedgehog Linux you probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
 * Should Malcolm analyze live network traffic with Zeek?
+    - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek. If you are using Hedgehog Linux you probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
 * Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?
+    - If you are using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
 * Specify capture interface(s) (comma-separated)
+    - Specify the network interface(s) for [live traffic analysis](live-analysis.md#LocalPCAP) if it is enabled for netsniff-ng, tcpdump, Suricata or Zeek as described above. For multiple interfaces, separate the interface names with a comma (e.g., `enp0s25` or `enp10s0,enp11s0`).
 * Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)
-    - `not port 5044 and not port * 8005 and not port 9200`
+    - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, you may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, you could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`.
 * Disable capture interface hardware offloading and adjust ring buffer sizes?
+    - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and you answer **Y** to this question, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be enabled if the interface(s) are being used for capture **only**, otherwise answer **N**. If you're unsure, you should probably answer **N**.
 * Enable dark mode for OpenSearch Dashboards?
+    - Answer **Y** if you prefer dark dashboards, **N** if you prefer light ones.
 
 ### <a name="MalcolmAuthSetup"></a> Setting up Authentication for Malcolm
 
