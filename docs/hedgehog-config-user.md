@@ -53,11 +53,11 @@ Select **Configure Forwarding** to set up forwarding logs and statistics from th
 
 ![Configure forwarders](./images/hedgehog/images/forwarder_config.png)
 
-There are five forwarder services used on the sensor, each for forwarding a different type of log or sensor metric.
+There are three forwarder services used on the sensor, each for forwarding a different type of log or sensor metric.
 
-## <a name="Hedgehogarkime-capture"></a>capture: Arkime session forwarding
+## <a name="Hedgehogarkime-capture"></a>arkime-capture: Arkime session forwarding
 
-[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [OpenSearch](https://opensearch.org/) database so that it can be viewed in [Arkime viewer](https://arkime.com/), whether standalone or as part of a [Malcolm]({{ site.github.repository_url }}) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions]({{ site.github.repository_url }}#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
+arkime-[capture](https://github.com/arkime/arkime/tree/master/capture) is not only used to capture PCAP files, but also the parse raw traffic into sessions and forward this session metadata to an [OpenSearch](https://opensearch.org/) database so that it can be viewed in [Arkime viewer](https://arkime.com/), whether standalone or as part of a [Malcolm]({{ site.github.repository_url }}) instance. If you're using Hedgehog Linux with Malcolm, please read [Correlating Zeek logs and Arkime sessions]({{ site.github.repository_url }}#ZeekArkimeFlowCorrelation) in the Malcolm documentation for more information.
 
 First, select the OpenSearch connection transport protocol, either **HTTPS** or **HTTP**. If the metrics are being forwarded to Malcolm, select **HTTPS** to encrypt messages from the sensor to the aggregator using TLS v1.2 using ECDHE-RSA-AES128-GCM-SHA256. If **HTTPS** is chosen, you must choose whether to enable SSL certificate verification. If you are using a self-signed certificate (such as the one automatically created during [Malcolm's configuration]({{ site.github.repository_url }}#configure-authentication)), choose **None**.
 
@@ -67,7 +67,7 @@ Next, enter the **OpenSearch host** IP address (ie., the IP address of the aggre
 
 ![OpenSearch host and port](./images/hedgehog/images/arkime-capture-ip-port.png)
 
-You will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch API. After you've entered the username and the password, the sensor will attempt a test connection to OpenSearch using the connection information provided.
+You will be asked to enter authentication credentials for the sensor's connections to the aggregator's OpenSearch API. After you've entered the username and the password, the sensor will attempt a test connection to OpenSearch using the connection information provided. If the Malcolm services have not yet been started, you may receive a **Connection refused** error. You may select **Ignore Error** for the credentials to be accepted anyway.
 
 ![OpenSearch username](./images/hedgehog/images/opensearch_username.png) ![OpenSearch password](./images/hedgehog/images/opensearch_password.png) ![Successful OpenSearch connection](./images/hedgehog/images/opensearch_connection_success.png)
 
