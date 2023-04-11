@@ -6,9 +6,9 @@
 
 ## <a name="GetMalcolm"></a>Getting Malcolm
 
-For a `TL;DR` example of downloading, configuring, and running Malcolm on a Linux platform, see [Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample).
+For a `TL;DR` example of downloading, configuring, and running Malcolm in Docker on a Linux platform, see **[Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)**.
 
-The scripts to control Malcolm require Python 3. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
+For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linux](hedgehog.md) sensor using the [Malcolm installer ISO](malcolm-iso.md#ISO) and [Hedgehog Linux installer ISO](hedgehog-installation.md#HedgehogInstallation), see **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)**.
 
 ### Source code
 
@@ -19,6 +19,8 @@ The files required to build and run Malcolm are available on its [GitHub page]({
 The `build.sh` script can build Malcolm's Docker images from scratch. See [Building from source](development.md#Build) for more information.
 
 ### Initial configuration
+
+The scripts to control Malcolm require Python 3. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
 You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's Docker images. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](malcolm-config.md#ConfigAndTuning)).
     
