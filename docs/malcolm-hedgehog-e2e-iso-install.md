@@ -242,7 +242,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * Capture packets using netsniff-ng?
     - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [netsniff-ng](http://netsniff-ng.org/) (instead of tcpdump). These PCAP files are then periodically rotated into Arkime for analysis. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
 * Capture packets using tcpdump?
-    - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng).
+    - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng). Do not answer **Y** for both `tcpdump` and `netsniff-ng`.
 * Should Arkime delete PCAP files based on available storage?
     - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
 * Should Malcolm analyze live network traffic with Suricata?
@@ -320,7 +320,9 @@ At the end of the installation process, you will be prompted with a few self-exp
 * **Should the GUI session be locked due to inactivity?**
 * **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
 
-Following these prompts, the installer will reboot and Hedgehog Linux will boot into [kiosk mode](hedgehog-boot.md#HedgehogKioskMode). To continue setup, press **Alt+F4** to exit kiosk mode to the Hedgehog Linux desktop environment.
+Following these prompts, the installer will reboot and Hedgehog Linux will boot into [kiosk mode](hedgehog-boot.md#HedgehogKioskMode).
+
+Kiosk mode can be exited by connecting an external USB keyboard and pressing **Alt+F4**, upon which the *sensor* user's desktop is shown.
 
 ### <a name="HedgehogDesktop"></a> Desktop Environment
 
@@ -334,9 +336,16 @@ The panel bordering the top of the Malcolm desktop is home to a number of useful
 
 *The Hedgehog Linux desktop*
 
-## <a name="HedgehogInterfaces"></a> Configure Hostname, Interfaces and Time Sync
+* **Terminal** - opens a command prompt in a terminal emulator
+* **Browser** - opens a web browser
+* **Kiosk** – returns the sensor to kiosk mode
+* **README** – displays this document
+* **Sensor status** – displays a list with the status of each sensor service
+* **Configure capture and forwarding** – opens a dialog for configuring the sensor's capture and forwarding services, as well as specifying which services should autostart upon boot
+* **Configure interfaces and hostname** – opens a dialog for configuring the sensor's network interfaces and setting the sensor's hostname
+* **Restart sensor services** - stops and restarts all of the [autostart services](#HedgehogConfigAutostart)
 
-https://malcolm.fyi/docs/hedgehog-config-root.html#HedgehogConfigRoot
+## <a name="HedgehogInterfaces"></a> Configure Hostname, Interfaces and Time Sync
 
 The first step of sensor configuration is to configure the network interfaces and sensor hostname. Clicking the **Configure Interfaces and Hostname** toolbar icon (or, if you are at a command line prompt, running `configure-interfaces`) will prompt you for the root password you created during installation, after which the configuration welcome screen is shown. Select **Continue** to proceed.
 
@@ -392,7 +401,7 @@ You will be presented with a list of network interfaces and prompted to select o
 
 ![Select capture interfaces](./images/hedgehog/images/capture_iface_select.png)
 
-Upon choosing the capture interfaces and selecting OK, you may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([`tcpdump`](https://www.tcpdump.org/)) and the traffic analysis services ([`zeek`](https://www.zeek.org/) and [`suricata`](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Hedgehog should ignore the ports it uses to communicate with Malcolm, you could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
+Upon choosing the capture interfaces and selecting OK, you may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([`zeek`](https://www.zeek.org/) and [`suricata`](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Hedgehog should ignore the ports it uses to communicate with Malcolm, you could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
 
 ![Specify capture filters](./images/hedgehog/images/capture_filter.png)
 
