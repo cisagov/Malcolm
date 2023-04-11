@@ -15,9 +15,11 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
     - [ISO Installation](#ISOInstallMalcolm)
     - [Desktop Environment](#MalcolmDesktop)
     - [Configuration](#MalcolmConfig)
+    - [Configure Hostname and Time Sync](#MalcolmTimeSync)
     - [Setting up Authentication](#MalcolmAuthSetup)
 * [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig)
     - [Hedgehog Linux ISO Installation](#ISOInstallHedgehog)
+    - [Desktop Environment](#HedgehogDesktop)
     - [Configure Hostname, Interfaces and Time Sync](#HedgehogInterfaces)
     - [Configure Capture](#HedgehogCapture)
         + [Capture](#HedgehogConfigCapture)
@@ -28,6 +30,7 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
         * [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
         * [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
     + [Autostart services](#HedgehogConfigAutostart)
+* [Verifying Traffic Capture and Forwarding](#Verify)
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
 
@@ -69,7 +72,7 @@ The ISO media boot on systems that support EFI-mode and legacy (BIOS) booting. C
 
 ## <a name="MalcolmInstallAndConfig"></a> Malcolm Installation and Configuration
 
-### <a name="ISOInstallMalcolm"></a> Malcolm ISO Installation
+### <a name="ISOInstallMalcolm"></a> ISO Installation
 
 Upon Booting the Malcolm installation ISO, you're presented with the following **Boot menu**. Use the arrow keys to select **Install Malcolm**, and press Enter.
 
@@ -114,7 +117,7 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 The Malcolm installer does not require an internet connection to complete successfully. If the installer prompts you to configure network connectivity, you may choose "do not configure the network at this time."
 
-### <a name="MalcolmDesktop"></a> Malcolm Desktop Environment
+### <a name="MalcolmDesktop"></a> Desktop Environment
 
 The Malcolm base operating system is a [hardened](hardening.md#Hardening) Linux installation based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/) [running](https://wiki.debian.org/Xfce) the [XFCE desktop environment](https://www.xfce.org/). It has been preloaded with all of the [components](components.md#Components) that make up Malcolm.
 
@@ -126,8 +129,7 @@ The panel bordering the top of the Malcolm desktop is home to a number of useful
 
 ![Malcolm Desktop](./images/screenshots/malcolm_desktop.png)
 
-
-### <a name="MalcolmConfig"></a> Malcolm Configuration
+### <a name="MalcolmConfig"></a> Configuration
 
 The first time the Malcolm base operating system boots the **Malcolm Configuration** wizard will start automatically. This same configuration script can be run again later by running [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning) from the Malcolm installation directory, or clicking the **Configure Malcolm** 🔳 icon in the top panel.
 
@@ -258,7 +260,25 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * Enable dark mode for OpenSearch Dashboards?
     - Answer **Y** if you prefer dark dashboards, **N** if you prefer light ones.
 
-### <a name="MalcolmAuthSetup"></a> Setting up Authentication for Malcolm
+### <a name="MalcolmTimeSync"></a> Configure Hostname and Time Sync
+
+If you wish to change Malcolm's hostname or configure system time synchronization, open a terminal (the icon immediately to the right of the **Applications** menu icon at the top of the Malcolm desktop) and run `sudo configure-interfaces.py` then enter your password. If you get an error about your user not belonging to the `sudo` group, run `su -c configure-interfaces.py` and use the `root` password instead.
+
+Here you can configure Malcolm to keep its time synchronized with either an NTP server (using the NTP protocol), another [Malcolm]({{ site.github.repository_url }}) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method you wish to configure.
+
+![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
+
+If **htpdate** is selected, you will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for another Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+
+![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
+
+If *ntpdate* is selected, you will be prompted to enter the IP address or hostname of the NTP server.
+
+![NTP configuration](./images/hedgehog/images/ntp_host.png)
+
+Upon configuring time synchronization, a "Time synchronization configured successfully!" message will be displayed, after which you will be returned to the welcome screen. Select **Cancel**.
+
+### <a name="MalcolmAuthSetup"></a> Setting up Authentication
 
 Once the [configuration](#MalcolmConfig) questions have been completed as described above, you can click the circular yellow Malcolm icon the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm. As you have not yet configured authentication, you will be prompted to do so. This authentication setup can be run again later by running [`./scripts/auth_setup`](authsetup.md#AuthSetup) from the Malcolm installation directory.
 
@@ -301,6 +321,14 @@ At the end of the installation process, you will be prompted with a few self-exp
 * **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
 
 Following these prompts, the installer will reboot and Hedgehog Linux will boot into [kiosk mode](hedgehog-boot.md#HedgehogKioskMode). To continue setup, press **Alt+F4** to exit kiosk mode to the Hedgehog Linux desktop environment.
+
+### <a name="HedgehogDesktop"></a> Desktop Environment
+
+The Hedgehog Linux base operating system is a [hardened](hedgehog-hardening.md#HedgehogHardening) Linux installation based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/) [running](https://wiki.debian.org/Xfce) the [XFCE desktop environment](https://www.xfce.org/). 
+
+Display resolution should be detected and adjusted automatically. If you need to make changes to display properties, click the **Applications** menu and select **Settings** → **Display**.
+
+The panel bordering the top of the Malcolm desktop is home to a number of useful shortcuts:
 
 ![Hedgehog Linux desktop](./images/hedgehog/images/desktop.png)
 
@@ -565,3 +593,6 @@ zeek:watcher                     RUNNING   pid 6510, uptime 0:03:17
 zeek:yara                        RUNNING   pid 6548, uptime 0:03:17
 zeek:zeekctl                     RUNNING   pid 6502, uptime 0:03:17
 ```
+
+## <a name="Verify"></a>Verifying Traffic Capture and Forwarding
+
