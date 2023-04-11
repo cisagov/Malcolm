@@ -291,8 +291,8 @@ As this is the first time setting up authentication, ensure the **all** option i
 You will be prompted to do the following:
 
 * Store administrator username/password for local Malcolm access: specifies the administrator credentials when using [local account management](#AuthBasicAccountManagement) (instead of LDAP) for authentication.
-* (Re)generate self-signed certificates for HTTPS access: creates the self-signed [TLS certificates](#TLSCerts) used for encrypting the connections between users' web browsers and Malcolm
-* (Re)generate self-signed certificates for a remote log forwarder: creates the self-signed [TLS certificates](#TLSCerts) for communications from a remote log forwarder (such as Hedgehog Linux or forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs))
+* (Re)generate self-signed certificates for HTTPS access: creates the self-signed [TLS certificates](authsetup.md#TLSCerts) used for encrypting the connections between users' web browsers and Malcolm
+* (Re)generate self-signed certificates for a remote log forwarder: creates the self-signed [TLS certificates](authsetup.md#TLSCerts) for communications from a remote log forwarder (such as Hedgehog Linux or forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs))
 * Configure remote primary or secondary OpenSearch instance: **N** if you are using Malcolm's local OpenSearch instance, or **Y** to specify credentials for a remote OpenSearch cluster (see [OpenSearch instances](opensearch-instances.md#OpenSearchInstance))
 * Store username/password for email alert sender account: answer **Y** to specify credentials for [Email Sender Accounts](alerting.md#AlertingEmail) to be used with OpenSearch Dashboards' alerting plugin
 * (Re)generate internal passwords for NetBox: if you answered **Y** to "Should Malcolm run and maintain an instance of NetBox...?" during the configuration questions, you should need to asnwer **Y** to this question at least the first time you start Malcolm
@@ -605,3 +605,18 @@ zeek:zeekctl                     RUNNING   pid 6502, uptime 0:03:17
 
 ## <a name="Verify"></a>Verifying Traffic Capture and Forwarding
 
+The easiest way to verify that network traffic is being captured by the sensor and forwarded to Malcolm is through Malcolm's Arkime [Sessions](arkime.md#ArkimeSessions) interface.
+
+If you are logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If you're connecting from another browser, connect to `https://<Malcolm host or IP address>`.
+
+As Malcolm is using [self-signed TLS certificates](authsetup.md#TLSCerts), you will likely have to confirm an exception in your browser to allow the self-signed certificates to proceed. Enter the credentials you specified when you [configured authentication](#MalcolmAuthSetup).
+
+Arkime's sessions view will be displayed. To view records from a specific Hedgehog Linux sensor, you can filter on the `node` field. In the search bar, enter `node == hedgehoghostname` (replacing `hedgehoghostname` with the [hostname](#HedgehogInterfaces) you configured for Hedgehog). See the [Search Queries in Arkime and OpenSearch](queries-cheat-sheet.md#SearchCheatSheet) cheat sheet for more search syntax hints.
+
+![Arkime's Sessions view](./images/screenshots/arkime_sessions_node_filter.png)
+
+*Arkime's sessions view with a filter on `node`*
+
+Arkime's views button (indicated by the eyeball **👁** icon) allows overlaying additional previously-specified filters onto the current sessions filters. For convenience, Malcolm provides several Arkime preconfigured views including filtering on the `event.provider` and `event.dataset` fields. This can be combined with the `node` filter described above to verify that different network log types (e.g., Arkime sessions, Zeek logs, Suricata alerts, etc.) are all being captured and forwarded correctly.
+
+![Malcolm views](./images/screenshots/arkime_apply_view.png)
