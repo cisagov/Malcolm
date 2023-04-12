@@ -12,20 +12,6 @@ spec:
     name: nginx-proxy-deployment
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx-htadmin-proxy
-  namespace: malcolm
-spec:
-  ports:
-    - port: 488
-      protocol: TCP
-  selector:
-    name: nginx-proxy-deployment
-
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -50,7 +36,6 @@ spec:
         ports:
           - containerPort: 443
           - containerPort: 8443
-          - containerPort: 488
         envFrom:
           - configMapRef:
               name: process-env

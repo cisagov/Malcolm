@@ -702,7 +702,7 @@ def logs():
             print("  - PCAP upload (web): https://localhost/upload/")
             print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
             print("  - NetBox: https://localhost/netbox/\n")
-            print("  - Account management: https://localhost:488/\n")
+            print("  - Account management: https://localhost/auth/\n")
             print("  - Documentation: https://localhost/readme/\n")
 
     process.poll()
@@ -1123,7 +1123,7 @@ def authSetup(wipe=False):
                     f.write('; Change this to customize your title:\n')
                     f.write('app_title = Malcolm User Management\n\n')
                     f.write('; htpasswd file\n')
-                    f.write('secure_path  = ./config/htpasswd\n')
+                    f.write('secure_path  = ./config/auth/htpasswd\n')
                     f.write('; metadata file\n')
                     f.write('metadata_path  = ./config/metadata\n\n')
                     f.write('; administrator user/password (htpasswd -b -c -B ...)\n')
@@ -1131,17 +1131,17 @@ def authSetup(wipe=False):
                     f.write('; username field quality checks\n')
                     f.write(';\n')
                     f.write('min_username_len = 4\n')
-                    f.write('max_username_len = 12\n\n')
+                    f.write('max_username_len = 32\n\n')
                     f.write('; Password field quality checks\n')
                     f.write(';\n')
-                    f.write('min_password_len = 6\n')
-                    f.write('max_password_len = 20\n\n')
+                    f.write('min_password_len = 8\n')
+                    f.write('max_password_len = 128\n\n')
 
                 # touch the metadata file
                 open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
                 DisplayMessage(
-                    'Additional local accounts can be created at https://localhost:488/ when Malcolm is running',
+                    'Additional local accounts can be created at https://localhost/auth/ when Malcolm is running',
                 )
 
             # generate HTTPS self-signed certificates

@@ -93,4 +93,4 @@ A few minutes after starting Malcolm (probably 5 to 10 minutes for Logstash to b
 * [Capture File and Log Archive Upload (Web)](upload.md#Upload): [https://localhost/upload/](https://localhost/upload/)
 * [Capture File and Log Archive Upload (SFTP)](upload.md#Upload): `sftp://<username>@127.0.0.1:8022/files`
 * [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis): [https://localhost/netbox/](https://localhost/netbox/)
-* [Account Management](authsetup.md#AuthBasicAccountManagement): [https://localhost:488](https://localhost:488)
+* [Account Management](authsetup.md#AuthBasicAccountManagement): [https://localhost/auth/](https://localhost/auth/)

@@ -61,6 +61,8 @@ RUN apt-get -q update && \
   cd /tmp && \
     mkdir -p ./htadmin && \
     curl -sSL "$HTADMIN_URL" | tar xzvf - -C ./htadmin --strip-components 1 && \
+    find /tmp/htadmin -type f -name index.php -execdir mv index.php htadmin.php \; && \
+    find /tmp/htadmin -type f -exec sed -i 's/index.php/htadmin.php/g' "{}" \; && \
     mv /tmp/htadmin/sites/html/htadmin /var/www/htadmin && \
     cd /var/www/htadmin && \
     ( grep -rhoPi "(src|href)=['\"]https?://.+?['\"]" ./includes/* | sed "s/^[a-zA-Z]*=['\"]*//" | sed "s/['\"]$//" | xargs -r -l curl -s -S -L -J -O ) && \

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - User Management
-Exec=/opt/firefox/firefox https://localhost:488/
+Exec=/opt/firefox/firefox https://localhost/auth/
 Terminal=false
 X-MultipleArgs=false
 Type=Application

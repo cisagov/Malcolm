@@ -55,7 +55,7 @@ OpenSearch username: servicedb
 servicedb password:
 servicedb password (again):
 
-Additional local accounts can be created at https://localhost:488/ when Malcolm is running
+Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
 Require SSL certificate validation for OpenSearch communication? (Y/n): n
 

@@ -96,7 +96,7 @@ FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
   "/var/www/upload/js/jquery.fileupload.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
-  "/var/www/htadmin/index.php;htadmin"
+  "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
   "/etc/ja3.yaml;logstash"
   "/etc/vendor_macs.yaml;logstash"

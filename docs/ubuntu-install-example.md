@@ -224,7 +224,7 @@ Administrator username: analyst
 analyst password:
 analyst password (again):
 
-Additional local accounts can be created at https://localhost:488/ when Malcolm is running
+Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
 (Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
@@ -293,7 +293,7 @@ In a few minutes, Malcolm services will be accessible via the following URLs:
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - NetBox: https://localhost/netbox/  
-  - Account management: https://localhost:488/
+  - Account management: https://localhost/auth/
   - Documentation: https://localhost/readme/
 
 NAME                           COMMAND                  SERVICE              STATUS               PORTS
