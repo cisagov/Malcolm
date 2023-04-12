@@ -83,7 +83,7 @@ $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-      - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
+      - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
   freq:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
   api:

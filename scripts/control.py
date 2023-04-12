@@ -1123,7 +1123,7 @@ def authSetup(wipe=False):
                     f.write('; Change this to customize your title:\n')
                     f.write('app_title = Malcolm User Management\n\n')
                     f.write('; htpasswd file\n')
-                    f.write('secure_path  = ./config/auth/htpasswd\n')
+                    f.write('secure_path  = ./auth/htpasswd\n')
                     f.write('; metadata file\n')
                     f.write('metadata_path  = ./config/metadata\n\n')
                     f.write('; administrator user/password (htpasswd -b -c -B ...)\n')

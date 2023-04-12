@@ -48,12 +48,12 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: htadmin-var-local-catrust-volume
-          - mountPath: /var/www/htadmin/config/auth
+          - mountPath: /var/www/htadmin/auth
             name: htadmin-config-volume
             subPath: "auth"
-          - mountPath: /var/www/htadmin/config/default/configmap
-            name: htadmin-config-default-volume 
-          - mountPath: /var/www/htadmin/config/
+          - mountPath: /var/www/htadmin/default/configmap
+            name: htadmin-config-default-volume
+          - mountPath: /var/www/htadmin/config
             name: htadmin-config-volume
             subPath: "htadmin"
       volumes:

@@ -445,7 +445,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-      - ./nginx/htpasswd:/var/www/htadmin/config/auth/htpasswd:rw
+      - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
       interval: 60s

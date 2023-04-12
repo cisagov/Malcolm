@@ -2,12 +2,14 @@
 
 HTADMIN_ENABLED=${NGINX_BASIC_AUTH:-"true"}
 
-if [[ ! -f /var/www/htadmin/config/config.ini ]]; then
-  cp /var/www/htadmin/config/default/config.ini /var/www/htadmin/config/config.ini
+if [[ ! -f /var/www/htadmin/config/config.ini ]] && [[ -f /var/www/htadmin/default/config.ini ]]; then
+  mkdir -p /var/www/htadmin/config/
+  cp /var/www/htadmin/default/config.ini /var/www/htadmin/config/config.ini
 fi
 
-if [[ ! -f /var/www/htadmin/config/metadata ]]; then
-  cp /var/www/htadmin/config/default/metadata /var/www/htadmin/config/metadata
+if [[ ! -f /var/www/htadmin/config/metadata ]] && [[ -f /var/www/htadmin/default/metadata ]]; then
+  mkdir -p /var/www/htadmin/config/
+  cp /var/www/htadmin/default/metadata /var/www/htadmin/config/metadata
 fi
 
 if [[ "$HTADMIN_ENABLED" == "true" ]]; then
