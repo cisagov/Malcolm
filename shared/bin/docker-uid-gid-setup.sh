@@ -1,5 +1,15 @@
 #!/bin/bash
 
+if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
+  ulimit -c 0 >/dev/null 2>&1
+  ulimit -l unlimited >/dev/null 2>&1
+  ulimit -m unlimited >/dev/null 2>&1
+  ulimit -v unlimited >/dev/null 2>&1
+  ulimit -x unlimited >/dev/null 2>&1
+  ulimit -n 65535 >/dev/null 2>&1
+  ulimit -u 262144 >/dev/null 2>&1
+fi
+
 set -e
 
 unset ENTRYPOINT_CMD
