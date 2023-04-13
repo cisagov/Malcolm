@@ -162,7 +162,6 @@ if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/nu
   ulimit -x unlimited >/dev/null 2>&1
   ulimit -n 65535 >/dev/null 2>&1
   ulimit -u 262144 >/dev/null 2>&1
-  ulimit -a
 fi
 if [[ ! -z "${ENTRYPOINT_CMD}" ]]; then
   if [[ -z "${ENTRYPOINT_ARGS}" ]]; then
