@@ -1,15 +1,5 @@
 #!/bin/bash
 
-if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
-  ulimit -c 0 >/dev/null 2>&1
-  ulimit -l unlimited >/dev/null 2>&1
-  ulimit -m unlimited >/dev/null 2>&1
-  ulimit -v unlimited >/dev/null 2>&1
-  ulimit -x unlimited >/dev/null 2>&1
-  ulimit -n 65535 >/dev/null 2>&1
-  ulimit -u 262144 >/dev/null 2>&1
-fi
-
 set -e
 
 unset ENTRYPOINT_CMD
@@ -65,8 +55,9 @@ else
   CONFIG_MAP_FIND_PRUNE_ARGS=()
 fi # check for CONFIG_MAP_DIR and rsync
 
-# change user/group ownership of any files/directories belonging to the original IDs
 set +e
+
+# change user/group ownership of any files/directories belonging to the original IDs
 if [[ -n ${PUID} ]] && [[ "${PUID}" != "${DEFAULT_UID}" ]]; then
   find / -path /sys -prune -o -path /proc -prune -o -user ${DEFAULT_UID} -exec chown -f ${PUID} "{}" \; 2>/dev/null
 fi
@@ -136,7 +127,6 @@ if [[ -n ${PUSER_CA_TRUST} ]] && command -v openssl >/dev/null 2>&1; then
   command -v update-ca-certificates >/dev/null 2>&1 && update-ca-certificates >/dev/null 2>&1
   command -v update-ca-trust >/dev/null 2>&1 && update-ca-trust extract >/dev/null 2>&1
 fi
-set -e
 
 # determine if we are now dropping privileges to exec ENTRYPOINT_CMD
 if [[ "$PUSER_PRIV_DROP" == "true" ]]; then
@@ -153,8 +143,17 @@ export USER="${EXEC_USER}"
 export HOME="${USER_HOME}"
 whoami
 id
-if [ ! -z "${ENTRYPOINT_CMD}" ]; then
-  if [ -z "${ENTRYPOINT_ARGS}" ]; then
+if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
+  ulimit -c 0 >/dev/null 2>&1
+  ulimit -l unlimited >/dev/null 2>&1
+  ulimit -m unlimited >/dev/null 2>&1
+  ulimit -v unlimited >/dev/null 2>&1
+  ulimit -x unlimited >/dev/null 2>&1
+  ulimit -n 65535 >/dev/null 2>&1
+  ulimit -u 262144 >/dev/null 2>&1
+fi
+if [[ ! -z "${ENTRYPOINT_CMD}" ]]; then
+  if [[ -z "${ENTRYPOINT_ARGS}" ]]; then
     "${ENTRYPOINT_CMD}"
   else
     "${ENTRYPOINT_CMD}" $(printf "%q " "${ENTRYPOINT_ARGS[@]}")
