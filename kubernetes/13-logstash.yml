@@ -40,7 +40,8 @@ spec:
         securityContext:
           capabilities:
             add:
-            - IPC_LOCK
+              - IPC_LOCK
+              - SYS_RESOURCE
         ports:
           - containerPort: 5044
           - containerPort: 9600
