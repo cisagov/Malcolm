@@ -120,6 +120,9 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_O
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
+# bootstrap keystore file if necessary
+/usr/local/bin/keystore-bootstrap.sh || true
+
 # logstash may wish to modify logstash.yml based on some environment variables (e.g.,
 # pipeline.workers), so copy the original onto from the image over the "working copy" before start
 [[ -r /usr/share/logstash/config/logstash.orig.yml ]] && \

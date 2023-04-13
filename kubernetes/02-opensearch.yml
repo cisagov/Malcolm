@@ -59,6 +59,8 @@ spec:
             name: opensearch-data-volume
           - mountPath: "/opt/opensearch/backup"
             name: opensearch-backup-volume
+          - name: opensearch-keystore-default-volume
+            mountPath: /usr/share/opensearch/config/bootstrap/configmap
       volumes:
         - name: opensearch-var-local-catrust-volume
           configMap:
@@ -72,3 +74,6 @@ spec:
         - name: opensearch-backup-volume
           persistentVolumeClaim:
             claimName: opensearch-backup-claim
+        - name: opensearch-keystore-default-volume
+          configMap:
+            name: opensearch-keystore

@@ -78,6 +78,7 @@ COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/manuf-oui-parse.py /usr/local/bin/
 COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
@@ -92,9 +93,10 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     usermod -a -G tty ${PUSER} && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
-    mkdir /logstash-persistent-queue && \
+    mkdir -p /logstash-persistent-queue /usr/share/logstash/config/bootstrap && \
     chown --silent -R ${PUSER}:root \
         /usr/share/logstash/config/logstash*.yml \
+        /usr/share/logstash/config/bootstrap \
         /usr/share/logstash/malcolm-pipelines \
         /usr/share/logstash/malcolm-patterns \
         /usr/share/logstash/malcolm-ruby \
