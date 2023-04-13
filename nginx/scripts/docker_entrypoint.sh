@@ -238,8 +238,9 @@ EOF
 fi # basic vs. ldap
 
 if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; then
-  mkdir -p /etc/nginx/auth/
-  cp /tmp/auth/default/htpasswd /etc/nginx/auth/
+  cp /tmp/auth/default/htpasswd /etc/nginx/auth/htpasswd
+  [[ -n ${PUID} ]] && chown -f ${PUID} /etc/nginx/auth/htpasswd
+  [[ -n ${PGID} ]] && chown -f :${PGID} /etc/nginx/auth/htpasswd
   rm -rf /tmp/auth/* || true
 fi
 

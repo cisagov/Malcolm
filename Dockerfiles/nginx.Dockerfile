@@ -186,8 +186,7 @@ RUN set -x ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
   make install ; \
   rm -rf /etc/nginx/html/ ; \
-  mkdir -p /etc/nginx/conf.d/ ; \
-  mkdir -p /usr/share/nginx/html/ ; \
+  mkdir -p /etc/nginx/conf.d/ /etc/nginx/auth/ /usr/share/nginx/html/ ; \
   install -m644 html/index.html /usr/share/nginx/html/ ; \
   install -m644 html/50x.html /usr/share/nginx/html/ ; \
   install -m755 objs/nginx-debug /usr/sbin/nginx-debug ; \

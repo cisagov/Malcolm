@@ -51,7 +51,7 @@ while getopts 'vds:p:f:' OPTION; do
       ;;
 
     ?)
-      echo "script usage: $(basename $0) [-v] [-i input]" >&2
+      echo "script usage: $(basename $0) [-v (verbose)] [-d (disabled)] [-s <service>] [-p <port>] [-f <format>]" >&2
       exit 1
       ;;
   esac
