@@ -31,6 +31,16 @@ spec:
       labels:
         name: logstash-deployment
     spec:
+      # affinity:
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #     - labelSelector:
+      #         matchExpressions:
+      #         - key: name
+      #           operator: In
+      #           values:
+      #           - opensearch-deployment
+      #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container
         image: ghcr.io/idaholab/malcolm/logstash-oss:kubernetes
