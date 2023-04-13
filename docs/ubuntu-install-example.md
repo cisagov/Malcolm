@@ -121,7 +121,10 @@ Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y/
 
 Specify external Docker network name (or leave blank for default networking) (): 
 
-Authenticate against Lightweight Directory Access Protocol (LDAP) server? (y/N): n
+1: Basic
+2: Lightweight Directory Access Protocol (LDAP)
+3: None
+Select authentication method (Basic): 1
 
 Store PCAP, log and index files locally under /home/user/Malcolm? (Y/n): y
 

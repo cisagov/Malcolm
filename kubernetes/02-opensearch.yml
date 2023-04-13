@@ -47,8 +47,6 @@ spec:
           - configMapRef:
               name: opensearch-env
         env:
-          - name: OPENSEARCH_DISABLED
-            value: "true"
           - name: VIRTUAL_HOST
             value: "os.malcolm.local"
         volumeMounts:

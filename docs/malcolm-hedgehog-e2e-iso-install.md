@@ -159,8 +159,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - See the previous question. If Malcolm is configured behind a remote proxy, Malcolm can prompt you to *Configure labels for Traefik?* to allow it to identify itself to Traefik.
 * Specify external Docker network name (or leave blank for default networking)
     - This allows you to configure Malcolm to use [custom Docker networks](https://docs.docker.com/compose/networking/#specify-custom-networks). Leave this blank unless you know you want to do otherwise.
-* Authenticate against Lightweight Directory Access Protocol (LDAP) server?
-    - Answer **N** to use Malcolm's own built-in [local account management](authsetup.md#AuthBasicAccountManagement), or **Y** to use [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP).
+* Select authentication method
+    - Choose **Basic** to use Malcolm's own built-in [local account management](authsetup.md#AuthBasicAccountManagement), **LDAP** to use [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP) or **None** to not require authentication (not recommended)
 * Select LDAP server compatibility type
     - This question allows you to specify Microsoft Active Directory compatibility (**winldap**) or generic LDAP compatibility (**openldap**, for OpenLDAP, glauth, etc.) when using [LDAP authentication](authsetup.md#AuthLDAP)
 * Use StartTLS (rather than LDAPS) for LDAP connection security?

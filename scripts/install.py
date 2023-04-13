@@ -562,12 +562,21 @@ class Installer(object):
             'Specify external Docker network name (or leave blank for default networking)', default=""
         )
 
+        allowedAuthModes = {
+            'Basic': 'true',
+            'Lightweight Directory Access Protocol (LDAP)': 'false',
+            'None': 'no_authentication',
+        }
+        authMode = None
+        while authMode not in list(allowedAuthModes.keys()):
+            authMode = InstallerChooseOne(
+                'Select authentication method',
+                choices=[(x, '', x == 'Basic') for x in list(allowedAuthModes.keys())],
+            )
+
         ldapStartTLS = False
         ldapServerType = 'winldap'
-        useBasicAuth = not InstallerYesOrNo(
-            'Authenticate against Lightweight Directory Access Protocol (LDAP) server?', default=False
-        )
-        if not useBasicAuth:
+        if 'ldap' in authMode.lower():
             allowedLdapModes = ('winldap', 'openldap')
             ldapServerType = None
             while ldapServerType not in allowedLdapModes:
@@ -584,7 +593,7 @@ class Installer(object):
                 ) as ldapDefaultsFile:
                     print(f"LDAP_SERVER_TYPE='{ldapServerType}'", file=ldapDefaultsFile)
                     print(
-                        f"LDAP_PROTO='{'ldap://' if useBasicAuth or ldapStartTLS else 'ldaps://'}'",
+                        f"LDAP_PROTO='{'ldap://' if ldapStartTLS else 'ldaps://'}'",
                         file=ldapDefaultsFile,
                     )
                     print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
@@ -939,17 +948,17 @@ class Installer(object):
                 'MANAGE_PCAP_FILES',
                 TrueOrFalseNoQuote(arkimeManagePCAP),
             ),
-            # basic (useBasicAuth=True) vs ldap (useBasicAuth=False)
+            # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
                 os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_BASIC_AUTH',
-                TrueOrFalseNoQuote(useBasicAuth),
+                allowedAuthModes.get(authMode, TrueOrFalseNoQuote(True)),
             ),
             # StartTLS vs. ldap:// or ldaps://
             EnvValue(
                 os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_LDAP_TLS_STUNNEL',
-                TrueOrFalseNoQuote(((not useBasicAuth) and ldapStartTLS)),
+                TrueOrFalseNoQuote(('ldap' in authMode.lower()) and ldapStartTLS),
             ),
             # turn on dark mode, or not
             EnvValue(
