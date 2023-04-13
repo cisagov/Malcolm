@@ -26,6 +26,7 @@ ENV PGROUP "suricata"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+ENV PUSER_RLIMIT_UNLOCK true
 
 ENV SUPERCRONIC_VERSION "0.2.2"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"

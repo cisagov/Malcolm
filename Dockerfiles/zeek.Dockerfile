@@ -28,6 +28,7 @@ ENV PGROUP "zeeker"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+ENV PUSER_RLIMIT_UNLOCK true
 
 # for download and install
 ARG ZEEK_LTS=
