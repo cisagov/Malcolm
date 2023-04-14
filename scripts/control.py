@@ -87,7 +87,6 @@ args = None
 dockerBin = None
 dockerComposeBin = None
 dockerComposeYaml = None
-kubeClient = None
 kubeImported = None
 opensslBin = None
 orchMode = None
@@ -350,6 +349,9 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             else:
                 eprint(e)
 
+    else:
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+
     # success = (error == 0)
     return (err == 0), results
 
@@ -359,7 +361,6 @@ def status():
     global args
     global dockerComposeBin
     global orchMode
-    global kubeClient
 
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
@@ -388,67 +389,26 @@ def status():
             eprint(f'Error getting {args.namespace} status: {e}')
             exit(-1)
 
+    else:
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+
 
 ###################################################################################################
 def netboxBackup(backupFileName=None):
     global args
     global dockerComposeBin
+    global orchMode
 
-    # docker-compose use local temporary path
-    osEnv = os.environ.copy()
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    backupFileName, backupMediaFileName = None, None
 
-    uidGidDict = GetUidGidFromComposeFile(args.composeFile)
-
-    dockerCmd = [
-        dockerComposeBin,
-        '-f',
-        args.composeFile,
-        'exec',
-        # disable pseudo-TTY allocation
-        '-T',
-        # execute as UID:GID in docker-compose.yml file
-        '-u',
-        f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-        'netbox-postgres',
-        'pg_dump',
-        '-U',
-        'netbox',
-        '-d',
-        'netbox',
-    ]
-
-    err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdout=True, stderr=False)
-    if (err != 0) or (len(results) == 0):
-        raise Exception('Error creating NetBox configuration database backup')
-
-    if (backupFileName is None) or (len(backupFileName) == 0):
-        backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.gz"
-
-    with gzip.GzipFile(backupFileName, "wb") as f:
-        f.write(bytes('\n'.join(results), 'utf-8'))
-
-    backupFileParts = os.path.splitext(backupFileName)
-    backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
-    with tarfile.open(backupMediaFileName, 'w:gz') as t:
-        t.add(os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media'), arcname='.')
-
-    return backupFileName, backupMediaFileName
-
-
-###################################################################################################
-def netboxRestore(backupFileName=None):
-    global args
-    global dockerComposeBin
-
-    if backupFileName and os.path.isfile(backupFileName):
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         uidGidDict = GetUidGidFromComposeFile(args.composeFile)
 
-        dockerCmdBase = [
+        dockerCmd = [
             dockerComposeBin,
             '-f',
             args.composeFile,
@@ -458,47 +418,108 @@ def netboxRestore(backupFileName=None):
             # execute as UID:GID in docker-compose.yml file
             '-u',
             f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
+            'netbox-postgres',
+            'pg_dump',
+            '-U',
+            'netbox',
+            '-d',
+            'netbox',
         ]
 
-        # if the netbox_init.py process is happening, interrupt it
-        dockerCmd = dockerCmdBase + ['netbox', 'bash', '-c', 'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill']
-        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-        if (err != 0) and args.debug:
-            eprint(f'Error interrupting netbox_init.py: {results}')
-
-        # drop the existing netbox database
-        dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
-        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-        if ((err != 0) or (len(results) == 0)) and args.debug:
-            eprint(f'Error dropping NetBox database: {results}')
-
-        # create a new netbox database
-        dockerCmd = dockerCmdBase + ['netbox-postgres', 'createdb', '-U', 'netbox', 'netbox']
-        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-        if err != 0:
-            raise Exception('Error creating new NetBox database')
-
-        # load the backed-up psql dump
-        dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
-        with gzip.open(backupFileName, 'rt') as f:
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
+        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdout=True, stderr=False)
         if (err != 0) or (len(results) == 0):
-            raise Exception('Error loading NetBox database')
+            raise Exception('Error creating NetBox configuration database backup')
 
-        # migrations if needed
-        dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
-        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-        if (err != 0) or (len(results) == 0):
-            raise Exception('Error performing NetBox migration')
+        if (backupFileName is None) or (len(backupFileName) == 0):
+            backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.gz"
 
-        # restore media directory
+        with gzip.GzipFile(backupFileName, "wb") as f:
+            f.write(bytes('\n'.join(results), 'utf-8'))
+
         backupFileParts = os.path.splitext(backupFileName)
         backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
-        mediaPath = os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media')
-        if os.path.isfile(backupMediaFileName) and os.path.isdir(mediaPath):
-            RemoveEmptyFolders(mediaPath, removeRoot=False)
-            with tarfile.open(backupMediaFileName) as t:
-                t.extractall(mediaPath)
+        with tarfile.open(backupMediaFileName, 'w:gz') as t:
+            t.add(os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media'), arcname='.')
+
+    else:
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+
+    return backupFileName, backupMediaFileName
+
+
+###################################################################################################
+def netboxRestore(backupFileName=None):
+    global args
+    global dockerComposeBin
+    global orchMode
+
+    if backupFileName and os.path.isfile(backupFileName):
+        if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+            # docker-compose use local temporary path
+            osEnv = os.environ.copy()
+            osEnv['TMPDIR'] = MalcolmTmpPath
+
+            uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+
+            dockerCmdBase = [
+                dockerComposeBin,
+                '-f',
+                args.composeFile,
+                'exec',
+                # disable pseudo-TTY allocation
+                '-T',
+                # execute as UID:GID in docker-compose.yml file
+                '-u',
+                f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
+            ]
+
+            # if the netbox_init.py process is happening, interrupt it
+            dockerCmd = dockerCmdBase + [
+                'netbox',
+                'bash',
+                '-c',
+                'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill',
+            ]
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if (err != 0) and args.debug:
+                eprint(f'Error interrupting netbox_init.py: {results}')
+
+            # drop the existing netbox database
+            dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if ((err != 0) or (len(results) == 0)) and args.debug:
+                eprint(f'Error dropping NetBox database: {results}')
+
+            # create a new netbox database
+            dockerCmd = dockerCmdBase + ['netbox-postgres', 'createdb', '-U', 'netbox', 'netbox']
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if err != 0:
+                raise Exception('Error creating new NetBox database')
+
+            # load the backed-up psql dump
+            dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
+            with gzip.open(backupFileName, 'rt') as f:
+                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
+            if (err != 0) or (len(results) == 0):
+                raise Exception('Error loading NetBox database')
+
+            # migrations if needed
+            dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if (err != 0) or (len(results) == 0):
+                raise Exception('Error performing NetBox migration')
+
+            # restore media directory
+            backupFileParts = os.path.splitext(backupFileName)
+            backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
+            mediaPath = os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media')
+            if os.path.isfile(backupMediaFileName) and os.path.isdir(mediaPath):
+                RemoveEmptyFolders(mediaPath, removeRoot=False)
+                with tarfile.open(backupMediaFileName) as t:
+                    t.extractall(mediaPath)
+
+        else:
+            raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
 
 ###################################################################################################
@@ -506,6 +527,7 @@ def logs():
     global args
     global dockerBin
     global dockerComposeBin
+    global orchMode
 
     urlUserPassRegEx = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
 
@@ -580,153 +602,164 @@ def logs():
     finishedStartingRegEx = re.compile(r'.+Pipelines\s+running\s+\{.*:non_running_pipelines=>\[\]\}')
     finishedStarting = False
 
-    # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
-    osEnv = os.environ.copy()
-    osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
-    # docker-compose use local temporary path
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+        # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
+        osEnv = os.environ.copy()
+        osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
+        # docker-compose use local temporary path
+        osEnv['TMPDIR'] = MalcolmTmpPath
 
-    err, out = run_process(
-        [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
-        env=osEnv,
-        debug=args.debug,
-    )
-    print("\n".join(out))
+        err, out = run_process(
+            [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
+            env=osEnv,
+            debug=args.debug,
+        )
+        print("\n".join(out))
 
-    if args.logLineCount is None:
-        args.logLineCount = 'all'
+        if args.logLineCount is None:
+            args.logLineCount = 'all'
 
-    process = Popen(
-        [
-            dockerComposeBin,
-            '-f',
-            args.composeFile,
-            'logs',
-            '--tail',
-            str(args.logLineCount),
-            '-f',
-            args.service,
-        ][: 8 if args.service is not None else -1],
-        env=osEnv,
-        stdout=PIPE,
-        stderr=None if args.debug else DEVNULL,
-    )
-    while True:
-        output = process.stdout.readline()
-        if (len(output) == 0) and (process.poll() is not None):
-            break
-        if output:
-            outputStr = urlUserPassRegEx.sub(r"\1xxxxxxxx\2", output.decode().strip())
-            outputStrEscaped = EscapeAnsi(outputStr)
-            if ignoreRegEx.match(outputStrEscaped):
-                # print(f'!!!!!!!: {outputStr}')
-                pass
-            elif (
-                (args.cmdStart or args.cmdRestart)
-                and (not args.cmdLogs)
-                and finishedStartingRegEx.match(outputStrEscaped)
-            ):
-                finishedStarting = True
-            else:
-                serviceMatch = serviceRegEx.search(outputStrEscaped)
-                serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
-                serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
-
-                messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
-                messageStrSplit = messageStr.split(' ')
-                messageTimeMatch = iso8601TimeRegEx.match(messageStrSplit[0])
-                if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
-                    messageStrToTestJson = messageStr
+        process = Popen(
+            [
+                dockerComposeBin,
+                '-f',
+                args.composeFile,
+                'logs',
+                '--tail',
+                str(args.logLineCount),
+                '-f',
+                args.service,
+            ][: 8 if args.service is not None else -1],
+            env=osEnv,
+            stdout=PIPE,
+            stderr=None if args.debug else DEVNULL,
+        )
+        while True:
+            output = process.stdout.readline()
+            if (len(output) == 0) and (process.poll() is not None):
+                break
+            if output:
+                outputStr = urlUserPassRegEx.sub(r"\1xxxxxxxx\2", output.decode().strip())
+                outputStrEscaped = EscapeAnsi(outputStr)
+                if ignoreRegEx.match(outputStrEscaped):
+                    # print(f'!!!!!!!: {outputStr}')
+                    pass
+                elif (
+                    (args.cmdStart or args.cmdRestart)
+                    and (not args.cmdLogs)
+                    and finishedStartingRegEx.match(outputStrEscaped)
+                ):
+                    finishedStarting = True
                 else:
-                    messageStrToTestJson = messageStrSplit[1:].join(' ')
+                    serviceMatch = serviceRegEx.search(outputStrEscaped)
+                    serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
+                    serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
 
-                outputJson = LoadStrIfJson(messageStrToTestJson)
-                if isinstance(outputJson, dict):
-                    # if there's a timestamp, move it outside of the JSON to the beginning of the log string
-                    timeKey = None
-                    if 'time' in outputJson:
-                        timeKey = 'time'
-                    elif 'timestamp' in outputJson:
-                        timeKey = 'timestamp'
-                    elif '@timestamp' in outputJson:
-                        timeKey = '@timestamp'
-                    timeStr = ''
-                    if timeKey is not None:
-                        timeStr = f"{outputJson[timeKey]} "
-                        outputJson.pop(timeKey, None)
-                    elif messageTimeMatch is not None:
-                        timeStr = f"{messageTimeMatch[0]} "
+                    messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
+                    messageStrSplit = messageStr.split(' ')
+                    messageTimeMatch = iso8601TimeRegEx.match(messageStrSplit[0])
+                    if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
+                        messageStrToTestJson = messageStr
+                    else:
+                        messageStrToTestJson = messageStrSplit[1:].join(' ')
 
-                    if (
-                        ('job.schedule' in outputJson)
-                        and ('job.position' in outputJson)
-                        and ('job.command' in outputJson)
-                    ):
-                        # this is a status output line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
+                    outputJson = LoadStrIfJson(messageStrToTestJson)
+                    if isinstance(outputJson, dict):
+                        # if there's a timestamp, move it outside of the JSON to the beginning of the log string
+                        timeKey = None
+                        if 'time' in outputJson:
+                            timeKey = 'time'
+                        elif 'timestamp' in outputJson:
+                            timeKey = 'timestamp'
+                        elif '@timestamp' in outputJson:
+                            timeKey = '@timestamp'
+                        timeStr = ''
+                        if timeKey is not None:
+                            timeStr = f"{outputJson[timeKey]} "
+                            outputJson.pop(timeKey, None)
+                        elif messageTimeMatch is not None:
+                            timeStr = f"{messageTimeMatch[0]} "
 
-                        # remove some clutter for the display
-                        for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
-                            outputJson.pop(noisyKey, None)
+                        if (
+                            ('job.schedule' in outputJson)
+                            and ('job.position' in outputJson)
+                            and ('job.command' in outputJson)
+                        ):
+                            # this is a status output line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
 
-                        # if it's just command and message, format those NOT as JSON
-                        jobCmd = outputJson['job.command']
-                        jobStatus = outputJson['msg']
-                        if (len(outputJson.keys()) == 2) and ('job.command' in outputJson) and ('msg' in outputJson):
-                            # if it's the most common status (starting or job succeeded) then don't print unless debug mode
-                            if args.debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
-                                print(
-                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr} {jobCmd}: {jobStatus}"
-                                )
+                            # remove some clutter for the display
+                            for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
+                                outputJson.pop(noisyKey, None)
+
+                            # if it's just command and message, format those NOT as JSON
+                            jobCmd = outputJson['job.command']
+                            jobStatus = outputJson['msg']
+                            if (
+                                (len(outputJson.keys()) == 2)
+                                and ('job.command' in outputJson)
+                                and ('msg' in outputJson)
+                            ):
+                                # if it's the most common status (starting or job succeeded) then don't print unless debug mode
+                                if args.debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
+                                    print(
+                                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr} {jobCmd}: {jobStatus}"
+                                    )
+                                else:
+                                    pass
+
                             else:
-                                pass
+                                # standardize and print the JSON output
+                                print(
+                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                                )
 
-                        else:
+                        elif 'dashboards' in serviceStr:
+                            # this is an output line from dashboards, let's clean it up a bit: remove some clutter for the display
+                            for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
+                                outputJson.pop(noisyKey, None)
+
                             # standardize and print the JSON output
                             print(
                                 f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
                             )
 
-                    elif 'dashboards' in serviceStr:
-                        # this is an output line from dashboards, let's clean it up a bit: remove some clutter for the display
-                        for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
-                            outputJson.pop(noisyKey, None)
+                        elif 'filebeat' in serviceStr:
+                            # this is an output line from filebeat, let's clean it up a bit: remove some clutter for the display
+                            for noisyKey in [
+                                'ecs.version',
+                                'harvester_id',
+                                'input_id',
+                                'log.level',
+                                'log.logger',
+                                'log.origin',
+                                'os_id',
+                                'service.name',
+                                'state_id',
+                            ]:
+                                outputJson.pop(noisyKey, None)
 
-                        # standardize and print the JSON output
-                        print(
-                            f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                        )
+                            # we'll fancify a couple of common things from filebeat
+                            if (
+                                (len(outputJson.keys()) == 3)
+                                and ('message' in outputJson)
+                                and ('source_file' in outputJson)
+                                and ('finished' in outputJson)
+                            ):
+                                print(
+                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
+                                )
 
-                    elif 'filebeat' in serviceStr:
-                        # this is an output line from filebeat, let's clean it up a bit: remove some clutter for the display
-                        for noisyKey in [
-                            'ecs.version',
-                            'harvester_id',
-                            'input_id',
-                            'log.level',
-                            'log.logger',
-                            'log.origin',
-                            'os_id',
-                            'service.name',
-                            'state_id',
-                        ]:
-                            outputJson.pop(noisyKey, None)
+                            elif len(outputJson.keys()) == 1:
+                                outputKey = next(iter(outputJson))
+                                print(
+                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
+                                )
+                            else:
+                                # standardize and print the JSON output
+                                print(
+                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                                )
 
-                        # we'll fancify a couple of common things from filebeat
-                        if (
-                            (len(outputJson.keys()) == 3)
-                            and ('message' in outputJson)
-                            and ('source_file' in outputJson)
-                            and ('finished' in outputJson)
-                        ):
-                            print(
-                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
-                            )
-
-                        elif len(outputJson.keys()) == 1:
-                            outputKey = next(iter(outputJson))
-                            print(
-                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
-                            )
                         else:
                             # standardize and print the JSON output
                             print(
@@ -734,38 +767,35 @@ def logs():
                             )
 
                     else:
-                        # standardize and print the JSON output
-                        print(
-                            f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                        )
+                        # just a regular non-JSON string, print as-is
+                        print(outputStr if coloramaImported else outputStrEscaped)
 
-                else:
-                    # just a regular non-JSON string, print as-is
-                    print(outputStr if coloramaImported else outputStrEscaped)
+            else:
+                time.sleep(0.5)
 
-        else:
-            time.sleep(0.5)
+            if finishedStarting:
+                process.terminate()
+                try:
+                    process.wait(timeout=5.0)
+                except TimeoutExpired:
+                    process.kill()
+                # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
+                # accessing these from the Malcolm server.
+                print("\nStarted Malcolm\n\n")
+                print("Malcolm services can be accessed via the following URLs:")
+                print("------------------------------------------------------------------------------")
+                print("  - Arkime: https://localhost/")
+                print("  - OpenSearch Dashboards: https://localhost/dashboards/")
+                print("  - PCAP upload (web): https://localhost/upload/")
+                print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
+                print("  - NetBox: https://localhost/netbox/\n")
+                print("  - Account management: https://localhost/auth/\n")
+                print("  - Documentation: https://localhost/readme/\n")
 
-        if finishedStarting:
-            process.terminate()
-            try:
-                process.wait(timeout=5.0)
-            except TimeoutExpired:
-                process.kill()
-            # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
-            # accessing these from the Malcolm server.
-            print("\nStarted Malcolm\n\n")
-            print("Malcolm services can be accessed via the following URLs:")
-            print("------------------------------------------------------------------------------")
-            print("  - Arkime: https://localhost/")
-            print("  - OpenSearch Dashboards: https://localhost/dashboards/")
-            print("  - PCAP upload (web): https://localhost/upload/")
-            print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-            print("  - NetBox: https://localhost/netbox/\n")
-            print("  - Account management: https://localhost/auth/\n")
-            print("  - Documentation: https://localhost/readme/\n")
+        process.poll()
 
-    process.poll()
+    else:
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
 
 ###################################################################################################
@@ -774,88 +804,95 @@ def stop(wipe=False):
     global dockerBin
     global dockerComposeBin
     global dockerComposeYaml
+    global orchMode
 
-    # docker-compose use local temporary path
-    osEnv = os.environ.copy()
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+        # docker-compose use local temporary path
+        osEnv = os.environ.copy()
+        osEnv['TMPDIR'] = MalcolmTmpPath
 
-    # if stop.sh is being called with wipe.sh (after the docker-compose file)
-    # then also remove named and anonymous volumes (not external volumes, of course)
-    err, out = run_process(
-        [dockerComposeBin, '-f', args.composeFile, 'down', '--volumes'][: 5 if wipe else -1],
-        env=osEnv,
-        debug=args.debug,
-    )
-    if err == 0:
-        eprint("Stopped Malcolm\n")
-    else:
-        eprint("Malcolm failed to stop\n")
-        eprint("\n".join(out))
-        exit(err)
-
-    if wipe:
-        # there is some overlap here among some of these containers, but it doesn't matter
-        boundPathsToWipe = (
-            BoundPath("arkime", "/opt/arkime/logs", True, None, None),
-            BoundPath("arkime", "/opt/arkime/raw", True, None, None),
-            BoundPath("filebeat", "/zeek", True, None, None),
-            BoundPath("file-monitor", "/zeek/logs", True, None, None),
-            BoundPath("netbox", "/opt/netbox/netbox/media", True, None, ["."]),
-            BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
-            BoundPath("netbox-redis", "/data", True, None, ["."]),
-            BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
-            BoundPath("pcap-monitor", "/pcap", True, ["processed", "upload"], None),
-            BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
-            BoundPath("upload", "/var/www/upload/server/php/chroot/files", True, None, None),
-            BoundPath("zeek", "/zeek/extract_files", True, None, None),
-            BoundPath("zeek", "/zeek/upload", True, None, None),
-            BoundPath("zeek-live", "/zeek/live", True, ["spool"], None),
-            BoundPath(
-                "filebeat",
-                "/zeek",
-                False,
-                ["processed", "current", "live"],
-                ["processed", "current", "live"],
-            ),
+        # if stop.sh is being called with wipe.sh (after the docker-compose file)
+        # then also remove named and anonymous volumes (not external volumes, of course)
+        err, out = run_process(
+            [dockerComposeBin, '-f', args.composeFile, 'down', '--volumes'][: 5 if wipe else -1],
+            env=osEnv,
+            debug=args.debug,
         )
-        for boundPath in boundPathsToWipe:
-            localPath = LocalPathForContainerBindMount(
-                boundPath.service,
-                dockerComposeYaml,
-                boundPath.container_dir,
-                MalcolmPath,
-            )
-            if localPath and os.path.isdir(localPath):
-                # delete files
-                if boundPath.files:
-                    if args.debug:
-                        eprint(f'Walking "{localPath}" for file deletion')
-                    for root, dirnames, filenames in os.walk(localPath, topdown=True, onerror=None):
-                        for file in filenames:
-                            fileSpec = os.path.join(root, file)
-                            if (os.path.isfile(fileSpec) or os.path.islink(fileSpec)) and (not file.startswith('.git')):
-                                try:
-                                    os.remove(fileSpec)
-                                except Exception:
-                                    pass
-                # delete whole directories
-                if boundPath.relative_dirs:
-                    for relDir in get_iterable(boundPath.relative_dirs):
-                        tmpPath = os.path.join(localPath, relDir)
-                        if os.path.isdir(tmpPath):
-                            if args.debug:
-                                eprint(f'Performing rmtree on "{tmpPath}"')
-                            shutil.rmtree(tmpPath, ignore_errors=True)
-                # cleanup empty directories
-                if boundPath.clean_empty_dirs:
-                    for cleanDir in get_iterable(boundPath.clean_empty_dirs):
-                        tmpPath = os.path.join(localPath, cleanDir)
-                        if os.path.isdir(tmpPath):
-                            if args.debug:
-                                eprint(f'Performing RemoveEmptyFolders on "{tmpPath}"')
-                            RemoveEmptyFolders(tmpPath, removeRoot=False)
+        if err == 0:
+            eprint("Stopped Malcolm\n")
+        else:
+            eprint("Malcolm failed to stop\n")
+            eprint("\n".join(out))
+            exit(err)
 
-        eprint("Malcolm has been stopped and its data cleared\n")
+        if wipe:
+            # there is some overlap here among some of these containers, but it doesn't matter
+            boundPathsToWipe = (
+                BoundPath("arkime", "/opt/arkime/logs", True, None, None),
+                BoundPath("arkime", "/opt/arkime/raw", True, None, None),
+                BoundPath("filebeat", "/zeek", True, None, None),
+                BoundPath("file-monitor", "/zeek/logs", True, None, None),
+                BoundPath("netbox", "/opt/netbox/netbox/media", True, None, ["."]),
+                BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
+                BoundPath("netbox-redis", "/data", True, None, ["."]),
+                BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
+                BoundPath("pcap-monitor", "/pcap", True, ["processed", "upload"], None),
+                BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
+                BoundPath("upload", "/var/www/upload/server/php/chroot/files", True, None, None),
+                BoundPath("zeek", "/zeek/extract_files", True, None, None),
+                BoundPath("zeek", "/zeek/upload", True, None, None),
+                BoundPath("zeek-live", "/zeek/live", True, ["spool"], None),
+                BoundPath(
+                    "filebeat",
+                    "/zeek",
+                    False,
+                    ["processed", "current", "live"],
+                    ["processed", "current", "live"],
+                ),
+            )
+            for boundPath in boundPathsToWipe:
+                localPath = LocalPathForContainerBindMount(
+                    boundPath.service,
+                    dockerComposeYaml,
+                    boundPath.container_dir,
+                    MalcolmPath,
+                )
+                if localPath and os.path.isdir(localPath):
+                    # delete files
+                    if boundPath.files:
+                        if args.debug:
+                            eprint(f'Walking "{localPath}" for file deletion')
+                        for root, dirnames, filenames in os.walk(localPath, topdown=True, onerror=None):
+                            for file in filenames:
+                                fileSpec = os.path.join(root, file)
+                                if (os.path.isfile(fileSpec) or os.path.islink(fileSpec)) and (
+                                    not file.startswith('.git')
+                                ):
+                                    try:
+                                        os.remove(fileSpec)
+                                    except Exception:
+                                        pass
+                    # delete whole directories
+                    if boundPath.relative_dirs:
+                        for relDir in get_iterable(boundPath.relative_dirs):
+                            tmpPath = os.path.join(localPath, relDir)
+                            if os.path.isdir(tmpPath):
+                                if args.debug:
+                                    eprint(f'Performing rmtree on "{tmpPath}"')
+                                shutil.rmtree(tmpPath, ignore_errors=True)
+                    # cleanup empty directories
+                    if boundPath.clean_empty_dirs:
+                        for cleanDir in get_iterable(boundPath.clean_empty_dirs):
+                            tmpPath = os.path.join(localPath, cleanDir)
+                            if os.path.isdir(tmpPath):
+                                if args.debug:
+                                    eprint(f'Performing RemoveEmptyFolders on "{tmpPath}"')
+                                RemoveEmptyFolders(tmpPath, removeRoot=False)
+
+            eprint("Malcolm has been stopped and its data cleared\n")
+
+    else:
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
 
 ###################################################################################################
@@ -863,6 +900,7 @@ def start():
     global args
     global dockerBin
     global dockerComposeBin
+    global orchMode
 
     # touch the htadmin metadata file and .opensearch.*.curlrc files
     open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
@@ -904,81 +942,85 @@ def start():
             # chmod 600 envFile
             os.chmod(envFile, stat.S_IRUSR | stat.S_IWUSR)
 
-    # make sure some directories exist before we start
-    boundPathsToCreate = (
-        BoundPath("arkime", "/opt/arkime/logs", False, None, None),
-        BoundPath("arkime", "/opt/arkime/raw", False, None, None),
-        BoundPath("file-monitor", "/zeek/logs", False, None, None),
-        BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
-        BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
-        BoundPath("netbox-postgres", "/var/lib/postgresql/data", False, None, None),
-        BoundPath("netbox-redis", "/data", False, None, None),
-        BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
-        BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
-        BoundPath("pcap-monitor", "/pcap", False, ["processed", "upload"], None),
-        BoundPath("suricata", "/var/log/suricata", False, ["live"], None),
-        BoundPath("upload", "/var/www/upload/server/php/chroot/files", False, None, None),
-        BoundPath("zeek", "/zeek/extract_files", False, None, None),
-        BoundPath("zeek", "/zeek/upload", False, None, None),
-        BoundPath("zeek", "/opt/zeek/share/zeek/site/intel", False, ["MISP", "STIX"], None),
-        BoundPath("zeek-live", "/zeek/live", False, ["spool"], None),
-        BoundPath("filebeat", "/zeek", False, ["processed", "current", "live", "extract_files", "upload"], None),
-    )
-    for boundPath in boundPathsToCreate:
-        localPath = LocalPathForContainerBindMount(
-            boundPath.service,
-            dockerComposeYaml,
-            boundPath.container_dir,
-            MalcolmPath,
-        )
-        if localPath:
-            try:
-                if args.debug:
-                    eprint(f'Ensuring "{localPath}" exists')
-                os.makedirs(localPath)
-            except OSError as exc:
-                if (exc.errno == errno.EEXIST) and os.path.isdir(localPath):
-                    pass
-                else:
-                    raise
-            if boundPath.relative_dirs:
-                for relDir in get_iterable(boundPath.relative_dirs):
-                    tmpPath = os.path.join(localPath, relDir)
-                    try:
-                        if args.debug:
-                            eprint(f'Ensuring "{tmpPath}" exists')
-                        os.makedirs(tmpPath)
-                    except OSError as exc:
-                        if (exc.errno == errno.EEXIST) and os.path.isdir(tmpPath):
-                            pass
-                        else:
-                            raise
-
     # touch the zeek intel file
     open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
 
     # clean up any leftover intel update locks
     shutil.rmtree(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True)
 
-    # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
-    osEnv = os.environ.copy()
-    osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
-    # docker-compose use local temporary path
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+        # make sure some directories exist before we start
+        boundPathsToCreate = (
+            BoundPath("arkime", "/opt/arkime/logs", False, None, None),
+            BoundPath("arkime", "/opt/arkime/raw", False, None, None),
+            BoundPath("file-monitor", "/zeek/logs", False, None, None),
+            BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
+            BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
+            BoundPath("netbox-postgres", "/var/lib/postgresql/data", False, None, None),
+            BoundPath("netbox-redis", "/data", False, None, None),
+            BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
+            BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
+            BoundPath("pcap-monitor", "/pcap", False, ["processed", "upload"], None),
+            BoundPath("suricata", "/var/log/suricata", False, ["live"], None),
+            BoundPath("upload", "/var/www/upload/server/php/chroot/files", False, None, None),
+            BoundPath("zeek", "/zeek/extract_files", False, None, None),
+            BoundPath("zeek", "/zeek/upload", False, None, None),
+            BoundPath("zeek", "/opt/zeek/share/zeek/site/intel", False, ["MISP", "STIX"], None),
+            BoundPath("zeek-live", "/zeek/live", False, ["spool"], None),
+            BoundPath("filebeat", "/zeek", False, ["processed", "current", "live", "extract_files", "upload"], None),
+        )
+        for boundPath in boundPathsToCreate:
+            localPath = LocalPathForContainerBindMount(
+                boundPath.service,
+                dockerComposeYaml,
+                boundPath.container_dir,
+                MalcolmPath,
+            )
+            if localPath:
+                try:
+                    if args.debug:
+                        eprint(f'Ensuring "{localPath}" exists')
+                    os.makedirs(localPath)
+                except OSError as exc:
+                    if (exc.errno == errno.EEXIST) and os.path.isdir(localPath):
+                        pass
+                    else:
+                        raise
+                if boundPath.relative_dirs:
+                    for relDir in get_iterable(boundPath.relative_dirs):
+                        tmpPath = os.path.join(localPath, relDir)
+                        try:
+                            if args.debug:
+                                eprint(f'Ensuring "{tmpPath}" exists')
+                            os.makedirs(tmpPath)
+                        except OSError as exc:
+                            if (exc.errno == errno.EEXIST) and os.path.isdir(tmpPath):
+                                pass
+                            else:
+                                raise
 
-    # start docker
-    err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug)
-    if err != 0:
-        eprint("Malcolm failed to start\n")
-        eprint("\n".join(out))
-        exit(err)
+        # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
+        osEnv = os.environ.copy()
+        osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
+        # docker-compose use local temporary path
+        osEnv['TMPDIR'] = MalcolmTmpPath
+
+        # start docker
+        err, out = run_process(
+            [dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug
+        )
+        if err != 0:
+            eprint("Malcolm failed to start\n")
+            eprint("\n".join(out))
+            exit(err)
+
+    else:
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
 
 ###################################################################################################
 def authSetup(wipe=False):
     global args
-    global dockerBin
-    global dockerComposeBin
     global opensslBin
 
     # for beats/logstash self-signed certificates
@@ -1638,14 +1680,13 @@ def authSetup(wipe=False):
 # main
 def main():
     global args
-    global orchMode
     global dockerBin
     global dockerComposeBin
-    global opensslBin
-    global yamlImported
-    global kubeClient
-    global kubeImported
     global dockerComposeYaml
+    global kubeImported
+    global opensslBin
+    global orchMode
+    global yamlImported
 
     # extract arguments from the command line
     # print (sys.argv[1:]);
@@ -1890,8 +1931,6 @@ def main():
                 eprint(f"Imported kubernetes: {kubeImported}")
             if kubeImported:
                 kubeImported.config.load_kube_config(args.composeFile)
-                kubeClient = kubeImported.client.CoreV1Api()
-                kubeClient.list_node()
             else:
                 raise Exception(
                     f'{ScriptName} requires the official Python client library for kubernetes for {orchMode} mode'
