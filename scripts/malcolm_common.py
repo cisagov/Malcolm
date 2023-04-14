@@ -15,7 +15,7 @@ import malcolm_utils
 from malcolm_utils import eprint, str2bool, run_process, deep_get
 
 from collections import defaultdict, namedtuple
-from enum import IntFlag, auto
+from enum import Flag, IntFlag, auto
 
 try:
     from pwd import getpwuid
@@ -79,6 +79,15 @@ DOCKER_INSTALL_URLS[PLATFORM_MAC] = [
 ]
 DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compose/install/')
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
+
+
+class OrchestrationFramework(Flag):
+    UNKNOWN = auto()
+    DOCKER_COMPOSE = auto()
+    KUBERNETES = auto()
+
+
+OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
 
 
 ##################################################################################################
@@ -583,6 +592,28 @@ def MalcolmAuthFilesExist(configDir=None):
         and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
         and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
+
+
+###################################################################################################
+# determine if a YAML file looks like a docker-compose.yml file or a kubeconfig file
+def DetermineYamlFileFormat(inputFileName):
+    result = OrchestrationFramework.UNKNOWN
+
+    if yamlImported := YAMLDynamic():
+        try:
+            with open(inputFileName, 'r') as cf:
+                orchestrationYaml = yamlImported.safe_load(cf)
+
+            if isinstance(orchestrationYaml, dict):
+                if any(key in orchestrationYaml for key in ('apiVersion', 'clusters', 'contexts', 'kind')):
+                    result = OrchestrationFramework.KUBERNETES
+                elif 'services' in orchestrationYaml:
+                    result = OrchestrationFramework.DOCKER_COMPOSE
+
+        except Exception as e:
+            eprint(f'Error deciphering {inputFileName}: {e}')
+
+    return result
 
 
 ###################################################################################################

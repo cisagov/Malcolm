@@ -22,11 +22,11 @@ import tarfile
 import time
 
 from malcolm_common import (
-    MalcolmTmpPath,
     AskForPassword,
     AskForString,
     BoundPath,
     ChooseOne,
+    DetermineYamlFileFormat,
     DisplayMessage,
     DisplayProgramBox,
     GetUidGidFromComposeFile,
@@ -35,6 +35,9 @@ from malcolm_common import (
     MainDialog,
     MalcolmAuthFilesExist,
     MalcolmPath,
+    MalcolmTmpPath,
+    OrchestrationFramework,
+    OrchestrationFrameworksSupported,
     PLATFORM_WINDOWS,
     posInt,
     ScriptPath,
@@ -56,10 +59,14 @@ from malcolm_utils import (
     str2bool,
     pushd,
 )
-import malcolm_kubernetes
+
+from malcolm_kubernetes import (
+    PrintPodStatus,
+    PrintNodeStatus,
+)
+
 from base64 import b64encode
 from collections import defaultdict, namedtuple
-from enum import Flag, auto
 from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
 
@@ -94,16 +101,6 @@ yamlImported = None
 
 
 ###################################################################################################
-class OrchestrationFramework(Flag):
-    UNKNOWN = auto()
-    DOCKER_COMPOSE = auto()
-    KUBERNETES = auto()
-
-
-OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
-
-
-###################################################################################################
 try:
     from colorama import init as ColoramaInit, Fore, Back, Style
 
@@ -111,28 +108,6 @@ try:
     coloramaImported = True
 except Exception:
     coloramaImported = False
-
-
-###################################################################################################
-# determine if a YAML file looks like a docker-compose.yml file or a kubeconfig file
-def determineYamlFileFormat(inputFileName):
-    global yamlImported
-
-    result = OrchestrationFramework.UNKNOWN
-    try:
-        with open(inputFileName, 'r') as cf:
-            orchestrationYaml = yamlImported.safe_load(cf)
-
-        if isinstance(orchestrationYaml, dict):
-            if any(key in orchestrationYaml for key in ('apiVersion', 'clusters', 'contexts', 'kind')):
-                result = OrchestrationFramework.KUBERNETES
-            elif 'services' in orchestrationYaml:
-                result = OrchestrationFramework.DOCKER_COMPOSE
-
-    except Exception as e:
-        eprint(f'Error deciphering {args.composeFile}: {e}')
-
-    return result
 
 
 ###################################################################################################
@@ -381,9 +356,9 @@ def status():
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         try:
-            malcolm_kubernetes.PrintNodeStatus()
+            PrintNodeStatus()
             print()
-            malcolm_kubernetes.PrintPodStatus(namespace=args.namespace)
+            PrintPodStatus(namespace=args.namespace)
             print()
         except Exception as e:
             eprint(f'Error getting {args.namespace} status: {e}')
@@ -1858,7 +1833,7 @@ def main():
     if not yamlImported:
         exit(2)
 
-    if not ((orchMode := determineYamlFileFormat(args.composeFile)) and (orchMode in OrchestrationFrameworksSupported)):
+    if not ((orchMode := DetermineYamlFileFormat(args.composeFile)) and (orchMode in OrchestrationFrameworksSupported)):
         raise Exception(f'{args.composeFile} must be a docker-compose or kubeconfig YAML file')
 
     with pushd(MalcolmPath):

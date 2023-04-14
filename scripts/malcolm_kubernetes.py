@@ -3,18 +3,22 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
-MALCOLM_IMAGE_PREFIX = 'ghcr.io/idaholab/malcolm/'
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from malcolm_common import (
     KubernetesDynamic,
 )
 from malcolm_utils import (
+    eprint,
     tablify,
 )
 
 
+###################################################################################################
+MALCOLM_IMAGE_PREFIX = 'ghcr.io/idaholab/malcolm/'
+
+
+###################################################################################################
 def _nanocore_to_millicore(n):
     n = int(n[:-1])
     return str(round(n / 1000000, 2)) + 'm'
