@@ -1827,7 +1827,7 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    yamlImported = YAMLDynamic(debug=args.debug, forceInteraction=sys.__stdin__.isatty())
+    yamlImported = YAMLDynamic(debug=args.debug)
     if args.debug:
         eprint(f"Imported yaml: {yamlImported}")
     if not yamlImported:
@@ -1901,7 +1901,7 @@ def main():
                 dockerComposeYaml = yamlImported.safe_load(cf)
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
-            kubeImported = KubernetesDynamic(debug=args.debug, forceInteraction=sys.__stdin__.isatty())
+            kubeImported = KubernetesDynamic(debug=args.debug)
             if args.debug:
                 eprint(f"Imported kubernetes: {kubeImported}")
             if kubeImported:
