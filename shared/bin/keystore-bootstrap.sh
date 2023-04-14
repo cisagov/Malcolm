@@ -15,7 +15,11 @@
 #       - symlinks to "persist" keystore (foobar requires this
 #         to be the file it actually looks at)
 #
-KEYSTORE_FILE_MIN_BYTES=196
+declare -A KEYSTORE_FILE_MIN_BYTES
+KEYSTORE_FILE_MIN_BYTES[opensearch]=196
+KEYSTORE_FILE_MIN_BYTES[logstash]=465
+KEYSTORE_FILE_MIN_BYTES[filebeat]=130
+KEYSTORE_FILE_MIN_BYTES[none]=128
 
 # for each "*-keystore" executable in the filesystem...
 find / -type f -name "*-keystore" -executable 2>/dev/null | while read KEYSTORE_BIN; do
@@ -23,8 +27,13 @@ find / -type f -name "*-keystore" -executable 2>/dev/null | while read KEYSTORE_
   # TOOL_PATH is parent of keystore bin, e.g., /usr/share/foobar
   TOOL_PATH="$(realpath $(dirname "${KEYSTORE_BIN}")/..)"
 
+  # tool name is just the part before -keystore
+  TOOL_NAME="$(basename "${KEYSTORE_BIN}" | sed 's/-keystore$//')"
+
   # keystore bin is like foobar-keystore, keystore file is foobar.keystore
-  KEYSTORE_NAME="$(basename "${KEYSTORE_BIN}" | sed 's/-\(keystore\)/.\1/')"
+  KEYSTORE_NAME="${TOOL_NAME}.keystore"
+
+  [[ -v "KEYSTORE_FILE_MIN_BYTES["${TOOL_NAME}"]" ]] && MIN_BYTES=${KEYSTORE_FILE_MIN_BYTES["${TOOL_NAME}"]} || MIN_BYTES=${KEYSTORE_FILE_MIN_BYTES[none]}
 
   # chdir to tool directory
   pushd "${TOOL_PATH}" >/dev/null 2>&1
@@ -35,14 +44,14 @@ find / -type f -name "*-keystore" -executable 2>/dev/null | while read KEYSTORE_
 
   # does ./config/persist/foobar.keystore exist, and is it big enough to be a real keystore file? ...
   if [[ ! -f ./config/persist/"${KEYSTORE_NAME}" ]] || \
-     (( $(stat --format=%s ./config/persist/"${KEYSTORE_NAME}" 2>/dev/null || echo 0) < ${KEYSTORE_FILE_MIN_BYTES} )); then
+     (( $(stat --format=%s ./config/persist/"${KEYSTORE_NAME}" 2>/dev/null || echo 0) < ${MIN_BYTES} )); then
 
     # ... no, it does not! if there was something there (too small/empty file) remove it
     rm -f ./config/persist/"${KEYSTORE_NAME}"
 
     # does ./config/bootstrap/foobar.keystore exist, and is it big enough to be copied into ./config/persist? ...
     if [[ -f ./config/bootstrap/"${KEYSTORE_NAME}" ]] && \
-       (( $(stat --format=%s ./config/bootstrap/"${KEYSTORE_NAME}" 2>/dev/null || echo 0) >= ${KEYSTORE_FILE_MIN_BYTES} )); then
+       (( $(stat --format=%s ./config/bootstrap/"${KEYSTORE_NAME}" 2>/dev/null || echo 0) >= ${MIN_BYTES} )); then
 
       # ... yes, it does! bootstrap becomes the new persist keystore
       cp ./config/bootstrap/"${KEYSTORE_NAME}" ./config/persist/"${KEYSTORE_NAME}"
