@@ -18,7 +18,7 @@
 KEYSTORE_FILE_MIN_BYTES=196
 
 # for each "*-keystore" executable in the filesystem...
-find / -type f -name "*-keystore" -executable | while read KEYSTORE_BIN; do
+find / -type f -name "*-keystore" -executable 2>/dev/null | while read KEYSTORE_BIN; do
 
   # TOOL_PATH is parent of keystore bin, e.g., /usr/share/foobar
   TOOL_PATH="$(realpath $(dirname "${KEYSTORE_BIN}")/..)"
