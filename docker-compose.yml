@@ -32,7 +32,7 @@ services:
       - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
-      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
+      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/persist/opensearch.keystore:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
       interval: 30s

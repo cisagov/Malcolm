@@ -93,10 +93,13 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     usermod -a -G tty ${PUSER} && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
-    mkdir -p /logstash-persistent-queue /usr/share/logstash/config/bootstrap && \
+    mkdir -p /logstash-persistent-queue \
+             /usr/share/logstash/config/bootstrap \
+             /usr/share/logstash/config/persist && \
     chown --silent -R ${PUSER}:root \
         /usr/share/logstash/config/logstash*.yml \
         /usr/share/logstash/config/bootstrap \
+        /usr/share/logstash/config/persist \
         /usr/share/logstash/malcolm-pipelines \
         /usr/share/logstash/malcolm-patterns \
         /usr/share/logstash/malcolm-ruby \
