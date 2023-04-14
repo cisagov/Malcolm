@@ -32,6 +32,7 @@ pcap
 _site
 scripts
 !scripts/malcolm_common.py
+!scripts/malcolm_kubernetes.py
 !scripts/malcolm_utils.py
 zeek-logs
 suricata-logs

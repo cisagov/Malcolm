@@ -30,6 +30,7 @@ from malcolm_common import (
     DisplayMessage,
     DisplayProgramBox,
     GetUidGidFromComposeFile,
+    KubernetesDynamic,
     LocalPathForContainerBindMount,
     MainDialog,
     MalcolmAuthFilesExist,
@@ -55,8 +56,10 @@ from malcolm_utils import (
     str2bool,
     pushd,
 )
+import malcolm_kubernetes
 from base64 import b64encode
 from collections import defaultdict, namedtuple
+from enum import Flag, auto
 from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
 
@@ -83,9 +86,23 @@ pyPlatform = platform.system()
 args = None
 dockerBin = None
 dockerComposeBin = None
-opensslBin = None
-yamlImported = None
 dockerComposeYaml = None
+kubeClient = None
+kubeImported = None
+opensslBin = None
+orchMode = None
+yamlImported = None
+
+
+###################################################################################################
+class OrchestrationFramework(Flag):
+    UNKNOWN = auto()
+    DOCKER_COMPOSE = auto()
+    KUBERNETES = auto()
+
+
+OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
+
 
 ###################################################################################################
 try:
@@ -98,189 +115,25 @@ except Exception:
 
 
 ###################################################################################################
-# perform a service-keystore operation in a Docker container
-#
-# service - the service in the docker-compose YML file
-# keystore_args - arguments to pass to the service-keystore binary in the container
-# run_process_kwargs - keyword arguments to pass to run_process
-#
-# returns True (success) or False (failure)
-#
-def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
-    global args
-    global dockerBin
-    global dockerComposeBin
+# determine if a YAML file looks like a docker-compose.yml file or a kubeconfig file
+def determineYamlFileFormat(inputFileName):
+    global yamlImported
 
-    err = -1
-    results = []
-
-    # the opensearch containers all follow the same naming pattern for these executables
-    keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
-
-    # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
-    dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
-
-    # docker-compose use local temporary path
-    osEnv = os.environ.copy()
-    osEnv['TMPDIR'] = MalcolmTmpPath
-
-    # open up the docker-compose file and "grep" for the line where the keystore file
-    # is bind-mounted into the service container (once and only once). the bind
-    # mount needs to exist in the YML file and the local directory containing the
-    # keystore file needs to exist (although the file itself might not yet).
-    # also get PUID and PGID variables from the docker-compose file.
-    localKeystore = None
-    localKeystoreDir = None
-    localKeystorePreExists = False
-    volumeKeystore = None
-    volumeKeystoreDir = None
-    uidGidDict = None
-
+    result = OrchestrationFramework.UNKNOWN
     try:
-        uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+        with open(inputFileName, 'r') as cf:
+            orchestrationYaml = yamlImported.safe_load(cf)
 
-        composeFileLines = list()
-        with open(args.composeFile, 'r') as f:
-            allLines = f.readlines()
-            composeFileLines = [x for x in allLines if re.search(fr'-.*?{service}.keystore\s*:.*{service}.keystore', x)]
-
-        if (len(composeFileLines) == 1) and (len(composeFileLines[0]) > 0):
-            matches = re.search(
-                fr'-\s*(?P<localKeystore>.*?{service}.keystore)\s*:\s*(?P<volumeKeystore>.*?{service}.keystore)',
-                composeFileLines[0],
-            )
-            if matches:
-                localKeystore = os.path.realpath(matches.group('localKeystore'))
-                localKeystoreDir = os.path.dirname(localKeystore)
-                volumeKeystore = matches.group('volumeKeystore')
-                volumeKeystoreDir = os.path.dirname(volumeKeystore)
-
-        if (localKeystore is not None) and (volumeKeystore is not None) and os.path.isdir(localKeystoreDir):
-            localKeystorePreExists = os.path.isfile(localKeystore)
-
-            dockerCmd = None
-
-            # determine if Malcolm is running; if so, we'll use docker-compose exec, other wise we'll use docker run
-            err, out = run_process(
-                [dockerComposeBin, '-f', args.composeFile, 'ps', '-q', service], env=osEnv, debug=args.debug
-            )
-            out[:] = [x for x in out if x]
-            if (err == 0) and (len(out) > 0):
-                # Malcolm is running, we can use an existing container
-
-                # assemble the service-keystore command
-                dockerCmd = [
-                    dockerComposeBin,
-                    '-f',
-                    args.composeFile,
-                    'exec',
-                    # if using stdin, indicate the container is "interactive", else noop (duplicate --rm)
-                    '-T' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
-                    # execute as UID:GID in docker-compose.yml file
-                    '-u',
-                    f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-                    # the work directory in the container is the directory to contain the keystore file
-                    '-w',
-                    volumeKeystoreDir,
-                    # the service name
-                    service,
-                    # the executable filespec
-                    keystoreBinProc,
-                ]
-
-            else:
-                # Malcolm isn't running, do 'docker run' to spin up a temporary container to run the ocmmand
-
-                # "grep" the docker image out of the service's image: value from the docker-compose YML file
-                serviceImage = None
-                composeFileLines = list()
-                with open(args.composeFile, 'r') as f:
-                    composeFileLines = [x for x in f.readlines() if f'image: ghcr.io/idaholab/malcolm/{service}' in x]
-                if (len(composeFileLines) > 0) and (len(composeFileLines[0]) > 0):
-                    imageLineValues = composeFileLines[0].split()
-                    if len(imageLineValues) > 1:
-                        serviceImage = imageLineValues[1]
-
-                if serviceImage is not None:
-                    # assemble the service-keystore command
-                    dockerCmd = [
-                        dockerBin,
-                        'run',
-                        # remove the container when complete
-                        '--rm',
-                        # if using stdin, indicate the container is "interactive", else noop
-                        '-i' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
-                        # if     dropPriv, dockerUidGuidSetup will take care of dropping privileges for the correct UID/GID
-                        # if NOT dropPriv, enter with the keystore executable directly
-                        '--entrypoint',
-                        dockerUidGuidSetup if dropPriv else keystoreBinProc,
-                        '--env',
-                        f'PUID={uidGidDict["PUID"]}',
-                        '--env',
-                        f'DEFAULT_UID={uidGidDict["PUID"]}',
-                        '--env',
-                        f'PGID={uidGidDict["PGID"]}',
-                        '--env',
-                        f'DEFAULT_GID={uidGidDict["PGID"]}',
-                        '--env',
-                        f'PUSER_CHOWN={volumeKeystoreDir}',
-                        # rw bind mount the local directory to contain the keystore file to the container directory
-                        '-v',
-                        f'{localKeystoreDir}:{volumeKeystoreDir}:rw',
-                        # the work directory in the container is the directory to contain the keystore file
-                        '-w',
-                        volumeKeystoreDir,
-                        # if     dropPriv, execute as root, as docker-uid-gid-setup.sh will drop privileges for us
-                        # if NOT dropPriv, execute as UID:GID in docker-compose.yml file
-                        '-u',
-                        'root' if dropPriv else f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-                        # the service image name grepped from the YML file
-                        serviceImage,
-                    ]
-
-                    if dropPriv:
-                        # the keystore executable filespec (as we used dockerUidGuidSetup as the entrypoint)
-                        dockerCmd.append(keystoreBinProc)
-
-                else:
-                    raise Exception(f'Unable to identify docker image for {service} in {args.composeFile}')
-
-            if dockerCmd is not None:
-                # append whatever other arguments to pass to the executable filespec
-                if keystore_args:
-                    dockerCmd.extend(list(keystore_args))
-
-                dockerCmd[:] = [x for x in dockerCmd if x]
-
-                # execute the command, passing through run_process_kwargs to run_process as expanded keyword arguments
-                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, **run_process_kwargs)
-                if (err != 0) or (not os.path.isfile(localKeystore)):
-                    raise Exception(f'Error processing command {service} keystore: {results}')
-
-            else:
-                raise Exception(f'Unable formulate keystore command for {service} in {args.composeFile}')
-
-        else:
-            raise Exception(f'Unable to identify a unique keystore file bind mount for {service} in {args.composeFile}')
+        if isinstance(orchestrationYaml, dict):
+            if any(key in orchestrationYaml for key in ('apiVersion', 'clusters', 'contexts', 'kind')):
+                result = OrchestrationFramework.KUBERNETES
+            elif 'services' in orchestrationYaml:
+                result = OrchestrationFramework.DOCKER_COMPOSE
 
     except Exception as e:
-        if err == 0:
-            err = -1
+        eprint(f'Error deciphering {args.composeFile}: {e}')
 
-        # don't be so whiny if the "create" failed just because it already existed or a 'remove' failed on a nonexistant item
-        if (
-            (not args.debug)
-            and list(keystore_args)
-            and (len(list(keystore_args)) > 0)
-            and (list(keystore_args)[0].lower() in ('create', 'remove'))
-            and localKeystorePreExists
-        ):
-            pass
-        else:
-            eprint(e)
-
-    # success = (error == 0)
-    return (err == 0), results
+    return result
 
 
 ###################################################################################################
@@ -308,25 +161,232 @@ def checkEnvFilesExist():
 
 
 ###################################################################################################
+# perform a service-keystore operation in a container
+#
+# service - the service in the docker-compose YML file
+# keystore_args - arguments to pass to the service-keystore binary in the container
+# run_process_kwargs - keyword arguments to pass to run_process
+#
+# returns True (success) or False (failure)
+#
+def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
+    global args
+    global dockerBin
+    global dockerComposeBin
+    global orchMode
+
+    err = -1
+    results = []
+
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+        # the opensearch containers all follow the same naming pattern for these executables
+        keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
+
+        # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
+        dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
+
+        # docker-compose use local temporary path
+        osEnv = os.environ.copy()
+        osEnv['TMPDIR'] = MalcolmTmpPath
+
+        # open up the docker-compose file and "grep" for the line where the keystore file
+        # is bind-mounted into the service container (once and only once). the bind
+        # mount needs to exist in the YML file and the local directory containing the
+        # keystore file needs to exist (although the file itself might not yet).
+        # also get PUID and PGID variables from the docker-compose file.
+        localKeystore = None
+        localKeystoreDir = None
+        localKeystorePreExists = False
+        volumeKeystore = None
+        volumeKeystoreDir = None
+        uidGidDict = None
+
+        try:
+            uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+
+            composeFileLines = list()
+            with open(args.composeFile, 'r') as f:
+                allLines = f.readlines()
+                composeFileLines = [
+                    x for x in allLines if re.search(fr'-.*?{service}.keystore\s*:.*{service}.keystore', x)
+                ]
+
+            if (len(composeFileLines) == 1) and (len(composeFileLines[0]) > 0):
+                matches = re.search(
+                    fr'-\s*(?P<localKeystore>.*?{service}.keystore)\s*:\s*(?P<volumeKeystore>.*?{service}.keystore)',
+                    composeFileLines[0],
+                )
+                if matches:
+                    localKeystore = os.path.realpath(matches.group('localKeystore'))
+                    localKeystoreDir = os.path.dirname(localKeystore)
+                    volumeKeystore = matches.group('volumeKeystore')
+                    volumeKeystoreDir = os.path.dirname(volumeKeystore)
+
+            if (localKeystore is not None) and (volumeKeystore is not None) and os.path.isdir(localKeystoreDir):
+                localKeystorePreExists = os.path.isfile(localKeystore)
+
+                dockerCmd = None
+
+                # determine if Malcolm is running; if so, we'll use docker-compose exec, other wise we'll use docker run
+                err, out = run_process(
+                    [dockerComposeBin, '-f', args.composeFile, 'ps', '-q', service], env=osEnv, debug=args.debug
+                )
+                out[:] = [x for x in out if x]
+                if (err == 0) and (len(out) > 0):
+                    # Malcolm is running, we can use an existing container
+
+                    # assemble the service-keystore command
+                    dockerCmd = [
+                        dockerComposeBin,
+                        '-f',
+                        args.composeFile,
+                        'exec',
+                        # if using stdin, indicate the container is "interactive", else noop (duplicate --rm)
+                        '-T' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
+                        # execute as UID:GID in docker-compose.yml file
+                        '-u',
+                        f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
+                        # the work directory in the container is the directory to contain the keystore file
+                        '-w',
+                        volumeKeystoreDir,
+                        # the service name
+                        service,
+                        # the executable filespec
+                        keystoreBinProc,
+                    ]
+
+                else:
+                    # Malcolm isn't running, do 'docker run' to spin up a temporary container to run the ocmmand
+
+                    # "grep" the docker image out of the service's image: value from the docker-compose YML file
+                    serviceImage = None
+                    composeFileLines = list()
+                    with open(args.composeFile, 'r') as f:
+                        composeFileLines = [
+                            x for x in f.readlines() if f'image: ghcr.io/idaholab/malcolm/{service}' in x
+                        ]
+                    if (len(composeFileLines) > 0) and (len(composeFileLines[0]) > 0):
+                        imageLineValues = composeFileLines[0].split()
+                        if len(imageLineValues) > 1:
+                            serviceImage = imageLineValues[1]
+
+                    if serviceImage is not None:
+                        # assemble the service-keystore command
+                        dockerCmd = [
+                            dockerBin,
+                            'run',
+                            # remove the container when complete
+                            '--rm',
+                            # if using stdin, indicate the container is "interactive", else noop
+                            '-i' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
+                            # if     dropPriv, dockerUidGuidSetup will take care of dropping privileges for the correct UID/GID
+                            # if NOT dropPriv, enter with the keystore executable directly
+                            '--entrypoint',
+                            dockerUidGuidSetup if dropPriv else keystoreBinProc,
+                            '--env',
+                            f'PUID={uidGidDict["PUID"]}',
+                            '--env',
+                            f'DEFAULT_UID={uidGidDict["PUID"]}',
+                            '--env',
+                            f'PGID={uidGidDict["PGID"]}',
+                            '--env',
+                            f'DEFAULT_GID={uidGidDict["PGID"]}',
+                            '--env',
+                            f'PUSER_CHOWN={volumeKeystoreDir}',
+                            # rw bind mount the local directory to contain the keystore file to the container directory
+                            '-v',
+                            f'{localKeystoreDir}:{volumeKeystoreDir}:rw',
+                            # the work directory in the container is the directory to contain the keystore file
+                            '-w',
+                            volumeKeystoreDir,
+                            # if     dropPriv, execute as root, as docker-uid-gid-setup.sh will drop privileges for us
+                            # if NOT dropPriv, execute as UID:GID in docker-compose.yml file
+                            '-u',
+                            'root' if dropPriv else f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
+                            # the service image name grepped from the YML file
+                            serviceImage,
+                        ]
+
+                        if dropPriv:
+                            # the keystore executable filespec (as we used dockerUidGuidSetup as the entrypoint)
+                            dockerCmd.append(keystoreBinProc)
+
+                    else:
+                        raise Exception(f'Unable to identify docker image for {service} in {args.composeFile}')
+
+                if dockerCmd is not None:
+                    # append whatever other arguments to pass to the executable filespec
+                    if keystore_args:
+                        dockerCmd.extend(list(keystore_args))
+
+                    dockerCmd[:] = [x for x in dockerCmd if x]
+
+                    # execute the command, passing through run_process_kwargs to run_process as expanded keyword arguments
+                    err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, **run_process_kwargs)
+                    if (err != 0) or (not os.path.isfile(localKeystore)):
+                        raise Exception(f'Error processing command {service} keystore: {results}')
+
+                else:
+                    raise Exception(f'Unable formulate keystore command for {service} in {args.composeFile}')
+
+            else:
+                raise Exception(
+                    f'Unable to identify a unique keystore file bind mount for {service} in {args.composeFile}'
+                )
+
+        except Exception as e:
+            if err == 0:
+                err = -1
+
+            # don't be so whiny if the "create" failed just because it already existed or a 'remove' failed on a nonexistant item
+            if (
+                (not args.debug)
+                and list(keystore_args)
+                and (len(list(keystore_args)) > 0)
+                and (list(keystore_args)[0].lower() in ('create', 'remove'))
+                and localKeystorePreExists
+            ):
+                pass
+            else:
+                eprint(e)
+
+    # success = (error == 0)
+    return (err == 0), results
+
+
+###################################################################################################
 def status():
     global args
     global dockerComposeBin
+    global orchMode
+    global kubeClient
 
-    # docker-compose use local temporary path
-    osEnv = os.environ.copy()
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+        # docker-compose use local temporary path
+        osEnv = os.environ.copy()
+        osEnv['TMPDIR'] = MalcolmTmpPath
 
-    err, out = run_process(
-        [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
-        env=osEnv,
-        debug=args.debug,
-    )
-    if err == 0:
-        print("\n".join(out))
-    else:
-        eprint("Failed to display Malcolm status\n")
-        eprint("\n".join(out))
-        exit(err)
+        err, out = run_process(
+            [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
+            env=osEnv,
+            debug=args.debug,
+        )
+        if err == 0:
+            print("\n".join(out))
+        else:
+            eprint("Failed to display Malcolm status\n")
+            eprint("\n".join(out))
+            exit(err)
+
+    elif orchMode is OrchestrationFramework.KUBERNETES:
+        try:
+            malcolm_kubernetes.PrintNodeStatus()
+            print()
+            malcolm_kubernetes.PrintPodStatus(namespace=args.namespace)
+            print()
+        except Exception as e:
+            eprint(f'Error listing {args.namespace} pods: {e}')
+            exit(-1)
 
 
 ###################################################################################################
@@ -1578,10 +1638,13 @@ def authSetup(wipe=False):
 # main
 def main():
     global args
+    global orchMode
     global dockerBin
     global dockerComposeBin
     global opensslBin
     global yamlImported
+    global kubeClient
+    global kubeImported
     global dockerComposeYaml
 
     # extract arguments from the command line
@@ -1609,7 +1672,7 @@ def main():
         metavar='<STR>',
         type=str,
         default='docker-compose.yml',
-        help='docker-compose YML file',
+        help='docker-compose or kubeconfig YML file',
     )
     parser.add_argument(
         '-e',
@@ -1620,6 +1683,16 @@ def main():
         type=str,
         default=None,
         help="Directory containing Malcolm's .env files",
+    )
+    parser.add_argument(
+        '-n',
+        '--namespace',
+        required=False,
+        dest='namespace',
+        metavar='<STR>',
+        type=str,
+        default='malcolm',
+        help="Kubernetes namespace",
     )
     parser.add_argument(
         '-s',
@@ -1642,7 +1715,6 @@ def main():
         help="Tail Malcolm logs",
     )
     parser.add_argument(
-        '-n',
         '--lines',
         dest='logLineCount',
         type=posInt,
@@ -1739,11 +1811,14 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    yamlImported = YAMLDynamic(debug=args.debug)
+    yamlImported = YAMLDynamic(debug=args.debug, forceInteraction=sys.__stdin__.isatty())
     if args.debug:
         eprint(f"Imported yaml: {yamlImported}")
     if not yamlImported:
         exit(2)
+
+    if not ((orchMode := determineYamlFileFormat(args.composeFile)) and (orchMode in OrchestrationFrameworksSupported)):
+        raise Exception(f'{args.composeFile} must be a docker-compose or kubeconfig YAML file')
 
     with pushd(MalcolmPath):
         # don't run this as root
@@ -1781,32 +1856,46 @@ def main():
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
 
-        # make sure docker/docker-compose is available
-        dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
-        if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
-            dockerComposeBin = 'docker-compose.exe'
-        elif which('docker-compose'):
-            dockerComposeBin = 'docker-compose'
-        elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-            dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
-        elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
-            dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
-        elif os.path.isfile('/usr/local/bin/docker-compose'):
-            dockerComposeBin = '/usr/local/bin/docker-compose'
-        elif os.path.isfile('/usr/bin/docker-compose'):
-            dockerComposeBin = '/usr/bin/docker-compose'
-        else:
-            dockerComposeBin = 'docker-compose'
-        err, out = run_process([dockerBin, 'info'], debug=args.debug)
-        if err != 0:
-            raise Exception(f'{ScriptName} requires docker, please run install.py')
-        err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], env=osEnv, debug=args.debug)
-        if err != 0:
-            raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
+        if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+            # make sure docker/docker-compose is available
+            dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
+            if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
+                dockerComposeBin = 'docker-compose.exe'
+            elif which('docker-compose'):
+                dockerComposeBin = 'docker-compose'
+            elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
+            elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
+                dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
+            elif os.path.isfile('/usr/local/bin/docker-compose'):
+                dockerComposeBin = '/usr/local/bin/docker-compose'
+            elif os.path.isfile('/usr/bin/docker-compose'):
+                dockerComposeBin = '/usr/bin/docker-compose'
+            else:
+                dockerComposeBin = 'docker-compose'
+            err, out = run_process([dockerBin, 'info'], debug=args.debug)
+            if err != 0:
+                raise Exception(f'{ScriptName} requires docker, please run install.py')
+            err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], env=osEnv, debug=args.debug)
+            if err != 0:
+                raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
 
-        # load compose file YAML (used to find some volume bind mount locations)
-        with open(args.composeFile, 'r') as cf:
-            dockerComposeYaml = yamlImported.safe_load(cf)
+            # load compose file YAML (used to find some volume bind mount locations)
+            with open(args.composeFile, 'r') as cf:
+                dockerComposeYaml = yamlImported.safe_load(cf)
+
+        elif orchMode is OrchestrationFramework.KUBERNETES:
+            kubeImported = KubernetesDynamic(debug=args.debug, forceInteraction=sys.__stdin__.isatty())
+            if args.debug:
+                eprint(f"Imported kubernetes: {kubeImported}")
+            if kubeImported:
+                kubeImported.config.load_kube_config(args.composeFile)
+                kubeClient = kubeImported.client.CoreV1Api()
+                kubeClient.list_node()
+            else:
+                raise Exception(
+                    f'{ScriptName} requires the official Python client library for kubernetes for {orchMode} mode'
+                )
 
         # identify openssl binary
         opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('openssl.exe')) else 'openssl'

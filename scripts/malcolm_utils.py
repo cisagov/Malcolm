@@ -439,6 +439,16 @@ def str2bool(v):
 
 
 ###################################################################################################
+# tablify
+def tablify(matrix, file=sys.stdout):
+    colMaxLen = {i: max(map(len, inner)) for i, inner in enumerate(zip(*matrix))}
+    for row in matrix:
+        for col, data in enumerate(row):
+            print(f"{data:{colMaxLen[col]}}", end=" | ", file=file)
+        print(file=file)
+
+
+###################################################################################################
 # a context manager returning a temporary filename which is deleted upon leaving the context
 @contextlib.contextmanager
 def temporary_filename(suffix=None):

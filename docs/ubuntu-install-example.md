@@ -12,7 +12,7 @@ To install Malcolm from the latest Malcolm release, browse to the [Malcolm relea
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
-malcolm_common.py malcolm_utils.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
+malcolm_common.py malcolm_kubernetes.py malcolm_utils.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
 ```
 
 If you are obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:

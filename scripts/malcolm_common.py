@@ -556,6 +556,10 @@ def YAMLDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
 
 
+def KubernetesDynamic(debug=False, forceInteraction=False):
+    return DoDynamicImport("kubernetes", "kubernetes", interactive=forceInteraction, debug=debug)
+
+
 def DotEnvDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("dotenv", "python-dotenv", interactive=forceInteraction, debug=debug)
 
