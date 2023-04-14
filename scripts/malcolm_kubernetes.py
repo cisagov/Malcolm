@@ -66,6 +66,8 @@ def node_stats(node):
         pods = k8s_api.list_pod_for_all_namespaces(watch=False, field_selector=field_selector)
         node_dict[node] = [
             api_response.metadata.name,
+            ','.join(list(set([x.address for x in api_response.status.addresses if not x.type.endswith('IP')]))),
+            ','.join(list(set([x.address for x in api_response.status.addresses if x.type.endswith('IP')]))),
             api_response.spec.provider_id.split('/')[-1],
             api_response.metadata.labels['node.kubernetes.io/instance-type'],
             _core_to_millicore(api_response.status.capacity['cpu']),
@@ -173,7 +175,9 @@ def PrintNodeStatus():
     statusRows = [
         [
             'Node Name',
-            'Provide ID',
+            'Hostname',
+            'IP',
+            'Provider ID',
             'Instance Type',
             'Total CPU',
             'CPU Usage',
@@ -181,8 +185,8 @@ def PrintNodeStatus():
             'Total Memory',
             'Memory Usage',
             'Total Storage',
-            'Current PODs',
-        ]
+            'Current Pods',
+        ],
     ]
     for node in node_summary:
         statusRows.append([str(x) for x in node_summary[node]])
@@ -205,15 +209,15 @@ def PrintPodStatus(namespace=None):
         [
             'Pod Name',
             'Namespace',
-            'Phase',
-            'POD IP',
-            'POD Kind',
+            'State',
+            'Pod IP',
+            'Pod Kind',
             'Worker Node',
             'CPU Usage',
-            'Mem Usage',
-            'Container Name:Restart',
+            'Memory Usage',
+            'Container Name:Restarts',
             'Container Image',
-        ]
+        ],
     ]
     if namespace:
         del statusRows[0][1]

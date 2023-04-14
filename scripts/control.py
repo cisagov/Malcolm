@@ -385,7 +385,7 @@ def status():
             malcolm_kubernetes.PrintPodStatus(namespace=args.namespace)
             print()
         except Exception as e:
-            eprint(f'Error listing {args.namespace} pods: {e}')
+            eprint(f'Error getting {args.namespace} status: {e}')
             exit(-1)
 
 
