@@ -17,6 +17,7 @@
 /nginx/nginx_ldap*.conf
 /htadmin/config.ini
 /htadmin/metadata
+*.keystore
 
 # runtime
 .tmp

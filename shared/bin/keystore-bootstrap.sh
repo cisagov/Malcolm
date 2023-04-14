@@ -18,7 +18,6 @@
 declare -A KEYSTORE_FILE_MIN_BYTES
 KEYSTORE_FILE_MIN_BYTES[opensearch]=196
 KEYSTORE_FILE_MIN_BYTES[logstash]=465
-KEYSTORE_FILE_MIN_BYTES[filebeat]=130
 KEYSTORE_FILE_MIN_BYTES[none]=128
 
 # for each "*-keystore" executable in the filesystem...
