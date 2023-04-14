@@ -32,7 +32,7 @@ find / -type f -name "*-keystore" -executable 2>/dev/null | while read KEYSTORE_
   # keystore bin is like foobar-keystore, keystore file is foobar.keystore
   KEYSTORE_NAME="${TOOL_NAME}.keystore"
 
-  [[ -v "KEYSTORE_FILE_MIN_BYTES["${TOOL_NAME}"]" ]] && MIN_BYTES=${KEYSTORE_FILE_MIN_BYTES["${TOOL_NAME}"]} || MIN_BYTES=${KEYSTORE_FILE_MIN_BYTES[none]}
+  [[ -z "${KEYSTORE_FILE_MIN_BYTES["${TOOL_NAME}"]+unset}" ]] && MIN_BYTES=${KEYSTORE_FILE_MIN_BYTES[none]} || MIN_BYTES=${KEYSTORE_FILE_MIN_BYTES["${TOOL_NAME}"]}
 
   # chdir to tool directory
   pushd "${TOOL_PATH}" >/dev/null 2>&1
