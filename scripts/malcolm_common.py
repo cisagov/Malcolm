@@ -5,6 +5,7 @@
 
 import getpass
 import importlib
+import json
 import os
 import platform
 import re
@@ -12,7 +13,15 @@ import string
 import sys
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, run_process, deep_get
+from malcolm_utils import (
+    deep_get,
+    eprint,
+    EscapeAnsi,
+    LoadStrIfJson,
+    remove_suffix,
+    run_process,
+    str2bool,
+)
 
 from collections import defaultdict, namedtuple
 from enum import Flag, IntFlag, auto
@@ -29,6 +38,14 @@ try:
 except ImportError:
     Dialog = None
     MainDialog = None
+
+try:
+    from colorama import init as ColoramaInit, Fore, Back, Style
+
+    ColoramaInit()
+    coloramaImported = True
+except Exception:
+    coloramaImported = False
 
 ###################################################################################################
 ScriptPath = os.path.dirname(os.path.realpath(__file__))
@@ -631,3 +648,198 @@ def DownloadToFile(url, local_filename, debug=False):
             f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({malcolm_utils.sizeof_fmt(fSize)})"
         )
     return fExists and (fSize > 0)
+
+
+###################################################################################################
+# process log line from containers' output
+
+URL_USER_PASS_REGEX = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
+
+# noisy logs (a lot of it is NGINX logs from health checks)
+LOG_IGNORE_REGEX = re.compile(
+    r"""
+.+(
+    deprecated
+  | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
+  | \bGET.+\b302\s+30\b
+  | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
+  | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
+  | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
+  | /_ns_/nstest\.html
+  | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
+  | \b(d|es)?stats\.json
+  | \b1.+GET\s+/\s+.+401.+curl
+  | _cat/indices
+  | branding.*config\s+is\s+not\s+found\s+or\s+invalid
+  | but\s+there\s+are\s+no\s+living\s+connections
+  | Connecting\s+to\s+backoff
+  | curl.+localhost.+GET\s+/api/status\s+200
+  | DEPRECATION
+  | descheduling\s+job\s*id
+  | eshealth
+  | esindices/list
+  | executing\s+attempt_(transition|set_replica_count)\s+for
+  | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+  | loaded\s+config\s+'/etc/netbox/config/
+  | "netbox"\s+application\s+started
+  | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
+  | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
+  | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
+  | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
+  | POST\s+HTTP/[\d\.].+\b200\b
+  | reaped\s+unknown\s+pid
+  | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
+  | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
+  | retry\.go.+(send\s+unwait|done$)
+  | running\s+full\s+sweep
+  | saved_objects
+  | scheduling\s+job\s*id.+opendistro-ism
+  | SSL/TLS\s+verifications\s+disabled
+  | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+  | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
+  | throttling\s+index
+  | update_mapping
+  | updating\s+number_of_replicas
+  | use_field_mapping
+  | Using\s+geoip\s+database
+)
+""",
+    re.VERBOSE | re.IGNORECASE,
+)
+
+# logs we don't want to eliminate, but we don't want to repeat ad-nauseum
+# TODO: not implemented yet
+#   dupeRegEx = re.compile(
+#       r"""
+#   .+(
+#       Maybe the destination pipeline is down or stopping
+#   )
+# """,
+#       re.VERBOSE | re.IGNORECASE,
+#   )
+
+SERVICE_REGEX = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
+
+CONTAINER_REPL_REGEX = re.compile(r'([\w\.-]+)-container(\s*\|)')
+
+ISO8601_TIME_REGEX = re.compile(
+    r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
+)
+
+
+def ProcessLogLine(line, debug=False):
+    global ISO8601_TIME_REGEX
+    global LOG_IGNORE_REGEX
+    global SERVICE_REGEX
+    global URL_USER_PASS_REGEX
+
+    outputStr = CONTAINER_REPL_REGEX.sub(r"\1\2", URL_USER_PASS_REGEX.sub(r"\1xxxxxxxx\2", line.decode().strip()))
+    outputStrEscaped = EscapeAnsi(outputStr)
+    if LOG_IGNORE_REGEX.match(outputStrEscaped):
+        return None
+    else:
+        serviceMatch = SERVICE_REGEX.search(outputStrEscaped)
+        serviceMatchFmt = SERVICE_REGEX.search(outputStr) if coloramaImported else serviceMatch
+        serviceStr = serviceMatchFmt.group('service').replace('-container', '') if (serviceMatchFmt is not None) else ''
+
+        messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
+        messageStrSplit = messageStr.split(' ')
+        messageTimeMatch = ISO8601_TIME_REGEX.match(messageStrSplit[0])
+        if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
+            messageStrToTestJson = messageStr
+        else:
+            messageStrToTestJson = messageStrSplit[1:].join(' ')
+
+        outputJson = LoadStrIfJson(messageStrToTestJson)
+        if isinstance(outputJson, dict):
+            # if there's a timestamp, move it outside of the JSON to the beginning of the log string
+            timeKey = None
+            if 'time' in outputJson:
+                timeKey = 'time'
+            elif 'timestamp' in outputJson:
+                timeKey = 'timestamp'
+            elif '@timestamp' in outputJson:
+                timeKey = '@timestamp'
+            timeStr = ''
+            if timeKey is not None:
+                timeStr = f"{outputJson[timeKey]} "
+                outputJson.pop(timeKey, None)
+            elif messageTimeMatch is not None:
+                timeStr = f"{messageTimeMatch[0]} "
+
+            if ('job.schedule' in outputJson) and ('job.position' in outputJson) and ('job.command' in outputJson):
+                # this is a status line line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
+
+                # remove some clutter for the display
+                for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
+                    outputJson.pop(noisyKey, None)
+
+                # if it's just command and message, format those NOT as JSON
+                jobCmd = outputJson['job.command']
+                jobStatus = outputJson['msg']
+                if (len(outputJson.keys()) == 2) and ('job.command' in outputJson) and ('msg' in outputJson):
+                    # if it's the most common status (starting or job succeeded) then don't print unless debug mode
+                    if debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
+                        return (
+                            f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr} {jobCmd}: {jobStatus}"
+                        )
+                    else:
+                        return None
+
+                else:
+                    # standardize and print the JSON line
+                    return (
+                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                    )
+
+            elif 'dashboards' in serviceStr:
+                # this is an line line from dashboards, let's clean it up a bit: remove some clutter for the display
+                for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
+                    outputJson.pop(noisyKey, None)
+
+                # standardize and print the JSON line
+                return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+
+            elif 'filebeat' in serviceStr:
+                # this is an line line from filebeat, let's clean it up a bit: remove some clutter for the display
+                for noisyKey in [
+                    'ecs.version',
+                    'harvester_id',
+                    'input_id',
+                    'log.level',
+                    'log.logger',
+                    'log.origin',
+                    'os_id',
+                    'service.name',
+                    'state_id',
+                ]:
+                    outputJson.pop(noisyKey, None)
+
+                # we'll fancify a couple of common things from filebeat
+                if (
+                    (len(outputJson.keys()) == 3)
+                    and ('message' in outputJson)
+                    and ('source_file' in outputJson)
+                    and ('finished' in outputJson)
+                ):
+                    return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
+
+                elif len(outputJson.keys()) == 1:
+                    outputKey = next(iter(outputJson))
+                    return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
+
+                else:
+                    # standardize and print the JSON line
+                    return (
+                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                    )
+
+            else:
+                # standardize and print the JSON line
+                return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+
+        else:
+            # just a regular non-JSON string, print as-is
+            return outputStr if coloramaImported else outputStrEscaped
+
+    return None

@@ -15,6 +15,7 @@ import platform
 import re
 import secrets
 import shutil
+import signal
 import stat
 import string
 import sys
@@ -39,6 +40,7 @@ from malcolm_common import (
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
     PLATFORM_WINDOWS,
+    ProcessLogLine,
     posInt,
     ScriptPath,
     YAMLDynamic,
@@ -97,6 +99,7 @@ dockerComposeYaml = None
 kubeImported = None
 opensslBin = None
 orchMode = None
+shuttingDown = [False]
 yamlImported = None
 
 
@@ -108,6 +111,13 @@ try:
     coloramaImported = True
 except Exception:
     coloramaImported = False
+
+
+###################################################################################################
+# handle sigint/sigterm and set a global shutdown variable
+def shutdown_handler(signum, frame):
+    global shuttingDown
+    shuttingDown[0] = True
 
 
 ###################################################################################################
@@ -503,86 +513,17 @@ def logs():
     global dockerBin
     global dockerComposeBin
     global orchMode
-
-    urlUserPassRegEx = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
-
-    # noisy logs (a lot of it is NGINX logs from health checks)
-    ignoreRegEx = re.compile(
-        r"""
-    .+(
-        deprecated
-      | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
-      | \bGET.+\b302\s+30\b
-      | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
-      | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
-      | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
-      | /_ns_/nstest\.html
-      | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
-      | \b(d|es)?stats\.json
-      | \b1.+GET\s+/\s+.+401.+curl
-      | _cat/indices
-      | branding.*config\s+is\s+not\s+found\s+or\s+invalid
-      | but\s+there\s+are\s+no\s+living\s+connections
-      | Connecting\s+to\s+backoff
-      | curl.+localhost.+GET\s+/api/status\s+200
-      | DEPRECATION
-      | descheduling\s+job\s*id
-      | eshealth
-      | esindices/list
-      | executing\s+attempt_(transition|set_replica_count)\s+for
-      | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
-      | loaded\s+config\s+'/etc/netbox/config/
-      | "netbox"\s+application\s+started
-      | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
-      | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
-      | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
-      | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
-      | POST\s+HTTP/[\d\.].+\b200\b
-      | reaped\s+unknown\s+pid
-      | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
-      | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
-      | retry\.go.+(send\s+unwait|done$)
-      | running\s+full\s+sweep
-      | saved_objects
-      | scheduling\s+job\s*id.+opendistro-ism
-      | SSL/TLS\s+verifications\s+disabled
-      | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
-      | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
-      | throttling\s+index
-      | update_mapping
-      | updating\s+number_of_replicas
-      | use_field_mapping
-      | Using\s+geoip\s+database
-    )
-  """,
-        re.VERBOSE | re.IGNORECASE,
-    )
-
-    # logs we don't want to eliminate, but we don't want to repeat ad-nauseum
-    # TODO: not implemented yet
-    #   dupeRegEx = re.compile(
-    #       r"""
-    #   .+(
-    #       Maybe the destination pipeline is down or stopping
-    #   )
-    # """,
-    #       re.VERBOSE | re.IGNORECASE,
-    #   )
-
-    serviceRegEx = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
-    iso8601TimeRegEx = re.compile(
-        r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
-    )
+    global shuttingDown
 
     finishedStartingRegEx = re.compile(r'.+Pipelines\s+running\s+\{.*:non_running_pipelines=>\[\]\}')
-    finishedStarting = False
+
+    osEnv = os.environ.copy()
+    # use local temporary path
+    osEnv['TMPDIR'] = MalcolmTmpPath
 
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
-        osEnv = os.environ.copy()
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
-        # docker-compose use local temporary path
-        osEnv['TMPDIR'] = MalcolmTmpPath
 
         err, out = run_process(
             [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
@@ -591,186 +532,85 @@ def logs():
         )
         print("\n".join(out))
 
-        if args.logLineCount is None:
-            args.logLineCount = 'all'
+        cmd = [
+            dockerComposeBin,
+            '-f',
+            args.composeFile,
+            'logs',
+            '--tail',
+            str(args.logLineCount) if args.logLineCount else 'all',
+            '-f',
+            args.service,
+        ][: 8 if args.service else -1]
 
-        process = Popen(
-            [
-                dockerComposeBin,
-                '-f',
+    elif orchMode is OrchestrationFramework.KUBERNETES:
+        if which("stern"):
+            cmd = [
+                "stern",
+                "--kubeconfig",
                 args.composeFile,
-                'logs',
+                "--only-log-lines",
+                "--color",
+                'auto' if coloramaImported else 'never',
+                "--template",
+                '{{.Namespace}}/{{color .PodColor .PodName}}/{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
+                if args.debug
+                else '{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}',
                 '--tail',
-                str(args.logLineCount),
-                '-f',
-                args.service,
-            ][: 8 if args.service is not None else -1],
-            env=osEnv,
-            stdout=PIPE,
-            stderr=None if args.debug else DEVNULL,
-        )
-        while True:
-            output = process.stdout.readline()
-            if (len(output) == 0) and (process.poll() is not None):
-                break
-            if output:
-                outputStr = urlUserPassRegEx.sub(r"\1xxxxxxxx\2", output.decode().strip())
-                outputStrEscaped = EscapeAnsi(outputStr)
-                if ignoreRegEx.match(outputStrEscaped):
-                    # print(f'!!!!!!!: {outputStr}')
-                    pass
-                elif (
-                    (args.cmdStart or args.cmdRestart)
-                    and (not args.cmdLogs)
-                    and finishedStartingRegEx.match(outputStrEscaped)
-                ):
-                    finishedStarting = True
-                else:
-                    serviceMatch = serviceRegEx.search(outputStrEscaped)
-                    serviceMatchFmt = serviceRegEx.search(outputStr) if coloramaImported else serviceMatch
-                    serviceStr = serviceMatchFmt.group('service') if (serviceMatchFmt is not None) else ''
+                str(args.logLineCount) if args.logLineCount else '-1',
+            ]
 
-                    messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
-                    messageStrSplit = messageStr.split(' ')
-                    messageTimeMatch = iso8601TimeRegEx.match(messageStrSplit[0])
-                    if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
-                        messageStrToTestJson = messageStr
-                    else:
-                        messageStrToTestJson = messageStrSplit[1:].join(' ')
-
-                    outputJson = LoadStrIfJson(messageStrToTestJson)
-                    if isinstance(outputJson, dict):
-                        # if there's a timestamp, move it outside of the JSON to the beginning of the log string
-                        timeKey = None
-                        if 'time' in outputJson:
-                            timeKey = 'time'
-                        elif 'timestamp' in outputJson:
-                            timeKey = 'timestamp'
-                        elif '@timestamp' in outputJson:
-                            timeKey = '@timestamp'
-                        timeStr = ''
-                        if timeKey is not None:
-                            timeStr = f"{outputJson[timeKey]} "
-                            outputJson.pop(timeKey, None)
-                        elif messageTimeMatch is not None:
-                            timeStr = f"{messageTimeMatch[0]} "
-
-                        if (
-                            ('job.schedule' in outputJson)
-                            and ('job.position' in outputJson)
-                            and ('job.command' in outputJson)
-                        ):
-                            # this is a status output line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
-
-                            # remove some clutter for the display
-                            for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
-                                outputJson.pop(noisyKey, None)
-
-                            # if it's just command and message, format those NOT as JSON
-                            jobCmd = outputJson['job.command']
-                            jobStatus = outputJson['msg']
-                            if (
-                                (len(outputJson.keys()) == 2)
-                                and ('job.command' in outputJson)
-                                and ('msg' in outputJson)
-                            ):
-                                # if it's the most common status (starting or job succeeded) then don't print unless debug mode
-                                if args.debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
-                                    print(
-                                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr} {jobCmd}: {jobStatus}"
-                                    )
-                                else:
-                                    pass
-
-                            else:
-                                # standardize and print the JSON output
-                                print(
-                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                                )
-
-                        elif 'dashboards' in serviceStr:
-                            # this is an output line from dashboards, let's clean it up a bit: remove some clutter for the display
-                            for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
-                                outputJson.pop(noisyKey, None)
-
-                            # standardize and print the JSON output
-                            print(
-                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                            )
-
-                        elif 'filebeat' in serviceStr:
-                            # this is an output line from filebeat, let's clean it up a bit: remove some clutter for the display
-                            for noisyKey in [
-                                'ecs.version',
-                                'harvester_id',
-                                'input_id',
-                                'log.level',
-                                'log.logger',
-                                'log.origin',
-                                'os_id',
-                                'service.name',
-                                'state_id',
-                            ]:
-                                outputJson.pop(noisyKey, None)
-
-                            # we'll fancify a couple of common things from filebeat
-                            if (
-                                (len(outputJson.keys()) == 3)
-                                and ('message' in outputJson)
-                                and ('source_file' in outputJson)
-                                and ('finished' in outputJson)
-                            ):
-                                print(
-                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
-                                )
-
-                            elif len(outputJson.keys()) == 1:
-                                outputKey = next(iter(outputJson))
-                                print(
-                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
-                                )
-                            else:
-                                # standardize and print the JSON output
-                                print(
-                                    f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                                )
-
-                        else:
-                            # standardize and print the JSON output
-                            print(
-                                f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
-                            )
-
-                    else:
-                        # just a regular non-JSON string, print as-is
-                        print(outputStr if coloramaImported else outputStrEscaped)
-
+            if args.namespace:
+                cmd.extend(['--namespace', args.namespace])
             else:
-                time.sleep(0.5)
+                cmd.append('--all-namespaces')
+            cmd.append(args.service if args.service else '.*')
 
-            if finishedStarting:
-                process.terminate()
-                try:
-                    process.wait(timeout=5.0)
-                except TimeoutExpired:
-                    process.kill()
-                # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
-                # accessing these from the Malcolm server.
-                print("\nStarted Malcolm\n\n")
-                print("Malcolm services can be accessed via the following URLs:")
-                print("------------------------------------------------------------------------------")
-                print("  - Arkime: https://localhost/")
-                print("  - OpenSearch Dashboards: https://localhost/dashboards/")
-                print("  - PCAP upload (web): https://localhost/upload/")
-                print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-                print("  - NetBox: https://localhost/netbox/\n")
-                print("  - Account management: https://localhost/auth/\n")
-                print("  - Documentation: https://localhost/readme/\n")
-
-        process.poll()
+        else:
+            raise Exception(
+                f'{sys._getframe().f_code.co_name} with orchestration mode {orchMode} requires "stern" (https://github.com/stern/stern/releases/latest)'
+            )
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+
+    process = Popen(
+        cmd,
+        env=osEnv,
+        stdout=PIPE,
+        stderr=None if args.debug else DEVNULL,
+    )
+    while not shuttingDown[0]:
+        output = process.stdout.readline()
+        if (len(output) == 0) and (process.poll() is not None):
+            break
+
+        if output := ProcessLogLine(output, debug=args.debug):
+            print(output)
+
+        else:
+            time.sleep(0.5)
+
+        if output and (args.cmdStart or args.cmdRestart) and (not args.cmdLogs) and finishedStartingRegEx.match(output):
+            process.terminate()
+            try:
+                process.wait(timeout=5.0)
+            except TimeoutExpired:
+                process.kill()
+            # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
+            # accessing these from the Malcolm server.
+            print("\nStarted Malcolm\n\n")
+            print("Malcolm services can be accessed via the following URLs:")
+            print("------------------------------------------------------------------------------")
+            print("  - Arkime: https://localhost/")
+            print("  - OpenSearch Dashboards: https://localhost/dashboards/")
+            print("  - PCAP upload (web): https://localhost/upload/")
+            print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
+            print("  - NetBox: https://localhost/netbox/\n")
+            print("  - Account management: https://localhost/auth/\n")
+            print("  - Documentation: https://localhost/readme/\n")
+
+    process.poll()
 
 
 ###################################################################################################
@@ -1661,6 +1501,7 @@ def main():
     global kubeImported
     global opensslBin
     global orchMode
+    global shuttingDown
     global yamlImported
 
     # extract arguments from the command line
@@ -1826,6 +1667,10 @@ def main():
         eprint("Malcolm path:", MalcolmPath)
     else:
         sys.tracebacklimit = 0
+
+    # handle sigint and sigterm for graceful shutdown
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
 
     yamlImported = YAMLDynamic(debug=args.debug)
     if args.debug:
