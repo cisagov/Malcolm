@@ -469,6 +469,16 @@ def touch(filename):
 
 
 ###################################################################################################
+# read the contents of a text file
+def file_contents(filename, encoding='utf8'):
+    if os.path.isfile(filename):
+        with open(filename, encoding=encoding) as f:
+            return f.read()
+    else:
+        return None
+
+
+###################################################################################################
 def val2bool(v):
     try:
         if v is None:

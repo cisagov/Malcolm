@@ -30,6 +30,7 @@ from malcolm_common import (
     DetermineYamlFileFormat,
     DisplayMessage,
     DisplayProgramBox,
+    DotEnvDynamic,
     GetUidGidFromComposeFile,
     KubernetesDynamic,
     LocalPathForContainerBindMount,
@@ -48,6 +49,7 @@ from malcolm_common import (
 )
 
 from malcolm_utils import (
+    dictsearch,
     eprint,
     EscapeForCurl,
     EscapeAnsi,
@@ -66,6 +68,7 @@ from malcolm_kubernetes import (
     PrintPodStatus,
     PrintNodeStatus,
     DeleteNamespace,
+    StartMalcolm,
 )
 
 from base64 import b64encode
@@ -102,6 +105,7 @@ opensslBin = None
 orchMode = None
 shuttingDown = [False]
 yamlImported = None
+dotenvImported = None
 
 
 ###################################################################################################
@@ -715,9 +719,19 @@ def stop(wipe=False):
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         deleteResults = DeleteNamespace(namespace=args.namespace)
-        eprint(f"The {args.namespace} namespace and its underlying resources have been deleted\n")
-        if args.debug:
+
+        if dictsearch(deleteResults, 'error'):
+            eprint(
+                f"Deleting {args.namespace} namespace and its underlying resources returned the following error(s):\n"
+            )
             eprint(deleteResults)
+            eprint()
+
+        else:
+            eprint(f"The {args.namespace} namespace and its underlying resources have been deleted\n")
+            if args.debug:
+                eprint(deleteResults)
+                eprint()
 
         if wipe:
             eprint(f'Data on PersistentVolume storage cannot be deleted by {ScriptName}: it must be deleted manually\n')
@@ -844,6 +858,25 @@ def start():
             eprint("Malcolm failed to start\n")
             eprint("\n".join(out))
             exit(err)
+
+    elif orchMode is OrchestrationFramework.KUBERNETES:
+        startResults = StartMalcolm(
+            namespace=args.namespace,
+            malcolmPath=MalcolmPath,
+            configPath=args.configDir,
+        )
+
+        if dictsearch(startResults, 'error'):
+            eprint(
+                f"Starting the {args.namespace} namespace and creating its underlying resources returned the following error(s):\n"
+            )
+            eprint(startResults)
+            eprint()
+
+        elif args.debug:
+            eprint()
+            eprint(startResults)
+            eprint()
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
@@ -1519,6 +1552,7 @@ def main():
     global orchMode
     global shuttingDown
     global yamlImported
+    global dotenvImported
 
     # extract arguments from the command line
     # print (sys.argv[1:]);
@@ -1692,6 +1726,12 @@ def main():
     if args.debug:
         eprint(f"Imported yaml: {yamlImported}")
     if not yamlImported:
+        exit(2)
+
+    dotenvImported = DotEnvDynamic(debug=args.debug)
+    if args.debug:
+        eprint(f"Imported dotenv: {dotenvImported}")
+    if not dotenvImported:
         exit(2)
 
     if not ((orchMode := DetermineYamlFileFormat(args.composeFile)) and (orchMode in OrchestrationFrameworksSupported)):

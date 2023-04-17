@@ -3,13 +3,21 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import glob
+import os
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict
 
 from malcolm_common import (
     KubernetesDynamic,
+    DotEnvDynamic,
+    MalcolmPath,
 )
 from malcolm_utils import (
     eprint,
+    file_contents,
+    remove_suffix,
     tablify,
     LoadStrIfJson,
 )
@@ -17,6 +25,66 @@ from malcolm_utils import (
 
 ###################################################################################################
 MALCOLM_IMAGE_PREFIX = 'ghcr.io/idaholab/malcolm/'
+
+MALCOLM_CONFIGMAPS = {
+    'etc-nginx': [
+        os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
+        os.path.join(MalcolmPath, os.path.join('nginx', 'nginx.conf')),
+    ],
+    'var-local-catrust': [
+        os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
+    ],
+    'etc-nginx-certs': [
+        os.path.join(MalcolmPath, os.path.join('nginx', 'certs')),
+    ],
+    'etc-nginx-certs-pem': [
+        os.path.join(MalcolmPath, os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
+    ],
+    'etc-nginx-auth': [
+        os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
+    ],
+    'opensearch-curlrc': [
+        os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
+        os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+    ],
+    'opensearch-keystore': [
+        os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore')),
+    ],
+    'logstash-certs': [
+        os.path.join(MalcolmPath, os.path.join('logstash', 'certs')),
+    ],
+    'logstash-maps': [
+        os.path.join(MalcolmPath, os.path.join('logstash', 'maps')),
+    ],
+    'logstash-keystore': [
+        os.path.join(MalcolmPath, os.path.join('logstash', 'logstash.keystore')),
+    ],
+    'yara-rules': [
+        os.path.join(MalcolmPath, os.path.join('yara', 'rules')),
+    ],
+    'suricata-rules': [
+        os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
+    ],
+    'filebeat-certs': [
+        os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
+    ],
+    'netbox-netmap-json': [
+        'net-map.json',
+    ],
+    'netbox-config': [
+        os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'configuration')),
+    ],
+    'netbox-reports': [
+        os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'reports')),
+    ],
+    'netbox-scripts': [
+        os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'scripts')),
+    ],
+    'htadmin-config': [
+        os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
+        os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+    ],
+}
 
 
 ###################################################################################################
@@ -234,17 +302,134 @@ def PrintPodStatus(namespace=None):
 
 
 def DeleteNamespace(namespace):
-    results_dict = {}
+    results_dict = defaultdict(dict)
     if namespace:
         if kubeImported := KubernetesDynamic():
             try:
-                results_dict[namespace] = kubeImported.client.CoreV1Api().delete_namespace(
+                results_dict[namespace]['delete_namespace'] = kubeImported.client.CoreV1Api().delete_namespace(
                     namespace,
                     propagation_policy='Foreground',
                 )
             except kubeImported.client.rest.ApiException as x:
-                results_dict[namespace] = LoadStrIfJson(str(x))
-                if not results_dict[namespace]:
-                    results_dict[namespace] = str(x)
+                if x.status != 404:
+                    results_dict[namespace]['error'] = LoadStrIfJson(str(x))
+                    if not results_dict[namespace]['error']:
+                        results_dict[namespace]['error'] = str(x)
+
+    return results_dict
+
+
+def StartMalcolm(namespace, malcolmPath, configPath):
+    if not namespace:
+        namespace = 'malcolm'
+
+    results_dict = defaultdict(dict)
+
+    if (
+        os.path.isdir(malcolmPath)
+        and os.path.isdir(configPath)
+        and (kubeImported := KubernetesDynamic())
+        and (dotenvImported := DotEnvDynamic())
+        and (client := kubeImported.client.CoreV1Api())
+        and (apiClient := kubeImported.client.ApiClient())
+    ):
+        # create the namespace
+        try:
+            results_dict['create_namespace']['result'] = client.create_namespace(
+                kubeImported.client.V1Namespace(metadata=kubeImported.client.V1ObjectMeta(name=namespace))
+            ).metadata
+        except kubeImported.client.rest.ApiException as x:
+            if x.status != 409:
+                results_dict['create_namespace']['error'] = LoadStrIfJson(str(x))
+                if not results_dict['create_namespace']['error']:
+                    results_dict['create_namespace']['error'] = str(x)
+
+        # create configmaps from files
+        results_dict['create_namespaced_config_map']['result'] = dict()
+        for configMapName, configMapFiles in MALCOLM_CONFIGMAPS.items():
+            try:
+                configMap = kubeImported.client.V1ConfigMap()
+                configMap.metadata = kubeImported.client.V1ObjectMeta(name=configMapName)
+                configMap.data = {}
+                for fname in configMapFiles:
+                    if os.path.isfile(fname):
+                        configMap.data[os.path.basename(fname)] = file_contents(fname)
+                    elif os.path.isdir(fname):
+                        for subfname in glob.iglob(os.path.join(os.path.join(fname, '**'), '*'), recursive=True):
+                            if os.path.isfile(subfname):
+                                configMap.data[os.path.basename(subfname)] = file_contents(subfname)
+                results_dict['create_namespaced_config_map']['result'][
+                    configMapName
+                ] = client.create_namespaced_config_map(
+                    namespace=namespace,
+                    body=configMap,
+                ).metadata
+            except kubeImported.client.rest.ApiException as x:
+                if x.status != 409:
+                    if not results_dict['create_namespaced_config_map']['error']:
+                        results_dict['create_namespaced_config_map']['error'] = dict()
+                    results_dict['create_namespaced_config_map']['error'][
+                        os.path.basename(configMapName)
+                    ] = LoadStrIfJson(str(x))
+                    if not results_dict['create_namespaced_config_map']['error'][os.path.basename(configMapName)]:
+                        results_dict['create_namespaced_config_map']['error'][os.path.basename(configMapName)] = str(x)
+
+        # create configmaps from .env files
+        results_dict['create_namespaced_config_map_from_env_file']['result'] = dict()
+        for envFileName in glob.iglob(os.path.join(configPath, '*.env'), recursive=False):
+            if os.path.isfile(envFileName):
+                try:
+                    configMap = kubeImported.client.V1ConfigMap()
+                    configMap.metadata = kubeImported.client.V1ObjectMeta(
+                        name=remove_suffix(os.path.basename(envFileName), '.env') + '-env'
+                    )
+                    configMap.data = dotenvImported.dotenv_values(envFileName)
+                    results_dict['create_namespaced_config_map_from_env_file']['result'][
+                        configMap.metadata.name
+                    ] = client.create_namespaced_config_map(
+                        namespace=namespace,
+                        body=configMap,
+                    ).metadata
+                except kubeImported.client.rest.ApiException as x:
+                    if x.status != 409:
+                        if not results_dict['create_namespaced_config_map_from_env_file']['error']:
+                            results_dict['create_namespaced_config_map_from_env_file']['error'] = dict()
+                        results_dict['create_namespaced_config_map_from_env_file']['error'][
+                            os.path.basename(envFileName)
+                        ] = LoadStrIfJson(str(x))
+                        if not results_dict['create_namespaced_config_map_from_env_file']['error'][
+                            os.path.basename(envFileName)
+                        ]:
+                            results_dict['create_namespaced_config_map_from_env_file']['error'][
+                                os.path.basename(envFileName)
+                            ] = str(x)
+
+        # apply manifests
+        results_dict['create_from_yaml']['result'] = dict()
+        for yamlName in sorted(
+            glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), '*.yml'), recursive=False)
+        ):
+            try:
+                results_dict['create_from_yaml']['result'][
+                    os.path.basename(yamlName)
+                ] = kubeImported.utils.create_from_yaml(
+                    apiClient,
+                    yamlName,
+                    namespace=namespace,
+                )
+            except kubeImported.client.rest.ApiException as x:
+                if x.status != 409:
+                    if not results_dict['create_from_yaml']['error']:
+                        results_dict['create_from_yaml']['error'] = dict()
+                    results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(x))
+                    if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
+                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(x)
+            except kubeImported.utils.FailToCreateError as fe:
+                if [exc for exc in fe.api_exceptions if exc.status != 409]:
+                    if not results_dict['create_from_yaml']['error']:
+                        results_dict['create_from_yaml']['error'] = dict()
+                    results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(fe))
+                    if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
+                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
 
     return results_dict
