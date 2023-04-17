@@ -11,6 +11,7 @@ from malcolm_common import (
 from malcolm_utils import (
     eprint,
     tablify,
+    LoadStrIfJson,
 )
 
 
@@ -230,3 +231,20 @@ def PrintPodStatus(namespace=None):
         statusRows.append([str(x) for x in pod_summary[pod]])
 
     tablify(statusRows)
+
+
+def DeleteNamespace(namespace):
+    results_dict = {}
+    if namespace:
+        if kubeImported := KubernetesDynamic():
+            try:
+                results_dict[namespace] = kubeImported.client.CoreV1Api().delete_namespace(
+                    namespace,
+                    propagation_policy='Foreground',
+                )
+            except kubeImported.client.rest.ApiException as x:
+                results_dict[namespace] = LoadStrIfJson(str(x))
+                if not results_dict[namespace]:
+                    results_dict[namespace] = str(x)
+
+    return results_dict

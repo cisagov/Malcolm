@@ -65,6 +65,7 @@ from malcolm_utils import (
 from malcolm_kubernetes import (
     PrintPodStatus,
     PrintNodeStatus,
+    DeleteNamespace,
 )
 
 from base64 import b64encode
@@ -572,45 +573,51 @@ def logs():
             )
 
     else:
-        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+        cmd = []
 
-    process = Popen(
-        cmd,
-        env=osEnv,
-        stdout=PIPE,
-        stderr=None if args.debug else DEVNULL,
-    )
-    while not shuttingDown[0]:
-        output = process.stdout.readline()
-        if (len(output) == 0) and (process.poll() is not None):
-            break
+    if cmd:
+        process = Popen(
+            cmd,
+            env=osEnv,
+            stdout=PIPE,
+            stderr=None if args.debug else DEVNULL,
+        )
+        while not shuttingDown[0]:
+            output = process.stdout.readline()
+            if (len(output) == 0) and (process.poll() is not None):
+                break
 
-        if output := ProcessLogLine(output, debug=args.debug):
-            print(output)
+            if output := ProcessLogLine(output, debug=args.debug):
+                print(output)
 
-        else:
-            time.sleep(0.5)
+            else:
+                time.sleep(0.5)
 
-        if output and (args.cmdStart or args.cmdRestart) and (not args.cmdLogs) and finishedStartingRegEx.match(output):
-            process.terminate()
-            try:
-                process.wait(timeout=5.0)
-            except TimeoutExpired:
-                process.kill()
-            # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
-            # accessing these from the Malcolm server.
-            print("\nStarted Malcolm\n\n")
-            print("Malcolm services can be accessed via the following URLs:")
-            print("------------------------------------------------------------------------------")
-            print("  - Arkime: https://localhost/")
-            print("  - OpenSearch Dashboards: https://localhost/dashboards/")
-            print("  - PCAP upload (web): https://localhost/upload/")
-            print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-            print("  - NetBox: https://localhost/netbox/\n")
-            print("  - Account management: https://localhost/auth/\n")
-            print("  - Documentation: https://localhost/readme/\n")
+            if (
+                output
+                and (args.cmdStart or args.cmdRestart)
+                and (not args.cmdLogs)
+                and finishedStartingRegEx.match(output)
+            ):
+                process.terminate()
+                try:
+                    process.wait(timeout=5.0)
+                except TimeoutExpired:
+                    process.kill()
+                # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
+                # accessing these from the Malcolm server.
+                print("\nStarted Malcolm\n\n")
+                print("Malcolm services can be accessed via the following URLs:")
+                print("------------------------------------------------------------------------------")
+                print("  - Arkime: https://localhost/")
+                print("  - OpenSearch Dashboards: https://localhost/dashboards/")
+                print("  - PCAP upload (web): https://localhost/upload/")
+                print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
+                print("  - NetBox: https://localhost/netbox/\n")
+                print("  - Account management: https://localhost/auth/\n")
+                print("  - Documentation: https://localhost/readme/\n")
 
-    process.poll()
+        process.poll()
 
 
 ###################################################################################################
@@ -705,6 +712,15 @@ def stop(wipe=False):
                                 RemoveEmptyFolders(tmpPath, removeRoot=False)
 
             eprint("Malcolm has been stopped and its data cleared\n")
+
+    elif orchMode is OrchestrationFramework.KUBERNETES:
+        deleteResults = DeleteNamespace(namespace=args.namespace)
+        eprint(f"The {args.namespace} namespace and its underlying resources have been deleted\n")
+        if args.debug:
+            eprint(deleteResults)
+
+        if wipe:
+            eprint(f'Data on PersistentVolume storage cannot be deleted by {ScriptName}: it must be deleted manually\n')
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
