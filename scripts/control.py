@@ -435,7 +435,8 @@ def printURLs():
     print(f"  - Arkime: https://{myIp}/")
     print(f"  - OpenSearch Dashboards: https://{myIp}/dashboards/")
     print(f"  - PCAP upload (web): https://{myIp}/upload/")
-    print(f"  - PCAP upload (sftp): sftp://username@{myIp}:8022/files/")
+    if orchMode is not OrchestrationFramework.KUBERNETES:
+        print(f"  - PCAP upload (sftp): sftp://username@{myIp}:8022/files/")
     print(f"  - NetBox: https://{myIp}/netbox/")
     print(f"  - Account management: https://{myIp}/auth/")
     print(f"  - Documentation: https://{myIp}/readme/")
