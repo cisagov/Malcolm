@@ -755,14 +755,14 @@ def logs():
         )
         while not shuttingDown[0]:
             output = process.stdout.readline()
-            if (len(output) == 0) and (process.poll() is not None):
-                break
+            if not output:
+                if process.poll() is not None:
+                    break
+                else:
+                    time.sleep(0.5)
 
-            if output := ProcessLogLine(output, debug=args.debug):
+            elif output := ProcessLogLine(output, debug=args.debug):
                 print(output)
-
-            else:
-                time.sleep(0.5)
 
             if (
                 output
