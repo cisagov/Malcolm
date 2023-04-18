@@ -3,6 +3,7 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import base64
 import glob
 import os
 
@@ -348,25 +349,47 @@ def StartMalcolm(namespace, malcolmPath, configPath):
         results_dict['create_namespaced_config_map']['result'] = dict()
         for configMapName, configMapFiles in MALCOLM_CONFIGMAPS.items():
             try:
-                configMap = kubeImported.client.V1ConfigMap()
-                configMap.metadata = kubeImported.client.V1ObjectMeta(name=configMapName)
-                configMap.data = {}
+                dataMap = {}
+                binaryDataMap = {}
                 for fname in configMapFiles:
                     if os.path.isfile(fname):
-                        configMap.data[os.path.basename(fname)] = file_contents(fname)
+                        contents = file_contents(
+                            fname,
+                            binary_fallback=True,
+                        )
+                        if hasattr(contents, 'decode'):
+                            binaryDataMap[os.path.basename(fname)] = base64.b64encode(contents).decode('utf-8')
+                        else:
+                            dataMap[os.path.basename(fname)] = contents
                     elif os.path.isdir(fname):
                         for subfname in glob.iglob(os.path.join(os.path.join(fname, '**'), '*'), recursive=True):
                             if os.path.isfile(subfname):
-                                configMap.data[os.path.basename(subfname)] = file_contents(subfname)
+                                contents = file_contents(
+                                    subfname,
+                                    binary_fallback=True,
+                                )
+                                if hasattr(contents, 'decode'):
+                                    binaryDataMap[os.path.basename(subfname)] = base64.b64encode(contents).decode(
+                                        'utf-8'
+                                    )
+                                else:
+                                    dataMap[os.path.basename(subfname)] = contents
                 results_dict['create_namespaced_config_map']['result'][
                     configMapName
                 ] = client.create_namespaced_config_map(
                     namespace=namespace,
-                    body=configMap,
+                    body=kubeImported.client.V1ConfigMap(
+                        metadata=kubeImported.client.V1ObjectMeta(
+                            name=configMapName,
+                            namespace=namespace,
+                        ),
+                        data=dataMap if dataMap else {},
+                        binary_data=binaryDataMap if binaryDataMap else {},
+                    ),
                 ).metadata
             except kubeImported.client.rest.ApiException as x:
                 if x.status != 409:
-                    if not results_dict['create_namespaced_config_map']['error']:
+                    if 'error' not in results_dict['create_namespaced_config_map']:
                         results_dict['create_namespaced_config_map']['error'] = dict()
                     results_dict['create_namespaced_config_map']['error'][
                         os.path.basename(configMapName)
@@ -392,7 +415,7 @@ def StartMalcolm(namespace, malcolmPath, configPath):
                     ).metadata
                 except kubeImported.client.rest.ApiException as x:
                     if x.status != 409:
-                        if not results_dict['create_namespaced_config_map_from_env_file']['error']:
+                        if 'error' not in results_dict['create_namespaced_config_map_from_env_file']:
                             results_dict['create_namespaced_config_map_from_env_file']['error'] = dict()
                         results_dict['create_namespaced_config_map_from_env_file']['error'][
                             os.path.basename(envFileName)
@@ -419,14 +442,14 @@ def StartMalcolm(namespace, malcolmPath, configPath):
                 )
             except kubeImported.client.rest.ApiException as x:
                 if x.status != 409:
-                    if not results_dict['create_from_yaml']['error']:
+                    if 'error' not in results_dict['create_from_yaml']:
                         results_dict['create_from_yaml']['error'] = dict()
                     results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(x))
                     if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
                         results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(x)
             except kubeImported.utils.FailToCreateError as fe:
                 if [exc for exc in fe.api_exceptions if exc.status != 409]:
-                    if not results_dict['create_from_yaml']['error']:
+                    if 'error' not in results_dict['create_from_yaml']:
                         results_dict['create_from_yaml']['error'] = dict()
                     results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(fe))
                     if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:

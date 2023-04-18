@@ -470,10 +470,23 @@ def touch(filename):
 
 ###################################################################################################
 # read the contents of a text file
-def file_contents(filename, encoding='utf8'):
+def file_contents(filename, encoding='utf-8', binary_fallback=False):
     if os.path.isfile(filename):
-        with open(filename, encoding=encoding) as f:
-            return f.read()
+        decodeErr = False
+
+        try:
+            with open(filename, 'r', encoding=encoding) as f:
+                return f.read()
+        except (UnicodeDecodeError, AttributeError):
+            if binary_fallback:
+                decodeErr = True
+            else:
+                raise
+
+        if decodeErr and binary_fallback:
+            with open(filename, 'rb') as f:
+                return f.read()
+
     else:
         return None
 
