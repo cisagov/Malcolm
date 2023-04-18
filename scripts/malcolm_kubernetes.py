@@ -306,13 +306,14 @@ def PodExec(
     stderr=True,
     stdin=None,
     timeout=60,
+    maxPodsToExec=1,
 ):
     results = {}
 
     if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
         podsNames = GetPodNamesForService(service, namespace)
 
-        for podName in podsNames:
+        for podName in podsNames[:maxPodsToExec]:
             retcode = -1
             output = []
             try:

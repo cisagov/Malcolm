@@ -449,12 +449,12 @@ def netboxBackup(backupFileName=None):
 
     backupFileName, backupMediaFileName = None, None
 
+    uidGidDict = GetUidGidFromEnv(args.configDir)
+
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
-
-        uidGidDict = GetUidGidFromEnv(args.configDir)
 
         dockerCmd = [
             dockerComposeBin,
@@ -489,6 +489,38 @@ def netboxBackup(backupFileName=None):
         with tarfile.open(backupMediaFileName, 'w:gz') as t:
             t.add(os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media'), arcname='.')
 
+    elif orchMode is OrchestrationFramework.KUBERNETES:
+        if podsResults := PodExec(
+            service='netbox-postgres',
+            namespace=args.namespace,
+            command=[
+                'pg_dump',
+                '-U',
+                'netbox',
+                '-d',
+                'netbox',
+            ],
+            maxPodsToExec=1,
+        ):
+            podName = next(iter(podsResults))
+            err = podsResults[podName]['err']
+            results = podsResults[podName]['output']
+        else:
+            err = 1
+            results = []
+
+        if (err != 0) or (len(results) == 0):
+            raise Exception('Error creating NetBox configuration database backup')
+
+        if (backupFileName is None) or (len(backupFileName) == 0):
+            backupFileName = f"malcolm_netbox_backup_{time.strftime('%Y%m%d-%H%M%S')}.gz"
+
+        with gzip.GzipFile(backupFileName, "wb") as f:
+            f.write(bytes('\n'.join(results), 'utf-8'))
+
+        # TODO: can't backup netbox/media directory via kubernetes at the moment
+        backupMediaFileName = None
+
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
@@ -502,12 +534,12 @@ def netboxRestore(backupFileName=None):
     global orchMode
 
     if backupFileName and os.path.isfile(backupFileName):
+        uidGidDict = GetUidGidFromEnv(args.configDir)
+
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # docker-compose use local temporary path
             osEnv = os.environ.copy()
             osEnv['TMPDIR'] = MalcolmTmpPath
-
-            uidGidDict = GetUidGidFromEnv(args.configDir)
 
             dockerCmdBase = [
                 dockerComposeBin,
@@ -565,6 +597,82 @@ def netboxRestore(backupFileName=None):
                 RemoveEmptyFolders(mediaPath, removeRoot=False)
                 with tarfile.open(backupMediaFileName) as t:
                     t.extractall(mediaPath)
+
+        elif orchMode is OrchestrationFramework.KUBERNETES:
+            # if the netbox_init.py process is happening, interrupt it
+            if podsResults := PodExec(
+                service='netbox',
+                namespace=args.namespace,
+                command=['bash', '-c', 'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill'],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if (err != 0) and args.debug:
+                eprint(f'Error ({err}) interrupting netbox_init.py: {results}')
+
+            # drop the existing netbox database
+            if podsResults := PodExec(
+                service='netbox-postgres',
+                namespace=args.namespace,
+                command=['dropdb', '-U', 'netbox', 'netbox', '--force'],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if ((err != 0) or (len(results) == 0)) and args.debug:
+                eprint(f'Error dropping NetBox database: {results}')
+
+            # create a new netbox database
+            if podsResults := PodExec(
+                service='netbox-postgres',
+                namespace=args.namespace,
+                command=['createdb', '-U', 'netbox', 'netbox'],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if err != 0:
+                raise Exception('Error creating new NetBox database')
+
+            # load the backed-up psql dump
+            with gzip.open(backupFileName, 'rt') as f:
+                if podsResults := PodExec(
+                    service='netbox-postgres',
+                    namespace=args.namespace,
+                    command=['psql', '-U', 'netbox'],
+                    stdin=f.read(),
+                ):
+                    err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                    results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+                else:
+                    err = 1
+                    results = []
+            if (err != 0) or (len(results) == 0):
+                raise Exception('Error loading NetBox database')
+
+            # migrations if needed
+            if podsResults := PodExec(
+                service='netbox',
+                namespace=args.namespace,
+                command=['/opt/netbox/netbox/manage.py', 'migrate'],
+            ):
+                eprint(podsResults)
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if (err != 0) or (len(results) == 0):
+                raise Exception('Error performing NetBox migration')
+
+            # TODO: can't restore netbox/media directory via kubernetes at the moment
 
         else:
             raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
@@ -636,6 +744,7 @@ def logs():
 
     else:
         cmd = []
+        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
     if cmd:
         process = Popen(
