@@ -17,10 +17,13 @@ from malcolm_common import (
     MalcolmPath,
 )
 from malcolm_utils import (
+    deep_get,
+    eprint,
     file_contents,
     remove_suffix,
     tablify,
     LoadStrIfJson,
+    val2bool,
 )
 
 
@@ -233,6 +236,46 @@ def pod_stats(node, namespace):
                 del pod_dict[pod_name][1]
 
     return pod_dict
+
+
+def get_node_hostnames_and_ips(mastersOnly=False):
+    result = {}
+    result['hostname'] = list()
+    result['external'] = list()
+    result['internal'] = list()
+
+    if (
+        (kubeImported := KubernetesDynamic())
+        and (k8s_api := kubeImported.client.CoreV1Api())
+        and (
+            node_stats := kubeImported.client.CustomObjectsApi().list_cluster_custom_object(
+                "metrics.k8s.io", "v1beta1", "nodes"
+            )
+        )
+    ):
+        for stat in node_stats['items']:
+            if (not mastersOnly) or any(
+                [
+                    val2bool(deep_get(stat, ['metadata', 'labels', l], default=False))
+                    for l in ('node-role.kubernetes.io/control-plane', 'node-role.kubernetes.io/master')
+                ]
+            ):
+                api_response = k8s_api.read_node_status(stat['metadata']['name'])
+                result['hostname'].extend(
+                    (list(set([x.address for x in api_response.status.addresses if not x.type.endswith('IP')])))
+                )
+                result['external'].extend(
+                    (list(set([x.address for x in api_response.status.addresses if x.type.endswith('ExternalIP')])))
+                )
+                result['internal'].extend(
+                    (list(set([x.address for x in api_response.status.addresses if x.type.endswith('InternalIP')])))
+                )
+
+    result['hostname'] = list(set(result['hostname']))
+    result['external'] = list(set(result['external']))
+    result['internal'] = list(set(result['internal']))
+
+    return result
 
 
 def PrintNodeStatus():

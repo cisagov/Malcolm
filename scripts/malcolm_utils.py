@@ -283,6 +283,22 @@ def isipaddress(value):
 
 
 ###################################################################################################
+# return the primary IP (the one with a default route) on the local box
+def get_primary_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # this IP doesn't have to be reachable
+        s.connect(('10.254.254.254', 1))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
+
+
+###################################################################################################
 # attempt to decode a string as JSON, returning the object if it decodes and None otherwise
 def LoadStrIfJson(jsonStr):
     try:
@@ -469,7 +485,7 @@ def touch(filename):
 
 
 ###################################################################################################
-# read the contents of a text file
+# read the contents of a file, first assuming text (with encoding), optionally falling back to binary
 def file_contents(filename, encoding='utf-8', binary_fallback=False):
     if os.path.isfile(filename):
         decodeErr = False

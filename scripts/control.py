@@ -54,6 +54,7 @@ from malcolm_utils import (
     EscapeForCurl,
     EscapeAnsi,
     get_iterable,
+    get_primary_ip,
     LoadStrIfJson,
     ParseCurlFile,
     RemoveEmptyFolders,
@@ -69,6 +70,7 @@ from malcolm_kubernetes import (
     PrintNodeStatus,
     DeleteNamespace,
     StartMalcolm,
+    get_node_hostnames_and_ips,
 )
 
 from base64 import b64encode
@@ -384,6 +386,36 @@ def status():
 
 
 ###################################################################################################
+def printURLs():
+    global orchMode
+
+    if orchMode is OrchestrationFramework.KUBERNETES:
+        addrs = get_node_hostnames_and_ips(mastersOnly=True)
+        if not any((addrs['external'], addrs['hostname'])):
+            addrs = get_node_hostnames_and_ips(mastersOnly=False)
+        if addrs['external']:
+            myIp = addrs['external'][0]
+        elif addrs['hostname']:
+            myIp = addrs['hostname'][0]
+        elif addrs['internal']:
+            myIp = addrs['internal'][0]
+        else:
+            myIp = '<cluster IP>'
+    else:
+        myIp = get_primary_ip()
+
+    print("\nMalcolm services can be accessed via the following URLs:")
+    print("------------------------------------------------------------------------------")
+    print(f"  - Arkime: https://{myIp}/")
+    print(f"  - OpenSearch Dashboards: https://{myIp}/dashboards/")
+    print(f"  - PCAP upload (web): https://{myIp}/upload/")
+    print(f"  - PCAP upload (sftp): sftp://username@{myIp}:8022/files/")
+    print(f"  - NetBox: https://{myIp}/netbox/")
+    print(f"  - Account management: https://{myIp}/auth/")
+    print(f"  - Documentation: https://{myIp}/readme/")
+
+
+###################################################################################################
 def netboxBackup(backupFileName=None):
     global args
     global dockerComposeBin
@@ -608,18 +640,9 @@ def logs():
                     process.wait(timeout=5.0)
                 except TimeoutExpired:
                     process.kill()
-                # # TODO: Replace 'localhost' with an outwards-facing IP since I doubt anybody is
-                # accessing these from the Malcolm server.
-                print("\nStarted Malcolm\n\n")
-                print("Malcolm services can be accessed via the following URLs:")
-                print("------------------------------------------------------------------------------")
-                print("  - Arkime: https://localhost/")
-                print("  - OpenSearch Dashboards: https://localhost/dashboards/")
-                print("  - PCAP upload (web): https://localhost/upload/")
-                print("  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/")
-                print("  - NetBox: https://localhost/netbox/\n")
-                print("  - Account management: https://localhost/auth/\n")
-                print("  - Documentation: https://localhost/readme/\n")
+
+                print("\nStarted Malcolm\n")
+                printURLs()
 
         process.poll()
 
@@ -1718,6 +1741,15 @@ def main():
         default=False,
         help="Display status of Malcolm components",
     )
+    parser.add_argument(
+        '--urls',
+        dest='cmdPrintURLs',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Display Malcolm URLs",
+    )
 
     try:
         parser.error = parser.exit
@@ -1877,6 +1909,10 @@ def main():
         # display Malcolm status
         if args.cmdStatus:
             status()
+
+        # display Malcolm URLS
+        if args.cmdPrintURLs:
+            printURLs()
 
         # backup NetBox files
         if args.netboxBackupFile is not None:
