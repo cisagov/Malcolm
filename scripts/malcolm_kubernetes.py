@@ -9,6 +9,7 @@ import os
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
+from itertools import chain
 
 from malcolm_common import (
     KubernetesDynamic,
@@ -16,8 +17,10 @@ from malcolm_common import (
     MalcolmPath,
 )
 from malcolm_utils import (
+    deep_get,
     eprint,
     file_contents,
+    get_iterable,
     remove_suffix,
     tablify,
     LoadStrIfJson,
@@ -302,12 +305,57 @@ def PrintPodStatus(namespace=None):
     tablify(statusRows)
 
 
-def DeleteNamespace(namespace):
+def DeleteNamespace(namespace, deleteRetPerVol=False):
     results_dict = defaultdict(dict)
+
     if namespace:
         if kubeImported := KubernetesDynamic():
+            k8s_api = kubeImported.client.CoreV1Api()
+
+            manualDeletePersistentVolumes = []
+            if deleteRetPerVol:
+                # If indicated, manually delete PersistentVolumes with "Retain" reclaim policy
+                #   - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#retain
+
+                # get a list of PersistentVolumes to delete after the delete_namespace
+                # 1. from list_namespaced_persistent_volume_claim
+                # 2. from list_persistent_volume with the "namespace=XXXXXXX" label
+                manualDeletePersistentVolumes = [
+                    x.spec.volume_name
+                    for x in k8s_api.list_namespaced_persistent_volume_claim(
+                        watch=False,
+                        namespace=namespace,
+                    ).items
+                ]
+                manualDeletePersistentVolumes.extend(
+                    [
+                        x.metadata.name
+                        for x in k8s_api.list_persistent_volume(
+                            label_selector=f'namespace={namespace}',
+                        ).items
+                        if x.spec.persistent_volume_reclaim_policy == 'Retain'
+                    ]
+                )
+
+                # filter (ensuring we only ended up with "Retain" PersistentVolumes) and dedupe
+                manualDeletePersistentVolumes = list(
+                    chain(
+                        *[
+                            [
+                                x.metadata.name
+                                for x in k8s_api.list_persistent_volume(
+                                    field_selector=f'metadata.name={name}',
+                                ).items
+                                if x.spec.persistent_volume_reclaim_policy == 'Retain'
+                            ]
+                            for name in set(manualDeletePersistentVolumes)
+                        ]
+                    )
+                )
+
+            # delete the namespace, which should delete the resources belonging to it
             try:
-                results_dict[namespace]['delete_namespace'] = kubeImported.client.CoreV1Api().delete_namespace(
+                results_dict[namespace]['delete_namespace'] = k8s_api.delete_namespace(
                     namespace,
                     propagation_policy='Foreground',
                 )
@@ -316,6 +364,22 @@ def DeleteNamespace(namespace):
                     results_dict[namespace]['error'] = LoadStrIfJson(str(x))
                     if not results_dict[namespace]['error']:
                         results_dict[namespace]['error'] = str(x)
+
+            # If indicated, manually delete each PersistentVolume with "Retain" reclaim policy identified above
+            if manualDeletePersistentVolumes:
+                results_dict[namespace]['delete_persistent_volume'] = dict()
+                for name in manualDeletePersistentVolumes:
+                    try:
+                        results_dict[namespace]['delete_persistent_volume'][name] = k8s_api.delete_persistent_volume(
+                            name=name
+                        )
+                    except kubeImported.client.rest.ApiException as x:
+                        if x.status != 404:
+                            if 'error' not in results_dict[namespace]['delete_persistent_volume']:
+                                results_dict[namespace]['delete_persistent_volume']['error'] = dict()
+                            results_dict[namespace]['delete_persistent_volume']['error'][name] = LoadStrIfJson(str(x))
+                            if not results_dict[namespace]['delete_persistent_volume']['error'][name]:
+                                results_dict[namespace]['delete_persistent_volume']['error'][name] = str(x)
 
     return results_dict
 

@@ -718,7 +718,10 @@ def stop(wipe=False):
             eprint("Malcolm has been stopped and its data cleared\n")
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        deleteResults = DeleteNamespace(namespace=args.namespace)
+        deleteResults = DeleteNamespace(
+            namespace=args.namespace,
+            deleteRetPerVol=args.deleteRetPerVol,
+        )
 
         if dictsearch(deleteResults, 'error'):
             eprint(
@@ -1684,6 +1687,19 @@ def main():
         default=False,
         help="Stop Malcolm and delete all data",
     )
+    parser.add_argument(
+        '--reclaim-persistent-volume',
+        dest='deleteRetPerVol',
+        action='store_true',
+        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "wipe" operation with Kubernetes)',
+    )
+    parser.add_argument(
+        '--no-reclaim-persistent-volume',
+        dest='deleteRetPerVol',
+        action='store_false',
+        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "wipe" operation with Kubernetes)',
+    )
+    parser.set_defaults(deleteRetPerVol=True)
     parser.add_argument(
         '--auth',
         dest='cmdAuthSetup',
