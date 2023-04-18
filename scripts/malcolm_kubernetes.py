@@ -10,15 +10,19 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 from itertools import chain
+from io import StringIO
 
 from malcolm_common import (
-    KubernetesDynamic,
     DotEnvDynamic,
+    KubernetesDynamic,
     MalcolmPath,
+    YAMLDynamic,
 )
 from malcolm_utils import (
     deep_get,
+    dictsearch,
     eprint,
+    get_iterable,
     file_contents,
     remove_suffix,
     tablify,
@@ -276,6 +280,109 @@ def get_node_hostnames_and_ips(mastersOnly=False):
     result['internal'] = list(set(result['internal']))
 
     return result
+
+
+def GetPodNamesForService(service, namespace):
+    podsNames = []
+
+    if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
+        podsNames = [
+            x.metadata.name
+            for x in client.list_namespaced_pod(
+                namespace,
+                watch=False,
+                label_selector=f'name={service}-deployment',
+            ).items
+        ]
+
+    return podsNames
+
+
+def PodExec(
+    service,
+    namespace,
+    command,
+    stdout=True,
+    stderr=True,
+    stdin=None,
+    timeout=60,
+):
+    retcode = -1
+    output = []
+
+    if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
+        podsNames = GetPodNamesForService(service, namespace)
+
+        for podName in podsNames:
+            resp = None
+            try:
+                while True:
+                    resp = client.read_namespaced_pod(
+                        name=podName,
+                        namespace=namespace,
+                    )
+                    if resp.status.phase != 'Pending':
+                        break
+
+                resp = kubeImported.stream.stream(
+                    client.connect_get_namespaced_pod_exec,
+                    podName,
+                    namespace,
+                    command=get_iterable(command),
+                    stdout=stdout,
+                    stderr=stderr,
+                    stdin=stdin is not None,
+                    tty=False,
+                    _preload_content=False,
+                )
+                rawOutput = StringIO('')
+                rawErrput = StringIO('')
+                stdinRemaining = list(get_iterable(stdin)) if (stdin is not None) else []
+                counter = 0
+                while resp.is_open() and (counter <= timeout):
+                    resp.update(timeout=1)
+                    counter += 1
+                    if stdout and resp.peek_stdout():
+                        rawOutput.write(resp.read_stdout())
+                    if stderr and resp.peek_stderr():
+                        rawErrput.write(resp.read_stderr())
+                    if stdinRemaining:
+                        resp.write_stdin(stdinRemaining.pop(0) + "\n")
+                if stdout and resp.peek_stdout():
+                    rawOutput.write(resp.read_stdout())
+                if stderr and resp.peek_stderr():
+                    rawErrput.write(resp.read_stderr())
+                output.extend(rawOutput.getvalue().split('\n'))
+                output.extend(rawErrput.getvalue().split('\n'))
+
+                err = None
+                if yamlImported := YAMLDynamic():
+                    err = yamlImported.safe_load(resp.read_channel(kubeImported.stream.ws_client.ERROR_CHANNEL))
+
+                if not err:
+                    err = {}
+                    err['status'] = 'Success'
+
+                if deep_get(err, ['status'], None) == 'Success':
+                    retcode = 0
+                elif deep_get(err, ['reason'], None) == 'NonZeroExitCode':
+                    retcodes = [
+                        int(deep_get(x, ['message'], 1))
+                        for x in deep_get(err, ['details', 'causes'], [{'reason': 'ExitCode', 'message': '1'}])
+                        if (deep_get(x, ['reason'], None) == 'ExitCode')
+                    ]
+                    retcode = retcodes[0] if len(retcodes) > 0 else 1
+                else:
+                    # can't parse, but it's a failure
+                    retcode = 1
+
+                resp.close()
+
+            except kubeImported.client.rest.ApiException as x:
+                if x.status != 404:
+                    raise
+
+    return retcode, output
 
 
 def PrintNodeStatus():

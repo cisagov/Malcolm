@@ -31,7 +31,7 @@ from malcolm_common import (
     DisplayMessage,
     DisplayProgramBox,
     DotEnvDynamic,
-    GetUidGidFromComposeFile,
+    GetUidGidFromEnv,
     KubernetesDynamic,
     LocalPathForContainerBindMount,
     MainDialog,
@@ -71,6 +71,8 @@ from malcolm_kubernetes import (
     DeleteNamespace,
     StartMalcolm,
     get_node_hostnames_and_ips,
+    PodExec,
+    GetPodNamesForService,
 )
 
 from base64 import b64encode
@@ -169,10 +171,11 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     err = -1
     results = []
 
-    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-        # the opensearch containers all follow the same naming pattern for these executables
-        keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
+    # the opensearch containers all follow the same naming pattern for these executables
+    keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
+    uidGidDict = GetUidGidFromEnv(args.configDir)
 
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
         dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
@@ -190,11 +193,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         localKeystorePreExists = False
         volumeKeystore = None
         volumeKeystoreDir = None
-        uidGidDict = None
 
         try:
-            uidGidDict = GetUidGidFromComposeFile(args.composeFile)
-
             composeFileLines = list()
             with open(args.composeFile, 'r') as f:
                 allLines = f.readlines()
@@ -341,10 +341,28 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             else:
                 eprint(e)
 
+    elif orchMode is OrchestrationFramework.KUBERNETES:
+        cmd = [keystoreBinProc]
+        if keystore_args:
+            cmd.extend(list(keystore_args))
+        cmd = [x for x in cmd if x]
+
+        err, results = PodExec(
+            service,
+            args.namespace,
+            [x for x in cmd if x],
+            stdin=run_process_kwargs['stdin']
+            if ('stdin' in run_process_kwargs and run_process_kwargs['stdin'])
+            else None,
+        )
+
+        if args.debug:
+            dbgStr = f"{cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {err}: {results}"
+            eprint(dbgStr)
+
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
-    # success = (error == 0)
     return (err == 0), results
 
 
@@ -428,7 +446,7 @@ def netboxBackup(backupFileName=None):
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
 
-        uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+        uidGidDict = GetUidGidFromEnv(args.configDir)
 
         dockerCmd = [
             dockerComposeBin,
@@ -481,7 +499,7 @@ def netboxRestore(backupFileName=None):
             osEnv = os.environ.copy()
             osEnv['TMPDIR'] = MalcolmTmpPath
 
-            uidGidDict = GetUidGidFromComposeFile(args.composeFile)
+            uidGidDict = GetUidGidFromEnv(args.configDir)
 
             dockerCmdBase = [
                 dockerComposeBin,

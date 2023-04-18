@@ -136,22 +136,21 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
 
 
 ##################################################################################################
-def GetUidGidFromComposeFile(composeFile):
+def GetUidGidFromEnv(configDir=None):
+    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     uidGidDict = defaultdict(str)
-    pyPlatform = platform.system()
-    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-    if os.path.isfile(composeFile):
-        with open(composeFile, 'r') as f:
-            composeFileLines = f.readlines()
-            uidGidDict.update(
-                dict(
-                    x.split(':')
-                    for x in [
-                        ''.join(x.split()) for x in composeFileLines if re.search(r'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
-                    ]
-                )
-            )
+    if dotEnvImported := DotEnvDynamic():
+        pyPlatform = platform.system()
+        uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+        uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+        envFileName = os.path.join(configDirToCheck, 'process.env')
+        if os.path.isfile(envFileName):
+            envValues = dotEnvImported.dotenv_values(envFileName)
+            if 'PUID' in envValues:
+                uidGidDict['PUID'] = envValues['PUID']
+            if 'PGID' in envValues:
+                uidGidDict['PGID'] = envValues['PGID']
+
     return uidGidDict
 
 
