@@ -13,6 +13,7 @@ end
 
 server_ip = "192.168.56.10"
 server_hostname = "server.k3s.internal"
+load_balancer_additional_ports = "{\\\"name\\\": \\\"proxied-tcp-5044\\\", \\\"port\\\": 5044, \\\"targetPort\\\": 5044, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"proxied-tcp-5045\\\", \\\"port\\\": 5045, \\\"targetPort\\\": 5045, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"proxied-tcp-8022\\\", \\\"port\\\": 8022, \\\"targetPort\\\": 8022, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"proxied-tcp-9200\\\", \\\"port\\\": 9200, \\\"targetPort\\\": 9200, \\\"protocol\\\": \\\"TCP\\\"}"
 
 agents = { "agent1" => "192.168.56.11",
            "agent2" => "192.168.56.12" }
@@ -33,7 +34,9 @@ common_script_0 = <<-SHELL
       moreutils \
       ripgrep \
       software-properties-common
-      cat >> /etc/security/limits.d/limits.conf <<EOF
+    curl -sSL -o /usr/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_"$(uname -s | tr '[:upper:]' '[:lower:]')"_"$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')"" && \
+      chmod 755 /usr/bin/yq
+    cat >> /etc/security/limits.d/limits.conf <<EOF
 * soft nofile 65535
 * hard nofile 65535
 * soft memlock unlimited
@@ -43,7 +46,7 @@ common_script_0 = <<-SHELL
 * soft core 0
 * hard core 0
 EOF
-      cat >> /etc/sysctl.conf <<EOF
+    cat >> /etc/sysctl.conf <<EOF
 # don't restrict dmesg to root
 kernel.dmesg_restrict=0
 
@@ -109,8 +112,9 @@ server_script_1 = <<-SHELL
     curl -sfL https://get.k3s.io | sh -
     echo "Waiting for k3s to start..."
     sleep 30
-    curl -sSL -o /tmp/deploy_nginx.yaml https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.6.4/deploy/static/provider/cloud/deploy.yaml
-    sed -i "/\\/nginx-ingress-controller$/a \\ \\ \\ \\ \\ \\ \\ \\ - --enable-ssl-passthrough" /tmp/deploy_nginx.yaml
+    curl -sSL -o /tmp/deploy_nginx.yaml https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/cloud/deploy.yaml
+    yq -i '( select(.kind == "Deployment").spec.template.spec.containers[].args[] | select(contains("/nginx-ingress-controller")) | parent ) += ["--enable-ssl-passthrough", "--tcp-services-configmap=\$(POD_NAMESPACE)/tcp-services"]' /tmp/deploy_nginx.yaml
+    yq -i "( select(.kind == \\"Service\\" and .spec.type == \\"LoadBalancer\\").spec.ports ) += [#{load_balancer_additional_ports}]" /tmp/deploy_nginx.yaml
     kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f /tmp/deploy_nginx.yaml
     until [ -f /var/lib/rancher/k3s/server/token ] && [ -f /etc/rancher/k3s/k3s.yaml ]; do sleep 5; done
     cp -v /var/lib/rancher/k3s/server/token /vagrant_shared

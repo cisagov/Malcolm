@@ -632,7 +632,6 @@ services:
       - upload
     ports:
       - "0.0.0.0:443:443"
-      - "127.0.0.1:5601:5601"
       - "127.0.0.1:9200:9200"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
