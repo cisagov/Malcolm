@@ -682,6 +682,7 @@ LOG_IGNORE_REGEX = re.compile(
   | loaded\s+config\s+'/etc/netbox/config/
   | "netbox"\s+application\s+started
   | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
+  | kube-probe/
   | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
