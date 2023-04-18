@@ -17,10 +17,7 @@ from malcolm_common import (
     MalcolmPath,
 )
 from malcolm_utils import (
-    deep_get,
-    eprint,
     file_contents,
-    get_iterable,
     remove_suffix,
     tablify,
     LoadStrIfJson,

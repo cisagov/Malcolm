@@ -791,7 +791,7 @@ class Installer(object):
             'Download updated Suricata signatures periodically?', default=False
         )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
-        zeekICSBestGuess = (autoZeek or liveZeek) and InstallerYesOrNo(
+        zeekICSBestGuess = autoZeek and InstallerYesOrNo(
             'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?', default=False
         )
         reverseDns = InstallerYesOrNo(
@@ -2053,7 +2053,7 @@ class LinuxInstaller(Installer):
                         else:
                             eprint(f"Installation of docker failed: {out}")
                     else:
-                        eprint(f"Downloading {dockerComposeUrl} to {tempFileName} failed")
+                        eprint(f"Downloading https://get.docker.com/ to {tempFileName} failed")
 
             if result and ((self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS)):
                 # centos/fedora don't automatically start/enable the daemon, so do so now
@@ -2746,7 +2746,7 @@ def main():
         installer = MacInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
     elif installerPlatform == PLATFORM_WINDOWS:
         raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
-        installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+        # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
 
     success = False
     installPath = None
