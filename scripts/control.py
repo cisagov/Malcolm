@@ -49,6 +49,7 @@ from malcolm_common import (
 )
 
 from malcolm_utils import (
+    deep_get,
     dictsearch,
     eprint,
     EscapeForCurl,
@@ -79,6 +80,7 @@ from base64 import b64encode
 from collections import defaultdict, namedtuple
 from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
+from itertools import chain
 
 try:
     from contextlib import nullcontext
@@ -347,7 +349,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             cmd.extend(list(keystore_args))
         cmd = [x for x in cmd if x]
 
-        err, results = PodExec(
+        podsResults = PodExec(
             service,
             args.namespace,
             [x for x in cmd if x],
@@ -356,9 +358,15 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             else None,
         )
 
+        err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+        results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+
         if args.debug:
-            dbgStr = f"{cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {err}: {results}"
+            dbgStr = f"{len(podsResults)} pods: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {err}: {results}"
             eprint(dbgStr)
+            for podname, podResults in podsResults.items():
+                dbgStr = f"{podname}: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {deep_get(podResults, ['err'], 1)}: {deep_get(podResults, ['output'], 'unknown')}"
+                eprint(dbgStr)
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')

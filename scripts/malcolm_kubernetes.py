@@ -307,14 +307,14 @@ def PodExec(
     stdin=None,
     timeout=60,
 ):
-    retcode = -1
-    output = []
+    results = {}
 
     if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
         podsNames = GetPodNamesForService(service, namespace)
 
         for podName in podsNames:
-            resp = None
+            retcode = -1
+            output = []
             try:
                 while True:
                     resp = client.read_namespaced_pod(
@@ -380,9 +380,15 @@ def PodExec(
 
             except kubeImported.client.rest.ApiException as x:
                 if x.status != 404:
-                    raise
+                    if retcode == 0:
+                        retcode = 1
+                    output.extend(str(x))
 
-    return retcode, output
+            results[podName] = {}
+            results[podName]['err'] = retcode
+            results[podName]['output'] = output
+
+    return results
 
 
 def PrintNodeStatus():
