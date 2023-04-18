@@ -1691,13 +1691,13 @@ def main():
         '--reclaim-persistent-volume',
         dest='deleteRetPerVol',
         action='store_true',
-        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "wipe" operation with Kubernetes)',
+        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "stop" operation with Kubernetes)',
     )
     parser.add_argument(
         '--no-reclaim-persistent-volume',
         dest='deleteRetPerVol',
         action='store_false',
-        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "wipe" operation with Kubernetes)',
+        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "stop" operation with Kubernetes)',
     )
     parser.set_defaults(deleteRetPerVol=True)
     parser.add_argument(
