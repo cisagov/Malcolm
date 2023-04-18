@@ -25,6 +25,7 @@ opensearch
 opensearch-backup
 arkime-logs
 arkime-raw
+kubernetes
 malcolm-iso
 sensor-iso
 nginx/nginx_ldap*.conf
