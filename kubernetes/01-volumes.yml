@@ -4,6 +4,8 @@ kind: PersistentVolume
 metadata:
   name: pcap-volume
   namespace: malcolm
+  labels:
+    namespace: malcolm
 spec:
   capacity:
     storage: 250Gi
@@ -45,6 +47,8 @@ kind: PersistentVolume
 metadata:
   name: zeek-volume
   namespace: malcolm
+  labels:
+    namespace: malcolm
 spec:
   capacity:
     storage: 100Gi
@@ -86,6 +90,8 @@ kind: PersistentVolume
 metadata:
   name: suricata-volume
   namespace: malcolm
+  labels:
+    namespace: malcolm
 spec:
   capacity:
     storage: 100Gi
@@ -127,6 +133,8 @@ kind: PersistentVolume
 metadata:
   name: config-volume
   namespace: malcolm
+  labels:
+    namespace: malcolm
 spec:
   capacity:
     storage: 50Gi
@@ -168,6 +176,8 @@ kind: PersistentVolume
 metadata:
   name: opensearch-volume
   namespace: malcolm
+  labels:
+    namespace: malcolm
 spec:
   capacity:
     storage: 250Gi
@@ -209,6 +219,8 @@ kind: PersistentVolume
 metadata:
   name: opensearch-backup-volume
   namespace: malcolm
+  labels:
+    namespace: malcolm
 spec:
   capacity:
     storage: 250Gi
