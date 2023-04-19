@@ -17,7 +17,7 @@ fi
 [[ "$OPENSEARCH_SSL_CERTIFICATE_VERIFICATION" != "true" ]] && DB_SSL_FLAG="--insecure" || DB_SSL_FLAG=""
 OPENSEARCH_URL_FULL="$(grep -Pi '^elasticsearch\s*=' $ARKIME_DIR/etc/config.ini | cut -d'=' -f2-)"
 
-rm -rf /var/run/arkime/initialized /var/run/arkime/runwise $ARKIME_DIR/logs/*
+rm -f /var/run/arkime/initialized /var/run/arkime/runwise
 
 # make sure TLS certificates exist prior to starting up
 CERT_FILE=$ARKIME_DIR/etc/viewer.crt
