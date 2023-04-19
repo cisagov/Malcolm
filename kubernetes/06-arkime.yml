@@ -76,6 +76,9 @@ spec:
             name: arkime-opensearch-curlrc-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
+          - name: arkime-runtime-logs-volume
+            mountPath: /opt/arkime/logs
+            subPath: "arkime"
       volumes:
         - name: arkime-var-local-catrust-volume
           configMap:
@@ -86,3 +89,6 @@ spec:
         - name: arkime-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: arkime-runtime-logs-volume
+          persistentVolumeClaim:
+            claimName: runtime-logs-claim
