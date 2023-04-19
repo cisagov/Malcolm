@@ -86,6 +86,9 @@ spec:
           subPath: "auth"
         - name: nginx-etc-auth-default-volume
           mountPath: /tmp/auth/default/configmap
+        - name: nginx-runtime-logs-volume
+          mountPath: /var/log/nginx
+          subPath: "nginx"
       volumes:
       - name: nginx-etc-nginx-volume
         configMap:
@@ -108,3 +111,6 @@ spec:
       - name: nginx-etc-auth-default-volume
         configMap:
           name: etc-nginx-auth
+      - name: nginx-runtime-logs-volume
+        persistentVolumeClaim:
+          claimName: runtime-logs-claim

@@ -174,6 +174,49 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
+  name: runtime-logs-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 50Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/runtime-logs
+    server: 10.9.0.226
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: runtime-logs-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: runtime-logs-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
   name: opensearch-volume
   namespace: malcolm
   labels:

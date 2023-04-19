@@ -244,5 +244,7 @@ if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; t
   rm -rf /tmp/auth/* || true
 fi
 
+rm -rf /var/log/nginx/* || true
+
 # start supervisor (which will spawn nginx, stunnel, etc.) or whatever the default command is
 exec "$@"

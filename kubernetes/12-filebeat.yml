@@ -76,7 +76,9 @@ spec:
             name: filebeat-zeek-volume
           - mountPath: "/suricata"
             name: filebeat-suricata-volume
-          # TODO: live nginx-logs from nginx-proxy container
+          - name: filebeat-nginx-runtime-logs-volume
+            mountPath: /nginx
+            subPath: "nginx"
       volumes:
         - name: filebeat-var-local-catrust-volume
           configMap:
@@ -93,3 +95,7 @@ spec:
         - name: filebeat-suricata-volume
           persistentVolumeClaim:
             claimName: suricata-claim
+        - name: filebeat-nginx-runtime-logs-volume
+          persistentVolumeClaim:
+            readOnly: true
+            claimName: runtime-logs-claim

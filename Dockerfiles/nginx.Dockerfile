@@ -169,7 +169,7 @@ RUN set -x ; \
     zlib-dev \
     ; \
     \
-  mkdir -p /usr/src/nginx-auth-ldap /usr/src/ngx_http_substitutions_filter_module /www /www/logs/nginx ; \
+  mkdir -p /usr/src/nginx-auth-ldap /usr/src/ngx_http_substitutions_filter_module /www /www/logs/nginx /var/log/nginx ; \
   tar -zxC /usr/src -f /nginx.tar.gz ; \
   tar -zxC /usr/src/nginx-auth-ldap --strip=1 -f /nginx-auth-ldap.tar.gz ; \
   tar -zxC /usr/src/ngx_http_substitutions_filter_module --strip=1 -f /ngx_http_substitutions_filter_module-master.tar.gz ; \
