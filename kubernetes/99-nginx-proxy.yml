@@ -8,6 +8,10 @@ spec:
   ports:
     - port: 443
       protocol: TCP
+    - port: 8443
+      protocol: TCP
+    - port: 9200
+      protocol: TCP
   selector:
     name: nginx-proxy-deployment
 
@@ -36,6 +40,7 @@ spec:
         ports:
           - containerPort: 443
           - containerPort: 8443
+          - containerPort: 9200
         envFrom:
           - configMapRef:
               name: process-env
