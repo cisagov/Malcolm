@@ -8,6 +8,10 @@ spec:
   ports:
     - port: 3310
       protocol: TCP
+      name: clamav
+    - port: 8440
+      protocol: TCP
+      name: http
   selector:
     name: file-monitor-deployment
 
@@ -34,7 +38,12 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 3310
+          - name: clamav
+            containerPort: 3310
+            protocol: TCP
+          - name: http
+            protocol: TCP
+            containerPort: 8440
         envFrom:
           - configMapRef:
               name: process-env

@@ -10,9 +10,12 @@ spec:
     - port: 5044
       protocol: TCP
       name: lumberjack
+    - port: 9001
+      protocol: TCP
+      name: supervisord
     - port: 9600
       protocol: TCP
-      name: api
+      name: http
   selector:
     name: logstash-deployment
 
@@ -54,8 +57,15 @@ spec:
               - IPC_LOCK
               - SYS_RESOURCE
         ports:
-          - containerPort: 5044
-          - containerPort: 9600
+          - name: lumberjack
+            protocol: TCP
+            containerPort: 5044
+          - name: supervisord
+            protocol: TCP
+            containerPort: 9001
+          - name: http
+            protocol: TCP
+            containerPort: 9600
         envFrom:
           - configMapRef:
               name: process-env

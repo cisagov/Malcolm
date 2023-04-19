@@ -5,13 +5,17 @@ metadata:
   name: nginx-proxy
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 443
       protocol: TCP
+      name: https
     - port: 8443
       protocol: TCP
+      name: http
     - port: 9200
       protocol: TCP
+      name: opensearch
   selector:
     name: nginx-proxy-deployment
 
@@ -38,9 +42,15 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 443
-          - containerPort: 8443
-          - containerPort: 9200
+          - name: https
+            protocol: TCP
+            containerPort: 443
+          - name: http
+            protocol: TCP
+            containerPort: 8443
+          - name: opensearch
+            protocol: TCP
+            containerPort: 9200
         envFrom:
           - configMapRef:
               name: process-env

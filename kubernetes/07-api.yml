@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 5000
       protocol: TCP
+      name: http
   selector:
     name: api-deployment
 
@@ -36,7 +37,9 @@ spec:
         command: ["gunicorn"]
         args: ["--bind", "0:5000", "manage:app"]
         ports:
-          - containerPort: 5000
+          - name: http
+            protocol: TCP
+            containerPort: 5000
         envFrom:
           - configMapRef:
               name: process-env

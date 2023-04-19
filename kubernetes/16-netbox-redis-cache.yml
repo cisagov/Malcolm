@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 6379
       protocol: TCP
+      name: redis
   selector:
     name: netbox-redis-cache-deployment
 
@@ -36,7 +37,9 @@ spec:
         command: ["sh"]
         args: ["-c", "redis-server --requirepass $(REDIS_PASSWORD)"]
         ports:
-          - containerPort: 6379
+          - name: redis
+            protocol: TCP
+            containerPort: 6379
         envFrom:
           - configMapRef:
               name: process-env

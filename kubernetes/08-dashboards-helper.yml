@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 28991
       protocol: TCP
+      name: http
   selector:
     name: dashboards-helper-deployment
 
@@ -34,7 +35,9 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 28991
+          - name: http
+            protocol: TCP
+            containerPort: 28991
         envFrom:
           - configMapRef:
               name: process-env

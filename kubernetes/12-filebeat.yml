@@ -9,6 +9,7 @@ spec:
   ports:
     - port: 5045
       protocol: TCP
+      name: tcpjson
   selector:
     name: filebeat-deployment
 
@@ -35,7 +36,9 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 5045
+          - name: tcpjson
+            protocol: TCP
+            containerPort: 5045
         envFrom:
           - configMapRef:
               name: process-env

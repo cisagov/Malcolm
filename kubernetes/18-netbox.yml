@@ -8,13 +8,13 @@ spec:
   ports:
     - port: 8080
       protocol: TCP
-      name: eightyeighty
+      name: http-main
     - port: 8081
       protocol: TCP
-      name: eightyeightyone
+      name: http-status
     - port: 9001
       protocol: TCP
-      name: ninethousandone
+      name: supervisord
   selector:
     name: netbox-deployment
 
@@ -41,9 +41,15 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 8080
-          - containerPort: 8081
-          - containerPort: 9001
+          - name: http-main
+            protocol: TCP
+            containerPort: 8080
+          - name: http-status
+            protocol: TCP
+            containerPort: 8081
+          - name: supervisord
+            protocol: TCP
+            containerPort: 9001
         envFrom:
           - configMapRef:
               name: process-env

@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 80
       protocol: TCP
+      name: http
   selector:
     name: htadmin-deployment
 
@@ -34,7 +35,9 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 80
+          - name: http
+            protocol: TCP
+            containerPort: 80
         envFrom:
           - configMapRef:
               name: process-env

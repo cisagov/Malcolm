@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 30441
       protocol: TCP
+      name: zmq
   selector:
     name: pcap-monitor-deployment
 
@@ -34,7 +35,9 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 30441
+          - name: zmq
+            protocol: TCP
+            containerPort: 30441
         envFrom:
           - configMapRef:
               name: process-env

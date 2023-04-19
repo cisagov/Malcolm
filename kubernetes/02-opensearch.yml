@@ -5,10 +5,10 @@ metadata:
   name: opensearch
   namespace: malcolm
 spec:
-  type: ClusterIP
   ports:
     - port: 9200
       protocol: TCP
+      name: opensearch
   selector:
     name: opensearch-deployment
 
@@ -40,7 +40,9 @@ spec:
               - IPC_LOCK
               - SYS_RESOURCE
         ports:
-          - containerPort: 9200
+          - name: opensearch
+            protocol: TCP
+            containerPort: 9200
         envFrom:
           - configMapRef:
               name: process-env

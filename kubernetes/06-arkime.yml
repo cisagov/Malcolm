@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 8005
       protocol: TCP
+      name: http
   selector:
     name: arkime-deployment
 
@@ -39,7 +40,9 @@ spec:
               - IPC_LOCK
               - SYS_RESOURCE
         ports:
-          - containerPort: 8005
+          - name: http
+            protocol: TCP
+            containerPort: 8005
         envFrom:
           - configMapRef:
               name: process-env

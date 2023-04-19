@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 10004
       protocol: TCP
+      name: http
   selector:
     name: freq-deployment
 
@@ -34,7 +35,9 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 10004
+          - name: http
+            protocol: TCP
+            containerPort: 10004
         envFrom:
           - configMapRef:
               name: process-env

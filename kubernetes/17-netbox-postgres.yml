@@ -8,6 +8,7 @@ spec:
   ports:
     - port: 5432
       protocol: TCP
+      name: postgresql
   selector:
     name: netbox-postgres-deployment
 
@@ -34,7 +35,9 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 5432
+          - name: postgresql
+            protocol: TCP
+            containerPort: 5432
         envFrom:
           - configMapRef:
               name: process-env

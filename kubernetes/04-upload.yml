@@ -9,7 +9,7 @@ spec:
   ports:
     - port: 22
       protocol: TCP
-      name: ssh
+      name: sftp
     - port: 80
       protocol: TCP
       name: http
@@ -39,8 +39,12 @@ spec:
         stdin: false
         tty: true
         ports:
-          - containerPort: 22
-          - containerPort: 80
+          - name: sftp
+            protocol: TCP
+            containerPort: 22
+          - name: http
+            protocol: TCP
+            containerPort: 80
         envFrom:
           - configMapRef:
               name: process-env
