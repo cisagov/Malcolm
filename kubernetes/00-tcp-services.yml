@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: malcolm
+data:
+  5044: "malcolm/logstash:5044"
+  5045: "malcolm/filebeat:5045"
+  8022: "malcolm/upload:22"
+  9200: "malcolm/nginx-proxy:9200"
