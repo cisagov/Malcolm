@@ -5,6 +5,7 @@ metadata:
   name: filebeat
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 5045
       protocol: TCP

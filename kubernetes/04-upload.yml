@@ -5,6 +5,7 @@ metadata:
   name: upload
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 22
       protocol: TCP

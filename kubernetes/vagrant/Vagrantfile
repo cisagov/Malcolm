@@ -114,7 +114,7 @@ server_script_1 = <<-SHELL
     echo "Waiting for k3s to start..."
     sleep 30
     curl -sSL -o /tmp/deploy_nginx.yaml https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/cloud/deploy.yaml
-    yq -i '( select(.kind == "Deployment").spec.template.spec.containers[].args[] | select(contains("/nginx-ingress-controller")) | parent ) += ["--enable-ssl-passthrough", "--tcp-services-configmap=\$(POD_NAMESPACE)/tcp-services"]' /tmp/deploy_nginx.yaml
+    yq -i '( select(.kind == "Deployment").spec.template.spec.containers[].args[] | select(contains("/nginx-ingress-controller")) | parent ) += ["--enable-ssl-passthrough", "--tcp-services-configmap=ingress-nginx/tcp-services"]' /tmp/deploy_nginx.yaml
     yq -i "( select(.kind == \\"Deployment\\").spec.template.spec.containers[].args[] | select(contains(\\"/nginx-ingress-controller\\")) | parent | parent | .ports ) += [#{deployment_additional_ports}]" /tmp/deploy_nginx.yaml
     yq -i "( select(.kind == \\"Service\\" and .spec.type == \\"LoadBalancer\\").spec.ports ) += [#{load_balancer_additional_ports}]" /tmp/deploy_nginx.yaml
     kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f /tmp/deploy_nginx.yaml

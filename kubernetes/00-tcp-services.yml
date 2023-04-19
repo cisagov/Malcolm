@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: tcp-services
-  namespace: malcolm
+  namespace: ingress-nginx
 data:
   5044: "malcolm/logstash:5044"
   5045: "malcolm/filebeat:5045"
