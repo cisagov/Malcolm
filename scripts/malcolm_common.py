@@ -581,8 +581,14 @@ def YAMLDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
 
 
-def KubernetesDynamic(debug=False, forceInteraction=False):
-    return DoDynamicImport("kubernetes", "kubernetes", interactive=forceInteraction, debug=debug)
+def KubernetesDynamic(verifySsl=False, debug=False, forceInteraction=False):
+    kubes = DoDynamicImport("kubernetes", "kubernetes", interactive=forceInteraction, debug=debug)
+    if kubes and not verifySsl:
+        configuration = kubes.client.Configuration()
+        configuration.verify_ssl = False
+        configuration.debug = False
+        kubes.client.Configuration.set_default(configuration)
+    return kubes
 
 
 def DotEnvDynamic(debug=False, forceInteraction=False):
