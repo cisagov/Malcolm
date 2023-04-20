@@ -421,6 +421,7 @@ services:
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
+      - ./pcap/spool:/tmp/upload_tmp_dir
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost"]
       interval: 30s

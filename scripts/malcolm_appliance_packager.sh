@@ -76,6 +76,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/opensearch-backup/"
   mkdir $VERBOSE -p "$DESTDIR/opensearch/nodes/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
+  mkdir $VERBOSE -p "$DESTDIR/pcap/spool/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
   mkdir $VERBOSE -p "$DESTDIR/config/"
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
