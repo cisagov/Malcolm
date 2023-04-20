@@ -97,6 +97,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
     - [Generating the ISO](malcolm-iso.md#ISOBuild)
     - [Setup](malcolm-iso.md#ISOSetup)
     - [Time synchronization](time-sync.md#ConfigTime)
+* [Deploying Malcolm with Kubernetes](kubernetes.md#Kubernetes)
 * [Hardening](hardening.md#Hardening)
     - [Compliance Exceptions](hardening.md#ComplianceExceptions)
 * [Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)
