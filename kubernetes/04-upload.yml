@@ -73,6 +73,9 @@ spec:
           - mountPath: "/var/www/upload/server/php/chroot/files"
             name: upload-pcap-volume
             subPath: "upload"
+          - mountPath: "/tmp/upload_tmp_dir"
+            name: upload-pcap-volume
+            subPath: "spool"
       volumes:
         - name: upload-var-local-catrust-volume
           configMap:

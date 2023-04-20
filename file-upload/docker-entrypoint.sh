@@ -12,6 +12,10 @@ then
   exit 1
 fi
 
+mkdir -p /tmp/upload_tmp_dir
+chown :$PGROUP /tmp/upload_tmp_dir
+chmod 775 /tmp/upload_tmp_dir
+
 if ! getent passwd "$MALCOLM_USERNAME" >/dev/null
 then
   # Make sure every container gets its own SSH host keys the first time around
