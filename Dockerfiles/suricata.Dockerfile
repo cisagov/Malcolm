@@ -27,10 +27,10 @@ ENV PGROUP "suricata"
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
 
-ENV SUPERCRONIC_VERSION "0.2.2"
+ENV SUPERCRONIC_VERSION "0.2.23"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "2319da694833c7a147976b8e5f337cd83397d6be"
+ENV SUPERCRONIC_SHA1SUM "dbed853c06aba2c611bbb1955b2c1667b51dcb0a"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV YQ_VERSION "4.24.2"
