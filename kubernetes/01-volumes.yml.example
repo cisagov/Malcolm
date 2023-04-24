@@ -8,7 +8,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 250Gi
+    storage: 500Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -22,7 +22,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/pcap
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -38,7 +38,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 250Gi
+      storage: 500Gi
   volumeName: pcap-volume
 
 ---
@@ -51,7 +51,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 100Gi
+    storage: 250Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -65,7 +65,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/zeek-logs
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -81,7 +81,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 100Gi
+      storage: 250Gi
   volumeName: zeek-volume
 
 ---
@@ -108,7 +108,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/suricata-logs
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -137,7 +137,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 50Gi
+    storage: 25Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -151,7 +151,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/config
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -167,7 +167,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 50Gi
+      storage: 25Gi
   volumeName: config-volume
 
 ---
@@ -180,7 +180,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 50Gi
+    storage: 25Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -194,7 +194,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/runtime-logs
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -210,7 +210,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 50Gi
+      storage: 25Gi
   volumeName: runtime-logs-volume
 
 ---
@@ -223,7 +223,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 250Gi
+    storage: 500Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -237,7 +237,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/opensearch
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -253,7 +253,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 250Gi
+      storage: 500Gi
   volumeName: opensearch-volume
 
 ---
@@ -266,7 +266,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 250Gi
+    storage: 500Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -280,7 +280,7 @@ spec:
     - retrans=2
   nfs:
     path: /malcolm/opensearch-backup
-    server: 10.9.0.226
+    server: 192.168.0.100
     readOnly: false
 
 ---
@@ -296,5 +296,5 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 250Gi
+      storage: 500Gi
   volumeName: opensearch-backup-volume
