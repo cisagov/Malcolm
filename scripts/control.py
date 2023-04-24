@@ -41,8 +41,8 @@ from malcolm_common import (
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
     PLATFORM_WINDOWS,
-    ProcessLogLine,
     posInt,
+    ProcessLogLine,
     ScriptPath,
     YAMLDynamic,
     YesOrNo,
@@ -52,35 +52,37 @@ from malcolm_utils import (
     deep_get,
     dictsearch,
     eprint,
-    EscapeForCurl,
     EscapeAnsi,
+    EscapeForCurl,
     get_iterable,
     get_primary_ip,
     LoadStrIfJson,
     ParseCurlFile,
+    pushd,
     RemoveEmptyFolders,
     run_process,
     same_file_or_dir,
-    which,
     str2bool,
-    pushd,
+    which,
 )
 
 from malcolm_kubernetes import (
-    PrintPodStatus,
-    PrintNodeStatus,
+    CheckPersistentStorageDefs,
     DeleteNamespace,
-    StartMalcolm,
     get_node_hostnames_and_ips,
-    PodExec,
     GetPodNamesForService,
+    PodExec,
+    PrintNodeStatus,
+    PrintPodStatus,
+    REQUIRED_VOLUME_OBJECTS,
+    StartMalcolm,
 )
 
 from base64 import b64encode
 from collections import defaultdict, namedtuple
 from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
 from urllib.parse import urlparse
-from itertools import chain
+from itertools import chain, groupby
 
 try:
     from contextlib import nullcontext
@@ -1022,23 +1024,36 @@ def start():
             exit(err)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        startResults = StartMalcolm(
+        if CheckPersistentStorageDefs(
             namespace=args.namespace,
             malcolmPath=MalcolmPath,
-            configPath=args.configDir,
-        )
-
-        if dictsearch(startResults, 'error'):
-            eprint(
-                f"Starting the {args.namespace} namespace and creating its underlying resources returned the following error(s):\n"
+        ):
+            startResults = StartMalcolm(
+                namespace=args.namespace,
+                malcolmPath=MalcolmPath,
+                configPath=args.configDir,
             )
-            eprint(startResults)
-            eprint()
 
-        elif args.debug:
-            eprint()
-            eprint(startResults)
-            eprint()
+            if dictsearch(startResults, 'error'):
+                eprint(
+                    f"Starting the {args.namespace} namespace and creating its underlying resources returned the following error(s):\n"
+                )
+                eprint(startResults)
+                eprint()
+
+            elif args.debug:
+                eprint()
+                eprint(startResults)
+                eprint()
+
+        else:
+            groupedStorageEntries = {
+                i: [j[0] for j in j]
+                for i, j in groupby(sorted(REQUIRED_VOLUME_OBJECTS.items(), key=lambda x: x[1]), lambda x: x[1])
+            }
+            raise Exception(
+                f'Storage objects required by Malcolm are not defined in {os.path.join(MalcolmPath, "kubernetes")}: {groupedStorageEntries}'
+            )
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')

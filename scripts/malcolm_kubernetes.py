@@ -94,6 +94,25 @@ MALCOLM_CONFIGMAPS = {
     ],
 }
 
+REQUIRED_VOLUME_OBJECTS = {
+    'pcap-claim': 'PersistentVolumeClaim',
+    'zeek-claim': 'PersistentVolumeClaim',
+    'suricata-claim': 'PersistentVolumeClaim',
+    'config-claim': 'PersistentVolumeClaim',
+    'runtime-logs-claim': 'PersistentVolumeClaim',
+    'opensearch-claim': 'PersistentVolumeClaim',
+    'opensearch-backup-claim': 'PersistentVolumeClaim',
+    # the PersistentVolumes themselves aren't used directly,
+    #   so we only need to define the PersistentVolumeClaims
+    # 'pcap-volume': 'PersistentVolume',
+    # 'zeek-volume': 'PersistentVolume',
+    # 'suricata-volume': 'PersistentVolume',
+    # 'config-volume': 'PersistentVolume',
+    # 'runtime-logs-volume': 'PersistentVolume',
+    # 'opensearch-volume': 'PersistentVolume',
+    # 'opensearch-backup-volume': 'PersistentVolume',
+}
+
 
 ###################################################################################################
 def _nanocore_to_millicore(n):
@@ -647,9 +666,17 @@ def StartMalcolm(namespace, malcolmPath, configPath):
 
         # apply manifests
         results_dict['create_from_yaml']['result'] = dict()
-        for yamlName in sorted(
-            glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), '*.yml'), recursive=False)
-        ):
+        yamlFiles = sorted(
+            list(
+                chain(
+                    *[
+                        glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), ftype), recursive=False)
+                        for ftype in ['*.yml', '*.yaml']
+                    ]
+                )
+            )
+        )
+        for yamlName in yamlFiles:
             try:
                 results_dict['create_from_yaml']['result'][
                     os.path.basename(yamlName)
@@ -674,3 +701,33 @@ def StartMalcolm(namespace, malcolmPath, configPath):
                         results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
 
     return results_dict
+
+
+def CheckPersistentStorageDefs(namespace, malcolmPath):
+    foundObjects = {k: False for (k, v) in REQUIRED_VOLUME_OBJECTS.items()}
+
+    if yamlImported := YAMLDynamic():
+        allYamlContents = []
+        yamlFiles = sorted(
+            list(
+                chain(
+                    *[
+                        glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), ftype), recursive=False)
+                        for ftype in ['*.yml', '*.yaml']
+                    ]
+                )
+            )
+        )
+        for yamlName in yamlFiles:
+            with open(yamlName, 'r') as cf:
+                allYamlContents.extend(list(yamlImported.safe_load_all(cf)))
+        for name, kind in REQUIRED_VOLUME_OBJECTS.items():
+            for doc in allYamlContents:
+                if (
+                    (doc.get('kind', None) == kind)
+                    and (deep_get(doc, ['metadata', 'namespace']) == namespace)
+                    and (deep_get(doc, ['metadata', 'name']) == name)
+                ):
+                    foundObjects[name] = True
+
+    return all([v for k, v in foundObjects.items()])
