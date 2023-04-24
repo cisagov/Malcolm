@@ -28,13 +28,13 @@ ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.23"
+ENV SUPERCRONIC_VERSION "0.2.24"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "dbed853c06aba2c611bbb1955b2c1667b51dcb0a"
+ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.24.2"
+ENV YQ_VERSION "4.33.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
 ENV SURICATA_CONFIG_DIR /etc/suricata
