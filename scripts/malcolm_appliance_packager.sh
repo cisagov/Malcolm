@@ -67,7 +67,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
-  mkdir $VERBOSE -p "$DESTDIR/netbox/env/"
+  mkdir $VERBOSE -p "$DESTDIR/netbox/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/media/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/postgres/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/redis/"
@@ -90,8 +90,9 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/upload/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
+
+  cp $VERBOSE ./config/*.example "$DESTDIR/config/"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
-  touch "$DESTDIR/"config/auth.env
   cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
@@ -102,7 +103,17 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   cp $VERBOSE -r ./netbox/config/ "$DESTDIR/netbox/"
-  cp $VERBOSE ./netbox/env/netbox.env.example "$DESTDIR/netbox/env/"
+
+  unset CONFIRMATION
+  echo ""
+  read -p "Package Kubernetes manifests in addition to docker-compose.yml [y/N]? " CONFIRMATION
+  CONFIRMATION=${CONFIRMATION:-N}
+  if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
+    mkdir $VERBOSE -p "$DESTDIR/kubernetes/"
+    cp $VERBOSE ./kubernetes/*.* "$DESTDIR/kubernetes/"
+    grep -v '^#' ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$DESTDIR/kubernetes/XXX"
+  fi
+
   pushd "$DESTDIR" >/dev/null 2>&1
   touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
   chmod 600 ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
@@ -125,6 +136,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_kubernetes.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
+
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
 

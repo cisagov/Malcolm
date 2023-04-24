@@ -73,7 +73,6 @@ VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 GITHUB_API_TOKEN="${GITHUB_TOKEN:-}"
 
 mkdir -p ./config
-[[ ! -f ./config/auth.env ]] && touch ./config/auth.env
 
 # MaxMind now requires a (free) license key to download the free versions of their GeoIP databases.
 if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
