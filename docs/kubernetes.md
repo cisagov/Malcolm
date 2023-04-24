@@ -48,6 +48,7 @@ spec:
             * --tcp-services-configmap=ingress-nginx/tcp-services
 …
 ```
+
     - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
 ```
 ---
@@ -91,6 +92,7 @@ spec:
 …
   type: LoadBalancer
 ```
+
     - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
 ```
 apiVersion: apps/v1
@@ -156,6 +158,7 @@ spec:
             - --tcp-services-configmap=ingress-nginx/tcp-services
 …
 ```
+
     - You must modify Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/00-ingress.yml) to specify the `host:` value and use [host-based routing](https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/):
 ```
 …
