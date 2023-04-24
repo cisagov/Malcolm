@@ -21,6 +21,7 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
 * To [forward](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) logs from a remote instance of [Hedgehog Linux](hedgehog.md):
     - See ["Exposing TCP and UDP services"](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) in the Ingress-NGINX documentation.
     - You must configure the controller to start up with the `--tcp-services-configmap=ingress-nginx/tcp-services` flag:
+
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -50,6 +51,7 @@ spec:
 ```
 
     - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
+
 ```
 ---
 apiVersion: v1
@@ -94,6 +96,7 @@ spec:
 ```
 
     - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
+
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -129,8 +132,11 @@ spec:
               protocol: TCP
 …
 ```
+
 * To use [SSL Passthrough](https://kubernetes.github.io/ingress-nginx/user-guide/tls/) to have the Kubernetes gateway use Malcolm's TLS certificates rather than its own:
+
     - You must configure the controller to start up with the `--enable-ssl-passthrough` flag.
+
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -160,6 +166,7 @@ spec:
 ```
 
     - You must modify Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/00-ingress.yml) to specify the `host:` value and use [host-based routing](https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/):
+
 ```
 …
 spec:
