@@ -21,168 +21,163 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
 * To [forward](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) logs from a remote instance of [Hedgehog Linux](hedgehog.md):
     - See ["Exposing TCP and UDP services"](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) in the Ingress-NGINX documentation.
     - You must configure the controller to start up with the `--tcp-services-configmap=ingress-nginx/tcp-services` flag:
-
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-…
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
-spec:
-…
-  template:
-…
-    spec:
-      containers:
-        * args:
-            * /nginx-ingress-controller
-            * --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller
-            * --election-id=ingress-nginx-leader
-            * --controller-class=k8s.io/ingress-nginx
-            * --ingress-class=nginx
-            * --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
-            * --validating-webhook=:8443
-            * --validating-webhook-certificate=/usr/local/certificates/cert
-            * --validating-webhook-key=/usr/local/certificates/key
-            * --enable-ssl-passthrough
-            * --tcp-services-configmap=ingress-nginx/tcp-services
-…
-```
+        ```
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+        …
+          name: ingress-nginx-controller
+          namespace: ingress-nginx
+        spec:
+        …
+          template:
+        …
+            spec:
+              containers:
+                + args:
+                    + /nginx-ingress-controller
+                    + --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller
+                    + --election-id=ingress-nginx-leader
+                    + --controller-class=k8s.io/ingress-nginx
+                    + --ingress-class=nginx
+                    + --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+                    + --validating-webhook=:8443
+                    + --validating-webhook-certificate=/usr/local/certificates/cert
+                    + --validating-webhook-key=/usr/local/certificates/key
+                    + --enable-ssl-passthrough
+                    + --tcp-services-configmap=ingress-nginx/tcp-services
+        …
+        ```
 
     - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
-
-```
----
-apiVersion: v1
-kind: Service
-metadata:
-…
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
-spec:
-  externalTrafficPolicy: Local
-  ipFamilies:
-    + IPv4
-  ipFamilyPolicy: SingleStack
-  ports:
-    + appProtocol: http
-      name: http
-      port: 80
-      protocol: TCP
-      targetPort: http
-    + appProtocol: https
-      name: https
-      port: 443
-      protocol: TCP
-      targetPort: https
-    + appProtocol: tcp
-      name: lumberjack
-      port: 5044
-      targetPort: 5044
-      protocol: TCP
-    + appProtocol: tcp
-      name: tcpjson
-      port: 5045
-      targetPort: 5045
-      protocol: TCP
-+ appProtocol: tcp
-      name: opensearch
-      port: 9200
-      targetPort: 9200
-      protocol: TCP
-…
-  type: LoadBalancer
-```
+        ```
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+        …
+          name: ingress-nginx-controller
+          namespace: ingress-nginx
+        spec:
+          externalTrafficPolicy: Local
+          ipFamilies:
+            - IPv4
+          ipFamilyPolicy: SingleStack
+          ports:
+            - appProtocol: http
+              name: http
+              port: 80
+              protocol: TCP
+              targetPort: http
+            - appProtocol: https
+              name: https
+              port: 443
+              protocol: TCP
+              targetPort: https
+            - appProtocol: tcp
+              name: lumberjack
+              port: 5044
+              targetPort: 5044
+              protocol: TCP
+            - appProtocol: tcp
+              name: tcpjson
+              port: 5045
+              targetPort: 5045
+              protocol: TCP
+        - appProtocol: tcp
+              name: opensearch
+              port: 9200
+              targetPort: 9200
+              protocol: TCP
+        …
+          type: LoadBalancer
+        ```
 
     - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
-
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-…
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
-spec:
-…
-  template:
-…
-    spec:
-      containers:
-…
-          ports:
-            - containerPort: 80
-              name: http
-              protocol: TCP
-            - containerPort: 443
-              name: https
-              protocol: TCP
-            - containerPort: 8443
-              name: webhook
-              protocol: TCP
-            - name: lumberjack
-              containerPort: 5044
-              protocol: TCP
-            - name: tcpjson
-              containerPort: 5045
-              protocol: TCP
-            - name: opensearch
-              containerPort: 9200
-              protocol: TCP
-…
-```
+        ```
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+        …
+          name: ingress-nginx-controller
+          namespace: ingress-nginx
+        spec:
+        …
+          template:
+        …
+            spec:
+              containers:
+        …
+                  ports:
+                    * containerPort: 80
+                      name: http
+                      protocol: TCP
+                    * containerPort: 443
+                      name: https
+                      protocol: TCP
+                    * containerPort: 8443
+                      name: webhook
+                      protocol: TCP
+                    * name: lumberjack
+                      containerPort: 5044
+                      protocol: TCP
+                    * name: tcpjson
+                      containerPort: 5045
+                      protocol: TCP
+                    * name: opensearch
+                      containerPort: 9200
+                      protocol: TCP
+        …
+        ```
 
 * To use [SSL Passthrough](https://kubernetes.github.io/ingress-nginx/user-guide/tls/) to have the Kubernetes gateway use Malcolm's TLS certificates rather than its own:
-
     - You must configure the controller to start up with the `--enable-ssl-passthrough` flag.
-
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-…
-  name: ingress-nginx-controller
-  namespace: ingress-nginx
-spec:
-…
-  template:
-…
-    spec:
-      containers:
-        - args:
-            - /nginx-ingress-controller
-            - --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller
-            - --election-id=ingress-nginx-leader
-            - --controller-class=k8s.io/ingress-nginx
-            - --ingress-class=nginx
-            - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
-            - --validating-webhook=:8443
-            - --validating-webhook-certificate=/usr/local/certificates/cert
-            - --validating-webhook-key=/usr/local/certificates/key
-            - --enable-ssl-passthrough
-            - --tcp-services-configmap=ingress-nginx/tcp-services
-…
-```
+        ```
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+        …
+          name: ingress-nginx-controller
+          namespace: ingress-nginx
+        spec:
+        …
+          template:
+        …
+            spec:
+              containers:
+                * args:
+                    * /nginx-ingress-controller
+                    * --publish-service=$(POD_NAMESPACE)/ingress-nginx-controller
+                    * --election-id=ingress-nginx-leader
+                    * --controller-class=k8s.io/ingress-nginx
+                    * --ingress-class=nginx
+                    * --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+                    * --validating-webhook=:8443
+                    * --validating-webhook-certificate=/usr/local/certificates/cert
+                    * --validating-webhook-key=/usr/local/certificates/key
+                    * --enable-ssl-passthrough
+                    * --tcp-services-configmap=ingress-nginx/tcp-services
+        …
+        ```
 
     - You must modify Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/00-ingress.yml) to specify the `host:` value and use [host-based routing](https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/):
 
-```
-…
-spec:
-  rules:
-  - host: malcolm.example.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-proxy
-            port:
-              number: 443
-…
-```
+        ```
+        …
+        spec:
+          rules:
+          + host: malcolm.example.org
+            http:
+              paths:
+              + path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: nginx-proxy
+                    port:
+                      number: 443
+        …
+        ```
 
 ### <a name="Limits"></a> Kubernetes Provider Settings
 
@@ -191,21 +186,21 @@ OpenSearch has some [important settings](https://opensearch.org/docs/latest/inst
 Settings which likely need to be changed in the underlying host running Kubernetes include:
 
 * System settings (e.g., in `/etc/sysctl.conf`)
-```
-# the maximum number of memory map areas a process may have
-vm.max_map_count=262144
-```
+        ```
+        # the maximum number of memory map areas a process may have
+        vm.max_map_count=262144
+        ```
 * System limits (e.g., in `/etc/security/limits.d/limits.conf`)
-```
-* soft nofile 65535
-* hard nofile 65535
-* soft memlock unlimited
-* hard memlock unlimited
-* soft nproc 262144
-* hard nproc 524288
-* soft core 0
-* hard core 0
-```
+        ```
+        + soft nofile 65535
+        + hard nofile 65535
+        + soft memlock unlimited
+        + hard memlock unlimited
+        + soft nproc 262144
+        + hard nproc 524288
+        + soft core 0
+        + hard core 0
+        ```
 
 ## <a name="Config"></a> Configuration
 
