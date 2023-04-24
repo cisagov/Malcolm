@@ -26,7 +26,7 @@ The types of third-party logs and metrics discussed in this document are *not* t
 
 ## <a name="Malcolm"></a>Configuring Malcolm
 
-The environment variables in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning)), as can be seen from the following excerpt from the [Installation example](ubuntu-install-example.md#InstallationExample):
+The environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)), as can be seen from the following excerpt from the [Installation example](ubuntu-install-example.md#InstallationExample):
 
 ```
 …
@@ -47,7 +47,7 @@ Tag to apply to messages sent to Filebeat TCP listener (_malcolm_beats): _malcol
 …
 ```
 
-The variables corresponding to these questions can be found in the `filebeat-variables` section of`docker-compose.yml`:
+The variables corresponding to these questions can be found in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars):
 
 * `FILEBEAT_TCP_LISTEN` - whether or not to expose a [Filebeat TCP input listener](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to which logs may be sent (the default TCP port is `5045`: you may need to adjust your firewall accordingly)
 * `FILEBEAT_TCP_LOG_FORMAT` - log format expected for logs sent to the Filebeat TCP input listener (`json` or `raw`)
@@ -60,7 +60,7 @@ These variables' values will depend on your forwarder and the format of the data
 
 ### <a name="MalcolmTLS"></a>Secure communication
 
-In order to maintain the integrity and confidentiality of your data, Malcolm's default (set via the `BEATS_SSL` environment variable in `docker-compose.yml`) is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
+In order to maintain the integrity and confidentiality of your data, Malcolm's default (set via the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars)) is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
 
 ## <a name="FluentBit"></a>Fluent Bit
 
@@ -276,7 +276,7 @@ Running  fluentbit_winev... fluentbit_winevtlog
 
 Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data to Malcolm's Filebeat TCP listener. Follow the [Get started with Beats](https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html) documentation for configuring Beats on your system.
 
-In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
+In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
 
 Your Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [filebeat.yml](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) file:
 

@@ -1,6 +1,6 @@
 # <a name="LocalMods"></a>Local modifications
 
-There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](README.md) (see [`docker-compose.yml` parameters](malcolm-config.md#DockerComposeYml) and [Customizing event severity scoring](severity.md#SeverityConfig) for some examples).
+There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](README.md) (see [Environment Variable Files](malcolm-config.md#MalcolmConfigEnvVars) and [Customizing event severity scoring](severity.md#SeverityConfig) for some examples).
 
 ## <a name="Bind"></a>Docker bind mounts
 
@@ -8,93 +8,205 @@ Some configuration changes can be put in place by modifying local copies of conf
 
 ```
 $ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
-  opensearch:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
-      - ./opensearch:/usr/share/opensearch/data:delegated
-      - ./opensearch-backup:/opt/opensearch/backup:delegated
-  dashboards-helper:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-  dashboards:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-  logstash:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-      - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
-      - ./logstash/certs/ca.crt:/certs/ca.crt:ro
-      - ./logstash/certs/server.crt:/certs/server.crt:ro
-      - ./logstash/certs/server.key:/certs/server.key:ro
-  filebeat:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./zeek-logs:/zeek
-      - ./suricata-logs:/suricata
-      - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
-      - ./filebeat/certs/client.crt:/certs/client.crt:ro
-      - ./filebeat/certs/client.key:/certs/client.key:ro
-  arkime:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./pcap:/data/pcap
-      - ./arkime-logs:/opt/arkime/logs
-      - ./arkime-raw:/opt/arkime/raw
-  zeek:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./pcap:/pcap
-      - ./zeek-logs/upload:/zeek/upload
-      - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
-  zeek-live:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./zeek-logs/live:/zeek/live
-      - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
-  suricata:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./suricata-logs:/var/log/suricata
-      - ./pcap:/data/pcap
-      - ./suricata/rules:/opt/suricata/rules:ro
-  suricata-live:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./suricata-logs:/var/log/suricata
-      - ./suricata/rules:/opt/suricata/rules:ro
-  file-monitor:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek-logs/current:/zeek/logs
-      - ./yara/rules:/yara-rules/custom:ro
-  pcap-capture:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./pcap/upload:/pcap
-  pcap-monitor:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./zeek-logs:/zeek
-      - ./pcap:/pcap
-  upload:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./pcap/upload:/var/www/upload/server/php/chroot/files
-  htadmin:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
-      - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-      - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
-  freq:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-  api:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-  nginx-proxy:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
-      - ./nginx/htpasswd:/etc/nginx/htpasswd:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
+opensearch:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
+    - ./opensearch:/usr/share/opensearch/data:delegated
+    - ./opensearch-backup:/opt/opensearch/backup:delegated
+    - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/persist/opensearch.keystore:rw
+dashboards-helper:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/dashboards-helper.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
+dashboards:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+logstash:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/netbox-common.env
+    - ./config/netbox.env
+    - ./config/beats-common.env
+    - ./config/lookup-common.env
+    - ./config/logstash.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
+    - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
+    - ./logstash/certs/ca.crt:/certs/ca.crt:ro
+    - ./logstash/certs/server.crt:/certs/server.crt:ro
+    - ./logstash/certs/server.key:/certs/server.key:ro
+filebeat:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
+    - ./config/nginx.env
+    - ./config/beats-common.env
+    - ./config/filebeat.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - ./zeek-logs:/zeek
+    - ./suricata-logs:/suricata
+    - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
+    - ./filebeat/certs/client.crt:/certs/client.crt:ro
+    - ./filebeat/certs/client.key:/certs/client.key:ro
+arkime:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
+    - ./config/auth.env
+    - ./config/arkime.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - ./pcap:/data/pcap
+    - ./arkime-logs:/opt/arkime/logs
+    - ./arkime-raw:/opt/arkime/raw
+zeek:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/zeek.env
+    - ./config/zeek-offline.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./pcap:/pcap
+    - ./zeek-logs/upload:/zeek/upload
+    - ./zeek-logs/extract_files:/zeek/extract_files
+    - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+zeek-live:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/pcap-capture.env
+    - ./config/zeek.env
+    - ./config/zeek-live.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./zeek-logs/live:/zeek/live
+    - ./zeek-logs/extract_files:/zeek/extract_files
+    - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+suricata:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/suricata.env
+    - ./config/suricata-offline.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./suricata-logs:/var/log/suricata
+    - ./pcap:/data/pcap
+    - ./suricata/rules:/opt/suricata/rules:ro
+suricata-live:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/pcap-capture.env
+    - ./config/suricata.env
+    - ./config/suricata-live.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./suricata-logs:/var/log/suricata
+    - ./suricata/rules:/opt/suricata/rules:ro
+file-monitor:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/zeek.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./zeek-logs/extract_files:/zeek/extract_files
+    - ./zeek-logs/current:/zeek/logs
+    - ./yara/rules:/yara-rules/custom:ro
+pcap-capture:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/pcap-capture.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./pcap/upload:/pcap
+pcap-monitor:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - ./zeek-logs:/zeek
+    - ./pcap:/pcap
+upload:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/auth.env
+    - ./config/upload.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./pcap/upload:/var/www/upload/server/php/chroot/files
+htadmin:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/auth-common.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
+    - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
+    - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
+freq:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/lookup-common.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+netbox:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./netbox/config/configuration:/etc/netbox/config:ro
+    - ./netbox/config/reports:/etc/netbox/reports:ro
+    - ./netbox/config/scripts:/etc/netbox/scripts:ro
+    - ./netbox/media:/opt/netbox/netbox/media:rw
+    - ./net-map.json:/usr/local/share/net-map.json:ro
+netbox-postgres:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox-postgres.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./netbox/postgres:/var/lib/postgresql/data:rw
+netbox-redis:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox-redis.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./netbox/redis:/data
+netbox-redis-cache:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox-redis-cache.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+api:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+nginx-proxy:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/auth-common.env
+    - ./config/nginx.env
+    - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
+    - ./nginx/htpasswd:/etc/nginx/auth/htpasswd:ro
+    - ./nginx/certs:/etc/nginx/certs:ro
+    - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
 ```
 
 So, for example, if you wanted to make a change to the `nginx-proxy` container's `nginx.conf` file, you could add the following line to the `volumes:` section of the `nginx-proxy` service in your `docker-compose.yml` file:

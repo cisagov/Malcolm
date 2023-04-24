@@ -138,6 +138,7 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py status
   ln -s ./control.py stop
   ln -s ./control.py wipe
+  ln -s ./install.py configure
   popd >/dev/null 2>&1
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_kubernetes.py "$MALCOLM_DEST_DIR/scripts/"

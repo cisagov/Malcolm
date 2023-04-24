@@ -2680,6 +2680,9 @@ def main():
         parser.print_help()
         exit(2)
 
+    if os.path.islink(os.path.join(ScriptPath, ScriptName)) and ScriptName.startswith('configure'):
+        args.configOnly = True
+
     if args.debug:
         eprint(os.path.join(ScriptPath, ScriptName))
         eprint(f"Arguments: {sys.argv[1:]}")

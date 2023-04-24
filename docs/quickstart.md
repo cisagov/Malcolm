@@ -20,9 +20,9 @@ The `build.sh` script can build Malcolm's Docker images from scratch. See [Build
 
 ### Initial configuration
 
-The scripts to control Malcolm require Python 3. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [requests](https://docs.python-requests.org/en/latest/) module for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
+The scripts to control Malcolm require Python 3. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [dotenv](https://github.com/theskumar/python-dotenv), [requests](https://docs.python-requests.org/en/latest/) and [PyYAML](https://pyyaml.org/) modules for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
-You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's Docker images. You should also ensure your system configuration and `docker-compose.yml` settings are tuned by running `./scripts/install.py` or `./scripts/install.py --configure` (see [System configuration and tuning](malcolm-config.md#ConfigAndTuning)).
+You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's Docker images. You should also ensure your system configuration and Malcolm settings are tuned by running `./scripts/install.py` and `./scripts/configure` (see [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)).
     
 ### Pull Malcolm's Docker images
 

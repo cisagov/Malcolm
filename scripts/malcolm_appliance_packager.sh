@@ -116,6 +116,7 @@ if mkdir "$DESTDIR"; then
   ln -s ./control.py status
   ln -s ./control.py stop
   ln -s ./control.py wipe
+  ln -s ./install.py configure
   popd  >/dev/null 2>&1
   pushd .. >/dev/null 2>&1
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"

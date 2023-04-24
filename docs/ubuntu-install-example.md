@@ -8,7 +8,7 @@ The commands in this example should be executed as a non-root user.
 
 You can use `git` to clone Malcolm into a local working copy, or you can download and extract the artifacts from the [latest release]({{ site.github.repository_url }}/releases).
 
-To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases) and download at a minimum `install.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
+To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases) and download at a minimum the files ending in `.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to your downloads directory:
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
@@ -83,12 +83,12 @@ vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
 /etc/security/limits.d/limits.conf does not exist, create it? (Y/n): y
 ```
 
-If you are configuring Malcolm from within a git working copy, `install.py` will now exit. Run `install.py` again like you did at the beginning of the example, only remove the `sudo` and add `--configure` to run `install.py` in "configuration only" mode.
+If you are configuring Malcolm from within a git working copy, `install.py` will now exit. Run `./scripts/configure` to continue with configuration:
 ```
-user@host:~/Malcolm$ ./scripts/install.py --configure
+user@host:~/Malcolm$ ./scripts/configure
 ```
 
-Alternately, if you are configuring Malcolm from the release tarball you will be asked if you would like to extract the contents of the tarball and to specify the installation directory and `install.py` will continue:
+Alternately, if you are configuring Malcolm from the release tarball you will be asked if you would like to extract the contents of the tarball and to specify the installation directory and Malcolm configuration will continue:
 ```
 Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y/n): y
 

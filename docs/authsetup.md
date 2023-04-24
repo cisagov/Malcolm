@@ -12,7 +12,7 @@ With the local basic authentication method, user accounts are managed by Malcolm
 
 LDAP authentication are managed on a remote directory service, such as a [Microsoft Active Directory Domain Services](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/get-started/virtual-dc/active-directory-domain-services-overview) or [OpenLDAP](https://www.openldap.org/).
 
-Malcolm's authentication method is defined in the `x-auth-variables` section near the top of the [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) file with the `NGINX_BASIC_AUTH` environment variable: `true` for local TLS-encrypted HTTP basic authentication, `false` for LDAP authentication.
+Malcolm's authentication method is defined in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars) file with the `NGINX_BASIC_AUTH` environment variable: `true` for local TLS-encrypted HTTP basic authentication, `false` for LDAP authentication and `no_authentication` to disable authentication completely.
 
 In either case, you **must** run `./scripts/auth_setup` before starting Malcolm for the first time in order to:
 
@@ -82,16 +82,16 @@ Authentication over LDAP can be done using one of three ways, [two of which](htt
 * **LDAPS** - a commonly used (though unofficial and considered deprecated) method in which SSL negotiation takes place before any commands are sent from the client to the server
 * **Unencrypted** (cleartext) (***not recommended***)
 
-In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` in the `x-auth-variables` section near the top of the [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) file, the `NGINX_LDAP_TLS_STUNNEL` and `NGINX_LDAP_TLS_STUNNEL` environment variables are used in conjunction with the values in `nginx/nginx_ldap.conf` to define the LDAP connection security level. Use the following combinations of values to achieve the connection security methods above, respectively:
+In addition to the `NGINX_BASIC_AUTH` environment variable being set to `false` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars) file, the `NGINX_LDAP_TLS_STUNNEL` and `NGINX_LDAP_TLS_STUNNEL` environment variables are used in conjunction with the values in `nginx/nginx_ldap.conf` to define the LDAP connection security level. Use the following combinations of values to achieve the connection security methods above, respectively:
 
 * **StartTLS**
-    - `NGINX_LDAP_TLS_STUNNEL` set to `true` in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml)
+    - `NGINX_LDAP_TLS_STUNNEL` set to `true` in [`auth-common.env`](malcolm-config.md#MalcolmConfigEnvVars)
     - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
 * **LDAPS**
-    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml)
+    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`auth-common.env`](malcolm-config.md#MalcolmConfigEnvVars)
     - `url` should begin with `ldaps://` and its port should be either the default LDAPS port (636) or the default LDAPS Global Catalog port (3269) in `nginx/nginx_ldap.conf` 
 * **Unencrypted** (clear text) (***not recommended***)
-    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml)
+    - `NGINX_LDAP_TLS_STUNNEL` set to `false` in [`auth-common.env`](malcolm-config.md#MalcolmConfigEnvVars)
     - `url` should begin with `ldap://` and its port should be either the default LDAP port (389) or the default Global Catalog port (3268) in `nginx/nginx_ldap.conf` 
 
 For encrypted connections (whether using **StartTLS** or **LDAPS**), Malcolm will require and verify certificates when one or more trusted CA certificate files are placed in the `nginx/ca-trust/` directory. Otherwise, any certificate presented by the domain server will be accepted.
@@ -102,4 +102,4 @@ When you [set up authentication](#AuthSetup) for Malcolm a set of unique [self-s
 
 Another option is to generate your own certificates (or have them issued to you) and have them placed in the `nginx/certs/` directory. The certificate and key file should be named `cert.pem` and `key.pem`, respectively.
 
-A third possibility is to use a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates for you and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities like [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm, so you'll need to set the `NGINX_SSL` environment variable to `false` in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) (or answer `no` to the "Require encrypted HTTPS connections?" question posed by `install.py`). If you are setting `NGINX_SSL` to `false`, **make sure** you understand what you are doing and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying your local firewall configuration.
+A third possibility is to use a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates for you and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities like [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm, so you'll need to set the `NGINX_SSL` environment variable to `false` in [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) (or answer `no` to the "Require encrypted HTTPS connections?" question posed by `./scripts/configure`). If you are setting `NGINX_SSL` to `false`, **make sure** you understand what you are doing and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying your local firewall configuration.
