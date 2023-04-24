@@ -4,7 +4,7 @@ version: '3.7'
 
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:kubernetes
+    image: ghcr.io/idaholab/malcolm/opensearch:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -37,7 +37,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:kubernetes
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -64,7 +64,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:kubernetes
+    image: ghcr.io/idaholab/malcolm/dashboards:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -90,7 +90,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:kubernetes
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -131,7 +131,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:kubernetes
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -166,7 +166,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:kubernetes
+    image: ghcr.io/idaholab/malcolm/arkime:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -201,7 +201,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:kubernetes
+    image: ghcr.io/idaholab/malcolm/zeek:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -238,7 +238,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:kubernetes
+    image: ghcr.io/idaholab/malcolm/zeek:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -265,7 +265,7 @@ services:
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:kubernetes
+    image: ghcr.io/idaholab/malcolm/suricata:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -301,7 +301,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:kubernetes
+    image: ghcr.io/idaholab/malcolm/suricata:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -327,7 +327,7 @@ services:
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
   file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:kubernetes
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -352,7 +352,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:kubernetes
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -374,7 +374,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:kubernetes
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -400,7 +400,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:kubernetes
+    image: ghcr.io/idaholab/malcolm/file-upload:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -428,7 +428,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:kubernetes
+    image: ghcr.io/idaholab/malcolm/htadmin:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -453,7 +453,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:kubernetes
+    image: ghcr.io/idaholab/malcolm/freq:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -475,7 +475,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:kubernetes
+    image: ghcr.io/idaholab/malcolm/netbox:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -507,7 +507,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:kubernetes
+    image: ghcr.io/idaholab/malcolm/postgresql:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -531,7 +531,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:kubernetes
+    image: ghcr.io/idaholab/malcolm/redis:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -559,7 +559,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:kubernetes
+    image: ghcr.io/idaholab/malcolm/redis:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
@@ -586,7 +586,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:kubernetes
+    image: ghcr.io/idaholab/malcolm/api:23.04.1
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -610,7 +610,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:kubernetes
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.04.1
     restart: "no"
     stdin_open: false
     tty: true
