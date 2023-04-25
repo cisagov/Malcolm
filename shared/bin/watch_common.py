@@ -204,7 +204,16 @@ class FileOperationEventHandler(FileSystemEventHandler):
 
 ###################################################################################################
 def ProcessFileEventWorker(workerArgs):
-    handler, observer, fileProcessor, fileProcessorKwargs, assumeClosedSec, workerThreadCount, shutDown, logger = (
+    (
+        handler,
+        observer,
+        fileProcessor,
+        fileProcessorKwargs,
+        assumeClosedSec,
+        workerThreadCount,
+        shutDown,
+        logger,
+    ) = (
         workerArgs[0],
         workerArgs[1],
         workerArgs[2],
@@ -220,8 +229,11 @@ def ProcessFileEventWorker(workerArgs):
     with workerThreadCount as workerId:
         logger.info(f"۞\tstarted\t[{workerId}]")
 
+        sleepInterval = 0.5
         while (not shutDown[0]) and observer.is_alive():
-            time.sleep(0.5)
+            time.sleep(sleepInterval)
+            sleepInterval = min(sleepInterval + 1.0, 5.0)
+
             nowTime = int(time.time())
 
             with handler.deck as d:
@@ -236,7 +248,10 @@ def ProcessFileEventWorker(workerArgs):
                             )
                             break
 
-                        else:
+                        if handler.polling or (fileHistory[-1].timestamp == 0):
+                            # TODO is this ^ check accurate? I know it is for polling, but will we
+                            #   ALWAYS have a FileClosedEvent (timestamp == 0) in non-polling mode?
+
                             del d[fileName]
                             if fileProcessor is not None:
                                 extraArgs = (
@@ -251,6 +266,7 @@ def ProcessFileEventWorker(workerArgs):
                             logger.info(
                                 f"🖄\tprocessed\t{fileName} at {(nowTime-fileHistory[-1].timestamp) if (fileHistory[-1].timestamp > 0) else 0} seconds\t[{workerId}]"
                             )
+                            sleepInterval = 0.5
 
         time.sleep(1)
         logger.info(f"⛒\tfinished\t[{workerId}]")
