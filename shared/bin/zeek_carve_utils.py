@@ -315,9 +315,10 @@ class CarvedFileSubscriberThreaded:
                 # no file received due to timeout, return empty dict. which means no file available
                 pass
 
-        self.logger.debug(
-            f"{self.scriptName}[{scanWorkerId}]:\t{'📨' if (FILE_SCAN_RESULT_FILE in fileinfo) else '🕑'}\t{fileinfo[FILE_SCAN_RESULT_FILE] if (FILE_SCAN_RESULT_FILE in fileinfo) else '(recv)'}",
-        )
+        if FILE_SCAN_RESULT_FILE in fileinfo:
+            self.logger.debug(
+                f"{self.scriptName}[{scanWorkerId}]:\t'📨'\t{fileinfo[FILE_SCAN_RESULT_FILE]}",
+            )
 
         return fileinfo
 

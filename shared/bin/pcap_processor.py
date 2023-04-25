@@ -754,7 +754,6 @@ def main():
             fileInfo = json.loads(new_files_socket.recv_string())
         except zmq.Again:
             # no file received due to timeout, we'll go around and try again
-            logging.debug(f"{scriptName}:\t🕑\t(recv)")
             fileInfo = None
 
         if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):

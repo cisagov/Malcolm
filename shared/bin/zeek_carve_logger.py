@@ -216,8 +216,8 @@ def main():
                 scanResult = json.loads(scanned_files_socket.recv_string())
                 logging.info(f"{scriptName}:\t📨\t{scanResult}")
             except zmq.Again:
+                # no file received due to timeout, we'll go around and try again
                 scanResult = None
-                logging.debug(f"{scriptName}:\t🕑\t(recv)")
 
             if isinstance(scanResult, dict):
                 # register/deregister scanners
