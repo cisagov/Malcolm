@@ -102,6 +102,8 @@ Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
 
 Should Malcolm use and maintain its own OpenSearch instance? (Y/n): y
 
+Compress OpenSearch index snapshots? (y/N): n
+
 Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): n
 
 Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
@@ -128,15 +130,17 @@ Select authentication method (Basic): 1
 
 Store PCAP, log and index files locally under /home/user/Malcolm? (Y/n): y
 
-Compress OpenSearch index snapshots? (y/N): n
-
 Delete the oldest indices when the database exceeds a certain size? (y/N): n
+
+Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y/N): y
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
 Download updated Suricata signatures periodically? (y/N): y
 
 Automatically analyze all PCAP files with Zeek? (Y/n): y
+
+Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek? (y/N): n
 
 Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
 
@@ -149,17 +153,8 @@ Expose OpenSearch port to external hosts? (y/N): n
 Expose Logstash port to external hosts? (y/N): n
 
 Expose Filebeat TCP port to external hosts? (y/N): y
-1: json
-2: raw
-Select log format for messages sent to Filebeat TCP listener (json): 1
 
-Source field to parse for messages sent to Filebeat TCP listener (message): message
-
-Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener (miscbeat): miscbeat
-
-Field to drop from events sent to Filebeat TCP listener (message): message
-
-Tag to apply to messages sent to Filebeat TCP listener (_malcolm_beats): _malcolm_beats
+Use default field values for Filebeat TCP listener? (Y/n): y
 
 Expose SFTP server (for PCAP upload) to external hosts? (y/N): n
 
@@ -195,13 +190,9 @@ Should Malcolm capture live network traffic to PCAP files for analysis with Arki
 
 Capture packets using netsniff-ng? (Y/n): y   
 
-Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y/N): y
-
 Should Malcolm analyze live network traffic with Suricata? (y/N): y
 
 Should Malcolm analyze live network traffic with Zeek? (y/N): y
-
-Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek? (y/N): n
 
 Specify capture interface(s) (comma-separated): eth0
 

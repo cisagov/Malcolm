@@ -341,6 +341,8 @@ Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
 
 Should Malcolm use and maintain its own OpenSearch instance? (Y/n): y
 
+Compress OpenSearch index snapshots? (y/N): n
+
 Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): n
 
 Setting 16g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y

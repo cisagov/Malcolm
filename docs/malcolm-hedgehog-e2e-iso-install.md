@@ -142,6 +142,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
 * Should Malcolm use and maintain its own OpenSearch instance?
     - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch cluster instead.
+* Compress OpenSearch index snapshots?
+    - Choose whether OpenSearch [index snapshots](https://opensearch.org/docs/2.6/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/) should be compressed or not, should you opt to configure them later in [OpenSearch index management](index-management.md#IndexManagement).
 * Forward Logstash logs to a secondary remote OpenSearch instance?
     - Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can be configured additionally forward logs to a secondary remote OpenSearch instance. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance.
 * Setting 16g for OpenSearch and 3g for Logstash. Is this OK?
@@ -168,16 +170,18 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - When using LDAP authentication, this question allows you to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
 * Store PCAP, log and index files locally under /home/user/Malcolm?
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows you to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
-* Compress OpenSearch index snapshots?
-    - Choose whether OpenSearch [index snapshots](https://opensearch.org/docs/2.6/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/) should be compressed or not, should you opt to configure them later in [OpenSearch index management](index-management.md#IndexManagement).
 * Delete the oldest indices when the database exceeds a certain size?
     - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
+* Should Arkime delete PCAP files based on available storage?
+    - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
 * Automatically analyze all PCAP files with Suricata?
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
 * Download updated Suricata signatures periodically?
     - If your Malcolm instance has internet connectivity, answer **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
 * Automatically analyze all PCAP files with Zeek?
     - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
+* Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?
+    - If you are using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
 * Perform reverse DNS lookup locally for source and destination IP addresses in logs?
     - If enabled, this option will perform reverse [DNS lookups](https://www.elastic.co/guide/en/logstash/current/plugins-filters-dns.html) on IP addresses found in traffic and use the results to enrich network logs. Answer **Y** if your Malcolm instance has access to a DNS server to perform these lookups.
 * Perform hardware vendor OUI lookups for MAC addresses?
@@ -190,6 +194,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 5044 so that Zeek and Suricata logs can be ingested by Malcolm's Logstash instance.
 * Expose Filebeat TCP port to external hosts?
     - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
+* Use default field values for Filebeat TCP listener?
+    - Answer **Y** to use the defaults and skip the next five questions about the Filebeat TCP listener.
 * Select log format for messages sent to Filebeat TCP listener
     - Possible choices include `json` and `raw`; you probably want to choose `json`.
 * Source field to parse for messages sent to Filebeat TCP listener
@@ -244,14 +250,10 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [netsniff-ng](http://netsniff-ng.org/) (instead of tcpdump). These PCAP files are then periodically rotated into Arkime for analysis. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
 * Capture packets using tcpdump?
     - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng). Do not answer **Y** for both `tcpdump` and `netsniff-ng`.
-* Should Arkime delete PCAP files based on available storage?
-    - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
 * Should Malcolm analyze live network traffic with Suricata?
     - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Suricata. If you are using Hedgehog Linux you probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
 * Should Malcolm analyze live network traffic with Zeek?
     - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek. If you are using Hedgehog Linux you probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
-* Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?
-    - If you are using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
 * Specify capture interface(s) (comma-separated)
     - Specify the network interface(s) for [live traffic analysis](live-analysis.md#LocalPCAP) if it is enabled for netsniff-ng, tcpdump, Suricata or Zeek as described above. For multiple interfaces, separate the interface names with a comma (e.g., `enp0s25` or `enp10s0,enp11s0`).
 * Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)
