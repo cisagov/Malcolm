@@ -195,8 +195,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         localKeystore = None
         localKeystoreDir = None
         localKeystorePreExists = False
-        volumeKeystore = None
-        volumeKeystoreDir = None
+        volumeKeystore = f"/usr/share/{service}/config/{service}.keystore"
+        volumeKeystoreDir = os.path.dirname(volumeKeystore)
 
         try:
             composeFileLines = list()
@@ -208,16 +208,14 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
 
             if (len(composeFileLines) == 1) and (len(composeFileLines[0]) > 0):
                 matches = re.search(
-                    fr'-\s*(?P<localKeystore>.*?{service}.keystore)\s*:\s*(?P<volumeKeystore>.*?{service}.keystore)',
+                    fr'-\s*(?P<localKeystore>.*?{service}.keystore)\s*:\s*.*?{service}.keystore',
                     composeFileLines[0],
                 )
                 if matches:
                     localKeystore = os.path.realpath(matches.group('localKeystore'))
                     localKeystoreDir = os.path.dirname(localKeystore)
-                    volumeKeystore = matches.group('volumeKeystore')
-                    volumeKeystoreDir = os.path.dirname(volumeKeystore)
 
-            if (localKeystore is not None) and (volumeKeystore is not None) and os.path.isdir(localKeystoreDir):
+            if (localKeystore is not None) and os.path.isdir(localKeystoreDir):
                 localKeystorePreExists = os.path.isfile(localKeystore)
 
                 dockerCmd = None
