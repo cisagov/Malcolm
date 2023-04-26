@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/idaholab/malcolm/zeek:kubernetes
+        image: ghcr.io/idaholab/malcolm/zeek:23.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: ghcr.io/idaholab/malcolm/nginx-proxy:kubernetes
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:23.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

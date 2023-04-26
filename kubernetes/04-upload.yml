@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: upload-container
-        image: ghcr.io/idaholab/malcolm/file-upload:kubernetes
+        image: ghcr.io/idaholab/malcolm/file-upload:23.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

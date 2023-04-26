@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: opensearch-container
-        image: ghcr.io/idaholab/malcolm/opensearch:kubernetes
+        image: ghcr.io/idaholab/malcolm/opensearch:23.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

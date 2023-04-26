@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: pcap-capture-container
-        image: ghcr.io/idaholab/malcolm/pcap-capture:kubernetes
+        image: ghcr.io/idaholab/malcolm/pcap-capture:23.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
