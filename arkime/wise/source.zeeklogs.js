@@ -1998,7 +1998,6 @@ class MalcolmSource extends WISESource {
       "zeek.synchrophasor.version",
       "zeek.synchrophasor_cfg.cfg_frame_id",
       "zeek.synchrophasor_cfg.cont_idx",
-      "zeek.synchrophasor_cfg.data_rate",
       "zeek.synchrophasor_cfg.pmu_count_actual",
       "zeek.synchrophasor_cfg.pmu_count_expected",
       "zeek.synchrophasor_cfg_detail.analog_conv_analog_flags",

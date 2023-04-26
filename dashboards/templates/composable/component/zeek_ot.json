@@ -723,7 +723,6 @@
         "zeek.synchrophasor.version": { "type": "keyword" },
         "zeek.synchrophasor_cfg.cfg_frame_id": { "type": "keyword" },
         "zeek.synchrophasor_cfg.cont_idx": { "type": "long" },
-        "zeek.synchrophasor_cfg.data_rate": { "type": "long" },
         "zeek.synchrophasor_cfg.pmu_count_actual": { "type": "long" },
         "zeek.synchrophasor_cfg.pmu_count_expected": { "type": "long" },
         "zeek.synchrophasor_cfg_detail.analog_conv_analog_flags": { "type": "long" },
