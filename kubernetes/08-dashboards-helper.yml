@@ -65,12 +65,12 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: dashboards-helper-var-local-catrust-volume
-          - mountPath: /var/local/curlrc/configmap
-            name: dashboards-helper-opensearch-curlrc-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: dashboards-helper-opensearch-curlrc-secret-volume
       volumes:
         - name: dashboards-helper-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: dashboards-helper-opensearch-curlrc-volume
-          configMap:
-            name: opensearch-curlrc
+        - name: dashboards-helper-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc

@@ -1269,13 +1269,13 @@ class Installer(object):
             ),
             # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
             EnvValue(
-                os.path.join(args.configDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek-secret.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_KEY',
                 fileCarveHttpServeEncryptKey,
             ),
             # virustotal API key
             EnvValue(
-                os.path.join(args.configDir, 'zeek.env'),
+                os.path.join(args.configDir, 'zeek-secret.env'),
                 'VTOT_API2_KEY',
                 vtotApiKey,
             ),

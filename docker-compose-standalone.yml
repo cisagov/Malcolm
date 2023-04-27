@@ -109,6 +109,7 @@ services:
       - ./config/opensearch.env
       - ./config/netbox-common.env
       - ./config/netbox.env
+      - ./config/netbox-secret.env
       - ./config/beats-common.env
       - ./config/lookup-common.env
       - ./config/logstash.env
@@ -180,6 +181,7 @@ services:
       - ./config/upload-common.env
       - ./config/auth.env
       - ./config/arkime.env
+      - ./config/arkime-secret.env
     environment:
       VIRTUAL_HOST : 'arkime.malcolm.local'
     ulimits:
@@ -222,6 +224,7 @@ services:
       - ./config/ssl.env
       - ./config/upload-common.env
       - ./config/zeek.env
+      - ./config/zeek-secret.env
       - ./config/zeek-offline.env
     depends_on:
       - opensearch
@@ -258,6 +261,7 @@ services:
       - ./config/upload-common.env
       - ./config/pcap-capture.env
       - ./config/zeek.env
+      - ./config/zeek-secret.env
       - ./config/zeek-live.env
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -338,6 +342,7 @@ services:
       - ./config/process.env
       - ./config/ssl.env
       - ./config/zeek.env
+      - ./config/zeek-secret.env
     environment:
       VIRTUAL_HOST : 'file-monitor.malcolm.local'
     volumes:
@@ -487,6 +492,7 @@ services:
       - ./config/ssl.env
       - ./config/netbox-common.env
       - ./config/netbox.env
+      - ./config/netbox-secret.env
     environment:
       VIRTUAL_HOST : 'netbox.malcolm.local'
     depends_on:

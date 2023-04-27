@@ -51,6 +51,8 @@ spec:
               name: ssl-env
           - configMapRef:
               name: zeek-env
+          - secretRef:
+              name: zeek-secret-env
         env:
           - name: VIRTUAL_HOST
             value: "file-monitor.malcolm.local"

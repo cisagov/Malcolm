@@ -56,14 +56,14 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: opensearch-var-local-catrust-volume
-          - mountPath: /var/local/curlrc/configmap
-            name: opensearch-opensearch-curlrc-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: opensearch-opensearch-curlrc-secret-volume
           - mountPath: "/usr/share/opensearch/data"
             name: opensearch-data-volume
           - mountPath: "/opt/opensearch/backup"
             name: opensearch-backup-volume
-          - name: opensearch-keystore-default-volume
-            mountPath: /usr/share/opensearch/config/bootstrap/configmap
+          - name: opensearch-keystore-default-secret-volume
+            mountPath: /usr/share/opensearch/config/bootstrap/secretmap
           - name: opensearch-config-persist-volume
             mountPath: /usr/share/opensearch/config/persist
             subPath: "opensearch"
@@ -71,18 +71,18 @@ spec:
         - name: opensearch-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: opensearch-opensearch-curlrc-volume
-          configMap:
-            name: opensearch-curlrc
+        - name: opensearch-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
         - name: opensearch-data-volume
           persistentVolumeClaim:
             claimName: opensearch-claim
         - name: opensearch-backup-volume
           persistentVolumeClaim:
             claimName: opensearch-backup-claim
-        - name: opensearch-keystore-default-volume
-          configMap:
-            name: opensearch-keystore
+        - name: opensearch-keystore-default-secret-volume
+          secret:
+            secretName: opensearch-keystore
         - name: opensearch-config-persist-volume
           persistentVolumeClaim:
             claimName: config-claim

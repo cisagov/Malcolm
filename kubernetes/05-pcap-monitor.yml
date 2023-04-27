@@ -62,8 +62,8 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: pcap-monitor-var-local-catrust-volume
-          - mountPath: /var/local/curlrc/configmap
-            name: pcap-monitor-opensearch-curlrc-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: pcap-monitor-opensearch-curlrc-secret-volume
           - mountPath: "/pcap"
             name: pcap-monitor-pcap-volume
           - mountPath: "/zeek"
@@ -72,9 +72,9 @@ spec:
         - name: pcap-monitor-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: pcap-monitor-opensearch-curlrc-volume
-          configMap:
-            name: opensearch-curlrc
+        - name: pcap-monitor-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
         - name: pcap-monitor-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim

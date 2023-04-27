@@ -56,6 +56,8 @@ spec:
             subPath: "auth"
           - mountPath: /var/www/htadmin/default/configmap
             name: htadmin-config-default-volume
+          - mountPath: /var/www/htadmin/default/secretmap
+            name: htadmin-config-default-secret-volume
           - mountPath: /var/www/htadmin/config
             name: htadmin-config-volume
             subPath: "htadmin"
@@ -69,4 +71,7 @@ spec:
         - name: htadmin-config-default-volume
           configMap:
             name: htadmin-config
+        - name: htadmin-config-default-secret-volume
+          secret:
+            secretName: htadmin-config
         

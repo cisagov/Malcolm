@@ -73,19 +73,21 @@ spec:
         volumeMounts:
         - name: nginx-etc-nginx-volume
           mountPath: /etc/nginx/configmap
+        - name: nginx-etc-nginx-secret-volume
+          mountPath: /etc/nginx/secretmap
         - name: nginx-var-local-catrust-volume
           mountPath: /var/local/ca-trust/configmap
-        - name: nginx-etc-nginx-certs-volume
-          mountPath: /etc/nginx/certs/configmap
+        - name: nginx-etc-nginx-certs-secret-volume
+          mountPath: /etc/nginx/certs/secretmap
         - name: nginx-etc-nginx-certs-pem-volume
           mountPath: /etc/nginx/dhparam/configmap
-        - name: nginx-opensearch-curlrc-volume
-          mountPath: /var/local/curlrc/configmap
+        - name: nginx-opensearch-curlrc-secret-volume
+          mountPath: /var/local/curlrc/secretmap
         - name: nginx-etc-auth-volume
           mountPath: /etc/nginx/auth
           subPath: "auth"
-        - name: nginx-etc-auth-default-volume
-          mountPath: /tmp/auth/default/configmap
+        - name: nginx-etc-auth-default-secret-volume
+          mountPath: /tmp/auth/default/secretmap
         - name: nginx-runtime-logs-volume
           mountPath: /var/log/nginx
           subPath: "nginx"
@@ -93,24 +95,27 @@ spec:
       - name: nginx-etc-nginx-volume
         configMap:
           name: etc-nginx
+      - name: nginx-etc-nginx-secret-volume
+        secret:
+          secretName: etc-nginx
       - name: nginx-var-local-catrust-volume
         configMap:
           name: var-local-catrust
-      - name: nginx-etc-nginx-certs-volume
-        configMap:
-          name: etc-nginx-certs
+      - name: nginx-etc-nginx-certs-secret-volume
+        secret:
+          secretName: etc-nginx-certs
       - name: nginx-etc-nginx-certs-pem-volume
         configMap:
           name: etc-nginx-certs-pem
-      - name: nginx-opensearch-curlrc-volume
-        configMap:
-          name: opensearch-curlrc
+      - name: nginx-opensearch-curlrc-secret-volume
+        secret:
+          secretName: opensearch-curlrc
       - name: nginx-etc-auth-volume
         persistentVolumeClaim:
           claimName: config-claim
-      - name: nginx-etc-auth-default-volume
-        configMap:
-          name: etc-nginx-auth
+      - name: nginx-etc-auth-default-secret-volume
+        secret:
+          secretName: etc-nginx-auth
       - name: nginx-runtime-logs-volume
         persistentVolumeClaim:
           claimName: runtime-logs-claim

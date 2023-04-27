@@ -12,7 +12,7 @@ To specify which files should be extracted, the following values are acceptable 
 
 Extracted files can be examined through any of the following methods:
 
-* submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, specify the `VTOT_API2_KEY` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars)
+* submitting file hashes to [**VirusTotal**](https://www.virustotal.com/en/#search); to enable this method, specify the `VTOT_API2_KEY` [environment variable in `zeek-secret.env`](malcolm-config.md#MalcolmConfigEnvVars)
 * scanning files with [**ClamAV**](https://www.clamav.net/); to enable this method, set the `EXTRACTED_FILE_ENABLE_CLAMAV` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) to `true`
 * scanning files with [**Yara**](https://github.com/VirusTotal/yara); to enable this method, set the `EXTRACTED_FILE_ENABLE_YARA` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) to `true`
 * scanning PE (portable executable) files with [**Capa**](https://github.com/fireeye/capa); to enable this method, set the `EXTRACTED_FILE_ENABLE_CAPA` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) to `true`

@@ -97,4 +97,4 @@ To clear the existing NetBox database and restore a previous backup, run the fol
 
 ```
 
-Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.
+Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox-secret.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.

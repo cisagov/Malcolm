@@ -50,12 +50,14 @@ spec:
               name: ssl-env
           - configMapRef:
               name: opensearch-env
-          - configMapRef:
+          - secretRef:
               name: auth-env
           - configMapRef:
               name: upload-common-env
           - configMapRef:
               name: arkime-env
+          - secretRef:
+              name: arkime-secret-env
         env:
           - name: VIRTUAL_HOST
             value: "arkime.malcolm.local"
@@ -72,8 +74,8 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: arkime-var-local-catrust-volume
-          - mountPath: /var/local/curlrc/configmap
-            name: arkime-opensearch-curlrc-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: arkime-opensearch-curlrc-secret-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
           - name: arkime-runtime-logs-volume
@@ -83,9 +85,9 @@ spec:
         - name: arkime-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: arkime-opensearch-curlrc-volume
-          configMap:
-            name: opensearch-curlrc
+        - name: arkime-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
         - name: arkime-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim

@@ -47,7 +47,7 @@ spec:
               name: ssl-env
           - configMapRef:
               name: netbox-common-env
-          - configMapRef:
+          - secretRef:
               name: netbox-redis-env
         env:
           - name: VIRTUAL_HOST

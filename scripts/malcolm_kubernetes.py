@@ -34,63 +34,128 @@ from malcolm_utils import (
 ###################################################################################################
 MALCOLM_IMAGE_PREFIX = 'ghcr.io/idaholab/malcolm/'
 
+MALCOLM_DOTFILE_SECRET_KEY = 'K8S_SECRET'
+
 MALCOLM_CONFIGMAPS = {
     'etc-nginx': [
-        os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
-        os.path.join(MalcolmPath, os.path.join('nginx', 'nginx.conf')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
+        },
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'nginx.conf')),
+        },
     ],
     'var-local-catrust': [
-        os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
+        },
     ],
     'etc-nginx-certs': [
-        os.path.join(MalcolmPath, os.path.join('nginx', 'certs')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'certs')),
+        },
     ],
     'etc-nginx-certs-pem': [
-        os.path.join(MalcolmPath, os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
+        },
     ],
     'etc-nginx-auth': [
-        os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
+        },
     ],
     'opensearch-curlrc': [
-        os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
-        os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
+        },
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+        },
     ],
     'opensearch-keystore': [
-        os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore')),
+        },
     ],
     'logstash-certs': [
-        os.path.join(MalcolmPath, os.path.join('logstash', 'certs')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'certs')),
+        },
     ],
     'logstash-maps': [
-        os.path.join(MalcolmPath, os.path.join('logstash', 'maps')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'maps')),
+        },
     ],
     'logstash-keystore': [
-        os.path.join(MalcolmPath, os.path.join('logstash', 'logstash.keystore')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'logstash.keystore')),
+        },
     ],
     'yara-rules': [
-        os.path.join(MalcolmPath, os.path.join('yara', 'rules')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('yara', 'rules')),
+        },
     ],
     'suricata-rules': [
-        os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
+        },
     ],
     'filebeat-certs': [
-        os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
+        },
     ],
     'netbox-netmap-json': [
-        'net-map.json',
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, 'net-map.json'),
+        },
     ],
     'netbox-config': [
-        os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'configuration')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'configuration')),
+        },
     ],
     'netbox-reports': [
-        os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'reports')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'reports')),
+        },
     ],
     'netbox-scripts': [
-        os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'scripts')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'scripts')),
+        },
     ],
     'htadmin-config': [
-        os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
-        os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
+        },
+        {
+            'secret': True,
+            'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+        },
     ],
 }
 
@@ -584,85 +649,107 @@ def StartMalcolm(namespace, malcolmPath, configPath):
 
         # create configmaps from files
         results_dict['create_namespaced_config_map']['result'] = dict()
+        results_dict['create_namespaced_secret']['result'] = dict()
         for configMapName, configMapFiles in MALCOLM_CONFIGMAPS.items():
-            try:
-                dataMap = {}
-                binaryDataMap = {}
-                for fname in configMapFiles:
-                    if os.path.isfile(fname):
-                        contents = file_contents(
-                            fname,
-                            binary_fallback=True,
-                        )
-                        if hasattr(contents, 'decode'):
-                            binaryDataMap[os.path.basename(fname)] = base64.b64encode(contents).decode('utf-8')
-                        else:
-                            dataMap[os.path.basename(fname)] = contents
-                    elif os.path.isdir(fname):
-                        for subfname in glob.iglob(os.path.join(os.path.join(fname, '**'), '*'), recursive=True):
-                            if os.path.isfile(subfname):
+            for isSecret in (True, False):
+                resultsEntry = 'create_namespaced_secret' if isSecret else 'create_namespaced_config_map'
+                mapFiles = [x['path'] for x in configMapFiles if (x.get('secret', False) is isSecret)]
+                if mapFiles:
+                    try:
+                        dataMap = {}
+                        binaryDataMap = {}
+                        for fname in mapFiles:
+                            if os.path.isfile(fname):
                                 contents = file_contents(
-                                    subfname,
+                                    fname,
                                     binary_fallback=True,
                                 )
                                 if hasattr(contents, 'decode'):
-                                    binaryDataMap[os.path.basename(subfname)] = base64.b64encode(contents).decode(
-                                        'utf-8'
-                                    )
+                                    binaryDataMap[os.path.basename(fname)] = base64.b64encode(contents).decode('utf-8')
                                 else:
-                                    dataMap[os.path.basename(subfname)] = contents
-                results_dict['create_namespaced_config_map']['result'][
-                    configMapName
-                ] = client.create_namespaced_config_map(
-                    namespace=namespace,
-                    body=kubeImported.client.V1ConfigMap(
-                        metadata=kubeImported.client.V1ObjectMeta(
+                                    dataMap[os.path.basename(fname)] = contents
+                            elif os.path.isdir(fname):
+                                for subfname in glob.iglob(
+                                    os.path.join(os.path.join(fname, '**'), '*'), recursive=True
+                                ):
+                                    if os.path.isfile(subfname):
+                                        contents = file_contents(
+                                            subfname,
+                                            binary_fallback=True,
+                                        )
+                                        if hasattr(contents, 'decode'):
+                                            binaryDataMap[os.path.basename(subfname)] = base64.b64encode(
+                                                contents
+                                            ).decode('utf-8')
+                                        else:
+                                            dataMap[os.path.basename(subfname)] = contents
+                        metadata = kubeImported.client.V1ObjectMeta(
                             name=configMapName,
                             namespace=namespace,
-                        ),
-                        data=dataMap if dataMap else {},
-                        binary_data=binaryDataMap if binaryDataMap else {},
-                    ),
-                ).metadata
-            except kubeImported.client.rest.ApiException as x:
-                if x.status != 409:
-                    if 'error' not in results_dict['create_namespaced_config_map']:
-                        results_dict['create_namespaced_config_map']['error'] = dict()
-                    results_dict['create_namespaced_config_map']['error'][
-                        os.path.basename(configMapName)
-                    ] = LoadStrIfJson(str(x))
-                    if not results_dict['create_namespaced_config_map']['error'][os.path.basename(configMapName)]:
-                        results_dict['create_namespaced_config_map']['error'][os.path.basename(configMapName)] = str(x)
+                        )
+                        if isSecret:
+                            results_dict[resultsEntry]['result'][configMapName] = client.create_namespaced_secret(
+                                namespace=namespace,
+                                body=kubeImported.client.V1Secret(
+                                    metadata=metadata,
+                                    string_data=dataMap if dataMap else {},
+                                    data=binaryDataMap if binaryDataMap else {},
+                                ),
+                            ).metadata
+                        else:
+                            results_dict[resultsEntry]['result'][configMapName] = client.create_namespaced_config_map(
+                                namespace=namespace,
+                                body=kubeImported.client.V1ConfigMap(
+                                    metadata=metadata,
+                                    data=dataMap if dataMap else {},
+                                    binary_data=binaryDataMap if binaryDataMap else {},
+                                ),
+                            ).metadata
+                    except kubeImported.client.rest.ApiException as x:
+                        if x.status != 409:
+                            if 'error' not in results_dict[resultsEntry]:
+                                results_dict[resultsEntry]['error'] = dict()
+                            results_dict[resultsEntry]['error'][os.path.basename(configMapName)] = LoadStrIfJson(str(x))
+                            if not results_dict[resultsEntry]['error'][os.path.basename(configMapName)]:
+                                results_dict[resultsEntry]['error'][os.path.basename(configMapName)] = str(x)
 
-        # create configmaps from .env files
+        # create configmaps (or secrets, given a K8S_SECRET key) from .env files
         results_dict['create_namespaced_config_map_from_env_file']['result'] = dict()
+        results_dict['create_namespaced_secret_from_env_file']['result'] = dict()
         for envFileName in glob.iglob(os.path.join(configPath, '*.env'), recursive=False):
             if os.path.isfile(envFileName):
                 try:
-                    configMap = kubeImported.client.V1ConfigMap()
-                    configMap.metadata = kubeImported.client.V1ObjectMeta(
+                    values = dotenvImported.dotenv_values(envFileName)
+                    isSecret = val2bool(values.pop(MALCOLM_DOTFILE_SECRET_KEY, False))
+                    metadata = kubeImported.client.V1ObjectMeta(
                         name=remove_suffix(os.path.basename(envFileName), '.env') + '-env'
                     )
-                    configMap.data = dotenvImported.dotenv_values(envFileName)
-                    results_dict['create_namespaced_config_map_from_env_file']['result'][
-                        configMap.metadata.name
-                    ] = client.create_namespaced_config_map(
-                        namespace=namespace,
-                        body=configMap,
-                    ).metadata
+                    if isSecret:
+                        resultsEntry = 'create_namespaced_secret_from_env_file'
+                        results_dict[resultsEntry]['result'][metadata.name] = client.create_namespaced_secret(
+                            namespace=namespace,
+                            body=kubeImported.client.V1Secret(
+                                metadata=metadata,
+                                string_data=values if values else {},
+                            ),
+                        ).metadata
+                    else:
+                        resultsEntry = 'create_namespaced_config_map_from_env_file'
+                        results_dict[resultsEntry]['result'][metadata.name] = client.create_namespaced_config_map(
+                            namespace=namespace,
+                            body=kubeImported.client.V1ConfigMap(
+                                metadata=metadata,
+                                data=values if values else {},
+                            ),
+                        ).metadata
+
                 except kubeImported.client.rest.ApiException as x:
                     if x.status != 409:
-                        if 'error' not in results_dict['create_namespaced_config_map_from_env_file']:
-                            results_dict['create_namespaced_config_map_from_env_file']['error'] = dict()
-                        results_dict['create_namespaced_config_map_from_env_file']['error'][
-                            os.path.basename(envFileName)
-                        ] = LoadStrIfJson(str(x))
-                        if not results_dict['create_namespaced_config_map_from_env_file']['error'][
-                            os.path.basename(envFileName)
-                        ]:
-                            results_dict['create_namespaced_config_map_from_env_file']['error'][
-                                os.path.basename(envFileName)
-                            ] = str(x)
+                        if 'error' not in results_dict[resultsEntry]:
+                            results_dict[resultsEntry]['error'] = dict()
+                        results_dict[resultsEntry]['error'][os.path.basename(envFileName)] = LoadStrIfJson(str(x))
+                        if not results_dict[resultsEntry]['error'][os.path.basename(envFileName)]:
+                            results_dict[resultsEntry]['error'][os.path.basename(envFileName)] = str(x)
 
         # apply manifests
         results_dict['create_from_yaml']['result'] = dict()

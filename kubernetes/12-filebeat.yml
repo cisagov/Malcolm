@@ -68,10 +68,10 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: filebeat-var-local-catrust-volume
-          - mountPath: /var/local/curlrc/configmap
-            name: filebeat-opensearch-curlrc-volume
-          - mountPath: /certs/configmap
-            name: filebeat-certs-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: filebeat-opensearch-curlrc-secret-volume
+          - mountPath: /certs/secretmap
+            name: filebeat-certs-secret-volume
           - mountPath: "/zeek"
             name: filebeat-zeek-volume
           - mountPath: "/suricata"
@@ -83,12 +83,12 @@ spec:
         - name: filebeat-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: filebeat-opensearch-curlrc-volume
-          configMap:
-            name: opensearch-curlrc
-        - name: filebeat-certs-volume
-          configMap:
-            name: filebeat-certs
+        - name: filebeat-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: filebeat-certs-secret-volume
+          secret:
+            secretName: filebeat-certs
         - name: filebeat-zeek-volume
           persistentVolumeClaim:
             claimName: zeek-claim

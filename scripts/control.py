@@ -1119,7 +1119,9 @@ def authSetup(wipe=False):
             'netbox',
             "(Re)generate internal passwords for NetBox",
             False,
-            not os.path.isfile(os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env')))),
+            not os.path.isfile(
+                os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox-secret.env')))
+            ),
         ),
         (
             'txfwcerts',
@@ -1190,6 +1192,7 @@ def authSetup(wipe=False):
                     )
                     f.write(f'MALCOLM_USERNAME={username}\n')
                     f.write(f'MALCOLM_PASSWORD={b64encode(passwordEncrypted.encode()).decode("ascii")}\n')
+                    f.write('K8S_SECRET=True\n')
                 os.chmod(authEnvFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
                 # create or update the htpasswd file
@@ -1627,20 +1630,23 @@ def authSetup(wipe=False):
                         f.write('POSTGRES_DB=netbox\n')
                         f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
                         f.write('POSTGRES_USER=netbox\n')
+                        f.write('K8S_SECRET=True\n')
                     os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
 
                     with open('netbox-redis-cache.env', 'w') as f:
                         f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
+                        f.write('K8S_SECRET=True\n')
                     os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
 
                     with open('netbox-redis.env', 'w') as f:
                         f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
+                        f.write('K8S_SECRET=True\n')
                     os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                    if (not os.path.isfile('netbox.env')) and (os.path.isfile('netbox.env.example')):
-                        shutil.copy2('netbox.env.example', 'netbox.env')
+                    if (not os.path.isfile('netbox-secret.env')) and (os.path.isfile('netbox-secret.env.example')):
+                        shutil.copy2('netbox-secret.env.example', 'netbox-secret.env')
 
-                    with fileinput.FileInput('netbox.env', inplace=True, backup=None) as envFile:
+                    with fileinput.FileInput('netbox-secret.env', inplace=True, backup=None) as envFile:
                         for line in envFile:
                             line = line.rstrip("\n")
 
@@ -1680,10 +1686,16 @@ def authSetup(wipe=False):
                                     fr"\g<1>{netboxSuToken}",
                                     line,
                                 )
+                            elif line.startswith('K8S_SECRET'):
+                                line = re.sub(
+                                    r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
+                                    fr"\g<1>True",
+                                    line,
+                                )
 
                             print(line)
 
-                    os.chmod('netbox.env', stat.S_IRUSR | stat.S_IWUSR)
+                    os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
 
             elif authItem[0] == 'txfwcerts':
                 DisplayMessage(

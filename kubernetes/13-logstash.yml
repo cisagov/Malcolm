@@ -77,6 +77,8 @@ spec:
               name: netbox-common-env
           - configMapRef:
               name: netbox-env
+          - secretRef:
+              name: netbox-secret-env
           - configMapRef:
               name: beats-common-env
           - configMapRef:
@@ -96,14 +98,14 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: logstash-var-local-catrust-volume
-          - mountPath: /var/local/curlrc/configmap
-            name: logstash-opensearch-curlrc-volume
-          - mountPath: /certs/configmap
-            name: logstash-certs-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: logstash-opensearch-curlrc-secret-volume
+          - mountPath: /certs/secretmap
+            name: logstash-certs-secret-volume
           - mountPath: /etc/configmap
             name: logstash-maps-volume
-          - name: logstash-keystore-default-volume
-            mountPath: /usr/share/logstash/config/bootstrap/configmap
+          - name: logstash-keystore-default-secret-volume
+            mountPath: /usr/share/logstash/config/bootstrap/secretmap
           - name: logstash-config-persist-volume
             mountPath: /usr/share/logstash/config/persist
             subPath: "logstash"
@@ -111,18 +113,18 @@ spec:
         - name: logstash-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: logstash-opensearch-curlrc-volume
-          configMap:
-            name: opensearch-curlrc
-        - name: logstash-certs-volume
-          configMap:
-            name: logstash-certs
+        - name: logstash-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: logstash-certs-secret-volume
+          secret:
+            secretName: logstash-certs
         - name: logstash-maps-volume
           configMap:
             name: logstash-maps
-        - name: logstash-keystore-default-volume
-          configMap:
-            name: logstash-keystore
+        - name: logstash-keystore-default-secret-volume
+          secret:
+            secretName: logstash-keystore
         - name: logstash-config-persist-volume
           persistentVolumeClaim:
             claimName: config-claim

@@ -59,6 +59,8 @@ spec:
               name: netbox-common-env
           - configMapRef:
               name: netbox-env
+          - secretRef:
+              name: netbox-secret-env
         env:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"
