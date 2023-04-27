@@ -27,43 +27,46 @@ groupmod --non-unique --gid ${PGID:-${DEFAULT_GID}} ${PGROUP}
 #   copied is made read-only, doesn't play nicely if you're using it for configuration
 #   files which exist in a directory which may need to do read-write operations on other files.
 #   This works for nested subdirectories, but don't nest CONFIG_MAP_DIR directories
-#   inside of other CONFIG_MAP_DIR directories.
+#   inside of other CONFIG_MAP_DIR directories. More than one CONFIG_MAP_DIR can be specified
+#   in this variable, separated by ';' (for example, "CONFIG_MAP_DIR=configmap;secretmap").
 #
 # TODO: else with cpio, tar, cp?
 
+CONFIG_MAP_FIND_PRUNE_ARGS=()
 if [[ -n ${CONFIG_MAP_DIR} ]] && command -v rsync >/dev/null 2>&1; then
-  find / -type d -name "${CONFIG_MAP_DIR}" -print -o -path /sys -prune -o -path /proc -prune 2>/dev/null | \
-  awk '{print gsub("/","/"), $0}' | sort -n | cut -d' ' -f2- | \
-  while read CMDIR; do
+  while read MAP_DIR; do
 
-    rsync --recursive --copy-links \
-          "--usermap=*:${PUID:-${DEFAULT_UID}}" \
-          "--groupmap=*:${PGID:-${DEFAULT_GID}}" \
-          --exclude='..*' --exclude="${CONFIG_MAP_DIR}"/ --exclude=.dockerignore --exclude=.gitignore \
-          "${CMDIR}"/ "${CMDIR}"/../
+    find / -type d -name "${MAP_DIR}" -print -o -path /sys -prune -o -path /proc -prune 2>/dev/null | \
+    awk '{print gsub("/","/"), $0}' | sort -n | cut -d' ' -f2- | \
+    while read CMDIR; do
 
-      # TODO - regarding ownership and permissions:
-      #
-      # I *think* what we want to do here is change the ownership of
-      #   these configmap-copied files to be owned by the user specified by PUID
-      #   (falling back to DEFAULT_UID) and PGID (falling back to DEFAULT_GID).
-      #   The other option would be to preserve the ownership of the source
-      #   fine with --owner --group, but I don't think that's what we want, as
-      #   if we were doing this with a docker bind mount they'd likely have the
-      #   permissions of the original user on the host, anyway, which is
-      #   supposed to match up to PUID/PGID.
-      #
-      # For permissions, rsync says that "existing files retain their existing permissions"
-      #   and "new files get their normal permission bits set to the source file's
-      #   permissions masked with the receiving directory's default permissions"
-      #   (either via umask or ACL) which I think is what we want. The other alternative
-      #   would be to do something like --chmod=D2755,F644
+      rsync --recursive --copy-links \
+            "--usermap=*:${PUID:-${DEFAULT_UID}}" \
+            "--groupmap=*:${PGID:-${DEFAULT_GID}}" \
+            --exclude='..*' --exclude="${MAP_DIR}"/ --exclude=.dockerignore --exclude=.gitignore \
+            "${CMDIR}"/ "${CMDIR}"/../
 
-  done # loop over found CONFIG_MAP_DIR directories
-  CONFIG_MAP_FIND_PRUNE_ARGS=(-o -name "${CONFIG_MAP_DIR}" -prune)
+        # TODO - regarding ownership and permissions:
+        #
+        # I *think* what we want to do here is change the ownership of
+        #   these configmap-copied files to be owned by the user specified by PUID
+        #   (falling back to DEFAULT_UID) and PGID (falling back to DEFAULT_GID).
+        #   The other option would be to preserve the ownership of the source
+        #   fine with --owner --group, but I don't think that's what we want, as
+        #   if we were doing this with a docker bind mount they'd likely have the
+        #   permissions of the original user on the host, anyway, which is
+        #   supposed to match up to PUID/PGID.
+        #
+        # For permissions, rsync says that "existing files retain their existing permissions"
+        #   and "new files get their normal permission bits set to the source file's
+        #   permissions masked with the receiving directory's default permissions"
+        #   (either via umask or ACL) which I think is what we want. The other alternative
+        #   would be to do something like --chmod=D2755,F644
 
-else
-  CONFIG_MAP_FIND_PRUNE_ARGS=()
+    done # loop over found MAP_DIR directories
+    CONFIG_MAP_FIND_PRUNE_ARGS+=(-o -name "${MAP_DIR}" -prune)
+
+  done < <(echo "${CONFIG_MAP_DIR}" | tr ';' '\n') # loop over ';' separated CONFIG_MAP_DIR values
 fi # check for CONFIG_MAP_DIR and rsync
 
 set +e
