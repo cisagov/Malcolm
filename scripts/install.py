@@ -970,12 +970,34 @@ class Installer(object):
                 shutil.copy2(defaultEnvExampleFile, args.configDir)
 
         # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-        envExampleFiles = glob.glob(os.path.join(args.configDir, '*.env.example'))
-        for envExampleFile in envExampleFiles:
+        for envExampleFile in glob.glob(os.path.join(args.configDir, '*.env.example')):
             envFile = envExampleFile[: -len('.example')]
             if not os.path.isfile(envFile):
                 shutil.copyfile(envExampleFile, envFile)
 
+        # change ownership of .envs file to match puid/pgid
+        if (
+            ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+            and (self.scriptUser == "root")
+            and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
+        ):
+            if args.debug:
+                eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
+            os.chown(args.configDir, int(puid), int(pgid))
+        envFiles = []
+        for exts in ('*.env', '*.env.example'):
+            envFiles.extend(glob.glob(os.path.join(args.configDir, exts)))
+        for envFile in envFiles:
+            if (
+                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+                and (self.scriptUser == "root")
+                and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
+            ):
+                if args.debug:
+                    eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
+                os.chown(envFile, int(puid), int(pgid))
+
+        # define environment variables to be set in .env files
         EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
 
         EnvValues = [
