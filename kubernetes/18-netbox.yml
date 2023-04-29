@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/mmguero-dev/malcolm/netbox:development
+        image: ghcr.io/idaholab/malcolm/netbox:23.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true

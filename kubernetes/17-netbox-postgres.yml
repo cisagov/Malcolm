@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: netbox-postgres-container
-        image: ghcr.io/mmguero-dev/malcolm/postgresql:development
+        image: ghcr.io/idaholab/malcolm/postgresql:23.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/mmguero-dev/malcolm/zeek:development
+        image: ghcr.io/idaholab/malcolm/zeek:23.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true

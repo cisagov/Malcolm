@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/mmguero-dev/malcolm/filebeat-oss:development
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:23.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true
