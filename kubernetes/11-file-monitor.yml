@@ -1,0 +1,91 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-monitor
+  namespace: malcolm
+spec:
+  ports:
+    - port: 3310
+      protocol: TCP
+      name: clamav
+    - port: 8440
+      protocol: TCP
+      name: http
+  selector:
+    name: file-monitor-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-monitor-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: file-monitor-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: file-monitor-deployment
+    spec:
+      containers:
+      - name: file-monitor-container
+        image: ghcr.io/idaholab/malcolm/file-monitor:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: clamav
+            containerPort: 3310
+            protocol: TCP
+          - name: http
+            protocol: TCP
+            containerPort: 8440
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: zeek-env
+          - secretRef:
+              name: zeek-secret-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "file-monitor.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - watcher
+            - logger
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: file-monitor-var-local-catrust-volume
+          - mountPath: "/zeek/extract_files"
+            name: file-monitor-zeek-volume
+            subPath: "extract_files"
+          - mountPath: "/zeek/logs"
+            name: file-monitor-zeek-volume
+            subPath: "current"
+          - mountPath: "/yara-rules/custom/configmap"
+            name: file-monitor-yara-rules-custom-volume
+      volumes:
+        - name: file-monitor-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: file-monitor-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: file-monitor-yara-rules-custom-volume
+          configMap:
+            name: yara-rules

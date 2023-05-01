@@ -315,7 +315,7 @@ sensor@hedgehog:opt$ for BEAT in filebeat miscbeat; do cp /opt/sensor_upgrade_ba
 sensor@hedgehog:opt$ cp /opt/sensor_upgrade_backup_2020-05-07/sensor_ctl/filebeat/{ca.crt,client.crt,client.key} /opt/sensor/sensor_ctl/logstash-client-certificates/
 ```
 
-24. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](hedgehog-config-user.md#HedgehogConfigUser) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
+24. Despite what we just did, you may consider running `capture-config` to re-configure [capture, forwarding, and autostart services](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig) from scratch anyway. You can use the backed-up version of `control_vars.conf` to refer back to as a basis for things you might want to restore (e.g., `CAPTURE_INTERFACE`, `CAPTURE_FILTER`, `PCAP_PATH`, `ZEEK_LOG_PATH`, your autostart settings, etc.).
 
 25. Once you feel confident you've completed all of these steps, issue a reboot on the Hedgehog
 

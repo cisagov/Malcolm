@@ -47,10 +47,10 @@ ENV DASHBOARDS_URL $DASHBOARDS_URL
 ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION "0.2.2"
+ENV SUPERCRONIC_VERSION "0.2.24"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "2319da694833c7a147976b8e5f337cd83397d6be"
+ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
@@ -63,11 +63,13 @@ ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /data/
 ADD dashboards/supervisord.conf /etc/supervisord.conf
 ADD dashboards/templates /opt/templates
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/opensearch_status.sh /data/
-ADD shared/bin/opensearch_index_size_prune.py /data/
-ADD shared/bin/opensearch_read_only.py /data/
-ADD scripts/malcolm_common.py /data/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 shared/bin/opensearch_status.sh /data/
+COPY --chmod=755 shared/bin/opensearch_index_size_prune.py /data/
+COPY --chmod=755 shared/bin/opensearch_read_only.py /data/
+ADD scripts/malcolm_utils.py /data/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
@@ -100,7 +102,11 @@ RUN apk update --no-cache && \
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/sbin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "dashboards-helper"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

@@ -24,7 +24,7 @@ if [[ "${SURICATA_LIVE_CAPTURE:-false}" != "true" ]]; then
             DOCUMENT_FOUND=$(
                 curl -sSL -XPOST \
                     -H 'Content-Type: application/json' \
-                    'http://api:5000/document' \
+                    'http://api:5000/mapi/document' \
                     -d "{\"limit\":1,\"filter\":{\"log.file.path\":\"$(basename $LOGFILE)\"}}" 2>/dev/null \
                 | jq '.results | length' 2>/dev/null || echo '0')
 

@@ -72,6 +72,7 @@ current_script = None
 # Used as a predicate to filter nodes during tree traversal.
 # see https://github.com/zeek/zeekscript/blob/4a3512dd114e2709d6738016176c27a65f3f1492/zeekscript/node.py#L157
 
+
 # This Node is a "create_stream" expression, e.g.:
 #   Log::create_stream(ICSNPP_OPCUA_Binary::LOG, [$columns=OPCUA_Binary::Info, $path="opcua-binary"])
 def IsCreateStreamExprNode(Node):

@@ -90,7 +90,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.5.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.6.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL="true"
@@ -122,8 +122,7 @@ RUN yum upgrade -y && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
-    # TODO: when 2.6.0 is released /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip --allow-root && \
-    # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
+    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip --allow-root && \
     chown --silent -R root:root /usr/share/opensearch-dashboards/plugins/* \
                                 /usr/share/opensearch-dashboards/node_modules/* \
                                 /usr/share/opensearch-dashboards/src/* && \
@@ -131,10 +130,13 @@ RUN yum upgrade -y && \
     yum clean all && \
     rm -rf /var/cache/yum
 
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 
 # Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
@@ -150,7 +152,12 @@ ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/
 ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
 
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "dashboards", \
+            "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/share/opensearch-dashboards/opensearch-dashboards-docker-entrypoint.sh"]
 

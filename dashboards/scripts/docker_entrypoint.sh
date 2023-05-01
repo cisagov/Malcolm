@@ -6,7 +6,7 @@ FINAL_YML=/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
 
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 
 if [[ -f "$ORIG_YML" ]]; then
     cp "$ORIG_YML" "$FINAL_YML"
@@ -16,7 +16,7 @@ if [[ -f "$ORIG_YML" ]]; then
     OPENSSL_PASSWORD=
     if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
         pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
-        NEW_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+        NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
         OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
         OPENSSL_PASSWORD="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)"
         popd >/dev/null 2>&1

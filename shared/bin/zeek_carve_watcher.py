@@ -10,52 +10,61 @@
 ###################################################################################################
 
 import argparse
-import copy
 import glob
 import json
+import logging
 import magic
 import os
 import pathlib
-import pyinotify
 import signal
 import sys
 import time
 import zmq
 
-from zeek_carve_utils import *
+from multiprocessing.pool import ThreadPool
+from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
+from watchdog.utils import WatchdogShutdown
+
+from zeek_carve_utils import (
+    CAPA_VIV_MIME,
+    CAPA_VIV_SUFFIX,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_FILE_SIZE,
+    FILE_SCAN_RESULT_FILE_TYPE,
+    VENTILATOR_PORT,
+)
+
+import malcolm_utils
+from malcolm_utils import touch, eprint, str2bool
+import watch_common
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 64
 MAXIMUM_CHECKED_FILE_SIZE_DEFAULT = 134217728
 
 ###################################################################################################
-debug = False
-verboseDebug = False
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
-shuttingDown = False
+shuttingDown = [False]
+
 
 ###################################################################################################
 # watch files written to and moved to this directory
-class EventWatcher(pyinotify.ProcessEvent):
-
-    # notify on files written in-place then closed (IN_CLOSE_WRITE), and moved into this directory (IN_MOVED_TO)
-    _methods = ["IN_CLOSE_WRITE", "IN_MOVED_TO"]
-
-    def __init__(self):
-        global debug
-
+class EventWatcher:
+    def __init__(self, logger=None):
         super().__init__()
+
+        self.logger = logger if logger else logging
 
         # initialize ZeroMQ context and socket(s) to send messages to
         self.context = zmq.Context()
 
         # Socket to send messages on
-        if debug:
-            eprint(f"{scriptName}:\tbinding ventilator port {VENTILATOR_PORT}")
+        self.logger.info(f"{scriptName}:\tbinding ventilator port {VENTILATOR_PORT}")
         self.ventilator_socket = self.context.socket(zmq.PUB)
         self.ventilator_socket.bind(f"tcp://*:{VENTILATOR_PORT}")
 
@@ -63,71 +72,56 @@ class EventWatcher(pyinotify.ProcessEvent):
         # and if he can't then what's the point? just block
         # self.ventilator_socket.SNDTIMEO = 5000
 
-        if debug:
-            eprint(f"{scriptName}:\tEventWatcher initialized")
+        self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
-
-###################################################################################################
-# set up event processor to append processed events from to the event queue
-def event_process_generator(cls, method):
-
-    # actual method called when we are notified of a file
-    def _method_name(self, event):
-
+    ###################################################################################################
+    # set up event processor to append processed events from to the event queue
+    def processFile(self, pathname):
         global args
-        global debug
-        global verboseDebug
 
-        if debug:
-            eprint(f"{scriptName}:\t👓\t{event.pathname}")
+        self.logger.info(f"{scriptName}:\t👓\t{pathname}")
 
-        if (not event.dir) and os.path.isfile(event.pathname):
-
-            fileSize = os.path.getsize(event.pathname)
+        if os.path.isfile(pathname):
+            fileSize = os.path.getsize(pathname)
             if args.minBytes <= fileSize <= args.maxBytes:
-
-                fileType = magic.from_file(event.pathname, mime=True)
-                if (pathlib.Path(event.pathname).suffix != CAPA_VIV_SUFFIX) and (fileType != CAPA_VIV_MIME):
+                fileType = magic.from_file(pathname, mime=True)
+                if (pathlib.Path(pathname).suffix != CAPA_VIV_SUFFIX) and (fileType != CAPA_VIV_MIME):
                     # the entity is a right-sized file, is not a capa .viv cache file, and it exists, so send it to get scanned
 
                     fileInfo = json.dumps(
                         {
-                            FILE_SCAN_RESULT_FILE: event.pathname,
+                            FILE_SCAN_RESULT_FILE: pathname,
                             FILE_SCAN_RESULT_FILE_SIZE: fileSize,
                             FILE_SCAN_RESULT_FILE_TYPE: fileType,
                         }
                     )
-                    if debug:
-                        eprint(f"{scriptName}:\t📩\t{fileInfo}")
+                    self.logger.info(f"{scriptName}:\t📩\t{fileInfo}")
                     try:
                         self.ventilator_socket.send_string(fileInfo)
-                        if debug:
-                            eprint(f"{scriptName}:\t📫\t{event.pathname}")
-                    except zmq.Again as timeout:
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t🕑\t{event.pathname}")
+                        self.logger.info(f"{scriptName}:\t📫\t{pathname}")
+                    except zmq.Again:
+                        self.logger.debug(f"{scriptName}:\t🕑\t{pathname}")
 
                 else:
                     # temporary capa .viv file, just ignore it as it will get cleaned up by the scanner when it's done
-                    if debug:
-                        eprint(f"{scriptName}:\t🚧\t{event.pathname}")
+                    self.logger.info(f"{scriptName}:\t🚧\t{pathname}")
 
             else:
                 # too small/big to care about, delete it
-                os.remove(event.pathname)
-                if debug:
-                    eprint(f"{scriptName}:\t🚫\t{event.pathname}")
+                os.remove(pathname)
+                self.logger.info(f"{scriptName}:\t🚫\t{pathname}")
 
-    # assign process method to class
-    _method_name.__name__ = "process_{}".format(method)
-    setattr(cls, _method_name.__name__, _method_name)
+
+def file_processor(pathname, **kwargs):
+    if "watcher" in kwargs and kwargs["watcher"]:
+        kwargs["watcher"].processFile(pathname)
 
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
 def shutdown_handler(signum, frame):
     global shuttingDown
-    shuttingDown = True
+    shuttingDown[0] = True
 
 
 ###################################################################################################
@@ -138,48 +132,14 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
 # main
 def main():
     global args
-    global debug
-    global verboseDebug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--ignore-existing',
         dest='ignoreExisting',
@@ -207,6 +167,30 @@ def main():
         help="If specified, monitor all directories with this name underneath --directory",
         metavar='<name>',
         type=str,
+        required=False,
+    )
+    parser.add_argument(
+        '-p',
+        '--polling',
+        dest='polling',
+        help="Use polling (instead of inotify)",
+        metavar='true|false',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=os.getenv('EXTRACTED_FILE_WATCHER_POLLING', False),
+        required=False,
+    )
+    parser.add_argument(
+        '-c',
+        '--closed-sec',
+        dest='assumeClosedSec',
+        help="When polling, assume a file is closed after this many seconds of inactivity",
+        metavar='<seconds>',
+        type=int,
+        default=int(
+            os.getenv('EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC', str(watch_common.ASSUME_CLOSED_SEC_DEFAULT))
+        ),
         required=False,
     )
     parser.add_argument(
@@ -239,38 +223,33 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
-    while (not shuttingDown) and (sleepCount < args.startSleepSec):
+    while (not shuttingDown[0]) and (sleepCount < args.startSleepSec):
         time.sleep(1)
         sleepCount += 1
-
-    # add events to watch to EventWatcher class
-    for method in EventWatcher._methods:
-        event_process_generator(EventWatcher, method)
 
     # if directory to monitor doesn't exist, create it now
     if os.path.isdir(args.baseDir):
         preexistingDir = True
     else:
         preexistingDir = False
-        if debug:
-            eprint(f'{scriptname}: creating "{args.baseDir}" to monitor')
+        logging.info(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
@@ -283,40 +262,78 @@ def main():
 
     # begin threaded watch of path(s)
     time.sleep(1)
-    watch_manager = pyinotify.WatchManager()
-    event_notifier = pyinotify.ThreadedNotifier(watch_manager, EventWatcher())
+
+    observer = PollingObserver() if args.polling else Observer()
+    handler = watch_common.FileOperationEventHandler(
+        logger=None,
+        polling=args.polling,
+    )
     for watchDir in watchDirs:
-        watch_manager.add_watch(os.path.abspath(watchDir), pyinotify.ALL_EVENTS)
-    if debug:
-        eprint(f"{scriptName}: monitoring {watchDirs}")
-    time.sleep(2)
-    event_notifier.start()
+        logging.info(f"{scriptName}:\tScheduling {watchDir}")
+        observer.schedule(handler, watchDir, recursive=False)
 
-    # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
-    if preexistingDir and (not args.ignoreExisting):
-        filesTouched = 0
-        for watchDir in watchDirs:
-            for preexistingFile in [os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()]:
-                touch(preexistingFile)
-                filesTouched += 1
-        if debug and (filesTouched > 0):
-            eprint(f"{scriptName}: found {filesTouched} preexisting files to check")
+    observer.start()
 
-    # loop forever, or until we're told to shut down, whichever comes first
-    while not shuttingDown:
-        if pdbFlagged:
-            pdbFlagged = False
-            breakpoint()
-        time.sleep(0.2)
+    logging.info(f"{scriptName}:\tmonitoring {watchDirs}")
 
-    # graceful shutdown
-    if debug:
-        eprint(f"{scriptName}: shutting down...")
-    event_notifier.stop()
+    try:
+        time.sleep(2)
+
+        # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
+        if preexistingDir and (not args.ignoreExisting) and (not shuttingDown[0]):
+            filesTouched = 0
+            for watchDir in watchDirs:
+                for preexistingFile in [
+                    os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()
+                ]:
+                    touch(preexistingFile)
+                    filesTouched += 1
+            if filesTouched > 0:
+                logging.info(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
+
+        # start the thread to actually handle the files as they're queued by the FileOperationEventHandler handler
+        workerThreadCount = malcolm_utils.AtomicInt(value=0)
+        ThreadPool(
+            1,
+            watch_common.ProcessFileEventWorker(
+                [
+                    handler,
+                    observer,
+                    file_processor,
+                    {'watcher': EventWatcher(logger=logging)},
+                    args.assumeClosedSec,
+                    workerThreadCount,
+                    shuttingDown,
+                    logging,
+                ],
+            ),
+        )
+
+        # loop forever, or until we're told to shut down, whichever comes first
+        while (not shuttingDown[0]) and observer.is_alive():
+            if pdbFlagged:
+                pdbFlagged = False
+                breakpoint()
+            observer.join(1)
+
+        # graceful shutdown
+        logging.info(f"{scriptName}:\tshutting down...")
+
+        if shuttingDown[0]:
+            raise WatchdogShutdown()
+
+    except WatchdogShutdown:
+        observer.unschedule_all()
+
+    finally:
+        observer.stop()
+        observer.join()
+
     time.sleep(1)
+    while workerThreadCount.value() > 0:
+        time.sleep(1)
 
-    if debug:
-        eprint(f"{scriptName}: finished monitoring {watchDirs}")
+    logging.info(f"{scriptName}:\tfinished monitoring {watchDirs}")
 
 
 if __name__ == '__main__':

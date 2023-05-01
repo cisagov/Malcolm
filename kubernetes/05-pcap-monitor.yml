@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pcap-monitor
+  namespace: malcolm
+spec:
+  ports:
+    - port: 30441
+      protocol: TCP
+      name: zmq
+  selector:
+    name: pcap-monitor-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pcap-monitor-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: pcap-monitor-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: pcap-monitor-deployment
+    spec:
+      containers:
+      - name: pcap-monitor-container
+        image: ghcr.io/idaholab/malcolm/pcap-monitor:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: zmq
+            protocol: TCP
+            containerPort: 30441
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: opensearch-env
+          - configMapRef:
+              name: upload-common-env
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - watch-upload
+            - pcap-publisher
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: pcap-monitor-var-local-catrust-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: pcap-monitor-opensearch-curlrc-secret-volume
+          - mountPath: "/pcap"
+            name: pcap-monitor-pcap-volume
+          - mountPath: "/zeek"
+            name: pcap-monitor-zeek-volume
+      volumes:
+        - name: pcap-monitor-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: pcap-monitor-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: pcap-monitor-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim
+        - name: pcap-monitor-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim

@@ -98,16 +98,17 @@ if [ -d "$WORKDIR" ]; then
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
   mkdir -p "$MALCOLM_DEST_DIR/arkime-logs/"
   mkdir -p "$MALCOLM_DEST_DIR/arkime-raw/"
+  mkdir -p "$MALCOLM_DEST_DIR/config/"
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/htadmin/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/maps/"
-  mkdir -p "$MALCOLM_DEST_DIR/netbox/env/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/media/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/postgres/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/redis/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/ca-trust/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"
+  mkdir -p "$MALCOLM_DEST_DIR/kubernetes/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch-backup/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch/nodes/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/processed/"
@@ -138,12 +139,17 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py status
   ln -s ./control.py stop
   ln -s ./control.py wipe
+  ln -s ./install.py configure
   popd >/dev/null 2>&1
+  cp ./config/*.example "$MALCOLM_DEST_DIR/config/"
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/malcolm_kubernetes.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./kubernetes/*.* "$MALCOLM_DEST_DIR/kubernetes/"
+  grep -v "^#" ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$MALCOLM_DEST_DIR/kubernetes/XXX"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
   cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
-  cp ./netbox/env/netbox.env.example "$MALCOLM_DEST_DIR/netbox/env/"
 
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
@@ -177,6 +183,7 @@ if [ -d "$WORKDIR" ]; then
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
+  cp "$SCRIPT_PATH/../scripts/malcolm_utils.py" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   mkdir -p ./config/includes.chroot/usr/share/images/desktop-base/

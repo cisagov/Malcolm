@@ -32,7 +32,7 @@ Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboa
           }
         }
     ```
-1. Include the new dashboard either by using a [bind mount](contributing-local-modifications.md#Bind) for the `./dashboards./dashboards/` directory or by [rebuilding](development.md#Build) the `dashboards-helper` Docker image. Dashboards are imported the first time Malcolm starts up.
+1. Include the new dashboard either by using a [bind mount](contributing-local-modifications.md#Bind) for the `./dashboards/dashboards/` directory or by [rebuilding](development.md#Build) the `dashboards-helper` Docker image. Dashboards are imported the first time Malcolm starts up.
 
 ## <a name="DashboardsPlugins"></a>OpenSearch Dashboards plugins
 

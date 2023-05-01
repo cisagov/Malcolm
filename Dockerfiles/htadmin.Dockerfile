@@ -61,11 +61,14 @@ RUN apt-get -q update && \
   cd /tmp && \
     mkdir -p ./htadmin && \
     curl -sSL "$HTADMIN_URL" | tar xzvf - -C ./htadmin --strip-components 1 && \
+    find /tmp/htadmin -type f -name index.php -execdir mv index.php htadmin.php \; && \
+    find /tmp/htadmin -type f -exec sed -i 's/index.php/htadmin.php/g' "{}" \; && \
     mv /tmp/htadmin/sites/html/htadmin /var/www/htadmin && \
     cd /var/www/htadmin && \
     ( grep -rhoPi "(src|href)=['\"]https?://.+?['\"]" ./includes/* | sed "s/^[a-zA-Z]*=['\"]*//" | sed "s/['\"]$//" | xargs -r -l curl -s -S -L -J -O ) && \
     sed -i "s@http[^'\"]*/@@gI" ./includes/* && \
-    mkdir fonts && cd fonts && \
+    mkdir -p fonts config auth default && \
+    cd fonts && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.ttf" && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff" && \
     curl -s -S -L -J -O "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP_VERSION/fonts/glyphicons-halflings-regular.woff2" && \
@@ -76,7 +79,9 @@ RUN apt-get -q update && \
   apt-get clean -y -q && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/html
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD docs/images/favicon/favicon.ico /var/www/htadmin/
 ADD htadmin/supervisord.conf /supervisord.conf
 ADD htadmin/htadmin.sh /usr/local/bin/
@@ -86,7 +91,11 @@ ADD htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "htadmin"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

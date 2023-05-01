@@ -2,9 +2,10 @@ server {
     listen 80 default_server;
 
     sendfile on;
+    gzip off;
 
     root /var/www/htadmin;
-    index index.php index.html index.htm;
+    index htadmin.php index.html index.htm;
 
     server_name htaccess.malcolm.local;
 
@@ -18,7 +19,15 @@ server {
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
     }
 
+    location /auth {
+        deny all;
+        return 404;
+    }
     location /config {
+        deny all;
+        return 404;
+    }
+    location /default {
         deny all;
         return 404;
     }

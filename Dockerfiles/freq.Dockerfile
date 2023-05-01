@@ -21,11 +21,11 @@ ENV PUSER_PRIV_DROP true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG FREQ_PORT=10004
+ARG FREQ_API_PORT=10004
 ARG FREQ_LOOKUP=true
 
-ENV FREQ_PORT   $FREQ_PORT
-ENV FREQ_LOOKUP $FREQ_LOOKUP
+ENV FREQ_API_PORT $FREQ_API_PORT
+ENV FREQ_LOOKUP   $FREQ_LOOKUP
 
 ENV FREQ_URL "https://codeload.github.com/markbaggett/freq/tar.gz/master"
 
@@ -55,14 +55,20 @@ RUN apt-get -q update && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD freq-server/supervisord.conf /etc/supervisord.conf
 
 WORKDIR /opt/freq_server
 
-EXPOSE $FREQ_PORT
+EXPOSE $FREQ_API_PORT
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "freq"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

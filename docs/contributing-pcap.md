@@ -9,4 +9,4 @@ When a PCAP is uploaded (either through Malcolm's [upload web interface](upload.
 
 While that might be a bit of hand-waving, these general steps take care of the PCAP processing piece: you shouldn't have to really edit any *existing* code to add a new PCAP processor. You're just creating a new container for the Malcolm appliance to the ZeroMQ topic and handle the PCAPs your tool receives. 
 
-The `PCAP_PIPELINE_DEBUG` and `PCAP_PIPELINE_DEBUG_EXTRA` environment variables in the `docker-compose` files can be set to `true` to enable verbose debug logging from the output of the Docker containers involved in the PCAP processing pipeline.
+The `PCAP_PIPELINE_VERBOSITY` environment variables in can be set to `-v`, `-vv`, etc., to increase the verbosity of debug logging from the output of the Docker containers involved in the PCAP processing pipeline.

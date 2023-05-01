@@ -55,7 +55,7 @@ exclude:
   - arkime
   - arkime-logs
   - arkime-raw
-  - auth.env
+  - config
   - dashboards
   - docker-compose-standalone.yml
   - docker-compose.yml
@@ -75,7 +75,6 @@ exclude:
   - htadmin
   - logstash
   - malcolm-iso
-  - name-map-ui
   - net-map.json
   - netbox
   - nginx

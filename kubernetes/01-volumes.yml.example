@@ -1,0 +1,300 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pcap-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/pcap
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pcap-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
+  volumeName: pcap-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zeek-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 250Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/zeek-logs
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zeek-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 250Gi
+  volumeName: zeek-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: suricata-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/suricata-logs
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: suricata-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: suricata-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: config-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 25Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/config
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+  volumeName: config-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: runtime-logs-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 25Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/runtime-logs
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: runtime-logs-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 25Gi
+  volumeName: runtime-logs-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: opensearch-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/opensearch
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
+  volumeName: opensearch-volume
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: opensearch-backup-volume
+  namespace: malcolm
+  labels:
+    namespace: malcolm
+spec:
+  capacity:
+    storage: 500Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.1
+    - soft
+    - noac
+    - timeo=600
+    - retrans=2
+  nfs:
+    path: /malcolm/opensearch-backup
+    server: 192.168.0.100
+    readOnly: false
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opensearch-backup-claim
+  namespace: malcolm
+spec:
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 500Gi
+  volumeName: opensearch-backup-volume

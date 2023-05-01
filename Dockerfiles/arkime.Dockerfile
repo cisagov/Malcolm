@@ -4,7 +4,7 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "v4.2.0"
+ENV ARKIME_VERSION "v4.3.0"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -45,7 +45,6 @@ RUN apt-get -q update && \
         python3-pip \
         python3-setuptools \
         python3-wheel \
-        rsync \
         sudo \
         swig \
         wget \
@@ -90,6 +89,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "arkime"
 ENV PGROUP "arkime"
 ENV PUSER_PRIV_DROP true
+ENV PUSER_RLIMIT_UNLOCK true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -101,14 +101,14 @@ ARG ARKIME_ECS_PROVIDER=arkime
 ARG ARKIME_ECS_DATASET=session
 ARG ARKIME_INTERFACE=eth0
 ARG ARKIME_ANALYZE_PCAP_THREADS=1
-ARG WISE=off
+ARG OPENSEARCH_MAX_SHARDS_PER_NODE=2500
+ARG WISE=on
 ARG VIEWER=on
 #Whether or not Arkime is in charge of deleting old PCAP files to reclaim space
 ARG MANAGE_PCAP_FILES=false
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
-ARG PCAP_PIPELINE_DEBUG=false
-ARG PCAP_PIPELINE_DEBUG_EXTRA=false
+ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
@@ -123,12 +123,12 @@ ENV ARKIME_ECS_PROVIDER $ARKIME_ECS_PROVIDER
 ENV ARKIME_ECS_DATASET $ARKIME_ECS_DATASET
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_ANALYZE_PCAP_THREADS $ARKIME_ANALYZE_PCAP_THREADS
+ENV OPENSEARCH_MAX_SHARDS_PER_NODE $OPENSEARCH_MAX_SHARDS_PER_NODE
 ENV WISE $WISE
 ENV VIEWER $VIEWER
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
-ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
-ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
+ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 
 COPY --from=build $ARKIME_DIR $ARKIME_DIR
@@ -141,6 +141,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       file \
       geoip-bin \
       gettext \
+      inotify-tools \
       jq \
       libcap2-bin \
       libjson-perl \
@@ -160,13 +161,14 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-setuptools \
       python3-wheel \
       rename \
+      rsync \
       sudo \
       supervisor \
       vim-tiny \
       wget \
       tini \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
-    pip3 install --no-cache-dir beautifulsoup4 pyzmq && \
+    pip3 install --no-cache-dir beautifulsoup4 pyzmq watchdog && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
@@ -176,11 +178,14 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # add configuration and scripts
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD arkime/scripts /opt/
 ADD shared/bin/pcap_processor.py /opt/
 ADD shared/bin/pcap_utils.py /opt/
-ADD scripts/malcolm_common.py /opt/
+ADD scripts/malcolm_utils.py /opt/
+ADD shared/bin/watch_common.py /opt/
 ADD shared/bin/opensearch_status.sh /opt/
 ADD shared/bin/self_signed_key_gen.sh /usr/local/bin/
 ADD arkime/etc $ARKIME_DIR/etc/
@@ -219,7 +224,12 @@ ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"
 EXPOSE 8000 8005 8081
 WORKDIR $ARKIME_DIR
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/opt/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "arkime", \
+            "/opt/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

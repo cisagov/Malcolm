@@ -26,6 +26,8 @@ ARG ZEEK_LOG_DIRECTORY=/zeek/logs
 ARG EXTRACTED_FILE_IGNORE_EXISTING=false
 ARG EXTRACTED_FILE_PRESERVATION=quarantined
 ARG EXTRACTED_FILE_WATCHER_START_SLEEP=30
+ARG EXTRACTED_FILE_WATCHER_POLLING=false
+ARG EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC=10
 ARG EXTRACTED_FILE_SCANNER_START_SLEEP=10
 ARG EXTRACTED_FILE_LOGGER_START_SLEEP=5
 ARG EXTRACTED_FILE_MIN_BYTES=64
@@ -34,8 +36,7 @@ ARG VTOT_API2_KEY=0
 ARG VTOT_REQUESTS_PER_MINUTE=4
 ARG EXTRACTED_FILE_ENABLE_CLAMAV=false
 ARG EXTRACTED_FILE_UPDATE_RULES=false
-ARG EXTRACTED_FILE_PIPELINE_DEBUG=false
-ARG EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA=false
+ARG EXTRACTED_FILE_PIPELINE_VERBOSITY=""
 ARG CLAMD_SOCKET_FILE=/tmp/clamd.ctl
 ARG CLAMD_MAX_REQUESTS=8
 ARG YARA_MAX_REQUESTS=8
@@ -55,6 +56,8 @@ ENV ZEEK_LOG_DIRECTORY $ZEEK_LOG_DIRECTORY
 ENV EXTRACTED_FILE_IGNORE_EXISTING $EXTRACTED_FILE_IGNORE_EXISTING
 ENV EXTRACTED_FILE_PRESERVATION $EXTRACTED_FILE_PRESERVATION
 ENV EXTRACTED_FILE_WATCHER_START_SLEEP $EXTRACTED_FILE_WATCHER_START_SLEEP
+ENV EXTRACTED_FILE_WATCHER_POLLING $EXTRACTED_FILE_WATCHER_POLLING
+ENV EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC $EXTRACTED_FILE_WATCHER_POLLING_ASSUME_CLOSED_SEC
 ENV EXTRACTED_FILE_SCANNER_START_SLEEP $EXTRACTED_FILE_SCANNER_START_SLEEP
 ENV EXTRACTED_FILE_LOGGER_START_SLEEP $EXTRACTED_FILE_LOGGER_START_SLEEP
 ENV EXTRACTED_FILE_MIN_BYTES $EXTRACTED_FILE_MIN_BYTES
@@ -63,8 +66,7 @@ ENV VTOT_API2_KEY $VTOT_API2_KEY
 ENV VTOT_REQUESTS_PER_MINUTE $VTOT_REQUESTS_PER_MINUTE
 ENV EXTRACTED_FILE_ENABLE_CLAMAV $EXTRACTED_FILE_ENABLE_CLAMAV
 ENV EXTRACTED_FILE_UPDATE_RULES $EXTRACTED_FILE_UPDATE_RULES
-ENV EXTRACTED_FILE_PIPELINE_DEBUG $EXTRACTED_FILE_PIPELINE_DEBUG
-ENV EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA $EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA
+ENV EXTRACTED_FILE_PIPELINE_VERBOSITY $EXTRACTED_FILE_PIPELINE_VERBOSITY
 ENV CLAMD_SOCKET_FILE $CLAMD_SOCKET_FILE
 ENV CLAMD_MAX_REQUESTS $CLAMD_MAX_REQUESTS
 ENV YARA_MAX_REQUESTS $YARA_MAX_REQUESTS
@@ -79,7 +81,7 @@ ENV YARA_VERSION "4.3.0"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
-ENV CAPA_VERSION "5.0.0"
+ENV CAPA_VERSION "5.1.0"
 ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 ENV CAPA_DIR "/opt/capa"
 ENV CAPA_BIN "${CAPA_DIR}/capa"
@@ -89,10 +91,10 @@ ENV EXTRACTED_FILE_HTTP_SERVER_ENCRYPT $EXTRACTED_FILE_HTTP_SERVER_ENCRYPT
 ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
-ENV SUPERCRONIC_VERSION "0.2.2"
+ENV SUPERCRONIC_VERSION "0.2.24"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "2319da694833c7a147976b8e5f337cd83397d6be"
+ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
@@ -130,11 +132,10 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-bs4 \
       python3-dev \
       python3-pip \
-      python3-pyinotify \
       python3-requests \
       python3-zmq \
       rsync && \
-    pip3 install clamd supervisor yara-python python-magic psutil pycryptodome && \
+    pip3 install clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -201,8 +202,12 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
       echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB}
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD shared/bin/zeek_carve*.py /usr/local/bin/
+ADD shared/bin/watch_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD file-monitor/supervisord.conf /etc/supervisord.conf
 ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 ADD file-monitor/*update.sh /usr/local/bin/
@@ -225,7 +230,12 @@ VOLUME ["$YARA_RULES_SRC_DIR"]
 EXPOSE 3310
 EXPOSE $EXTRACTED_FILE_HTTP_SERVER_PORT
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "file-monitor", \
+            "/docker-entrypoint.sh"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

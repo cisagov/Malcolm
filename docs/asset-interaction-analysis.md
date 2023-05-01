@@ -16,7 +16,7 @@ Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbo
 
 ## <a name="NetBoxEnrichment"></a>Enriching network traffic metadata via NetBox lookups
 
-As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBOX_ENRICHMENT` [environment variable in `docker-compose.yml`](malcolm-config.md#DockerComposeYml) is set to `true`) the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/).
+As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBOX_ENRICHMENT` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`) the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/).
 
 * `destination.…`
     - `destination.device.cluster` (`/virtualization/clusters/`) (for [Virtual Machine](https://demo.netbox.dev/static/docs/coe-functionality/virtualization/) device types)
@@ -28,13 +28,13 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
     - [`destination.device.service`](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) (`/ipam/services/`)
     - `destination.device.site` (`/dcim/sites/`)
     - `destination.device.url` (`/dcim/devices/`)
-    - `destination.device.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#DockerComposeYml))
+    - `destination.device.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
     - `destination.segment.id` (`/ipam/vrfs/{id}`)
     - `destination.segment.name` (`/ipam/vrfs/`)
     - `destination.segment.site` (`/dcim/sites/`)
     - `destination.segment.tenant` (`/tenancy/tenants/`)
     - `destination.segment.url` (`/ipam/vrfs/`)
-    - `destination.segment.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#DockerComposeYml))
+    - `destination.segment.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)
     - `related.device_type`
@@ -47,7 +47,7 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
 
 For Malcolm's purposes, both physical devices and virtualized hosts will be stored as described above: the `device_type` field can be used to distinguish between them.
 
-NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges, of course. The value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `docker-compose.yml`](malcolm-config.md#DockerComposeYml) will be used as a query parameter for these enrichment lookups.
+NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges, of course. The value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used as a query parameter for these enrichment lookups.
 
 This feature was implemented as described in [idaholab/Malcolm#132](https://github.com/idaholab/Malcolm/issues/132).
 
@@ -73,7 +73,7 @@ See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
 
 ## <a name="NetBoxPopPassive"></a>Populate NetBox inventory via passively-gathered network traffic metadata
 
-The purpose of an asset management system is to document the intended state of a network: were Malcolm to actively and agressively populate NetBox with the live network state, a network configuration fault could result in an incorrect documented configuration. The Malcolm development team is investigating what data, if any, should automatically flow to NetBox based on traffic observed (enabled via the `NETBOX_CRON` [environment variable in `docker-compose.yml`](malcolm-config.md#DockerComposeYml)), and what NetBox inventory data could be used, if any, to enrich Malcolm's network traffic metadata. Well-considered suggestions in this area are welcome.
+The purpose of an asset management system is to document the intended state of a network: were Malcolm to actively and agressively populate NetBox with the live network state, a network configuration fault could result in an incorrect documented configuration. The Malcolm development team is investigating what data, if any, should automatically flow to NetBox based on traffic observed (enabled via the `NETBOX_CRON` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars)), and what NetBox inventory data could be used, if any, to enrich Malcolm's network traffic metadata. Well-considered suggestions in this area are welcome.
 
 See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135).
 
@@ -97,4 +97,4 @@ To clear the existing NetBox database and restore a previous backup, run the fol
 
 ```
 
-Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.
+Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox-secret.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.

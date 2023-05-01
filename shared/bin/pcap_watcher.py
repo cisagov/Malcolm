@@ -14,21 +14,38 @@ import glob
 import json
 import logging
 import magic
-import malcolm_common
 import os
 import pathlib
-import pyinotify
 import signal
 import sys
 import time
 import zmq
 
-from pcap_utils import *
+from pcap_utils import (
+    FILE_INFO_DICT_NAME,
+    FILE_INFO_DICT_NODE,
+    FILE_INFO_DICT_SIZE,
+    FILE_INFO_DICT_TAGS,
+    FILE_INFO_FILE_MIME,
+    FILE_INFO_FILE_TYPE,
+    PCAP_MIME_TYPES,
+    PCAP_TOPIC_PORT,
+    tags_from_filename,
+)
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, ParseCurlFile, remove_prefix, touch
+import watch_common
+
 from collections import defaultdict
+from multiprocessing.pool import ThreadPool
 
 from opensearchpy import OpenSearch, Search
 from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
 from urllib3.exceptions import NewConnectionError
+
+from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
+from watchdog.utils import WatchdogShutdown
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -41,32 +58,27 @@ ARKIME_FILES_INDEX = "arkime_files"
 ARKIME_FILE_SIZE_FIELD = "filesize"
 
 ###################################################################################################
-debug = False
-verboseDebug = False
 pdbFlagged = False
 args = None
 opensearchHttpAuth = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
-shuttingDown = False
+shuttingDown = [False]
 DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 
 
 ###################################################################################################
 # watch files written to and moved to this directory
-class EventWatcher(pyinotify.ProcessEvent):
-    # notify on files written in-place then closed (IN_CLOSE_WRITE), and moved into this directory (IN_MOVED_TO)
-    _methods = ["IN_CLOSE_WRITE", "IN_MOVED_TO"]
-
-    def __init__(self):
+class EventWatcher:
+    def __init__(self, logger=None):
         global args
         global opensearchHttpAuth
-        global debug
-        global verboseDebug
+        global shuttingDown
 
         super().__init__()
 
+        self.logger = logger if logger else logging
         self.useOpenSearch = False
         self.openSearchClient = None
 
@@ -76,11 +88,10 @@ class EventWatcher(pyinotify.ProcessEvent):
             healthy = False
 
             # create the connection to OpenSearch
-            while (not connected) and (not shuttingDown):
+            while (not connected) and (not shuttingDown[0]):
                 try:
                     try:
-                        if debug:
-                            eprint(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
+                        self.logger.info(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
 
                         self.openSearchClient = OpenSearch(
                             hosts=[args.opensearchUrl],
@@ -91,16 +102,14 @@ class EventWatcher(pyinotify.ProcessEvent):
                             request_timeout=1,
                         )
 
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+                        self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
 
                         self.openSearchClient.cluster.health(
                             wait_for_status='red',
                             request_timeout=1,
                         )
 
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+                        self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
 
                         connected = self.openSearchClient is not None
                         if not connected:
@@ -112,12 +121,12 @@ class EventWatcher(pyinotify.ProcessEvent):
                         ConnectionRefusedError,
                         NewConnectionError,
                     ) as connError:
-                        if debug:
-                            eprint(f"{scriptName}:\tOpenSearch connection error: {connError}")
+                        self.logger.error(f"{scriptName}:\tOpenSearch connection error: {connError}")
 
                 except Exception as genericError:
-                    if debug:
-                        eprint(f"{scriptName}:\tUnexpected exception while connecting to OpenSearch: {genericError}")
+                    self.logger.error(
+                        f"{scriptName}:\tUnexpected exception while connecting to OpenSearch: {genericError}"
+                    )
 
                 if (not connected) and args.opensearchWaitForHealth:
                     time.sleep(1)
@@ -127,16 +136,14 @@ class EventWatcher(pyinotify.ProcessEvent):
                     break
 
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
-            while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown):
+            while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown[0]):
                 try:
-                    if debug:
-                        eprint(f"{scriptName}:\twaiting for OpenSearch to be healthy")
+                    self.logger.info(f"{scriptName}:\twaiting for OpenSearch to be healthy")
                     self.openSearchClient.cluster.health(
                         index=ARKIME_FILES_INDEX,
                         wait_for_status='yellow',
                     )
-                    if verboseDebug:
-                        eprint(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
+                    self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
                     healthy = True
 
                 except (
@@ -145,8 +152,7 @@ class EventWatcher(pyinotify.ProcessEvent):
                     ConnectionRefusedError,
                     NewConnectionError,
                 ) as connError:
-                    if verboseDebug:
-                        eprint(f"{scriptName}:\tOpenSearch health check: {connError}")
+                    self.logger.debug(f"{scriptName}:\tOpenSearch health check: {connError}")
 
                 if not healthy:
                     time.sleep(1)
@@ -157,8 +163,7 @@ class EventWatcher(pyinotify.ProcessEvent):
         self.context = zmq.Context()
 
         # Socket to send messages on
-        if debug:
-            eprint(f"{scriptName}:\tbinding publisher port {PCAP_TOPIC_PORT}")
+        self.logger.info(f"{scriptName}:\tbinding publisher port {PCAP_TOPIC_PORT}")
         self.topic_socket = self.context.socket(zmq.PUB)
         self.topic_socket.bind(f"tcp://*:{PCAP_TOPIC_PORT}")
 
@@ -166,34 +171,27 @@ class EventWatcher(pyinotify.ProcessEvent):
         # and if he can't then what's the point? just block
         # self.topic_socket.SNDTIMEO = 5000
 
-        if debug:
-            eprint(f"{scriptName}:\tEventWatcher initialized")
+        self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
-
-###################################################################################################
-# set up event processor to append processed events from to the event queue
-def event_process_generator(cls, method):
-    # actual method called when we are notified of a file
-    def _method_name(self, event):
+    ###################################################################################################
+    # set up event processor to append processed events from to the event queue
+    def processFile(self, pathname):
         global args
-        global debug
-        global verboseDebug
 
-        if debug:
-            eprint(f"{scriptName}:\t👓\t{event.pathname}")
+        self.logger.info(f"{scriptName}:\t👓\t{pathname}")
 
         # the entity must be a regular PCAP file and actually exist
-        if (not event.dir) and os.path.isfile(event.pathname):
+        if os.path.isfile(pathname):
             # get the file magic description and mime type
-            fileMime = magic.from_file(event.pathname, mime=True)
-            fileType = magic.from_file(event.pathname)
+            fileMime = magic.from_file(pathname, mime=True)
+            fileType = magic.from_file(pathname)
 
             # get the file size, in bytes to compare against sane values
-            fileSize = os.path.getsize(event.pathname)
+            fileSize = os.path.getsize(pathname)
             if (args.minBytes <= fileSize <= args.maxBytes) and (
                 (fileMime in PCAP_MIME_TYPES) or ('pcap-ng' in fileType)
             ):
-                relativePath = remove_prefix(event.pathname, os.path.join(args.baseDir, ''))
+                relativePath = remove_prefix(pathname, os.path.join(args.baseDir, ''))
 
                 # check with Arkime's files index in OpenSearch and make sure it's not a duplicate
                 fileIsDuplicate = False
@@ -212,16 +210,14 @@ def event_process_generator(cls, method):
 
                 if fileIsDuplicate:
                     # this is duplicate file (it's been processed before) so ignore it
-                    if debug:
-                        eprint(f"{scriptName}:\t📋\t{event.pathname}")
+                    self.logger.info(f"{scriptName}:\t📋\t{pathname}")
 
                 else:
                     # the entity is a right-sized non-duplicate file, and it exists, so send it to get processed
-                    if debug:
-                        eprint(f"{scriptName}:\t📩\t{event.pathname}")
+                    self.logger.info(f"{scriptName}:\t📩\t{pathname}")
                     try:
                         fileInfo = {
-                            FILE_INFO_DICT_NAME: event.pathname if args.includeAbsolutePath else relativePath,
+                            FILE_INFO_DICT_NAME: pathname if args.includeAbsolutePath else relativePath,
                             FILE_INFO_DICT_SIZE: fileSize,
                             FILE_INFO_FILE_MIME: fileMime,
                             FILE_INFO_FILE_TYPE: fileType,
@@ -229,27 +225,25 @@ def event_process_generator(cls, method):
                             FILE_INFO_DICT_TAGS: tags_from_filename(relativePath),
                         }
                         self.topic_socket.send_string(json.dumps(fileInfo))
-                        if debug:
-                            eprint(f"{scriptName}:\t📫\t{fileInfo}")
-                    except zmq.Again as timeout:
-                        if verboseDebug:
-                            eprint(f"{scriptName}:\t🕑\t{event.pathname}")
+                        self.logger.info(f"{scriptName}:\t📫\t{fileInfo}")
+                    except zmq.Again:
+                        self.logger.debug(f"{scriptName}:\t🕑\t{pathname}")
 
             else:
                 # too small/big to care about, or the wrong type, ignore it
-                if debug:
-                    eprint(f"{scriptName}:\t✋\t{event.pathname}")
+                self.logger.info(f"{scriptName}:\t✋\t{pathname}")
 
-    # assign process method to class
-    _method_name.__name__ = "process_{}".format(method)
-    setattr(cls, _method_name.__name__, _method_name)
+
+def file_processor(pathname, **kwargs):
+    if "watcher" in kwargs and kwargs["watcher"]:
+        kwargs["watcher"].processFile(pathname)
 
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
 def shutdown_handler(signum, frame):
     global shuttingDown
-    shuttingDown = True
+    shuttingDown[0] = True
 
 
 ###################################################################################################
@@ -260,50 +254,15 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
 # main
 def main():
     global args
     global opensearchHttpAuth
-    global debug
-    global verboseDebug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--min-bytes',
         dest='minBytes',
@@ -336,7 +295,7 @@ def main():
         dest='opensearchCurlRcFile',
         metavar='<filename>',
         type=str,
-        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
         help='cURL.rc formatted file containing OpenSearch connection parameters',
     )
     parser.add_argument(
@@ -418,6 +377,28 @@ def main():
         type=str,
         required=False,
     )
+    parser.add_argument(
+        '-p',
+        '--polling',
+        dest='polling',
+        help="Use polling (instead of inotify)",
+        metavar='true|false',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=os.getenv('PCAP_PIPELINE_POLLING', False),
+        required=False,
+    )
+    parser.add_argument(
+        '-c',
+        '--closed-sec',
+        dest='assumeClosedSec',
+        help="When polling, assume a file is closed after this many seconds of inactivity",
+        metavar='<seconds>',
+        type=int,
+        default=int(os.getenv('PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC', str(watch_common.ASSUME_CLOSED_SEC_DEFAULT))),
+        required=False,
+    )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
         '-d', '--directory', dest='baseDir', help='Directory to monitor', metavar='<directory>', type=str, required=True
@@ -430,22 +411,19 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
-
-    logging.basicConfig(level=logging.ERROR)
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
-        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
-        if (not args.opensearchIsLocal)
-        else defaultdict(lambda: None)
+        ParseCurlFile(args.opensearchCurlRcFile) if (not args.opensearchIsLocal) else defaultdict(lambda: None)
     )
     if not args.opensearchUrl:
         if args.opensearchIsLocal:
@@ -460,25 +438,19 @@ def main():
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
-    while (not shuttingDown) and (sleepCount < args.startSleepSec):
+    while (not shuttingDown[0]) and (sleepCount < args.startSleepSec):
         time.sleep(1)
         sleepCount += 1
-
-    # add events to watch to EventWatcher class
-    for method in EventWatcher._methods:
-        event_process_generator(EventWatcher, method)
 
     # if directory to monitor doesn't exist, create it now
     if os.path.isdir(args.baseDir):
         preexistingDir = True
     else:
         preexistingDir = False
-        if debug:
-            eprint(f'{scriptName}: creating "{args.baseDir}" to monitor')
+        logging.info(f'{scriptName}:\tcreating "{args.baseDir}" to monitor')
         pathlib.Path(args.baseDir).mkdir(parents=False, exist_ok=True)
 
     # if recursion was requested, get list of directories to monitor
@@ -492,44 +464,77 @@ def main():
     # begin threaded watch of path(s)
     time.sleep(1)
 
-    event_notifier_started = False
-    watch_manager = pyinotify.WatchManager()
-    event_notifier = pyinotify.ThreadedNotifier(watch_manager, EventWatcher())
+    observer = PollingObserver() if args.polling else Observer()
+    handler = watch_common.FileOperationEventHandler(
+        logger=None,
+        polling=args.polling,
+    )
     for watchDir in watchDirs:
-        watch_manager.add_watch(os.path.abspath(watchDir), pyinotify.ALL_EVENTS)
-    if debug:
-        eprint(f"{scriptName}: monitoring {watchDirs}")
-    time.sleep(2)
-    if not shuttingDown:
-        event_notifier.start()
-        event_notifier_started = True
+        logging.debug(f"{scriptName}:\tScheduling {watchDir}")
+        observer.schedule(handler, watchDir, recursive=False)
 
-    # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
-    if preexistingDir and (not args.ignoreExisting) and (not shuttingDown):
-        filesTouched = 0
-        for watchDir in watchDirs:
-            for preexistingFile in [os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()]:
-                touch(preexistingFile)
-                filesTouched += 1
-        if debug and (filesTouched > 0):
-            eprint(f"{scriptName}: found {filesTouched} preexisting files to check")
+    observer.start()
 
-    # loop forever, or until we're told to shut down, whichever comes first
-    while not shuttingDown:
-        if pdbFlagged:
-            pdbFlagged = False
-            breakpoint()
-        time.sleep(0.2)
+    logging.info(f"{scriptName}:\tmonitoring {watchDirs}")
 
-    # graceful shutdown
-    if debug:
-        eprint(f"{scriptName}: shutting down...")
-    if event_notifier_started:
-        event_notifier.stop()
+    try:
+        time.sleep(2)
+
+        # if there are any previously included files (and not ignoreExisting), "touch" them so that they will be notified on
+        if preexistingDir and (not args.ignoreExisting) and (not shuttingDown[0]):
+            filesTouched = 0
+            for watchDir in watchDirs:
+                for preexistingFile in [
+                    os.path.join(watchDir, x) for x in pathlib.Path(watchDir).iterdir() if x.is_file()
+                ]:
+                    touch(preexistingFile)
+                    filesTouched += 1
+            if filesTouched > 0:
+                logging.info(f"{scriptName}:\tfound {filesTouched} preexisting files to check")
+
+        # start the thread to actually handle the files as they're queued by the FileOperationEventHandler handler
+        workerThreadCount = malcolm_utils.AtomicInt(value=0)
+        ThreadPool(
+            1,
+            watch_common.ProcessFileEventWorker(
+                [
+                    handler,
+                    observer,
+                    file_processor,
+                    {'watcher': EventWatcher(logger=logging)},
+                    args.assumeClosedSec,
+                    workerThreadCount,
+                    shuttingDown,
+                    logging,
+                ],
+            ),
+        )
+
+        # loop forever, or until we're told to shut down, whichever comes first
+        while (not shuttingDown[0]) and observer.is_alive():
+            if pdbFlagged:
+                pdbFlagged = False
+                breakpoint()
+            observer.join(1)
+
+        # graceful shutdown
+        logging.info(f"{scriptName}:\tshutting down...")
+
+        if shuttingDown[0]:
+            raise WatchdogShutdown()
+
+    except WatchdogShutdown:
+        observer.unschedule_all()
+
+    finally:
+        observer.stop()
+        observer.join()
+
     time.sleep(1)
+    while workerThreadCount.value() > 0:
+        time.sleep(1)
 
-    if debug:
-        eprint(f"{scriptName}: finished monitoring {watchDirs}")
+    logging.info(f"{scriptName}:\tfinished monitoring {watchDirs}")
 
 
 if __name__ == '__main__':

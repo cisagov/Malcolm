@@ -7,19 +7,22 @@
 # auth-related
 /.ldap_config_defaults
 /auth.env
+/config/*.env
 /.opensearch*.curlrc
 /logstash/certs
 /filebeat/certs
 /nginx/certs
 /nginx/ca-trust
 /nginx/htpasswd
-/nginx/nginx_ldap.conf
+/nginx/nginx_ldap*.conf
 /htadmin/config.ini
 /htadmin/metadata
+*.keystore
 
 # runtime
 .tmp
 .configured
+config.*/
 
 # development
 .envrc
@@ -44,3 +47,4 @@ __pycache__/
 __pypackages__/
 *.py[cod]
 *$py.class
+.DS_Store

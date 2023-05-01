@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suricata-live-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: suricata-live-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: suricata-live-deployment
+    spec:
+      containers:
+      - name: suricata-live-container
+        image: ghcr.io/idaholab/malcolm/suricata:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        securityContext:
+          capabilities:
+            add:
+              - IPC_LOCK
+              - NET_ADMIN
+              - NET_RAW
+              - SYS_ADMIN
+              - SYS_RESOURCE
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: upload-common-env
+          - configMapRef:
+              name: suricata-env
+          - configMapRef:
+              name: suricata-live-env
+          - configMapRef:
+              name: pcap-capture-env
+        env:
+          - name: SURICATA_DISABLED
+            value: "true"
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: suricata-live-var-local-catrust-volume
+      volumes:
+        - name: suricata-live-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust

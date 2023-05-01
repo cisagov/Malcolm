@@ -13,7 +13,22 @@ import fileinput
 import re
 from dialog import Dialog
 from debinterface.interfaces import Interfaces
-from sensorcommon import *
+
+from sensorcommon import (
+    CancelledError,
+    clearquit,
+    get_available_adapters,
+    identify_adapter,
+    NIC_BLINK_SECONDS,
+)
+from malcolm_utils import (
+    eprint,
+    run_subprocess,
+    remove_prefix,
+    aggressive_url_encode,
+    isipaddress,
+    check_socket,
+)
 
 
 class Constants:
@@ -79,6 +94,7 @@ class Constants:
 d = Dialog(dialog='dialog', autowidgetsize=True)
 d.set_background_title(Constants.MSG_BACKGROUND_TITLE)
 
+
 ###################################################################################################
 # if the given interface is up, "ifdown" it
 def network_stop(selected_iface):
@@ -91,7 +107,7 @@ def network_stop(selected_iface):
     else:
         command = f"cat /sys/class/net/{selected_iface}/operstate"
 
-    return run_process(command, stderr=True)
+    return run_subprocess(command, stderr=True)
 
 
 ###################################################################################################
@@ -106,13 +122,12 @@ def network_start(selected_iface):
     else:
         command = f"cat /sys/class/net/{selected_iface}/operstate"
 
-    return run_process(command, stderr=True)
+    return run_subprocess(command, stderr=True)
 
 
 ###################################################################################################
 # for a given interface, bring it down, write its new settings, and bring it back up
 def write_and_display_results(interfaces, selected_iface):
-
     ecode, stop_results = network_stop(selected_iface)
     stop_results = list(
         filter(
@@ -147,7 +162,7 @@ def write_and_display_results(interfaces, selected_iface):
     else:
         start_text = Constants.MSG_NETWORK_START_ERROR
 
-    code = d.msgbox(stop_text + "\n".join(stop_results) + "\n\n. . .\n\n" + start_text + "\n".join(start_results))
+    d.msgbox(stop_text + "\n".join(stop_results) + "\n\n. . .\n\n" + start_text + "\n".join(start_results))
 
 
 ###################################################################################################
@@ -166,7 +181,7 @@ def main():
     try:
         with open(Constants.DEV_IDENTIFIER_FILE, 'r') as f:
             installation = f.readline().strip()
-    except:
+    except Exception:
         pass
     if installation == Constants.DEV_SENSOR:
         modeChoices = [Constants.MSG_CONFIG_INTERFACE, Constants.MSG_CONFIG_HOST, Constants.MSG_CONFIG_TIME_SYNC]
@@ -182,7 +197,6 @@ def main():
     while not quit_flag:
         os.chdir(start_dir)
         try:
-
             # welcome
             code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
             if code == Dialog.CANCEL or code == Dialog.ESC:
@@ -196,15 +210,15 @@ def main():
                 raise CancelledError
 
             if config_mode == Constants.MSG_CONFIG_HOST[0]:
-                ##### system hostname configuration ##################################################################################################
+                # system hostname configuration ######################################################################################################
 
                 # get current host/identification information
-                ecode, host_get_output = run_process('hostnamectl', stderr=True)
+                ecode, host_get_output = run_subprocess('hostnamectl', stderr=True)
                 if ecode == 0:
                     emsg_str = '\n'.join(host_get_output)
                     code = d.msgbox(text=f"{Constants.MSG_SET_HOSTNAME_CURRENT}{emsg_str}")
 
-                    code, hostname_get_output = run_process('hostname', stderr=False)
+                    code, hostname_get_output = run_subprocess('hostname', stderr=False)
                     if (code == 0) and (len(hostname_get_output) > 0):
                         old_hostname = hostname_get_output[0].strip()
                     else:
@@ -216,16 +230,16 @@ def main():
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
                         elif len(new_hostname) <= 0:
-                            code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format(f'Invalid hostname specified'))
+                            code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format('Invalid hostname specified'))
                         else:
                             break
 
                     # set new hostname
-                    ecode, host_set_output = run_process(
+                    ecode, host_set_output = run_subprocess(
                         f'hostnamectl set-hostname {new_hostname.strip()}', stderr=True
                     )
                     if ecode == 0:
-                        ecode, host_get_output = run_process('hostnamectl', stderr=True)
+                        ecode, host_get_output = run_subprocess('hostnamectl', stderr=True)
                         emsg_str = '\n'.join(host_get_output)
                         code = d.msgbox(text=f"{Constants.MSG_SET_HOSTNAME_SUCCESS}{emsg_str}")
 
@@ -253,7 +267,7 @@ def main():
                     )
 
             elif config_mode == Constants.MSG_CONFIG_TIME_SYNC[0]:
-                ##### time synchronization configuration##############################################################################################
+                # time synchronization configuration##################################################################################################
                 time_sync_mode = ''
                 code = Dialog.OK
                 while (len(time_sync_mode) == 0) and (code == Dialog.OK):
@@ -296,7 +310,7 @@ def main():
                             break
 
                     # test with htpdate to see if we can connect
-                    ecode, test_output = run_process(
+                    ecode, test_output = run_subprocess(
                         f"{Constants.TIME_SYNC_HTPDATE_TEST_COMMAND} {http_host}:{http_port}"
                     )
                     if ecode == 0:
@@ -314,14 +328,14 @@ def main():
 
                     # get polling interval
                     code, htpdate_interval = d.rangebox(
-                        f"Time synchronization polling interval (minutes)", width=60, min=1, max=60, init=15
+                        "Time synchronization polling interval (minutes)", width=60, min=1, max=60, init=15
                     )
                     if code == Dialog.CANCEL or code == Dialog.ESC:
                         raise CancelledError
 
                     # stop and disable the ntp process
-                    run_process('/bin/systemctl stop ntp')
-                    run_process('/bin/systemctl disable ntp')
+                    run_subprocess('/bin/systemctl stop ntp')
+                    run_subprocess('/bin/systemctl disable ntp')
 
                     # write out htpdate file for cron
                     with open(Constants.TIME_SYNC_HTPDATE_CRON, 'w+') as f:
@@ -374,9 +388,9 @@ def main():
                                 print(line)
 
                     # enable and start the ntp process
-                    run_process('/bin/systemctl stop ntp')
-                    run_process('/bin/systemctl enable ntp')
-                    ecode, start_output = run_process('/bin/systemctl start ntp', stderr=True)
+                    run_subprocess('/bin/systemctl stop ntp')
+                    run_subprocess('/bin/systemctl enable ntp')
+                    ecode, start_output = run_subprocess('/bin/systemctl start ntp', stderr=True)
                     if ecode == 0:
                         code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS}")
                     else:
@@ -386,7 +400,7 @@ def main():
                     raise CancelledError
 
             else:
-                ##### interface IP address configuration #############################################################################################
+                # interface IP address configuration #################################################################################################
 
                 # read configuration from /etc/network/interfaces.d/sensor (or the default /etc/network/interfaces if for some reason it doesn't exist)
                 interfaces_path = (
@@ -552,7 +566,7 @@ def main():
                             write_and_display_results(interfaces, selected_iface)
                             break
 
-        except CancelledError as c:
+        except CancelledError:
             # d.msgbox(text=Constants.MSG_CANCEL_ERROR)
             # just start over
             continue

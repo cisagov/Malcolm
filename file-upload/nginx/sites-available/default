@@ -2,6 +2,7 @@ server {
     listen 80 default_server;
 
     sendfile on;
+    gzip off;
     client_max_body_size 50G;
     client_body_buffer_size 4M;
 

@@ -4,7 +4,6 @@
 import argparse
 import humanfriendly
 import json
-import malcolm_common
 import re
 import requests
 import os
@@ -14,27 +13,14 @@ import urllib3
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, ParseCurlFile
+
 ###################################################################################################
 debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 urllib3.disable_warnings()
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 ###################################################################################################
@@ -77,7 +63,7 @@ def main():
         dest='opensearchCurlRcFile',
         metavar='<filename>',
         type=str,
-        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
         help='cURL.rc formatted file containing OpenSearch connection parameters',
     )
     parser.add_argument(
@@ -147,7 +133,7 @@ def main():
     try:
         parser.error = parser.exit
         args = parser.parse_args()
-    except Exception as e:
+    except Exception:
         parser.print_help()
         exit(2)
 
@@ -165,9 +151,7 @@ def main():
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
-        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
-        if (not args.opensearchIsLocal)
-        else defaultdict(lambda: None)
+        ParseCurlFile(args.opensearchCurlRcFile) if (not args.opensearchIsLocal) else defaultdict(lambda: None)
     )
     if not args.opensearchUrl:
         if args.opensearchIsLocal:
@@ -209,7 +193,6 @@ def main():
                 raise Exception(f'Invalid limit percentage {args.limit}')
 
     if limitPercent is not None:
-
         # get allocation statistics for node(s) to do percentage calculation
         esDiskUsageStats = []
         osInfoResponse = requests.get(
@@ -250,10 +233,10 @@ def main():
         #     ...
         # ]
         if len(esDiskUsageStats) != 1:
-            raise Exception(f'Unable to determine node, please specify --node if using a percentage limit')
+            raise Exception('Unable to determine node, please specify --node if using a percentage limit')
         elif 'disk.total' not in esDiskUsageStats[0]:
             raise Exception(
-                f'Unable to determine disk.total for {esDiskUsageStats[0]["node"] if "node" in esDiskUsageStats[0] else node}'
+                f'Unable to determine disk.total for {esDiskUsageStats[0]["node"] if "node" in esDiskUsageStats[0] else "node"}'
             )
         limitMegabytes = int(float(esDiskUsageStats[0]['disk.total']) * (float(limitPercent) / 100.0)) // 1000000
 

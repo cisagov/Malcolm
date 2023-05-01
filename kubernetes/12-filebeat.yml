@@ -1,0 +1,101 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: filebeat
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5045
+      protocol: TCP
+      name: tcpjson
+  selector:
+    name: filebeat-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: filebeat-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: filebeat-deployment
+    spec:
+      containers:
+      - name: filebeat-container
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: tcpjson
+            protocol: TCP
+            containerPort: 5045
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: nginx-env
+          - configMapRef:
+              name: opensearch-env
+          - configMapRef:
+              name: upload-common-env
+          - configMapRef:
+              name: beats-common-env
+          - configMapRef:
+              name: filebeat-env
+        livenessProbe:
+          exec:
+            command:
+            - supervisorctl
+            - status
+            - filebeat
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: filebeat-var-local-catrust-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: filebeat-opensearch-curlrc-secret-volume
+          - mountPath: /certs/secretmap
+            name: filebeat-certs-secret-volume
+          - mountPath: "/zeek"
+            name: filebeat-zeek-volume
+          - mountPath: "/suricata"
+            name: filebeat-suricata-volume
+          - name: filebeat-nginx-runtime-logs-volume
+            mountPath: /nginx
+            subPath: "nginx"
+      volumes:
+        - name: filebeat-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: filebeat-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: filebeat-certs-secret-volume
+          secret:
+            secretName: filebeat-certs
+        - name: filebeat-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: filebeat-suricata-volume
+          persistentVolumeClaim:
+            claimName: suricata-claim
+        - name: filebeat-nginx-runtime-logs-volume
+          persistentVolumeClaim:
+            readOnly: true
+            claimName: runtime-logs-claim

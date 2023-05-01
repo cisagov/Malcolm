@@ -4,9 +4,6 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG SITE_NAME="Capture File and Log Archive Upload"
-
-ENV SITE_NAME $SITE_NAME
 ENV JQUERY_FILE_UPLOAD_VERSION v9.19.1
 ENV JQUERY_FILE_UPLOAD_URL "https://github.com/blueimp/jQuery-File-Upload/archive/${JQUERY_FILE_UPLOAD_VERSION}.tar.gz"
 
@@ -52,6 +49,9 @@ ENV TERM xterm
 ARG PHP_VERSION=7.4
 ENV PHP_VERSION $PHP_VERSION
 
+ARG SITE_NAME="Capture File and Log Archive Upload"
+ENV SITE_NAME $SITE_NAME
+
 COPY --from=build /jQuery-File-Upload/ /var/www/upload/
 
 RUN apt-get -q update && \
@@ -72,9 +72,11 @@ RUN apt-get -q update && \
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/*
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
-ADD file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD file-upload/jquery-file-upload/bootstrap.min.css /var/www/upload/bower_components/bootstrap/dist/css/bootstrap.min.css
 ADD file-upload/jquery-file-upload/index.html /var/www/upload/index.html
 ADD file-upload/jquery-file-upload/index.php /var/www/upload/server/php/index.php
@@ -101,7 +103,12 @@ RUN mkdir -p /var/run/sshd /var/www/upload/server/php/chroot /run/php && \
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]
 EXPOSE 22 80
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "upload", \
+            "/docker-entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 

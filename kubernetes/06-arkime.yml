@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arkime
+  namespace: malcolm
+spec:
+  ports:
+    - port: 8005
+      protocol: TCP
+      name: http
+  selector:
+    name: arkime-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arkime-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: arkime-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: arkime-deployment
+    spec:
+      containers:
+      - name: arkime-container
+        image: ghcr.io/idaholab/malcolm/arkime:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        securityContext:
+          capabilities:
+            add:
+              - IPC_LOCK
+              - SYS_RESOURCE
+        ports:
+          - name: http
+            protocol: TCP
+            containerPort: 8005
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: opensearch-env
+          - secretRef:
+              name: auth-env
+          - configMapRef:
+              name: upload-common-env
+          - configMapRef:
+              name: arkime-env
+          - secretRef:
+              name: arkime-secret-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "arkime.malcolm.local"
+        livenessProbe:
+          httpGet:
+            path: /_ns_/nstest.html
+            port: 8005
+            scheme: HTTPS
+          initialDelaySeconds: 210
+          periodSeconds: 90
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: arkime-var-local-catrust-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: arkime-opensearch-curlrc-secret-volume
+          - mountPath: "/data/pcap"
+            name: arkime-pcap-volume
+          - name: arkime-runtime-logs-volume
+            mountPath: /opt/arkime/logs
+            subPath: "arkime"
+      volumes:
+        - name: arkime-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: arkime-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: arkime-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim
+        - name: arkime-runtime-logs-volume
+          persistentVolumeClaim:
+            claimName: runtime-logs-claim

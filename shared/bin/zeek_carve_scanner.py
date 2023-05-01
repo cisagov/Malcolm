@@ -15,18 +15,49 @@ import os
 import pathlib
 import json
 import signal
+import logging
 import sys
 import threading
 import time
 import zmq
 
-from zeek_carve_utils import *
 from multiprocessing.pool import ThreadPool
 
+from zeek_carve_utils import (
+    AnalyzerResult,
+    AnalyzerScan,
+    BroSignatureLine,
+    CapaScan,
+    CarvedFileSubscriberThreaded,
+    ClamAVScan,
+    extracted_filespec_to_fields,
+    FILE_SCAN_RESULT_DESCRIPTION,
+    FILE_SCAN_RESULT_ENGINES,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_FILE_SIZE,
+    FILE_SCAN_RESULT_HITS,
+    FILE_SCAN_RESULT_MESSAGE,
+    FILE_SCAN_RESULT_SCANNER,
+    FILE_SCAN_RESULT_FILE_TYPE,
+    FileScanProvider,
+    PRESERVE_ALL,
+    PRESERVE_NONE,
+    PRESERVE_PRESERVED_DIR_NAME,
+    PRESERVE_QUARANTINED,
+    PRESERVE_QUARANTINED_DIR_NAME,
+    SINK_PORT,
+    VENTILATOR_PORT,
+    VirusTotalSearch,
+    YARA_CUSTOM_RULES_DIR,
+    YARA_RULES_DIR,
+    YaraScan,
+    ZEEK_SIGNATURE_NOTICE,
+)
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, AtomicInt
+
+
 ###################################################################################################
-debug = False
-verboseDebug = False
-debugToggled = False
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
@@ -34,6 +65,7 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -50,19 +82,8 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
 # look for a file to scan (probably in its original directory, but possibly already moved to quarantine)
 def locate_file(fileInfo):
-    global verboseDebug
-
     if isinstance(fileInfo, dict) and (FILE_SCAN_RESULT_FILE in fileInfo):
         fileName = fileInfo[FILE_SCAN_RESULT_FILE]
     elif isinstance(fileInfo, str):
@@ -71,7 +92,6 @@ def locate_file(fileInfo):
         fileName = None
 
     if fileName is not None:
-
         if os.path.isfile(fileName):
             return fileName
 
@@ -81,8 +101,7 @@ def locate_file(fileInfo):
                     os.path.join(os.path.dirname(os.path.realpath(fileName)), testPath), os.path.basename(fileName)
                 )
                 if os.path.isfile(testFileName):
-                    if verboseDebug:
-                        eprint(f"{scriptName}:\t⏩\t{testFileName}")
+                    logging.debug(f"{scriptName}:\t⏩\t{testFileName}")
                     return testFileName
 
     return None
@@ -90,20 +109,16 @@ def locate_file(fileInfo):
 
 ###################################################################################################
 def scanFileWorker(checkConnInfo, carvedFileSub):
-    global debug
-    global verboseDebug
     global shuttingDown
     global scanWorkersCount
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
     scannerRegistered = False
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    logging.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
     try:
         if isinstance(checkConnInfo, FileScanProvider):
-
             # initialize ZeroMQ context and socket(s) to send scan results
             context = zmq.Context()
 
@@ -112,8 +127,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
             scanned_files_socket.connect(f"tcp://localhost:{SINK_PORT}")
             # todo: do I want to set this? probably not, since what else would we do if we can't send? just block
             # scanned_files_socket.SNDTIMEO = 5000
-            if debug:
-                eprint(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
+            logging.info(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
 
             fileInfo = None
             fileName = None
@@ -121,7 +135,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
             # loop forever, or until we're told to shut down
             while not shuttingDown:
-
                 # "register" this scanner with the logger
                 while (not scannerRegistered) and (not shuttingDown):
                     try:
@@ -129,13 +142,11 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                             json.dumps({FILE_SCAN_RESULT_SCANNER: checkConnInfo.scanner_name()})
                         )
                         scannerRegistered = True
-                        if debug:
-                            eprint(f"{scriptName}[{scanWorkerId}]:\t🇷\t{checkConnInfo.scanner_name()}")
+                        logging.info(f"{scriptName}[{scanWorkerId}]:\t🇷\t{checkConnInfo.scanner_name()}")
 
-                    except zmq.Again as timeout:
+                    except zmq.Again:
                         # todo: what to do here?
-                        if verboseDebug:
-                            eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🇷")
+                        logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🇷")
 
                 if shuttingDown:
                     break
@@ -143,8 +154,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                 if retrySubmitFile and (fileInfo is not None) and (locate_file(fileInfo) is not None):
                     # we were unable to submit the file for processing, so try again
                     time.sleep(1)
-                    if debug:
-                        eprint(f"{scriptName}[{scanWorkerId}]:\t🔃\t{json.dumps(fileInfo)}")
+                    logging.info(f"{scriptName}[{scanWorkerId}]:\t🔃\t{json.dumps(fileInfo)}")
 
                 else:
                     retrySubmitFile = False
@@ -153,10 +163,8 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                 fileName = locate_file(fileInfo)
                 if (fileName is not None) and os.path.isfile(fileName):
-
                     # file exists, submit for scanning
-                    if debug:
-                        eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
+                    logging.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{json.dumps(fileInfo)}")
                     requestComplete = False
                     scanResult = None
                     fileSize = (
@@ -181,8 +189,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                         ),
                     )
                     if scan.submissionResponse is not None:
-                        if debug:
-                            eprint(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
+                        logging.info(f"{scriptName}[{scanWorkerId}]:\t🔍\t{fileName}")
 
                         # file was successfully submitted and is now being scanned
                         retrySubmitFile = False
@@ -190,13 +197,11 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                         # todo: maximum time we wait for a single file to be scanned?
                         while (not requestComplete) and (not shuttingDown):
-
                             # wait a moment then check to see if the scan is complete
                             time.sleep(scan.provider.check_interval())
                             response = scan.provider.check_result(scan.submissionResponse)
 
                             if isinstance(response, AnalyzerResult):
-
                                 # whether the scan has completed
                                 requestComplete = response.finished
 
@@ -229,13 +234,11 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                         try:
                             # Send results to sink
                             scanned_files_socket.send_string(json.dumps(scan.provider.format(fileName, scanResult)))
-                            if debug:
-                                eprint(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
+                            logging.info(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
 
-                        except zmq.Again as timeout:
+                        except zmq.Again:
                             # todo: what to do here?
-                            if verboseDebug:
-                                eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
+                            logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
 
         else:
             eprint(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
@@ -248,51 +251,23 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                     json.dumps({FILE_SCAN_RESULT_SCANNER: f"-{checkConnInfo.scanner_name()}"})
                 )
                 scannerRegistered = False
-                if debug:
-                    eprint(f"{scriptName}[{scanWorkerId}]:\t🙃\t{checkConnInfo.scanner_name()}")
-            except zmq.Again as timeout:
+                logging.info(f"{scriptName}[{scanWorkerId}]:\t🙃\t{checkConnInfo.scanner_name()}")
+            except zmq.Again:
                 # todo: what to do here?
-                if verboseDebug:
-                    eprint(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🙃")
+                logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🙃")
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
+    logging.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
 
 ###################################################################################################
 # main
 def main():
     global args
-    global debug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
-    global verboseDebug
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--start-sleep',
         dest='startSleepSec',
@@ -389,20 +364,20 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
@@ -418,11 +393,14 @@ def main():
         if not args.yaraCustomOnly:
             yaraDirs.append(YARA_RULES_DIR)
         yaraDirs.append(YARA_CUSTOM_RULES_DIR)
-        checkConnInfo = YaraScan(debug=debug, verboseDebug=verboseDebug, rulesDirs=yaraDirs, reqLimit=args.reqLimit)
+        checkConnInfo = YaraScan(
+            logger=logging,
+            rulesDirs=yaraDirs,
+            reqLimit=args.reqLimit,
+        )
     elif args.enableCapa:
         checkConnInfo = CapaScan(
-            debug=debug,
-            verboseDebug=verboseDebug,
+            logger=logging,
             rulesDir=args.capaRulesDir,
             verboseHits=args.capaVerbose,
             reqLimit=args.reqLimit,
@@ -431,15 +409,20 @@ def main():
         if not args.enableClamAv:
             eprint('No scanner specified, defaulting to ClamAV')
         checkConnInfo = ClamAVScan(
-            debug=debug, verboseDebug=verboseDebug, socketFileName=args.clamAvSocket, reqLimit=args.reqLimit
+            logger=logging,
+            socketFileName=args.clamAvSocket,
+            reqLimit=args.reqLimit,
         )
 
     carvedFileSub = CarvedFileSubscriberThreaded(
-        debug=debug, verboseDebug=verboseDebug, host='localhost', port=VENTILATOR_PORT, scriptName=scriptName
+        logger=logging,
+        host='localhost',
+        port=VENTILATOR_PORT,
+        scriptName=scriptName,
     )
 
     # start scanner threads which will pull filenames to be scanned and send the results to the logger
-    scannerThreads = ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
+    ThreadPool(checkConnInfo.max_requests(), scanFileWorker, ([checkConnInfo, carvedFileSub]))
     while not shuttingDown:
         if pdbFlagged:
             pdbFlagged = False
