@@ -1,7 +1,7 @@
 certifi==2022.12.7
 chardet==5.1.0
 click==8.1.3
-Flask==2.2.3
+Flask==2.3.2
 Flask-Cors==3.0.10
 gunicorn==20.1.0
 idna==3.4
