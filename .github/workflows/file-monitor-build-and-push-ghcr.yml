@@ -5,11 +5,13 @@ on:
     branches:
       - main
       - development
-      - kubernetes
     paths:
       - 'file-monitor/**'
       - 'Dockerfiles/file-monitor.Dockerfile'
       - 'shared/bin/*'
+      - '!shared/bin/agg-init.sh'
+      - '!shared/bin/common-init.sh'
+      - '!shared/bin/sensor-init.sh'
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'
       - '.trigger_workflow_build'
