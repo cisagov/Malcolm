@@ -3,7 +3,7 @@
 
 import argparse
 import json
-import malcolm_common
+import malcolm_utils
 import re
 import requests
 import os
@@ -28,6 +28,7 @@ scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 urllib3.disable_warnings()
+
 
 ###################################################################################################
 # print to stderr
@@ -88,7 +89,7 @@ def main():
         dest='opensearchCurlRcFile',
         metavar='<filename>',
         type=str,
-        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/opensearch.primary.curlrc'),
+        default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
         help='cURL.rc formatted file containing OpenSearch connection parameters',
     )
     parser.add_argument(
@@ -148,7 +149,7 @@ def main():
 
     args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
     opensearchCreds = (
-        malcolm_common.ParseCurlFile(args.opensearchCurlRcFile)
+        malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile)
         if (not args.opensearchIsLocal)
         else defaultdict(lambda: None)
     )
@@ -199,7 +200,6 @@ def main():
         eprint('Index ID for {} is {}'.format(args.index, indexId))
 
     if indexId is not None:
-
         # get the current fields list
         getFieldsResponse = requests.get(
             '{}/{}'.format(args.dashboardsUrl, GET_FIELDS_URI),
@@ -214,7 +214,6 @@ def main():
         # get the fields from the template, if specified, and merge those into the fields list
         if args.template is not None:
             try:
-
                 # request template from OpenSearch and pull the mappings/properties (field list) out
                 getTemplateResponse = requests.get(
                     '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template),
@@ -225,7 +224,6 @@ def main():
                 getTemplateResponseJson = getTemplateResponse.json()
                 if 'index_templates' in getTemplateResponseJson:
                     for template in getTemplateResponseJson['index_templates']:
-
                         templateFields = template['index_template']['template']['mappings']['properties']
 
                         # also include fields from component templates into templateFields before processing
@@ -259,7 +257,6 @@ def main():
                                 and ('type' in templateFields[field])
                                 and (templateFields[field]['type'] in mergeFieldTypes)
                             ):
-
                                 # create field dict in same format as those returned by GET_FIELDS_URI above
                                 mergedFieldInfo = {}
                                 mergedFieldInfo['name'] = field
@@ -321,7 +318,6 @@ def main():
         fieldFormatMap = {}
         for field in getFieldsList:
             if field['name'][:1].isalpha():
-
                 # for Arkime to query by database field name, see arkime issue/PR 1461/1463
                 valQuote = '"' if field['type'] == 'string' else ''
                 valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'

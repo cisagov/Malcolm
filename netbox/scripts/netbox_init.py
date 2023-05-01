@@ -26,6 +26,7 @@ script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 
+
 ###################################################################################################
 def get_iterable(x):
     if isinstance(x, Iterable) and not isinstance(x, str):
@@ -36,7 +37,7 @@ def get_iterable(x):
 
 def is_ip_address(x):
     try:
-        ip = ipaddress.ip_address(x)
+        ipaddress.ip_address(x)
         return True
     except Exception:
         return False
@@ -44,7 +45,7 @@ def is_ip_address(x):
 
 def is_ip_v4_address(x):
     try:
-        ip = ipaddress.IPv4Address(x)
+        ipaddress.IPv4Address(x)
         return True
     except Exception:
         return False
@@ -52,7 +53,7 @@ def is_ip_v4_address(x):
 
 def is_ip_v6_address(x):
     try:
-        ip = ipaddress.IPv6Address(x)
+        ipaddress.IPv6Address(x)
         return True
     except Exception:
         return False
@@ -60,7 +61,7 @@ def is_ip_v6_address(x):
 
 def is_ip_network(x):
     try:
-        ip = ipaddress.ip_network(x)
+        ipaddress.ip_network(x)
         return True
     except Exception:
         return False
@@ -274,14 +275,14 @@ def main():
     # wait for a good connection
     while args.wait:
         try:
-            sitesConnTest = [x.name for x in nb.dcim.sites.all()]
+            [x.name for x in nb.dcim.sites.all()]
             break
         except Exception as e:
             logging.info(f"{type(e).__name__}: {e}")
             logging.debug("retrying in a few seconds...")
             time.sleep(5)
 
-    ###### GROUPS ################################################################################################
+    # GROUPS #####################################################################################################
     DEFAULT_GROUP_NAMES = (
         args.staffGroupName,
         args.defaultGroupName,
@@ -303,7 +304,7 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing groups: {e}")
 
-    ####### PERMISSIONS ###########################################################################################
+    # PERMISSIONS ##################################################################################################
     DEFAULT_PERMISSIONS = {
         f'{args.staffGroupName}_permission': {
             'name': f'{args.staffGroupName}_permission',
@@ -531,7 +532,6 @@ def main():
             with open(args.netMapFileName) as f:
                 netMapJson = json.load(f)
         if netMapJson is not None:
-
             # create new VRFs
             vrfPreExisting = {x.name: x for x in nb.ipam.vrfs.all()}
             logging.debug(f"VRFs (before): { {k:v.id for k, v in vrfPreExisting.items()} }")

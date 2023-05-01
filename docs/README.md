@@ -4,7 +4,7 @@
 
 Malcolm processes network traffic data in the form of packet capture (docs/PCAP) files or Zeek logs. A [sensor](live-analysis.md#Hedgehog) (packet capture appliance) monitors network traffic mirrored to it over a SPAN port on a network switch or router, or using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs and [Arkime](https://arkime.com/) sessions are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for examination later.
 
-Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (docs/OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments](host-and-subnet-mapping.md#SegmentNaming) and [hosts](host-and-subnet-mapping.md#HostNaming) based on user-defined IP address and MAC mappings, performing [TLS fingerprinting](https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
+Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (docs/OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments and hosts](asset-interaction-analysis.md#AssetInteractionAnalysis) based on a user-defined asset inventory, performing [TLS fingerprinting](https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
 
 The enriched data is stored in an [OpenSearch](https://opensearch.org/) document store in a format suitable for analysis through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or for display in a security operations center (SOC). Logs can also optionally be forwarded on to another instance of Malcolm.
 
@@ -24,7 +24,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 * [Configuration](malcolm-preparation.md#Configuration)
     - [Recommended system requirements](system-requirements.md#SystemRequirements)
     - [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
-        + [`docker-compose.yml` parameters](malcolm-config.md#DockerComposeYml)
+        + [Environment Variable Files](malcolm-config.md#MalcolmConfigEnvVars)
     - [Configure authentication](authsetup.md#AuthSetup)
         + [Local account management](authsetup.md#AuthBasicAccountManagement)
         + [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP)
@@ -71,11 +71,6 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
 * [Search Queries in Arkime and OpenSearch](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
-    - [Automatic host and subnet name assignment](host-and-subnet-mapping.md#HostAndSubnetNaming)
-        + [Defining hostname and CIDR subnet names interface](host-and-subnet-mapping.md#NameMapUI)
-        + [Applying mapping changes](host-and-subnet-mapping.md#ApplyMapping)
-        + [IP/MAC address to hostname mapping](host-and-subnet-mapping.md#HostNaming)
-        + [CIDR subnet to network segment name mapping](host-and-subnet-mapping.md#SegmentNaming)
     - [OpenSearch index management](index-management.md#IndexManagement)
     - [Event severity scoring](severity.md#Severity)
         + [Customizing event severity scoring](severity.md#SeverityConfig)
@@ -102,6 +97,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
     - [Generating the ISO](malcolm-iso.md#ISOBuild)
     - [Setup](malcolm-iso.md#ISOSetup)
     - [Time synchronization](time-sync.md#ConfigTime)
+* [Deploying Malcolm with Kubernetes](kubernetes.md#Kubernetes)
 * [Hardening](hardening.md#Hardening)
     - [Compliance Exceptions](hardening.md#ComplianceExceptions)
 * [Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)

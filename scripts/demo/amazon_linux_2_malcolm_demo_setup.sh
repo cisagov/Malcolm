@@ -559,6 +559,7 @@ function InstallMalcolm {
         "LOGSTASH_REVERSE_DNS:'true'"
         "LOGSTASH_SEVERITY_SCORING:'true'"
         "PCAP_PIPELINE_IGNORE_PREEXISTING:'true'"
+        "PCAP_PIPELINE_POLLING:'true'"
         "YARA_MAX_REQUESTS:4"
         "ZEEK_AUTO_ANALYZE_PCAP_FILES:'true'"
         "ZEEK_DISABLE_BEST_GUESS_ICS:''"
@@ -572,7 +573,8 @@ function InstallMalcolm {
           sed -i "s/\(^[[:space:]]*$KEY[[:space:]]*:[[:space:]]*\).*/\1$VALUE/g" "$CONFIG"
         done
       done
-      touch auth.env
+      mkdir -p ./config
+      touch ./config/auth.env
       grep image: docker-compose-standalone.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1

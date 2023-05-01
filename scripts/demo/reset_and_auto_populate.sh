@@ -319,7 +319,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
 
         # get the total number of session records in the database
         NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
-                          curl -sSL "http://localhost:5000/agg/event.provider?from=1970" | \
+                          curl -sSL "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
                           jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
                           awk '{s+=$1} END {print s}') 2>/dev/null )
         if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
@@ -370,7 +370,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
-    for CONTAINER in filebeat logstash upload pcap-monitor zeek name-map-ui pcap-capture freq; do
+    for CONTAINER in filebeat logstash upload pcap-monitor zeek pcap-capture freq; do
       docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5

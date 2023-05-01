@@ -17,7 +17,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "filebeat"
 ENV PGROUP "filebeat"
 # not dropping privileges globally: supervisord will take care of it
-# on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.sh)
+# on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.py)
 # can chown uploaded files
 ENV PUSER_PRIV_DROP false
 
@@ -37,6 +37,8 @@ ARG FILEBEAT_ZEEK_LOG_PATH="/zeek/current"
 ARG FILEBEAT_ZEEK_LOG_LIVE_PATH="/zeek/live"
 ARG FILEBEAT_SURICATA_LOG_PATH="/suricata"
 ARG FILEBEAT_NGINX_LOG_PATH="/nginx"
+ARG FILEBEAT_WATCHER_POLLING=false
+ARG FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC=10
 ARG LOG_CLEANUP_MINUTES=0
 ARG ZIP_CLEANUP_MINUTES=0
 ARG NGINX_LOG_ACCESS_AND_ERRORS=false
@@ -57,10 +59,10 @@ ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
 ARG FILEBEAT_TCP_TAG="_malcolm_beats"
 
-ENV SUPERCRONIC_VERSION "0.2.2"
+ENV SUPERCRONIC_VERSION "0.2.24"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "2319da694833c7a147976b8e5f337cd83397d6be"
+ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV TINI_VERSION v0.19.0
@@ -91,7 +93,7 @@ RUN apt-get -q update && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor && \
+    python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -102,12 +104,15 @@ RUN apt-get -q update && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
+ADD shared/bin/watch_common.py /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
 RUN for INPUT in nginx tcp; do \
@@ -123,6 +128,8 @@ RUN for INPUT in nginx tcp; do \
 ENV AUTO_TAG $AUTO_TAG
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
 ENV ZIP_CLEANUP_MINUTES $ZIP_CLEANUP_MINUTES
+ENV FILEBEAT_WATCHER_POLLING $FILEBEAT_WATCHER_POLLING
+ENV FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC $FILEBEAT_WATCHER_POLLING_ASSUME_CLOSED_SEC
 ENV FILEBEAT_SCAN_FREQUENCY $FILEBEAT_SCAN_FREQUENCY
 ENV FILEBEAT_CLEAN_INACTIVE $FILEBEAT_CLEAN_INACTIVE
 ENV FILEBEAT_IGNORE_OLDER $FILEBEAT_IGNORE_OLDER
@@ -157,7 +164,11 @@ ENV FILEBEAT_ZEEK_DIR "/zeek/"
 
 VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "filebeat"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

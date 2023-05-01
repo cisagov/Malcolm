@@ -1,0 +1,641 @@
+{
+  "version": "2.6.0",
+  "objects": [
+    {
+      "id": "2cc56240-e460-11ed-a9d5-9f591c284cb4",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:48:24.081Z",
+      "version": "Wzk1MSwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor",
+        "hits": 0,
+        "description": "Dashboard for the DNP3 Protocol",
+        "panelsJSON": "[{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":30,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":13,\"h\":18,\"i\":\"38d18152-c0f9-436b-a19d-ac76cfbc1bac\"},\"panelIndex\":\"38d18152-c0f9-436b-a19d-ac76cfbc1bac\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":21,\"y\":0,\"w\":27,\"h\":18,\"i\":\"b3c290e3-6d8f-4616-beaa-f5183a0d5208\"},\"panelIndex\":\"b3c290e3-6d8f-4616-beaa-f5183a0d5208\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":8,\"y\":18,\"w\":8,\"h\":19,\"i\":\"faf91692-201a-47c1-9439-62cb71e577de\"},\"panelIndex\":\"faf91692-201a-47c1-9439-62cb71e577de\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":16,\"y\":18,\"w\":10,\"h\":19,\"i\":\"3a54cfa0-dc19-49ad-b63f-8e570227587d\"},\"panelIndex\":\"3a54cfa0-dc19-49ad-b63f-8e570227587d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":26,\"y\":18,\"w\":10,\"h\":19,\"i\":\"118707f0-37e5-4838-b58f-a9c75b37f021\"},\"panelIndex\":\"118707f0-37e5-4838-b58f-a9c75b37f021\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":36,\"y\":18,\"w\":12,\"h\":19,\"i\":\"3a76fd84-afcf-4c18-b378-c2434c1c2ce3\"},\"panelIndex\":\"3a76fd84-afcf-4c18-b378-c2434c1c2ce3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":30,\"w\":8,\"h\":13,\"i\":\"3033af99-af03-4def-b524-55bf5706e9e7\"},\"panelIndex\":\"3033af99-af03-4def-b524-55bf5706e9e7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":8,\"y\":37,\"w\":10,\"h\":19,\"i\":\"063f5459-fca9-4f55-b0a8-5fc15d59e1e2\"},\"panelIndex\":\"063f5459-fca9-4f55-b0a8-5fc15d59e1e2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":18,\"y\":37,\"w\":10,\"h\":19,\"i\":\"668fcd2b-fcb1-468e-89af-d10a89e66992\"},\"panelIndex\":\"668fcd2b-fcb1-468e-89af-d10a89e66992\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":28,\"y\":37,\"w\":10,\"h\":19,\"i\":\"7ad5b38e-aa33-45b2-83b5-650ea45778f5\"},\"panelIndex\":\"7ad5b38e-aa33-45b2-83b5-650ea45778f5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":38,\"y\":37,\"w\":10,\"h\":19,\"i\":\"b94ddaeb-f509-401c-8f14-ae0d4c363dc8\"},\"panelIndex\":\"b94ddaeb-f509-401c-8f14-ae0d4c363dc8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":43,\"w\":8,\"h\":13,\"i\":\"8fd25887-38e9-4cb7-8c85-f659f2337b65\"},\"panelIndex\":\"8fd25887-38e9-4cb7-8c85-f659f2337b65\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":56,\"w\":48,\"h\":18,\"i\":\"2e030d08-7422-4420-9c32-515ea641f5ec\"},\"panelIndex\":\"2e030d08-7422-4420-9c32-515ea641f5ec\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":74,\"w\":48,\"h\":18,\"i\":\"44849c88-bbe0-4907-94a6-4a930b3bf61c\"},\"panelIndex\":\"44849c88-bbe0-4907-94a6-4a930b3bf61c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":92,\"w\":48,\"h\":24,\"i\":\"8afdbe78-d879-4285-b589-769e1f006ebf\"},\"panelIndex\":\"8afdbe78-d879-4285-b589-769e1f006ebf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"2.6.0\",\"gridData\":{\"x\":0,\"y\":116,\"w\":48,\"h\":22,\"i\":\"dba8956a-61cf-4d3a-a691-07a97072b51c\"},\"panelIndex\":\"dba8956a-61cf-4d3a-a691-07a97072b51c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"}]",
+        "optionsJSON": "{\"useMargins\":true}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "visualization",
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3"
+        },
+        {
+          "name": "panel_1",
+          "type": "visualization",
+          "id": "a4acba10-e460-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "f3dffed0-e460-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "2928e520-e461-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_4",
+          "type": "visualization",
+          "id": "606cff30-e461-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_5",
+          "type": "visualization",
+          "id": "e286d040-e461-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_6",
+          "type": "visualization",
+          "id": "28c384e0-e467-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_7",
+          "type": "visualization",
+          "id": "9ba20280-e461-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_8",
+          "type": "visualization",
+          "id": "b2f24660-e467-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_9",
+          "type": "visualization",
+          "id": "6fe5f7e0-e467-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_10",
+          "type": "visualization",
+          "id": "8d694670-e465-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_11",
+          "type": "visualization",
+          "id": "fa71b860-e465-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_12",
+          "type": "visualization",
+          "id": "a7f2ae90-e466-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_13",
+          "type": "visualization",
+          "id": "9af335d0-e46a-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_14",
+          "type": "visualization",
+          "id": "6ed03030-e469-11ed-be6f-077da9a43874"
+        },
+        {
+          "name": "panel_15",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        },
+        {
+          "name": "panel_16",
+          "type": "search",
+          "id": "53729e40-e45f-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:57:19.151Z",
+      "version": "Wzg0OSwxXQ==",
+      "attributes": {
+        "title": "Network Logs",
+        "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Known Summary](/dashboards/app/dashboards#/view/89d1cc50-974c-11ed-bb6b-3fb06c879b11)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[Asset Interaction Analysis](/dashboards/app/dashboards#/view/677ee170-809e-11ed-8d5b-07069f823b6f)  \\n[↪ NetBox](/netbox/)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Synchrophasor](/dashboards/app/dashboards#/view/2cc56240-e460-11ed-a9d5-9f591c284cb4)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "a4acba10-e460-11ed-a9d5-9f591c284cb4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIwOSwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Log Count",
+        "visState": "{\"title\":\"Synchrophasor - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"},\"schema\":\"group\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "f3dffed0-e460-11ed-a9d5-9f591c284cb4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIxMCwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Log Count Over Time",
+        "visState": "{\"title\":\"Synchrophasor - Log Count Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-15y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\"\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "53729e40-e45f-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "2928e520-e461-11ed-a9d5-9f591c284cb4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIxMSwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Source",
+        "visState": "{\"title\":\"Synchrophasor - Source\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "53729e40-e45f-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "606cff30-e461-11ed-a9d5-9f591c284cb4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIxMiwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Destination",
+        "visState": "{\"title\":\"Synchrophasor - Destination\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "53729e40-e45f-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "e286d040-e461-11ed-a9d5-9f591c284cb4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:08:46.643Z",
+      "version": "Wzk0MCwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Action",
+        "visState": "{\"title\":\"Synchrophasor - Action\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Action\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "28c384e0-e467-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:18:43.502Z",
+      "version": "Wzk0NCwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Frame Types",
+        "visState": "{\"title\":\"Synchrophasor - Frame Types\",\"type\":\"horizontal_bar\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.synchrophasor.frame_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Frame Type\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"normal\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "9ba20280-e461-11ed-a9d5-9f591c284cb4",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIxNCwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Transport",
+        "visState": "{\"title\":\"Synchrophasor - Transport\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Transport\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "53729e40-e45f-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "b2f24660-e467-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:22:35.332Z",
+      "version": "Wzk0NiwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Stations",
+        "visState": "{\"title\":\"Synchrophasor - Stations\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.synchrophasor_cfg_detail.station_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Station\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "6fe5f7e0-e467-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:20:42.844Z",
+      "version": "Wzk0NSwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Phasors",
+        "visState": "{\"title\":\"Synchrophasor - Phasors\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.synchrophasor_cfg_detail.phnam\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Phasor\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "8d694670-e465-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:07:13.365Z",
+      "version": "WzkzNywxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Analog Channels",
+        "visState": "{\"title\":\"Synchrophasor - Analog Channels\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.synchrophasor_cfg_detail.annam\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Analog Channel\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "fa71b860-e465-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:10:16.291Z",
+      "version": "Wzk0MSwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Digital Channels",
+        "visState": "{\"title\":\"Synchrophasor - Digital Channels\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.synchrophasor_cfg_detail.dgnam\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Digital Channel\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "a7f2ae90-e466-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:15:07.383Z",
+      "version": "Wzk0MiwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Data Modified",
+        "visState": "{\"title\":\"Synchrophasor - Data Modified\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.synchrophasor_data_detail.data_modified\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Data Modified\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "9af335d0-e46a-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:43:23.563Z",
+      "version": "Wzk1MCwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Rate of Change of Frequency Over Time",
+        "visState": "{\"title\":\"Synchrophasor - Rate of Change of Frequency Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"zeek.synchrophasor_data_detail.rocof\",\"customLabel\":\"ROCOF (Hz/sec * 100)\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-15y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"Count\"},\"schema\":\"radius\"}],\"params\":{\"type\":\"line\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"ROCOF (Hz/sec * 100)\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"line\",\"mode\":\"stacked\",\"data\":{\"label\":\"ROCOF (Hz/sec * 100)\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":false,\"lineWidth\":2,\"interpolate\":\"linear\",\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"radiusRatio\":25}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "6ed03030-e469-11ed-be6f-077da9a43874",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T19:35:00.017Z",
+      "version": "Wzk0OCwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Frequency Deviation From Nominal Over Time",
+        "visState": "{\"title\":\"Synchrophasor - Frequency Deviation From Nominal Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"zeek.synchrophasor_data_detail.freq_dev_mhz\",\"customLabel\":\"Maximum frequency deviation from nominal (mHz)\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-15y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"log\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Maximum frequency deviation from nominal (mHz)\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Maximum frequency deviation from nominal (mHz)\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "031207a0-e460-11ed-a9d5-9f591c284cb4"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "031207a0-e460-11ed-a9d5-9f591c284cb4",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIxNSwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor and Related - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "event.dataset",
+          "network.transport",
+          "source.ip",
+          "destination.ip",
+          "destination.port",
+          "zeek.synchrophasor.frame_type",
+          "event.action",
+          "totDataBytes",
+          "zeek.uid"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:synchrophasor*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "53729e40-e45f-11ed-a9d5-9f591c284cb4",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-04-26T18:56:23.870Z",
+      "version": "WzIxNiwxXQ==",
+      "attributes": {
+        "title": "Synchrophasor - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "network.transport",
+          "network.protocol_version",
+          "source.ip",
+          "destination.ip",
+          "destination.port",
+          "zeek.synchrophasor.data_stream_id",
+          "zeek.synchrophasor.history",
+          "zeek.synchrophasor.data_rate",
+          "zeek.synchrophasor.data_frame_count",
+          "zeek.synchrophasor.frame_size_tot",
+          "zeek.uid"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.provider:zeek AND event.dataset:synchrophasor\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    }
+  ]
+}

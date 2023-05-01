@@ -19,19 +19,17 @@ Hedgehog Linux is a Debian-based operating system built to
     - [Installer](hedgehog-installation.md#HedgehogInstaller)
 * [Boot](hedgehog-boot.md#HedgehogBoot)
     - [Kiosk mode](hedgehog-boot.md#HedgehogKioskMode)
-* [Configuration](hedgehog-config.md#HedgehogConfiguration)
-    - [Interfaces, hostname, and time synchronization](hedgehog-config-root.md#HedgehogConfigRoot)
-        + [Hostname](hedgehog-config-root.md#HedgehogConfigHostname)
-        + [Interfaces](hedgehog-config-root.md#HedgehogConfigIface)
-        + [Time synchronization](hedgehog-config-root.md#HedgehogConfigTime)
-    - [Capture, forwarding, and autostart services](hedgehog-config-user.md#HedgehogConfigUser)
-        + [Capture](hedgehog-config-user.md#HedgehogConfigCapture)
-            * [Automatic file extraction and scanning](hedgehog-config-user.md#HedgehogZeekFileExtraction)
-        + [Forwarding](hedgehog-config-user.md#HedgehogConfigForwarding)
-            * [arkime-capture](hedgehog-config-user.md#Hedgehogarkime-capture): Arkime session forwarding
-            * [filebeat](hedgehog-config-user.md#Hedgehogfilebeat): Zeek and Suricata log forwarding
-            * [miscbeat](hedgehog-config-user.md#Hedgehogmiscbeat): System metrics forwarding        
-        + [Autostart services](hedgehog-config-user.md#HedgehogConfigAutostart)
+* [Configuration](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig)
+    - [Configure Hostname, Interfaces and Time Sync](malcolm-hedgehog-e2e-iso-install.md#HedgehogInterfaces)
+    - [Configure Capture](malcolm-hedgehog-e2e-iso-install.md#HedgehogCapture)
+        + [Capture](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigCapture)
+        + [File extraction and scanning](malcolm-hedgehog-e2e-iso-install.md#HedgehogZeekFileExtraction)
+    - [Configure Forwarding](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding)
+        * [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture): Arkime session forwarding
+        * [ssl-client-receive](malcolm-hedgehog-e2e-iso-install.md#HedgehogGetCerts): Receive client SSL files for filebeat from Malcolm
+        * [filebeat](malcolm-hedgehog-e2e-iso-install.md#Hedgehogfilebeat): Zeek and Suricata log forwarding
+        * [miscbeat](malcolm-hedgehog-e2e-iso-install.md#Hedgehogmiscbeat): System metrics forwarding        
+    - [Autostart services](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigAutostart)
 + [Zeek Intelligence Framework](hedgehog-config-zeek-intel.md#HedgehogZeekIntel)
 * [Appendix A - Generating the ISO](hedgehog-iso-build.md#HedgehogISOBuild)
 * [Appendix B - Configuring SSH access](hedgehog-ssh.md#HedgehogConfigSSH)

@@ -28,18 +28,19 @@ ENV PGROUP "zeeker"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+ENV PUSER_RLIMIT_UNLOCK true
 
 # for download and install
 ARG ZEEK_LTS=
-ARG ZEEK_VERSION=5.2.0-0
+ARG ZEEK_VERSION=5.2.1-0
 
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
 
-ENV SUPERCRONIC_VERSION "0.2.2"
+ENV SUPERCRONIC_VERSION "0.2.24"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "2319da694833c7a147976b8e5f337cd83397d6be"
+ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for build
@@ -149,9 +150,12 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/*/*
 
 # add configuration and scripts
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD shared/bin/pcap_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
@@ -187,7 +191,8 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/capstats && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
-    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py
+    ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
+    ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
@@ -204,8 +209,7 @@ ARG ZEEK_INTEL_REFRESH_THREADS=2
 ARG ZEEK_INTEL_FEED_SINCE=
 ARG ZEEK_EXTRACTOR_MODE=none
 ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
-ARG PCAP_PIPELINE_DEBUG=false
-ARG PCAP_PIPELINE_DEBUG_EXTRA=false
+ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG ZEEK_LIVE_CAPTURE=false
 ARG ZEEK_ROTATED_PCAP=false
@@ -225,8 +229,7 @@ ENV ZEEK_INTEL_REFRESH_THREADS $ZEEK_INTEL_REFRESH_THREADS
 ENV ZEEK_INTEL_FEED_SINCE $ZEEK_INTEL_FEED_SINCE
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
-ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
-ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
+ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV ZEEK_LIVE_CAPTURE $ZEEK_LIVE_CAPTURE
 ENV ZEEK_ROTATED_PCAP $ZEEK_ROTATED_PCAP
@@ -252,6 +255,7 @@ ARG ZEEK_DISABLE_SPICY_STUN=
 ARG ZEEK_DISABLE_SPICY_TAILSCALE=
 ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
+ARG ZEEK_SYNCHROPHASOR_DETAILED=
 
 ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
 ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
@@ -269,12 +273,18 @@ ENV ZEEK_DISABLE_SPICY_STUN $ZEEK_DISABLE_SPICY_STUN
 ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
+ENV ZEEK_SYNCHROPHASOR_DETAILED $ZEEK_SYNCHROPHASOR_DETAILED
 
 ENV PUSER_CHOWN "$ZEEK_DIR"
 
 VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/docker_entrypoint.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "zeek"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

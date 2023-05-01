@@ -1,0 +1,77 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-redis-cache
+  namespace: malcolm
+spec:
+  ports:
+    - port: 6379
+      protocol: TCP
+      name: redis
+  selector:
+    name: netbox-redis-cache-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-redis-cache-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: netbox-redis-cache-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: netbox-redis-cache-deployment
+    spec:
+      containers:
+      - name: netbox-redis-cache-container
+        image: ghcr.io/idaholab/malcolm/redis:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        command: ["sh"]
+        args: ["-c", "redis-server --requirepass $(REDIS_PASSWORD)"]
+        ports:
+          - name: redis
+            protocol: TCP
+            containerPort: 6379
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: netbox-common-env
+          - secretRef:
+              name: netbox-redis-cache-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "netbox-redis-cache.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+             - sh
+             - "-c"
+             - |
+               /bin/bash <<'EOF'
+
+               [[ "$NETBOX_REDIS_DISABLED" == 'true' ]] || ( pidof redis-server || exit 1 )
+
+               EOF
+          initialDelaySeconds: 45
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: netbox-redis-cache-var-local-catrust-volume
+      volumes:
+        - name: netbox-redis-cache-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust

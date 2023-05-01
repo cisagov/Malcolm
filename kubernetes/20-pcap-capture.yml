@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pcap-capture-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: pcap-capture-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: pcap-capture-deployment
+    spec:
+      containers:
+      - name: pcap-capture-container
+        image: ghcr.io/idaholab/malcolm/pcap-capture:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        securityContext:
+          capabilities:
+            add:
+              - IPC_LOCK
+              - NET_ADMIN
+              - NET_RAW
+              - SYS_ADMIN
+              - SYS_RESOURCE
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: pcap-capture-env
+        env:
+          - name: PCAP_CAPTURE_DISABLED
+            value: "true"
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: capture-var-local-catrust-volume
+          - mountPath: "/pcap"
+            name: capture-pcap-volume
+            subPath: "upload"
+      volumes:
+        - name: capture-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: capture-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim

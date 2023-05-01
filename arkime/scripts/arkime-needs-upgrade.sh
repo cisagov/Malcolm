@@ -4,7 +4,7 @@
 
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
   CURL_CONFIG_PARAMS=(
     --config

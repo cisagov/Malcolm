@@ -9,19 +9,20 @@ import json
 import os
 import socket
 import ssl
-import subprocess
 import sys
 import urllib.request
+import subprocess
 
 from base64 import b64encode
 from bs4 import BeautifulSoup
 from bs4.element import Comment
-from contextlib import closing
 from http.client import HTTPSConnection, HTTPConnection
-from multiprocessing import RawValue
-from threading import Lock
+from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+
+from malcolm_utils import run_subprocess
 
 NIC_BLINK_SECONDS = 10
+
 
 ###################################################################################################
 class CancelledError(Exception):
@@ -42,91 +43,6 @@ class Iface:
 def clearquit():
     os.system('clear')
     sys.exit(0)
-
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-# urlencode each character of a string
-def aggressive_url_encode(string):
-    return "".join("%{0:0>2}".format(format(ord(char), "x")) for char in string)
-
-
-###################################################################################################
-# strip a prefix from the beginning of a string if needed
-def remove_prefix(text, prefix):
-    if (len(prefix) > 0) and text.startswith(prefix):
-        return text[len(prefix) :]
-    else:
-        return text
-
-
-###################################################################################################
-# nice human-readable file sizes
-def sizeof_fmt(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
-        if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
-        num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-###################################################################################################
-# will it float?
-def isfloat(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
-
-###################################################################################################
-# check a string or list to see if something is a valid IP address
-def isipaddress(value):
-    result = True
-    try:
-        if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
-            for v in value:
-                ip = ipaddress.ip_address(v)
-        else:
-            ip = ipaddress.ip_address(value)
-    except:
-        result = False
-    return result
-
-
-###################################################################################################
-# execute a shell process returning its exit code and output
-def run_process(command, stdout=True, stderr=False, stdin=None, timeout=60):
-    retcode = -1
-    output = []
-    p = subprocess.run(
-        [command], input=stdin, universal_newlines=True, capture_output=True, shell=True, timeout=timeout
-    )
-    if p:
-        retcode = p.returncode
-        if stderr and p.stderr:
-            output.extend(p.stderr.splitlines())
-        if stdout and p.stdout:
-            output.extend(p.stdout.splitlines())
-
-    return retcode, output
 
 
 def tag_visible(element):
@@ -196,22 +112,10 @@ def test_connection(
 
 
 ###################################################################################################
-# test if a remote port is open
-def check_socket(host, port):
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-        sock.settimeout(10)
-        if sock.connect_ex((host, port)) == 0:
-            return True
-        else:
-            return False
-
-
-###################################################################################################
 # determine a list of available (non-virtual) adapters (Iface's)
 def get_available_adapters():
-
     available_adapters = []
-    _, all_iface_list = run_process("find /sys/class/net/ -mindepth 1 -maxdepth 1 -type l -printf '%P %l\\n'")
+    _, all_iface_list = run_subprocess("find /sys/class/net/ -mindepth 1 -maxdepth 1 -type l -printf '%P %l\\n'")
     available_iface_list = [x.split(" ", 1)[0] for x in all_iface_list if 'virtual' not in x]
 
     # for each adapter, determine its MAC address and link speed
@@ -221,12 +125,12 @@ def get_available_adapters():
         try:
             with open(f"/sys/class/net/{adapter}/address", 'r') as f:
                 mac_address = f.readline().strip()
-        except:
+        except Exception:
             pass
         try:
             with open(f"/sys/class/net/{adapter}/speed", 'r') as f:
                 speed = f.readline().strip()
-        except:
+        except Exception:
             pass
         description = f"{mac_address} ({speed} Mbits/sec)"
         iface = Iface(adapter, description)
@@ -245,7 +149,7 @@ def identify_adapter(adapter, duration=NIC_BLINK_SECONDS, background=False):
             stderr=subprocess.DEVNULL,
         )
     else:
-        retCode, _ = run_process(
+        retCode, _ = run_subprocess(
             f"/sbin/ethtool --identify {adapter} {duration}", stdout=False, stderr=False, timeout=duration * 2
         )
         return retCode == 0

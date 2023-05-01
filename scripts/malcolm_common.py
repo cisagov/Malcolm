@@ -3,8 +3,6 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import argparse
-import contextlib
 import getpass
 import importlib
 import json
@@ -13,23 +11,25 @@ import platform
 import re
 import string
 import sys
-import time
 
-from enum import IntFlag, auto
+import malcolm_utils
+from malcolm_utils import (
+    deep_get,
+    eprint,
+    EscapeAnsi,
+    LoadStrIfJson,
+    remove_suffix,
+    run_process,
+    str2bool,
+)
+
+from collections import defaultdict, namedtuple
+from enum import Flag, IntFlag, auto
 
 try:
     from pwd import getpwuid
 except ImportError:
     getpwuid = None
-from subprocess import PIPE, STDOUT, Popen, CalledProcessError
-
-
-from collections import defaultdict, namedtuple
-
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 
 try:
     from dialog import Dialog
@@ -38,6 +38,14 @@ try:
 except ImportError:
     Dialog = None
     MainDialog = None
+
+try:
+    from colorama import init as ColoramaInit, Fore, Back, Style
+
+    ColoramaInit()
+    coloramaImported = True
+except Exception:
+    coloramaImported = False
 
 ###################################################################################################
 ScriptPath = os.path.dirname(os.path.realpath(__file__))
@@ -90,75 +98,13 @@ DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compo
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
 
 
-###################################################################################################
-# chdir to directory as context manager, returning automatically
-@contextlib.contextmanager
-def pushd(directory):
-    prevDir = os.getcwd()
-    os.chdir(directory)
-    try:
-        yield
-    finally:
-        os.chdir(prevDir)
+class OrchestrationFramework(Flag):
+    UNKNOWN = auto()
+    DOCKER_COMPOSE = auto()
+    KUBERNETES = auto()
 
 
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-def EscapeAnsi(line):
-    ansiEscape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
-    return ansiEscape.sub('', line)
-
-
-###################################################################################################
-def EscapeForCurl(s):
-    return s.translate(
-        str.maketrans(
-            {
-                '"': r'\"',
-                "\\": r"\\",
-                "\t": r"\t",
-                "\n": r"\n",
-                "\r": r"\r",
-                "\v": r"\v",
-            }
-        )
-    )
-
-
-###################################################################################################
-def custom_make_translation(text, translation):
-    regex = re.compile('|'.join(map(re.escape, translation)))
-    return regex.sub(lambda match: translation[match.group(0)], text)
-
-
-##################################################################################################
-def UnescapeForCurl(s):
-    return custom_make_translation(
-        s,
-        {
-            r'\"': '"',
-            r"\t": "\t",
-            r"\n": "\n",
-            r"\r": "\r",
-            r"\v": "\v",
-            r"\\": "\\",
-        },
-    )
-
-
-###################################################################################################
-# if the object is an iterable, return it, otherwise return a tuple with it as a single element.
-# useful if you want to user either a scalar or an array in a loop, etc.
-def GetIterable(x):
-    if isinstance(x, Iterable) and not isinstance(x, str):
-        return x
-    else:
-        return (x,)
+OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
 
 
 ##################################################################################################
@@ -175,7 +121,7 @@ def ReplaceBindMountLocation(line, location, linePrefix):
 def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
     localPath = None
     if service and dockerComposeContents and containerPath:
-        vols = DeepGet(dockerComposeContents, ['services', service, 'volumes'])
+        vols = deep_get(dockerComposeContents, ['services', service, 'volumes'])
         if (vols is not None) and (len(vols) > 0):
             for vol in vols:
                 volSplit = vol.split(':')
@@ -190,75 +136,22 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
 
 
 ##################################################################################################
-def GetUidGidFromComposeFile(composeFile):
+def GetUidGidFromEnv(configDir=None):
+    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     uidGidDict = defaultdict(str)
-    pyPlatform = platform.system()
-    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-    if os.path.isfile(composeFile):
-        with open(composeFile, 'r') as f:
-            composeFileLines = f.readlines()
-            uidGidDict.update(
-                dict(
-                    x.split(':')
-                    for x in [
-                        ''.join(x.split()) for x in composeFileLines if re.search(r'^\s*P[UG]ID\s*:\s*\d+\s*$', x)
-                    ]
-                )
-            )
+    if dotEnvImported := DotEnvDynamic():
+        pyPlatform = platform.system()
+        uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+        uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+        envFileName = os.path.join(configDirToCheck, 'process.env')
+        if os.path.isfile(envFileName):
+            envValues = dotEnvImported.dotenv_values(envFileName)
+            if 'PUID' in envValues:
+                uidGidDict['PUID'] = envValues['PUID']
+            if 'PGID' in envValues:
+                uidGidDict['PGID'] = envValues['PGID']
+
     return uidGidDict
-
-
-###################################################################################################
-def same_file_or_dir(path1, path2):
-    try:
-        return os.path.samefile(path1, path2)
-    except Exception:
-        return False
-
-
-###################################################################################################
-# parse a curl-formatted config file, with special handling for user:password and URL
-# see https://everything.curl.dev/cmdline/configfile
-# e.g.:
-#
-# given .opensearch.primary.curlrc containing:
-# -
-# user: "sikari:changethis"
-# insecure
-# -
-#
-# ParseCurlFile('.opensearch.primary.curlrc') returns:
-#   {
-#    'user': 'sikari',
-#    'password': 'changethis',
-#    'insecure': ''
-#   }
-def ParseCurlFile(curlCfgFileName):
-    result = defaultdict(lambda: None)
-    if os.path.isfile(curlCfgFileName):
-        itemRegEx = re.compile(r'^([^\s:=]+)((\s*[:=]?\s*)(.*))?$')
-        with open(curlCfgFileName, 'r') as f:
-            allLines = [x.strip().lstrip('-') for x in f.readlines() if not x.startswith('#')]
-        for line in allLines:
-            found = itemRegEx.match(line)
-            if found is not None:
-                key = found.group(1)
-                value = UnescapeForCurl(found.group(4).lstrip('"').rstrip('"'))
-                if (key == 'user') and (':' in value):
-                    splitVal = value.split(':', 1)
-                    result[key] = splitVal[0]
-                    if len(splitVal) > 1:
-                        result['password'] = splitVal[1]
-                else:
-                    result[key] = value
-
-    return result
-
-
-###################################################################################################
-def contains_whitespace(s):
-    return True in [c in s for c in string.whitespace]
 
 
 ###################################################################################################
@@ -603,22 +496,6 @@ def DisplayProgramBox(
 
 
 ###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    elif isinstance(v, str):
-        if v.lower() in ("yes", "true", "t", "y", "1"):
-            return True
-        elif v.lower() in ("no", "false", "f", "n", "0"):
-            return False
-        else:
-            raise ValueError("Boolean value expected")
-    else:
-        raise ValueError("Boolean value expected")
-
-
-###################################################################################################
 # Dies if $value isn't positive. NoneType is also acceptable
 def posInt(value):
     if value is None:
@@ -626,120 +503,9 @@ def posInt(value):
 
     ivalue = int(value)
     if ivalue <= 0:
-        raise argparse.ArgumentTypeError("{} is an invalid positive int value".format(value))
+        raise ValueError("{} is an invalid positive int value".format(value))
 
     return ivalue
-
-
-###################################################################################################
-# determine if a program/script exists and is executable in the system path
-def Which(cmd, debug=False):
-    result = any(os.access(os.path.join(path, cmd), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
-    if debug:
-        eprint(f"Which {cmd} returned {result}")
-    return result
-
-
-###################################################################################################
-# nice human-readable file sizes
-def SizeHumanFormat(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
-        if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
-        num /= 1024.0
-    return f"{num:.1f}{'Yi'}{suffix}"
-
-
-###################################################################################################
-# is this string valid json? if so, load and return it
-def LoadStrIfJson(jsonStr):
-    try:
-        return json.loads(jsonStr)
-    except ValueError:
-        return None
-
-
-###################################################################################################
-# safe deep get for a dictionary
-#
-# Example:
-#   d = {'meta': {'status': 'OK', 'status_code': 200}}
-#   DeepGet(d, ['meta', 'status_code'])          # => 200
-#   DeepGet(d, ['garbage', 'status_code'])       # => None
-#   DeepGet(d, ['meta', 'garbage'], default='-') # => '-'
-def DeepGet(d, keys, default=None):
-    assert type(keys) is list
-    if d is None:
-        return default
-    if not keys:
-        return d
-    return DeepGet(d.get(keys[0]), keys[1:], default)
-
-
-###################################################################################################
-# run command with arguments and return its exit code, stdout, and stderr
-def check_output_input(*popenargs, **kwargs):
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden')
-
-    if 'stderr' in kwargs:
-        raise ValueError('stderr argument not allowed, it will be overridden')
-
-    if 'input' in kwargs and kwargs['input']:
-        if 'stdin' in kwargs:
-            raise ValueError('stdin and input arguments may not both be used')
-        inputdata = kwargs['input']
-        kwargs['stdin'] = PIPE
-    else:
-        inputdata = None
-    kwargs.pop('input', None)
-
-    process = Popen(*popenargs, stdout=PIPE, stderr=PIPE, **kwargs)
-    try:
-        output, errput = process.communicate(inputdata)
-    except Exception:
-        process.kill()
-        process.wait()
-        raise
-
-    retcode = process.poll()
-
-    return retcode, output, errput
-
-
-###################################################################################################
-# run command with arguments and return its exit code, stdout, and stderr
-def run_process(
-    command, stdout=True, stderr=True, stdin=None, retry=0, retrySleepSec=5, cwd=None, env=None, debug=False
-):
-    retcode = -1
-    output = []
-
-    try:
-        # run the command
-        retcode, cmdout, cmderr = check_output_input(
-            command, input=stdin.encode() if stdin else stdin, cwd=cwd, env=env
-        )
-
-        # split the output on newlines to return a list
-        if stderr and (len(cmderr) > 0):
-            output.extend(cmderr.decode(sys.getdefaultencoding()).split('\n'))
-        if stdout and (len(cmdout) > 0):
-            output.extend(cmdout.decode(sys.getdefaultencoding()).split('\n'))
-
-    except (FileNotFoundError, OSError, IOError):
-        if stderr:
-            output.append(f"Command {command} not found or unable to execute")
-
-    if debug:
-        eprint(f"{command}({stdin[:80] + bool(stdin[80:]) * '...' if stdin else ''}) returned {retcode}: {output}")
-
-    if (retcode != 0) and retry and (retry > 0):
-        # sleep then retry
-        time.sleep(retrySleepSec)
-        return run_process(command, stdout, stderr, stdin, retry - 1, retrySleepSec, cwd, env, debug)
-    else:
-        return retcode, output
 
 
 ###################################################################################################
@@ -766,12 +532,12 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
         pyPlatform = platform.system()
         pyExec = sys.executable
         pipCmd = "pip3"
-        if not Which(pipCmd, debug=debug):
+        if not malcolm_utils.which(pipCmd, debug=debug):
             pipCmd = "pip"
 
         eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
-        if interactive and Which(pipCmd, debug=debug):
+        if interactive and malcolm_utils.which(pipCmd, debug=debug):
             if YesOrNo(f"Importing the {pipPkgName} module failed. Attempt to install via {pipCmd}?"):
                 installCmd = None
 
@@ -815,22 +581,55 @@ def YAMLDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
 
 
+def KubernetesDynamic(verifySsl=False, debug=False, forceInteraction=False):
+    return DoDynamicImport("kubernetes", "kubernetes", interactive=forceInteraction, debug=debug)
+
+
+def DotEnvDynamic(debug=False, forceInteraction=False):
+    return DoDynamicImport("dotenv", "python-dotenv", interactive=forceInteraction, debug=debug)
+
+
 ###################################################################################################
 # do the required auth files for Malcolm exist?
-def MalcolmAuthFilesExist():
+def MalcolmAuthFilesExist(configDir=None):
+    configDirToCheck = (
+        configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
+    )
     return (
         os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox.env'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'postgres.env'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'redis-cache.env'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'redis.env'))))
-        and os.path.isfile(os.path.join(MalcolmPath, 'auth.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-redis-cache.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-redis.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
         and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
+
+
+###################################################################################################
+# determine if a YAML file looks like a docker-compose.yml file or a kubeconfig file
+def DetermineYamlFileFormat(inputFileName):
+    result = OrchestrationFramework.UNKNOWN
+
+    if yamlImported := YAMLDynamic():
+        try:
+            with open(inputFileName, 'r') as cf:
+                orchestrationYaml = yamlImported.safe_load(cf)
+
+            if isinstance(orchestrationYaml, dict):
+                if any(key in orchestrationYaml for key in ('apiVersion', 'clusters', 'contexts', 'kind')):
+                    result = OrchestrationFramework.KUBERNETES
+                elif 'services' in orchestrationYaml:
+                    result = OrchestrationFramework.DOCKER_COMPOSE
+
+        except Exception as e:
+            eprint(f'Error deciphering {inputFileName}: {e}')
+
+    return result
 
 
 ###################################################################################################
@@ -845,34 +644,202 @@ def DownloadToFile(url, local_filename, debug=False):
     fSize = os.path.getsize(local_filename)
     if debug:
         eprint(
-            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({SizeHumanFormat(fSize)})"
+            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({malcolm_utils.sizeof_fmt(fSize)})"
         )
     return fExists and (fSize > 0)
 
 
 ###################################################################################################
-# recursively remove empty subfolders
-def RemoveEmptyFolders(path, removeRoot=True):
-    if not os.path.isdir(path):
-        return
+# process log line from containers' output
 
-    files = os.listdir(path)
-    if len(files):
-        for f in files:
-            fullpath = os.path.join(path, f)
-            if os.path.isdir(fullpath):
-                RemoveEmptyFolders(fullpath)
+URL_USER_PASS_REGEX = re.compile(r'(\w+://[^/]+?:)[^/]+?(@[^/]+)')
 
-    files = os.listdir(path)
-    if len(files) == 0 and removeRoot:
-        try:
-            os.rmdir(path)
-        except Exception:
-            pass
+# noisy logs (a lot of it is NGINX logs from health checks)
+LOG_IGNORE_REGEX = re.compile(
+    r"""
+.+(
+    deprecated
+  | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
+  | \bGET.+\b302\s+30\b
+  | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
+  | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
+  | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
+  | /_ns_/nstest\.html
+  | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
+  | \b(d|es)?stats\.json
+  | \b1.+GET\s+/\s+.+401.+curl
+  | _cat/indices
+  | branding.*config\s+is\s+not\s+found\s+or\s+invalid
+  | but\s+there\s+are\s+no\s+living\s+connections
+  | Connecting\s+to\s+backoff
+  | curl.+localhost.+GET\s+/api/status\s+200
+  | DEPRECATION
+  | descheduling\s+job\s*id
+  | eshealth
+  | esindices/list
+  | executing\s+attempt_(transition|set_replica_count)\s+for
+  | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+  | loaded\s+config\s+'/etc/netbox/config/
+  | "netbox"\s+application\s+started
+  | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
+  | kube-probe/
+  | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
+  | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
+  | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
+  | POST\s+HTTP/[\d\.].+\b200\b
+  | reaped\s+unknown\s+pid
+  | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
+  | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
+  | retry\.go.+(send\s+unwait|done$)
+  | running\s+full\s+sweep
+  | saved_objects
+  | scheduling\s+job\s*id.+opendistro-ism
+  | SSL/TLS\s+verifications\s+disabled
+  | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
+  | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
+  | throttling\s+index
+  | update_mapping
+  | updating\s+number_of_replicas
+  | use_field_mapping
+  | Using\s+geoip\s+database
+)
+""",
+    re.VERBOSE | re.IGNORECASE,
+)
+
+# logs we don't want to eliminate, but we don't want to repeat ad-nauseum
+# TODO: not implemented yet
+#   dupeRegEx = re.compile(
+#       r"""
+#   .+(
+#       Maybe the destination pipeline is down or stopping
+#   )
+# """,
+#       re.VERBOSE | re.IGNORECASE,
+#   )
+
+SERVICE_REGEX = re.compile(r'^(?P<service>.+?\|)\s*(?P<message>.*)$')
+
+CONTAINER_REPL_REGEX = re.compile(r'([\w\.-]+)-container(\s*\|)')
+
+ISO8601_TIME_REGEX = re.compile(
+    r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$'
+)
 
 
-###################################################################################################
-# open a file and close it, updating its access time
-def Touch(filename):
-    open(filename, 'a').close()
-    os.utime(filename, None)
+def ProcessLogLine(line, debug=False):
+    global ISO8601_TIME_REGEX
+    global LOG_IGNORE_REGEX
+    global SERVICE_REGEX
+    global URL_USER_PASS_REGEX
+
+    outputStr = CONTAINER_REPL_REGEX.sub(r"\1\2", URL_USER_PASS_REGEX.sub(r"\1xxxxxxxx\2", line.decode().strip()))
+    outputStrEscaped = EscapeAnsi(outputStr)
+    if LOG_IGNORE_REGEX.match(outputStrEscaped):
+        return None
+    else:
+        serviceMatch = SERVICE_REGEX.search(outputStrEscaped)
+        serviceMatchFmt = SERVICE_REGEX.search(outputStr) if coloramaImported else serviceMatch
+        serviceStr = serviceMatchFmt.group('service').replace('-container', '') if (serviceMatchFmt is not None) else ''
+
+        messageStr = serviceMatch.group('message') if (serviceMatch is not None) else ''
+        messageStrSplit = messageStr.split(' ')
+        messageTimeMatch = ISO8601_TIME_REGEX.match(messageStrSplit[0])
+        if (messageTimeMatch is None) or (len(messageStrSplit) <= 1):
+            messageStrToTestJson = messageStr
+        else:
+            messageStrToTestJson = messageStrSplit[1:].join(' ')
+
+        outputJson = LoadStrIfJson(messageStrToTestJson)
+        if isinstance(outputJson, dict):
+            # if there's a timestamp, move it outside of the JSON to the beginning of the log string
+            timeKey = None
+            if 'time' in outputJson:
+                timeKey = 'time'
+            elif 'timestamp' in outputJson:
+                timeKey = 'timestamp'
+            elif '@timestamp' in outputJson:
+                timeKey = '@timestamp'
+            timeStr = ''
+            if timeKey is not None:
+                timeStr = f"{outputJson[timeKey]} "
+                outputJson.pop(timeKey, None)
+            elif messageTimeMatch is not None:
+                timeStr = f"{messageTimeMatch[0]} "
+
+            if ('job.schedule' in outputJson) and ('job.position' in outputJson) and ('job.command' in outputJson):
+                # this is a status line line from supercronic, let's format and clean it up so it fits in better with the rest of the logs
+
+                # remove some clutter for the display
+                for noisyKey in ['level', 'channel', 'iteration', 'job.position', 'job.schedule']:
+                    outputJson.pop(noisyKey, None)
+
+                # if it's just command and message, format those NOT as JSON
+                jobCmd = outputJson['job.command']
+                jobStatus = outputJson['msg']
+                if (len(outputJson.keys()) == 2) and ('job.command' in outputJson) and ('msg' in outputJson):
+                    # if it's the most common status (starting or job succeeded) then don't print unless debug mode
+                    if debug or ((jobStatus != 'starting') and (jobStatus != 'job succeeded')):
+                        return (
+                            f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr} {jobCmd}: {jobStatus}"
+                        )
+                    else:
+                        return None
+
+                else:
+                    # standardize and print the JSON line
+                    return (
+                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                    )
+
+            elif 'dashboards' in serviceStr:
+                # this is an line line from dashboards, let's clean it up a bit: remove some clutter for the display
+                for noisyKey in ['type', 'tags', 'pid', 'method', 'prevState', 'prevMsg']:
+                    outputJson.pop(noisyKey, None)
+
+                # standardize and print the JSON line
+                return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+
+            elif 'filebeat' in serviceStr:
+                # this is an line line from filebeat, let's clean it up a bit: remove some clutter for the display
+                for noisyKey in [
+                    'ecs.version',
+                    'harvester_id',
+                    'input_id',
+                    'log.level',
+                    'log.logger',
+                    'log.origin',
+                    'os_id',
+                    'service.name',
+                    'state_id',
+                ]:
+                    outputJson.pop(noisyKey, None)
+
+                # we'll fancify a couple of common things from filebeat
+                if (
+                    (len(outputJson.keys()) == 3)
+                    and ('message' in outputJson)
+                    and ('source_file' in outputJson)
+                    and ('finished' in outputJson)
+                ):
+                    return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputJson['message'].rstrip('.')}: {outputJson['source_file']}"
+
+                elif len(outputJson.keys()) == 1:
+                    outputKey = next(iter(outputJson))
+                    return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{outputKey + ': ' if outputKey != 'message' else ''}{outputJson[outputKey]}"
+
+                else:
+                    # standardize and print the JSON line
+                    return (
+                        f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+                    )
+
+            else:
+                # standardize and print the JSON line
+                return f"{serviceStr}{Style.RESET_ALL if coloramaImported else ''} {timeStr}{json.dumps(outputJson)}"
+
+        else:
+            # just a regular non-JSON string, print as-is
+            return outputStr if coloramaImported else outputStrEscaped
+
+    return None

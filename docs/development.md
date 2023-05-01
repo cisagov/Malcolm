@@ -11,6 +11,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
 * `arkime-raw` - an initially empty directory to which the `arkime` container will write captured PCAP files; as Arkime as employed by Malcolm is currently used for processing previously-captured PCAP files, this directory is currently unused
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
+* `config` - a directory containing the environment variable files that define Malcolm's configuration
 * `docs` - a directory containing instructions and documentation
 * `opensearch` - an initially empty directory where the OpenSearch database instance will reside
 * `opensearch-backup` - an initially empty directory for storing OpenSearch [index snapshots](index-management.md#IndexManagement) 
@@ -22,7 +23,6 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `dashboards` - code and configuration for the `dashboards` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
 * `logstash` - code and configuration for the `logstash` container which parses Zeek logs and forwards them to the `opensearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](malcolm-iso.md#ISO) for a minimal Debian-based Linux installation for running Malcolm
-* `name-map-ui` - code and configuration for the `name-map-ui` container which provides the [host and subnet name mapping](host-and-subnet-mapping.md#HostAndSubnetNaming) interface
 * `netbox` - code and configuration for the `netbox`, `netbox-postgres`, `netbox-redis` and `netbox-redis-cache` containers which provide asset management capabilities
 * `nginx` - configuration for the `nginx` reverse proxy container
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
@@ -39,8 +39,6 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 
 and the following files of special note:
 
-* `auth.env` - the script `./scripts/auth_setup` prompts the user for the administrator credentials used by the Malcolm appliance, and `auth.env` is the environment file where those values are stored
-* `net-map.json` - a JSON-formatted file mapping devices and network segments to their names
 * `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 
@@ -64,7 +62,6 @@ Then, go take a walk or something since it will be a while. When you're done, yo
 * `ghcr.io/idaholab/malcolm/freq` (based on `debian:11-slim`)
 * `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:11-slim`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
-* `ghcr.io/idaholab/malcolm/name-map-ui` (based on `alpine:3.17`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
 * `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.17`)
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
@@ -93,7 +90,7 @@ Administrator username: analyst
 analyst password:
 analyst password (again):
 
-Additional local accounts can be created at https://localhost:488/ when Malcolm is running
+Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
 (Re)generate self-signed certificates for HTTPS access (Y/n): y 
 
@@ -131,9 +128,8 @@ A minute or so after starting Malcolm, the following services will be accessible
   - OpenSearch Dashboards: https://localhost/dashboards/
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
-  - Host and subnet name mapping editor: https://localhost/name-map-ui/
   - NetBox: https://localhost/netbox/
-  - Account management: https://localhost:488/  
+  - Account management: https://localhost/auth/
   - Documentation: https://localhost/readme/
 ```
 

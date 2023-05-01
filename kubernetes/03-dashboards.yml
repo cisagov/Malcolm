@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboards
+  namespace: malcolm
+spec:
+  ports:
+    - port: 5601
+      protocol: TCP
+      name: http
+  selector:
+    name: dashboards-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboards-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: dashboards-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: dashboards-deployment
+    spec:
+      containers:
+      - name: dashboards-container
+        image: ghcr.io/idaholab/malcolm/dashboards:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: http
+            protocol: TCP
+            containerPort: 5601
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: opensearch-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "dashboards.malcolm.local"
+        livenessProbe:
+          httpGet:
+            path: /dashboards/api/status
+            port: 5601
+            scheme: HTTP
+          initialDelaySeconds: 210
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: dashboards-var-local-catrust-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: dashboards-opensearch-curlrc-secret-volume
+      volumes:
+        - name: dashboards-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: dashboards-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc

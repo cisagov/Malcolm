@@ -1,0 +1,204 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#
+# This Vagrantfile facilitates testing Malcolm's kubernetes deployment
+#   by providing a simple virtualized 3 node k3s cluster.
+# Not for production use.
+#
+
+unless Vagrant.has_plugin?("vagrant-reload")
+  raise 'vagrant-reload plugin is not installed!'
+end
+
+server_ip = "192.168.56.10"
+server_hostname = "server.k3s.internal"
+load_balancer_additional_ports = "{\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"lumberjack\\\", \\\"port\\\": 5044, \\\"targetPort\\\": 5044, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"tcpjson\\\", \\\"port\\\": 5045, \\\"targetPort\\\": 5045, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"sftp\\\", \\\"port\\\": 8022, \\\"targetPort\\\": 8022, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"opensearch\\\", \\\"port\\\": 9200, \\\"targetPort\\\": 9200, \\\"protocol\\\": \\\"TCP\\\"}"
+deployment_additional_ports = "{\\\"name\\\": \\\"lumberjack\\\", \\\"containerPort\\\": 5044, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"tcpjson\\\", \\\"containerPort\\\": 5045, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"sftp\\\", \\\"containerPort\\\": 8022, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"opensearch\\\", \\\"containerPort\\\": 9200, \\\"protocol\\\": \\\"TCP\\\"}"
+
+agents = { "agent1" => "192.168.56.11",
+           "agent2" => "192.168.56.12" }
+
+common_script_0 = <<-SHELL
+    sudo -i
+    apt-get -qqy update
+    apt-get -y install --no-install-recommends \
+      apt-transport-https \
+      bat \
+      ca-certificates \
+      curl \
+      fd-find \
+      git \
+      gnupg2 \
+      iptables \
+      jq \
+      moreutils \
+      ripgrep \
+      software-properties-common
+    curl -sSL -o /usr/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_"$(uname -s | tr '[:upper:]' '[:lower:]')"_"$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')"" && \
+      chmod 755 /usr/bin/yq
+    cat >> /etc/security/limits.d/limits.conf <<EOF
+* soft nofile 65535
+* hard nofile 65535
+* soft memlock unlimited
+* hard memlock unlimited
+* soft nproc 262144
+* hard nproc 524288
+* soft core 0
+* hard core 0
+EOF
+    cat >> /etc/sysctl.conf <<EOF
+# don't restrict dmesg to root
+kernel.dmesg_restrict=0
+
+# the maximum number of open file handles
+fs.file-max=2097152
+
+# increase maximums for inotify watches
+fs.inotify.max_user_watches=131072
+fs.inotify.max_queued_events=131072
+fs.inotify.max_user_instances=512
+
+# the maximum number of memory map areas a process may have
+vm.max_map_count=262144
+
+# decrease "swappiness" (swapping out runtime memory vs. dropping pages)
+vm.swappiness=1
+
+# the % of system memory fillable with "dirty" pages before flushing
+vm.dirty_background_ratio=40
+
+# maximum % of dirty system memory before committing everything
+vm.dirty_ratio=80
+
+net.core.netdev_max_backlog=250000
+net.core.optmem_max=33554432
+net.core.rmem_default=425984
+net.core.rmem_max=33554432
+net.core.somaxconn=65535
+net.core.wmem_default=425984
+net.core.wmem_max=33554432
+net.ipv4.tcp_rmem=10240 425984 33554432
+net.ipv4.tcp_wmem=10240 425984 33554432
+net.ipv4.udp_mem=10240 425984 33554432
+
+net.ipv4.conf.all.accept_redirects=0
+net.ipv4.conf.all.accept_source_route=0
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.default.accept_source_route=0
+net.ipv4.conf.default.send_redirects=0
+net.ipv4.icmp_echo_ignore_broadcasts=1
+net.ipv4.ip_forward=1
+net.ipv6.conf.all.accept_source_route=0
+net.ipv6.conf.all.accept_ra=0
+net.ipv6.conf.default.accept_ra=0
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+net.ipv6.conf.lo.disable_ipv6=1
+EOF
+      sed -i 's/^\\(GRUB_CMDLINE_LINUX_DEFAULT=\\).*/\\1"elevator=deadline systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem random.trust_cpu=on"/' /etc/default/grub
+      update-grub
+  SHELL
+
+server_script_0 = <<-SHELL
+    sudo -i
+    rm -f /vagrant_shared/token /vagrant_shared/k3s.yaml
+  SHELL
+
+server_script_1 = <<-SHELL
+    sudo -i
+    echo "#{server_ip} #{server_hostname}" >> /etc/hosts
+    export INSTALL_K3S_EXEC="server --disable traefik --bind-address=#{server_ip} --node-external-ip=#{server_ip} --flannel-iface=eth1"
+    curl -sfL https://get.k3s.io | sh -
+    echo "Waiting for k3s to start..."
+    sleep 30
+    curl -sSL -o /tmp/deploy_nginx.yaml https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/cloud/deploy.yaml
+    yq -i '( select(.kind == "Deployment").spec.template.spec.containers[].args[] | select(contains("/nginx-ingress-controller")) | parent ) += ["--enable-ssl-passthrough", "--tcp-services-configmap=ingress-nginx/tcp-services"]' /tmp/deploy_nginx.yaml
+    yq -i "( select(.kind == \\"Deployment\\").spec.template.spec.containers[].args[] | select(contains(\\"/nginx-ingress-controller\\")) | parent | parent | .ports ) += [#{deployment_additional_ports}]" /tmp/deploy_nginx.yaml
+    yq -i "( select(.kind == \\"Service\\" and .spec.type == \\"LoadBalancer\\").spec.ports ) += [#{load_balancer_additional_ports}]" /tmp/deploy_nginx.yaml
+    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f /tmp/deploy_nginx.yaml
+    until [ -f /var/lib/rancher/k3s/server/token ] && [ -f /etc/rancher/k3s/k3s.yaml ]; do sleep 5; done
+    cp -v /var/lib/rancher/k3s/server/token /vagrant_shared
+    cp -v /etc/rancher/k3s/k3s.yaml /vagrant_shared
+  SHELL
+
+agent_script_1 = <<-SHELL
+    sudo -i
+    echo "#{server_ip} #{server_hostname}" >> /etc/hosts
+    export K3S_TOKEN_FILE=/vagrant_shared/token
+    export K3S_URL=https://#{server_ip}:6443
+    export INSTALL_K3S_EXEC="--flannel-iface=eth1"
+    echo "Waiting for k3s server..."
+    until [ -f /vagrant_shared/token ]; do sleep 5; done
+    curl -sfL https://get.k3s.io | sh -
+  SHELL
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/debian-11"
+  config.ssh.config = "ssh_config"
+
+  config.vm.define "server", primary: true do |server|
+    server.vm.network "private_network", ip: server_ip
+    server.vm.network :forwarded_port, guest: 6443, host: 6443
+    for p in 30000..30100
+        server.vm.network :forwarded_port, guest: p, host: p, protocol: "tcp"
+    end
+    server.vm.synced_folder '.', '/vagrant', disabled: true
+    server.vm.synced_folder "./shared", "/vagrant_shared", type: "sshfs", disabled: false
+    server.vm.hostname = "server"
+
+    server.vm.provider :libvirt do |vm|
+      vm.cpus   = 2
+      vm.memory = 4096
+    end
+    server.vm.provider :virtualbox do |vm|
+      vm.cpus   = 2
+      vm.memory = 4096
+    end
+    server.vm.provider :vmware_desktop do |vm|
+      vm.cpus   = 2
+      vm.memory = 4096
+    end
+    server.vm.provider :vmware_fusion do |vm|
+      vm.cpus   = 2
+      vm.memory = 4096
+    end
+
+    server.vm.provision "shell", inline: server_script_0
+    server.vm.provision "shell", inline: common_script_0
+    server.vm.provision :reload
+    server.vm.provision "shell", inline: server_script_1
+  end
+
+  agents.each do |agent_name, agent_ip|
+    config.vm.define agent_name do |agent|
+      agent.vm.network "private_network", ip: agent_ip
+      agent.vm.synced_folder '.', '/vagrant', disabled: true
+      agent.vm.synced_folder "./shared", "/vagrant_shared", type: "sshfs", disabled: false
+      agent.vm.hostname = agent_name
+
+      agent.vm.provider :libvirt do |vm|
+        vm.cpus   = 4
+        vm.memory = 12288
+      end
+      agent.vm.provider :virtualbox do |vm|
+        vm.cpus   = 4
+        vm.memory = 12288
+      end
+      agent.vm.provider :vmware_desktop do |vm|
+        vm.cpus   = 4
+        vm.memory = 12288
+      end
+      agent.vm.provider :vmware_fusion do |vm|
+        vm.cpus   = 4
+        vm.memory = 12288
+      end
+
+      agent.vm.provision "shell", inline: common_script_0
+      agent.vm.provision :reload
+      agent.vm.provision "shell", inline: agent_script_1
+    end
+  end
+end
+

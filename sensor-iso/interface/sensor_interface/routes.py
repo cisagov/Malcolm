@@ -1,6 +1,10 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import psutil, time, json, logging, os
+import psutil
+import time
+import json
+import logging
+import os
 from .sysquery import sys_service as sys_s
 from flask import render_template, send_from_directory
 from flask import Flask
@@ -62,7 +66,6 @@ def activate_service(script):
 
 @app.route('/update', methods=['GET'])
 def update_stats():
-
     req_time = int(time.time())
 
     disk_write_data_start = psutil.disk_io_counters(perdisk=False)

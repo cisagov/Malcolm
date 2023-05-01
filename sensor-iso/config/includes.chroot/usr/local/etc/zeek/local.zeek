@@ -9,6 +9,8 @@ global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F 
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
 global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == "") ? F : T;
+global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == "") ? F : T;
+global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
@@ -62,7 +64,6 @@ redef ignore_checksums = T;
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
 @load policy/protocols/modbus/known-masters-slaves
-@load policy/protocols/mqtt
 @load ./login.zeek
 
 @if (!disable_best_guess_ics)
@@ -115,6 +116,31 @@ event zeek_init() &priority=-5 {
   if (disable_spicy_wireguard) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
   }
+
+  # register additional ports for Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_...
+  if (synchrophasor_ports_str != "") {
+    local synchrophasor_ports = split_string(synchrophasor_ports_str, /,/);
+    if (|synchrophasor_ports| > 0) {
+      local synch_ports_tcp: set[port] = {};
+      local synch_ports_udp: set[port] = {};
+      for (synch_port_idx in synchrophasor_ports) {
+        local synch_port = to_port(synchrophasor_ports[synch_port_idx]);
+        local synch_prot = get_port_transport_proto(synch_port);
+        if (synch_prot == tcp) {
+          add synch_ports_tcp[synch_port];
+        } else if (synch_prot == udp) {
+          add synch_ports_udp[synch_port];
+        }
+      }
+      if (|synch_ports_tcp| > 0) {
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP, synch_ports_tcp);
+      }
+      if (|synch_ports_udp| > 0) {
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP, synch_ports_udp);
+      }
+    }
+  }
+
 }
 
 @if (!disable_log_passwords)
@@ -127,3 +153,8 @@ event zeek_init() &priority=-5 {
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;
+@if (synchrophasor_detailed)
+  redef SYNCHROPHASOR::log_data_frame = T;
+  redef SYNCHROPHASOR::log_data_detail = T;
+  redef SYNCHROPHASOR::log_cfg_detail = T;
+@endif

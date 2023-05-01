@@ -27,18 +27,20 @@ ENV TERM xterm
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL=true
 ARG PCAP_PATH=/pcap
-ARG PCAP_PIPELINE_DEBUG=false
-ARG PCAP_PIPELINE_DEBUG_EXTRA=false
+ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_PIPELINE_IGNORE_PREEXISTING=false
+ARG PCAP_PIPELINE_POLLING=false
+ARG PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC=10
 ARG PCAP_NODE_NAME=malcolm
 ARG ZEEK_PATH=/zeek
 
 ENV OPENSEARCH_URL $OPENSEARCH_URL
 ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
 ENV PCAP_PATH $PCAP_PATH
-ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
-ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
+ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_PIPELINE_IGNORE_PREEXISTING $PCAP_PIPELINE_IGNORE_PREEXISTING
+ENV PCAP_PIPELINE_POLLING $PCAP_PIPELINE_POLLING
+ENV PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC $PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 ENV ZEEK_PATH $ZEEK_PATH
 
@@ -60,20 +62,27 @@ RUN apt-get -q update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    pip3 install --no-cache-dir opensearch-py pyzmq pyinotify python-magic requests && \
+    pip3 install --no-cache-dir opensearch-py pyzmq python-magic requests watchdog && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD pcap-monitor/scripts/ /usr/local/bin/
 ADD shared/bin/pcap_watcher.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD shared/bin/watch_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 
 EXPOSE 30441
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "pcap-monitor"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

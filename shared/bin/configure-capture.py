@@ -14,9 +14,18 @@ import fileinput
 from collections import defaultdict
 from dialog import Dialog
 
-from zeek_carve_utils import *
-from sensorcommon import *
 from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+
+from zeek_carve_utils import PRESERVE_NONE, PRESERVE_QUARANTINED, PRESERVE_ALL
+from sensorcommon import (
+    CancelledError,
+    clearquit,
+    get_available_adapters,
+    identify_adapter,
+    NIC_BLINK_SECONDS,
+    test_connection,
+)
+from malcolm_utils import run_subprocess, remove_prefix, aggressive_url_encode, isipaddress, check_socket
 
 
 class Constants:
@@ -242,7 +251,7 @@ def input_opensearch_connection_info(
             break
 
     # HTTP/HTTPS authentication
-    code, http_username = d.inputbox(f"OpenSearch HTTP/HTTPS server username", init=default_username)
+    code, http_username = d.inputbox("OpenSearch HTTP/HTTPS server username", init=default_username)
     if (code == Dialog.CANCEL) or (code == Dialog.ESC):
         raise CancelledError
     return_dict[Constants.BEAT_HTTP_USERNAME] = http_username.strip()
@@ -250,13 +259,13 @@ def input_opensearch_connection_info(
     # make them enter the password twice
     while True:
         code, http_password = d.passwordbox(
-            f"OpenSearch HTTP/HTTPS server password", insecure=True, init=default_password
+            "OpenSearch HTTP/HTTPS server password", insecure=True, init=default_password
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise CancelledError
 
         code, http_password2 = d.passwordbox(
-            f"OpenSearch HTTP/HTTPS server password (again)",
+            "OpenSearch HTTP/HTTPS server password (again)",
             insecure=True,
             init=default_password if (http_password == default_password) else "",
         )
@@ -313,7 +322,7 @@ def main():
     try:
         with open(Constants.DEV_IDENTIFIER_FILE, 'r') as f:
             installation = f.readline().strip()
-    except:
+    except Exception:
         pass
     if installation not in Constants.DEV_VALID:
         print(Constants.MSG_ERR_DEV_INVALID)
@@ -379,7 +388,7 @@ def main():
                 raise CancelledError
 
             if mode == Constants.MSG_CONFIG_MODE_AUTOSTART:
-                ##### sensor autostart services configuration #######################################################################################
+                # sensor autostart services configuration #############################################################################################
 
                 while True:
                     # select processes for autostart (except for the file scan ones, handle those with the file scanning stuff)
@@ -432,7 +441,7 @@ def main():
                     code = d.msgbox(text=Constants.MSG_CONFIG_AUTOSTART_SUCCESS)
 
             elif mode == Constants.MSG_CONFIG_MODE_CAPTURE:
-                ##### sensor capture configuration ##################################################################################################
+                # sensor capture configuration ########################################################################################################
 
                 # determine a list of available (non-virtual) adapters
                 available_adapters = get_available_adapters()
@@ -485,7 +494,7 @@ def main():
                         capture_filter = capture_filter.strip()
                         if len(capture_filter) > 0:
                             # test out the capture filter to see if there's a syntax error
-                            ecode, filter_test_results = run_process(
+                            ecode, filter_test_results = run_subprocess(
                                 f'tcpdump -i {selected_ifaces[0]} -d "{capture_filter}"', stdout=False, stderr=True
                             )
                         else:
@@ -792,7 +801,7 @@ def main():
                     )
 
             elif mode == Constants.MSG_CONFIG_MODE_FORWARD:
-                ##### sensor forwarding (beats) configuration #########################################################################
+                # sensor forwarding (beats) configuration #############################################################################
 
                 # only display MSG_CONFIG_TXRX if we have appropriate executable and script
                 txRxScript = '/opt/sensor/sensor_ctl/tx-rx-secure.sh'
@@ -951,13 +960,13 @@ def main():
                     os.chdir(Constants.BEAT_DIR[fwd_mode])
 
                     # check to see if a keystore has already been created for the forwarder
-                    ecode, list_results = run_process(f"{Constants.BEAT_CMD[fwd_mode]} keystore list")
+                    ecode, list_results = run_subprocess(f"{Constants.BEAT_CMD[fwd_mode]} keystore list")
                     if (ecode == 0) and (len(list_results) > 0):
                         # it has, do they wish to overwrite it?
                         if d.yesno(Constants.MSG_OVERWRITE_CONFIG.format(fwd_mode)) != Dialog.OK:
                             raise CancelledError
 
-                    ecode, create_results = run_process(
+                    ecode, create_results = run_subprocess(
                         f"{Constants.BEAT_CMD[fwd_mode]} keystore create --force", stderr=True
                     )
                     if ecode != 0:
@@ -1174,7 +1183,7 @@ def main():
 
                     # it's go time, call keystore add for each item
                     for k, v in sorted(forwarder_dict.items()):
-                        ecode, add_results = run_process(
+                        ecode, add_results = run_subprocess(
                             f"{Constants.BEAT_CMD[fwd_mode]} keystore add {k} --stdin --force", stdin=v, stderr=True
                         )
                         if ecode != 0:
@@ -1182,7 +1191,7 @@ def main():
                             raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
 
                     # get a final list of parameters that were set to show the user that stuff happened
-                    ecode, list_results = run_process(f"{Constants.BEAT_CMD[fwd_mode]} keystore list")
+                    ecode, list_results = run_subprocess(f"{Constants.BEAT_CMD[fwd_mode]} keystore list")
                     if ecode == 0:
                         code = d.msgbox(
                             text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(fwd_mode, "\n".join(list_results))
@@ -1252,7 +1261,7 @@ def main():
                     # we're here without a valid forwarding type selection?!?
                     raise Exception(Constants.MSG_MESSAGE_ERROR.format(Constants.MSG_INVALID_FORWARDING_TYPE))
 
-        except CancelledError as c:
+        except CancelledError:
             # d.msgbox(text=Constants.MSG_CANCEL_ERROR)
             # just start over
             continue

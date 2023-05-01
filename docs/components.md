@@ -15,7 +15,6 @@ Malcolm leverages the following excellent open source tools, among others.
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
 * [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
-* [List.js](https://github.com/javve/list.js) - for the [host and subnet name mapping](host-and-subnet-mapping.md#HostAndSubnetNaming) interface
 * [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
 * [NetBox](https://netbox.dev/) - a suite for modeling and documenting modern networks
 * [PostgreSQL](https://www.postgresql.org/) - a relational database for persisting NetBox's data

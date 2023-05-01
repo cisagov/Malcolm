@@ -1,0 +1,110 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox
+  namespace: malcolm
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      name: http-main
+    - port: 8081
+      protocol: TCP
+      name: http-status
+    - port: 9001
+      protocol: TCP
+      name: supervisord
+  selector:
+    name: netbox-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: netbox-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: netbox-deployment
+    spec:
+      containers:
+      - name: netbox-container
+        image: ghcr.io/idaholab/malcolm/netbox:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: http-main
+            protocol: TCP
+            containerPort: 8080
+          - name: http-status
+            protocol: TCP
+            containerPort: 8081
+          - name: supervisord
+            protocol: TCP
+            containerPort: 9001
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: netbox-common-env
+          - configMapRef:
+              name: netbox-env
+          - secretRef:
+              name: netbox-secret-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "netbox.malcolm.local"
+        livenessProbe:
+          httpGet:
+            path: /netbox/api/
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 300
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: netbox-var-local-catrust-volume
+          - mountPath: /usr/local/share/configmap
+            name: netbox-netmap-json-volume
+          - mountPath: /etc/netbox/config/configmap
+            name: netbox-config-volume
+          - mountPath: /etc/netbox/reports/configmap
+            name: netbox-reports-volume
+          - mountPath: /etc/netbox/scripts/configmap
+            name: netbox-scripts-volume
+          - mountPath: /opt/netbox/netbox/media
+            name: netbox-media-volume
+            subPath: netbox/media
+      volumes:
+        - name: netbox-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: netbox-netmap-json-volume
+          configMap:
+            name: netbox-netmap-json
+        - name: netbox-config-volume
+          configMap:
+            name: netbox-config
+        - name: netbox-reports-volume
+          configMap:
+            name: netbox-reports
+        - name: netbox-scripts-volume
+          configMap:
+            name: netbox-scripts
+        - name: netbox-media-volume
+          persistentVolumeClaim:
+            claimName: config-claim
+

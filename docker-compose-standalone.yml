@@ -2,382 +2,21 @@
 
 version: '3.7'
 
-################################################################################
-# Commonly tweaked configuration options
-#-------------------------------------------------------------------------------
-x-process-variables: &process-variables
-  # docker containers will run processes as unprivileged user with UID:GID
-  PUID : 1000
-  PGID : 1000
-  # for debugging container init via tini (https://github.com/krallin/tini)
-  TINI_VERBOSITY : 1
-
-x-auth-variables: &auth-variables
-  # authentication method: encrypted HTTP basic authentication ('true') vs LDAP ('false')
-  NGINX_BASIC_AUTH : 'true'
-  # NGINX LDAP (NGINX_BASIC_AUTH=false) can support LDAP, LDAPS, or LDAP+StartTLS.
-  #   For StartTLS, set NGINX_LDAP_TLS_STUNNEL=true to issue the StartTLS command
-  #   and use stunnel to tunnel the connection.
-  NGINX_LDAP_TLS_STUNNEL : 'false'
-  # stunnel will require and verify certificates for StartTLS when one or more
-  #   trusted CA certificate files are placed in the ./nginx/ca-trust directory.
-  #   For additional security, hostname or IP address checking of the associated
-  #   CA certificate(s) can be enabled by providing these values.
-  NGINX_LDAP_TLS_STUNNEL_CHECK_HOST : ''
-  NGINX_LDAP_TLS_STUNNEL_CHECK_IP : ''
-  NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL : 2
-
-x-nginx-variables: &nginx-variables
-  # Whether or not nginx should use HTTPS. This is almost CERTAINLY what you want.
-  #   The only case you may want to set this to false is if you're using another
-  #   reverse proxy in front of Malcolm. Even if set to 'false', NGINX will still
-  #   listen on port 443 (it just won't be encrypted). If you change this, you'll
-  #   probably want to change "0.0.0.0:443:443" to something like
-  #   "127.0.0.1:80:443" in the ports section for the nginx-proxy service.
-  NGINX_SSL : 'true'
-  # Whether or not to write nginx's access.log and error.log to OpenSearch
-  NGINX_LOG_ACCESS_AND_ERRORS : 'false'
-
-x-ssl-variables: &ssl-variables
-  # When possible, docker containers will automatically add trusted CA certificate files
-  #   found in the ./nginx/ca-trust directory (which is bind mounted to /ca-trust).
-  PUSER_CA_TRUST : '/var/local/ca-trust'
-
-x-opensearch-variables: &opensearch-variables
-  # Used in various services to define the connection to the OpenSearch document store.
-  # Whether or not Malcolm will start and use its own local OpenSearch instance as its
-  #   primary data store. Set to 'false' if you're connecting to another OpenSearch
-  #   cluster, in which case the other environment variables in this section must also
-  #   be set with the connection parameters.
-  OPENSEARCH_LOCAL : 'true'
-  # URL for connecting to OpenSearch instance. When using Malcolm's internal instance
-  #   of OpenSearch (i.e., OPENSEARCH_LOCAL is 'true') this should be
-  #   'http://opensearch:9200', otherwise specify the primary remote instance URL
-  #   in the format 'protocol://host:port'.
-  OPENSEARCH_URL : 'http://opensearch:9200'
-  # Used when OPENSEARCH_LOCAL is 'false', the cURL-formatted config file contains login
-  #   credentials for the primary OpenSearch instance. It can be generated for you by the
-  #   ./scripts/auth_setup script. The notable parameters expected from this file would be
-  #   user (with a "user:password" value) and "insecure" (if the certificate verification
-  #   setting below is 'false'). See cURL config file format at
-  #   https://everything.curl.dev/cmdline/configfile. This file is bind mounted locally
-  #   from .opensearch.primary.curlrc as /var/local/opensearch.primary.curlrc
-  OPENSEARCH_CREDS_CONFIG_FILE : '/var/local/opensearch.primary.curlrc'
-  # Whether or not connections to the primary remote OpenSearch instance require full
-  #  TLS certificate validation for the connection (this may fail if using self-signed
-  #  certificates).
-  OPENSEARCH_SSL_CERTIFICATE_VERIFICATION : 'false'
-  # Whether or not Malcolm's Logstash instance will forward logs to a secondary remote
-  #   OpenSearch instance in addition to the (local or remote) primary instance.
-  OPENSEARCH_SECONDARY : 'false'
-  # URL for connecting to the secondary remote OpenSearch instance, specified
-  #   in the format 'protocol://host:port'.
-  OPENSEARCH_SECONDARY_URL : ''
-  # Used when OPENSEARCH_SECONDARY is 'true', the cURL-formatted config file contains login
-  #   credentials for the secondary OpenSearch instance. The comments describing
-  #   OPENSEARCH_CREDS_CONFIG_FILE above also apply here. This file is bind mounted locally
-  #   from .opensearch.secondary.curlrc as /var/local/opensearch.secondary.curlrc
-  OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE : '/var/local/opensearch.secondary.curlrc'
-  # Whether or not connections to the secondary remote OpenSearch instance require full
-  #  TLS certificate validation for the connection (this may fail if using self-signed
-  #  certificates).
-  OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION : 'false'
-
-x-arkime-variables: &arkime-variables
-  # Whether or not Arkime is allowed to delete uploaded/captured PCAP (see
-  #   https://arkime.com/faq#pcap-deletion)
-  MANAGE_PCAP_FILES : 'false'
-  # The number of Arkime capture processes allowed to run concurrently
-  ARKIME_ANALYZE_PCAP_THREADS : 1
-  # MaxMind GeoIP database update API key (see
-  #   https://support.maxmind.com/hc/en-us/articles/4407116112539-Using-License-Keys)
-  MAXMIND_GEOIP_DB_LICENSE_KEY : '0'
-
-x-zeek-live-variables: &zeek-live-variables
-  # Whether or not Zeek should monitor live traffic on a local
-  #   interface (PCAP_IFACE variable below specifies capture interfaces)
-  ZEEK_LIVE_CAPTURE : 'false'
-
-x-zeek-offline-variables: &zeek-offline-variables
-  # Whether or not Zeek should analyze uploaded PCAP files
-  ZEEK_AUTO_ANALYZE_PCAP_FILES : 'true'
-  # The number of Zeek processes for analyzing uploaded PCAP files allowed
-  #   to run concurrently
-  ZEEK_AUTO_ANALYZE_PCAP_THREADS : 1
-  # Whether or not Zeek should analyze captured PCAP files captured
-  #   by netsniff-ng/tcpdump (see PCAP_ENABLE_NETSNIFF and PCAP_ENABLE_TCPDUMP
-  #   below). If ZEEK_LIVE_CAPTURE is true, this should be false: otherwise
-  #   Zeek will see duplicate traffic.
-  ZEEK_ROTATED_PCAP : 'true'
-
-x-zeek-variables: &zeek-variables
-  # Specifies the value for Zeek's Intel::item_expiration timeout (-1min to disable)
-  ZEEK_INTEL_ITEM_EXPIRATION : '-1min'
-  # When querying a TAXII or MISP feed, only process threat indicators that have
-  #   been created or modified since the time represented by this value;
-  #   it may be either a fixed date/time (01/01/2021) or relative interval (30 days ago)
-  ZEEK_INTEL_FEED_SINCE : ''
-  # Specifies a cron expression indicating the refresh interval for generating the
-  #   Zeek Intelligence Framework files ('' disables automatic refresh)
-  ZEEK_INTEL_REFRESH_CRON_EXPRESSION : ''
-  # Determines the file extraction behavior for file transfers detected by Zeek
-  ZEEK_EXTRACTOR_MODE : 'none'
-  # Whether or not files extant in ./zeek-logs/extract_files/ will be ignored on startup
-  EXTRACTED_FILE_IGNORE_EXISTING : 'false'
-  # Determines the behavior for preservation of Zeek-extracted files
-  EXTRACTED_FILE_PRESERVATION : 'quarantined'
-  # The minimum size (in bytes) for files to be extracted by Zeek
-  EXTRACTED_FILE_MIN_BYTES : 64
-  # The maximum size (in bytes) for files to be extracted by Zeek
-  EXTRACTED_FILE_MAX_BYTES : 134217728
-  # A VirusTotal Public API v.20 used to submit hashes of Zeek-extracted files
-  VTOT_API2_KEY : '0'
-  # Rate limiting for VirusTotal, ClamAV, YARA and capa with Zeek-extracted files
-  VTOT_REQUESTS_PER_MINUTE : 4
-  CLAMD_MAX_REQUESTS : 8
-  YARA_MAX_REQUESTS : 8
-  CAPA_MAX_REQUESTS : 4
-  # Whether or not YARA will scan Zeek-extracted files
-  EXTRACTED_FILE_ENABLE_YARA : 'false'
-  # Whether or not the default YARA ruleset will be ignored and only custom rules used
-  EXTRACTED_FILE_YARA_CUSTOM_ONLY : 'false'
-  # Whether or not capa will scan Zeek-extracted executables
-  EXTRACTED_FILE_ENABLE_CAPA : 'false'
-  # Whether or not capa will be extra verbose
-  EXTRACTED_FILE_CAPA_VERBOSE : 'false'
-  # Whether or not ClamAV will scan Zeek-extracted executables
-  EXTRACTED_FILE_ENABLE_CLAMAV : 'false'
-  # Whether or not to regularly update rule definitions for file scanning engines
-  EXTRACTED_FILE_UPDATE_RULES : 'false'
-  # Whether or not to enable debug output for Zeek-extracted file scanning
-  EXTRACTED_FILE_PIPELINE_DEBUG : 'false'
-  # Whether or not to enable very verbose debug output for Zeek-extracted file scanning
-  EXTRACTED_FILE_PIPELINE_DEBUG_EXTRA : 'false'
-  # Whether or not to serve the directory containing Zeek-extracted over HTTP at ./extracted-files/
-  EXTRACTED_FILE_HTTP_SERVER_ENABLE : 'false'
-  # Whether or not Zeek-extracted files served over HTTP will be AES-256-CBC-encrypted
-  EXTRACTED_FILE_HTTP_SERVER_ENCRYPT : 'true'
-  # Specifies the AES-256-CBC decryption password for encrypted Zeek-extracted files served over HTTP
-  EXTRACTED_FILE_HTTP_SERVER_KEY : 'quarantined'
-  # Environment variables for tweaking Zeek at runtime (see local.zeek)
-  #   Set to any non-blank value to disable the corresponding feature
-  ZEEK_DISABLE_HASH_ALL_FILES : ''
-  ZEEK_DISABLE_LOG_PASSWORDS : ''
-  ZEEK_DISABLE_SSL_VALIDATE_CERTS : ''
-  ZEEK_DISABLE_TRACK_ALL_ASSETS : ''
-  ZEEK_DISABLE_BEST_GUESS_ICS : 'true'
-  ZEEK_DISABLE_SPICY_DHCP : 'true'
-  ZEEK_DISABLE_SPICY_DNS : 'true'
-  ZEEK_DISABLE_SPICY_HTTP : 'true'
-  ZEEK_DISABLE_SPICY_IPSEC : ''
-  ZEEK_DISABLE_SPICY_LDAP : ''
-  ZEEK_DISABLE_SPICY_OPENVPN : ''
-  ZEEK_DISABLE_SPICY_STUN : ''
-  ZEEK_DISABLE_SPICY_TAILSCALE : ''
-  ZEEK_DISABLE_SPICY_TFTP : ''
-  ZEEK_DISABLE_SPICY_WIREGUARD : ''
-
-x-suricata-live-variables: &suricata-live-variables
-  # Whether or not Suricata should monitor live traffic on a local
-  #   interface (PCAP_IFACE variable below specifies capture interfaces)
-  SURICATA_LIVE_CAPTURE : 'false'
-  # Specifies the Suricata runmode for live capture (see
-  #   https://suricata.readthedocs.io/en/latest/performance/runmodes.html)
-  SURICATA_RUNMODE : 'workers'
-
-x-suricata-offline-variables: &suricata-offline-variables
-  # Whether or not Suricata should analyze uploaded PCAP files
-  SURICATA_AUTO_ANALYZE_PCAP_FILES: 'true'
-  # The number of Suricata processes for analyzing uploaded PCAP files allowed
-  #   to run concurrently
-  SURICATA_AUTO_ANALYZE_PCAP_THREADS : 1
-  # Whether or not Suricata should analyze captured PCAP files captured
-  #   by netsniff-ng/tcpdump (see PCAP_ENABLE_NETSNIFF and PCAP_ENABLE_TCPDUMP
-  #   below). If SURICATA_LIVE_CAPTURE is true, this should be false: otherwise
-  #   Suricata will see duplicate traffic.
-  SURICATA_ROTATED_PCAP : 'true'
-
-x-suricata-variables: &suricata-variables
-  # Whether or not the default Suricata ruleset will be ignored and only custom rules used
-  SURICATA_CUSTOM_RULES_ONLY : 'false'
-  SURICATA_UPDATE_RULES: 'false'
-  SURICATA_UPDATE_DEBUG: 'false'
-  SURICATA_UPDATE_ETOPEN: 'true'
-  # suricata_config_populate.py can use MANY more environment variables to tweak
-  #   suricata.yaml (see https://github.com/OISF/suricata/blob/master/suricata.yaml.in and
-  #   https://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html).
-  #   DEFAULT_VARS in that script defines those variables (albeit without the
-  #   required `SURICATA_` prefixing each)
-
-x-dashboards-helper-variables: &dashboards-helper-variables
-  # Whether or not to set OpenSearch Dashboards to dark mode
-  DASHBOARDS_DARKMODE : 'true'
-  # The maximum cumulative size of OpenSearch indices containing network traffic metadata
-  #   (arkime_sessions3-*) before which the oldest indices will be deleted ('' to disable
-  #   storage-based index pruning).
-  OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT : '0'
-  # Whether to determine the "oldest" indices for storage-based index pruning by creation
-  #   date/time ('true') or index name ('false')
-  OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT : 'false'
-  # Parameters for the OpenSearch repository used for index snapshots
-  ISM_SNAPSHOT_COMPRESSED : 'false'
-  ISM_SNAPSHOT_REPO : 'logs'
-
-x-logstash-variables: &logstash-variables
-  # Parameters for tuning Logstash pipelines (see
-  #   https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html)
-  pipeline.workers : 3
-  pipeline.batch.size : 75
-  pipeline.batch.delay : 50
-  # Whether or not Logstash will map MAC addresses to vendors for MAC addresses
-  LOGSTASH_OUI_LOOKUP             : 'true'
-  # Whether or not Logstash will perform severity scoring on network traffic metadata
-  LOGSTASH_SEVERITY_SCORING       : 'true'
-  # Whether or not Logstash will perform a reverse DNS lookup for external IP addresses
-  LOGSTASH_REVERSE_DNS            : 'false'
-  # Whether or not Logstash will enrich network traffic metadata directly from net-map.json
-  LOGSTASH_NETWORK_MAP_ENRICHMENT : 'true'
-  # Whether or not Logstash will enrich network traffic metadata via NetBox API calls
-  LOGSTASH_NETBOX_ENRICHMENT      : 'false'
-
-x-filebeat-variables: &filebeat-variables
-  # filebeat parameters used for monitoring log files containing network traffic metadata
-  #   (see https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-log.html)
-  FILEBEAT_SCAN_FREQUENCY : '10s'
-  FILEBEAT_CLEAN_INACTIVE : '180m'
-  FILEBEAT_IGNORE_OLDER : '120m'
-  FILEBEAT_CLOSE_INACTIVE : '120s'
-  FILEBEAT_CLOSE_INACTIVE_LIVE : '90m'
-  FILEBEAT_CLOSE_RENAMED : 'true'
-  FILEBEAT_CLOSE_REMOVED : 'true'
-  FILEBEAT_CLOSE_EOF : 'true'
-  FILEBEAT_CLEAN_REMOVED : 'true'
-  # Whether or not to expose a filebeat TCP input listener (see
-  #    https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html)
-  FILEBEAT_TCP_LISTEN : 'false'
-  # Log format expected for events sent to the filebeat TCP input listener ('json' or 'raw')
-  FILEBEAT_TCP_LOG_FORMAT : 'raw'
-  # Source field name to parse (when FILEBEAT_TCP_LOG_FORMAT is 'json') for events sent to the
-  #    filebeat TCP input listener
-  FILEBEAT_TCP_PARSE_SOURCE_FIELD : 'message'
-  # Target field name to store decoded JSON fields (when FILEBEAT_TCP_LOG_FORMAT is 'json') for
-  #    events sent to the filebeat TCP input listener
-  FILEBEAT_TCP_PARSE_TARGET_FIELD : ''
-  # Name of field to drop (if it exists) in events sent to the filebeat TCP input listener
-  FILEBEAT_TCP_PARSE_DROP_FIELD : ''
-  # Tag to append to events sent to the filebeat TCP input listener
-  FILEBEAT_TCP_TAG : '_malcolm_beats'
-
-x-netbox-variables: &netbox-variables
-  # Parameters related to NetBox (and supporting tools). Note that other more specific parameters
-  #   can also be configured in the env_file files for netbox* services
-  # The name of the default "site" to be created upon NetBox initialization, and to be queried
-  #   for enrichment (see LOGSTASH_NETBOX_ENRICHMENT)
-  NETBOX_DEFAULT_SITE : 'Malcolm'
-  # Whether to disable Malcolm's NetBox instance ('true') or not ('false')
-  NETBOX_DISABLED : &netboxdisabled 'true'
-  NETBOX_POSTGRES_DISABLED : *netboxdisabled
-  NETBOX_REDIS_DISABLED : *netboxdisabled
-  NETBOX_REDIS_CACHE_DISABLED : *netboxdisabled
-  # Whether or not to periodically query network traffic metadata and use it to populate NetBox
-  NETBOX_CRON : 'false'
-  # If using the NetBox interface to create API tokens, set this
-  #   (see https://docs.djangoproject.com/en/4.1/ref/settings/#csrf-trusted-origins)
-  # CSRF_TRUSTED_ORIGINS : 'https://malcolm.example.org'
-
-x-common-upload-variables: &common-upload-variables
-  # Whether or not to automatically apply tags based (on the PCAP filename) to network traffic metadata
-  #   parsed from uploaded PCAP files
-  AUTO_TAG : 'true'
-  # The node name (e.g., the hostname of this machine running Malcolm) to associate with
-  #   network traffic metadata
-  PCAP_NODE_NAME : 'malcolm'
-  # Whether or not to enable debug output for processing uploaded/captured PCAP files
-  PCAP_PIPELINE_DEBUG : 'false'
-  # Whether or not to enable very verbose debug output for processing uploaded/captured PCAP files
-  PCAP_PIPELINE_DEBUG_EXTRA : 'false'
-  # Whether or not PCAP files extant in ./pcap/ will be ignored on startup
-  PCAP_PIPELINE_IGNORE_PREEXISTING : 'false'
-  # 'pcap-monitor' to match the name of the container providing the uploaded/captured PCAP file
-  #   monitoring service
-  PCAP_MONITOR_HOST : 'pcap-monitor'
-  # The age (in minutes) at which already-processed log files containing network traffic metadata should
-  #   be pruned from the filesystem
-  LOG_CLEANUP_MINUTES : 360
-  # The age (in minutes) at which the compressed archives containing already-processed log files should
-  #   be pruned from the filesystem
-  ZIP_CLEANUP_MINUTES : 720
-
-x-common-lookup-variables: &common-lookup-variables
-  # Whether or not domain names (from DNS queries and SSL server names) will be assigned entropy scores
-  #   as calculated by freq
-  FREQ_LOOKUP : 'true'
-  # When severity scoring is enabled, this variable indicates the entropy threshold for
-  #   assigning severity to events with entropy scores calculated by freq;
-  #   a lower value will only assign severity scores to fewer domain names with higher entropy
-  FREQ_SEVERITY_THRESHOLD : '2.0'
-  # When severity scoring is enabled, this variable indicates the size threshold (in megabytes)
-  #   for assigning severity to large connections or file transfers
-  TOTAL_MEGABYTES_SEVERITY_THRESHOLD : 1000
-  # When severity scoring is enabled, this variable indicates the duration threshold (in seconds)
-  #   for assigning severity to long connections
-  CONNECTION_SECONDS_SEVERITY_THRESHOLD : 3600
-  # When severity scoring is enabled, this variable defines a comma-separated list of
-  #   sensitive countries (using ISO 3166-1 alpha-2 codes)
-  SENSITIVE_COUNTRY_CODES : 'AM,AZ,BY,CN,CU,DZ,GE,HK,IL,IN,IQ,IR,KG,KP,KZ,LY,MD,MO,PK,RU,SD,SS,SY,TJ,TM,TW,UA,UZ'
-
-x-common-beats-variables: &common-beats-variables
-  # Whether or not Logstash will use require encrypted communications for any external
-  #   Beats-based forwarders from which it will accept logs
-  BEATS_SSL : 'true'
-
-x-pcap-capture-variables: &pcap-capture-variables
-  # Whether or not netsniff-ng should create PCAP files from live traffic on a local
-  #   interface for analysis by Arkime capture (should be 'false' if PCAP_ENABLE_TCPDUMP
-  #   is 'true')
-  PCAP_ENABLE_NETSNIFF : 'false'
-  # Whether or not tcpdump should create PCAP files from live traffic on a local
-  #   interface for analysis by Arkime capture (should be 'false' if PCAP_ENABLE_NETSNIFF
-  #   is 'true')
-  PCAP_ENABLE_TCPDUMP : 'false'
-  # Specifies local network interface(s) for local packet capture if PCAP_ENABLE_NETSNIFF,
-  #   PCAP_ENABLE_TCPDUMP, ZEEK_LIVE_CAPTURE or SURICATA_LIVE_CAPTURE are 'true'
-  PCAP_IFACE : 'lo'
-  # Whether or not ethtool will disable NIC hardware offloading features and adjust
-  #   ring buffer sizes for capture interface(s) (should be 'true' if the interface(s) are
-  #   being used for capture only, 'false' if they are being used for management/communication)
-  PCAP_IFACE_TWEAK : 'false'
-  # Specifies how large a locally-captured PCAP file can become (in megabytes) before
-  #   it is closed for processing and a new PCAP file created
-  PCAP_ROTATE_MEGABYTES : 4096
-  # Specifies a time interval (in minutes) after which a locally-captured PCAP file
-  #   will be closed for processing and a new PCAP file created
-  PCAP_ROTATE_MINUTES : 10
-  # Specifies a tcpdump-style filter expression for local packet capture ('' to capture all traffic)
-  PCAP_FILTER : ''
-################################################################################
-
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:23.04.0
+    image: ghcr.io/idaholab/malcolm/opensearch:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: opensearch
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
     environment:
-      <<: [*opensearch-variables, *ssl-variables, *process-variables]
-      logger.level : 'WARN'
-      bootstrap.memory_lock : 'true'
-      MAX_LOCKED_MEMORY : 'unlimited'
-      OPENSEARCH_JAVA_OPTS : '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
       VIRTUAL_HOST : 'os.malcolm.local'
-      discovery.type : 'single-node'
-      cluster.routing.allocation.disk.threshold_enabled : 'false'
-      cluster.routing.allocation.node_initial_primaries_recoveries : 8
-      indices.query.bool.max_clause_count : 4096
-      path.repo : '/opt/opensearch/backup'
     ulimits:
       memlock:
         soft: -1
@@ -386,11 +25,11 @@ services:
       - IPC_LOCK
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./opensearch:/usr/share/opensearch/data:delegated
       - ./opensearch-backup:/opt/opensearch/backup:delegated
-      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/opensearch.keystore:rw
+      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/persist/opensearch.keystore:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
       interval: 30s
@@ -398,27 +37,26 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.04.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: dashboards-helper
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/dashboards-helper.env
     environment:
-      <<: [*dashboards-helper-variables, *opensearch-variables, *ssl-variables, *process-variables]
-      DASHBOARDS_URL : 'http://dashboards:5601/dashboards'
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
-      ARKIME_INDEX_PATTERN : 'arkime_sessions3-*'
-      ARKIME_INDEX_PATTERN_ID : 'arkime_sessions3-*'
-      ARKIME_INDEX_TIME_FIELD : 'firstPacket'
-      CREATE_OS_ARKIME_SESSION_INDEX : 'true'
     depends_on:
       - opensearch
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
@@ -426,22 +64,25 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:23.04.0
+    image: ghcr.io/idaholab/malcolm/dashboards:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: dashboards
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
     environment:
-      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'dashboards.malcolm.local'
     depends_on:
       - opensearch
       - dashboards-helper
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
@@ -449,7 +90,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:23.04.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -462,23 +103,28 @@ services:
         hard: -1
     cap_add:
       - IPC_LOCK
-    env_file: ./netbox/env/netbox.env
-    environment:
-      <<: [*common-lookup-variables, *common-beats-variables, *logstash-variables, *netbox-variables, *opensearch-variables, *ssl-variables, *process-variables]
-      LS_JAVA_OPTS : '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/netbox-common.env
+      - ./config/netbox.env
+      - ./config/netbox-secret.env
+      - ./config/beats-common.env
+      - ./config/lookup-common.env
+      - ./config/logstash.env
     depends_on:
       - opensearch
     ports:
       - "127.0.0.1:5044:5044"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/opensearch.secondary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
       - ./logstash/certs/server.key:/certs/server.key:ro
-      - ./net-map.json:/usr/share/logstash/config/net-map.json:ro
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
       interval: 30s
@@ -486,26 +132,28 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.04.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: filebeat
     networks:
       - default
-    environment:
-      <<: [*common-beats-variables, *common-upload-variables, *filebeat-variables, *opensearch-variables, *nginx-variables, *ssl-variables, *process-variables]
-      FILEBEAT_ZEEK_LOG_PATH : '/zeek/current'
-      FILEBEAT_ZEEK_LOG_LIVE_PATH : '/zeek/live'
-      FILEBEAT_SURICATA_LOG_PATH : '/suricata'
-      FILEBEAT_NGINX_LOG_PATH : '/nginx'
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/upload-common.env
+      - ./config/nginx.env
+      - ./config/beats-common.env
+      - ./config/filebeat.env
     depends_on:
       - logstash
     ports:
       - "127.0.0.1:5045:5045"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - nginx-log-path:/nginx:ro
       - ./zeek-logs:/zeek
       - ./suricata-logs:/suricata
@@ -519,7 +167,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:23.04.0
+    image: ghcr.io/idaholab/malcolm/arkime:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -527,13 +175,15 @@ services:
     networks:
       - default
     env_file:
-      - ./auth.env
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/upload-common.env
+      - ./config/auth.env
+      - ./config/arkime.env
+      - ./config/arkime-secret.env
     environment:
-      <<: [*arkime-variables, *common-upload-variables, *opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'arkime.malcolm.local'
-      OPENSEARCH_MAX_SHARDS_PER_NODE : 2500
-      VIEWER : 'on'
-      WISE : 'on'
     ulimits:
       memlock:
         soft: -1
@@ -542,7 +192,7 @@ services:
       - opensearch
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
       - ./arkime-logs:/opt/arkime/logs
       - ./arkime-raw:/opt/arkime/raw
@@ -553,7 +203,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:23.04.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -569,10 +219,13 @@ services:
       - NET_ADMIN
       - NET_RAW
       - SYS_ADMIN
-    environment:
-      <<: [*zeek-offline-variables, *zeek-variables, *common-upload-variables, *ssl-variables, *process-variables]
-      ZEEK_PCAP_PROCESSOR : 'true'
-      ZEEK_CRON : 'false'
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/upload-common.env
+      - ./config/zeek.env
+      - ./config/zeek-secret.env
+      - ./config/zeek-offline.env
     depends_on:
       - opensearch
     volumes:
@@ -588,7 +241,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:23.04.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -602,20 +255,21 @@ services:
       - NET_ADMIN
       - NET_RAW
       - SYS_ADMIN
-    environment:
-      <<: [*pcap-capture-variables, *zeek-live-variables, *zeek-variables, *common-upload-variables, *ssl-variables, *process-variables]
-      ZEEK_PCAP_PROCESSOR : 'false'
-      ZEEK_CRON : 'true'
-      ZEEK_LOG_PATH : '/zeek/live'
-      ZEEK_INTEL_PATH : '/opt/zeek/share/zeek/site/intel'
-      EXTRACT_FILES_PATH : '/zeek/extract_files'
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/upload-common.env
+      - ./config/pcap-capture.env
+      - ./config/zeek.env
+      - ./config/zeek-secret.env
+      - ./config/zeek-live.env
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./zeek-logs/live:/zeek/live
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:23.04.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -631,9 +285,12 @@ services:
       - NET_ADMIN
       - NET_RAW
       - SYS_ADMIN
-    environment:
-      <<: [*suricata-offline-variables, *suricata-variables, *common-upload-variables, *ssl-variables, *process-variables]
-      SURICATA_PCAP_PROCESSOR : 'true'
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/upload-common.env
+      - ./config/suricata.env
+      - ./config/suricata-offline.env
     depends_on:
       - logstash
     volumes:
@@ -648,7 +305,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:23.04.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -662,23 +319,31 @@ services:
       - NET_ADMIN
       - NET_RAW
       - SYS_ADMIN
-    environment:
-      <<: [*pcap-capture-variables, *suricata-live-variables, *suricata-variables, *common-upload-variables, *ssl-variables, *process-variables]
-      SURICATA_PCAP_PROCESSOR : 'false'
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/upload-common.env
+      - ./config/pcap-capture.env
+      - ./config/suricata.env
+      - ./config/suricata-live.env
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
   file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:23.04.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: file-monitor
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/zeek.env
+      - ./config/zeek-secret.env
     environment:
-      <<: [*zeek-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'file-monitor.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -692,7 +357,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:23.04.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -706,26 +371,31 @@ services:
       - NET_ADMIN
       - NET_RAW
       - SYS_ADMIN
-    environment:
-      <<: [*pcap-capture-variables, *ssl-variables, *process-variables]
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/pcap-capture.env
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.04.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: pcapmon
+    hostname: pcap-monitor
     networks:
       - default
-    environment:
-      <<: [*common-upload-variables, *opensearch-variables, *ssl-variables, *process-variables]
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/upload-common.env
     depends_on:
       - opensearch
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./zeek-logs:/zeek
       - ./pcap:/pcap
     healthcheck:
@@ -735,7 +405,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:23.04.0
+    image: ghcr.io/idaholab/malcolm/file-upload:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
@@ -743,10 +413,11 @@ services:
     networks:
       - default
     env_file:
-      - ./auth.env
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/auth.env
+      - ./config/upload.env
     environment:
-      <<: [*ssl-variables, *process-variables]
-      SITE_NAME : 'Capture File and Log Archive Upload'
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
       - arkime
@@ -762,21 +433,24 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:23.04.0
+    image: ghcr.io/idaholab/malcolm/htadmin:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: htadmin
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/auth-common.env
     environment:
-      <<: [*auth-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'htadmin.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
       - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-      - ./nginx/htpasswd:/var/www/htadmin/config/htpasswd:rw
+      - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
       interval: 60s
@@ -784,15 +458,18 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:23.04.0
+    image: ghcr.io/idaholab/malcolm/freq:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: freq
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/lookup-common.env
     environment:
-      <<: [*common-lookup-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'freq.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -802,37 +479,21 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
-  name-map-ui:
-    image: ghcr.io/idaholab/malcolm/name-map-ui:23.04.0
-    restart: "no"
-    stdin_open: false
-    tty: true
-    hostname: name-map-ui
-    networks:
-      - default
-    environment:
-      <<: [*ssl-variables, *process-variables]
-      VIRTUAL_HOST : 'name-map-ui.malcolm.local'
-    volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./net-map.json:/var/www/html/maps/net-map.json:rw
-    healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:8080/fpm-ping"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:23.04.0
+    image: ghcr.io/idaholab/malcolm/netbox:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox
     networks:
       - default
-    env_file: ./netbox/env/netbox.env
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/netbox-common.env
+      - ./config/netbox.env
+      - ./config/netbox-secret.env
     environment:
-      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox.malcolm.local'
     depends_on:
       - netbox-postgres
@@ -852,16 +513,19 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:23.04.0
+    image: ghcr.io/idaholab/malcolm/postgresql:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox-postgres
     networks:
       - default
-    env_file: ./netbox/env/postgres.env
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/netbox-common.env
+      - ./config/netbox-postgres.env
     environment:
-      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -873,16 +537,19 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:23.04.0
+    image: ghcr.io/idaholab/malcolm/redis:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox-redis
     networks:
       - default
-    env_file: ./netbox/env/redis.env
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/netbox-common.env
+      - ./config/netbox-redis.env
     environment:
-      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-redis.malcolm.local'
     command:
       - sh
@@ -898,16 +565,19 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:23.04.0
+    image: ghcr.io/idaholab/malcolm/redis:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox-redis-cache
     networks:
       - default
-    env_file: ./netbox/env/redis-cache.env
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/netbox-common.env
+      - ./config/netbox-redis-cache.env
     environment:
-      <<: [*netbox-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
     command:
       - sh
@@ -922,7 +592,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:23.04.0
+    image: ghcr.io/idaholab/malcolm/api:23.05.0
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -930,47 +600,50 @@ services:
     hostname: api
     networks:
       - default
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
     environment:
-      <<: [*opensearch-variables, *ssl-variables, *process-variables]
       VIRTUAL_HOST : 'api.malcolm.local'
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/opensearch.primary.curlrc:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/ping"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/mapi/ping"]
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.04.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.05.0
     restart: "no"
     stdin_open: false
     tty: true
     hostname: nginx-proxy
     networks:
       - default
-    environment:
-      <<: [*nginx-variables, *auth-variables, *ssl-variables, *process-variables]
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/auth-common.env
+      - ./config/nginx.env
     depends_on:
       - api
       - arkime
       - dashboards
       - file-monitor
       - htadmin
-      - name-map-ui
       - netbox
       - upload
     ports:
       - "0.0.0.0:443:443"
-      - "0.0.0.0:488:488"
-      - "127.0.0.1:5601:5601"
       - "127.0.0.1:9200:9200"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - nginx-log-path:/var/log/nginx:rw
       - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
-      - ./nginx/htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx/htpasswd:/etc/nginx/auth/htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
     healthcheck:
@@ -980,15 +653,15 @@ services:
       retries: 3
       start_period: 120s
     labels:
-      traefik.enable: "false"
-      # traefik.http.routers.osmalcolm.rule: 'Host(`opensearch.malcolm.example.org`)'
-      # traefik.http.routers.osmalcolm.entrypoints: 'websecure'
-      # traefik.http.routers.osmalcolm.tls.certresolver: 'myresolver'
+      traefik.enable: 'false'
+      # traefik.http.routers.osmalcolm.rule: 'Host(``)'
+      # traefik.http.routers.osmalcolm.entrypoints: ''
+      # traefik.http.routers.osmalcolm.tls.certresolver: ''
       # traefik.http.routers.osmalcolm.service: 'osmalcolm'
       # traefik.http.services.osmalcolm.loadbalancer.server.port: '9200'
-      # traefik.http.routers.malcolm.rule: 'Host(`malcolm.example.org`)'
-      # traefik.http.routers.malcolm.entrypoints: 'websecure'
-      # traefik.http.routers.malcolm.tls.certresolver: 'myresolver'
+      # traefik.http.routers.malcolm.rule: 'Host(``)'
+      # traefik.http.routers.malcolm.entrypoints: ''
+      # traefik.http.routers.malcolm.tls.certresolver: ''
       # traefik.http.routers.malcolm.service: 'malcolm'
       # traefik.http.services.malcolm.loadbalancer.server.port: '443'
 

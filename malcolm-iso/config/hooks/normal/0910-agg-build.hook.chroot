@@ -115,3 +115,21 @@ chmod 755 /usr/local/bin/step
 chown root:root /usr/local/bin/step
 rm -rf /tmp/step*
 ###
+
+# stern
+RELEASE_URL="https://api.github.com/repos/stern/stern/releases/latest"
+RELEASE_FILE_REGEX="_linux_amd64\\\.tar\\\.gz$"
+cd /tmp
+mkdir -p ./stern
+curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./stern
+mv ./stern/stern /usr/local/bin/stern
+chmod 755 /usr/local/bin/stern
+chown root:root /usr/local/bin/stern
+rm -rf /tmp/stern*
+###
+
+# kubectl
+curl -sSL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -sSL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod 755 /usr/local/bin/kubectl
+chown root:root /usr/local/bin/kubectl
+###

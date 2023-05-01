@@ -87,10 +87,12 @@ ENV NGINX_LDAP_TLS_STUNNEL_CHECK_IP $NGINX_LDAP_TLS_STUNNEL_CHECK_IP
 ENV NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL $NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
 
 # build latest nginx with nginx-auth-ldap
-ENV NGINX_VERSION=1.20.2
+ENV NGINX_VERSION=1.22.1
 ENV NGINX_AUTH_LDAP_BRANCH=master
+ENV NGINX_HTTP_SUB_FILTER_BRANCH=master
 
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
+ADD https://codeload.github.com/yaoweibin/ngx_http_substitutions_filter_module/tar.gz/$NGINX_HTTP_SUB_FILTER_BRANCH /ngx_http_substitutions_filter_module-master.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
 
 RUN set -x ; \
@@ -140,6 +142,7 @@ RUN set -x ; \
     --with-file-aio \
     --with-http_v2_module \
     --add-module=/usr/src/nginx-auth-ldap \
+    --add-module=/usr/src/ngx_http_substitutions_filter_module \
   " ; \
   apk update --no-cache; \
   apk upgrade --no-cache; \
@@ -166,9 +169,10 @@ RUN set -x ; \
     zlib-dev \
     ; \
     \
-  mkdir -p /usr/src/nginx-auth-ldap /www /www/logs/nginx ; \
+  mkdir -p /usr/src/nginx-auth-ldap /usr/src/ngx_http_substitutions_filter_module /www /www/logs/nginx /var/log/nginx ; \
   tar -zxC /usr/src -f /nginx.tar.gz ; \
   tar -zxC /usr/src/nginx-auth-ldap --strip=1 -f /nginx-auth-ldap.tar.gz ; \
+  tar -zxC /usr/src/ngx_http_substitutions_filter_module --strip=1 -f /ngx_http_substitutions_filter_module-master.tar.gz ; \
   cd /usr/src/nginx-$NGINX_VERSION ; \
   ./configure $CONFIG --with-debug ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
@@ -182,8 +186,7 @@ RUN set -x ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
   make install ; \
   rm -rf /etc/nginx/html/ ; \
-  mkdir -p /etc/nginx/conf.d/ ; \
-  mkdir -p /usr/share/nginx/html/ ; \
+  mkdir -p /etc/nginx/conf.d/ /etc/nginx/auth/ /usr/share/nginx/html/ ; \
   install -m644 html/index.html /usr/share/nginx/html/ ; \
   install -m644 html/50x.html /usr/share/nginx/html/ ; \
   install -m755 objs/nginx-debug /usr/sbin/nginx-debug ; \
@@ -216,7 +219,7 @@ RUN set -x ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz; \
+  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_substitutions_filter_module-master.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
@@ -224,7 +227,7 @@ COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/ngi
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
@@ -233,7 +236,10 @@ ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 

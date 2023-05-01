@@ -9,6 +9,9 @@ import requests
 import sys
 import tempfile
 
+import malcolm_utils
+from malcolm_utils import eprint, str2bool
+
 try:
     import ruamel.yaml as yaml
 except ImportError:
@@ -24,22 +27,6 @@ debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def strip_mac(mac):
@@ -57,7 +44,14 @@ def main():
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
     parser.add_argument(
-        '-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output"
+        '-v',
+        '--verbose',
+        dest='debug',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Verbose output",
     )
     parser.add_argument(
         '-i',

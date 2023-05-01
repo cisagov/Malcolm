@@ -7,7 +7,7 @@ Malcolm's default standalone configuration is to use a local [OpenSearch](https:
 
 As the permutations of OpenSearch cluster configurations are numerous, it is beyond Malcolm's scope to set up multi-node clusters. However, Malcolm can be configured to use a remote OpenSearch cluster rather than its own internal instance.
 
-The `OPENSEARCH_…` [environment variables in `docker-compose.yml`](malcolm-config.md#DockerComposeYml) control whether Malcolm uses its own local OpenSearch instance or a remote OpenSearch instance as its primary data store. The configuration portion of Malcolm install script ([`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning)) can help you configure these options.
+The `OPENSEARCH_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control whether Malcolm uses its own local OpenSearch instance or a remote OpenSearch instance as its primary data store. The configuration portion of Malcolm install script ([`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) can help you configure these options.
 
 For example, to use the default standalone configuration, answer `Y` when prompted `Should Malcolm use and maintain its own OpenSearch instance?`.
 
@@ -25,7 +25,7 @@ You must run auth_setup after install.py to store OpenSearch connection credenti
 …
 ```
 
-Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can be configured additionally forward logs to a secondary remote OpenSearch instance. The `OPENSEARCH_SECONDARY_…` [environment variables in `docker-compose.yml`](malcolm-config.md#DockerComposeYml) control this behavior. Configuration of a remote secondary OpenSearch instance is similar to that of a remote primary OpenSearch instance:
+Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can be configured additionally forward logs to a secondary remote OpenSearch instance. The `OPENSEARCH_SECONDARY_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control this behavior. Configuration of a remote secondary OpenSearch instance is similar to that of a remote primary OpenSearch instance:
 
 
 ```
@@ -42,7 +42,7 @@ You must run auth_setup after install.py to store OpenSearch connection credenti
 
 ## <a name="OpenSearchAuth"></a>Authentication and authorization for remote OpenSearch clusters
 
-In addition to setting the environment variables in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml) as described above, you must provide Malcolm with credentials for it to be able to communicate with remote OpenSearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary OpenSearch connections, respectively, and are bind mounted into the Docker containers which need to communicate with OpenSearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](authsetup.md#AuthSetup) script as illustrated:
+In addition to setting the environment variables in [`opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) as described above, you must provide Malcolm with credentials for it to be able to communicate with remote OpenSearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary OpenSearch connections, respectively, and are bind mounted into the Docker containers which need to communicate with OpenSearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](authsetup.md#AuthSetup) script as illustrated:
 
 ```
 $ ./scripts/auth_setup 
@@ -55,7 +55,7 @@ OpenSearch username: servicedb
 servicedb password:
 servicedb password (again):
 
-Additional local accounts can be created at https://localhost:488/ when Malcolm is running
+Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
 Require SSL certificate validation for OpenSearch communication? (Y/n): n
 

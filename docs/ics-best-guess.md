@@ -8,4 +8,4 @@ Naturally, these lookups could produce false positives, so these connections are
 
 ![](./images/screenshots/dashboards_bestguess.png)
 
-This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` environment variable in [`docker-compose.yml`](malcolm-config.md#DockerComposeYml).
+This feature is disabled by default, but it can be enabled by clearing (setting to `''`) the value of the `ZEEK_DISABLE_BEST_GUESS_ICS` [environment variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars).

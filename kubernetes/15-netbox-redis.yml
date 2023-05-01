@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-redis
+  namespace: malcolm
+spec:
+  ports:
+    - port: 6379
+      protocol: TCP
+      name: redis
+  selector:
+    name: netbox-redis-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-redis-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: netbox-redis-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: netbox-redis-deployment
+    spec:
+      containers:
+      - name: netbox-redis-container
+        image: ghcr.io/idaholab/malcolm/redis:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        command: ["sh"]
+        args: ["-c", "redis-server --appendonly yes --requirepass $(REDIS_PASSWORD)"]
+        ports:
+          - name: redis
+            protocol: TCP
+            containerPort: 6379
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: netbox-common-env
+          - secretRef:
+              name: netbox-redis-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "netbox-redis.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+             - sh
+             - "-c"
+             - |
+               /bin/bash <<'EOF'
+
+               [[ "$NETBOX_REDIS_DISABLED" == 'true' ]] || ( pidof redis-server || exit 1 )
+
+               EOF
+          initialDelaySeconds: 45
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: netbox-redis-var-local-catrust-volume
+          - mountPath: /data
+            name: netbox-redis-volume
+            subPath: netbox/redis
+      volumes:
+        - name: netbox-redis-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: netbox-redis-volume
+          persistentVolumeClaim:
+            claimName: config-claim

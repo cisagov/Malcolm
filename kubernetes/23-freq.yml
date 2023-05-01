@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: freq
+  namespace: malcolm
+spec:
+  ports:
+    - port: 10004
+      protocol: TCP
+      name: http
+  selector:
+    name: freq-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: freq-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: freq-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: freq-deployment
+    spec:
+      containers:
+      - name: freq-container
+        image: ghcr.io/idaholab/malcolm/freq:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: http
+            protocol: TCP
+            containerPort: 10004
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: lookup-common-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "freq.malcolm.local"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 10004
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: freq-var-local-catrust-volume
+      volumes:
+        - name: freq-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust

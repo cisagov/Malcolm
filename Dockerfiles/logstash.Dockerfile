@@ -16,6 +16,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "logstash"
 ENV PGROUP "logstash"
 ENV PUSER_PRIV_DROP true
+ENV PUSER_RLIMIT_UNLOCK true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -27,7 +28,6 @@ ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse,beats-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=external-os
 ARG LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=internal-os,external-os
-ARG LOGSTASH_NETWORK_MAP_ENRICHMENT=true
 ARG LOGSTASH_NETBOX_ENRICHMENT=false
 ARG LOGSTASH_NETBOX_ENRICHMENT_VERBOSE=false
 ARG LOGSTASH_NETBOX_ENRICHMENT_LOOKUP_SERVICE=true
@@ -37,7 +37,6 @@ ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL
 ENV LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL $LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL
 ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES
-ENV LOGSTASH_NETWORK_MAP_ENRICHMENT $LOGSTASH_NETWORK_MAP_ENRICHMENT
 ENV LOGSTASH_NETBOX_ENRICHMENT $LOGSTASH_NETBOX_ENRICHMENT
 ENV LOGSTASH_NETBOX_ENRICHMENT_VERBOSE $LOGSTASH_NETBOX_ENRICHMENT_VERBOSE
 ENV LOGSTASH_NETBOX_ENRICHMENT_LOOKUP_SERVICE $LOGSTASH_NETBOX_ENRICHMENT_LOOKUP_SERVICE
@@ -74,9 +73,12 @@ RUN set -x && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/bin/jruby \
            /root/.cache /root/.gem /root/.bundle
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-ADD shared/bin/manuf-oui-parse.py /usr/local/bin/
-ADD shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 shared/bin/manuf-oui-parse.py /usr/local/bin/
+COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
 ADD logstash/config/log4j2.properties /usr/share/logstash/config/
 ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
@@ -84,16 +86,20 @@ ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/patterns/ /usr/share/logstash/malcolm-patterns/
 ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
-ADD scripts/malcolm_common.py /usr/local/bin/
+ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD logstash/supervisord.conf /etc/supervisord.conf
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
     usermod -a -G tty ${PUSER} && \
     rm -f /usr/share/logstash/pipeline/logstash.conf && \
     rmdir /usr/share/logstash/pipeline && \
-    mkdir /logstash-persistent-queue && \
+    mkdir -p /logstash-persistent-queue \
+             /usr/share/logstash/config/bootstrap \
+             /usr/share/logstash/config/persist && \
     chown --silent -R ${PUSER}:root \
         /usr/share/logstash/config/logstash*.yml \
+        /usr/share/logstash/config/bootstrap \
+        /usr/share/logstash/config/persist \
         /usr/share/logstash/malcolm-pipelines \
         /usr/share/logstash/malcolm-patterns \
         /usr/share/logstash/malcolm-ruby \
@@ -118,7 +124,11 @@ EXPOSE 5044
 EXPOSE 9001
 EXPOSE 9600
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "logstash"]
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 

@@ -12,11 +12,11 @@ RUN    apt-get update -q \
     && python3 -m pip install flake8
 
 COPY ./api /usr/src/app/
-COPY scripts/malcolm_common.py /usr/src/app/
+COPY scripts/malcolm_utils.py /usr/src/app/
 WORKDIR /usr/src/app
 
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
-    && flake8 --ignore=E501,F401,W503
+    && flake8 --ignore=E203,E501,F401,W503
 
 FROM python:3-slim
 
@@ -70,16 +70,18 @@ WORKDIR "${APP_HOME}"
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 COPY ./api "${APP_HOME}"
-COPY scripts/malcolm_common.py "${APP_HOME}"/
+COPY scripts/malcolm_utils.py "${APP_HOME}"/
 COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
 
-ADD shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \
     && apt-get -y -q --no-install-recommends install curl netcat rsync tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
-    && chmod 755 /usr/local/bin/docker-uid-gid-setup.sh \
     && groupadd --gid ${DEFAULT_GID} ${PGROUP} \
     &&   useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home "${HOME}" ${PUSER} \
     &&   chown -R ${PUSER}:${PGROUP} "${HOME}" \
@@ -89,7 +91,12 @@ RUN    apt-get -q update \
 
 EXPOSE 5000
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "${APP_HOME}/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "api", \
+            "/malcolm/api/entrypoint.sh"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

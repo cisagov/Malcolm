@@ -15,9 +15,8 @@ from socketserver import ThreadingMixIn
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from Crypto.Cipher import AES
 
-KEY_SIZE = 32
-OPENSSL_ENC_MAGIC = b'Salted__'
-PKCS5_SALT_LEN = 8
+
+from malcolm_utils import str2bool, eprint, EVP_KEY_SIZE, PKCS5_SALT_LEN, OPENSSL_ENC_MAGIC, EVP_BytesToKey
 
 ###################################################################################################
 args = None
@@ -26,64 +25,10 @@ script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-    sys.stderr.flush()
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-###################################################################################################
-# EVP_BytesToKey
-#
-# reference: https://github.com/openssl/openssl/blob/6f0ac0e2f27d9240516edb9a23b7863e7ad02898/crypto/evp/evp_key.c#L74
-#            https://gist.github.com/chrono-meter/d122cbefc6f6248a0af554995f072460
-def EVP_BytesToKey(key_length: int, iv_length: int, md, salt: bytes, data: bytes, count: int = 1) -> (bytes, bytes):
-    assert data
-    assert salt == b'' or len(salt) == PKCS5_SALT_LEN
-
-    md_buf = b''
-    key = b''
-    iv = b''
-    addmd = 0
-
-    while key_length > len(key) or iv_length > len(iv):
-        c = md()
-        if addmd:
-            c.update(md_buf)
-        addmd += 1
-        c.update(data)
-        c.update(salt)
-        md_buf = c.digest()
-        for i in range(1, count):
-            md_buf = md(md_buf)
-
-        md_buf2 = md_buf
-
-        if key_length > len(key):
-            key, md_buf2 = key + md_buf2[: key_length - len(key)], md_buf2[key_length - len(key) :]
-
-        if iv_length > len(iv):
-            iv = iv + md_buf2[: iv_length - len(iv)]
-
-    return key, iv
-
 
 ###################################################################################################
 #
 class HTTPHandler(SimpleHTTPRequestHandler):
-
     # return full path based on server base path and requested path
     def translate_path(self, path):
         path = SimpleHTTPRequestHandler.translate_path(self, path)
@@ -110,7 +55,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(fullpath)}.encrypted')
                 self.end_headers()
                 salt = os.urandom(PKCS5_SALT_LEN)
-                key, iv = EVP_BytesToKey(KEY_SIZE, AES.block_size, hashlib.sha256, salt, args.key.encode('utf-8'))
+                key, iv = EVP_BytesToKey(EVP_KEY_SIZE, AES.block_size, hashlib.sha256, salt, args.key.encode('utf-8'))
                 cipher = AES.new(key, AES.MODE_CBC, iv)
                 encrypted = b""
                 encrypted += OPENSSL_ENC_MAGIC
@@ -204,7 +149,13 @@ def main():
         help=f"Encrypt files with aes-256-cbc ({defaultEncrypt})",
     )
     parser.add_argument(
-        '-k', '--key', dest='key', help=f"File encryption key", metavar='<str>', type=str, default=defaultKey
+        '-k',
+        '--key',
+        dest='key',
+        help="File encryption key",
+        metavar='<str>',
+        type=str,
+        default=defaultKey,
     )
     try:
         parser.error = parser.exit
