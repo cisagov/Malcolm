@@ -12,14 +12,14 @@ ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     # need to build the opensearch URL (including username/password) by combining
     # OPENSEARCH_URL and parameters from OPENSEARCH_CREDS_CONFIG_FILE
 
     # get the new username/password from the curl file (I already wrote python code to do this, so sue me)
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
-    NEW_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+    NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
     NEW_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
     NEW_PASSWORD="$(urlencodeall "$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)")"
     popd >/dev/null 2>&1

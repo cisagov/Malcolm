@@ -1,0 +1,121 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-proxy
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      protocol: TCP
+      name: https
+    - port: 8443
+      protocol: TCP
+      name: http
+    - port: 9200
+      protocol: TCP
+      name: opensearch
+  selector:
+    name: nginx-proxy-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-proxy-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: nginx-proxy-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: nginx-proxy-deployment
+    spec:
+      containers:
+      - name: nginx-proxy-container
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: https
+            protocol: TCP
+            containerPort: 443
+          - name: http
+            protocol: TCP
+            containerPort: 8443
+          - name: opensearch
+            protocol: TCP
+            containerPort: 9200
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: auth-common-env
+          - configMapRef:
+              name: nginx-env
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+        - name: nginx-etc-nginx-volume
+          mountPath: /etc/nginx/configmap
+        - name: nginx-etc-nginx-secret-volume
+          mountPath: /etc/nginx/secretmap
+        - name: nginx-var-local-catrust-volume
+          mountPath: /var/local/ca-trust/configmap
+        - name: nginx-etc-nginx-certs-secret-volume
+          mountPath: /etc/nginx/certs/secretmap
+        - name: nginx-etc-nginx-certs-pem-volume
+          mountPath: /etc/nginx/dhparam/configmap
+        - name: nginx-opensearch-curlrc-secret-volume
+          mountPath: /var/local/curlrc/secretmap
+        - name: nginx-etc-auth-volume
+          mountPath: /etc/nginx/auth
+          subPath: "auth"
+        - name: nginx-etc-auth-default-secret-volume
+          mountPath: /tmp/auth/default/secretmap
+        - name: nginx-runtime-logs-volume
+          mountPath: /var/log/nginx
+          subPath: "nginx"
+      volumes:
+      - name: nginx-etc-nginx-volume
+        configMap:
+          name: etc-nginx
+      - name: nginx-etc-nginx-secret-volume
+        secret:
+          secretName: etc-nginx
+      - name: nginx-var-local-catrust-volume
+        configMap:
+          name: var-local-catrust
+      - name: nginx-etc-nginx-certs-secret-volume
+        secret:
+          secretName: etc-nginx-certs
+      - name: nginx-etc-nginx-certs-pem-volume
+        configMap:
+          name: etc-nginx-certs-pem
+      - name: nginx-opensearch-curlrc-secret-volume
+        secret:
+          secretName: opensearch-curlrc
+      - name: nginx-etc-auth-volume
+        persistentVolumeClaim:
+          claimName: config-claim
+      - name: nginx-etc-auth-default-secret-volume
+        secret:
+          secretName: etc-nginx-auth
+      - name: nginx-runtime-logs-volume
+        persistentVolumeClaim:
+          claimName: runtime-logs-claim

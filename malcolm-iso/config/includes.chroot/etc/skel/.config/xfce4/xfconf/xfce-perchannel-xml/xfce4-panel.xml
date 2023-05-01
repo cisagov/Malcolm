@@ -20,7 +20,6 @@
         <value type="int" value="24"/>
         <value type="int" value="22"/>
         <value type="int" value="21"/>
-        <value type="int" value="19"/>
         <value type="int" value="18"/>
         <value type="int" value="29"/>
         <value type="int" value="17"/>
@@ -95,11 +94,6 @@
     <property name="plugin-18" type="string" value="launcher">
       <property name="items" type="array">
         <value type="string" value="16343117498.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-19" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="16343117417.desktop"/>
       </property>
     </property>
     <property name="plugin-17" type="string" value="launcher">

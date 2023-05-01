@@ -19,14 +19,13 @@ import re
 
 
 def slugFormat(name):
-    return re.sub('\W+', '-', name.lower())
+    return re.sub(r'\W+', '-', name.lower())
 
 
 YAML_EXTENSIONS = ['yml', 'yaml']
 
 
 def getFiles(library_dir, vendors=None):
-
     files = []
     discoveredVendors = []
     base_path = os.path.join(library_dir, 'device-types', '')
@@ -91,7 +90,7 @@ def readYAMl(files, **kwargs):
         with open(file, 'r') as stream:
             try:
                 data = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
+            except yaml.YAMLError:
                 continue
             manufacturer = data['manufacturer']
             data['manufacturer'] = {}
@@ -107,7 +106,6 @@ def readYAMl(files, **kwargs):
 
 
 def read_yaml_modules(files, **kwargs):
-
     slugs = kwargs.get('slugs', None)
     module_types = []
     manufacturers = []
@@ -115,7 +113,7 @@ def read_yaml_modules(files, **kwargs):
         with open(file, 'r') as stream:
             try:
                 data = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
+            except yaml.YAMLError:
                 continue
             manufacturer = data['manufacturer']
             data['manufacturer'] = {}
@@ -147,7 +145,7 @@ def createManufacturers(vendors, nb, counter=None):
         if counter is not None:
             for man in manSuccess:
                 counter.update({'manufacturer': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -169,7 +167,7 @@ def createInterfaces(interfaces, deviceType, nb, counter=None):
         if counter is not None:
             for intf in ifSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -191,7 +189,7 @@ def create_module_interfaces(interfaces, module_type, nb, counter=None):
         if counter is not None:
             for intf in ifSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -213,12 +211,11 @@ def createConsolePorts(consoleports, deviceType, nb, counter=None):
         if counter is not None:
             for port in cpSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
 def create_module_console_ports(consoleports, module_type, nb, counter=None):
-
     all_consoleports = {str(item): item for item in nb.dcim.console_port_templates.filter(moduletype_id=module_type)}
     need_consoleports = []
     for consoleport in consoleports:
@@ -236,7 +233,7 @@ def create_module_console_ports(consoleports, module_type, nb, counter=None):
         if counter is not None:
             for port in cpSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -258,7 +255,7 @@ def createPowerPorts(powerports, deviceType, nb, counter=None):
         if counter is not None:
             for pp in ppSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -280,7 +277,7 @@ def create_module_power_ports(powerports, module_type, nb, counter=None):
         if counter is not None:
             for pp in ppSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -304,7 +301,7 @@ def createConsoleServerPorts(consoleserverports, deviceType, nb, counter=None):
         if counter is not None:
             for csp in cspSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -328,7 +325,7 @@ def create_module_console_server_ports(consoleserverports, module_type, nb, coun
         if counter is not None:
             for csp in cspSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -358,7 +355,7 @@ def createFrontPorts(frontports, deviceType, nb, counter=None):
         if counter is not None:
             for fp in fpSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -388,7 +385,7 @@ def create_module_front_ports(frontports, module_type, nb, counter=None):
         if counter is not None:
             for fp in fpSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -410,7 +407,7 @@ def createRearPorts(rearports, deviceType, nb, counter=None):
         if counter is not None:
             for rp in rpSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -432,7 +429,7 @@ def create_module_rear_ports(rearports, module_type, nb, counter=None):
         if counter is not None:
             for rp in rpSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -454,7 +451,7 @@ def createDeviceBays(devicebays, deviceType, nb, counter=None):
         if counter is not None:
             for db in dbSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -483,7 +480,7 @@ def create_module_bays(module_bays, device_type, nb, counter=None):
         if counter is not None:
             for module_bay in module_bay_res:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -513,7 +510,7 @@ def createPowerOutlets(poweroutlets, deviceType, nb, counter=None):
         if counter is not None:
             for po in poSuccess:
                 counter.update({'updated': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -556,7 +553,7 @@ def create_module_power_outlets(poweroutlets, module_type, nb, counter=None):
         if counter is not None:
             for po in poSuccess:
                 counter.update({'module_port_added': 1})
-    except pynetbox.RequestError as e:
+    except pynetbox.RequestError:
         pass
 
 
@@ -570,7 +567,7 @@ def createDeviceTypes(deviceTypes, nb, counter=None):
                 dt = nb.dcim.device_types.create(deviceType)
                 if counter is not None:
                     counter.update({'added': 1})
-            except pynetbox.RequestError as e:
+            except pynetbox.RequestError:
                 pass
 
         if "interfaces" in deviceType:
@@ -621,7 +618,7 @@ def create_module_types(module_types, nb, counter=None):
                 module_type_res = nb.dcim.module_types.create(curr_mt)
                 if counter is not None:
                     counter.update({'module_added': 1})
-            except pynetbox.RequestError as exce:
+            except pynetbox.RequestError:
                 pass
 
         # module_type_res = all_module_types[curr_mt['manufacturer']['slug']][curr_mt["model"]]
@@ -652,7 +649,6 @@ def import_library(nb, library_dir):
     )
 
     if library_dir is not None and os.path.isdir(library_dir):
-
         files, vendors = getFiles(library_dir)
         deviceTypes = readYAMl(files)
         createManufacturers(vendors, nb, counter=cntr)

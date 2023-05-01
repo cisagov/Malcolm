@@ -23,7 +23,7 @@ If you checked out a working copy of the Malcolm repository from GitHub with a `
 5. apply saved configuration change stashed earlier
     * `git stash pop`
 6. if you see `Merge conflict` messages, resolve the [conflicts](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts) with your favorite text editor
-7. you may wish to re-run `install.py --configure` as described in [System configuration and tuning](malcolm-config.md#ConfigAndTuning) in case there are any new `docker-compose.yml` parameters for Malcolm that need to be set up
+7. you may wish to re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-config.md#ConfigAndTuning) in case there are any new configuration parameters for Malcolm that need to be set up
 8. start Malcolm
     * `./scripts/start`
 9. you may be prompted to [configure authentication](authsetup.md#AuthSetup) if there are new authentication-related files that need to be generated
@@ -39,14 +39,14 @@ If you installed Malcolm from [pre-packaged installation files]({{ site.github.r
     * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
 3. backup current Malcolm scripts, configuration files and certificates
     * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
-    * `cp -r filebeat/ htadmin/ logstash/ nginx/ auth.env docker-compose.yml net-map.json ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
+    * `cp -r filebeat/ htadmin/ logstash/ nginx/ config/ docker-compose.yml ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
 3. replace scripts and local documentation in your existing installation with the new ones
     * `rm -rf ./scripts ./README.md`
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
 4. replace (overwrite) `docker-compose.yml` file with new version
     * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
-5. re-run `./scripts/install.py --configure` as described in [System configuration and tuning](malcolm-config.md#ConfigAndTuning)
-6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](malcolm-config.md#DockerComposeYml) you may have edited by hand in `docker-compose.yml` that's not prompted for in `install.py --configure`)
+5. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
+6. using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file you backed up in step 3, and manually migrate over any customizations you wish to preserve from that file (e.g., `PCAP_FILTER`, `MAXMIND_GEOIP_DB_LICENSE_KEY`, `MANAGE_PCAP_FILES`; [anything else](malcolm-config.md#MalcolmConfigEnvVars) you may have edited by hand in `docker-compose.yml` that's not prompted for in `configure`)
 7. pull the new docker images (this will take a while)
     * `docker-compose pull` to pull them from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.gz` if you have an offline tarball of the Malcolm docker images
 8. start Malcolm

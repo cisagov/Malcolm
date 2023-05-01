@@ -26,14 +26,15 @@ ENV PGROUP "suricata"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.2"
+ENV SUPERCRONIC_VERSION "0.2.24"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "2319da694833c7a147976b8e5f337cd83397d6be"
+ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.24.2"
+ENV YQ_VERSION "4.33.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
 ENV SURICATA_CONFIG_DIR /etc/suricata
@@ -90,13 +91,17 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         moreutils \
         procps \
         psmisc \
+        python3-pip \
         python3-ruamel.yaml \
+        python3-setuptools \
+        python3-wheel \
         python3-zmq \
         rsync \
         supervisor \
         vim-tiny \
         tini \
         zlib1g && \
+    pip3 install --no-cache-dir watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \
@@ -124,15 +129,17 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 COPY --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
+COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
 
-ARG PCAP_PIPELINE_DEBUG=false
-ARG PCAP_PIPELINE_DEBUG_EXTRA=false
+ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG AUTO_TAG=true
 ARG SURICATA_PCAP_PROCESSOR=true
@@ -151,8 +158,7 @@ ARG PCAP_IFACE=lo
 ARG PCAP_IFACE_TWEAK=false
 ARG PCAP_FILTER=
 
-ENV PCAP_PIPELINE_DEBUG $PCAP_PIPELINE_DEBUG
-ENV PCAP_PIPELINE_DEBUG_EXTRA $PCAP_PIPELINE_DEBUG_EXTRA
+ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV AUTO_TAG $AUTO_TAG
 ENV SURICATA_PCAP_PROCESSOR $SURICATA_PCAP_PROCESSOR
@@ -180,6 +186,11 @@ VOLUME ["$SURICATA_RUN_DIR"]
 
 WORKDIR $SURICATA_RUN_DIR
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-uid-gid-setup.sh", "/usr/local/bin/docker_entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", \
+            "--", \
+            "/usr/local/bin/docker-uid-gid-setup.sh", \
+            "/usr/local/bin/service_check_passthrough.sh", \
+            "-s", "suricata", \
+            "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]

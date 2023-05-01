@@ -17,9 +17,6 @@ export PIPELINES_CFG="/usr/share/logstash/config/pipelines.yml"
 # pipeline section in pipelines.yml (then delete 00_config.conf before starting)
 export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
 
-# files defining IP->host and MAC->host mapping
-INPUT_MIXED_MAP="/usr/share/logstash/config/net-map.json"
-
 # the name of the enrichment pipeline subdirectory under $PIPELINES_DIR
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 
@@ -31,10 +28,6 @@ export OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRE
 export OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL:-"external-os"}
 OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES:-"$OPENSEARCH_PIPELINE_ADDRESS_INTERNAL,$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL"}
 
-# ip-to-segment-logstash.py translates $INPUT_MIXED_MAP into this logstash filter file
-NETWORK_MAP_OUTPUT_FILTER="$PIPELINES_DIR"/"$ENRICHMENT_PIPELINE"/16_host_segment_filters.conf
-export NETWORK_MAP_ENRICHMENT=${LOGSTASH_NETWORK_MAP_ENRICHMENT:-"true"}
-
 # output plugin configuration for primary and secondary opensearch destinations
 OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
 OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-"false"}
@@ -42,8 +35,8 @@ OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-"false"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION:-"false"}
 
-OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/opensearch.primary.curlrc"}
-OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/opensearch.secondary.curlrc"}
+OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
+OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.secondary.curlrc"}
 
 [[ "$OPENSEARCH_SECONDARY" != "true" ]] && OPENSEARCH_SECONDARY_URL=
 export OPENSEARCH_SECONDARY_URL
@@ -76,10 +69,6 @@ find "$PIPELINES_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort
   fi
 '
 
-# create filters for network segment and host mapping in the enrichment directory
-rm -f "$NETWORK_MAP_OUTPUT_FILTER"
-[[ "$NETWORK_MAP_ENRICHMENT" == "true" ]] && /usr/local/bin/ip-to-segment-logstash.py --input "$INPUT_MIXED_MAP" -o "$NETWORK_MAP_OUTPUT_FILTER"
-
 if [[ -z "$OPENSEARCH_SECONDARY_URL" ]]; then
   # external ES host destination is not specified, remove external destination from enrichment pipeline output
   OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES="$(echo "$OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES" | sed "s/,[[:blank:]]*$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL//")"
@@ -95,7 +84,7 @@ OPENSSL_USER=
 OPENSSL_PASSWORD=
 if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
-    NEW_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+    NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
     OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
     OPENSSL_PASSWORD="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)"
     popd >/dev/null 2>&1
@@ -105,7 +94,7 @@ OPENSSL_SECONDARY_USER=
 OPENSSL_SECONDARY_PASSWORD=
 if [[ "$OPENSEARCH_SECONDARY" == "true" ]] && [[ -r "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
-    NEW_SECONDARY_USER_PASSWORD="$(python3 -c "import malcolm_common; result=malcolm_common.ParseCurlFile('$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+    NEW_SECONDARY_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
     OPENSSL_SECONDARY_USER="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f1)"
     OPENSSL_SECONDARY_PASSWORD="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f2-)"
     popd >/dev/null 2>&1
@@ -130,6 +119,9 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_O
 
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
+
+# bootstrap keystore file if necessary
+/usr/local/bin/keystore-bootstrap.sh || true
 
 # logstash may wish to modify logstash.yml based on some environment variables (e.g.,
 # pipeline.workers), so copy the original onto from the image over the "working copy" before start

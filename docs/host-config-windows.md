@@ -13,4 +13,4 @@ Installing and configuring [Docker to run under Windows](https://docs.docker.com
 
 ## <a name="HostSystemConfigWindowsMalcolm"></a>Finish Malcolm's configuration
 
-Once Docker is installed, configured and running as described in the previous section, run [`./scripts/install.py --configure`](malcolm-config.md#ConfigAndTuning) to finish configuration of the local Malcolm installation. Malcolm will be controlled and run from within your WSL distribution's terminal environment.
+Once Docker is installed, configured and running as described in the previous section, run [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) to finish configuration of the local Malcolm installation. Malcolm will be controlled and run from within your WSL distribution's terminal environment.

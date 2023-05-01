@@ -10,9 +10,9 @@
 ###################################################################################################
 
 import argparse
-import datetime
 import json
 import os
+import logging
 import pathlib
 import re
 import shutil
@@ -24,18 +24,36 @@ import zmq
 from collections import defaultdict
 from contextlib import nullcontext
 from datetime import datetime
-from zeek_carve_utils import *
+
+from zeek_carve_utils import (
+    BroSignatureLine,
+    extracted_filespec_to_fields,
+    FILE_SCAN_RESULT_DESCRIPTION,
+    FILE_SCAN_RESULT_ENGINES,
+    FILE_SCAN_RESULT_FILE,
+    FILE_SCAN_RESULT_HITS,
+    FILE_SCAN_RESULT_MESSAGE,
+    FILE_SCAN_RESULT_SCANNER,
+    PRESERVE_ALL,
+    PRESERVE_NONE,
+    PRESERVE_PRESERVED_DIR_NAME,
+    PRESERVE_QUARANTINED,
+    PRESERVE_QUARANTINED_DIR_NAME,
+    SINK_PORT,
+    ZEEK_SIGNATURE_NOTICE,
+)
+
+import malcolm_utils
+from malcolm_utils import str2bool, AtomicInt, same_file_or_dir
 
 ###################################################################################################
-debug = False
-verboseDebug = False
-debugToggled = False
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -52,57 +70,14 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
-#
-def same_file_or_dir(path1, path2):
-    try:
-        return os.path.samefile(path1, path2)
-    except:
-        return False
-
-
-###################################################################################################
 # main
 def main():
     global args
-    global debug
-    global verboseDebug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--start-sleep',
         dest='startSleepSec',
@@ -147,13 +122,14 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
     # determine what to do with scanned files (preserve only "hits", preserve all, preserve none)
@@ -161,14 +137,13 @@ def main():
     if len(args.preserveMode) == 0:
         args.preserveMode = PRESERVE_QUARANTINED
     elif args.preserveMode not in [PRESERVE_QUARANTINED, PRESERVE_ALL, PRESERVE_NONE]:
-        eprint(f'Invalid file preservation mode "{args.preserveMode}"')
+        logging.error(f'Invalid file preservation mode "{args.preserveMode}"')
         sys.exit(1)
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
@@ -190,12 +165,10 @@ def main():
     quarantineDir = os.path.join(args.baseDir, PRESERVE_QUARANTINED_DIR_NAME)
     preserveDir = os.path.join(args.baseDir, PRESERVE_PRESERVED_DIR_NAME)
     if (args.preserveMode != PRESERVE_NONE) and (not os.path.isdir(quarantineDir)):
-        if debug:
-            eprint(f'Creating "{quarantineDir}" for quarantined files')
+        logging.info(f'Creating "{quarantineDir}" for quarantined files')
         pathlib.Path(quarantineDir).mkdir(parents=False, exist_ok=True)
     if (args.preserveMode == PRESERVE_ALL) and (not os.path.isdir(preserveDir)):
-        if debug:
-            eprint(f'Creating "{preserveDir}" for other preserved files')
+        logging.info(f'Creating "{preserveDir}" for other preserved files')
         pathlib.Path(preserveDir).mkdir(parents=False, exist_ok=True)
 
     # initialize ZeroMQ context and socket(s) to send messages to
@@ -207,8 +180,7 @@ def main():
     scanned_files_socket.SNDTIMEO = 5000
     scanned_files_socket.RCVTIMEO = 5000
 
-    if debug:
-        eprint(f"{scriptName}: bound sink port {SINK_PORT}")
+    logging.info(f"{scriptName}: bound sink port {SINK_PORT}")
 
     scanners = set()
     fileScanCounts = defaultdict(AtomicInt)
@@ -235,7 +207,6 @@ def main():
             print(f'#types\t{BroSignatureLine.signature_types_line()}', file=broSigFile, end='\n')
 
         while not shuttingDown:
-
             if pdbFlagged:
                 pdbFlagged = False
                 breakpoint()
@@ -243,28 +214,24 @@ def main():
             triggered = False
             try:
                 scanResult = json.loads(scanned_files_socket.recv_string())
-                if debug:
-                    eprint(f"{scriptName}:\t📨\t{scanResult}")
-            except zmq.Again as timeout:
+                logging.info(f"{scriptName}:\t📨\t{scanResult}")
+            except zmq.Again:
+                # no file received due to timeout, we'll go around and try again
                 scanResult = None
-                if verboseDebug:
-                    eprint(f"{scriptName}:\t🕑\t(recv)")
 
             if isinstance(scanResult, dict):
-
                 # register/deregister scanners
                 if FILE_SCAN_RESULT_SCANNER in scanResult:
                     scanner = scanResult[FILE_SCAN_RESULT_SCANNER].lower()
                     if scanner.startswith('-'):
-                        if debug:
-                            eprint(f"{scriptName}:\t🙃\t{scanner[1:]}")
+                        logging.info(f"{scriptName}:\t🙃\t{scanner[1:]}")
                         try:
                             scanners.remove(scanner[1:])
                         except KeyError:
                             pass
                     else:
-                        if debug and (scanner not in scanners):
-                            eprint(f"{scriptName}:\t🇷\t{scanner}")
+                        if scanner not in scanners:
+                            logging.info(f"{scriptName}:\t🇷\t{scanner}")
                         scanners.add(scanner)
 
                 # process scan results
@@ -279,7 +246,6 @@ def main():
                         FILE_SCAN_RESULT_DESCRIPTION,
                     )
                 ):
-
                     triggered = scanResult[FILE_SCAN_RESULT_HITS] > 0
                     fileName = scanResult[FILE_SCAN_RESULT_FILE]
                     fileNameBase = os.path.basename(fileName)
@@ -318,25 +284,21 @@ def main():
 
                     # finally, what to do with the file itself
                     if os.path.isfile(fileName):
-
                         # once all of the scanners have had their turn...
                         if fileScanCount >= len(scanners):
                             fileScanCounts.pop(fileNameBase, None)
                             fileScanHits.pop(fileNameBase, None)
 
                             if (fileScanHitCount > 0) and (args.preserveMode != PRESERVE_NONE):
-
                                 # move triggering file to quarantine
                                 if not same_file_or_dir(
                                     fileName, os.path.join(quarantineDir, fileNameBase)
                                 ):  # unless it's somehow already there
-
                                     try:
                                         shutil.move(fileName, quarantineDir)
-                                        if debug:
-                                            eprint(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
+                                        logging.info(f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})")
                                     except Exception as e:
-                                        eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+                                        logging.warning(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
                                         # hm move failed, delete it i guess?
                                         os.remove(fileName)
 
@@ -344,29 +306,25 @@ def main():
                                 if not same_file_or_dir(
                                     quarantineDir, os.path.dirname(fileName)
                                 ):  # don't move or delete if it's somehow already quarantined
-
                                     if args.preserveMode == PRESERVE_ALL:
                                         # move non-triggering file to preserved directory
                                         try:
                                             shutil.move(fileName, preserveDir)
-                                            if verboseDebug:
-                                                eprint(
-                                                    f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})"
-                                                )
+                                            logging.debug(
+                                                f"{scriptName}:\t⏩\t{fileName} ({fileScanCount}/{len(scanners)})"
+                                            )
                                         except Exception as e:
-                                            eprint(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
+                                            logging.warning(f"{scriptName}:\t❗\t🚫\t{fileName} move exception: {e}")
                                             # hm move failed, delete it i guess?
                                             os.remove(fileName)
 
                                     else:
                                         # delete the file
                                         os.remove(fileName)
-                                        if verboseDebug:
-                                            eprint(f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})")
+                                        logging.debug(f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})")
 
     # graceful shutdown
-    if debug:
-        eprint(f"{scriptName}: shutting down...")
+    logging.info(f"{scriptName}: shutting down...")
 
 
 if __name__ == '__main__':

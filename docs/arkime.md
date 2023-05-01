@@ -120,7 +120,7 @@ While the default source and destination fields are *Src IP* and *Dst IP:Dst Por
 
 * *Src OUI* and *Dst OUI* (hardware manufacturers)
 * *Src IP* and *Protocols*
-* *Originating Network Segment* and *Responding Network Segment* (see [CIDR subnet to network segment name mapping](host-and-subnet-mapping.md#SegmentNaming))
+* *Originating Network Segment* and *Responding Network Segment* (see [Asset Interaction Analysis](asset-interaction-analysis.md#AssetInteractionAnalysis))
 * *Originating GeoIP City* and *Responding GeoIP City*
 
 or any other combination of these or other fields.

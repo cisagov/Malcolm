@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - development
-      - kubernetes
     paths:
       - 'sensor-iso/**'
       - 'shared/bin/*'
@@ -92,6 +91,7 @@ jobs:
         name: Build image
         run: |
           cp -r ./shared ./docs ./_config.yml ./_includes ./_layouts ./Gemfile ./README.md ./sensor-iso
+          cp ./scripts/malcolm_utils.py ./sensor-iso/shared/bin/
           cp ./scripts/documentation_build.sh ./sensor-iso/docs/
           cp -r ./arkime/patch ./sensor-iso/shared/arkime_patch
           pushd ./sensor-iso

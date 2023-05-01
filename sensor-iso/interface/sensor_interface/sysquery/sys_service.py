@@ -1,6 +1,7 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import subprocess, json
+import subprocess
+import json
 import os
 
 # traverse back up the path of the project directory to the scripts location
@@ -8,7 +9,6 @@ path = os.path.join(os.path.sep.join(__file__.split(os.path.sep)[:-3]), "sensor_
 
 
 def service(command):
-
     # TODO implement better error handling
 
     command, arguement = command.split(" ")

@@ -1,0 +1,130 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5044
+      protocol: TCP
+      name: lumberjack
+    - port: 9001
+      protocol: TCP
+      name: supervisord
+    - port: 9600
+      protocol: TCP
+      name: http
+  selector:
+    name: logstash-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: logstash-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: logstash-deployment
+    spec:
+      # affinity:
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #     - labelSelector:
+      #         matchExpressions:
+      #         - key: name
+      #           operator: In
+      #           values:
+      #           - opensearch-deployment
+      #       topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: logstash-container
+        image: ghcr.io/idaholab/malcolm/logstash-oss:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        securityContext:
+          capabilities:
+            add:
+              - IPC_LOCK
+              - SYS_RESOURCE
+        ports:
+          - name: lumberjack
+            protocol: TCP
+            containerPort: 5044
+          - name: supervisord
+            protocol: TCP
+            containerPort: 9001
+          - name: http
+            protocol: TCP
+            containerPort: 9600
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: opensearch-env
+          - configMapRef:
+              name: netbox-common-env
+          - configMapRef:
+              name: netbox-env
+          - secretRef:
+              name: netbox-secret-env
+          - configMapRef:
+              name: beats-common-env
+          - configMapRef:
+              name: lookup-common-env
+          - configMapRef:
+              name: logstash-env
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9600
+            scheme: HTTP
+          initialDelaySeconds: 600
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: logstash-var-local-catrust-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: logstash-opensearch-curlrc-secret-volume
+          - mountPath: /certs/secretmap
+            name: logstash-certs-secret-volume
+          - mountPath: /etc/configmap
+            name: logstash-maps-volume
+          - name: logstash-keystore-default-secret-volume
+            mountPath: /usr/share/logstash/config/bootstrap/secretmap
+          - name: logstash-config-persist-volume
+            mountPath: /usr/share/logstash/config/persist
+            subPath: "logstash"
+      volumes:
+        - name: logstash-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: logstash-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: logstash-certs-secret-volume
+          secret:
+            secretName: logstash-certs
+        - name: logstash-maps-volume
+          configMap:
+            name: logstash-maps
+        - name: logstash-keystore-default-secret-volume
+          secret:
+            secretName: logstash-keystore
+        - name: logstash-config-persist-volume
+          persistentVolumeClaim:
+            claimName: config-claim

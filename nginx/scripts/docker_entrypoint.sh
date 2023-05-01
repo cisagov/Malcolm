@@ -38,7 +38,7 @@ NGINX_SSL_CONF=/etc/nginx/nginx_ssl_config.conf
 # a blank file just to use as an "include" placeholder for the nginx's LDAP config when LDAP is not used
 NGINX_BLANK_CONF=/etc/nginx/nginx_blank.conf
 
-# "include" file for auth_basic, prompt, and .htpasswd location
+# "include" file for auth_basic, prompt, and htpasswd location
 NGINX_BASIC_AUTH_CONF=/etc/nginx/nginx_auth_basic.conf
 
 # "include" file for auth_ldap, prompt, and "auth_ldap_servers" name
@@ -92,7 +92,7 @@ if (( ${#CA_FILES} )) ; then
 
     # variables for nginx config
     NGINX_LDAP_CA_PATH_LINE="  ssl_ca_dir $CA_TRUST_RUN_DIR;"
-    ( [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] || [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] ) && NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;" || NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert chain;"
+    ( [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_HOST ]] || [[ -n $NGINX_LDAP_TLS_STUNNEL_CHECK_IP ]] ) && NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert on;" || NGINX_LDAP_CHECK_REMOTE_CERT_LINE="  ssl_check_cert off;"
   fi
   popd >/dev/null 2>&1
 fi
@@ -236,6 +236,15 @@ EOF
   fi # stunnel/starttls vs. ldap/ldaps
 
 fi # basic vs. ldap
+
+if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; then
+  cp /tmp/auth/default/htpasswd /etc/nginx/auth/htpasswd
+  [[ -n ${PUID} ]] && chown -f ${PUID} /etc/nginx/auth/htpasswd
+  [[ -n ${PGID} ]] && chown -f :${PGID} /etc/nginx/auth/htpasswd
+  rm -rf /tmp/auth/* || true
+fi
+
+rm -rf /var/log/nginx/* || true
 
 # start supervisor (which will spawn nginx, stunnel, etc.) or whatever the default command is
 exec "$@"

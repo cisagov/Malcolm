@@ -1,0 +1,82 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upload
+  namespace: malcolm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 22
+      protocol: TCP
+      name: sftp
+    - port: 80
+      protocol: TCP
+      name: http
+  selector:
+    name: upload-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upload-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: upload-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: upload-deployment
+    spec:
+      containers:
+      - name: upload-container
+        image: ghcr.io/idaholab/malcolm/file-upload:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: sftp
+            protocol: TCP
+            containerPort: 22
+          - name: http
+            protocol: TCP
+            containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - secretRef:
+              name: auth-env
+          - configMapRef:
+              name: upload-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "upload.malcolm.local"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: upload-var-local-catrust-volume
+          - mountPath: "/var/www/upload/server/php/chroot/files"
+            name: upload-pcap-volume
+            subPath: "upload"
+      volumes:
+        - name: upload-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: upload-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim

@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netbox-postgres
+  namespace: malcolm
+spec:
+  ports:
+    - port: 5432
+      protocol: TCP
+      name: postgresql
+  selector:
+    name: netbox-postgres-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbox-postgres-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: netbox-postgres-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: netbox-postgres-deployment
+    spec:
+      containers:
+      - name: netbox-postgres-container
+        image: ghcr.io/idaholab/malcolm/postgresql:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: postgresql
+            protocol: TCP
+            containerPort: 5432
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: netbox-common-env
+          - secretRef:
+              name: netbox-postgres-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "netbox-postgres.malcolm.local"
+        livenessProbe:
+          exec:
+            command:
+             - sh
+             - "-c"
+             - |
+               /bin/bash <<'EOF'
+
+               [[ "$NETBOX_POSTGRES_DISABLED" == 'true' ]] || pg_isready -d "$POSTGRES_DB" -U "$POSTGRES_USER"
+
+               EOF
+          initialDelaySeconds: 90
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: netbox-postgres-var-local-catrust-volume
+          - mountPath: /var/lib/postgresql/data
+            name: netbox-postgres-volume
+            subPath: netbox/postgres
+      volumes:
+        - name: netbox-postgres-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: netbox-postgres-volume
+          persistentVolumeClaim:
+            claimName: config-claim

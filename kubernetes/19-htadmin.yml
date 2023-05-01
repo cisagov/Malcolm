@@ -1,0 +1,77 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: htadmin
+  namespace: malcolm
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      name: http
+  selector:
+    name: htadmin-deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: htadmin-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: htadmin-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: htadmin-deployment
+    spec:
+      containers:
+      - name: htadmin-container
+        image: ghcr.io/idaholab/malcolm/htadmin:23.05.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        ports:
+          - name: http
+            protocol: TCP
+            containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: auth-common-env
+        env:
+          - name: VIRTUAL_HOST
+            value: "htadmin.malcolm.local"
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: htadmin-var-local-catrust-volume
+          - mountPath: /var/www/htadmin/auth
+            name: htadmin-config-volume
+            subPath: "auth"
+          - mountPath: /var/www/htadmin/default/configmap
+            name: htadmin-config-default-volume
+          - mountPath: /var/www/htadmin/default/secretmap
+            name: htadmin-config-default-secret-volume
+          - mountPath: /var/www/htadmin/config
+            name: htadmin-config-volume
+            subPath: "htadmin"
+      volumes:
+        - name: htadmin-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: htadmin-config-volume
+          persistentVolumeClaim:
+            claimName: config-claim
+        - name: htadmin-config-default-volume
+          configMap:
+            name: htadmin-config
+        - name: htadmin-config-default-secret-volume
+          secret:
+            secretName: htadmin-config
+        

@@ -6,7 +6,7 @@
     "description": "Malcolm API webhook to index OpenSearch alerts as session documents",
     "config_type": "webhook",
     "webhook": {
-      "url": "http://api:5000/alert",
+      "url": "http://api:5000/mapi/alert",
       "method": "POST",
       "header_params": {
         "Content-Type": "application/json"

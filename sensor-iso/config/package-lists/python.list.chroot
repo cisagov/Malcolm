@@ -9,9 +9,7 @@ python3-netifaces
 python3-pip
 python3-psutil
 python3-pycryptodome
-python3-pyinotify
 python3-requests
-python3-ruamel.yaml
 python3-semantic-version
 python3-setuptools
 python3-tz

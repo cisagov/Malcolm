@@ -11,8 +11,12 @@ try:
     import ruamel.yaml as yaml
 except ImportError:
     import yaml
-from netaddr import *
+
+from netaddr import EUI
 from operator import itemgetter
+
+import malcolm_utils
+from malcolm_utils import eprint, str2bool
 
 ###################################################################################################
 args = None
@@ -23,23 +27,6 @@ orig_path = os.getcwd()
 
 padded_mac_low = '00:00:00:00:00:00'
 padded_mac_high = 'FF:FF:FF:FF:FF:FF'
-
-###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-    sys.stderr.flush()
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    elif v.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    else:
-        raise ValueError("Boolean value expected")
 
 
 ###################################################################################################
@@ -100,14 +87,13 @@ def main():
         macPadHigh = macPad + padded_mac_high[-(len(padded_mac_high) - len(macPad)) :]
         macLow = EUI(macPadLow.replace(':', '-'))
         macHigh = EUI(macPadHigh.replace(':', '-'))
-        eui64 = int(macHigh.eui64()) - int(macLow.eui64())
         companies.append(
             {
                 'name': oui['companyName'],
                 'low': str(macLow),
-                #'low': int(re.sub("[.:-]", "", str(macLow)), 16),
+                # 'low': int(re.sub("[.:-]", "", str(macLow)), 16),
                 'high': str(macHigh),
-                #'high': int(re.sub("[.:-]", "", str(macHigh)), 16),
+                # 'high': int(re.sub("[.:-]", "", str(macHigh)), 16),
             }
         )
 

@@ -3,7 +3,7 @@
 * [Configuration](#Configuration)
     - [Recommended system requirements](system-requirements.md#SystemRequirements)
     - [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
-        + [`docker-compose.yml` parameters](malcolm-config.md#DockerComposeYml)
+        + [Environment Variable Files](malcolm-config.md#MalcolmConfigEnvVars)
     - [Configure authentication](authsetup.md#AuthSetup)
         + [Local account management](authsetup.md#AuthBasicAccountManagement)
         + [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP)

@@ -11,5 +11,8 @@ pip3 install --no-compile --no-cache-dir --force-reinstall --upgrade \
   dateparser \
   debinterface \
   pymisp \
+  python-dotenv \
+  ruamel.yaml \
   stix2 \
-  taxii2-client
+  taxii2-client \
+  watchdog

@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - development
-      - kubernetes
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'

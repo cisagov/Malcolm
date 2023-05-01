@@ -72,7 +72,7 @@ MALCOLM_VERSION="$($GREP -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print 
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 GITHUB_API_TOKEN="${GITHUB_TOKEN:-}"
 
-[[ ! -f ./auth.env ]] && touch ./auth.env
+mkdir -p ./config
 
 # MaxMind now requires a (free) license key to download the free versions of their GeoIP databases.
 if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
@@ -95,7 +95,7 @@ FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
   "/var/www/upload/js/jquery.fileupload.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
-  "/var/www/htadmin/index.php;htadmin"
+  "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
   "/etc/ja3.yaml;logstash"
   "/etc/vendor_macs.yaml;logstash"
@@ -104,8 +104,7 @@ FILES_IN_IMAGES=(
   "/opt/arkime/etc/ipv4-address-space.csv;arkime"
   "/opt/arkime/etc/oui.txt;arkime"
   "/opt/arkime/bin/capture;arkime"
-  "/var/www/html/list.min.js;name-map-ui"
-  "/var/www/html/jquery.min.js;name-map-ui"
+  "/opt/netbox-devicetype-library/schema/components.json;netbox"
   "/opt/zeek/bin/zeek;zeek"
   "/opt/zeek/bin/spicyz;zeek"
   "/usr/share/nginx/html/index.html;nginx-proxy"

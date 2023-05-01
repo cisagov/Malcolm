@@ -12,6 +12,7 @@
 
 import argparse
 import json
+import logging
 import os
 import shutil
 import signal
@@ -21,7 +22,20 @@ import tempfile
 import time
 import zmq
 
-from pcap_utils import *
+from pcap_utils import (
+    FILE_INFO_DICT_NAME,
+    FILE_INFO_DICT_NODE,
+    FILE_INFO_DICT_SIZE,
+    FILE_INFO_DICT_TAGS,
+    FILE_INFO_FILE_MIME,
+    FILE_INFO_FILE_TYPE,
+    PCAP_MIME_TYPES,
+    PCAP_TOPIC_PORT,
+    tags_from_filename,
+)
+import malcolm_utils
+from malcolm_utils import eprint, str2bool, AtomicInt, run_process
+
 from multiprocessing.pool import ThreadPool
 from collections import deque
 from itertools import chain, repeat
@@ -64,9 +78,7 @@ TAGS_NOSHOW = (
 
 
 ###################################################################################################
-debug = False
-verboseDebug = False
-debugToggled = False
+
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
@@ -76,6 +88,7 @@ shuttingDown = False
 scanWorkersCount = AtomicInt(value=0)
 arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
 arkimeDataset = os.getenv('ARKIME_ECS_DATASET', 'session')
+
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -92,18 +105,7 @@ def pdb_handler(sig, frame):
 
 
 ###################################################################################################
-# handle sigusr2 for toggling debug
-def debug_toggle_handler(signum, frame):
-    global debug
-    global debugToggled
-    debug = not debug
-    debugToggled = True
-
-
-###################################################################################################
 def arkimeCaptureFileWorker(arkimeWorkerArgs):
-    global debug
-    global verboseDebug
     global shuttingDown
     global scanWorkersCount
     global arkimeProvider
@@ -111,17 +113,20 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, arkimeBin, nodeName, autoTag, notLocked = (
+    newFileQueue, pcapBaseDir, arkimeBin, nodeName, autoTag, notLocked, logger = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
         arkimeWorkerArgs[2],
         arkimeWorkerArgs[3],
         arkimeWorkerArgs[4],
         arkimeWorkerArgs[5],
+        arkimeWorkerArgs[6],
     )
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    if not logger:
+        logger = logging
+
+    logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
     # loop forever, or until we're told to shut down
     while not shuttingDown:
@@ -132,7 +137,6 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-
                 if pcapBaseDir and os.path.isdir(pcapBaseDir):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
@@ -147,8 +151,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                         else list()
                     )
-                    if debug:
-                        eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                    logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                     # put together arkime execution command
                     cmd = [
@@ -169,32 +172,27 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                     cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
                     # execute capture for pcap file
-                    retcode, output = run_process(cmd, debug=verboseDebug)
+                    retcode, output = run_process(cmd, logger=logger)
                     if retcode == 0:
-                        if debug:
-                            eprint(
-                                f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                            )
+                        logger.info(
+                            f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                        )
                     else:
-                        if debug:
-                            eprint(
-                                f"{scriptName}[{scanWorkerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}"
-                            )
+                        logger.warning(
+                            f"{scriptName}[{scanWorkerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
+                        )
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
+    logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
 
 ###################################################################################################
 def zeekFileWorker(zeekWorkerArgs):
-    global debug
-    global verboseDebug
     global shuttingDown
     global scanWorkersCount
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, zeekBin, autoZeek, forceZeek, autoTag, uploadDir, defaultExtractFileMode = (
+    newFileQueue, pcapBaseDir, zeekBin, autoZeek, forceZeek, autoTag, uploadDir, defaultExtractFileMode, logger = (
         zeekWorkerArgs[0],
         zeekWorkerArgs[1],
         zeekWorkerArgs[2],
@@ -203,10 +201,13 @@ def zeekFileWorker(zeekWorkerArgs):
         zeekWorkerArgs[5],
         zeekWorkerArgs[6],
         zeekWorkerArgs[7],
+        zeekWorkerArgs[8],
     )
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    if not logger:
+        logger = logging
+
+    logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
     # loop forever, or until we're told to shut down
     while not shuttingDown:
@@ -217,7 +218,6 @@ def zeekFileWorker(zeekWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isdir(uploadDir):
-
                 if pcapBaseDir and os.path.isdir(pcapBaseDir):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
@@ -237,7 +237,6 @@ def zeekFileWorker(zeekWorkerArgs):
                             )
                         )
                     ):
-
                         extractFileMode = defaultExtractFileMode
 
                         # if file carving was specified via tag, make note of it
@@ -260,13 +259,11 @@ def zeekFileWorker(zeekWorkerArgs):
                             if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                             else list()
                         )
-                        if debug:
-                            eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                         # create a temporary work directory where zeek will be executed to generate the log files
                         with tempfile.TemporaryDirectory() as tmpLogDir:
                             if os.path.isdir(tmpLogDir):
-
                                 processTimeUsec = int(round(time.time() * 1000000))
 
                                 # use Zeek to process the pcap
@@ -282,17 +279,15 @@ def zeekFileWorker(zeekWorkerArgs):
                                 # execute zeek with the cwd of tmpLogDir so that's where the logs go, and with the updated file carving environment variable
                                 zeekEnv = os.environ.copy()
                                 zeekEnv[ZEEK_EXTRACTOR_MODE_ENV_VAR] = extractFileMode
-                                retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, debug=verboseDebug)
+                                retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, logger=logger)
                                 if retcode == 0:
-                                    if debug:
-                                        eprint(
-                                            f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                                        )
+                                    logger.info(
+                                        f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                    )
                                 else:
-                                    if debug:
-                                        eprint(
-                                            f"{scriptName}[{scanWorkerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}"
-                                        )
+                                    logger.info(
+                                        f"{scriptName}[{scanWorkerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
+                                    )
 
                                 # clean up the .state directory we don't care to keep
                                 tmpStateDir = os.path.join(tmpLogDir, ZEEK_STATE_DIR)
@@ -302,7 +297,6 @@ def zeekFileWorker(zeekWorkerArgs):
                                 # make sure log files were generated
                                 logFiles = [logFile for logFile in os.listdir(tmpLogDir) if logFile.endswith('.log')]
                                 if len(logFiles) > 0:
-
                                     # tar up the results
                                     tgzFileName = os.path.join(
                                         tmpLogDir,
@@ -321,36 +315,30 @@ def zeekFileWorker(zeekWorkerArgs):
                                     # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
                                     # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
                                     shutil.copy(tgzFileName, uploadDir)
-                                    if verboseDebug:
-                                        eprint(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
+                                    logger.debug(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
 
                                 else:
                                     # zeek returned no log files (or an error)
-                                    if debug:
-                                        eprint(
-                                            f"{scriptName}[{scanWorkerId}]:\t❓\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} generated no log files"
-                                        )
-
-                            else:
-                                if debug:
-                                    eprint(
-                                        f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                    logger.warning(
+                                        f"{scriptName}[{scanWorkerId}]:\t❓\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} generated no log files"
                                     )
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
+                            else:
+                                logger.warning(
+                                    f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                )
+
+    logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
 
 ###################################################################################################
 def suricataFileWorker(suricataWorkerArgs):
-    global debug
-    global verboseDebug
     global shuttingDown
     global scanWorkersCount
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, autoSuricata, forceSuricata, suricataBin, autoTag, uploadDir, suricataConfig = (
+    newFileQueue, pcapBaseDir, autoSuricata, forceSuricata, suricataBin, autoTag, uploadDir, suricataConfig, logger = (
         suricataWorkerArgs[0],
         suricataWorkerArgs[1],
         suricataWorkerArgs[2],
@@ -359,10 +347,13 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[5],
         suricataWorkerArgs[6],
         suricataWorkerArgs[7],
+        suricataWorkerArgs[8],
     )
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    if not logger:
+        logger = logging
+
+    logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
     # loop forever, or until we're told to shut down
     while not shuttingDown:
@@ -373,7 +364,6 @@ def suricataFileWorker(suricataWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-
                 # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
                 # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
                 # as Suricata now does its own network capture in Malcolm standalone mode.
@@ -391,12 +381,10 @@ def suricataFileWorker(suricataWorkerArgs):
                         )
                     )
                 ):
-
                     if pcapBaseDir and os.path.isdir(pcapBaseDir):
                         fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
                     if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-
                         # finalize tags list
                         fileInfo[FILE_INFO_DICT_TAGS] = (
                             [
@@ -407,13 +395,11 @@ def suricataFileWorker(suricataWorkerArgs):
                             if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                             else list()
                         )
-                        if debug:
-                            eprint(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
                         # create a temporary work directory where suricata will be executed to generate the log files
                         with tempfile.TemporaryDirectory() as tmpLogDir:
                             if os.path.isdir(tmpLogDir):
-
                                 processTimeUsec = int(round(time.time() * 1000000))
 
                                 # put together suricata execution command
@@ -428,7 +414,7 @@ def suricataFileWorker(suricataWorkerArgs):
                                 ]
 
                                 # execute suricata-capture for pcap file
-                                retcode, output = run_process(cmd, debug=verboseDebug)
+                                retcode, output = run_process(cmd, logger=logger)
 
                                 eveJsonFile = os.path.join(tmpLogDir, "eve.json")
                                 if os.path.isfile(eveJsonFile):
@@ -444,30 +430,25 @@ def suricataFileWorker(suricataWorkerArgs):
                                     )
 
                                 if retcode == 0:
-                                    if debug:
-                                        eprint(
-                                            f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                                        )
+                                    logger.info(
+                                        f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                    )
                                 else:
-                                    if debug:
-                                        eprint(
-                                            f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output if verboseDebug else ''}"
-                                        )
-
-                            else:
-                                if debug:
-                                    eprint(
-                                        f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                    logger.warning(
+                                        f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
                                     )
 
-    if debug:
-        eprint(f"{scriptName}[{scanWorkerId}]:\tfinished")
+                            else:
+                                logger.warning(
+                                    f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                )
+
+    logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
 
 ###################################################################################################
 # main
 def main():
-
     processingMode = None
     if 'pcap_processor' in scriptName:
         eprint(
@@ -487,36 +468,11 @@ def main():
         exit(2)
 
     global args
-    global debug
-    global debugToggled
     global pdbFlagged
     global shuttingDown
-    global verboseDebug
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='debug',
-        help="Verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
-    parser.add_argument(
-        '--extra-verbose',
-        dest='verboseDebug',
-        help="Super verbose output",
-        metavar='true|false',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        required=False,
-    )
+    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
         '--start-sleep',
         dest='startSleepSec',
@@ -698,20 +654,20 @@ def main():
         parser.print_help()
         exit(2)
 
-    verboseDebug = args.verboseDebug
-    debug = args.debug or verboseDebug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("{} arguments: {}".format(scriptName, sys.argv[1:]))
-        eprint("{} arguments: {}".format(scriptName, args))
-    else:
+    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
+    logging.basicConfig(
+        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info("Arguments: {}".format(sys.argv[1:]))
+    logging.info("Arguments: {}".format(args))
+    if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
-    signal.signal(signal.SIGUSR2, debug_toggle_handler)
 
     # sleep for a bit if requested
     sleepCount = 0
@@ -728,15 +684,14 @@ def main():
     new_files_socket.setsockopt(zmq.SUBSCRIBE, b"")  # All topics
     new_files_socket.setsockopt(zmq.LINGER, 0)  # All topics
     new_files_socket.RCVTIMEO = 1500
-    if debug:
-        eprint(f"{scriptName}:\tsubscribed to topic at {PCAP_TOPIC_PORT}")
+    logging.info(f"{scriptName}:\tsubscribed to topic at {PCAP_TOPIC_PORT}")
 
     # we'll pull from the topic in the main thread and queue them for processing by the worker threads
     newFileQueue = deque()
 
     # start worker threads which will pull filenames/tags to be processed by capture
     if processingMode == PCAP_PROCESSING_MODE_ARKIME:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             arkimeCaptureFileWorker,
             (
@@ -747,11 +702,12 @@ def main():
                     args.nodeName,
                     args.autoTag,
                     args.notLocked,
+                    logging,
                 ],
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             zeekFileWorker,
             (
@@ -764,11 +720,12 @@ def main():
                     args.autoTag,
                     args.zeekUploadDir,
                     args.zeekExtractFileMode,
+                    logging,
                 ],
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
-        scannerThreads = ThreadPool(
+        ThreadPool(
             args.threads,
             suricataFileWorker,
             (
@@ -781,6 +738,7 @@ def main():
                     args.autoTag,
                     args.suricataUploadDir,
                     args.suricataConfigFile,
+                    logging,
                 ],
             ),
         )
@@ -794,21 +752,17 @@ def main():
         # accept a file info dict from new_files_socket as json
         try:
             fileInfo = json.loads(new_files_socket.recv_string())
-        except zmq.Again as timeout:
+        except zmq.Again:
             # no file received due to timeout, we'll go around and try again
-            if verboseDebug:
-                eprint(f"{scriptName}:\t🕑\t(recv)")
             fileInfo = None
 
         if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
             # queue for the workers to process with capture
             newFileQueue.append(fileInfo)
-            if debug:
-                eprint(f"{scriptName}:\t📨\t{fileInfo}")
+            logging.info(f"{scriptName}:\t📨\t{fileInfo}")
 
     # graceful shutdown
-    if debug:
-        eprint(f"{scriptName}: shutting down...")
+    logging.info(f"{scriptName}: shutting down...")
     time.sleep(5)
 
 

@@ -67,7 +67,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
-  mkdir $VERBOSE -p "$DESTDIR/netbox/env/"
+  mkdir $VERBOSE -p "$DESTDIR/netbox/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/media/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/postgres/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/redis/"
@@ -77,6 +77,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/opensearch/nodes/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/"
+  mkdir $VERBOSE -p "$DESTDIR/config/"
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
   mkdir $VERBOSE -p "$DESTDIR/suricata-logs/live"
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
@@ -89,17 +90,30 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/upload/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX"
+
+  cp $VERBOSE ./config/*.example "$DESTDIR/config/"
   cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
-  touch "$DESTDIR/"auth.env
   cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_kubernetes.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   cp $VERBOSE -r ./netbox/config/ "$DESTDIR/netbox/"
-  cp $VERBOSE ./netbox/env/netbox.env.example "$DESTDIR/netbox/env/"
+
+  unset CONFIRMATION
+  echo ""
+  read -p "Package Kubernetes manifests in addition to docker-compose.yml [y/N]? " CONFIRMATION
+  CONFIRMATION=${CONFIRMATION:-N}
+  if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
+    mkdir $VERBOSE -p "$DESTDIR/kubernetes/"
+    cp $VERBOSE ./kubernetes/*.* "$DESTDIR/kubernetes/"
+    grep -v '^#' ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$DESTDIR/kubernetes/XXX"
+  fi
+
   pushd "$DESTDIR" >/dev/null 2>&1
   touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
   chmod 600 ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
@@ -113,12 +127,16 @@ if mkdir "$DESTDIR"; then
   ln -s ./control.py status
   ln -s ./control.py stop
   ln -s ./control.py wipe
+  ln -s ./install.py configure
   popd  >/dev/null 2>&1
   pushd .. >/dev/null 2>&1
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
+  cp $VERBOSE "$SCRIPT_PATH/malcolm_kubernetes.py" "$RUN_PATH/"
+  cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
+
   tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
 
@@ -153,9 +171,8 @@ if mkdir "$DESTDIR"; then
   echo "  - OpenSearch Dashboards: https://localhost/dashboards/" | tee -a "$README"
   echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
   echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
-  echo "  - Host and subnet name mapping editor: https://localhost/name-map-ui/" | tee -a "$README"
   echo "  - NetBox: https://localhost/netbox/" | tee -a "$README"
-  echo "  - Account management: https://localhost:488/" | tee -a "$README"
+  echo "  - Account management: https://localhost/auth/" | tee -a "$README"
   echo "  - Documentation: https://localhost/readme/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1
