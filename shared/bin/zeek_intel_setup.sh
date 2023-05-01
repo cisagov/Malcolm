@@ -25,7 +25,7 @@ function finish {
     rmdir -- "$LOCK_DIR" || echo "Failed to remove lock directory '$LOCK_DIR'" >&2
 }
 
-if mkdir -- "$LOCK_DIR" 2>/dev/null; then
+if mkdir -p -- "$LOCK_DIR" 2>/dev/null; then
     trap finish EXIT
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
