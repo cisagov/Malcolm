@@ -23,7 +23,7 @@ from sensorcommon import (
 )
 from malcolm_utils import (
     eprint,
-    run_process,
+    run_subprocess,
     remove_prefix,
     aggressive_url_encode,
     isipaddress,
@@ -107,7 +107,7 @@ def network_stop(selected_iface):
     else:
         command = f"cat /sys/class/net/{selected_iface}/operstate"
 
-    return run_process(command, stderr=True)
+    return run_subprocess(command, stderr=True)
 
 
 ###################################################################################################
@@ -122,7 +122,7 @@ def network_start(selected_iface):
     else:
         command = f"cat /sys/class/net/{selected_iface}/operstate"
 
-    return run_process(command, stderr=True)
+    return run_subprocess(command, stderr=True)
 
 
 ###################################################################################################
@@ -213,12 +213,12 @@ def main():
                 # system hostname configuration ######################################################################################################
 
                 # get current host/identification information
-                ecode, host_get_output = run_process('hostnamectl', stderr=True)
+                ecode, host_get_output = run_subprocess('hostnamectl', stderr=True)
                 if ecode == 0:
                     emsg_str = '\n'.join(host_get_output)
                     code = d.msgbox(text=f"{Constants.MSG_SET_HOSTNAME_CURRENT}{emsg_str}")
 
-                    code, hostname_get_output = run_process('hostname', stderr=False)
+                    code, hostname_get_output = run_subprocess('hostname', stderr=False)
                     if (code == 0) and (len(hostname_get_output) > 0):
                         old_hostname = hostname_get_output[0].strip()
                     else:
@@ -235,11 +235,11 @@ def main():
                             break
 
                     # set new hostname
-                    ecode, host_set_output = run_process(
+                    ecode, host_set_output = run_subprocess(
                         f'hostnamectl set-hostname {new_hostname.strip()}', stderr=True
                     )
                     if ecode == 0:
-                        ecode, host_get_output = run_process('hostnamectl', stderr=True)
+                        ecode, host_get_output = run_subprocess('hostnamectl', stderr=True)
                         emsg_str = '\n'.join(host_get_output)
                         code = d.msgbox(text=f"{Constants.MSG_SET_HOSTNAME_SUCCESS}{emsg_str}")
 
@@ -310,7 +310,7 @@ def main():
                             break
 
                     # test with htpdate to see if we can connect
-                    ecode, test_output = run_process(
+                    ecode, test_output = run_subprocess(
                         f"{Constants.TIME_SYNC_HTPDATE_TEST_COMMAND} {http_host}:{http_port}"
                     )
                     if ecode == 0:
@@ -334,8 +334,8 @@ def main():
                         raise CancelledError
 
                     # stop and disable the ntp process
-                    run_process('/bin/systemctl stop ntp')
-                    run_process('/bin/systemctl disable ntp')
+                    run_subprocess('/bin/systemctl stop ntp')
+                    run_subprocess('/bin/systemctl disable ntp')
 
                     # write out htpdate file for cron
                     with open(Constants.TIME_SYNC_HTPDATE_CRON, 'w+') as f:
@@ -388,9 +388,9 @@ def main():
                                 print(line)
 
                     # enable and start the ntp process
-                    run_process('/bin/systemctl stop ntp')
-                    run_process('/bin/systemctl enable ntp')
-                    ecode, start_output = run_process('/bin/systemctl start ntp', stderr=True)
+                    run_subprocess('/bin/systemctl stop ntp')
+                    run_subprocess('/bin/systemctl enable ntp')
+                    ecode, start_output = run_subprocess('/bin/systemctl start ntp', stderr=True)
                     if ecode == 0:
                         code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS}")
                     else:
