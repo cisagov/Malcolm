@@ -28,7 +28,6 @@ from malcolm_utils import (
     aggressive_url_encode,
     isipaddress,
     check_socket,
-    test_connection,
 )
 
 
