@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:2.6.0
+FROM opensearchproject/opensearch:2.7.0
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
