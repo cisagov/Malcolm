@@ -19,11 +19,16 @@
                     "changed": { "type": "integer" }
                   }
                 },
-                "details": { "type": "flat_object" },
+                "details": {
+                  "type": "nested",
+                  "properties": {
+                    "path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
+                  }
+                },
                 "added": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "changed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "removed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "databases": { "type": "flat_object" }
+                "databases": { "type": "nested" }
               }
             },
             "cpu": {
@@ -53,7 +58,15 @@
                     "size": { "type": "long" },
                     "used": { "type": "long" },
                     "avail": { "type": "long" },
-                    "details": { "type": "flat_object" }
+                    "details": {
+                      "type": "nested",
+                      "properties": {
+                        "target": { "type": "keyword" },
+                        "size": { "type": "long" },
+                        "used": { "type": "long" },
+                        "avail": { "type": "long" }
+                      }
+                    }
                   }
                 }
               }
@@ -73,7 +86,7 @@
                 "drops.rx": { "type": "long" },
                 "drops.total": { "type": "long" },
                 "interface": { "type": "keyword" },
-                "details": { "type": "flat_object" }
+                "details": { "type": "nested" }
               }
             },
             "syslog": {

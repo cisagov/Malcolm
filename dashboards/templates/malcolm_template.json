@@ -49,7 +49,7 @@
             "service": { "type": "keyword" },
             "site": { "type": "keyword" },
             "url": { "type": "keyword" },
-            "details": { "type": "flat_object" }
+            "details": { "type": "nested" }
           }
         },
         "destination.segment": {
@@ -59,7 +59,7 @@
             "site": { "type": "keyword" },
             "tenant": { "type": "keyword" },
             "url": { "type": "keyword" },
-            "details": { "type": "flat_object" }
+            "details": { "type": "nested" }
           }
         },
         "event.freq_score_v1": { "type": "float" },
@@ -92,7 +92,7 @@
             "service": { "type": "keyword" },
             "site": { "type": "keyword" },
             "url": { "type": "keyword" },
-            "details": { "type": "flat_object" }
+            "details": { "type": "nested" }
           }
         },
         "source.segment": {
@@ -102,7 +102,7 @@
             "site": { "type": "keyword" },
             "tenant": { "type": "keyword" },
             "url": { "type": "keyword" },
-            "details": { "type": "flat_object" }
+            "details": { "type": "nested" }
           }
         },
         "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
