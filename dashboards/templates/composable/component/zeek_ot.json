@@ -33,13 +33,7 @@
         "zeek.bsap_ip_rdb.res_seq": { "type": "integer" },
         "zeek.bsap_ip_rdb.sequence": { "type": "integer" },
         "zeek.bsap_ip_rdb.variable_count": { "type": "integer" },
-        "zeek.bsap_ip_rdb.variables": {
-          "type": "nested",
-          "properties": {
-            "var": { "type": "keyword" },
-            "val": { "type": "keyword" }
-          }
-        },
+        "zeek.bsap_ip_rdb.variables": { "type": "flat_object" },
         "zeek.bsap_serial_header.ctl": { "type": "integer" },
         "zeek.bsap_serial_header.dadd": { "type": "integer" },
         "zeek.bsap_serial_header.dfun": { "type": "keyword" },
@@ -51,13 +45,7 @@
         "zeek.bsap_serial_header.type_name": { "type": "keyword" },
         "zeek.bsap_serial_rdb.func_code": { "type": "keyword" },
         "zeek.bsap_serial_rdb.variable_count": { "type": "integer" },
-        "zeek.bsap_serial_rdb.variables": {
-          "type": "nested",
-          "properties": {
-            "var": { "type": "keyword" },
-            "val": { "type": "keyword" }
-          }
-        },
+        "zeek.bsap_serial_rdb.variables": { "type": "flat_object" },
         "zeek.bsap_serial_rdb_ext.data": { "type": "keyword", "ignore_above": 128, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.bsap_serial_rdb_ext.dfun": { "type": "keyword" },
         "zeek.bsap_serial_rdb_ext.extfun": { "type": "keyword" },
@@ -186,13 +174,7 @@
         "zeek.genisys.direction": { "type": "keyword" },
         "zeek.genisys.crc_transmitted": { "type": "keyword" },
         "zeek.genisys.crc_calculated": { "type": "keyword" },
-        "zeek.genisys.payload": {
-          "type": "nested",
-          "properties": {
-            "address": { "type": "integer" },
-            "data": { "type": "integer" }
-          }
-        },
+        "zeek.genisys.payload": { "type": "flat_object" },
         "zeek.known_modbus.device_type": { "type": "keyword" },
         "zeek.modbus.exception": { "type": "keyword" },
         "zeek.modbus.func": { "type": "keyword" },

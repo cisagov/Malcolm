@@ -682,7 +682,7 @@ def fields():
             f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
             params={
                 'pattern': pattern,
-                'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+                'meta_fields': ["_source", "_id", "_type", "_index", "_score", "_value", "_valueAndPath"],
             },
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
