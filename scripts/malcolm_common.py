@@ -678,6 +678,7 @@ LOG_IGNORE_REGEX = re.compile(
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
+  | failed\s+to\s+get\s+tcp\s+stats\s+from\s+/proc
   | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | loaded\s+config\s+'/etc/netbox/config/
   | "netbox"\s+application\s+started
