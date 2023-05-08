@@ -438,21 +438,21 @@ class Installer(object):
                 )
 
             if self.totalMemoryGigs >= 63.0:
-                osMemory = '30g'
-                lsMemory = '6g'
+                osMemory = '24g'
+                lsMemory = '3g'
             elif self.totalMemoryGigs >= 31.0:
                 osMemory = '16g'
-                lsMemory = '3g'
+                lsMemory = '2500m'
             elif self.totalMemoryGigs >= 15.0:
                 osMemory = '10g'
                 lsMemory = '2500m'
             elif self.totalMemoryGigs >= 11.0:
                 osMemory = '6g'
-                lsMemory = '2500m'
+                lsMemory = '2g'
             elif self.totalMemoryGigs >= 7.0:
                 eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '4g'
-                lsMemory = '2500m'
+                lsMemory = '2g'
             elif self.totalMemoryGigs > 0.0:
                 eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '3500m'
@@ -472,9 +472,9 @@ class Installer(object):
         # we don't want it too high, as in Malcolm Logstash also competes with OpenSearch, etc. for resources
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if self.totalCores > 16:
-                lsWorkers = 10
-            elif self.totalCores >= 12:
                 lsWorkers = 6
+            elif self.totalCores >= 12:
+                lsWorkers = 4
             else:
                 lsWorkers = 3
         else:
