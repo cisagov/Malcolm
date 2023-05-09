@@ -1,4 +1,5 @@
 [Unit]
+AssertPathExists=%h/Malcolm/filebeat/certs/client.key
 After=network.target
 
 [Service]
