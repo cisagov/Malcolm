@@ -223,6 +223,30 @@ function h() { if [ -z "$1" ]; then history; else history | grep -i "$@"; fi; }
 ########################################################################
 function fname() { find . -iname "*$@*"; }
 
+function findupes() {
+  find . -not -empty -type f -printf "%s\n" 2>/dev/null | \
+    sort -rn | \
+    uniq -d | \
+    xargs -I{} -n1 find -type f -size {}c -print0 | \
+    xargs -0 md5sum | \
+    sort | \
+    uniq -w32 --all-repeated=separate
+}
+
+function sfind() {
+  if [ "$1" ]; then
+    FIND_FOLDER="$1"
+  else
+    FIND_FOLDER="$(pwd)"
+  fi
+  if [ "$2" ]; then
+    FIND_PATTERN="$2"
+  else
+    FIND_PATTERN="*"
+  fi
+  find "$FIND_FOLDER" -type f -iname "$FIND_PATTERN" -print0 | xargs -r -0 ls -la | awk '{system("numfmt -z --to=iec-i --suffix=B --padding=7 "$5) ; out=""; for(i=9;i<=NF;i++){out=out" "$i}; print " KB\t"out}' | sort -h
+}
+
 ########################################################################
 # examine running processes
 ########################################################################
@@ -291,7 +315,36 @@ function arps()
 
 function portping()
 {
-  python <<<"import socket; socket.setdefaulttimeout(1); socket.socket().connect(('$1', $2))" 2> /dev/null && echo OPEN || echo CLOSED;
+  CONN_TIMEOUT=5
+  if [[ -n "$BASH_VERSION" ]] && [[ $LINUX ]]; then
+    # use /dev/tcp
+    timeout $CONN_TIMEOUT bash -c "cat /dev/null > /dev/tcp/$1/$2" && echo OPEN || echo CLOSED
+  elif command -v python3 >/dev/null 2>&1; then
+    # use python socket library
+    python3 <<<"import socket; socket.setdefaulttimeout($CONN_TIMEOUT); socket.socket().connect(('$1', $2))" 2> /dev/null && echo OPEN || echo CLOSED
+  elif command -v socat >/dev/null 2>&1; then
+    # use socat
+    socat /dev/null TCP4:"$1":"$2",connect-timeout="$CONN_TIMEOUT" >/dev/null 2>&1 && echo OPEN || echo CLOSED
+  elif command -v nc >/dev/null 2>&1; then
+    # use some flavor of netcat
+    if ( nc -h 2>&1 | grep -q 'to somewhere' ); then
+      # traditional
+      ( timeout $((CONN_TIMEOUT+1)) bash -c "cat /dev/null | nc -v -w "$CONN_TIMEOUT" "$1" "$2" 2>&1" || true ) | grep -q 'open$' && echo OPEN || echo CLOSED
+    elif ( nc 2>&1 | grep -q '46CDdFhklNnrStUuvZz' ); then
+      # openbsd
+      timeout $((CONN_TIMEOUT+1)) bash -c "cat /dev/null | nc -w "$CONN_TIMEOUT" "$1" "$2" >/dev/null 2>&1" && echo OPEN || echo CLOSED
+    elif ( nc --help 2>&1 | grep -q 'Ncat' ); then
+      # ncat
+      timeout $CONN_TIMEOUT bash -c "cat /dev/null | nc -v --send-only "$1" "$2" >/dev/null 2>&1" && echo OPEN || echo CLOSED
+    else
+      echo UNKNOWN
+    fi
+  elif command -v telnet >/dev/null 2>&1; then
+    # use telnet
+    timeout $CONN_TIMEOUT bash -c "echo -e '\x1dclose\x0d' | telnet "$1" "$2" >/dev/null 2>&1" && echo OPEN || echo CLOSED
+  else
+    echo UNKNOWN
+  fi
 }
 
 ########################################################################
@@ -466,7 +519,12 @@ function sensormonitor () {
     select-pane -t 2 \; \
     send-keys 'while true; do clear; /opt/sensor/sensor_ctl/status | grep -v "Not started" | sed "s/pid.* //"; sleep 60; done' C-m \; \
     select-pane -t 3 \; \
-    send-keys 'tail -F /opt/sensor/sensor_ctl/log/*' C-m
+    send-keys 'tail -F /opt/sensor/sensor_ctl/log/*' C-m \; \
+    select-pane -t 2 \; \
+    resize-pane -U 999 \; \
+    resize-pane -D 27 \; \
+    resize-pane -R 999 \; \
+    resize-pane -L 58
 }
 
 function suricata-update () {
