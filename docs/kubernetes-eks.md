@@ -19,17 +19,22 @@ Prerequisites:
   ```bash
   kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
   ```
+1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) [ingress-nginx](kubernetes.md#Ingress)
+1. Associate IAM OIDC provider with cluster
+  ```bash
+  eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name
+  ```
 1. [Create Amazon EBS CSI driver IAM role](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
 1. [Add the Amazon EBS CSI add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
 1. Create volumes (**p**cap, **z**eek, **s**uricata, **c**onfig, **r**untime-**l**ogs, **o**pensearch, **b**ackup), got volume IDs
     ```bash
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --iops 16000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 250 --iops 16000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 100 --iops 16000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --iops 16000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --iops 16000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --iops 16000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 500 --iops 4000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 250 --iops 4000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 100 --iops 4000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 25 --iops 1000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 25 --iops 1000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 500 --volume-type gp2
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 500 --volume-type gp2
     ```
     ```
     p vol-0123456789c82a042
@@ -275,7 +280,7 @@ Prerequisites:
       accessModes:
         - ReadWriteOnce
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
+      storageClassName: gp2-retain
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-01234567895ff99a1
@@ -287,7 +292,7 @@ Prerequisites:
       name: opensearch-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: gp2-retain
       accessModes:
         - ReadWriteOnce
       volumeMode: Filesystem
@@ -311,7 +316,7 @@ Prerequisites:
       accessModes:
         - ReadWriteOnce
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
+      storageClassName: gp2-retain
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-01234567891150804
@@ -323,7 +328,7 @@ Prerequisites:
       name: opensearch-backup-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: gp2-retain
       accessModes:
         - ReadWriteOnce
       volumeMode: Filesystem
