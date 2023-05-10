@@ -7,24 +7,24 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
 1. Create [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
 1. Create [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
 1. Create volumes (**p**cap, **z**eek, **s**uricata, **c**onfig, **r**untime-**l**ogs, **o**pensearch, **b**ackup), got volume IDs
-        ```bash
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 250 --volume-type gp2
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 100 --volume-type gp2
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --volume-type gp2
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --volume-type gp2
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
-        aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
-        ```
-        ```
-        p vol-0123456789c82a042
-        z vol-0123456789c67edd9
-        s vol-0123456789dccd75e
-        c vol-0123456789429a231
-        r vol-0123456789dc2ea7a
-        o vol-01234567895ff99a1
-        b vol-01234567891150804
-        ```
+      ```bash
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 250 --volume-type gp2
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 100 --volume-type gp2
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --volume-type gp2
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --volume-type gp2
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
+      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
+      ```
+      ```
+      p vol-0123456789c82a042
+      z vol-0123456789c67edd9
+      s vol-0123456789dccd75e
+      c vol-0123456789429a231
+      r vol-0123456789dc2ea7a
+      o vol-01234567895ff99a1
+      b vol-01234567891150804
+      ```
 1. Create EC2 instance, attach volumes
     ```bash
     aws ec2 attach-volume --volume-id vol-0123456789c82a042 --instance-id i-0123456789abcdef0 --device /dev/xvdp
