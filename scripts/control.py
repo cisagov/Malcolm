@@ -395,17 +395,19 @@ def status():
         else:
             eprint("Failed to display Malcolm status\n")
             eprint("\n".join(out))
-            exit(err)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         try:
             PrintNodeStatus()
             print()
+        except Exception as e:
+            if args.debug:
+                eprint(f'Error getting node status: {e}')
+        try:
             PrintPodStatus(namespace=args.namespace)
             print()
         except Exception as e:
             eprint(f'Error getting {args.namespace} status: {e}')
-            exit(-1)
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')

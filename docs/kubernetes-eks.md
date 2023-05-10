@@ -2,29 +2,44 @@
 
 This document is a rough work in progress and isn't necessarily correct (yet). -SG
 
+Prerequisites:
+
+* [aws cli](https://aws.amazon.com/cli/)
+* [eksctl](https://eksctl.io/)
+
 1. Create [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:) with subnets in 2 availability zones
 1. Create [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
 1. Create [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
 1. Create [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
+1. Generate kubeconfig file if you need to
+  ```bash
+  aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
+  ```
+1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
+  ```bash
+  kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+  ```
+1. [Create Amazon EBS CSI driver IAM role](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
+1. [Add the Amazon EBS CSI add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
 1. Create volumes (**p**cap, **z**eek, **s**uricata, **c**onfig, **r**untime-**l**ogs, **o**pensearch, **b**ackup), got volume IDs
-      ```bash
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 250 --volume-type gp2
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 100 --volume-type gp2
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --volume-type gp2
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --volume-type gp2
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
-      aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --volume-type gp2
-      ```
-      ```
-      p vol-0123456789c82a042
-      z vol-0123456789c67edd9
-      s vol-0123456789dccd75e
-      c vol-0123456789429a231
-      r vol-0123456789dc2ea7a
-      o vol-01234567895ff99a1
-      b vol-01234567891150804
-      ```
+    ```bash
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 250 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 100 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 25 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --iops 16000 --volume-type io1
+    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --size 500 --iops 16000 --volume-type io1
+    ```
+    ```
+    p vol-0123456789c82a042
+    z vol-0123456789c67edd9
+    s vol-0123456789dccd75e
+    c vol-0123456789429a231
+    r vol-0123456789dc2ea7a
+    o vol-01234567895ff99a1
+    b vol-01234567891150804
+    ```
 1. Create EC2 instance, attach volumes
     ```bash
     aws ec2 attach-volume --volume-id vol-0123456789c82a042 --instance-id i-0123456789abcdef0 --device /dev/xvdp
@@ -80,7 +95,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-0123456789c82a042
@@ -92,7 +107,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: pcap-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -116,7 +131,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-0123456789c67edd9
@@ -128,7 +143,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: zeek-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -152,7 +167,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-0123456789dccd75e
@@ -164,7 +179,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: suricata-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -188,7 +203,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-0123456789429a231
@@ -200,7 +215,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: config-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -224,7 +239,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-0123456789dc2ea7a
@@ -236,7 +251,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: runtime-logs-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -260,7 +275,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-01234567895ff99a1
@@ -272,7 +287,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: opensearch-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -296,7 +311,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
+      storageClassName: io1
       awsElasticBlockStore:
         fsType: xfs
         volumeID: aws://us-east-1a/vol-01234567891150804
@@ -308,7 +323,7 @@ This document is a rough work in progress and isn't necessarily correct (yet). -
       name: opensearch-backup-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: io1
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
