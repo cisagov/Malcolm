@@ -273,7 +273,7 @@ Prerequisites:
         storage: 500Gi
       volumeMode: Filesystem
       accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
       persistentVolumeReclaimPolicy: Retain
       storageClassName: io1
       awsElasticBlockStore:
@@ -289,7 +289,7 @@ Prerequisites:
     spec:
       storageClassName: io1
       accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
       volumeMode: Filesystem
       resources:
         requests:
@@ -309,7 +309,7 @@ Prerequisites:
         storage: 500Gi
       volumeMode: Filesystem
       accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
       persistentVolumeReclaimPolicy: Retain
       storageClassName: io1
       awsElasticBlockStore:
@@ -325,7 +325,7 @@ Prerequisites:
     spec:
       storageClassName: io1
       accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
       volumeMode: Filesystem
       resources:
         requests:
