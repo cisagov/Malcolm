@@ -9,80 +9,83 @@ Prerequisites:
 
 1. Create [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:) with subnets in 2 availability zones
 1. Create [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
+1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html)
+1. SSH to instance and initialize NFS subdirectories
+    - set up malcolm subdirectory
+      ```bash
+      sudo touch /mnt/efs/fs1/test-file.txt
+      sudo mkdir -p /mnt/efs/fs1/malcolm
+      sudo chown 1000:1000 /mnt/efs/fs1/malcolm
+      ```
+    - `/mnt/efs/fs1/malcolm/init_storage.sh`
+      ```bash
+      #!/bin/bash
+
+      if [ -z "$BASH_VERSION" ]; then
+        echo "Wrong interpreter, please run \"$0\" with bash"
+        exit 1
+      fi
+
+      ENCODING="utf-8"
+
+      RUN_PATH="$(pwd)"
+      [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
+      [[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
+      if ! (type "$REALPATH" && type "$DIRNAME") > /dev/null; then
+        echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME"
+        exit 1
+      fi
+      SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
+      pushd "$SCRIPT_PATH" >/dev/null 2>&1
+
+      rm -rf ./opensearch/* ./opensearch-backup/* ./pcap/* ./suricata-logs/* ./zeek-logs/* ./config/netbox/* ./config/zeek/*
+      mkdir -vp ./config/auth ./config/htadmin ./config/opensearch ./config/logstash ./config/netbox/media ./config/netbox/postgres ./config/netbox/redis ./config/zeek/intel/MISP ./config/zeek/intel/STIX ./opensearch ./opensearch-backup ./pcap/upload ./pcap/processed ./suricata-logs ./zeek-logs/current ./zeek-logs/upload ./zeek-logs/extract_files
+
+      popd >/dev/null 2>&1
+      ```
+      ```bash
+      /mnt/efs/fs1/malcolm/init_storage.sh
+      mkdir: created directory './config/netbox/media'
+      mkdir: created directory './config/netbox/postgres'
+      mkdir: created directory './config/netbox/redis'
+      mkdir: created directory './config/zeek/intel'
+      mkdir: created directory './config/zeek/intel/MISP'
+      mkdir: created directory './config/zeek/intel/STIX'
+      mkdir: created directory './pcap/upload'
+      mkdir: created directory './pcap/processed'
+      mkdir: created directory './zeek-logs/current'
+      mkdir: created directory './zeek-logs/upload'
+      mkdir: created directory './zeek-logs/extract_files'
+      ```
+1. I set up [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html), but I don't know (yet) if that will be useful
+    ```
+    opensearch-backup /malcolm/opensearch-backup
+    opensearch /malcolm/opensearch
+    pcap /malcolm/pcap
+    config /malcolm/config
+    suricata-logs /malcolm/suricata-logs
+    zeek-logs /malcolm/zeek-logs
+    ```
 1. Create [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
 1. Create [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
 1. Generate kubeconfig file if you need to
-  ```bash
-  aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
-  ```
+    ```bash
+    aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
+    ```
 1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
-  ```bash
-  kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-  ```
+    ```bash
+    kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    ```
 1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) [ingress-nginx](kubernetes.md#Ingress)
 1. Associate IAM OIDC provider with cluster
-  ```bash
-  eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name
-  ```
-1. [Create Amazon EBS CSI driver IAM role](https://docs.aws.amazon.com/eks/latest/userguide/csi-iam-role.html)
-1. [Add the Amazon EBS CSI add-on](https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html)
-1. Create volumes (**p**cap, **z**eek, **s**uricata, **c**onfig, **r**untime-**l**ogs, **o**pensearch, **b**ackup), got volume IDs
     ```bash
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 500 --iops 4000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 250 --iops 4000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 100 --iops 4000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 25 --iops 1000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 25 --iops 1000 --volume-type io1
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 500 --volume-type gp2
-    aws ec2 create-volume --region us-east-1 --availability-zone us-east-1a --tag-specifications 'ResourceType=volume,Tags=[{Key=malcolm,Value=""}]' --size 500 --volume-type gp2
+    eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name
     ```
-    ```
-    p vol-0123456789c82a042
-    z vol-0123456789c67edd9
-    s vol-0123456789dccd75e
-    c vol-0123456789429a231
-    r vol-0123456789dc2ea7a
-    o vol-01234567895ff99a1
-    b vol-01234567891150804
-    ```
-1. Create EC2 instance, attach volumes
-    ```bash
-    aws ec2 attach-volume --volume-id vol-0123456789c82a042 --instance-id i-0123456789abcdef0 --device /dev/xvdp
-    aws ec2 attach-volume --volume-id vol-0123456789c67edd9 --instance-id i-0123456789abcdef0 --device /dev/xvdz
-    aws ec2 attach-volume --volume-id vol-0123456789dccd75e --instance-id i-0123456789abcdef0 --device /dev/xvds
-    aws ec2 attach-volume --volume-id vol-0123456789429a231 --instance-id i-0123456789abcdef0 --device /dev/xvdc
-    aws ec2 attach-volume --volume-id vol-0123456789dc2ea7a --instance-id i-0123456789abcdef0 --device /dev/xvdr
-    aws ec2 attach-volume --volume-id vol-01234567895ff99a1 --instance-id i-0123456789abcdef0 --device /dev/xvdo
-    aws ec2 attach-volume --volume-id vol-01234567891150804 --instance-id i-0123456789abcdef0 --device /dev/xvdb
-    ```
-1. Format attached volumes as XFS
-    ```bash
-    for DRV in p z s c r o b; do sudo mkfs.xfs -f /dev/xvd${DRV}; done
-    ```
-1. Mount drives and set permissions
-    ```bash
-    for DRV in p z s c r o b; do sudo umount -f /dev/xvd${DRV} 2>/dev/null; sudo mkdir -vp /media/xvd${DRV}; sudo mount /dev/xvd${DRV} /media/xvd${DRV}; sudo chown -R $(id -u):$(id -g) /media/xvd${DRV}; df -h /media/xvd${DRV}; done
-    ```
-1. Create necessary subdirectories inside of some directories (config, pcap, zeek)
-    ```bash
-    mkdir -vp /media/xvdc/{auth,htadmin,opensearch,logstash,netbox/media,netbox/postgres,netbox/redis,zeek/intel/MISP,zeek/intel/STIX}
-    mkdir -vp /media/xvdp/{upload,proceessed}
-    mkdir -vp /media/xvdz/{current,upload,extract_files}
-    ```
-1. Unmount drives
-    ```bash
-    for DRV in p z s c r o b; do sudo umount -f /dev/xvd${DRV}; done
-    ```
-1. Detach volumes
-    ```bash
-    aws ec2 detach-volume --volume-id vol-0123456789c82a042 --instance-id i-0123456789abcdef0
-    aws ec2 detach-volume --volume-id vol-0123456789c67edd9 --instance-id i-0123456789abcdef0
-    aws ec2 detach-volume --volume-id vol-0123456789dccd75e --instance-id i-0123456789abcdef0
-    aws ec2 detach-volume --volume-id vol-0123456789429a231 --instance-id i-0123456789abcdef0
-    aws ec2 detach-volume --volume-id vol-0123456789dc2ea7a --instance-id i-0123456789abcdef0
-    aws ec2 detach-volume --volume-id vol-01234567895ff99a1 --instance-id i-0123456789abcdef0
-    aws ec2 detach-volume --volume-id vol-01234567891150804 --instance-id i-0123456789abcdef0
-    ```
+1. [deploy Amazon EFS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html)
+    * look at **Prerequisites**
+    * do **Create an IAM policy and role**
+    * do **Install the Amazon EFS driver**
+    * do **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
 1. Create YAML for persistent volumes and volume claims from the EBS Volume ID
     ```yaml
     ---
