@@ -1,35 +1,39 @@
-## Notes for deploying Malcolm on AWS EKS
+# <a name="KubernetesEKS"></a>Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)
 
-This document is a rough work in progress and isn't necessarily correct (yet). -SG
+This document outlines the process of setting up a cluster on [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/) using [Amazon Web Services](https://aws.amazon.com/) in preparation for [**Deploying Malcolm with Kubernetes**](kubernetes.md).
 
-Prerequisites:
+This is a work-in-progress document that is still a bit rough around the edges. You'll need to replace things like `cluster-name` and `us-east-1` with the values that are appliable to your cluster. Any feedback is welcome in the [relevant issue](https://github.com/idaholab/Malcolm/issues/194) on GitHub.
 
-* [aws cli](https://aws.amazon.com/cli/)
+## Prerequisites
+
+* [aws cli](https://aws.amazon.com/cli/) with functioning access to your AWS infrastructure
 * [eksctl](https://eksctl.io/)
 
-1. Create [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:) with subnets in 2 availability zones
-1. Create [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
-1. Create [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
-1. Generate kubeconfig file if you need to
+## Procedure
+
+1. Create a [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:) with subnets in 2 or more availability zones
+1. Create a [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
+1. Create an [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
+1. Generate a kubeconfig file to use with Malcolm's control scripts (`malcolmeks.yaml` is used in this example)
     ```bash
     aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
     ```
-1. Create [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
+1. Create a [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
 1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
     ```bash
     kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
     ```
-1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) [ingress-nginx](kubernetes.md#Ingress)
+1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) ingress-nginx as described [here](kubernetes.md#Ingress)
 1. Associate IAM OIDC provider with cluster
     ```bash
     eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name --approve
     ```
 1. [deploy Amazon EFS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html)
-    * look at **Prerequisites**
-    * do **Create an IAM policy and role**
-    * do **Install the Amazon EFS driver**
-    * do **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
-1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html)
+    * review **Prerequisites**
+    * follow steps for **Create an IAM policy and role**
+    * follow steps for **Install the Amazon EFS driver**
+    * follow steps for **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
+1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html) for initializing the directory structure on the EFS filesystem (this can be a very small instance, e.g., t2.micro). Make sure when configuring this instance you give configure to the EFS file system in the storage configuration.
 1. SSH to instance and initialize NFS subdirectories
     - set up malcolm subdirectory
       ```bash
@@ -343,3 +347,4 @@ Prerequisites:
           storage: 500Gi
       volumeName: opensearch-backup-volume
     ```
+1. Finish [configuring](kubernetes.md#Config) and [configuring](kubernetes.md#Running) Malcolm as described in [**Deploying Malcolm with Kubernetes**](kubernetes.md)

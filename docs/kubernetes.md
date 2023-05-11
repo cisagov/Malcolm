@@ -13,6 +13,7 @@
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
+* [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS)
 
 ## <a name="System"></a> System
 
