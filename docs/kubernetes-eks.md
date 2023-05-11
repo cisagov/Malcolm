@@ -59,7 +59,7 @@ Prerequisites:
       pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
       rm -rf ./opensearch/* ./opensearch-backup/* ./pcap/* ./suricata-logs/* ./zeek-logs/* ./config/netbox/* ./config/zeek/* ./runtime-logs/*
-      mkdir -vp ./config/auth ./config/htadmin ./config/opensearch ./config/logstash ./config/netbox/media ./config/netbox/postgres ./config/netbox/redis ./config/zeek/intel/MISP ./config/zeek/intel/STIX ./opensearch ./opensearch-backup ./pcap/upload ./pcap/processed ./suricata-logs ./zeek-logs/current ./zeek-logs/upload ./zeek-logs/extract_files ./runtime-logs
+      mkdir -vp ./config/auth ./config/htadmin ./config/opensearch ./config/logstash ./config/netbox/media ./config/netbox/postgres ./config/netbox/redis ./config/zeek/intel/MISP ./config/zeek/intel/STIX ./opensearch ./opensearch-backup ./pcap/upload ./pcap/processed ./suricata-logs ./zeek-logs/current ./zeek-logs/upload ./zeek-logs/extract_files ./runtime-logs/arkime ./runtime-logs/nginx
 
       popd >/dev/null 2>&1
       ```
