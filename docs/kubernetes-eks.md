@@ -9,6 +9,26 @@ Prerequisites:
 
 1. Create [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:) with subnets in 2 availability zones
 1. Create [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
+1. Create [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
+1. Generate kubeconfig file if you need to
+    ```bash
+    aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
+    ```
+1. Create [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
+1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
+    ```bash
+    kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    ```
+1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) [ingress-nginx](kubernetes.md#Ingress)
+1. Associate IAM OIDC provider with cluster
+    ```bash
+    eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name --approve
+    ```
+1. [deploy Amazon EFS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html)
+    * look at **Prerequisites**
+    * do **Create an IAM policy and role**
+    * do **Install the Amazon EFS driver**
+    * do **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
 1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html)
 1. SSH to instance and initialize NFS subdirectories
     - set up malcolm subdirectory
@@ -38,8 +58,8 @@ Prerequisites:
       SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
       pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
-      rm -rf ./opensearch/* ./opensearch-backup/* ./pcap/* ./suricata-logs/* ./zeek-logs/* ./config/netbox/* ./config/zeek/*
-      mkdir -vp ./config/auth ./config/htadmin ./config/opensearch ./config/logstash ./config/netbox/media ./config/netbox/postgres ./config/netbox/redis ./config/zeek/intel/MISP ./config/zeek/intel/STIX ./opensearch ./opensearch-backup ./pcap/upload ./pcap/processed ./suricata-logs ./zeek-logs/current ./zeek-logs/upload ./zeek-logs/extract_files
+      rm -rf ./opensearch/* ./opensearch-backup/* ./pcap/* ./suricata-logs/* ./zeek-logs/* ./config/netbox/* ./config/zeek/* ./runtime-logs/*
+      mkdir -vp ./config/auth ./config/htadmin ./config/opensearch ./config/logstash ./config/netbox/media ./config/netbox/postgres ./config/netbox/redis ./config/zeek/intel/MISP ./config/zeek/intel/STIX ./opensearch ./opensearch-backup ./pcap/upload ./pcap/processed ./suricata-logs ./zeek-logs/current ./zeek-logs/upload ./zeek-logs/extract_files ./runtime-logs
 
       popd >/dev/null 2>&1
       ```
@@ -56,39 +76,22 @@ Prerequisites:
       mkdir: created directory './zeek-logs/current'
       mkdir: created directory './zeek-logs/upload'
       mkdir: created directory './zeek-logs/extract_files'
+      mkdir: created directory './runtime-logs'
       ```
-1. I set up [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html), but I don't know (yet) if that will be useful
-    ```
-    opensearch-backup /malcolm/opensearch-backup
-    opensearch /malcolm/opensearch
-    pcap /malcolm/pcap
-    config /malcolm/config
-    suricata-logs /malcolm/suricata-logs
-    zeek-logs /malcolm/zeek-logs
-    ```
-1. Create [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
-1. Create [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
-1. Generate kubeconfig file if you need to
-    ```bash
-    aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
-    ```
-1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
-    ```bash
-    kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-    ```
-1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) [ingress-nginx](kubernetes.md#Ingress)
-1. Associate IAM OIDC provider with cluster
-    ```bash
-    eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name
-    ```
-1. [deploy Amazon EFS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html)
-    * look at **Prerequisites**
-    * do **Create an IAM policy and role**
-    * do **Install the Amazon EFS driver**
-    * do **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
-1. Create YAML for persistent volumes and volume claims from the EBS Volume ID
+1. Set up [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html), and note the **Access point ID**s to put in your YAML in the next step
+
+    | name              | mountpoint                 | access point ID        | 
+    | ----------------- | -------------------------- | ---------------------- |
+    | config            | /malcolm/config            | fsap-config            |
+    | opensearch        | /malcolm/opensearch        | fsap-opensearch        |
+    | opensearch-backup | /malcolm/opensearch-backup | fsap-opensearch-backup |
+    | pcap              | /malcolm/pcap              | fsap-pcap              |
+    | runtime-logs      | /malcolm/runtime-logs      | fsap-runtime-logs      |
+    | suricata-logs     | /malcolm/suricata-logs     | fsap-suricata-logs     |
+    | zeek-logs         | /malcolm/zeek-logs         | fsap-zeek-logs         |
+
+1. Create YAML for persistent volumes and volume claims from the EBS Volume ID. In this example, replace `fs-FILESYSTEMID` with your EFS filesystem ID and `fsap-XXXXXXXX` with the appropriate access point ID
     ```yaml
-    ---
     apiVersion: v1
     kind: PersistentVolume
     metadata:
@@ -103,10 +106,10 @@ Prerequisites:
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-0123456789c82a042
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-FILESYSTEMID::fsap-pcap
 
     ---
     apiVersion: v1
@@ -115,7 +118,7 @@ Prerequisites:
       name: pcap-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -139,10 +142,10 @@ Prerequisites:
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-0123456789c67edd9
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-FILESYSTEMID::fsap-zeek-logs
 
     ---
     apiVersion: v1
@@ -151,7 +154,7 @@ Prerequisites:
       name: zeek-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -175,10 +178,10 @@ Prerequisites:
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-0123456789dccd75e
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-FILESYSTEMID::fsap-suricata-logs
 
     ---
     apiVersion: v1
@@ -187,7 +190,7 @@ Prerequisites:
       name: suricata-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -211,10 +214,10 @@ Prerequisites:
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-0123456789429a231
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-FILESYSTEMID::fsap-config
 
     ---
     apiVersion: v1
@@ -223,7 +226,7 @@ Prerequisites:
       name: config-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -247,10 +250,10 @@ Prerequisites:
       accessModes:
         - ReadWriteMany
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: io1
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-0123456789dc2ea7a
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-02997421cdc55b8e4::fsap-runtime-logs
 
     ---
     apiVersion: v1
@@ -259,7 +262,7 @@ Prerequisites:
       name: runtime-logs-claim
       namespace: malcolm
     spec:
-      storageClassName: io1
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteMany
       volumeMode: Filesystem
@@ -283,10 +286,10 @@ Prerequisites:
       accessModes:
         - ReadWriteOnce
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-01234567895ff99a1
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-FILESYSTEMID::fsap-opensearch
 
     ---
     apiVersion: v1
@@ -295,7 +298,7 @@ Prerequisites:
       name: opensearch-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteOnce
       volumeMode: Filesystem
@@ -319,10 +322,10 @@ Prerequisites:
       accessModes:
         - ReadWriteOnce
       persistentVolumeReclaimPolicy: Retain
-      storageClassName: gp2-retain
-      awsElasticBlockStore:
-        fsType: xfs
-        volumeID: aws://us-east-1a/vol-01234567891150804
+      storageClassName: efs-sc
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: fs-FILESYSTEMID::fsap-opensearch-backup
 
     ---
     apiVersion: v1
@@ -331,7 +334,7 @@ Prerequisites:
       name: opensearch-backup-claim
       namespace: malcolm
     spec:
-      storageClassName: gp2-retain
+      storageClassName: efs-sc
       accessModes:
         - ReadWriteOnce
       volumeMode: Filesystem
