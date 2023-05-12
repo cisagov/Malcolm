@@ -23,7 +23,7 @@ This is a work-in-progress document that is still a bit rough around the edges. 
     ```bash
     kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
     ```
-1. [Deploy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) ingress-nginx as described [here](kubernetes.md#Ingress)
+1. Deploy ingress-nginx as described [here](kubernetes.md#Ingress). [This script (`deploy_ingress_nginx.sh`)]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) may be helpful in doing so. To [provide external access](https://repost.aws/knowledge-center/eks-access-kubernetes-services) to services in the EKS cluster, pass `-a -e` to `deploy_ingress_nginx.sh`
 1. Associate IAM OIDC provider with cluster
     ```bash
     eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name --approve
