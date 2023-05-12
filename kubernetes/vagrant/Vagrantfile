@@ -111,7 +111,7 @@ server_script_1 = <<-SHELL
     curl -sfL https://get.k3s.io | sh -
     echo "Waiting for k3s to start..."
     sleep 30
-    bash /tmp/deploy_ingress_nginx.sh -k /etc/rancher/k3s/k3s.yaml
+    bash /tmp/deploy_ingress_nginx.sh -s -t -k /etc/rancher/k3s/k3s.yaml
     until [ -f /var/lib/rancher/k3s/server/token ] && [ -f /etc/rancher/k3s/k3s.yaml ]; do sleep 5; done
     cp -v /var/lib/rancher/k3s/server/token /vagrant_shared
     cp -v /etc/rancher/k3s/k3s.yaml /vagrant_shared
