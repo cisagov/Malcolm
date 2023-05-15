@@ -1766,6 +1766,8 @@ class Installer(object):
 
         try:
             touch(MalcolmCfgRunOnceFile)
+            if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
+                os.chown(MalcolmCfgRunOnceFile, int(puid), int(pgid))
         except Exception:
             pass
 
