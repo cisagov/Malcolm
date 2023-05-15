@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Stop Malcolm
-Exec=tilix -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/control.py --stop"
+Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/scripts/control.py --stop"
 Comment=Stop Malcolm
 Terminal=false
 Type=Application

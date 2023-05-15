@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Malcolm Debug Logs
-Exec=tilix -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/control.py --logs"
+Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/scripts/control.py --logs"
 Comment=Monitor the debug output of Malcolm containers
 Terminal=false
 Type=Application
