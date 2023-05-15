@@ -984,28 +984,6 @@ class Installer(object):
             if not os.path.isfile(envFile):
                 shutil.copyfile(envExampleFile, envFile)
 
-        # change ownership of .envs file to match puid/pgid
-        if (
-            ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
-            and (self.scriptUser == "root")
-            and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
-        ):
-            if args.debug:
-                eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
-            os.chown(args.configDir, int(puid), int(pgid))
-        envFiles = []
-        for exts in ('*.env', '*.env.example'):
-            envFiles.extend(glob.glob(os.path.join(args.configDir, exts)))
-        for envFile in envFiles:
-            if (
-                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
-                and (self.scriptUser == "root")
-                and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
-            ):
-                if args.debug:
-                    eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
-                os.chown(envFile, int(puid), int(pgid))
-
         # define environment variables to be set in .env files
         EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
 
@@ -1406,6 +1384,28 @@ class Installer(object):
 
             except Exception as e:
                 eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
+
+        # change ownership of .envs file to match puid/pgid
+        if (
+            ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+            and (self.scriptUser == "root")
+            and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
+        ):
+            if args.debug:
+                eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
+            os.chown(args.configDir, int(puid), int(pgid))
+        envFiles = []
+        for exts in ('*.env', '*.env.example'):
+            envFiles.extend(glob.glob(os.path.join(args.configDir, exts)))
+        for envFile in envFiles:
+            if (
+                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+                and (self.scriptUser == "root")
+                and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
+            ):
+                if args.debug:
+                    eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
+                os.chown(envFile, int(puid), int(pgid))
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # modify docker-compose specific values (port mappings, volume bind mounts, etc.) in-place in docker-compose files
