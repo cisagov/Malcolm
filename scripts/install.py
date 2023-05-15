@@ -408,8 +408,14 @@ class Installer(object):
             raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
         # figure out what UID/GID to run non-rood processes under docker as
-        puid = '1000'
-        pgid = '1000'
+        defaultUid = '1000'
+        defaultGid = '1000'
+        if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
+            defaultUid = os.stat(malcolm_install_path).st_uid
+            defaultGid = os.stat(malcolm_install_path).st_gid
+
+        puid = defaultUid
+        pgid = defaultGid
         try:
             if self.platform == PLATFORM_LINUX:
                 puid = str(os.getuid())
@@ -417,8 +423,8 @@ class Installer(object):
                 if (puid == '0') or (pgid == '0'):
                     raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
         except Exception:
-            puid = '1000'
-            pgid = '1000'
+            puid = defaultUid
+            pgid = defaultGid
 
         while (
             (not puid.isdigit())
