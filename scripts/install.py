@@ -1375,15 +1375,28 @@ class Installer(object):
                 pass
 
             try:
-                dotenv_imported.set_key(
-                    val.envFile,
-                    val.key,
-                    val.value,
-                    quote_mode='never',
-                    encoding='utf-8',
-                )
+                oldDotEnvVersion = False
+                try:
+                    dotenv_imported.set_key(
+                        val.envFile,
+                        val.key,
+                        str(val.value),
+                        quote_mode='never',
+                        encoding='utf-8',
+                    )
+                except TypeError:
+                    oldDotEnvVersion = True
+
+                if oldDotEnvVersion:
+                    dotenv_imported.set_key(
+                        val.envFile,
+                        val.key,
+                        str(val.value),
+                        quote_mode='never',
+                    )
+
             except Exception as e:
-                eprint(f"Setting value for {val.key} in {val.envFile} module failed: {e}")
+                eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # modify docker-compose specific values (port mappings, volume bind mounts, etc.) in-place in docker-compose files
