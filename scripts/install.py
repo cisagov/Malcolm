@@ -411,8 +411,8 @@ class Installer(object):
         defaultUid = '1000'
         defaultGid = '1000'
         if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
-            defaultUid = os.stat(malcolm_install_path).st_uid
-            defaultGid = os.stat(malcolm_install_path).st_gid
+            defaultUid = str(os.stat(malcolm_install_path).st_uid)
+            defaultGid = str(os.stat(malcolm_install_path).st_gid)
 
         puid = defaultUid
         pgid = defaultGid
