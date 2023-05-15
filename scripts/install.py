@@ -3,6 +3,10 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import sys
+
+sys.dont_write_bytecode = True
+
 import argparse
 import datetime
 import errno
@@ -17,7 +21,6 @@ import pprint
 import math
 import re
 import shutil
-import sys
 import tarfile
 import tempfile
 import time
@@ -405,8 +408,14 @@ class Installer(object):
             raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
         # figure out what UID/GID to run non-rood processes under docker as
-        puid = '1000'
-        pgid = '1000'
+        defaultUid = '1000'
+        defaultGid = '1000'
+        if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
+            defaultUid = str(os.stat(malcolm_install_path).st_uid)
+            defaultGid = str(os.stat(malcolm_install_path).st_gid)
+
+        puid = defaultUid
+        pgid = defaultGid
         try:
             if self.platform == PLATFORM_LINUX:
                 puid = str(os.getuid())
@@ -414,8 +423,8 @@ class Installer(object):
                 if (puid == '0') or (pgid == '0'):
                     raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
         except Exception:
-            puid = '1000'
-            pgid = '1000'
+            puid = defaultUid
+            pgid = defaultGid
 
         while (
             (not puid.isdigit())
@@ -438,21 +447,21 @@ class Installer(object):
                 )
 
             if self.totalMemoryGigs >= 63.0:
-                osMemory = '30g'
-                lsMemory = '6g'
+                osMemory = '24g'
+                lsMemory = '3g'
             elif self.totalMemoryGigs >= 31.0:
                 osMemory = '16g'
-                lsMemory = '3g'
+                lsMemory = '2500m'
             elif self.totalMemoryGigs >= 15.0:
                 osMemory = '10g'
                 lsMemory = '2500m'
             elif self.totalMemoryGigs >= 11.0:
                 osMemory = '6g'
-                lsMemory = '2500m'
+                lsMemory = '2g'
             elif self.totalMemoryGigs >= 7.0:
                 eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '4g'
-                lsMemory = '2500m'
+                lsMemory = '2g'
             elif self.totalMemoryGigs > 0.0:
                 eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '3500m'
@@ -472,9 +481,9 @@ class Installer(object):
         # we don't want it too high, as in Malcolm Logstash also competes with OpenSearch, etc. for resources
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if self.totalCores > 16:
-                lsWorkers = 10
-            elif self.totalCores >= 12:
                 lsWorkers = 6
+            elif self.totalCores >= 12:
+                lsWorkers = 4
             else:
                 lsWorkers = 3
         else:
@@ -975,28 +984,6 @@ class Installer(object):
             if not os.path.isfile(envFile):
                 shutil.copyfile(envExampleFile, envFile)
 
-        # change ownership of .envs file to match puid/pgid
-        if (
-            ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
-            and (self.scriptUser == "root")
-            and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
-        ):
-            if args.debug:
-                eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
-            os.chown(args.configDir, int(puid), int(pgid))
-        envFiles = []
-        for exts in ('*.env', '*.env.example'):
-            envFiles.extend(glob.glob(os.path.join(args.configDir, exts)))
-        for envFile in envFiles:
-            if (
-                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
-                and (self.scriptUser == "root")
-                and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
-            ):
-                if args.debug:
-                    eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
-                os.chown(envFile, int(puid), int(pgid))
-
         # define environment variables to be set in .env files
         EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
 
@@ -1375,15 +1362,50 @@ class Installer(object):
                 pass
 
             try:
-                dotenv_imported.set_key(
-                    val.envFile,
-                    val.key,
-                    val.value,
-                    quote_mode='never',
-                    encoding='utf-8',
-                )
+                oldDotEnvVersion = False
+                try:
+                    dotenv_imported.set_key(
+                        val.envFile,
+                        val.key,
+                        str(val.value),
+                        quote_mode='never',
+                        encoding='utf-8',
+                    )
+                except TypeError:
+                    oldDotEnvVersion = True
+
+                if oldDotEnvVersion:
+                    dotenv_imported.set_key(
+                        val.envFile,
+                        val.key,
+                        str(val.value),
+                        quote_mode='never',
+                    )
+
             except Exception as e:
-                eprint(f"Setting value for {val.key} in {val.envFile} module failed: {e}")
+                eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
+
+        # change ownership of .envs file to match puid/pgid
+        if (
+            ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+            and (self.scriptUser == "root")
+            and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
+        ):
+            if args.debug:
+                eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
+            os.chown(args.configDir, int(puid), int(pgid))
+        envFiles = []
+        for exts in ('*.env', '*.env.example'):
+            envFiles.extend(glob.glob(os.path.join(args.configDir, exts)))
+        for envFile in envFiles:
+            if (
+                ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
+                and (self.scriptUser == "root")
+                and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
+            ):
+                if args.debug:
+                    eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
+                os.chown(envFile, int(puid), int(pgid))
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # modify docker-compose specific values (port mappings, volume bind mounts, etc.) in-place in docker-compose files
@@ -1744,6 +1766,8 @@ class Installer(object):
 
         try:
             touch(MalcolmCfgRunOnceFile)
+            if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
+                os.chown(MalcolmCfgRunOnceFile, int(puid), int(pgid))
         except Exception:
             pass
 
