@@ -3,6 +3,10 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import sys
+
+sys.dont_write_bytecode = True
+
 import argparse
 import errno
 import fileinput
@@ -18,7 +22,6 @@ import shutil
 import signal
 import stat
 import string
-import sys
 import tarfile
 import time
 
